@@ -1,0 +1,255 @@
+.news-section {
+  width: 100%;
+  background-color: #006eb3; /* Azul predominante del diseño */
+  padding: 40px 20px 80px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.news-container {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* --- CABECERA --- */
+.news-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  color: white;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 15px;
+}
+
+.news-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.news-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+  position: relative;
+  display: inline-block;
+}
+
+.news-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 3px;
+  background-color: white;
+}
+
+.news-subtitle {
+  font-size: 1.4rem;
+  font-weight: 300;
+  opacity: 0.9;
+}
+
+.news-ver-mas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: opacity 0.2s ease;
+}
+
+.news-ver-mas:hover {
+  opacity: 0.8;
+}
+
+/* --- GRILLA DE TARJETAS --- */
+.news-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* --- DISEÑO DE LA TARJETA BLANCA --- */
+.news-card {
+  background-color: #ffffff;
+  padding: 30px 25px 60px 25px; /* Padding extra abajo por la punta */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Esto genera el borde inferior en forma de flecha/punta */
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), 50% 100%, 0 calc(100% - 30px));
+}
+
+.blue-text {
+  color: #006eb3;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+/* Textos generales de las tarjetas */
+.card-header-line {
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.card-header-line h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.card-header-line span {
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+.card-question {
+  font-size: 1.4rem;
+  text-align: center;
+  margin: 10px 0 20px 0;
+}
+
+.card-paragraph {
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.5;
+  text-align: justify;
+}
+
+/* Imágenes Placeholder */
+.card-map-placeholder {
+  margin-top: 20px;
+  width: 100%;
+  min-height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.map-image, .logos-image {
+  max-width: 100%;
+  /* height: 200px; */
+  object-fit: contain;
+}
+
+.card-logos-placeholder {
+  margin-top: auto;
+  padding-top: 0px;
+}
+
+/* --- TARJETA CENTRAL (Estilos específicos) --- */
+.card-header-center {
+  text-align: center;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+}
+
+.card-list-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.cross-icon {
+  color: #006eb3;
+  font-size: 1.2rem;
+}
+
+/* Grilla de píldoras celestes */
+.info-pills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.info-pill {
+  background-color: #e6f7ff;
+  border: 1px solid #bae7ff;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.75rem;
+  color: #006eb3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.pill-icon {
+  font-size: 1.2rem;
+}
+
+/* --- TARJETA DERECHA (Importante) --- */
+.important-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.important-item {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.imp-icon {
+  font-size: 2rem;
+  color: #006eb3;
+}
+
+.important-item p {
+  font-size: 0.85rem;
+  color: #444;
+  margin: 0;
+}
+
+.important-phone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 40px;
+  font-size: 1.4rem;
+  color: #006eb3;
+}
+
+/* Footers de tarjetas */
+.card-footer-text {
+  margin-top: auto;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  padding-top: 20px;
+}
+
+
+/* Responsividad para tablets y móviles */
+@media (max-width: 992px) {
+  .news-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .news-card {
+    /* Reducimos la exageración de la punta en móviles para ahorrar espacio */
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), 50% 100%, 0 calc(100% - 20px));
+    padding-bottom: 40px;
+  }
+}

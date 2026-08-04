@@ -1,0 +1,46 @@
+/* Contenedor principal anclado a la esquina inferior derecha */
+.whatsapp-float-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  z-index: 2000; /* Aseguramos que esté por encima del carrusel y otros elementos */
+  transition: transform 0.3s ease;
+}
+
+.whatsapp-float-container:hover {
+  transform: translateY(-5px);
+}
+
+/* El círculo verde claro que contiene el SVG */
+.whatsapp-icon-wrapper {
+  background-color: #83d4ae; /* Verde claro del diseño */
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2; /* Importante: por encima de la etiqueta de texto */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  border: 3px solid #ffffff; /* Borde blanco sutil que se ve en la imagen */
+}
+
+/* La píldora con el texto y el fondo en degradado */
+.whatsapp-text {
+  /* Degradado de verde claro a azul grisáceo */
+  background: linear-gradient(to right, #83d4ae, #4f6a7d);
+  color: #ffffff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  /* Padding extra a la izquierda para que el círculo superpuesto no tape el texto */
+  padding: 12px 25px 12px 30px; 
+  border-radius: 0 30px 30px 0; /* Bordes redondeados solo a la derecha */
+  margin-left: -20px; /* Esto "hunde" la píldora detrás del círculo */
+  z-index: 1;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.1);
+}
