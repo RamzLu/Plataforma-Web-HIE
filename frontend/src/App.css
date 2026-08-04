@@ -1,0 +1,11 @@
+.App {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  /* 
+    El header mide aprox 80px de alto (50px de logo + 15px padding arriba y abajo).
+    Agregamos este padding-top para que el contenido de las siguientes 
+    secciones empiece justo debajo del header fijo y no quede tapado.
+  */
+  padding-top: 80px; 
+}

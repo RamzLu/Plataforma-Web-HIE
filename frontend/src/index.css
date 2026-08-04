@@ -1,0 +1,22 @@
+/* Reset básico para limpiar estilos por defecto del navegador y de Vite */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #1a1a1a; /* El color oscuro que tienes de fondo actualmente */
+  overflow-x: hidden; /* Evita scroll horizontal indeseado */
+}
+
+/* El div raíz de React debe ocupar todo el ancho */
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
