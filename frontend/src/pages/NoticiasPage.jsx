@@ -7,6 +7,7 @@ import iconMama from "../assets/icon-mama.png";
 import iconCorazon from "../assets/icon-corazon.png";
 import iconDonacion from "../assets/icon-donacion-de-sangre.png";
 import iconDengue from "../assets/icon-dengue.png";
+import avatarHospital from "../assets/iconEVITAface.jpg";
 
 // imagenes de los folletos para los articulos medicos
 import folletoCD1 from "../assets/folletoCD1.jpg";
@@ -84,15 +85,15 @@ const medicalArticles = [
   },
 ];
 
-const NewsCard = ({ news }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+// Actualizamos NewsCard para que reciba las funciones de abrir Modal y Lightbox
+const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
   const isLong = news.body.length > 1 || news.body[0].length > 120;
 
   return (
     <article className="full-news-card">
       <div className="full-news-header">
         <div className="hospital-avatar">
-          <img src="/logo.png" alt="Avatar Hospital" />
+          <img src={avatarHospital} alt="Avatar Hospital" />
         </div>
         <div className="post-meta">
           <h3>Hospital Interdistrital Evita Formosa</h3>
@@ -102,21 +103,13 @@ const NewsCard = ({ news }) => {
 
       <div className="full-news-body">
         <h4 className="full-news-title">{news.title}</h4>
-        {isExpanded ? (
-          news.body.map((paragraph, idx) => (
-            <p key={idx} className="expanded-text">
-              {paragraph}
-            </p>
-          ))
-        ) : (
-          <p className="clamped-text">{news.body[0]}</p>
-        )}
+        {/* El texto siempre se mantiene truncado en la tarjeta */}
+        <p className="clamped-text">{news.body[0]}</p>
+
+        {/* Botón que ahora abre el Pop-up */}
         {isLong && (
-          <button
-            className="read-more-btn"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            {isExpanded ? "Ver menos" : "Ver más"}
+          <button className="read-more-btn" onClick={() => onOpenNews(news)}>
+            Ver más
           </button>
         )}
       </div>
@@ -128,6 +121,8 @@ const NewsCard = ({ news }) => {
               key={index}
               src={img}
               alt={`${news.title} - foto ${index + 1}`}
+              className="clickable-img"
+              onClick={() => onOpenLightbox(news.images, index)}
             />
           ))}
       </div>
@@ -139,10 +134,16 @@ const NoticiasPage = () => {
   const sliderRef = useRef(null);
   const modalSliderRef = useRef(null);
 
+  // Estados para los Modales (Pop-ups)
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [selectedNews, setSelectedNews] = useState(null);
 
-  // NUENO ESTADO: Índice de la imagen abierta en el Lightbox (null significa cerrado)
-  const [lightboxIndex, setLightboxIndex] = useState(null);
+  // Estado universal para el Lightbox (Visor de Imágenes)
+  const [lightbox, setLightbox] = useState({
+    isOpen: false,
+    images: [],
+    index: 0,
+  });
 
   const sortedNews = [...newsData].sort((a, b) => b.id - a.id);
 
@@ -166,28 +167,26 @@ const NoticiasPage = () => {
     }
   };
 
-  // --- FUNCIONES DEL LIGHTBOX ---
-  const openLightbox = (index) => setLightboxIndex(index);
-  const closeLightbox = () => setLightboxIndex(null);
+  // --- FUNCIONES DEL LIGHTBOX UNIVERSAL ---
+  const openLightbox = (images, index) =>
+    setLightbox({ isOpen: true, images, index });
+  const closeLightbox = () =>
+    setLightbox({ isOpen: false, images: [], index: 0 });
 
   const nextLightboxImage = (e) => {
-    e.stopPropagation(); // Evita que el clic cierre el visor
-    if (selectedArticle) {
-      setLightboxIndex(
-        (prev) => (prev + 1) % selectedArticle.campaignImages.length,
-      );
-    }
+    e.stopPropagation();
+    setLightbox((prev) => ({
+      ...prev,
+      index: (prev.index + 1) % prev.images.length,
+    }));
   };
 
   const prevLightboxImage = (e) => {
     e.stopPropagation();
-    if (selectedArticle) {
-      setLightboxIndex(
-        (prev) =>
-          (prev - 1 + selectedArticle.campaignImages.length) %
-          selectedArticle.campaignImages.length,
-      );
-    }
+    setLightbox((prev) => ({
+      ...prev,
+      index: (prev.index - 1 + prev.images.length) % prev.images.length,
+    }));
   };
 
   return (
@@ -204,7 +203,12 @@ const NoticiasPage = () => {
           </button>
           <div className="news-slider" ref={sliderRef}>
             {sortedNews.map((news) => (
-              <NewsCard key={news.id} news={news} />
+              <NewsCard
+                key={news.id}
+                news={news}
+                onOpenNews={setSelectedNews}
+                onOpenLightbox={openLightbox}
+              />
             ))}
           </div>
           <button
@@ -235,10 +239,30 @@ const NoticiasPage = () => {
         </section>
       </div>
 
-      {/* POP-UP DE ARTÍCULOS */}
+      {/* =========================================
+          POP-UP PARA ARTÍCULOS MÉDICOS
+      ========================================= */}
       {selectedArticle && (
         <div className="modal-overlay" onClick={() => setSelectedArticle(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close-btn"
+              onClick={() => setSelectedArticle(null)}
+            >
+              &times;
+            </button>
+
+            {/* NUEVO: Cabecera con Logo y Nombre del Hospital */}
+            <div className="modal-author">
+              <div className="hospital-avatar">
+                <img src="/logo.png" alt="Avatar Hospital" />
+              </div>
+              <div>
+                <h3>Hospital Interdistrital Evita Formosa</h3>
+                <span>Artículo de Salud • 🌎</span>
+              </div>
+            </div>
+
             <div className="modal-header">
               <h2
                 className="modal-title"
@@ -246,15 +270,12 @@ const NoticiasPage = () => {
               >
                 {selectedArticle.title}
               </h2>
-              <button
-                className="modal-close-btn"
-                onClick={() => setSelectedArticle(null)}
-              >
-                CERRAR Y VOLVER
-              </button>
             </div>
 
-            <div className="modal-body">
+            <div
+              className="modal-body"
+              style={{ borderLeftColor: selectedArticle.color }}
+            >
               <h3 className="modal-subtitle">{selectedArticle.subtitle}</h3>
               {selectedArticle.description.map((paragraph, idx) => (
                 <p key={idx} className="modal-text">
@@ -275,16 +296,14 @@ const NoticiasPage = () => {
 
               <div className="modal-slider" ref={modalSliderRef}>
                 {selectedArticle.campaignImages.map((img, idx) => (
-                  // Añadimos el evento onClick para abrir el Lightbox
                   <div
                     className="modal-campaign-img"
                     key={idx}
-                    onClick={() => openLightbox(idx)}
+                    onClick={() =>
+                      openLightbox(selectedArticle.campaignImages, idx)
+                    }
                   >
-                    <img
-                      src={img}
-                      alt={`Campaña ${selectedArticle.title} ${idx + 1}`}
-                    />
+                    <img src={img} alt={`Campaña ${idx + 1}`} />
                   </div>
                 ))}
               </div>
@@ -303,11 +322,63 @@ const NoticiasPage = () => {
       )}
 
       {/* =========================================
-          LIGHTBOX ESTILO FACEBOOK (VISOR DE IMÁGENES)
+          POP-UP PARA NOTICIAS
       ========================================= */}
-      {lightboxIndex !== null && selectedArticle && (
+      {selectedNews && (
+        <div className="modal-overlay" onClick={() => setSelectedNews(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close-btn"
+              onClick={() => setSelectedNews(null)}
+            >
+              &times;
+            </button>
+
+            {/* NUEVO: Cabecera con Logo y Nombre del Hospital */}
+            <div className="modal-author">
+              <div className="hospital-avatar">
+                <img src={avatarHospital} alt="Avatar Hospital" />
+              </div>
+              <div>
+                <h3>Hospital Interdistrital Evita Formosa</h3>
+                <span>{selectedNews.date} • 🌎</span>
+              </div>
+            </div>
+
+            <div className="modal-header">
+              <h2 className="modal-title" style={{ color: "#006eb3" }}>
+                {selectedNews.title}
+              </h2>
+            </div>
+
+            <div className="modal-body" style={{ borderLeftColor: "#006eb3" }}>
+              {selectedNews.body.map((paragraph, idx) => (
+                <p key={idx} className="modal-text">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+
+            <div className="news-modal-images-grid">
+              {selectedNews.images.map((img, idx) => (
+                <div
+                  className="modal-campaign-img"
+                  key={idx}
+                  onClick={() => openLightbox(selectedNews.images, idx)}
+                >
+                  <img src={img} alt={`Imagen noticia ${idx + 1}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================
+          LIGHTBOX UNIVERSAL (VISOR DE IMÁGENES)
+      ========================================= */}
+      {lightbox.isOpen && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
-          {/* Cruz para cerrar */}
           <button className="lightbox-close" onClick={closeLightbox}>
             &times;
           </button>
@@ -316,28 +387,29 @@ const NoticiasPage = () => {
             className="lightbox-content"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Flecha Izquierda */}
-            <button
-              className="lightbox-arrow lb-left"
-              onClick={prevLightboxImage}
-            >
-              &#10094;
-            </button>
+            {lightbox.images.length > 1 && (
+              <button
+                className="lightbox-arrow lb-left"
+                onClick={prevLightboxImage}
+              >
+                &#10094;
+              </button>
+            )}
 
-            {/* Imagen Ampliada */}
             <img
-              src={selectedArticle.campaignImages[lightboxIndex]}
-              alt="Folleto ampliado"
+              src={lightbox.images[lightbox.index]}
+              alt="Ampliada"
               className="lightbox-img"
             />
 
-            {/* Flecha Derecha */}
-            <button
-              className="lightbox-arrow lb-right"
-              onClick={nextLightboxImage}
-            >
-              &#10095;
-            </button>
+            {lightbox.images.length > 1 && (
+              <button
+                className="lightbox-arrow lb-right"
+                onClick={nextLightboxImage}
+              >
+                &#10095;
+              </button>
+            )}
           </div>
         </div>
       )}

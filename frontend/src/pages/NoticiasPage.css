@@ -97,34 +97,37 @@
 }
 
 .hospital-avatar {
-  width: 40px;
-  height: 40px;
+  width: 45px; /* Un poco más grande para que destaque */
+  height: 45px;
   border-radius: 50%;
-  background-color: #f0fcfd;
+  background-color: #ffffff;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e2e8f0;
   flex-shrink: 0;
+  overflow: hidden; /* LA CLAVE: Recorta la imagen cuadrada para hacerla un círculo perfecto */
 }
 
 .hospital-avatar img {
-  width: 70%;
-  height: 70%;
-  object-fit: contain;
+  width: 100%; /* Ahora ocupa todo el espacio del círculo */
+  height: 100%;
+  object-fit: cover; /* Llena el espacio sin deformar la imagen */
 }
 
 .post-meta h3 {
-  margin: 0;
-  font-size: 0.9rem;
+  margin: 0 0 3px 0; /* Pequeño margen para separar de la fecha */
+  font-size: 0.95rem;
   color: #0c2340;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .post-meta span {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: #65676b;
+  line-height: 1;
 }
-
 .full-news-body {
   padding: 0 15px 15px 15px;
   display: flex;
@@ -317,7 +320,7 @@
 }
 
 /* =========================================
-   ESTILOS DEL MODAL (POP-UP)
+   ESTILOS DEL MODAL (POP-UP) RENOVADO
 ========================================= */
 
 .modal-overlay {
@@ -326,95 +329,96 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  /* Fondo oscuro semitransparente con desenfoque (blur) */
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(
+    15,
+    23,
+    42,
+    0.6
+  ); /* Un tono más oscuro y azulado para mayor contraste */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 2000; /* Asegura que esté por encima del Header */
+  z-index: 2000;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
-  /* Animación suave de aparición */
   animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .modal-content {
-  background-color: #f6fafc; /* Celeste muy clarito basado en tu diseño */
+  background-color: #ffffff; /* Blanco puro para máxima limpieza */
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
-  border-radius: 20px;
-  padding: 40px;
+  border-radius: 24px; /* Bordes un poco más suaves */
+  padding: 50px; /* Más respiro interior */
   position: relative;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* Sombra más profunda y elegante */
   display: flex;
   flex-direction: column;
 }
 
 .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 25px;
+  padding-right: 40px; /* Evita que el texto pise el botón de cerrar */
 }
 
 .modal-title {
   font-size: 2.2rem;
   font-weight: 800;
   margin: 0;
+  line-height: 1.2;
 }
 
-/* Botón de cerrar idéntico al diseño (Rojo, ovalado) */
+/* --- Botón de cerrar minimalista (X flotante) --- */
 .modal-close-btn {
-  background-color: #df2121;
-  color: white;
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  background-color: #f1f5f9;
+  color: #64748b;
   border: none;
-  border-radius: 30px;
-  padding: 10px 25px;
-  font-weight: 800;
-  font-size: 1rem;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 1.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(223, 33, 33, 0.3);
-  transition:
-    transform 0.2s,
-    background-color 0.2s;
+  transition: all 0.2s ease;
+  line-height: 0;
 }
 
 .modal-close-btn:hover {
-  background-color: #c01919;
-  transform: scale(1.05);
+  background-color: #fee2e2;
+  color: #ef4444; /* Se vuelve rojo suave al interactuar */
+  transform: rotate(90deg); /* Animación de rotación sutil */
 }
 
+/* --- Toque de personalidad: Línea de acento lateral --- */
 .modal-body {
-  margin-bottom: 30px;
+  margin-bottom: 35px;
+  padding-left: 24px;
+  border-left: 4px solid #006eb3; /* Esta línea tomará color dinámico desde React */
 }
 
 .modal-subtitle {
-  color: #0c2340;
-  font-size: 1.4rem;
+  color: #1e293b;
+  font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 15px;
 }
 
 .modal-text {
-  font-size: 1.05rem;
-  color: #333;
-  line-height: 1.6;
-  margin-bottom: 8px;
+  font-size: 1.1rem;
+  color: #334155; /* Texto oscuro, casi negro, ideal para lectura larga */
+  line-height: 1.7; /* Interlineado más amplio y relajado */
+  margin-bottom: 12px;
 }
 
-/* Slider interno del modal (Folletos) */
+/* El resto de las clases del slider modal y las imágenes quedan igual */
 .modal-slider-container {
   position: relative;
   width: 100%;
@@ -436,13 +440,21 @@
   display: none;
 }
 
-/* Calculamos que entren 3 imágenes exactas a la vez restando los márgenes */
 .modal-campaign-img {
   min-width: calc(33.333% - 10px);
   max-width: calc(33.333% - 10px);
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.modal-campaign-img:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
 }
 
 .modal-campaign-img img {
@@ -452,29 +464,30 @@
   object-fit: cover;
 }
 
-/* Flechas del modal (más pequeñas y discretas) */
 .modal-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   background-color: white;
   color: #006eb3;
-  border: 1px solid #d1d9e0;
+  border: 1px solid #e2e8f0;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   font-size: 1.2rem;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   z-index: 10;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .modal-arrow:hover {
   background-color: #006eb3;
   color: white;
+  border-color: #006eb3;
 }
 
 .modal-left {
@@ -487,26 +500,21 @@
 /* Responsividad del Modal */
 @media (max-width: 768px) {
   .modal-content {
-    padding: 25px;
+    padding: 30px 20px;
   }
-
-  .modal-header {
-    flex-direction: column;
-    gap: 15px;
-  }
-
   .modal-close-btn {
-    align-self: flex-start;
+    top: 15px;
+    right: 15px;
   }
-
-  /* En celulares mostramos solo 2 folletos por vez en lugar de 3 */
+  .modal-body {
+    padding-left: 15px;
+  }
   .modal-campaign-img {
     min-width: calc(50% - 7.5px);
     max-width: calc(50% - 7.5px);
   }
 }
 @media (max-width: 480px) {
-  /* En pantallas muy pequeñas, 1 a la vez */
   .modal-campaign-img {
     min-width: 100%;
     max-width: 100%;
@@ -630,4 +638,64 @@
     top: 15px;
     right: 20px;
   }
+}
+/* =========================================
+   NUEVAS CLASES PARA EL MODAL DE NOTICIAS
+========================================= */
+
+/* Cursor para indicar que la imagen se puede ampliar */
+.clickable-img {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.clickable-img:hover {
+  opacity: 0.85; /* Ligero efecto al pasar el ratón */
+}
+
+/* Grilla para las imágenes dentro del Pop-up de Noticias */
+.news-modal-images-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+/* Reutilizamos el tamaño de las campañas pero en flex */
+.news-modal-images-grid .modal-campaign-img {
+  flex: 1 1 calc(33.333% - 15px);
+  max-width: calc(33.333% - 15px);
+  min-width: 200px; /* Para que en celulares pasen a estar una debajo de la otra */
+}
+/* --- Cabecera de Autor en el Modal (Logo y Nombre) --- */
+.modal-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+.modal-author div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.modal-author .hospital-avatar {
+  width: 50px;
+  height: 50px;
+  /* El borde y color de fondo ya lo hereda de la clase original .hospital-avatar */
+}
+
+.modal-author h3 {
+  margin: 0 0 3px 0;
+  font-size: 1.05rem; /* Tamaño óptimo para que "Formosa" no salte a otra línea */
+  color: #0c2340;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.modal-author span {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1;
 }
