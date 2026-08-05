@@ -292,3 +292,223 @@
     grid-template-columns: 1fr; /* En celulares mostramos 1 columna */
   }
 }
+/* Modificamos la tarjeta de artículo para que sea un botón sin estilos por defecto */
+.article-card {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  padding: 30px 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  min-height: 250px;
+  font-family: inherit;
+}
+
+.article-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================
+   ESTILOS DEL MODAL (POP-UP)
+========================================= */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* Fondo oscuro semitransparente con desenfoque (blur) */
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000; /* Asegura que esté por encima del Header */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  /* Animación suave de aparición */
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background-color: #f6fafc; /* Celeste muy clarito basado en tu diseño */
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  border-radius: 20px;
+  padding: 40px;
+  position: relative;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.modal-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+/* Botón de cerrar idéntico al diseño (Rojo, ovalado) */
+.modal-close-btn {
+  background-color: #df2121;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 25px;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(223, 33, 33, 0.3);
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
+}
+
+.modal-close-btn:hover {
+  background-color: #c01919;
+  transform: scale(1.05);
+}
+
+.modal-body {
+  margin-bottom: 30px;
+}
+
+.modal-subtitle {
+  color: #0c2340;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.modal-text {
+  font-size: 1.05rem;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+/* Slider interno del modal (Folletos) */
+.modal-slider-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.modal-slider {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding: 10px 0;
+  width: 100%;
+}
+
+.modal-slider::-webkit-scrollbar {
+  display: none;
+}
+
+/* Calculamos que entren 3 imágenes exactas a la vez restando los márgenes */
+.modal-campaign-img {
+  min-width: calc(33.333% - 10px);
+  max-width: calc(33.333% - 10px);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.modal-campaign-img img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* Flechas del modal (más pequeñas y discretas) */
+.modal-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: white;
+  color: #006eb3;
+  border: 1px solid #d1d9e0;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-arrow:hover {
+  background-color: #006eb3;
+  color: white;
+}
+
+.modal-left {
+  left: -20px;
+}
+.modal-right {
+  right: -20px;
+}
+
+/* Responsividad del Modal */
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 25px;
+  }
+
+  .modal-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .modal-close-btn {
+    align-self: flex-start;
+  }
+
+  /* En celulares mostramos solo 2 folletos por vez en lugar de 3 */
+  .modal-campaign-img {
+    min-width: calc(50% - 7.5px);
+    max-width: calc(50% - 7.5px);
+  }
+}
+@media (max-width: 480px) {
+  /* En pantallas muy pequeñas, 1 a la vez */
+  .modal-campaign-img {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}

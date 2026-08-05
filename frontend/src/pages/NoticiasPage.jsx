@@ -2,31 +2,91 @@ import React, { useState, useRef } from "react";
 import { newsData } from "../data/newsData";
 import "./NoticiasPage.css";
 
-// 1. IMPORTA LOS ÍCONOS DE TUS ARTÍCULOS
-// Asegúrate de guardar estos 4 íconos en la carpeta frontend/src/assets/
+// 1. Íconos de las tarjetas
 import iconMama from "../assets/icon-mama.png";
 import iconCorazon from "../assets/icon-corazon.png";
 import iconDonacion from "../assets/icon-donacion-de-sangre.png";
 import iconDengue from "../assets/icon-dengue.png";
 
-// Datos de la nueva sección de artículos médicos
+// imagenes de los folletos para los articulos medicos
+import folletoCD1 from "../assets/folletoCD1.jpg";
+import folletoCD2 from "../assets/folletoCD2.jpg";
+import folletoCD3 from "../assets/folletoCD3.jpg";
+import folletoCD4 from "../assets/folletoCD4.jpg";
+import folletoCD5 from "../assets/folletoCD5.jpg";
+import folletoEjemplo from "../assets/folletoCD5.jpg";
+
+// 2. Datos expandidos para incluir la información del Modal
 const medicalArticles = [
   {
     id: 1,
     title: "CÁNCER DE MAMA",
     color: "#e88e9f",
     icon: iconMama,
-    link: "#",
+    subtitle: "Prevenir es curar. Chequeos anuales.",
+    description: [
+      "Hoy reconocemos y agradecemos a quienes, con un gesto simple y solidario, ayudan a salvar vidas. Cada donación puede marcar la diferencia para pacientes que necesitan transfusiones, atraviesan tratamientos oncológicos, intervenciones quirúrgicas, emergencias o diversas enfermedades.",
+      "Te compartimos todo lo que necesitás saber sobre la donación de sangre: quiénes pueden donar, cuáles son los requisitos básicos, algunos mitos y verdades, y por qué es tan importante que más personas se sumen a esta cadena de solidaridad.",
+      "✨ Donar sangre es un acto voluntario, seguro y fundamental.",
+      "✨ Una sola donación puede ayudar a varias personas.",
+      "✨ La sangre no se fabrica: solo puede obtenerse gracias a la generosidad de los donantes.",
+    ],
+    campaignImages: [
+      folletoCD1,
+      folletoCD2,
+      folletoCD3,
+      folletoCD4,
+      folletoCD5,
+    ],
   },
   {
     id: 2,
     title: "TU CORAZÓN",
     color: "#e32726",
     icon: iconCorazon,
-    link: "#",
+    subtitle: "Cuidá tu motor de vida",
+    description: [
+      "Mantener una dieta equilibrada, hacer ejercicio regularmente y controlar tu presión arterial son pasos clave para un corazón sano.",
+    ],
+    campaignImages: [folletoEjemplo, folletoEjemplo, folletoEjemplo],
   },
-  { id: 3, title: "DONACIÓN", color: "#b90000", icon: iconDonacion, link: "#" },
-  { id: 4, title: "DENGUE", color: "#000000", icon: iconDengue, link: "#" },
+  {
+    id: 3,
+    title: "DONACIÓN",
+    color: "#b90000",
+    icon: iconDonacion,
+    subtitle: "Doná sangre. Salvá vidas",
+    description: [
+      "Hoy te compartimos todo lo que necesitás saber sobre la donación de sangre: quiénes pueden donar, cuáles son los requisitos básicos, algunos mitos y verdades, y por qué es tan importante que más personas se sumen a esta cadena de solidaridad.",
+      "Donar sangre es un acto voluntario, seguro y fundamental.",
+      "Una sola donación puede ayudar a varias personas.",
+      "La sangre no se fabrica: solo puede obtenerse gracias a la generosidad de los donantes.",
+    ],
+    // Aquí puedes poner 3, 6, o las imágenes que quieras. El slider las acomodará.
+    campaignImages: [
+      folletoEjemplo,
+      folletoEjemplo,
+      folletoEjemplo,
+      folletoEjemplo,
+      folletoEjemplo,
+    ],
+  },
+  {
+    id: 4,
+    title: "DENGUE",
+    color: "#000000",
+    icon: iconDengue,
+    subtitle: "Sin mosquito no hay dengue",
+    description: [
+      "Eliminar los criaderos de mosquitos en nuestros hogares es la principal medida de prevención contra el dengue, zika y chikungunya.",
+    ],
+    campaignImages: [
+      folletoEjemplo,
+      folletoEjemplo,
+      folletoEjemplo,
+      folletoEjemplo,
+    ],
+  },
 ];
 
 const NewsCard = ({ news }) => {
@@ -83,10 +143,17 @@ const NewsCard = ({ news }) => {
 };
 
 const NoticiasPage = () => {
+  // Referencia para el slider de noticias principales
   const sliderRef = useRef(null);
+
+  // Estados y referencias para el Modal de Artículos
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const modalSliderRef = useRef(null);
+
   const sortedNews = [...newsData].sort((a, b) => b.id - a.id);
 
-  const scroll = (direction) => {
+  // Scroll de noticias
+  const scrollNews = (direction) => {
     if (sliderRef.current) {
       const scrollAmount = 360;
       sliderRef.current.scrollBy({
@@ -96,52 +163,129 @@ const NoticiasPage = () => {
     }
   };
 
+  // Scroll dinámico para los folletos del modal (avanza de a 3 imágenes aproximadas)
+  const scrollModal = (direction) => {
+    if (modalSliderRef.current) {
+      // Calculamos el ancho visible para saltar las imágenes correctamente
+      const scrollAmount = modalSliderRef.current.offsetWidth;
+      modalSliderRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <main className="noticias-page">
       <div className="noticias-page-container">
-        {/* SECCIÓN 1: NOTICIAS (CARRUSEL) */}
         <h1 className="page-title">Últimas Publicaciones</h1>
 
         <div className="slider-wrapper">
           <button
             className="slider-arrow left-arrow"
-            onClick={() => scroll("left")}
+            onClick={() => scrollNews("left")}
           >
             &#10094;
           </button>
-
           <div className="news-slider" ref={sliderRef}>
             {sortedNews.map((news) => (
               <NewsCard key={news.id} news={news} />
             ))}
           </div>
-
           <button
             className="slider-arrow right-arrow"
-            onClick={() => scroll("right")}
+            onClick={() => scrollNews("right")}
           >
             &#10095;
           </button>
         </div>
 
-        {/* SECCIÓN 2: ARTÍCULOS MÉDICOS */}
         <section className="medical-articles-section">
           <h2 className="articles-section-title">ARTÍCULOS MÉDICOS</h2>
-
           <div className="articles-grid">
             {medicalArticles.map((article) => (
-              <a href={article.link} key={article.id} className="article-card">
-                {/* El color del título cambia dinámicamente según los datos de arriba */}
+              // Cambiamos el link <a> por un botón que abre el modal
+              <button
+                key={article.id}
+                className="article-card"
+                onClick={() => setSelectedArticle(article)}
+              >
                 <h3 style={{ color: article.color }}>{article.title}</h3>
                 <div className="article-icon-wrapper">
                   <img src={article.icon} alt={article.title} />
                 </div>
                 <span className="article-link-text">ver</span>
-              </a>
+              </button>
             ))}
           </div>
         </section>
       </div>
+
+      {/* =========================================
+          MODAL (POP-UP) SUPERPUESTO CON BLUR
+      ========================================= */}
+      {selectedArticle && (
+        <div className="modal-overlay" onClick={() => setSelectedArticle(null)}>
+          {/* El stopPropagation evita que al hacer click dentro del cuadro blanco se cierre el modal */}
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2
+                className="modal-title"
+                style={{ color: selectedArticle.color }}
+              >
+                {selectedArticle.title}
+              </h2>
+              <button
+                className="modal-close-btn"
+                onClick={() => setSelectedArticle(null)}
+              >
+                CERRAR Y VOLVER
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <h3 className="modal-subtitle">{selectedArticle.subtitle}</h3>
+              {selectedArticle.description.map((paragraph, idx) => (
+                <p key={idx} className="modal-text">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+
+            {/* Slider de Folletos dentro del modal */}
+            <div className="modal-slider-container">
+              {selectedArticle.campaignImages.length > 3 && (
+                <button
+                  className="modal-arrow modal-left"
+                  onClick={() => scrollModal("left")}
+                >
+                  &#10094;
+                </button>
+              )}
+
+              <div className="modal-slider" ref={modalSliderRef}>
+                {selectedArticle.campaignImages.map((img, idx) => (
+                  <div className="modal-campaign-img" key={idx}>
+                    <img
+                      src={img}
+                      alt={`Campaña ${selectedArticle.title} ${idx + 1}`}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {selectedArticle.campaignImages.length > 3 && (
+                <button
+                  className="modal-arrow modal-right"
+                  onClick={() => scrollModal("right")}
+                >
+                  &#10095;
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
