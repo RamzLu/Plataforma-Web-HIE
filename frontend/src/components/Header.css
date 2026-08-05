@@ -1,4 +1,3 @@
-/* Se cambió position a fixed y se ancló a top y left */
 .main-header {
   width: 100%;
   background-color: #f0fcfd;
@@ -7,25 +6,32 @@
   top: 0;
   left: 0;
   z-index: 1000;
+  height: 80px;
 }
 
 .header-container {
   max-width: 1400px;
+  height: 100%;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
+  padding: 0 40px;
 }
 
-/* Manejo de la imagen del Logo */
 .logo-container {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.logo-container a {
   display: flex;
   align-items: center;
 }
 
 .logo {
-  height: 60px;
+  height: 55px;
   width: auto;
   object-fit: contain;
 }
@@ -49,11 +55,27 @@
   color: #0c2340;
   font-weight: 700;
   font-size: 0.9rem;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    sans-serif;
   letter-spacing: 0.5px;
-  transition: color 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  padding-bottom: 5px;
 }
 
 .nav-item a:hover {
   color: #008080;
+}
+
+/* Estilos específicos para el elemento activo (INICIO) */
+.nav-item a.active {
+  color: #61b896;
+  border-bottom: 3px solid #61b896;
 }

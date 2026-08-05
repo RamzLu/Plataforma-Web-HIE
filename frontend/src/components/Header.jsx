@@ -1,21 +1,25 @@
-import React from 'react';
-import './Header.css';
+import React from "react";
+import "./Header.css";
 
-// 1. Importamos la imagen dinámicamente desde la carpeta assets
-import logoIcon from '../assets/pngIcon.png';
+import logoIcon from "../assets/pngIcon.png";
 
 const Header = () => {
   return (
     <header className="main-header">
       <div className="header-container">
-        {/* 2. Usamos la variable importada en el atributo src */}
         <div className="logo-container">
-          <img src={logoIcon} alt="Logo Red Evita Formosa" className="logo" />
+          <a href="/">
+            <img src={logoIcon} alt="Logo Red Evita Formosa" className="logo" />
+          </a>
         </div>
 
-        {/* Menú de navegación principal */}
         <nav className="header-nav">
           <ul className="nav-list">
+            <li className="nav-item">
+              <a href="#inicio" className="active">
+                INICIO
+              </a>
+            </li>
             <li className="nav-item">
               <a href="#especialidades">ESPECIALIDADES</a>
             </li>
