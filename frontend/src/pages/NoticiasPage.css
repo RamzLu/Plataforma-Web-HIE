@@ -204,3 +204,91 @@
     padding: 10px 20px;
   }
 }
+/* =========================================
+   NUEVA SECCIÓN: ARTÍCULOS MÉDICOS
+========================================= */
+
+.medical-articles-section {
+  margin-top: 80px; /* Separación generosa respecto al slider de noticias */
+  width: 100%;
+}
+
+.articles-section-title {
+  color: #0c2340; /* Azul oscuro institucional */
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columnas iguales */
+  gap: 30px;
+  align-items: stretch; /* Asegura que todas las tarjetas midan lo mismo */
+}
+
+.article-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 30px 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  min-height: 250px; /* Tamaño mediano, ni muy chico ni muy grande */
+}
+
+.article-card:hover {
+  transform: translateY(-5px); /* Efecto de levitación al pasar el mouse */
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+}
+
+.article-card h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.article-icon-wrapper {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  height: 100px;
+}
+
+.article-icon-wrapper img {
+  height: 110px;
+  width: auto;
+  object-fit: contain;
+}
+
+.article-link-text {
+  color: #1c1e21;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1rem;
+}
+
+/* Responsividad para móviles y tablets */
+@media (max-width: 1024px) {
+  .articles-grid {
+    grid-template-columns: repeat(2, 1fr); /* En tablets bajamos a 2 columnas */
+  }
+}
+
+@media (max-width: 600px) {
+  .articles-grid {
+    grid-template-columns: 1fr; /* En celulares mostramos 1 columna */
+  }
+}
