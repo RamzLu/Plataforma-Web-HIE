@@ -1,0 +1,149 @@
+.main-footer {
+  width: 100%;
+  background-color: #0c2340; /* Azul muy oscuro para máximo contraste */
+  color: #ffffff;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+.footer-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 60px 40px;
+  display: flex;
+  justify-content: space-between;
+  gap: 50px;
+  flex-wrap: wrap; /* Permite que las columnas bajen en pantallas chicas */
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 300px; /* Asegura que no se aprieten demasiado antes de bajar */
+}
+
+/* --- Columna 1: Branding --- */
+.brand-col {
+  gap: 20px;
+}
+
+.footer-logo {
+  height: 150px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.footer-description {
+  font-size: 1.15rem; /* Letra grande para adultos mayores */
+  line-height: 1.6;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* --- Columna 2: Contacto --- */
+.footer-heading {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: #a4c2d6; /* Celeste claro para diferenciar títulos */
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 10px;
+}
+
+.footer-contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Mucho espacio entre los ítems para no equivocarse al hacer clic */
+}
+
+.footer-contact-list li {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1.7rem; /* Texto muy legible */
+  font-weight: 500;
+}
+
+.footer-icon {
+  width: 28px;
+  height: 28px;
+  color: #83d4ae; /* Verde contrastante para los iconos */
+  flex-shrink: 0;
+}
+
+.footer-contact-list a {
+  color: #ffffff;
+  text-decoration: none;
+  transition:
+    color 0.2s,
+    text-decoration 0.2s;
+}
+
+/* Efecto hover muy evidente para accesibilidad visual */
+.footer-contact-list a:hover,
+.footer-contact-list a:focus {
+  color: #83d4ae;
+  text-decoration: underline;
+  outline: none; /* Focus gestionado por diseño */
+}
+
+/* --- Columna 3: Logos Gobierno --- */
+.gov-col {
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.footer-gov-logo {
+  max-width: 100%;
+  height: auto;
+  /* Aplica filtro blanco si el logo original es de letras oscuras */
+  filter: brightness(0) invert(1);
+}
+
+/* --- Barra de Copyright Inferior --- */
+.footer-bottom {
+  background-color: #061222; /* Un azul aún más oscuro para el piso */
+  text-align: center;
+  padding: 20px;
+}
+
+.footer-bottom p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Responsividad para Tablets y Móviles */
+@media (max-width: 992px) {
+  .footer-container {
+    padding: 50px 20px;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+  }
+
+  .footer-col {
+    min-width: 100%;
+  }
+
+  .footer-logo,
+  .footer-gov-logo {
+    max-width: 250px; /* Evita que los logos queden gigantes en celular */
+  }
+}
