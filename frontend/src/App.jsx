@@ -1,28 +1,28 @@
 import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
-import Carousel from "./components/Carousel";
-import NewsSection from "./components/NewsSection";
-import PatientInfoSection from "./components/PatientInfoSection";
-import AprendeSection from "./components/AprendeSection";
-import WhatsAppButton from "./components/WhatsAppButton";
 import Footer from "./components/Footer";
+import WhatsAppButton from "./components/WhatsAppButton";
+import HomePage from "./pages/HomePage";
+import NoticiasPage from "./pages/NoticiasPage";
 import "./App.css";
 
 function App() {
   return (
-    <div className="App">
-      <Header />
+    <Router>
+      <div className="App">
+        <Header />
 
-      <main>
-        <Carousel />
-        <NewsSection />
-        <PatientInfoSection />
-        <AprendeSection />
-      </main>
+        {/* Aquí es donde la magia ocurre: el contenido central cambia según la ruta, pero Header y Footer se quedan */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/noticias" element={<NoticiasPage />} />
+        </Routes>
 
-      <WhatsAppButton />
-      <Footer />
-    </div>
+        <Footer />
+        <WhatsAppButton />
+      </div>
+    </Router>
   );
 }
 
