@@ -512,3 +512,122 @@
     max-width: 100%;
   }
 }
+/* Añadimos estilos de interacción a la miniatura del folleto */
+.modal-campaign-img {
+  min-width: calc(33.333% - 10px);
+  max-width: calc(33.333% - 10px);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer; /* Cursor de mano */
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.modal-campaign-img:hover {
+  transform: scale(1.03); /* Pequeño zoom para incitar el clic */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================================
+   LIGHTBOX (VISOR ESTILO FACEBOOK)
+========================================= */
+
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85); /* Fondo muy oscuro, casi negro */
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 3000; /* Por encima del modal anterior (2000) */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 25px;
+  right: 40px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 3.5rem;
+  font-weight: 300;
+  cursor: pointer;
+  z-index: 3010;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.lightbox-close:hover {
+  color: #ff4d4d;
+}
+
+.lightbox-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain; /* Mantiene la proporción de la imagen sin recortarla */
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.lightbox-arrow:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #0c2340;
+}
+
+/* Las flechas se colocan por fuera de la imagen en pantallas grandes */
+.lb-left {
+  left: -90px;
+}
+.lb-right {
+  right: -90px;
+}
+
+/* Responsividad para el Lightbox */
+@media (max-width: 900px) {
+  .lb-left {
+    left: 10px;
+  }
+  .lb-right {
+    right: 10px;
+  }
+
+  .lightbox-close {
+    top: 15px;
+    right: 20px;
+  }
+}

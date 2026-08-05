@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { newsData } from "../data/newsData";
 import "./NoticiasPage.css";
 
-// 1. Íconos de las tarjetas
+// Íconos
 import iconMama from "../assets/icon-mama.png";
 import iconCorazon from "../assets/icon-corazon.png";
 import iconDonacion from "../assets/icon-donacion-de-sangre.png";
@@ -25,11 +25,7 @@ const medicalArticles = [
     icon: iconMama,
     subtitle: "Prevenir es curar. Chequeos anuales.",
     description: [
-      "Hoy reconocemos y agradecemos a quienes, con un gesto simple y solidario, ayudan a salvar vidas. Cada donación puede marcar la diferencia para pacientes que necesitan transfusiones, atraviesan tratamientos oncológicos, intervenciones quirúrgicas, emergencias o diversas enfermedades.",
-      "Te compartimos todo lo que necesitás saber sobre la donación de sangre: quiénes pueden donar, cuáles son los requisitos básicos, algunos mitos y verdades, y por qué es tan importante que más personas se sumen a esta cadena de solidaridad.",
-      "✨ Donar sangre es un acto voluntario, seguro y fundamental.",
-      "✨ Una sola donación puede ayudar a varias personas.",
-      "✨ La sangre no se fabrica: solo puede obtenerse gracias a la generosidad de los donantes.",
+      "La detección temprana del cáncer de mama salva vidas. Realizarte los controles anuales y conocer tu cuerpo es fundamental para cuidar tu salud.",
     ],
     campaignImages: [
       folletoCD1,
@@ -62,7 +58,6 @@ const medicalArticles = [
       "Una sola donación puede ayudar a varias personas.",
       "La sangre no se fabrica: solo puede obtenerse gracias a la generosidad de los donantes.",
     ],
-    // Aquí puedes poner 3, 6, o las imágenes que quieras. El slider las acomodará.
     campaignImages: [
       folletoEjemplo,
       folletoEjemplo,
@@ -107,7 +102,6 @@ const NewsCard = ({ news }) => {
 
       <div className="full-news-body">
         <h4 className="full-news-title">{news.title}</h4>
-
         {isExpanded ? (
           news.body.map((paragraph, idx) => (
             <p key={idx} className="expanded-text">
@@ -117,7 +111,6 @@ const NewsCard = ({ news }) => {
         ) : (
           <p className="clamped-text">{news.body[0]}</p>
         )}
-
         {isLong && (
           <button
             className="read-more-btn"
@@ -143,16 +136,16 @@ const NewsCard = ({ news }) => {
 };
 
 const NoticiasPage = () => {
-  // Referencia para el slider de noticias principales
   const sliderRef = useRef(null);
-
-  // Estados y referencias para el Modal de Artículos
-  const [selectedArticle, setSelectedArticle] = useState(null);
   const modalSliderRef = useRef(null);
+
+  const [selectedArticle, setSelectedArticle] = useState(null);
+
+  // NUENO ESTADO: Índice de la imagen abierta en el Lightbox (null significa cerrado)
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const sortedNews = [...newsData].sort((a, b) => b.id - a.id);
 
-  // Scroll de noticias
   const scrollNews = (direction) => {
     if (sliderRef.current) {
       const scrollAmount = 360;
@@ -163,15 +156,37 @@ const NoticiasPage = () => {
     }
   };
 
-  // Scroll dinámico para los folletos del modal (avanza de a 3 imágenes aproximadas)
   const scrollModal = (direction) => {
     if (modalSliderRef.current) {
-      // Calculamos el ancho visible para saltar las imágenes correctamente
       const scrollAmount = modalSliderRef.current.offsetWidth;
       modalSliderRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
       });
+    }
+  };
+
+  // --- FUNCIONES DEL LIGHTBOX ---
+  const openLightbox = (index) => setLightboxIndex(index);
+  const closeLightbox = () => setLightboxIndex(null);
+
+  const nextLightboxImage = (e) => {
+    e.stopPropagation(); // Evita que el clic cierre el visor
+    if (selectedArticle) {
+      setLightboxIndex(
+        (prev) => (prev + 1) % selectedArticle.campaignImages.length,
+      );
+    }
+  };
+
+  const prevLightboxImage = (e) => {
+    e.stopPropagation();
+    if (selectedArticle) {
+      setLightboxIndex(
+        (prev) =>
+          (prev - 1 + selectedArticle.campaignImages.length) %
+          selectedArticle.campaignImages.length,
+      );
     }
   };
 
@@ -204,7 +219,6 @@ const NoticiasPage = () => {
           <h2 className="articles-section-title">ARTÍCULOS MÉDICOS</h2>
           <div className="articles-grid">
             {medicalArticles.map((article) => (
-              // Cambiamos el link <a> por un botón que abre el modal
               <button
                 key={article.id}
                 className="article-card"
@@ -221,12 +235,9 @@ const NoticiasPage = () => {
         </section>
       </div>
 
-      {/* =========================================
-          MODAL (POP-UP) SUPERPUESTO CON BLUR
-      ========================================= */}
+      {/* POP-UP DE ARTÍCULOS */}
       {selectedArticle && (
         <div className="modal-overlay" onClick={() => setSelectedArticle(null)}>
-          {/* El stopPropagation evita que al hacer click dentro del cuadro blanco se cierre el modal */}
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2
@@ -252,7 +263,6 @@ const NoticiasPage = () => {
               ))}
             </div>
 
-            {/* Slider de Folletos dentro del modal */}
             <div className="modal-slider-container">
               {selectedArticle.campaignImages.length > 3 && (
                 <button
@@ -265,7 +275,12 @@ const NoticiasPage = () => {
 
               <div className="modal-slider" ref={modalSliderRef}>
                 {selectedArticle.campaignImages.map((img, idx) => (
-                  <div className="modal-campaign-img" key={idx}>
+                  // Añadimos el evento onClick para abrir el Lightbox
+                  <div
+                    className="modal-campaign-img"
+                    key={idx}
+                    onClick={() => openLightbox(idx)}
+                  >
                     <img
                       src={img}
                       alt={`Campaña ${selectedArticle.title} ${idx + 1}`}
@@ -283,6 +298,46 @@ const NoticiasPage = () => {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================
+          LIGHTBOX ESTILO FACEBOOK (VISOR DE IMÁGENES)
+      ========================================= */}
+      {lightboxIndex !== null && selectedArticle && (
+        <div className="lightbox-overlay" onClick={closeLightbox}>
+          {/* Cruz para cerrar */}
+          <button className="lightbox-close" onClick={closeLightbox}>
+            &times;
+          </button>
+
+          <div
+            className="lightbox-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Flecha Izquierda */}
+            <button
+              className="lightbox-arrow lb-left"
+              onClick={prevLightboxImage}
+            >
+              &#10094;
+            </button>
+
+            {/* Imagen Ampliada */}
+            <img
+              src={selectedArticle.campaignImages[lightboxIndex]}
+              alt="Folleto ampliado"
+              className="lightbox-img"
+            />
+
+            {/* Flecha Derecha */}
+            <button
+              className="lightbox-arrow lb-right"
+              onClick={nextLightboxImage}
+            >
+              &#10095;
+            </button>
           </div>
         </div>
       )}
