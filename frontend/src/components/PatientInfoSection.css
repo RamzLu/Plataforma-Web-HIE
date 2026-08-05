@@ -1,0 +1,222 @@
+.patient-section {
+  width: 100%;
+  background-color: #a8c1d1;
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.patient-container {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-section-header {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.subtitle-dark {
+  color: #0c2340;
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-bottom: -5px;
+}
+
+.title-white {
+  color: #ffffff;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Tarjeta Blanca Principal */
+.patient-main-card {
+  background-color: #fbfcff;
+  border-radius: 40px;
+  display: flex;
+  min-height: 450px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+/* --- LADO IZQUIERDO --- */
+.patient-content-left {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  z-index: 2; /* Mantiene el texto por encima */
+}
+
+.turnos-box {
+  background-color: #b3c7d3;
+  border-radius: 20px;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.turnos-text {
+  color: #006eb3;
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.turnos-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.turnos-time {
+  color: #006eb3;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.btn-whatsapp-small {
+  background-color: #006eb3;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.btn-whatsapp-small:hover {
+  background-color: #00558b;
+}
+
+/* Acordeón */
+.accordion-wrapper {
+  display: flex;
+  flex-direction: column;
+  /* Aumentamos el gap de 10px a 25px para separar más las píldoras */
+  gap: 25px; 
+}
+
+.accordion-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.accordion-header {
+  background-color: #006b9e;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  z-index: 2;
+  transition: background-color 0.2s;
+}
+
+.accordion-header:hover {
+  background-color: #005680;
+}
+
+.accordion-icon {
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
+.accordion-content {
+  background-color: #c0d1db;
+  color: #444;
+  font-size: 0.95rem;
+  padding: 0 25px;
+  max-height: 0;
+  overflow: hidden;
+  border-radius: 0 0 20px 20px;
+  margin-top: -15px;
+  transition: all 0.3s ease-in-out;
+}
+
+.accordion-content.open {
+  max-height: 200px;
+  padding: 30px 25px 15px 25px;
+}
+
+.accordion-content p {
+  margin: 0;
+}
+
+/* --- LADO DERECHO (Efecto Diagonal) --- */
+/* --- LADO DERECHO (Efecto Diagonal) --- */
+.patient-image-right {
+  flex: 0.8;
+  position: relative;
+}
+
+/* El contenedor sesgado que hace el corte diagonal */
+.image-skew-wrapper {
+  width: 125%; /* Lo hacemos mucho más ancho para tener margen */
+  height: 110%; 
+  position: absolute;
+  top: -5%; 
+  left: -15%; /* Lo desplazamos hacia la izquierda para compensar */
+  transform: skewX(-14deg); 
+  border-radius: 40px; 
+  overflow: hidden;
+  box-shadow: -5px 0 15px rgba(0,0,0,0.1); 
+}
+
+/* La imagen des-sesgada para que no se deforme */
+.patient-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center; /* Asegura que la parte importante quede en el medio */
+  /* Bajamos el zoom drásticamente de 1.35 a 1.12 */
+  transform: skewX(14deg) scale(1.12); 
+  transform-origin: center;
+  display: block;
+}
+
+/* Responsividad para móviles */
+@media (max-width: 992px) {
+  .patient-main-card {
+    flex-direction: column;
+    overflow: hidden; 
+  }
+  
+  .image-skew-wrapper {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    top: 0;
+    left: 0;
+    transform: none; 
+    border-radius: 0;
+  }
+  
+  .patient-img {
+    transform: none;
+  }
+  
+  .turnos-box {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+}
