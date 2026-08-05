@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import WhatsAppButton from "./components/WhatsAppButton";
 import HomePage from "./pages/HomePage";
 import NoticiasPage from "./pages/NoticiasPage";
+import EspecialidadesPage from "./pages/EspecialidadesPage";
 import "./App.css";
 
 function App() {
@@ -13,10 +14,10 @@ function App() {
       <div className="App">
         <Header />
 
-        {/* Aquí es donde la magia ocurre: el contenido central cambia según la ruta, pero Header y Footer se quedan */}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/noticias" element={<NoticiasPage />} />
+          <Route path="/especialidades" element={<EspecialidadesPage />} />
         </Routes>
 
         <Footer />

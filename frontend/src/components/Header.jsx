@@ -26,8 +26,14 @@ const Header = () => {
               </Link>
             </li>
             <li className="nav-item">
-              {/* Navegamos al ID de la misma página si estamos en el Home */}
-              <a href="/#especialidades">ESPECIALIDADES</a>
+              <Link
+                to="/especialidades"
+                className={
+                  location.pathname === "/especialidades" ? "active" : ""
+                }
+              >
+                ESPECIALIDADES
+              </Link>
             </li>
             <li className="nav-item">
               <Link
