@@ -255,7 +255,7 @@ const NoticiasPage = () => {
             {/* NUEVO: Cabecera con Logo y Nombre del Hospital */}
             <div className="modal-author">
               <div className="hospital-avatar">
-                <img src="/logo.png" alt="Avatar Hospital" />
+                <img src={avatarHospital} alt="Avatar Hospital" />
               </div>
               <div>
                 <h3>Hospital Interdistrital Evita Formosa</h3>
