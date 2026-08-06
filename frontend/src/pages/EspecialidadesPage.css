@@ -40,7 +40,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 60px; /* Separación entre el buscador y las tarjetas */
+  gap: 40px; /* Separación entre el buscador y las tarjetas */
 }
 
 /* --- BARRA DE BÚSQUEDA --- */

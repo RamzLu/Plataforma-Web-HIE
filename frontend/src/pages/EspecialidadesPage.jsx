@@ -1,5 +1,6 @@
 import React from "react";
 import "./EspecialidadesPage.css";
+import Breadcrumb from "../components/Breadcrumb";
 
 import iconEspecialidades from "../assets/especialidades-icon.png";
 import iconServicios from "../assets/icon-para-servicios-hospital.png";
@@ -10,12 +11,10 @@ import iconServicios from "../assets/icon-para-servicios-hospital.png";
 const EspecialidadesPage = () => {
   return (
     <main className="especialidades-page">
-      {/* Capa de fondo con efecto borroso. 
-          Si importas la imagen arriba, puedes agregarle style={{ backgroundImage: `url(${bgEspecialidades})` }} 
-      */}
       <div className="especialidades-bg"></div>
 
       <div className="especialidades-content">
+        <Breadcrumb currentPage="Especialidades" />
         {/* Barra de búsqueda */}
         <div className="search-bar-container">
           <svg

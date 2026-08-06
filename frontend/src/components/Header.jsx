@@ -44,16 +44,23 @@ const Header = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <a href="/#documentacion">DOCUMENTACIÓN</a>
+              <Link
+                to="/documentacion"
+                className={
+                  location.pathname === "/documentacion" ? "active" : ""
+                }
+              >
+                DOCUMENTACIÓN
+              </Link>
             </li>
             <li className="nav-item">
-              <a href="#contacto">CONTACTO</a>
+              <a href="/#contacto">CONTACTO</a>
             </li>
             <li className="nav-item">
-              <a href="#profesionales">PROFESIONALES</a>
+              <a href="/#profesionales">PROFESIONALES</a>
             </li>
             <li className="nav-item">
-              <a href="#acerca-de">ACERCA DE</a>
+              <a href="/#acerca-de">ACERCA DE</a>
             </li>
           </ul>
         </nav>
