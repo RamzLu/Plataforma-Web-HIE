@@ -10,7 +10,10 @@ import iconDonacion from "../assets/icon-donacion-de-sangre.png";
 import iconDengue from "../assets/icon-dengue.png";
 import avatarHospital from "../assets/iconEVITAface.jpg";
 
-// imagenes de los folletos para los articulos medicos
+// Imagen para el banner de Últimas Publicaciones
+import fondoBannerNoticias from "../assets/banner_noticias.png";
+
+// Imágenes de los folletos para los artículos médicos
 import folletoCD1 from "../assets/folletoCD1.jpg";
 import folletoCD2 from "../assets/folletoCD2.jpg";
 import folletoCD3 from "../assets/folletoCD3.jpg";
@@ -18,7 +21,6 @@ import folletoCD4 from "../assets/folletoCD4.jpg";
 import folletoCD5 from "../assets/folletoCD5.jpg";
 import folletoEjemplo from "../assets/folletoCD5.jpg";
 
-// 2. Datos expandidos para incluir la información del Modal
 const medicalArticles = [
   {
     id: 1,
@@ -86,7 +88,6 @@ const medicalArticles = [
   },
 ];
 
-// Actualizamos NewsCard para que reciba las funciones de abrir Modal y Lightbox
 const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
   const isLong = news.body.length > 1 || news.body[0].length > 120;
 
@@ -104,10 +105,8 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
 
       <div className="full-news-body">
         <h4 className="full-news-title">{news.title}</h4>
-        {/* El texto siempre se mantiene truncado en la tarjeta */}
         <p className="clamped-text">{news.body[0]}</p>
 
-        {/* Botón que ahora abre el Pop-up */}
         {isLong && (
           <button className="read-more-btn" onClick={() => onOpenNews(news)}>
             Ver más
@@ -135,11 +134,9 @@ const NoticiasPage = () => {
   const sliderRef = useRef(null);
   const modalSliderRef = useRef(null);
 
-  // Estados para los Modales (Pop-ups)
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedNews, setSelectedNews] = useState(null);
 
-  // Estado universal para el Lightbox (Visor de Imágenes)
   const [lightbox, setLightbox] = useState({
     isOpen: false,
     images: [],
@@ -168,7 +165,6 @@ const NoticiasPage = () => {
     }
   };
 
-  // --- FUNCIONES DEL LIGHTBOX UNIVERSAL ---
   const openLightbox = (images, index) =>
     setLightbox({ isOpen: true, images, index });
   const closeLightbox = () =>
@@ -192,10 +188,35 @@ const NoticiasPage = () => {
 
   return (
     <main className="noticias-page">
-      <div className="noticias-page-container">
-        <Breadcrumb currentPage="Noticias" />
-        <h1 className="page-title">Últimas Publicaciones</h1>
+      
+      {/* BANNER FULL WIDTH: Últimas Publicaciones */}
+      <div
+        className="news-header-fluid"
+        style={{
+          // Color #e9ebee mezclado con la imagen para suavizar
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), #7b8eaa), url(${fondoBannerNoticias})`,
+        }}
+      >
+        <div className="news-header-inner">
+          <Breadcrumb currentPage="Noticias" />
+          <h1 className="news-main-title">ÚLTIMAS PUBLICACIONES</h1>
+          <div className="news-info-wrapper">
+            <div className="news-info-labels">
+              <span className="news-label active">HOSPITAL</span>
+              <span className="news-label">EVITA</span>
+            </div>
+            <div className="news-info-divider"></div>
+            <div className="news-info-text">
+              <p>Manténgase informado con la actualidad</p>
+              <p>y comunicados oficiales de la institución.</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <div className="noticias-page-container">
+        
+        {/* SLIDER DE NOTICIAS FACEBOOK */}
         <div className="slider-wrapper">
           <button
             className="slider-arrow left-arrow"
@@ -221,8 +242,14 @@ const NoticiasPage = () => {
           </button>
         </div>
 
+        {/* SECCIÓN DE ARTÍCULOS MÉDICOS CON NUEVA TIPOGRAFÍA */}
         <section className="medical-articles-section">
-          <h2 className="articles-section-title">ARTÍCULOS MÉDICOS</h2>
+          <div className="medical-header">
+            <h4 className="medical-subtitle">ESPACIO DE EDUCACIÓN EN SALUD</h4>
+            <div className="medical-divider"></div>
+            <h2 className="medical-title">ARTÍCULOS<br />MÉDICOS</h2>
+          </div>
+
           <div className="articles-grid">
             {medicalArticles.map((article) => (
               <button
@@ -254,7 +281,6 @@ const NoticiasPage = () => {
               &times;
             </button>
 
-            {/* NUEVO: Cabecera con Logo y Nombre del Hospital */}
             <div className="modal-author">
               <div className="hospital-avatar">
                 <img src={avatarHospital} alt="Avatar Hospital" />
@@ -336,7 +362,6 @@ const NoticiasPage = () => {
               &times;
             </button>
 
-            {/* NUEVO: Cabecera con Logo y Nombre del Hospital */}
             <div className="modal-author">
               <div className="hospital-avatar">
                 <img src={avatarHospital} alt="Avatar Hospital" />

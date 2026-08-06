@@ -1,19 +1,113 @@
+/* =========================================
+   ESTRUCTURA BASE DE LA PÁGINA
+========================================= */
 .noticias-page {
   width: 100%;
   background-color: #e9ebee;
-  padding: 40px 20px 80px 20px;
+  /* Sin padding superior para que el banner toque el menú */
+  padding: 0 0 80px 0; 
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   min-height: calc(100vh - 80px);
 }
 
 .noticias-page-container {
   max-width: 1500px;
   width: 100%;
+  padding: 0 20px;
   position: relative;
 }
 
-/* --- ESTRUCTURA DEL SLIDER --- */
+/* =========================================
+   BANNER FULL WIDTH: ÚLTIMAS PUBLICACIONES
+========================================= */
+.news-header-fluid {
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin-bottom: 50px;
+  display: flex;
+  justify-content: center;
+  /* Aumentamos el padding superior de 60px a 120px para empujar el texto hacia abajo */
+  padding: 120px 20px 60px 20px; 
+}
+
+.news-header-inner {
+  width: 100%;
+  max-width: 1500px; /* Alineado con el slider */
+  border-left: 8px solid #2b5b94;
+  padding-left: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Ajuste sutil para el breadcrumb dentro del banner */
+.news-header-inner .breadcrumb-container {
+  margin-bottom: 15px;
+}
+
+.news-main-title {
+  color: #2b5b94;
+  font-size: 3.2rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+.news-info-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.news-info-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: right;
+  justify-content: center;
+}
+
+.news-label {
+  color: #2b5b94;
+  font-size: 1.1rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.news-label.active {
+  font-weight: 700;
+}
+
+.news-info-divider {
+  width: 1.5px;
+  background-color: #2b5b94;
+  align-self: stretch;
+}
+
+.news-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.news-info-text p {
+  color: #1c1e21;
+  font-size: 1.15rem;
+  font-weight: 300;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* =========================================
+   SLIDER DE NOTICIAS
+========================================= */
 .slider-wrapper {
   position: relative;
   display: flex;
@@ -29,7 +123,6 @@
   padding: 10px 5px;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  /* ESTA ES LA CLAVE: stretch fuerza a que todas las tarjetas midan lo mismo que la más alta */
   align-items: stretch;
 }
 
@@ -69,7 +162,7 @@
   right: -25px;
 }
 
-/* --- TARJETA DE NOTICIA --- */
+/* --- TARJETAS DE NOTICIAS --- */
 .full-news-card {
   min-width: 320px;
   max-width: 320px;
@@ -80,7 +173,6 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  /* Al estar en un contenedor "stretch", la tarjeta ocupará el 100% de la altura disponible */
 }
 
 .full-news-header {
@@ -91,7 +183,7 @@
 }
 
 .hospital-avatar {
-  width: 45px; /* Un poco más grande para que destaque */
+  width: 45px; 
   height: 45px;
   border-radius: 50%;
   background-color: #ffffff;
@@ -100,17 +192,17 @@
   align-items: center;
   border: 1px solid #e2e8f0;
   flex-shrink: 0;
-  overflow: hidden; /* LA CLAVE: Recorta la imagen cuadrada para hacerla un círculo perfecto */
+  overflow: hidden; 
 }
 
 .hospital-avatar img {
-  width: 100%; /* Ahora ocupa todo el espacio del círculo */
+  width: 100%; 
   height: 100%;
-  object-fit: cover; /* Llena el espacio sin deformar la imagen */
+  object-fit: cover; 
 }
 
 .post-meta h3 {
-  margin: 0 0 3px 0; /* Pequeño margen para separar de la fecha */
+  margin: 0 0 3px 0; 
   font-size: 0.95rem;
   color: #0c2340;
   font-weight: 700;
@@ -122,12 +214,12 @@
   color: #65676b;
   line-height: 1;
 }
+
 .full-news-body {
   padding: 0 15px 15px 15px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  /* flex-grow 1 empuja el contenedor de imágenes siempre al fondo */
   flex-grow: 1;
 }
 
@@ -176,7 +268,6 @@
   color: #004d80;
 }
 
-/* --- GRILLA DINÁMICA DE IMÁGENES --- */
 .full-news-images {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -192,30 +283,45 @@
   display: block;
 }
 
-/* Responsividad para móviles */
-@media (max-width: 768px) {
-  .slider-arrow {
-    display: none;
-  }
-  .news-slider {
-    padding: 10px 20px;
-  }
-}
-
-.page-title,
-.articles-section-title {
-  color: #006eb3;
-  font-weight: 300;
-  font-size: 2.2rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-align: center;
-  margin-bottom: 40px;
-}
-
+/* =========================================
+   ARTÍCULOS MÉDICOS
+========================================= */
 .medical-articles-section {
-  margin-top: 80px;
+  margin-top: 100px;
   width: 100%;
+}
+
+.medical-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 50px;
+}
+
+.medical-subtitle {
+  color: #2b5b94;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 0;
+}
+
+.medical-divider {
+  width: 45px;
+  height: 2px;
+  background-color: #2b5b94;
+  margin: 15px 0 25px 0;
+}
+
+.medical-title {
+  color: #2b5b94;
+  font-size: 4.5rem; 
+  font-weight: 300; 
+  line-height: 1.05;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: -1px; 
 }
 
 .articles-grid {
@@ -227,6 +333,7 @@
 
 .article-card {
   background-color: #ffffff;
+  border: none;
   border-radius: 20px;
   padding: 30px 20px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
@@ -234,11 +341,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  text-decoration: none;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   min-height: 250px;
+  font-family: inherit;
 }
 
 .article-card:hover {
@@ -276,58 +382,16 @@
   font-size: 1rem;
 }
 
-/* Responsividad para móviles y tablets */
-@media (max-width: 1024px) {
-  .articles-grid {
-    grid-template-columns: repeat(2, 1fr); /* En tablets bajamos a 2 columnas */
-  }
-}
-
-@media (max-width: 600px) {
-  .articles-grid {
-    grid-template-columns: 1fr; /* En celulares mostramos 1 columna */
-  }
-}
-/* Modificamos la tarjeta de artículo para que sea un botón sin estilos por defecto */
-.article-card {
-  background-color: #ffffff;
-  border: none;
-  border-radius: 20px;
-  padding: 30px 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-  min-height: 250px;
-  font-family: inherit;
-}
-
-.article-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
-}
-
 /* =========================================
-   ESTILOS DEL MODAL (POP-UP) RENOVADO
+   ESTILOS DEL MODAL (POP-UP)
 ========================================= */
-
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(
-    15,
-    23,
-    42,
-    0.6
-  ); /* Un tono más oscuro y azulado para mayor contraste */
+  background-color: rgba(15, 23, 42, 0.6); 
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 2000;
@@ -339,22 +403,22 @@
 }
 
 .modal-content {
-  background-color: #ffffff; /* Blanco puro para máxima limpieza */
+  background-color: #ffffff; 
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
-  border-radius: 24px; /* Bordes un poco más suaves */
-  padding: 50px; /* Más respiro interior */
+  border-radius: 24px; 
+  padding: 50px; 
   position: relative;
   overflow-y: auto;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* Sombra más profunda y elegante */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
   display: flex;
   flex-direction: column;
 }
 
 .modal-header {
   margin-bottom: 25px;
-  padding-right: 40px; /* Evita que el texto pise el botón de cerrar */
+  padding-right: 40px; 
 }
 
 .modal-title {
@@ -364,7 +428,6 @@
   line-height: 1.2;
 }
 
-/* --- Botón de cerrar minimalista (X flotante) --- */
 .modal-close-btn {
   position: absolute;
   top: 25px;
@@ -386,15 +449,14 @@
 
 .modal-close-btn:hover {
   background-color: #fee2e2;
-  color: #ef4444; /* Se vuelve rojo suave al interactuar */
-  transform: rotate(90deg); /* Animación de rotación sutil */
+  color: #ef4444; 
+  transform: rotate(90deg); 
 }
 
-/* --- Toque de personalidad: Línea de acento lateral --- */
 .modal-body {
   margin-bottom: 35px;
   padding-left: 24px;
-  border-left: 4px solid #006eb3; /* Esta línea tomará color dinámico desde React */
+  border-left: 4px solid #006eb3; 
 }
 
 .modal-subtitle {
@@ -406,12 +468,44 @@
 
 .modal-text {
   font-size: 1.1rem;
-  color: #334155; /* Texto oscuro, casi negro, ideal para lectura larga */
-  line-height: 1.7; /* Interlineado más amplio y relajado */
+  color: #334155; 
+  line-height: 1.7; 
   margin-bottom: 12px;
 }
 
-/* El resto de las clases del slider modal y las imágenes quedan igual */
+.modal-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.modal-author div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.modal-author .hospital-avatar {
+  width: 50px;
+  height: 50px;
+}
+
+.modal-author h3 {
+  margin: 0 0 3px 0;
+  font-size: 1.05rem; 
+  color: #0c2340;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.modal-author span {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1;
+}
+
 .modal-slider-container {
   position: relative;
   width: 100%;
@@ -436,18 +530,16 @@
 .modal-campaign-img {
   min-width: calc(33.333% - 10px);
   max-width: calc(33.333% - 10px);
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer; 
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .modal-campaign-img:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  transform: scale(1.03); 
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .modal-campaign-img img {
@@ -490,61 +582,41 @@
   right: -20px;
 }
 
-/* Responsividad del Modal */
-@media (max-width: 768px) {
-  .modal-content {
-    padding: 30px 20px;
-  }
-  .modal-close-btn {
-    top: 15px;
-    right: 15px;
-  }
-  .modal-body {
-    padding-left: 15px;
-  }
-  .modal-campaign-img {
-    min-width: calc(50% - 7.5px);
-    max-width: calc(50% - 7.5px);
-  }
-}
-@media (max-width: 480px) {
-  .modal-campaign-img {
-    min-width: 100%;
-    max-width: 100%;
-  }
-}
-/* Añadimos estilos de interacción a la miniatura del folleto */
-.modal-campaign-img {
-  min-width: calc(33.333% - 10px);
-  max-width: calc(33.333% - 10px);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  cursor: pointer; /* Cursor de mano */
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+.news-modal-images-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
 }
 
-.modal-campaign-img:hover {
-  transform: scale(1.03); /* Pequeño zoom para incitar el clic */
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+.news-modal-images-grid .modal-campaign-img {
+  flex: 1 1 calc(33.333% - 15px);
+  max-width: calc(33.333% - 15px);
+  min-width: 200px; 
+}
+
+.clickable-img {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.clickable-img:hover {
+  opacity: 0.85; 
 }
 
 /* =========================================
    LIGHTBOX (VISOR ESTILO FACEBOOK)
 ========================================= */
-
 .lightbox-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.85); /* Fondo muy oscuro, casi negro */
+  background-color: rgba(0, 0, 0, 0.85); 
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  z-index: 3000; /* Por encima del modal anterior (2000) */
+  z-index: 3000; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -582,7 +654,7 @@
 .lightbox-img {
   max-width: 100%;
   max-height: 90vh;
-  object-fit: contain; /* Mantiene la proporción de la imagen sin recortarla */
+  object-fit: contain; 
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
@@ -610,7 +682,6 @@
   color: #0c2340;
 }
 
-/* Las flechas se colocan por fuera de la imagen en pantallas grandes */
 .lb-left {
   left: -90px;
 }
@@ -618,7 +689,26 @@
   right: -90px;
 }
 
-/* Responsividad para el Lightbox */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* =========================================
+   RESPONSIVIDAD GENERAL
+========================================= */
+@media (max-width: 1024px) {
+  .articles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .medical-title {
+    font-size: 3.5rem;
+  }
+}
+
 @media (max-width: 900px) {
   .lb-left {
     left: 10px;
@@ -626,69 +716,66 @@
   .lb-right {
     right: 10px;
   }
-
   .lightbox-close {
     top: 15px;
     right: 20px;
   }
 }
-/* =========================================
-   NUEVAS CLASES PARA EL MODAL DE NOTICIAS
-========================================= */
 
-/* Cursor para indicar que la imagen se puede ampliar */
-.clickable-img {
-  cursor: pointer;
-  transition: opacity 0.2s;
+@media (max-width: 768px) {
+  .slider-arrow {
+    display: none;
+  }
+  .news-slider {
+    padding: 10px 20px;
+  }
+  .news-header-fluid {
+    padding: 100px 20px 40px 20px;
+  }
+  .news-header-inner {
+    border-left-width: 5px;
+    padding-left: 20px;
+  }
+  .news-main-title {
+    font-size: 2.2rem;
+  }
+  .news-info-wrapper {
+    align-items: flex-start;
+  }
+  .news-info-text p {
+    font-size: 0.95rem;
+  }
+  .medical-title {
+    font-size: 2.8rem;
+  }
+  .medical-subtitle {
+    font-size: 0.9rem;
+  }
+  .modal-content {
+    padding: 30px 20px;
+  }
+  .modal-close-btn {
+    top: 15px;
+    right: 15px;
+  }
+  .modal-body {
+    padding-left: 15px;
+  }
+  .modal-campaign-img {
+    min-width: calc(50% - 7.5px);
+    max-width: calc(50% - 7.5px);
+  }
 }
 
-.clickable-img:hover {
-  opacity: 0.85; /* Ligero efecto al pasar el ratón */
+@media (max-width: 600px) {
+  .articles-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* Grilla para las imágenes dentro del Pop-up de Noticias */
-.news-modal-images-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 10px;
-}
-
-/* Reutilizamos el tamaño de las campañas pero en flex */
-.news-modal-images-grid .modal-campaign-img {
-  flex: 1 1 calc(33.333% - 15px);
-  max-width: calc(33.333% - 15px);
-  min-width: 200px; /* Para que en celulares pasen a estar una debajo de la otra */
-}
-/* --- Cabecera de Autor en el Modal (Logo y Nombre) --- */
-.modal-author {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 25px;
-}
-.modal-author div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.modal-author .hospital-avatar {
-  width: 50px;
-  height: 50px;
-  /* El borde y color de fondo ya lo hereda de la clase original .hospital-avatar */
-}
-
-.modal-author h3 {
-  margin: 0 0 3px 0;
-  font-size: 1.05rem; /* Tamaño óptimo para que "Formosa" no salte a otra línea */
-  color: #0c2340;
-  font-weight: 700;
-  line-height: 1.2;
-}
-.modal-author span {
-  font-size: 0.85rem;
-  color: #64748b;
-  font-weight: 500;
-  line-height: 1;
+@media (max-width: 480px) {
+  .modal-campaign-img {
+    min-width: 100%;
+    max-width: 100%;
+  }
 }
