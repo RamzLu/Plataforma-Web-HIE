@@ -202,31 +202,27 @@
   }
 }
 
-/* --- TÍTULOS DE SECCIÓN (Estilo Fino y Azul) --- */
 .page-title,
 .articles-section-title {
-  color: #006eb3; /* Azul idéntico al de tu imagen */
-  font-weight: 300; /* Hace que la letra sea fina/delgada */
-  font-size: 2.2rem; /* Tamaño del texto */
-  text-transform: uppercase; /* Fuerza las mayúsculas */
-  letter-spacing: 2px; /* Da esa separación elegante entre letras */
-  text-align: center; /* Centra el texto */
+  color: #006eb3;
+  font-weight: 300;
+  font-size: 2.2rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
   margin-bottom: 40px;
 }
-/* =========================================
-   NUEVA SECCIÓN: ARTÍCULOS MÉDICOS
-========================================= */
 
 .medical-articles-section {
-  margin-top: 80px; /* Separación generosa respecto al slider de noticias */
+  margin-top: 80px;
   width: 100%;
 }
 
 .articles-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 columnas iguales */
+  grid-template-columns: repeat(4, 1fr);
   gap: 30px;
-  align-items: stretch; /* Asegura que todas las tarjetas midan lo mismo */
+  align-items: stretch;
 }
 
 .article-card {
@@ -242,11 +238,11 @@
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
-  min-height: 250px; /* Tamaño mediano, ni muy chico ni muy grande */
+  min-height: 250px;
 }
 
 .article-card:hover {
-  transform: translateY(-5px); /* Efecto de levitación al pasar el mouse */
+  transform: translateY(-5px);
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
 }
 
