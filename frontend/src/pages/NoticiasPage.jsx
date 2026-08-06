@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { newsData } from "../data/newsData";
 import "./NoticiasPage.css";
+import Breadcrumb from "../components/Breadcrumb";
 
 // Íconos
 import iconMama from "../assets/icon-mama.png";
@@ -192,6 +193,7 @@ const NoticiasPage = () => {
   return (
     <main className="noticias-page">
       <div className="noticias-page-container">
+        <Breadcrumb currentPage="Noticias" />
         <h1 className="page-title">Últimas Publicaciones</h1>
 
         <div className="slider-wrapper">

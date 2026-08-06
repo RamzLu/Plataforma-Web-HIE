@@ -1,0 +1,38 @@
+.breadcrumb-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 1.3rem;
+  font-weight: 300; /* Fuente ligera como en tu imagen */
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.breadcrumb-link {
+  color: #006eb3; /* Azul del enlace */
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  text-decoration: underline;
+  color: #004d80;
+}
+
+.breadcrumb-separator {
+  margin: 0 12px;
+  color: #1c1e21; /* Negro para la barra */
+  font-weight: 300;
+}
+
+.breadcrumb-current {
+  color: #1c1e21; /* Negro para la página actual */
+}
+
+/* Responsividad para celulares */
+@media (max-width: 768px) {
+  .breadcrumb-container {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+  }
+}

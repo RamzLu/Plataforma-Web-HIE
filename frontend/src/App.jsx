@@ -6,11 +6,13 @@ import WhatsAppButton from "./components/WhatsAppButton";
 import HomePage from "./pages/HomePage";
 import NoticiasPage from "./pages/NoticiasPage";
 import EspecialidadesPage from "./pages/EspecialidadesPage";
+import ScrollToTop from "./components/ScrollToTop";
 import "./App.css";
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="App">
         <Header />
 
