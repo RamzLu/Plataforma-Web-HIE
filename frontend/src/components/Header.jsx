@@ -57,7 +57,14 @@ const Header = () => {
               <a href="/#contacto">CONTACTO</a>
             </li>
             <li className="nav-item">
-              <a href="/#profesionales">PROFESIONALES</a>
+              <Link
+                to="/profesionales"
+                className={
+                  location.pathname === "/profesionales" ? "active" : ""
+                }
+              >
+                PROFESIONALES
+              </Link>
             </li>
             <li className="nav-item">
               <a href="/#acerca-de">ACERCA DE</a>

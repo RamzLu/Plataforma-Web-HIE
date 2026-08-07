@@ -13,6 +13,7 @@ import HomePage from "./pages/HomePage";
 import EspecialidadesPage from "./pages/EspecialidadesPage";
 import NoticiasPage from "./pages/NoticiasPage";
 import DocumentacionPage from "./pages/DocumentacionPage";
+import ProfesionalesPage from "./pages/ProfesionalesPage";
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
         <Route path="/especialidades" element={<EspecialidadesPage />} />
         <Route path="/noticias" element={<NoticiasPage />} />
         <Route path="/documentacion" element={<DocumentacionPage />} />
+        <Route path="/profesionales" element={<ProfesionalesPage />} />
 
         <Route
           path="*"
