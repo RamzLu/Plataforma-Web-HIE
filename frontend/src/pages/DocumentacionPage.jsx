@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "./DocumentacionPage.css";
 import { documentosData } from "../data/documentos";
 
+import Breadcrumb from "../components/Breadcrumb";
+
 import fondoBanner from "../assets/banner_documentacion.png";
 
 const DocumentacionPage = () => {
@@ -56,15 +58,14 @@ const DocumentacionPage = () => {
 
   return (
     <main className="documentacion-page">
-      {/* CABECERA FULL WIDTH (Fuera del contenedor limitante) */}
       <div
         className="doc-header-fluid"
         style={{
-          // Este degradado aplica una capa blanca al 85% de opacidad sobre tu imagen
           backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), #a4c2d6), url(${fondoBanner})`,
         }}
       >
         <div className="doc-header-inner">
+            <Breadcrumb currentPage="documentación" />
           <h1 className="doc-title">REPOSITORIO DE DOCUMENTOS</h1>
           <div className="doc-info-wrapper">
             <div className="doc-info-labels">
