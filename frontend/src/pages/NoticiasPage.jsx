@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { newsData } from "../data/newsData";
 import "./NoticiasPage.css";
 import Breadcrumb from "../components/Breadcrumb";
@@ -193,8 +193,19 @@ const NoticiasPage = () => {
   };
 
   const prevAltaSlide = () => {
-    setAltaIndex((prev) => (prev - 1 + miniCarouselData.length) % miniCarouselData.length);
+    setAltaIndex(
+      (prev) => (prev - 1 + miniCarouselData.length) % miniCarouselData.length,
+    );
   };
+
+  // Movimiento automático lento para el mini carrusel cada 5 segundos[cite: 8]
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextAltaSlide();
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [altaIndex]);
 
   const openLightbox = (images, index) =>
     setLightbox({ isOpen: true, images, index });
@@ -219,7 +230,6 @@ const NoticiasPage = () => {
 
   return (
     <main className="noticias-page">
-      
       {/* BANNER FULL WIDTH: Últimas Publicaciones */}
       <div
         className="news-header-fluid"
@@ -245,7 +255,6 @@ const NoticiasPage = () => {
       </div>
 
       <div className="noticias-page-container">
-        
         {/* SLIDER DE NOTICIAS FACEBOOK */}
         <div className="slider-wrapper">
           <button
@@ -274,18 +283,26 @@ const NoticiasPage = () => {
 
         {/* SECCIÓN DE ARTÍCULOS MÉDICOS (Diseño 2 columnas según la imagen) */}
         <section className="medical-articles-section">
-          
           {/* COLUMNA IZQUIERDA: Títulos y Mini Carrusel */}
           <div className="medical-left-column">
             <div className="medical-header">
-              <h4 className="medical-subtitle">ESPACIO DE EDUCACIÓN EN SALUD</h4>
+              <h4 className="medical-subtitle">
+                ESPACIO DE EDUCACIÓN EN SALUD
+              </h4>
               <div className="medical-divider"></div>
-              <h2 className="medical-title">ARTÍCULOS<br />MÉDICOS</h2>
+              <h2 className="medical-title">
+                ARTÍCULOS
+                <br />
+                MÉDICOS
+              </h2>
             </div>
 
             <div className="mini-carousel-card">
               <div className="mini-carousel-img-wrapper">
-                <button className="mini-arrow mini-left" onClick={prevAltaSlide}>
+                <button
+                  className="mini-arrow mini-left"
+                  onClick={prevAltaSlide}
+                >
                   &#10094;
                 </button>
                 <img
@@ -293,18 +310,23 @@ const NoticiasPage = () => {
                   alt={miniCarouselData[altaIndex].caption}
                   key={altaIndex} // Fuerza el re-render para la animación de fade
                 />
-                <button className="mini-arrow mini-right" onClick={nextAltaSlide}>
+                <button
+                  className="mini-arrow mini-right"
+                  onClick={nextAltaSlide}
+                >
                   &#10095;
                 </button>
               </div>
-              
-              <p className="mini-caption">{miniCarouselData[altaIndex].caption}</p>
-              
+
+              <p className="mini-caption">
+                {miniCarouselData[altaIndex].caption}
+              </p>
+
               <div className="mini-dots">
                 {miniCarouselData.map((_, idx) => (
                   <div
                     key={idx}
-                    className={`mini-dot ${altaIndex === idx ? 'active' : ''}`}
+                    className={`mini-dot ${altaIndex === idx ? "active" : ""}`}
                     onClick={() => setAltaIndex(idx)}
                   />
                 ))}
@@ -312,7 +334,7 @@ const NoticiasPage = () => {
             </div>
           </div>
 
-<div className="articles-grid">
+          <div className="articles-grid">
             {medicalArticles.map((article) => (
               <button
                 key={article.id}
@@ -320,42 +342,38 @@ const NoticiasPage = () => {
                 onClick={() => setSelectedArticle(article)}
               >
                 <h3 style={{ color: article.color }}>{article.title}</h3>
-                
+
                 <div className="article-icon-wrapper">
-                  <img 
-                    src={article.icon} 
-                    alt={article.title} 
-                    className="icon-static" 
+                  <img
+                    src={article.icon}
+                    alt={article.title}
+                    className="icon-static"
                   />
-                  <img 
-                    src={article.iconAnimated} 
-                    alt={`${article.title} animado`} 
-                    className="icon-animated" 
+                  <img
+                    src={article.iconAnimated}
+                    alt={`${article.title} animado`}
+                    className="icon-animated"
                   />
                 </div>
-                {/* ----------------------------------------- */}
-                
-                {/* Flecha minimalista que reemplaza al texto "ver" */}
+
                 <div className="article-card-arrow">
-                  <svg 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24" 
+                  <svg
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth="2" 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="M14 5l7 7m0 0l-7 7m7-7H3"
                     />
                   </svg>
                 </div>
-
               </button>
             ))}
           </div>
-
         </section>
       </div>
 
