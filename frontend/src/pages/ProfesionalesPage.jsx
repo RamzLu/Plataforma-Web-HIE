@@ -1,10 +1,15 @@
 import React, { useState, useRef } from "react";
+// Importamos los componentes de Swiper y sus módulos
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, FreeMode } from "swiper/modules";
+
+// Importamos los estilos necesarios de Swiper
+import "swiper/css";
+import "swiper/css/free-mode";
+import "swiper/css/autoplay";
 import "./ProfesionalesPage.css";
 
-// 1. IMPORTA AQUÍ TU IMAGEN DE FONDO
-import fondoProfesionales from "../assets/fondo-pagina-profesional.jpg"; // <-- CAMBIA ESTO POR TU FOTO
-
-// Importa las fotos de tus doctores (puedes dejarlos en null si no tienes foto aún)
+import fondoProfesionales from "../assets/fondo-pagina-profesional.jpg";
 import docEjemplo1 from "../assets/foto-doctor-ejemplo.jpg";
 import docEjemplo2 from "../assets/foto-doctora-ejemplo.jpg";
 
@@ -42,65 +47,110 @@ const equipoMedicoData = [
         titulo: "Médico Clínico",
         foto: null,
       },
+      {
+        id: 6,
+        nombre: "Dra. Valentina Rojas",
+        titulo: "Médica Clínica",
+        foto: null,
+      },
+      {
+        id: 7,
+        nombre: "Dr. Javier Morales",
+        titulo: "Médico Clínico",
+        foto: null,
+      },
     ],
   },
   {
     especialidad: "PEDIATRÍA",
     profesionales: [
       {
-        id: 6,
+        id: 8,
         nombre: "Lic. Ana Ramirez",
         titulo: "Lic. en Pediatría",
         foto: docEjemplo2,
       },
       {
-        id: 7,
+        id: 9,
         nombre: "Dr. Juan Medina",
         titulo: "Pediatra Especialista",
         foto: null,
       },
       {
-        id: 8,
+        id: 10,
         nombre: "Dra. Sofía Castro",
         titulo: "Pediatra Neonatóloga",
         foto: null,
       },
-      { id: 9, nombre: "Dr. Luis Navarro", titulo: "Pediatra", foto: null },
+      { id: 11, nombre: "Dr. Luis Navarro", titulo: "Pediatra", foto: null },
+      {
+        id: 12,
+        nombre: "Dr. Juan Medina",
+        titulo: "Pediatra Especialista",
+        foto: null,
+      },
+      {
+        id: 13,
+        nombre: "Dra. Sofía Castro",
+        titulo: "Pediatra Neonatóloga",
+        foto: null,
+      },
+      { id: 14, nombre: "Dr. Luis Navarro", titulo: "Pediatra", foto: null },
     ],
   },
   {
     especialidad: "GINECOLOGÍA",
     profesionales: [
       {
-        id: 10,
+        id: 15,
         nombre: "Dra. María Blanco",
         titulo: "Ginecóloga y Obstetra",
         foto: null,
       },
       {
-        id: 11,
+        id: 16,
         nombre: "Dra. Patricia Luna",
         titulo: "Ginecóloga",
         foto: null,
       },
-      { id: 12, nombre: "Dr. Roberto Paz", titulo: "Ginecólogo", foto: null },
+      { id: 17, nombre: "Dr. Roberto Paz", titulo: "Ginecólogo", foto: null },
+      {
+        id: 18,
+        nombre: "Dra. María Blanco",
+        titulo: "Ginecóloga y Obstetra",
+        foto: null,
+      },
+      {
+        id: 19,
+        nombre: "Dra. Patricia Luna",
+        titulo: "Ginecóloga",
+        foto: null,
+      },
+      { id: 20, nombre: "Dr. Roberto Paz", titulo: "Ginecólogo", foto: null },
     ],
   },
 ];
 
-// =========================================
-// SUB-COMPONENTE: CARRUSEL POR ESPECIALIDAD
-// =========================================
 const SpecialtyRow = ({ especialidad, profesionales }) => {
-  const scrollRef = useRef(null);
+  const swiperRef = useRef(null);
 
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = 240; // Ancho de la tarjeta + gap
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
+  // Al poner el mouse encima, arranca el movimiento automático
+  const handleMouseEnter = () => {
+    if (swiperRef.current && swiperRef.current.swiper) {
+      const swiper = swiperRef.current.swiper;
+      if (swiper.autoplay) {
+        swiper.autoplay.start();
+      }
+    }
+  };
+
+  // Al sacar el mouse, se detiene el movimiento
+  const handleMouseLeave = () => {
+    if (swiperRef.current && swiperRef.current.swiper) {
+      const swiper = swiperRef.current.swiper;
+      if (swiper.autoplay) {
+        swiper.autoplay.stop();
+      }
     }
   };
 
@@ -108,77 +158,86 @@ const SpecialtyRow = ({ especialidad, profesionales }) => {
     <div className="specialty-block">
       <h2 className="specialty-title">{especialidad}</h2>
 
-      <div className="carousel-wrapper">
-        <button className="carousel-arrow left" onClick={() => scroll("left")}>
-          &#10094;
-        </button>
-
-        <div className="carousel-track" ref={scrollRef}>
-          {profesionales.map((prof) => (
-            <div className="prof-card" key={prof.id}>
-              <div className="prof-card-bg">
-                {prof.foto ? (
-                  <img src={prof.foto} alt={prof.nombre} />
-                ) : (
-                  /* Si no hay foto, mostramos un icono genérico sutil */
-                  <svg
-                    width="60"
-                    height="60"
-                    fill="#cbd5e1"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                  </svg>
-                )}
-              </div>
-
-              <div className="prof-info">
-                <h4>{prof.nombre}</h4>
-                <span>{prof.titulo}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <button
-          className="carousel-arrow right"
-          onClick={() => scroll("right")}
+      <div
+        className="carousel-wrapper"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <Swiper
+          ref={swiperRef}
+          modules={[Autoplay, FreeMode]}
+          spaceBetween={20}
+          slidesPerView="auto"
+          loop={true}
+          freeMode={{
+            enabled: true,
+            sticky: false,
+            momentumBounce: false,
+          }}
+          speed={4000}
+          autoplay={{
+            delay: 0,
+            disableOnInteraction: false,
+            // Arranca detenido por defecto hasta que el usuario pose el mouse
+            stopOnLastSlide: false,
+          }}
+          // Inicializamos para que empiece detenido
+          onInit={(swiper) => {
+            if (swiper.autoplay) swiper.autoplay.stop();
+          }}
+          className="mySwiper"
         >
-          &#10095;
-        </button>
+          {profesionales.map((prof) => (
+            <SwiperSlide key={prof.id} style={{ width: "240px" }}>
+              <div className="prof-card">
+                <div className="prof-card-bg">
+                  {prof.foto ? (
+                    <img src={prof.foto} alt={prof.nombre} />
+                  ) : (
+                    <svg
+                      width="60"
+                      height="60"
+                      fill="#cbd5e1"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                  )}
+                </div>
+
+                <div className="prof-info">
+                  <h4>{prof.nombre}</h4>
+                  <span>{prof.titulo}</span>
+                </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     </div>
   );
 };
 
-// =========================================
-// COMPONENTE PRINCIPAL
-// =========================================
 const ProfesionalesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedArea, setSelectedArea] = useState("Todas las áreas");
 
-  // Obtener la lista única de áreas para el filtro (dropdown)
   const areasList = [
     "Todas las áreas",
     ...equipoMedicoData.map((d) => d.especialidad),
   ];
 
-  // Lógica de Filtro y Búsqueda
   const filteredData = equipoMedicoData
     .map((area) => {
-      // 1. Filtramos los profesionales dentro de cada área por el texto de búsqueda
       const filteredProfs = area.profesionales.filter((p) =>
         p.nombre.toLowerCase().includes(searchTerm.toLowerCase()),
       );
       return { ...area, profesionales: filteredProfs };
     })
     .filter((area) => {
-      // 2. Filtramos el área seleccionada en el select
       const matchArea =
         selectedArea === "Todas las áreas" ||
         area.especialidad === selectedArea;
-      // 3. Solo mostramos las áreas que tengan al menos 1 profesional que coincida con la búsqueda
       return matchArea && area.profesionales.length > 0;
     });
 
@@ -186,10 +245,9 @@ const ProfesionalesPage = () => {
     <main
       className="profesionales-page"
       style={{
-        backgroundImage: `linear-gradient(rgba(12, 35, 64, 0.4), rgba(12, 35, 64, 0.36)), url(${fondoProfesionales})`,
+        backgroundImage: `linear-gradient(rgba(12, 35, 64, 0.65), rgba(12, 35, 64, 0.65)), url(${fondoProfesionales})`,
       }}
     >
-      <div className="prof-overlay"></div>
       <div className="prof-header">
         <h1>NUESTRO EQUIPO MÉDICO</h1>
         <p>
@@ -202,7 +260,6 @@ const ProfesionalesPage = () => {
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
           >
             <path
               strokeLinecap="round"

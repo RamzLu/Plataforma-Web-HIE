@@ -312,11 +312,16 @@
   font-style: italic;
 }
 
-/* =========================================
-   RESPONSIVIDAD
-/* =========================================
-   RESPONSIVIDAD Y OPTIMIZACIÓN MÓVIL
-========================================= */
+/* Ajustes para que Swiper funcione de manera fluida en las filas */
+.mySwiper {
+  width: 100%;
+  padding: 10px 0;
+  overflow: hidden;
+}
+
+.swiper-wrapper {
+  transition-timing-function: linear !important; /* Hace que el movimiento automático sea constante y sin aceleraciones extrañas */
+}
 @media (max-width: 1300px) {
   .carousel-arrow.left {
     left: -20px;
