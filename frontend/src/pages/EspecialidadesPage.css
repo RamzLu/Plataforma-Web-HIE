@@ -38,7 +38,6 @@
   background-repeat: no-repeat;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   margin-bottom: 60px;
-  display: flex;
   justify-content: center;
   padding: 120px 20px 60px 20px;
 }
