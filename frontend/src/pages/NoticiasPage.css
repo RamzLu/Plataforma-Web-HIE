@@ -4,7 +4,6 @@
 .noticias-page {
   width: 100%;
   background-color: #e9ebee;
-  /* Sin padding superior para que el banner toque el menú */
   padding: 0 0 80px 0; 
   display: flex;
   flex-direction: column;
@@ -31,13 +30,12 @@
   margin-bottom: 50px;
   display: flex;
   justify-content: center;
-  /* Aumentamos el padding superior de 60px a 120px para empujar el texto hacia abajo */
   padding: 120px 20px 60px 20px; 
 }
 
 .news-header-inner {
   width: 100%;
-  max-width: 1500px; /* Alineado con el slider */
+  max-width: 1500px; 
   border-left: 8px solid #2b5b94;
   padding-left: 40px;
   display: flex;
@@ -45,7 +43,6 @@
   align-items: flex-start;
 }
 
-/* Ajuste sutil para el breadcrumb dentro del banner */
 .news-header-inner .breadcrumb-container {
   margin-bottom: 15px;
 }
@@ -106,7 +103,7 @@
 }
 
 /* =========================================
-   SLIDER DE NOTICIAS
+   SLIDER DE NOTICIAS FACEBOOK
 ========================================= */
 .slider-wrapper {
   position: relative;
@@ -284,23 +281,35 @@
 }
 
 /* =========================================
-   ARTÍCULOS MÉDICOS
+   ARTÍCULOS MÉDICOS Y CARRUSEL LATERAL
 ========================================= */
 .medical-articles-section {
-  margin-top: 100px;
+  margin-top: 80px;
   width: 100%;
+  display: flex;
+  align-items: flex-start; /* Alinea los elementos arriba */
+  justify-content: space-between;
+  gap: 50px; 
+}
+
+/* --- COLUMNA IZQUIERDA (Título + Carrusel) --- */
+.medical-left-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 0.9; /* Proporción para la izquierda */
 }
 
 .medical-header {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-bottom: 50px;
+  margin-bottom: 30px;
 }
 
 .medical-subtitle {
   color: #2b5b94;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -311,7 +320,7 @@
   width: 45px;
   height: 2px;
   background-color: #2b5b94;
-  margin: 15px 0 25px 0;
+  margin: 15px 0 20px 0;
 }
 
 .medical-title {
@@ -324,19 +333,110 @@
   letter-spacing: -1px; 
 }
 
+/* Tarjeta del Mini Carrusel */
+.mini-carousel-card {
+  background-color: #ffffff;
+  padding: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mini-carousel-img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  display: flex;
+  align-items: center;
+}
+
+.mini-carousel-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: fadeInAlta 0.5s ease-in-out;
+}
+
+@keyframes fadeInAlta {
+  from { opacity: 0.8; }
+  to { opacity: 1; }
+}
+
+.mini-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  font-size: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.mini-arrow:hover {
+  background-color: #e2e8f0;
+  color: #0c2340;
+}
+
+.mini-left { left: 10px; }
+.mini-right { right: 10px; }
+
+.mini-caption {
+  margin-top: 15px;
+  font-size: 0.95rem;
+  color: #334155;
+  font-weight: 400;
+  text-align: center;
+}
+
+.mini-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.mini-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.mini-dot.active {
+  background-color: #475569;
+}
+
+
+/* --- COLUMNA DERECHA (Grilla) --- */
 .articles-grid {
+  flex: 1.3; /* Proporción para la derecha */
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 25px;
   align-items: stretch;
 }
 
 .article-card {
   background-color: #ffffff;
   border: none;
-  border-radius: 20px;
+  border-radius: 12px;
   padding: 30px 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -349,15 +449,17 @@
 
 .article-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .article-card h3 {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 700;
   margin: 0;
   text-align: center;
   text-transform: uppercase;
+  letter-spacing: 1px; 
 }
 
 .article-icon-wrapper {
@@ -366,21 +468,50 @@
   align-items: center;
   justify-content: center;
   margin: 20px 0;
-  height: 100px;
+  height: 90px; /* Mantenemos la altura fija */
+  width: 100%;  /* Le damos un ancho fijo al contenedor */
+  position: relative;
 }
 
 .article-icon-wrapper img {
-  height: 110px;
-  width: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity 0.3s ease;
 }
 
-.article-link-text {
-  color: #1c1e21;
-  font-weight: 700;
-  font-style: italic;
-  font-size: 1rem;
+/* --- ESTADO 1: ÍCONO ESTÁTICO (PNG) --- */
+.icon-static {
+  opacity: 1;
+  /* JUEGA CON ESTE NÚMERO: 
+     Si se ve muy grande, bájalo (ej: 0.8 o 0.7). 
+     Si se ve muy chico, súbelo (ej: 1.2 o 1.3). 
+     1 = tamaño original */
+  transform: scale(0.85); 
 }
+
+/* --- ESTADO 2: ÍCONO ANIMADO (GIF) --- */
+.icon-animated {
+  opacity: 0;
+  /* JUEGA CON ESTE NÚMERO: 
+     Si se ve muy grande, bájalo (ej: 0.8 o 0.7). 
+     Si se ve muy chico, súbelo (ej: 1.2 o 1.3). 
+     1 = tamaño original */
+  transform: scale(1.15); 
+}
+
+/* EFECTO HOVER */
+.article-card:hover .icon-static {
+  opacity: 0;
+}
+
+.article-card:hover .icon-animated {
+  opacity: 1;
+}
+
 
 /* =========================================
    ESTILOS DEL MODAL (POP-UP)
@@ -698,8 +829,23 @@
    RESPONSIVIDAD GENERAL
 ========================================= */
 @media (max-width: 1024px) {
+  .medical-articles-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 40px;
+  }
+  .medical-left-column {
+    width: 100%;
+    align-items: center; /* Centramos el título y el carrusel en tablets/celulares */
+  }
+  .medical-header {
+    align-items: center;
+  }
+  .mini-carousel-card {
+    max-width: 600px;
+  }
   .articles-grid {
-    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
   }
 }
 
@@ -747,6 +893,7 @@
   }
   .medical-title {
     font-size: 2.8rem;
+    text-align: center;
   }
   .medical-subtitle {
     font-size: 0.9rem;

@@ -3,17 +3,27 @@ import { newsData } from "../data/newsData";
 import "./NoticiasPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 
-// Íconos
+// Íconos animados
 import iconMama from "../assets/icon-mama.png";
 import iconCorazon from "../assets/icon-corazon.png";
 import iconDonacion from "../assets/icon-donacion-de-sangre.png";
 import iconDengue from "../assets/icon-dengue.png";
 import avatarHospital from "../assets/iconEVITAface.jpg";
-
-// Imagen para el banner de Últimas Publicaciones
+//Iconos estaticos
+import iconMamaStatic from "../assets/icon-mama-estatico.png";
+import iconCorazonStatic from "../assets/icon-corazon-estatico.png";
+import iconDonacionStatic from "../assets/icon-donacion-de-sangre-estatico.png";
+import iconDengueStatic from "../assets/icon-dengue-estatico.png";
+// Banner de Últimas Publicaciones
 import fondoBannerNoticias from "../assets/banner_noticias.png";
 
-// Imágenes de los folletos para los artículos médicos
+// Imágenes para el Mini Carrusel
+import imgAlta1 from "../assets/fondoCARRUSELnoticiasCM.jpg";
+import imgAlta2 from "../assets/fondoCARRUSELnoticias2.jpg";
+import imgAlta3 from "../assets/fondoCARRUSELnoticias3.jpg";
+import imgAlta4 from "../assets/fondoCARRUSELnoticias4.jpg";
+
+// Imágenes de los folletos
 import folletoCD1 from "../assets/folletoCD1.jpg";
 import folletoCD2 from "../assets/folletoCD2.jpg";
 import folletoCD3 from "../assets/folletoCD3.jpg";
@@ -26,7 +36,8 @@ const medicalArticles = [
     id: 1,
     title: "CÁNCER DE MAMA",
     color: "#e88e9f",
-    icon: iconMama,
+    icon: iconMamaStatic,
+    iconAnimated: iconMama,
     subtitle: "Prevenir es curar. Chequeos anuales.",
     description: [
       "La detección temprana del cáncer de mama salva vidas. Realizarte los controles anuales y conocer tu cuerpo es fundamental para cuidar tu salud.",
@@ -43,7 +54,8 @@ const medicalArticles = [
     id: 2,
     title: "TU CORAZÓN",
     color: "#e32726",
-    icon: iconCorazon,
+    icon: iconCorazonStatic,
+    iconAnimated: iconCorazon,
     subtitle: "Cuidá tu motor de vida",
     description: [
       "Mantener una dieta equilibrada, hacer ejercicio regularmente y controlar tu presión arterial son pasos clave para un corazón sano.",
@@ -54,7 +66,8 @@ const medicalArticles = [
     id: 3,
     title: "DONACIÓN",
     color: "#b90000",
-    icon: iconDonacion,
+    icon: iconDonacionStatic,
+    iconAnimated: iconDonacion,
     subtitle: "Doná sangre. Salvá vidas",
     description: [
       "Hoy te compartimos todo lo que necesitás saber sobre la donación de sangre: quiénes pueden donar, cuáles son los requisitos básicos, algunos mitos y verdades, y por qué es tan importante que más personas se sumen a esta cadena de solidaridad.",
@@ -74,7 +87,8 @@ const medicalArticles = [
     id: 4,
     title: "DENGUE",
     color: "#000000",
-    icon: iconDengue,
+    icon: iconDengueStatic,
+    iconAnimated: iconDengue,
     subtitle: "Sin mosquito no hay dengue",
     description: [
       "Eliminar los criaderos de mosquitos en nuestros hogares es la principal medida de prevención contra el dengue, zika y chikungunya.",
@@ -86,6 +100,14 @@ const medicalArticles = [
       folletoEjemplo,
     ],
   },
+];
+
+// Data para el Mini Carrusel bajo el título
+const miniCarouselData = [
+  { id: 1, img: imgAlta1 },
+  { id: 2, img: imgAlta2 },
+  { id: 3, img: imgAlta3 },
+  { id: 4, img: imgAlta4 },
 ];
 
 const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
@@ -136,6 +158,7 @@ const NoticiasPage = () => {
 
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedNews, setSelectedNews] = useState(null);
+  const [altaIndex, setAltaIndex] = useState(0);
 
   const [lightbox, setLightbox] = useState({
     isOpen: false,
@@ -163,6 +186,14 @@ const NoticiasPage = () => {
         behavior: "smooth",
       });
     }
+  };
+
+  const nextAltaSlide = () => {
+    setAltaIndex((prev) => (prev + 1) % miniCarouselData.length);
+  };
+
+  const prevAltaSlide = () => {
+    setAltaIndex((prev) => (prev - 1 + miniCarouselData.length) % miniCarouselData.length);
   };
 
   const openLightbox = (images, index) =>
@@ -193,8 +224,7 @@ const NoticiasPage = () => {
       <div
         className="news-header-fluid"
         style={{
-          // Color #e9ebee mezclado con la imagen para suavizar
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), #7b8eaa), url(${fondoBannerNoticias})`,
+          backgroundImage: `linear-gradient(rgba(46, 111, 196, 0.85), rgba(233, 235, 238, 0.85)), url(${fondoBannerNoticias})`,
         }}
       >
         <div className="news-header-inner">
@@ -242,15 +272,47 @@ const NoticiasPage = () => {
           </button>
         </div>
 
-        {/* SECCIÓN DE ARTÍCULOS MÉDICOS CON NUEVA TIPOGRAFÍA */}
+        {/* SECCIÓN DE ARTÍCULOS MÉDICOS (Diseño 2 columnas según la imagen) */}
         <section className="medical-articles-section">
-          <div className="medical-header">
-            <h4 className="medical-subtitle">ESPACIO DE EDUCACIÓN EN SALUD</h4>
-            <div className="medical-divider"></div>
-            <h2 className="medical-title">ARTÍCULOS<br />MÉDICOS</h2>
+          
+          {/* COLUMNA IZQUIERDA: Títulos y Mini Carrusel */}
+          <div className="medical-left-column">
+            <div className="medical-header">
+              <h4 className="medical-subtitle">ESPACIO DE EDUCACIÓN EN SALUD</h4>
+              <div className="medical-divider"></div>
+              <h2 className="medical-title">ARTÍCULOS<br />MÉDICOS</h2>
+            </div>
+
+            <div className="mini-carousel-card">
+              <div className="mini-carousel-img-wrapper">
+                <button className="mini-arrow mini-left" onClick={prevAltaSlide}>
+                  &#10094;
+                </button>
+                <img
+                  src={miniCarouselData[altaIndex].img}
+                  alt={miniCarouselData[altaIndex].caption}
+                  key={altaIndex} // Fuerza el re-render para la animación de fade
+                />
+                <button className="mini-arrow mini-right" onClick={nextAltaSlide}>
+                  &#10095;
+                </button>
+              </div>
+              
+              <p className="mini-caption">{miniCarouselData[altaIndex].caption}</p>
+              
+              <div className="mini-dots">
+                {miniCarouselData.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`mini-dot ${altaIndex === idx ? 'active' : ''}`}
+                    onClick={() => setAltaIndex(idx)}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="articles-grid">
+<div className="articles-grid">
             {medicalArticles.map((article) => (
               <button
                 key={article.id}
@@ -258,13 +320,42 @@ const NoticiasPage = () => {
                 onClick={() => setSelectedArticle(article)}
               >
                 <h3 style={{ color: article.color }}>{article.title}</h3>
+                
                 <div className="article-icon-wrapper">
-                  <img src={article.icon} alt={article.title} />
+                  <img 
+                    src={article.icon} 
+                    alt={article.title} 
+                    className="icon-static" 
+                  />
+                  <img 
+                    src={article.iconAnimated} 
+                    alt={`${article.title} animado`} 
+                    className="icon-animated" 
+                  />
                 </div>
-                <span className="article-link-text">ver</span>
+                {/* ----------------------------------------- */}
+                
+                {/* Flecha minimalista que reemplaza al texto "ver" */}
+                <div className="article-card-arrow">
+                  <svg 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth="2" 
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
+                  </svg>
+                </div>
+
               </button>
             ))}
           </div>
+
         </section>
       </div>
 
