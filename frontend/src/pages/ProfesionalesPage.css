@@ -1,0 +1,380 @@
+/* =========================================
+   ESTRUCTURA BASE Y FONDO
+========================================= */
+.profesionales-page {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* Fija la altura exactamente al tamaño de la pantalla */
+  overflow: hidden; /* Evita que toda la página web se mueva hacia abajo */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-color: #2b5b94;
+  padding: 100px 20px 20px 20px; /* Reduje el padding inferior */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+.prof-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(
+    8px
+  ); /* Cambia este número para más o menos desenfoque */
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(
+    12,
+    35,
+    64,
+    0.4
+  ); /* Tinte azul oscuro sutil para oscurecer el fondo un poco */
+  z-index: 1; /* Se pone por encima de la imagen de fondo */
+}
+
+/* Forzamos a que el contenido esté por encima de la capa borrosa */
+.prof-header,
+.prof-container {
+  position: relative;
+  z-index: 2;
+}
+/* =========================================
+   CABECERA Y BUSCADOR (Header)
+========================================= */
+.prof-header {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #ffffff; /* Letras blancas para contrastar con el fondo oscuro */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.prof-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.prof-header p {
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 400;
+  margin: 0 0 30px 0;
+  opacity: 0.9;
+}
+
+/* Barra de Búsqueda estilo píldora */
+.prof-search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 50px;
+  padding: 8px 8px 8px 20px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  color: #64748b;
+  margin-right: 10px;
+}
+
+.prof-search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: #334155;
+  background: transparent;
+}
+
+.prof-search-bar input::placeholder {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.prof-filter-select {
+  background-color: #67a6a6; /* Color verde/teal del diseño */
+  color: #ffffff;
+  border: none;
+  outline: none;
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  appearance: none; /* Quita la flecha por defecto en algunos navegadores */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px top 50%;
+  background-size: 10px auto;
+  padding-right: 35px;
+  transition: background-color 0.2s;
+}
+
+.prof-filter-select:hover {
+  background-color: #558c8c;
+}
+
+.prof-filter-select option {
+  background-color: #ffffff;
+  color: #334155;
+}
+
+/* =========================================
+   CONTENEDOR DE ESPECIALIDADES
+========================================= */
+/* =========================================
+   CONTENEDOR CON SCROLL INTERNO
+========================================= */
+.prof-container {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  flex: 1; /* Ocupa todo el espacio que sobra debajo del buscador */
+  overflow-y: auto; /* Habilita el scroll SOLO en esta zona */
+  padding-right: 15px; /* Deja espacio para la barra */
+  padding-bottom: 60px;
+}
+
+/* Estilizamos la barra de scroll para que se vea profesional */
+.prof-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.prof-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.prof-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+}
+
+.prof-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* El bloque blanco que envuelve al carrusel */
+.specialty-block {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 25px 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  position: relative; /* Necesario para ubicar las flechas afuera */
+}
+
+.specialty-title {
+  color: #1e3a5f;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0 0 20px 0;
+  letter-spacing: 0.5px;
+}
+
+/* =========================================
+   CARRUSEL HORIZONTAL
+========================================= */
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Oculta scrollbar Firefox */
+  -ms-overflow-style: none; /* Oculta scrollbar IE/Edge */
+  padding-bottom: 10px; /* Espacio para la sombra de las tarjetas */
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none; /* Oculta scrollbar Chrome/Safari */
+}
+
+/* Flechas de navegación (Flotan por fuera del bloque blanco) */
+/* Flechas de navegación (Ahora flotan por dentro del bloque para no ser cortadas) */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #ffffff; /* Fondo sólido para que las tarjetas de atrás no se transparenten */
+  color: #1e3a5f;
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  font-size: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25); /* Sombra más definida para que resalten */
+  transition: all 0.2s ease;
+}
+
+.carousel-arrow:hover {
+  background-color: #f1f5f9;
+  color: #0c2340;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Las posicionamos justo en el borde interno del carrusel */
+.carousel-arrow.left {
+  left: -15px;
+}
+
+.carousel-arrow.right {
+  right: -15px;
+}
+
+/* =========================================
+   TARJETAS DE PROFESIONALES
+========================================= */
+.prof-card {
+  min-width: 220px;
+  max-width: 220px;
+  height: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0; /* Evita que se aplasten */
+  border: 1px solid #e2e8f0; /* Borde muy sutil simulando el diseño */
+}
+
+/* Si no hay foto, le damos un fondo gris claro */
+.prof-card-bg {
+  width: 100%;
+  height: 100%;
+  background-color: #f1f5f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.prof-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top; /* Centra la cara del doctor */
+}
+
+.prof-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  /* Degradado blanco desde abajo hacia arriba para leer bien el texto */
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 1) 40%,
+    rgba(255, 255, 255, 0.7) 80%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  padding: 30px 15px 15px 15px;
+  text-align: center;
+}
+
+.prof-info h4 {
+  color: #1e293b;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+}
+
+.prof-info span {
+  color: #006eb3;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* =========================================
+   RESPONSIVIDAD
+/* =========================================
+   RESPONSIVIDAD Y OPTIMIZACIÓN MÓVIL
+========================================= */
+@media (max-width: 1300px) {
+  .carousel-arrow.left {
+    left: -20px;
+  }
+  .carousel-arrow.right {
+    right: -20px;
+  }
+}
+
+@media (max-width: 900px) {
+  /* Hacemos el buscador más compacto usando Grid para que no ocupe 3 renglones */
+  .prof-search-bar {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    border-radius: 16px;
+    padding: 12px 18px;
+  }
+  .search-icon {
+    margin: 0;
+    align-self: center; /* Centra la lupa junto al texto */
+  }
+  .prof-search-bar input {
+    width: 100%;
+    text-align: left;
+  }
+  .prof-filter-select {
+    grid-column: 1 / -1; /* Hace que el botón verde ocupe todo el ancho pero solo en la fila de abajo */
+    width: 100%;
+    text-align: center;
+    background-position: calc(100% - 15px) center;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Reducimos los márgenes gigantes para que el carrusel tenga más espacio vertical */
+  .profesionales-page {
+    padding-top: 85px;
+  }
+  .prof-header {
+    margin-bottom: 20px;
+  }
+  .prof-header h1 {
+    font-size: 1.7rem;
+    margin-bottom: 5px;
+  }
+  .prof-header p {
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+  }
+  .prof-container {
+    gap: 25px; /* Menos espacio muerto entre una especialidad y otra */
+    padding-bottom: 120px; /* Damos margen al final para que el WhatsApp no tape las tarjetas */
+  }
+  .specialty-block {
+    padding: 15px;
+  }
+  .carousel-arrow {
+    display: none; /* En el celular la gente scrollea con el dedo */
+  }
+}
