@@ -433,23 +433,24 @@
 
 .article-card {
   background-color: #ffffff;
-  border: none;
-  border-radius: 12px;
+  border: 4px solid #cbd5e1; /* Borde gris-celeste sutil para enmarcar la tarjeta */
+  border-radius: 16px; /* Bordes un pelín más redondeados y modernos */
   padding: 30px 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Sombra base un poco más definida */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease; /* Transición para que el borde y sombra cambien suavemente */
   min-height: 250px;
   font-family: inherit;
 }
 
 .article-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-color: #2b5b94; /* Al pasar el cursor, el borde se pinta de azul */
+  box-shadow: 0 12px 25px rgba(43, 91, 148, 0.15); /* Sombra más fuerte y con un leve tono azulado */
 }
 
 .article-card h3 {
