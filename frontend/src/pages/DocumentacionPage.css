@@ -126,7 +126,7 @@
   display: flex;
   align-items: center;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: 2px solid #2b5b94;
   border-radius: 50px; /* Bordes totalmente redondeados */
   padding: 14px 25px; /* Un poco más de padding vertical */
   width: 100%;
@@ -146,7 +146,7 @@
 .doc-search-icon {
   width: 22px;
   height: 22px;
-  color: #64748b;
+  color: #1762cb;
   margin-right: 15px;
 }
 
@@ -161,7 +161,7 @@
 }
 
 .doc-search-input::placeholder {
-  color: #94a3b8;
+  color: #000000;
   font-style: italic;
   font-weight: 300;
 }
@@ -182,7 +182,7 @@
   align-items: center;
   justify-content: center;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1; /* Mismo borde que el buscador */
+  border: 2px solid #2b5b94; /* Mismo borde que el buscador */
   padding: 10px 22px;
   border-radius: 50px; /* Mismo radio que el buscador */
   cursor: pointer;
@@ -197,7 +197,7 @@
 
 .filter-chip:hover {
   border-color: #94a3b8;
-  color: #1c1e21;
+  color: #052f61;
 }
 
 .filter-chip.active {
