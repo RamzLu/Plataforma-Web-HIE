@@ -1,164 +1,417 @@
+/* =========================================
+   ESTRUCTURA BASE DE LA PÁGINA
+========================================= */
 .especialidades-page {
-  position: relative;
   width: 100%;
-  min-height: calc(
-    100vh - 80px
-  ); /* Ocupa toda la pantalla descontando el header */
+  background-color: #e9ebee; /* Mismo fondo gris/celeste que Noticias */
+  padding: 0 0 80px 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  padding: 40px 20px;
-  overflow: hidden; /* Evita que el fondo borroso sobresalga */
+  min-height: calc(100vh - 80px);
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
-/* El fondo borroso se maneja en una capa independiente para no poner borroso el texto */
-.especialidades-bg {
-  position: absolute;
-  top: -20px;
-  left: -20px;
-  right: -20px;
-  bottom: -20px; /* Hacemos la imagen un poco más grande para que los bordes borrosos no se vean mal */
+.especialidades-container {
+  max-width: 1200px; /* Un poco más contenido para centrar la atención */
+  width: 100%;
+  padding: 0 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  /* Fallback: Gradiente suave si no hay imagen */
-  background: linear-gradient(135deg, #d3e8f8 0%, #e8f4f8 100%);
-
-  /* Cuando tengas la imagen, descomenta la línea de abajo y ajusta la ruta */
-  /* background-image: url('../assets/tu-imagen-fondo.jpg'); */
-
+/* =========================================
+   BANNER FULL WIDTH
+========================================= */
+.esp-header-fluid {
+  width: 100%;
   background-size: cover;
   background-position: center;
-  filter: blur(12px); /* Intensidad del efecto borroso */
-  z-index: 0;
+  background-repeat: no-repeat;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin-bottom: 60px;
+  display: flex;
+  justify-content: center;
+  padding: 120px 20px 60px 20px;
 }
 
-/* Contenido por encima del fondo */
-.especialidades-content {
-  position: relative;
-  z-index: 1;
+.esp-header-inner {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1200px;
+  border-left: 8px solid #2b5b94;
+  padding-left: 40px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 40px; /* Separación entre el buscador y las tarjetas */
+  align-items: flex-start;
 }
 
-/* --- BARRA DE BÚSQUEDA --- */
-.search-bar-container {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  border-radius: 50px;
-  border: 2px solid #2b5b94;
-  padding: 10px 25px;
-  width: 100%;
-  max-width: 600px;
-  box-shadow: 0 10px 25px rgba(0, 106, 255, 0.1);
-  transition: box-shadow 0.3s ease;
+.esp-main-title {
+  color: #2b5b94;
+  font-size: 3.2rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
 }
 
-.search-bar-container:focus-within {
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+.esp-subtitle {
+  color: #64748b;
+  font-size: 1.15rem;
+  font-weight: 400;
+  margin: 0;
 }
 
-.search-icon {
-  width: 24px;
-  height: 24px;
-  color: #1762cb;
-  margin-right: 15px;
-}
-
-.search-input {
-  border: none;
-  outline: none;
-  width: 100%;
-  font-size: 1.1rem;
-  color: #333;
-  font-family: inherit;
-  background: transparent;
-}
-
-.search-input::placeholder {
-  color: #000000;
-  font-style: italic;
-}
-
-/* --- TARJETAS --- */
-.cards-wrapper {
-  display: flex;
+/* =========================================
+   VISTA 1: MENÚ PRINCIPAL (2 Tarjetas Grandes)
+========================================= */
+.esp-main-menu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 40px;
   width: 100%;
-  justify-content: center;
+  max-width: 900px;
 }
 
-.option-card {
-  background-color: #f6fafc; /* Blanco con un levísimo tono celeste */
-  border: none;
+.menu-card {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 20px;
-  padding: 50px 30px;
+  padding: 60px 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  flex: 1;
-  max-width: 500px;
+  justify-content: center;
   cursor: pointer;
-  /* Sombra pesada como en el diseño */
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
 }
 
-.option-card:hover {
+.menu-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2);
+  border-color: #2b5b94;
+  box-shadow: 0 15px 30px rgba(43, 91, 148, 0.15);
 }
 
-.card-icon-container {
-  height: 120px;
+.menu-card-icon {
+  width: 70px;
+  height: 70px;
+  background-color: #f1f5f9;
+  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 25px;
+  color: #2b5b94;
 }
 
-.card-icon {
-  height: 100%;
-  width: auto;
+.menu-card-icon svg {
+  width: 35px;
+  height: 35px;
 }
 
-.card-title {
-  color: #006eb3; /* Azul institucional */
-  font-size: 1.6rem;
-  font-weight: 800;
-  margin: 0 0 10px 0;
-  letter-spacing: 0.5px;
+.menu-card:hover .menu-card-icon {
+  background-color: #2b5b94;
+  color: #ffffff;
+  transition: all 0.3s ease;
 }
 
-.card-subtitle {
-  color: #006eb3;
-  font-size: 1.2rem;
+.menu-card h2 {
+  color: #1c1e21;
+  font-size: 1.8rem;
   font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* =========================================
+   VISTA 2: GRILLA DE ESPECIALIDADES
+========================================= */
+.esp-grid-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  width: 100%;
+  position: relative;
+}
+
+.btn-volver {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 10px;
+}
+
+.btn-volver:hover {
+  color: #2b5b94;
+}
+
+.btn-volver svg {
+  width: 20px;
+  height: 20px;
+}
+
+.esp-instruction {
+  color: #334155;
+  font-size: 1.2rem;
+  font-weight: 500;
   margin: 0;
 }
 
-/* --- RESPONSIVIDAD --- */
-@media (max-width: 800px) {
-  .cards-wrapper {
-    flex-direction: column;
-    align-items: center;
-  }
+.specialties-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas como en la imagen */
+  gap: 25px;
+  width: 100%;
+}
 
-  .option-card {
+.specialty-card {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px; /* Borde redondeado elegante */
+  padding: 35px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  min-height: 120px;
+}
+
+.specialty-card:hover {
+  transform: translateY(-5px);
+  border-color: #2b5b94;
+  box-shadow: 0 12px 25px rgba(43, 91, 148, 0.15);
+}
+
+.specialty-card h3 {
+  color: #006eb3; /* Azul vibrante */
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* =========================================
+   ESTILOS DEL MODAL (POP-UP)
+========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.65); /* Fondo oscuro con blur */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content-esp {
+  background-color: #f8fafc; /* Un fondo apenitas gris muy claro para diferenciar del blanco */
+  width: 100%;
+  max-width: 650px;
+  border-radius: 20px;
+  padding: 0;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header-esp {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header-esp h2 {
+  color: #006eb3;
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.modal-body-esp {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* Estilos de las secciones del modal (adaptados a la imagen) */
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.info-text {
+  font-size: 1rem;
+  color: #334155;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.info-text.italic {
+  font-style: italic;
+  color: #475569;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.info-icon {
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+/* Texto destacado en rojo (como el DNI en la imagen) */
+.text-danger {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+/* Footer del modal con el botón rojo */
+.modal-footer-esp {
+  padding: 0 40px 40px 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-cerrar-rojo {
+  background-color: #e11d48; /* Rojo elegante */
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 40px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-cerrar-rojo:hover {
+  background-color: #be123c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(225, 29, 72, 0.4);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================================
+   RESPONSIVIDAD
+========================================= */
+@media (max-width: 992px) {
+  .specialties-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablet */
+  }
+}
+
+@media (max-width: 768px) {
+  .esp-header-fluid {
+    padding: 100px 20px 40px 20px;
+  }
+  .esp-header-inner {
+    border-left-width: 5px;
+    padding-left: 20px;
+  }
+  .esp-main-title {
+    font-size: 2.2rem;
+  }
+  .esp-main-menu {
+    grid-template-columns: 1fr;
+  }
+  .esp-grid-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .btn-volver {
+    position: relative;
+    top: 0;
+    transform: none;
+    padding: 0;
+  }
+  .esp-instruction {
+    font-size: 1.1rem;
+    text-align: center;
     width: 100%;
   }
-
-  .card-title {
-    font-size: 1.4rem;
+  .modal-content-esp {
+    max-height: 90vh;
+    overflow-y: auto;
   }
+  .modal-header-esp {
+    padding: 20px 25px;
+  }
+  .modal-body-esp,
+  .modal-footer-esp {
+    padding: 25px;
+  }
+}
 
-  .card-subtitle {
-    font-size: 1.1rem;
+@media (max-width: 600px) {
+  .specialties-grid {
+    grid-template-columns: 1fr; /* 1 columna en celulares */
   }
 }
