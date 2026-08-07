@@ -151,8 +151,8 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #64748b;
-  font-size: 1rem;
+  color: #2e5388;
+  font-size: 1.5rem;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -163,7 +163,8 @@
 }
 
 .btn-volver:hover {
-  color: #2b5b94;
+  color: #0f3563;
+  transform: translateY(-50%) translateX(-2px);
 }
 
 .btn-volver svg {
@@ -239,7 +240,6 @@
   background-color: #f8fafc; /* Un fondo apenitas gris muy claro para diferenciar del blanco */
   width: 100%;
   max-width: 650px;
-  border-radius: 20px;
   padding: 0;
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
@@ -309,8 +309,22 @@
 }
 
 .info-icon {
-  font-size: 1.2rem;
-  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0c2340; /* Azul oscuro institucional */
+  margin-right: 5px; /* Pequeño margen para separarlo del texto */
+}
+
+/* Estilo que aplicará automáticamente a todos los SVG dentro de .info-icon */
+.info-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor; /* Hereda el azul oscuro de arriba */
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* Texto destacado en rojo (como el DNI en la imagen) */
@@ -387,10 +401,31 @@
     gap: 20px;
   }
   .btn-volver {
-    position: relative;
-    top: 0;
-    transform: none;
-    padding: 0;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #2b5b94; /* Azul por defecto para mayor contraste */
+    font-size: 1.35rem; /* Letra mucho más grande y legible */
+    font-weight: 700; /* Texto más grueso */
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Más respiro entre la flecha y la palabra */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 15px 25px 15px 0; /* Área de clic súper amplia para facilitar la interacción */
+  }
+
+  .btn-volver:hover {
+    color: #0c2340; /* Se oscurece al pasar el ratón */
+    transform: translateY(-50%) translateX(-3px); /* Pequeño movimiento hacia atrás para indicar "volver" */
+  }
+
+  .btn-volver svg {
+    width: 28px; /* Icono mucho más grande */
+    height: 28px;
   }
   .esp-instruction {
     font-size: 1.1rem;

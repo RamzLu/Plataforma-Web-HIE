@@ -202,13 +202,25 @@ const EspecialidadesPage = () => {
 
               <div className="info-section">
                 <div className="info-row">
-                  <span className="info-icon">📍</span>
+                  <span className="info-icon">
+                    {/* Icono de Ubicación */}
+                    <svg viewBox="0 0 24 24">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </span>
                   <p className="info-text">
                     <strong>Ubicación:</strong> {selectedSpecialty.ubicacion}
                   </p>
                 </div>
                 <div className="info-row">
-                  <span className="info-icon">🕒</span>
+                  <span className="info-icon">
+                    {/* Icono de Reloj */}
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </span>
                   <p className="info-text">
                     <strong>Horarios:</strong> {selectedSpecialty.horarios}
                   </p>
@@ -217,7 +229,14 @@ const EspecialidadesPage = () => {
 
               <div className="info-section">
                 <h4 className="info-title">
-                  <span className="info-icon">⚠️</span>
+                  <span className="info-icon">
+                    {/* Icono de Alerta / Requisitos */}
+                    <svg viewBox="0 0 24 24">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                      <line x1="12" y1="9" x2="12" y2="13"></line>
+                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                  </span>
                   REQUISITOS PARA ATENDERSE:
                 </h4>
                 <p className="info-text">
@@ -231,15 +250,31 @@ const EspecialidadesPage = () => {
 
               <div className="info-section">
                 <h4 className="info-title">
-                  <span className="info-icon">📞</span>
+                  <span className="info-icon">
+                    {/* Icono de Teléfono Principal */}
+                    <svg viewBox="0 0 24 24">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                  </span>
                   ¿CÓMO CONSEGUIR TURNO?
                 </h4>
                 <p className="info-text">
                   No damos turnos por internet. Acérquese a la ventanilla de
                   Admisión de lunes a viernes de 7:00 a 12:00, o llame al:
                 </p>
-                <div className="info-row" style={{ marginTop: "10px" }}>
-                  <span className="info-icon">☎️</span>
+                <div
+                  className="info-row"
+                  style={{ marginTop: "10px", alignItems: "center" }}
+                >
+                  <span className="info-icon">
+                    {/* Icono de Teléfono Secundario / Flecha */}
+                    <svg
+                      viewBox="0 0 24 24"
+                      style={{ width: "18px", height: "18px" }}
+                    >
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </span>
                   <p className="info-text text-danger">
                     {selectedSpecialty.contacto}
                   </p>
