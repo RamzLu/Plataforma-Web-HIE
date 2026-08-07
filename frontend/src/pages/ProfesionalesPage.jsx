@@ -218,6 +218,13 @@ const SpecialtyRow = ({ especialidad, profesionales }) => {
   );
 };
 
+const normalizeText = (text) => {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+};
+
 const ProfesionalesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedArea, setSelectedArea] = useState("Todas las áreas");
@@ -227,10 +234,14 @@ const ProfesionalesPage = () => {
     ...equipoMedicoData.map((d) => d.especialidad),
   ];
 
+  const normalizedSearch = normalizeText(searchTerm);
+
   const filteredData = equipoMedicoData
     .map((area) => {
-      const filteredProfs = area.profesionales.filter((p) =>
-        p.nombre.toLowerCase().includes(searchTerm.toLowerCase()),
+      const filteredProfs = area.profesionales.filter(
+        (p) =>
+          normalizeText(p.nombre).includes(normalizedSearch) ||
+          normalizeText(p.titulo).includes(normalizedSearch),
       );
       return { ...area, profesionales: filteredProfs };
     })
