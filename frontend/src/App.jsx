@@ -14,7 +14,8 @@ import EspecialidadesPage from "./pages/EspecialidadesPage";
 import NoticiasPage from "./pages/NoticiasPage";
 import DocumentacionPage from "./pages/DocumentacionPage";
 import ProfesionalesPage from "./pages/ProfesionalesPage";
-import CapacitacionPage from "./pages/CapacitacionPage"; // <- NUEVO IMPORT
+import CapacitacionPage from "./pages/CapacitacionPage";
+import ContactoPage from "./pages/ContactoPage";
 
 const App = () => {
   return (
@@ -29,7 +30,7 @@ const App = () => {
         <Route path="/documentacion" element={<DocumentacionPage />} />
         <Route path="/profesionales" element={<ProfesionalesPage />} />
         <Route path="/capacitacion" element={<CapacitacionPage />} />{" "}
-        {/* <- NUEVA RUTA */}
+        <Route path="/contacto" element={<ContactoPage />} />
         <Route
           path="*"
           element={
