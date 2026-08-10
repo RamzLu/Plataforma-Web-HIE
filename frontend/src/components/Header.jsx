@@ -1,88 +1,101 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./Header.css";
-import logoIcon from "../assets/pngIcon.png";
+import logoIcon from "../assets/logoHospitalEvita.png";
 
 const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <header className="main-header">
       <div className="header-container">
-        <div className="logo-container">
-          <Link to="/">
-            <img src={logoIcon} alt="Logo Red Evita Formosa" className="logo" />
-          </Link>
-        </div>
+        {/* LOGO E IDENTIDAD INSTITUCIONAL */}
+        <Link to="/" className="header-brand" onClick={closeMenu}>
+          <img src={logoIcon} alt="Hospital Evita" className="header-logo" />
+          <div className="brand-text">
+            <span className="brand-title">HOSPITAL INTERDISTRITAL</span>
+            <span className="brand-subtitle">EVITA</span>
+          </div>
+        </Link>
 
-        <nav className="header-nav">
+        {/* BOTÓN HAMBURGUESA (SÓLO VISIBLE EN MÓVILES) */}
+        <button
+          className={`hamburger-btn ${isMenuOpen ? "open" : ""}`}
+          onClick={toggleMenu}
+          aria-label="Toggle Navigation Menu"
+        >
+          <span className="hamburger-bar"></span>
+          <span className="hamburger-bar"></span>
+          <span className="hamburger-bar"></span>
+        </button>
+
+        {/* MENÚ DE NAVEGACIÓN */}
+        <nav className={`nav-menu ${isMenuOpen ? "active" : ""}`}>
           <ul className="nav-list">
-            <li className="nav-item">
+            <li>
               <Link
                 to="/"
-                className={location.pathname === "/" ? "active" : ""}
+                className={`nav-link ${isActive("/") ? "active" : ""}`}
+                onClick={closeMenu}
               >
                 INICIO
               </Link>
             </li>
-            <li className="nav-item">
+            <li>
               <Link
-                to="/especialidades"
-                className={
-                  location.pathname === "/especialidades" ? "active" : ""
-                }
+                to="/institucional"
+                className={`nav-link ${isActive("/institucional") ? "active" : ""}`}
+                onClick={closeMenu}
               >
-                ESPECIALIDADES
+                INSTITUCIONAL
               </Link>
             </li>
-            <li className="nav-item">
+            <li>
               <Link
                 to="/noticias"
-                className={location.pathname === "/noticias" ? "active" : ""}
+                className={`nav-link ${isActive("/noticias") ? "active" : ""}`}
+                onClick={closeMenu}
               >
                 NOTICIAS
               </Link>
             </li>
-            <li className="nav-item">
+            <li>
               <Link
                 to="/documentacion"
-                className={
-                  location.pathname === "/documentacion" ? "active" : ""
-                }
+                className={`nav-link ${isActive("/documentacion") ? "active" : ""}`}
+                onClick={closeMenu}
               >
                 DOCUMENTACIÓN
               </Link>
             </li>
-            <li className="nav-item">
-              <Link
-                to="/profesionales"
-                className={
-                  location.pathname === "/profesionales" ? "active" : ""
-                }
-              >
-                PROFESIONALES
-              </Link>
-            </li>
-            <li className="nav-item">
+            <li>
               <Link
                 to="/capacitacion"
-                className={
-                  location.pathname === "/capacitacion" ? "active" : ""
-                }
+                className={`nav-link ${isActive("/capacitacion") ? "active" : ""}`}
+                onClick={closeMenu}
               >
                 CAPACITACIÓN
               </Link>
             </li>
-            <li className="nav-item">
+            <li>
               <Link
                 to="/contacto"
-                className={location.pathname === "/contacto" ? "active" : ""}
+                className={`nav-link ${isActive("/contacto") ? "active" : ""}`}
+                onClick={closeMenu}
               >
                 CONTACTO
               </Link>
-            </li>
-            <li className="nav-item">
-              <a href="/#acerca-de">ACERCA DE</a>
             </li>
           </ul>
         </nav>

@@ -29,7 +29,6 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   margin-bottom: 50px;
   justify-content: center;
   padding: 70px 20px;
@@ -69,7 +68,7 @@
 }
 
 .cap-label {
-  color: #edf4fd;
+  color: #003a86;
   font-size: 1.1rem;
   font-weight: 400;
   text-transform: uppercase;

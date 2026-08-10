@@ -103,7 +103,7 @@ const CapacitacionPage = () => {
       <div
         className="cap-header-fluid"
         style={{
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85),rgba(43, 91, 148, 0.85)), url(${fondoBanner})`,
+          backgroundImage: `linear-gradient(#4283d0, #eaf6fc), url(${fondoBanner})`,
         }}
       >
         <div className="cap-header-inner">

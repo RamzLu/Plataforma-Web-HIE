@@ -1,81 +1,180 @@
 .main-header {
   width: 100%;
-  background-color: #f0fcfd;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  height: 80px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
-  height: 80px;
+  border-bottom: none;
 }
 
+.main-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #2b5b94 0%, #8de4fe 100%);
+  pointer-events: none;
+}
 .header-container {
-  max-width: 1400px;
+  max-width: 1200px;
   height: 100%;
   margin: 0 auto;
+  padding: 0 20px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  padding: 0 40px;
 }
 
-.logo-container {
+/* BRANDING Y LOGO */
+.header-brand {
   display: flex;
   align-items: center;
-  height: 100%;
+  gap: 12px;
+  text-decoration: none;
 }
 
-.logo-container a {
+.header-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.brand-text {
   display: flex;
-  align-items: center;
+  flex-direction: column;
 }
 
-.logo {
-  height: 55px;
-  width: auto;
-  object-fit: contain;
+.brand-title {
+  color: #2b5b94;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
 }
 
-/* Navegación y Tipografía */
-.header-nav {
-  display: flex;
-  align-items: center;
+.brand-subtitle {
+  color: #2b5b94;
+  font-size: 1.1rem;
+  font-weight: 300;
+  letter-spacing: 1px;
 }
 
+/* NAVEGACIÓN DESKTOP */
 .nav-list {
   display: flex;
   list-style: none;
+  gap: 24px;
   margin: 0;
   padding: 0;
-  gap: 30px;
 }
 
-.nav-item a {
+.nav-link {
   text-decoration: none;
-  color: #0c2340;
-  font-weight: 700;
-  font-size: 0.9rem;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    sans-serif;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 600;
   letter-spacing: 0.5px;
-  transition: all 0.2s ease-in-out;
-  padding-bottom: 5px;
+  transition: color 0.2s ease;
+  padding: 8px 0;
+  position: relative;
 }
 
-.nav-item a:hover {
-  color: #008080;
+.nav-link:hover,
+.nav-link.active {
+  color: #2b5b94;
 }
 
-/* Estilos específicos para el elemento activo (INICIO) */
-.nav-item a.active {
-  color: #61b896;
-  border-bottom: 3px solid #61b896;
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #2b5b94;
+}
+
+/* BOTÓN HAMBURGUESA (Oculto en pantallas grandes) */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.hamburger-bar {
+  width: 100%;
+  height: 3px;
+  background-color: #2b5b94;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* ANIMACIÓN TRANSFORMACIÓN BOTÓN X AL ABRIR */
+.hamburger-btn.open .hamburger-bar:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger-btn.open .hamburger-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.open .hamburger-bar:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* --- ADAPTACIÓN RESPONSIVE (MÓVILES Y TABLETS) --- */
+@media (max-width: 992px) {
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 80px);
+    background-color: #ffffff;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .nav-menu.active {
+    transform: translateX(0);
+  }
+
+  .nav-list {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 20px;
+  }
+
+  .nav-link {
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    padding: 10px;
+  }
+
+  .nav-link.active::after {
+    display: none;
+  }
 }

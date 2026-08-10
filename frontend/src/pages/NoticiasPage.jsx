@@ -35,7 +35,7 @@ const medicalArticles = [
   {
     id: 1,
     title: "CÁNCER DE MAMA",
-    color: "#e88e9f",
+    color: "#005c89",
     icon: iconMamaStatic,
     iconAnimated: iconMama,
     subtitle: "Prevenir es curar. Chequeos anuales.",
@@ -53,7 +53,7 @@ const medicalArticles = [
   {
     id: 2,
     title: "TU CORAZÓN",
-    color: "#e32726",
+    color: "#005c89",
     icon: iconCorazonStatic,
     iconAnimated: iconCorazon,
     subtitle: "Cuidá tu motor de vida",
@@ -65,7 +65,7 @@ const medicalArticles = [
   {
     id: 3,
     title: "DONACIÓN",
-    color: "#b90000",
+    color: "#005c89",
     icon: iconDonacionStatic,
     iconAnimated: iconDonacion,
     subtitle: "Doná sangre. Salvá vidas",
@@ -86,7 +86,7 @@ const medicalArticles = [
   {
     id: 4,
     title: "DENGUE",
-    color: "#000000",
+    color: "#005c89",
     icon: iconDengueStatic,
     iconAnimated: iconDengue,
     subtitle: "Sin mosquito no hay dengue",
