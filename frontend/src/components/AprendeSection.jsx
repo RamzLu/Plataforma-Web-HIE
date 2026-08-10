@@ -1,77 +1,91 @@
-import React from 'react';
-import './AprendeSection.css';
+import React from "react";
+import { Link } from "react-router-dom";
+import "./AprendeSection.css";
 
 // IMPORTACIÓN DE IMÁGENES
-// Asegúrate de guardar estas imágenes en frontend/src/assets/
-import aprendeMainImg from '../assets/aprendeMain.jpg'; // Imagen principal (RCP)
-import tipDengueImg from '../assets/aprendeDengue.jpg'; // Imagen del tip de Dengue
-import guiaLabImg from '../assets/aprendeLaboratorio.jpg'; // Imagen de la guía de Laboratorio
+import aprendeMainImg from "../assets/aprendeMain.jpg";
+import tipDengueImg from "../assets/aprendeDengue.jpg";
+import guiaLabImg from "../assets/aprendeLaboratorio.jpg";
+import capacitacionImg from "../assets/aprendeCapacitacion.jpg";
 
 const AprendeSection = () => {
   return (
     <section className="aprende-section">
       <div className="aprende-container">
-        
-        {/* Lado Izquierdo: Imagen Principal */}
-        <div className="aprende-left">
-          <img src={aprendeMainImg} alt="Capacitación de salud - RCP" className="aprende-main-img" />
-        </div>
-
-        {/* Lado Derecho: Contenido y Tarjetas */}
-        <div className="aprende-right">
-          
-          {/* Tarjeta Superior de Introducción */}
-          <div className="aprende-intro-card">
-            <div className="aprende-intro-header">
-              <h3>APRENDE CON EL EVITA</h3>
-            </div>
-            <div className="aprende-intro-body">
-              <p>
-                Tu espacio de educación para la salud. Encontrá información clara, 
-                consejos prácticos y guías en formato rápido para cuidar tu bienestar 
-                y el de tu familia.
-              </p>
-            </div>
-          </div>
-
-          {/* Grilla inferior de recursos (Tip de Salud y Guía Práctica) */}
-          <div className="aprende-resources-grid">
-            
-            {/* Tarjeta 1: Tip de Salud */}
-            <div className="resource-card">
-              <div className="resource-header header-green">
-                <h4>TIP DE SALUD</h4>
-              </div>
-              <div className="resource-body">
-                <h5 className="resource-title">Prevención del Dengue</h5>
-                <div className="resource-img-container">
-                  <img src={tipDengueImg} alt="Prevención del Dengue" className="resource-img" />
-                </div>
-              </div>
-              <a href="#dengue" className="resource-footer-btn">
-                VER MÁS
-              </a>
-            </div>
-
-            {/* Tarjeta 2: Guía Práctica */}
-            <div className="resource-card">
-              <div className="resource-header header-yellow">
-                <h4>GUÍA PRÁCTICA</h4>
-              </div>
-              <div className="resource-body">
-                <h5 className="resource-title">Ayuno para Laboratorio</h5>
-                <div className="resource-img-container">
-                  <img src={guiaLabImg} alt="Ayuno para laboratorio" className="resource-img" />
-                </div>
-              </div>
-              <a href="#laboratorio" className="resource-footer-btn">
-                VER MÁS
-              </a>
-            </div>
-
+        {/* LADO IZQUIERDO: IMAGEN EDITORIAL GRANDE */}
+        <div className="aprende-left-image">
+          <div className="image-frame">
+            <img
+              src={aprendeMainImg}
+              alt="Educación para la salud - Hospital Evita"
+            />
           </div>
         </div>
 
+        {/* LADO DERECHO: TEXTOS, DESCRIPCIÓN Y LAS 3 TARJETAS */}
+        <div className="aprende-right-content">
+          <div className="aprende-header">
+            <span className="aprende-subtitle">EDUCACIÓN PARA LA SALUD</span>
+            <h2 className="aprende-title">APRENDÉ CON EL EVITA</h2>
+          </div>
+
+          <p className="aprende-description">
+            Tu espacio de educación médica y preventiva. Encontrá información
+            clara, consejos prácticos y guías de orientación en formato rápido
+            para cuidar tu bienestar y el de tu familia.
+          </p>
+
+          {/* GRILLA DE 3 TARJETAS REDISEÑADAS */}
+          <div className="aprende-cards-grid">
+            {/* TARJETA 1: DENGUE -> NOTICIAS */}
+            <div className="aprende-card">
+              <div className="card-image-box">
+                <img src={tipDengueImg} alt="Prevención del Dengue" />
+              </div>
+              <div className="card-info">
+                <span className="card-badge green">TIP DE SALUD</span>
+                <h4>Prevención del Dengue</h4>
+              </div>
+              <Link
+                to="/noticias?categoria=dengue"
+                className="card-action-link"
+              >
+                <span>MÁS INFORMACIÓN</span>
+                <span className="arrow">→</span>
+              </Link>
+            </div>
+
+            {/* TARJETA 2: GUÍA PRÁCTICA -> DOCUMENTACIÓN */}
+            <div className="aprende-card">
+              <div className="card-image-box">
+                <img src={guiaLabImg} alt="Ayuno para laboratorio" />
+              </div>
+              <div className="card-info">
+                <span className="card-badge yellow">GUÍA PRÁCTICA</span>
+                <h4>Ayuno para Laboratorio</h4>
+              </div>
+              <Link to="/documentacion" className="card-action-link">
+                <span>MÁS INFORMACIÓN</span>
+                <span className="arrow">→</span>
+              </Link>
+            </div>
+
+            {/* TARJETA 3: CAPACITACIÓN -> CAPACITACIÓN */}
+            <div className="aprende-card">
+              <div className="card-image-box">
+                <img src={capacitacionImg} alt="Cursos y Jornadas HIE" />
+              </div>
+              <div className="card-info">
+                <span className="card-badge blue">FORMACIÓN</span>
+                <h4>Cursos y Jornadas HIE</h4>
+              </div>
+              <Link to="/capacitacion" className="card-action-link">
+                <span>MÁS INFORMACIÓN</span>
+                <span className="arrow">→</span>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

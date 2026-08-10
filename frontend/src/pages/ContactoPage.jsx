@@ -59,22 +59,69 @@ const ContactoPage = () => {
           </div>
         </div>
 
-        {/* CONTENIDO INFERIOR */}
         <div className="location-bottom-content">
           <div className="location-bottom-inner">
-            {/* GRILLA SUPERIOR: DIRECCIÓN + MAPA */}
             <div className="location-grid-top">
-              {/* TARJETA BLANCA DE DIRECCIÓN */}
-              <div className="address-card-box">
-                <h3>¿Dónde nos encontramos?</h3>
-                <p>
-                  Nos encontramos ubicados en la{" "}
-                  <strong>Avenida José de Luca Barberis al 250</strong>, justo
-                  en la esquina con la calle <strong>Coronel Bogado</strong>.
-                </p>
-                <p className="address-sub">
-                  Nuestro edificio es grande y de fácil acceso.
-                </p>
+              {/* SECCIÓN CONTACTANOS AQUÍ INTEGRADA AL FONDO AZUL */}
+              <div className="contact-info-split-transparent">
+                {/* COLUMNA IZQUIERDA: TITULOS */}
+                <div className="split-left">
+                  <span className="split-title-bold">CONTACTANOS</span>
+                  <span className="split-title-light">AQUÍ</span>
+                </div>
+
+                {/* LÍNEA DIVISORIA VERTICAL BLANCA */}
+                <div className="split-divider-white"></div>
+
+                {/* COLUMNA DERECHA: DATOS DE CONTACTO */}
+                <div className="split-right">
+                  <p className="address-line-white">
+                    Avenida José de Luca Barberis al 250
+                  </p>
+                  <p className="city-line-white">Formosa, Argentina</p>
+                  <p className="phone-line-white">(3704) 436-100</p>
+
+                  {/* REDES SOCIALES */}
+                  <div className="social-links-box-white">
+                    <a
+                      href="https://facebook.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="social-item-white"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+                      </svg>
+                      <span>Facebook</span>
+                    </a>
+
+                    <a
+                      href="https://instagram.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="social-item-white"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <rect
+                          x="2"
+                          y="2"
+                          width="20"
+                          height="20"
+                          rx="5"
+                          ry="5"
+                        ></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                      </svg>
+                      <span>Instagram</span>
+                    </a>
+                  </div>
+                </div>
               </div>
 
               {/* MAPA INTERACTIVO */}

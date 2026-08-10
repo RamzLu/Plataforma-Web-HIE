@@ -1,183 +1,217 @@
 .aprende-section {
   width: 100%;
-  /* Azul institucional oscuro, armonizado con el resto de la web */
-  background-color: #005b8f; 
-  padding: 60px 20px;
+  background-color: #f8fafc; /* Fondo gris claro suave como en las referencias */
+  padding: 80px 20px;
   display: flex;
   justify-content: center;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 .aprende-container {
-  max-width: 1200px;
+  max-width: 1100px;
   width: 100%;
-  display: flex;
-  gap: 40px;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 50px;
+  align-items: center;
 }
 
 /* --- LADO IZQUIERDO --- */
-.aprende-left {
-  flex: 1;
-  border-radius: 30px;
-  overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+.aprende-left-content {
+  display: flex;
+  flex-direction: column;
 }
 
-.aprende-main-img {
+.aprende-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.aprende-subtitle {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.aprende-title {
+  color: #2b5b94;
+  font-size: 2.8rem;
+  font-weight: 300; /* Letra ultraliviana idéntica a tus referencias */
+  letter-spacing: 2px;
+  margin: 5px 0 0 0;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.aprende-description {
+  color: #334155;
+  font-size: 1.05rem;
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0 0 35px 0;
+  letter-spacing: 0.2px;
+}
+
+/* GRILLA DE 3 TARJETAS */
+.aprende-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.aprende-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.aprende-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.card-image-box {
+  width: 100%;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  background-color: #f1f5f9;
+}
+
+.card-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  margin-bottom: 15px;
+}
+
+.card-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.card-badge.green {
+  color: #319795;
+}
+
+.card-badge.yellow {
+  color: #d69e2e;
+}
+
+.card-badge.blue {
+  color: #2b5b94;
+}
+
+.card-info h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0c2340;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* ENLACE CON FLECHA ESTILO REFERENCIA */
+.card-action-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  text-decoration: none;
+  color: #2b5b94;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
+}
+
+.card-action-link:hover {
+  color: #1c4373;
+}
+
+.card-action-link .arrow {
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.card-action-link:hover .arrow {
+  transform: translateX(3px);
+}
+
+/* --- LADO DERECHO: IMAGEN EDITORIAL --- */
+.aprende-right-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-frame {
+  width: 100%;
+  height: 480px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid #cbd5e1;
+}
+
+.image-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-/* --- LADO DERECHO --- */
-.aprende-right {
-  flex: 1.1; /* Toma un poco más de espacio que la imagen */
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-/* Tarjeta de Introducción */
-.aprende-intro-card {
-  background-color: #ffffff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-}
-
-.aprende-intro-header {
-  background-color: #b3d4e6; /* Celeste grisáceo suave */
-  padding: 15px 20px;
-  text-align: center;
-}
-
-.aprende-intro-header h3 {
-  margin: 0;
-  color: #0c2340;
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.aprende-intro-body {
-  padding: 25px 30px;
-}
-
-.aprende-intro-body p {
-  margin: 0;
-  color: #4a5c6a;
-  font-size: 1.05rem;
-  line-height: 1.6;
-  font-style: italic;
-  text-align: center;
-}
-
-/* Grilla de Recursos (Tarjetas inferiores) */
-.aprende-resources-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 25px;
-}
-
-.resource-card {
-  background-color: #ffffff;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease;
-}
-
-.resource-card:hover {
-  transform: translateY(-5px);
-}
-
-/* Cabeceras de colores refinados */
-.resource-header {
-  padding: 12px 10px;
-  text-align: center;
-}
-
-.header-green {
-  background-color: #8cc63f; /* Verde manzana profesional */
-}
-
-.header-yellow {
-  background-color: #ffca28; /* Amarillo ámbar profesional */
-}
-
-.resource-header h4 {
-  margin: 0;
-  color: #0c2340;
-  font-size: 1.1rem;
-  font-weight: 800;
-}
-
-/* Cuerpo de la tarjeta de recurso */
-.resource-body {
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1; /* Ocupa el espacio restante */
-}
-
-.resource-title {
-  margin: 0 0 15px 0;
-  color: #0c2340;
-  font-size: 1rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-.resource-img-container {
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.resource-img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
-/* Botón inferior */
-.resource-footer-btn {
-  background-color: #a4c2d6; /* Tono similar al original pero más limpio */
-  color: #0c2340;
-  text-align: center;
-  text-decoration: none;
-  font-weight: 800;
-  font-size: 1rem;
-  padding: 15px 0;
-  margin-top: auto; /* Lo empuja hacia abajo del todo */
-  transition: background-color 0.2s;
-  border-radius: 0 0 20px 20px;
-}
-
-.resource-footer-btn:hover {
-  background-color: #8fb1c9;
-}
-
-/* Responsividad para móviles y tablets */
+/* --- RESPONSIVIDAD --- */
 @media (max-width: 992px) {
   .aprende-container {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
-  
-  .aprende-left {
-    min-height: 350px;
+
+  .aprende-title {
+    font-size: 2.2rem;
+  }
+
+  .image-frame {
+    height: 320px;
   }
 }
 
-@media (max-width: 600px) {
-  .aprende-resources-grid {
+@media (max-width: 650px) {
+  .aprende-cards-grid {
     grid-template-columns: 1fr;
+  }
+
+  .card-image-box {
+    height: 130px;
   }
 }

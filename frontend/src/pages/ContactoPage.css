@@ -190,37 +190,133 @@
   gap: 30px;
   align-items: center;
 }
-
-.address-card-box {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 32px 28px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  color: #1c1e21;
+/* BLOQUE DE CONTACTO TRANSPARENTE EN AZUL INSTITUCIONAL */
+.contact-info-split-transparent {
+  background: transparent;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  color: #ffffff;
 }
 
-.address-card-box h3 {
+/* COLUMNA IZQUIERDA */
+.split-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  min-width: 150px;
+}
+
+.split-title-bold {
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.split-title-light {
+  color: #ffffff;
   font-size: 1.35rem;
   font-weight: 300;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  margin: 0 0 16px 0;
-  color: #2b5b94;
+  line-height: 1.2;
 }
 
-.address-card-box p {
+/* LÍNEA DIVISORIA VERTICAL */
+.split-divider-white {
+  width: 2.5px;
+  height: 170px;
+  background-color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+/* COLUMNA DERECHA */
+.split-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.address-line-white {
   font-size: 1.15rem;
   font-weight: 300;
-  line-height: 1.6;
-  margin: 0 0 14px 0;
-  color: #223652;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.2px;
 }
 
-.address-card-box p strong {
-  font-weight: 700;
-  color: #0c2340;
+.city-line-white {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
 }
 
+.phone-line-white {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 6px 0 10px 0;
+  letter-spacing: 0.5px;
+}
+
+/* REDES SOCIALES EN BLANCO Y CELESTE SUAVE */
+.social-links-box-white {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 4px;
+}
+
+.social-item-white {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 300;
+  opacity: 0.9;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.social-item-white:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.social-item-white svg {
+  width: 18px;
+  height: 18px;
+  stroke: #ffffff;
+}
+
+/* ADAPTACIÓN EN MÓVILES */
+@media (max-width: 600px) {
+  .contact-info-split-transparent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .split-left {
+    align-items: flex-start;
+    text-align: left;
+    min-width: auto;
+  }
+
+  .split-divider-white {
+    width: 100%;
+    height: 1px;
+  }
+}
 .address-sub {
   font-size: 0.95rem;
   font-weight: 300;

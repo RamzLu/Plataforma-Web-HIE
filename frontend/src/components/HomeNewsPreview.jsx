@@ -9,38 +9,53 @@ const HomeNewsPreview = () => {
   return (
     <section className="home-news-preview">
       <div className="preview-container">
+        {/* ENCABEZADO INSTITUCIONAL EDITORIAL */}
         <div className="preview-header">
-          <h2 className="preview-title">Nuevas Noticias</h2>
+          <div className="preview-title-group">
+            <span className="preview-subtitle">NOVEDADES INSTITUCIONALES</span>
+            <h2 className="preview-title">NUEVAS NOTICIAS</h2>
+          </div>
           <Link to="/noticias" className="preview-view-all">
-            Ver todas
+            <span>VER TODAS</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
           </Link>
         </div>
 
-        <div className="preview-grid">
-          {latestNews.map((news) => (
-            <div key={news.id} className="preview-card">
-              <div className="preview-img-container">
-                {/* Aseguramos que siempre cargue la primera foto del arreglo */}
-                {news.images && news.images.length > 0 && (
-                  <img
-                    src={news.images[0]}
-                    alt={news.title}
-                    className="preview-img"
-                  />
-                )}
-              </div>
-              <div className="preview-content">
-                <span className="preview-date">{news.date}</span>
-                <h4 className="preview-card-title">{news.title}</h4>
-                <p className="preview-excerpt">
-                  {news.body[0].substring(0, 100)}...
-                </p>
-                <Link to="/noticias" className="preview-read-more">
-                  Leer más
-                </Link>
-              </div>
-            </div>
-          ))}
+        {/* CONTENEDOR CON SCROLL HORIZONTAL EN MÓVIL */}
+        <div className="preview-scroll-wrapper">
+          <div className="preview-grid">
+            {latestNews.map((news) => (
+              <article key={news.id} className="preview-card">
+                <div className="preview-img-container">
+                  {news.images && news.images.length > 0 && (
+                    <img
+                      src={news.images[0]}
+                      alt={news.title}
+                      className="preview-img"
+                    />
+                  )}
+                </div>
+                <div className="preview-content">
+                  <span className="preview-date">{news.date}</span>
+                  <h4 className="preview-card-title">{news.title}</h4>
+                  <p className="preview-excerpt">
+                    {news.body[0].substring(0, 100)}...
+                  </p>
+                  <Link to="/noticias" className="preview-read-more">
+                    <span>MÁS INFORMACIÓN</span>
+                    <span className="arrow">→</span>
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>

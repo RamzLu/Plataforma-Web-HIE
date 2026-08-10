@@ -1,66 +1,114 @@
 .home-news-preview {
   width: 100%;
-  padding: 60px 20px;
-  background-color: #f4f7fa;
+  padding: 80px 20px;
+  background-color: #f8fafc; /* Fondo gris claro suave */
   display: flex;
   justify-content: center;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 .preview-container {
-  max-width: 1200px;
+  max-width: 1100px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
+/* --- ENCABEZADO INSTITUCIONAL --- */
 .preview-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 30px;
-  border-bottom: 2px solid #d1d9e0;
-  padding-bottom: 10px;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 18px;
 }
 
-.preview-title {
-  color: #0c2340;
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 0;
-}
-
-.preview-view-all {
-  color: #006eb3;
-  font-weight: 700;
-  text-decoration: none;
-  font-size: 1rem;
-}
-
-.preview-view-all:hover {
-  text-decoration: underline;
-}
-
-.preview-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-}
-
-.preview-card {
-  background-color: white;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s;
+.preview-title-group {
   display: flex;
   flex-direction: column;
 }
 
+.preview-subtitle {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.preview-title {
+  color: #2b5b94;
+  font-size: 2.2rem;
+  font-weight: 300; /* Letra ultraliviana */
+  letter-spacing: 1.5px;
+  margin: 4px 0 0 0;
+  text-transform: uppercase;
+}
+
+.preview-view-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2b5b94;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
+}
+
+.preview-view-all:hover {
+  color: #1c4373;
+}
+
+.preview-view-all svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* --- GRILLA ESCRITORIO --- */
+.preview-scroll-wrapper {
+  width: 100%;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  align-items: stretch;
+}
+
+/* --- TARJETAS BLANCAS --- */
+.preview-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
 .preview-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 .preview-img-container {
   width: 100%;
-  height: 200px;
+  height: 190px;
+  background-color: #f1f5f9;
+  overflow: hidden;
 }
 
 .preview-img {
@@ -77,28 +125,91 @@
 }
 
 .preview-date {
-  font-size: 0.85rem;
-  color: #666;
-  margin-bottom: 10px;
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 400;
+  margin-bottom: 8px;
 }
 
 .preview-card-title {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
   color: #0c2340;
+  line-height: 1.4;
   margin: 0 0 10px 0;
-  font-weight: 700;
 }
 
 .preview-excerpt {
   font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 20px;
+  font-weight: 300;
+  color: #334155;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
   flex: 1;
 }
 
 .preview-read-more {
-  color: #61b896;
-  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   text-decoration: none;
-  font-size: 0.95rem;
+  color: #2b5b94;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+  transition: color 0.2s ease;
+}
+
+.preview-read-more:hover {
+  color: #1c4373;
+}
+
+.preview-read-more .arrow {
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+.preview-read-more:hover .arrow {
+  transform: translateX(3px);
+}
+
+/* --- MÓVILES (CARRUSEL CON SCROLL HORIZONTAL) --- */
+@media (max-width: 768px) {
+  .preview-scroll-wrapper {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 15px;
+    margin: 0 -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  /* Oculta la barra de desplazamiento visual */
+  .preview-scroll-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+  .preview-scroll-wrapper {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .preview-grid {
+    display: flex; /* Cambia a layout horizontal */
+    gap: 15px;
+    width: max-content;
+  }
+
+  .preview-card {
+    width: 82vw; /* Deja ver el borde de la siguiente tarjeta */
+    max-width: 310px;
+    scroll-snap-align: start; /* Anclaje por tarjeta */
+    flex-shrink: 0;
+  }
+
+  .preview-title {
+    font-size: 1.7rem;
+  }
 }
