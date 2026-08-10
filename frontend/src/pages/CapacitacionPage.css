@@ -1,0 +1,509 @@
+.capacitacion-page {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  background-color: #eaf6fc;
+  padding: 80px 0 100px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+.capacitacion-container {
+  max-width: 1100px;
+  width: 100%;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cap-header-fluid {
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin-bottom: 50px;
+  justify-content: center;
+  padding: 70px 20px;
+}
+
+.cap-header-inner {
+  width: 100%;
+  max-width: 1100px;
+  border-left: 8px solid #2b5b94;
+  padding-left: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.cap-title {
+  color: #2b5b94;
+  font-size: 3.2rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+.cap-info-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.cap-info-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: right;
+  justify-content: center;
+}
+
+.cap-label {
+  color: #edf4fd;
+  font-size: 1.1rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cap-label.active {
+  font-weight: 700;
+}
+
+.cap-info-divider {
+  width: 1.5px;
+  background-color: #2b5b94;
+  align-self: stretch;
+}
+
+.cap-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cap-info-text p {
+  color: #1c1e21;
+  font-size: 1.15rem;
+  font-weight: 300;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cap-banner-box {
+  width: 100%;
+  background: linear-gradient(135deg, #d3e5f8 0%, #2b5b94 100%);
+  border-radius: 0px;
+  padding: 30px 45px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.cap-banner-left {
+  flex: 1;
+  text-align: right;
+  padding-right: 35px;
+}
+
+.cap-banner-headline {
+  color: #0c2340;
+  font-size: 1.8rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  line-height: 1.25;
+  margin: 0 0 12px 0;
+}
+
+.cap-banner-subtext {
+  color: #0c2340;
+  font-size: 1.15rem;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.cap-banner-divider {
+  width: 2px;
+  height: 144px;
+  background-color: #183a65;
+  flex-shrink: 0;
+}
+
+.cap-banner-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 35px;
+  flex-shrink: 0;
+}
+
+.cap-banner-logo {
+  height: 144px;
+}
+.cap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.cap-card {
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.cap-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+.cap-card-bg {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.cap-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(12, 35, 64, 0.9) 0%,
+    rgba(12, 35, 64, 0.35) 100%
+  );
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  color: #ffffff;
+}
+
+.cap-card-overlay h3,
+.cap-card-empty h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1.25;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.cap-card-overlay p,
+.cap-card-empty p {
+  font-size: 0.85rem;
+  font-weight: 300;
+  font-style: italic;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+.cap-card-empty {
+  width: 100%;
+  height: 100%;
+  padding: 25px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: #ffffff;
+  color: #1c1e21;
+}
+
+.cap-btn-vermas {
+  background-color: #2b5b94;
+  color: #ffffff;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 25px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: inherit;
+  text-transform: uppercase;
+}
+
+.cap-btn-vermas:hover {
+  background-color: #1c4373;
+}
+
+.cap-btn-vermas.outline {
+  background-color: #2b5b94;
+  color: #ffffff;
+}
+
+.cap-disclaimer {
+  text-align: center;
+  color: #e8453c;
+  font-size: 0.85rem;
+  font-weight: 400;
+  margin-top: 10px;
+}
+
+.cap-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  padding: 20px;
+}
+
+.cap-modal-content {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 12px;
+  padding: 35px 30px 25px 30px;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  border: 1px solid #cbd5e1;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cap-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #a0aec0;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.cap-modal-close:hover {
+  color: #2d3748;
+}
+
+.cap-modal-title {
+  color: #2b5b94;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+}
+
+.cap-modal-info {
+  text-align: left;
+  margin-bottom: 25px;
+  color: #1c1e21;
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.cap-modal-info p {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* CONTENEDOR E ÍCONO DE INFORMACIÓN */
+.cap-info-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2b5b94;
+  flex-shrink: 0;
+}
+
+.cap-info-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cap-modal-desc-box {
+  margin-top: 15px;
+  background-color: #f8fafc;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.cap-modal-desc-box .cap-modal-desc {
+  margin: 0;
+  align-items: flex-start;
+}
+
+.cap-modal-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.cap-modal-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+  font-family: inherit;
+  text-transform: uppercase;
+}
+
+.cap-modal-btn:hover {
+  transform: translateY(-2px);
+}
+
+.cap-modal-btn.download {
+  background-color: transparent;
+  color: #e8453c;
+  border: 2px solid #e8453c;
+}
+
+.cap-modal-btn.download:hover {
+  background-color: #e8453c;
+  color: #ffffff;
+}
+
+.cap-modal-btn.download .cap-modal-btn-icon {
+  background-color: transparent;
+}
+
+.cap-modal-btn.download:hover .cap-modal-btn-icon svg {
+  fill: #ffffff;
+}
+
+.cap-modal-btn.whatsapp {
+  background-color: #2b5b94;
+  color: #ffffff;
+}
+
+.cap-modal-btn-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cap-modal-btn-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.cap-modal-tagline {
+  color: #e8453c;
+  font-size: 0.8rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* --- RESPONSIVIDAD --- */
+@media (max-width: 992px) {
+  .cap-banner-box {
+    flex-direction: column;
+    padding: 25px 20px;
+    gap: 20px;
+  }
+
+  .cap-banner-left {
+    text-align: center;
+    padding-right: 0;
+  }
+
+  .cap-banner-divider {
+    width: 80%;
+    height: 6px;
+  }
+
+  .cap-banner-right {
+    padding-left: 0;
+  }
+
+  .cap-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cap-header-fluid {
+    padding: 30px 20px;
+  }
+
+  .cap-header-inner {
+    border-left-width: 5px;
+    padding-left: 20px;
+  }
+
+  .cap-title {
+    font-size: 2rem;
+  }
+
+  .cap-info-wrapper {
+    align-items: flex-start;
+  }
+
+  .cap-info-text p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .cap-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cap-modal-actions {
+    flex-direction: column;
+  }
+}
