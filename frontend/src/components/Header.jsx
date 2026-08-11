@@ -54,11 +54,11 @@ const Header = () => {
             </li>
             <li>
               <Link
-                to="/institucional"
-                className={`nav-link ${isActive("/institucional") ? "active" : ""}`}
+                to="/especialidades"
+                className={`nav-link ${isActive("/especialidades") ? "active" : ""}`}
                 onClick={closeMenu}
               >
-                INSTITUCIONAL
+                ESPECIALIDADES
               </Link>
             </li>
             <li>
@@ -90,6 +90,15 @@ const Header = () => {
             </li>
             <li>
               <Link
+                to="/profesionales"
+                className={`nav-link ${isActive("/profesionales") ? "active" : ""}`}
+                onClick={closeMenu}
+              >
+                PROFESIONALES
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/contacto"
                 className={`nav-link ${isActive("/contacto") ? "active" : ""}`}
                 onClick={closeMenu}
@@ -97,6 +106,7 @@ const Header = () => {
                 CONTACTO
               </Link>
             </li>
+            
           </ul>
         </nav>
       </div>
