@@ -1,0 +1,372 @@
+.hospital-map-section {
+  width: 100%;
+  background-color: #f8fafc;
+  padding: 80px 20px;
+  display: flex;
+  justify-content: center;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+.hospital-map-container {
+  max-width: 1150px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* ENCABEZADO INSTITUCIONAL */
+.hospital-map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 18px;
+}
+
+.map-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.map-subtitle {
+  color: #14315a;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.map-title {
+  color: #2b5b94;
+  font-size: 2.2rem;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  margin: 4px 0 0 0;
+  text-transform: uppercase;
+}
+
+.map-caption {
+  font-size: 1.3rem;
+  font-weight: 3000;
+  color: #042b5b;
+  font-style: italic;
+  margin: 0;
+  max-width: 380px;
+  text-align: right;
+}
+
+/* PESTAÑAS DE FILTRO */
+.map-filter-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-tab-btn {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-tab-btn:hover {
+  border-color: #2b5b94;
+  color: #2b5b94;
+}
+
+.filter-tab-btn.active {
+  background-color: #2b5b94;
+  color: #ffffff;
+  border-color: #2b5b94;
+  box-shadow: 0 4px 12px rgba(43, 91, 148, 0.2);
+}
+
+/* GRILLA PRINCIPAL */
+.hospital-map-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 30px;
+  align-items: stretch;
+}
+
+/* COLUMNA IZQUIERDA */
+.map-controls-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* LISTA DE BOTONES/TARJETAS */
+.areas-list-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.area-selector-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.area-selector-card:hover {
+  transform: translateY(-2px);
+  border-color: #2b5b94;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
+}
+
+.area-selector-card.selected {
+  background-color: #ffffff;
+  border: 2px solid #2b5b94;
+  box-shadow: 0 6px 18px rgba(43, 91, 148, 0.12);
+}
+
+.area-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.area-block-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.area-selector-card.selected .area-block-tag {
+  color: #2b5b94;
+}
+
+.arrow-indicator {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.area-selector-card.selected .arrow-indicator {
+  color: #2b5b94;
+}
+
+.area-selector-card h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0c2340;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* TARJETA INFORMATIVA DEL ÁREA */
+.area-info-card {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tag-live {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #51b897;
+  text-transform: uppercase;
+}
+
+.info-badge-header h3 {
+  margin: 4px 0 0 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #0c2340;
+}
+
+.info-desc {
+  margin: 0;
+  color: #334155;
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.info-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 14px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.meta-item svg {
+  width: 18px;
+  height: 18px;
+  stroke: #2b5b94;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.meta-item div {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-item strong {
+  color: #0c2340;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-item span {
+  font-weight: 300;
+}
+
+/* COLUMNA DERECHA (VISOR DEL PLANO) */
+.map-viewer-col {
+  width: 100%;
+  display: flex;
+}
+
+.map-image-frame {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.map-view-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: rgba(12, 35, 64, 0.85);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+.map-display-img {
+  width: 100%;
+  height: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  transition: opacity 0.3s ease;
+}
+/* BOTÓN VER MÁS DENTRO DE LA FICHA DEL ÁREA */
+.area-info-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+  text-decoration: none;
+  color: #2b5b94;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.area-info-btn:hover {
+  color: #1c4373;
+}
+
+.area-info-btn .arrow {
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+.area-info-btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* COMPENSACIÓN DEL HEADER FIJO AL HACER SCROLL POR ANCLA */
+.hospital-map-section {
+  scroll-margin-top: 80px;
+  width: 100%;
+  background-color: #f8fafc;
+  padding: 80px 20px;
+  display: flex;
+  justify-content: center;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+/* RESPONSIVIDAD */
+@media (max-width: 992px) {
+  .hospital-map-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .map-caption {
+    text-align: left;
+  }
+
+  .hospital-map-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .map-display-img {
+    max-height: 380px;
+  }
+}
+
+@media (max-width: 600px) {
+  .areas-list-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .map-title {
+    font-size: 1.7rem;
+  }
+}

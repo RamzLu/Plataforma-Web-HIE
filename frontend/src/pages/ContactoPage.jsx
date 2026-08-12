@@ -1,17 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import "./ContactoPage.css";
 import Breadcrumb from "../components/Breadcrumb";
+import HospitalMapSection from "../components/HospitalMapSection";
 
 // Imágenes institucionales
 import fotoAtencion from "../assets/fotoContacto.jpg";
 import fotoFachadaHIE from "../assets/fotoFachadaHIE2.jpg";
 
 const ContactoPage = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const targetElement = document.getElementById(
+        location.hash.replace("#", ""),
+      );
+      if (targetElement) {
+        setTimeout(() => {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 150);
+      }
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location]);
+
   return (
     <main className="contacto-page">
-      {/* =========================================
-          1. SECCIÓN SUPERIOR HERO
-      ========================================= */}
       <div className="contacto-container">
         <section className="contacto-hero">
           <div className="contacto-hero-left">
@@ -39,9 +55,6 @@ const ContactoPage = () => {
         </section>
       </div>
 
-      {/* =========================================
-          2. SECCIÓN FULL WIDTH: CÓMO LLEGAR Y CANALES
-      ========================================= */}
       <section className="location-fullwidth-section">
         {/* BLOQUE SUPERIOR CON FACHADA */}
         <div
@@ -62,18 +75,14 @@ const ContactoPage = () => {
         <div className="location-bottom-content">
           <div className="location-bottom-inner">
             <div className="location-grid-top">
-              {/* SECCIÓN CONTACTANOS AQUÍ INTEGRADA AL FONDO AZUL */}
               <div className="contact-info-split-transparent">
-                {/* COLUMNA IZQUIERDA: TITULOS */}
                 <div className="split-left">
                   <span className="split-title-bold">CONTACTANOS</span>
                   <span className="split-title-light">AQUÍ</span>
                 </div>
 
-                {/* LÍNEA DIVISORIA VERTICAL BLANCA */}
                 <div className="split-divider-white"></div>
 
-                {/* COLUMNA DERECHA: DATOS DE CONTACTO */}
                 <div className="split-right">
                   <p className="address-line-white">
                     Avenida José de Luca Barberis al 250
@@ -81,7 +90,6 @@ const ContactoPage = () => {
                   <p className="city-line-white">Formosa, Argentina</p>
                   <p className="phone-line-white">(3704) 436-100</p>
 
-                  {/* REDES SOCIALES */}
                   <div className="social-links-box-white">
                     <a
                       href="https://facebook.com"
@@ -124,13 +132,11 @@ const ContactoPage = () => {
                 </div>
               </div>
 
-              {/* MAPA INTERACTIVO */}
+              {/* MAPA GOOGLE */}
               <div className="map-frame-box">
                 <iframe
                   title="Ubicación Hospital Interdistrital Evita"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5137.059081367517!2d-58.20186001051813!3d-26.180984538089557!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945caf5c8f477e01%3A0x3ad3344cf5acca56!2sHospital%20Interdistrital%20Evita!5e0!3m2!1ses-419!2sar!4v1786376854376!5m2!1ses-419!2sar"
-                  width="600"
-                  height="450"
+                  src="https://maps.google.com/maps?q=-26.17885,-58.19795(Hospital%20Interdistrital%20Evita)&t=&z=17&ie=UTF8&iwloc=B&output=embed"
                   className="map-iframe"
                   allowFullScreen=""
                   loading="lazy"
@@ -138,11 +144,9 @@ const ContactoPage = () => {
                 ></iframe>
               </div>
             </div>
-            
 
-            {/* SECCIÓN TRANSPORTE (REDISEÑO MINIMALISTA Y UNIFICADO) */}
+            {/* SECCIÓN TRANSPORTE */}
             <div className="transport-unified-card">
-              {/* COLUMNA 1: COLECTIVOS */}
               <div className="transport-col">
                 <div className="transport-col-header">
                   <svg
@@ -193,10 +197,8 @@ const ContactoPage = () => {
                 </ul>
               </div>
 
-              {/* DIVISOR VERTICAL */}
               <div className="transport-col-divider"></div>
 
-              {/* COLUMNA 2: TAXI / REMÍS */}
               <div className="transport-col">
                 <div className="transport-col-header">
                   <svg
@@ -227,6 +229,8 @@ const ContactoPage = () => {
           </div>
         </div>
       </section>
+
+      <HospitalMapSection />
     </main>
   );
 };

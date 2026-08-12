@@ -1,0 +1,133 @@
+.home-map-banner-section {
+  width: 100%;
+  background-color: #f8fafc;
+  padding: 0 20px 80px 20px;
+  display: flex;
+  justify-content: center;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+.home-map-banner-container {
+  max-width: 1100px;
+  width: 100%;
+}
+
+.home-map-banner-card {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.home-map-banner-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.banner-tag {
+  color: #0b3979;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.banner-title {
+  color: #2b5b94;
+  font-size: 2.2rem;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  margin: 0 0 14px 0;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.banner-desc {
+  color: #334155;
+  font-size: 0.98rem;
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0 0 25px 0;
+}
+
+.banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #2b5b94;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border-radius: 25px;
+  align-self: flex-start;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.banner-btn:hover {
+  background-color: #1c4373;
+  transform: translateY(-2px);
+}
+
+.banner-btn .arrow {
+  font-size: 1.1rem;
+}
+
+.home-map-banner-preview {
+  width: 100%;
+  height: 220px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background-color: #f1f5f9;
+}
+
+.home-map-banner-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* COMPENSACIÓN DEL HEADER FIJO AL HACER SCROLL POR ANCLA */
+.hospital-map-section {
+  scroll-margin-top: 80px;
+  width: 100%;
+  background-color: #f8fafc;
+  padding: 80px 20px;
+  display: flex;
+  justify-content: center;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+@media (max-width: 992px) {
+  .home-map-banner-card {
+    grid-template-columns: 1fr;
+    padding: 30px;
+  }
+
+  .home-map-banner-preview {
+    height: 180px;
+  }
+}
