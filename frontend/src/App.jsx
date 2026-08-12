@@ -16,6 +16,7 @@ import DocumentacionPage from "./pages/DocumentacionPage";
 import ProfesionalesPage from "./pages/ProfesionalesPage";
 import CapacitacionPage from "./pages/CapacitacionPage";
 import ContactoPage from "./pages/ContactoPage";
+import AboutPage from "./pages/AboutPage";
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
         <Route path="/profesionales" element={<ProfesionalesPage />} />
         <Route path="/capacitacion" element={<CapacitacionPage />} />{" "}
         <Route path="/contacto" element={<ContactoPage />} />
+        <Route path="/acerca de" element={<AboutPage />} />
         <Route
           path="*"
           element={

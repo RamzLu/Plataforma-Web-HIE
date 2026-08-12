@@ -1,0 +1,268 @@
+.timeline-interactive-section {
+  width: 100%;
+  background-color: #f8fafc;
+  padding: 40px 20px 80px 20px;
+  display: flex;
+  justify-content: center;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+.timeline-interactive-container {
+  max-width: 1100px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* ENCABEZADO */
+.timeline-interactive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 18px;
+}
+
+.timeline-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-header-tag {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.timeline-header-title {
+  color: #2b5b94;
+  font-size: 2.2rem;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  margin: 4px 0 0 0;
+  text-transform: uppercase;
+}
+
+.timeline-header-caption {
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: #64748b;
+  font-style: italic;
+  margin: 0;
+  max-width: 380px;
+  text-align: right;
+}
+
+/* BARRA DE AÑOS */
+.timeline-years-bar {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.year-tab-btn {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.year-tab-btn .btn-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--accent-color, #2b5b94);
+  transition: transform 0.2s ease;
+}
+
+.year-tab-btn:hover {
+  border-color: var(--accent-color, #2b5b94);
+  color: var(--accent-color, #2b5b94);
+  transform: translateY(-2px);
+}
+
+.year-tab-btn.active {
+  background-color: #ffffff;
+  border: 2px solid var(--accent-color, #2b5b94);
+  color: #0c2340;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.year-tab-btn.active .btn-dot {
+  transform: scale(1.3);
+}
+
+/* GRILLA PRINCIPAL */
+.timeline-interactive-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 30px;
+  align-items: stretch;
+}
+
+/* VISOR DE IMAGEN (LADO IZQUIERDO) */
+.timeline-image-viewer {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 480px;
+}
+
+.timeline-viewer-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: rgba(12, 35, 64, 0.85);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+.timeline-road-img {
+  width: 100%;
+  height: 100%;
+  max-height: 440px;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.3s ease;
+}
+
+/* TARJETA DE DETALLE (LADO DERECHO) */
+.timeline-detail-col {
+  display: flex;
+}
+
+.timeline-detail-card {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-media {
+  width: 100%;
+  height: 220px;
+  position: relative;
+  background-color: #e2e8f0;
+}
+
+.detail-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.detail-year-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+.detail-body {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.detail-category {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.detail-title {
+  color: #0c2340;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.detail-desc {
+  color: #334155;
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 6px 0 0 0;
+}
+
+/* RESPONSIVIDAD */
+@media (max-width: 992px) {
+  .timeline-interactive-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .timeline-header-caption {
+    text-align: left;
+  }
+
+  .timeline-interactive-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .timeline-image-viewer {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 600px) {
+  .timeline-header-title {
+    font-size: 1.7rem;
+  }
+
+  .timeline-years-bar {
+    justify-content: center;
+  }
+
+  .year-tab-btn {
+    flex: 1 1 calc(50% - 15px);
+    justify-content: center;
+  }
+}

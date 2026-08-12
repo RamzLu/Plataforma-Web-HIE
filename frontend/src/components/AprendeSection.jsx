@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./AprendeSection.css";
 
-// IMPORTACIÓN DE IMÁGENES
 import aprendeMainImg from "../assets/aprendeMain.jpg";
 import tipDengueImg from "../assets/aprendeDengue.jpg";
 import guiaLabImg from "../assets/aprendeLaboratorio.jpg";
@@ -12,7 +11,6 @@ const AprendeSection = () => {
   return (
     <section className="aprende-section">
       <div className="aprende-container">
-        {/* LADO IZQUIERDO: IMAGEN EDITORIAL GRANDE */}
         <div className="aprende-left-image">
           <div className="image-frame">
             <img
@@ -22,7 +20,6 @@ const AprendeSection = () => {
           </div>
         </div>
 
-        {/* LADO DERECHO: TEXTOS, DESCRIPCIÓN Y LAS 3 TARJETAS */}
         <div className="aprende-right-content">
           <div className="aprende-header">
             <span className="aprende-subtitle">EDUCACIÓN PARA LA SALUD</span>
@@ -35,9 +32,7 @@ const AprendeSection = () => {
             para cuidar tu bienestar y el de tu familia.
           </p>
 
-          {/* GRILLA DE 3 TARJETAS REDISEÑADAS */}
           <div className="aprende-cards-grid">
-            {/* TARJETA 1: DENGUE -> NOTICIAS */}
             <div className="aprende-card">
               <div className="card-image-box">
                 <img src={tipDengueImg} alt="Prevención del Dengue" />
@@ -55,7 +50,6 @@ const AprendeSection = () => {
               </Link>
             </div>
 
-            {/* TARJETA 2: GUÍA PRÁCTICA -> DOCUMENTACIÓN */}
             <div className="aprende-card">
               <div className="card-image-box">
                 <img src={guiaLabImg} alt="Ayuno para laboratorio" />
@@ -70,7 +64,6 @@ const AprendeSection = () => {
               </Link>
             </div>
 
-            {/* TARJETA 3: CAPACITACIÓN -> CAPACITACIÓN */}
             <div className="aprende-card">
               <div className="card-image-box">
                 <img src={capacitacionImg} alt="Cursos y Jornadas HIE" />

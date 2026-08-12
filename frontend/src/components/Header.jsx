@@ -106,7 +106,15 @@ const Header = () => {
                 CONTACTO
               </Link>
             </li>
-            
+            <li>
+              <Link
+                to="/acerca de"
+                className={`nav-link ${isActive("/contacto") ? "active" : ""}`}
+                onClick={closeMenu}
+              >
+                ACERCA DE
+              </Link>
+            </li>
           </ul>
         </nav>
       </div>

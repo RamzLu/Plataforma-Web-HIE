@@ -1,0 +1,636 @@
+.about-page {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  background:
+    linear-gradient(rgba(248, 250, 252, 0.92), rgba(248, 250, 252, 0.759)),
+    url("../assets/fotoFachadaHIE2.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+
+  padding-top: 100px;
+  padding-bottom: 80px;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  overflow-x: hidden;
+}
+
+.about-container {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 70px;
+}
+
+/* --- 1. HERO INSTITUCIONAL --- */
+.about-hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.about-hero-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.about-subtitle {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 15px;
+}
+
+.about-title {
+  color: #2b5b94;
+  font-size: 2.6rem;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  margin: 8px 0 16px 0;
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+
+.about-lead {
+  color: #334155;
+  font-size: 1.05rem;
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.about-hero-right {
+  width: 100%;
+  height: 100%;
+}
+
+.about-hero-image-box {
+  width: 100%;
+  height: 320px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.about-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- 2. STATS / CIFRAS CLAVE --- */
+.about-stats-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.about-stat-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 25px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.stat-number {
+  color: #2b5b94;
+  font-size: 2.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.stat-label {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* --- ENCABEZADOS DE SECCIÓN --- */
+.about-section-header {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+}
+
+.header-tag {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.header-title {
+  color: #2b5b94;
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  margin: 4px 0 0 0;
+  text-transform: uppercase;
+}
+
+/* --- 3. HISTORIA / TIMELINE --- */
+.history-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.timeline-badge-col {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 15px;
+}
+
+.timeline-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #51b897;
+  border: 3px solid #2b5b94;
+  flex-shrink: 0;
+}
+
+.timeline-period {
+  color: #2b5b94;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.timeline-content-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.timeline-content-card h3 {
+  color: #0c2340;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.timeline-content-card p {
+  color: #334155;
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* --- 4. TECNOLOGÍA MÉDICA --- */
+.tech-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.tech-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 28px 22px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  transition: transform 0.25s ease;
+}
+
+.tech-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.tech-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.tech-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: #2b5b94;
+}
+
+.tech-card h4 {
+  color: #0c2340;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.tech-card p {
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* --- 5. SERVICIOS Y ESPECIALIDADES POLIVALENTES --- */
+.services-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+}
+
+.spec-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 26px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+}
+
+.spec-card.highlight {
+  background-color: #ffffff;
+  border-left: 4px solid #e6a100;
+}
+
+.spec-card-header {
+  margin-bottom: 14px;
+}
+
+.spec-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.spec-tag.red {
+  color: #e53e3e;
+}
+
+.spec-tag.blue {
+  color: #2b5b94;
+}
+
+.spec-tag.green {
+  color: #319795;
+}
+
+.spec-tag.yellow {
+  color: #d69e2e;
+}
+
+.spec-card-header h3 {
+  color: #0c2340;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 4px 0 0 0;
+}
+
+.spec-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spec-list li {
+  position: relative;
+  padding-left: 18px;
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.4;
+}
+
+.spec-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #2b5b94;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.spec-card-desc {
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* --- 6. MISIÓN, VISIÓN Y VALORES --- */
+.mvv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.mvv-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 30px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  transition: transform 0.25s ease;
+}
+
+.mvv-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.mvv-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.mvv-icon-box svg {
+  width: 22px;
+  height: 22px;
+  stroke: #2b5b94;
+}
+
+.mvv-card h3 {
+  color: #2b5b94;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+}
+
+.mvv-card p {
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* --- 7. GALERÍA EDITORIAL --- */
+.about-gallery-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-rows: repeat(2, 180px);
+  gap: 20px;
+}
+
+.gallery-item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background-color: #f1f5f9;
+}
+
+.gallery-item.large {
+  grid-row: span 2;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.gallery-item:hover img {
+  transform: scale(1.03);
+}
+
+.gallery-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 12px 18px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(12, 35, 64, 0.85) 100%
+  );
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 300;
+  letter-spacing: 0.3px;
+}
+
+/* --- RESPONSIVIDAD --- */
+@media (max-width: 992px) {
+  .about-hero {
+    grid-template-columns: 1fr;
+    padding: 30px;
+  }
+
+  .about-stats-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .timeline-item {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .timeline-badge-col {
+    padding-top: 0;
+  }
+
+  .tech-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .services-spec-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mvv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-gallery-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .gallery-item.large {
+    grid-row: auto;
+    height: 240px;
+  }
+
+  .gallery-item {
+    height: 200px;
+  }
+}
+/* =========================================
+   BLOQUE DE IMPACTO SOCIAL Y RECONOCIMIENTO
+========================================= */
+.about-impact-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.impact-card {
+  width: 100%;
+  max-width: 850px;
+  background-color: #b8d5e5; /* Celeste grisáceo suave idéntico a la imagen */
+  border-radius: 24px;
+  padding: 30px 40px;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  box-shadow: 0 8px 25px rgba(12, 35, 64, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.impact-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(12, 35, 64, 0.1);
+}
+
+/* CONTENEDOR DEL ÍCONO */
+.impact-icon-wrapper {
+  flex-shrink: 0;
+  width: 95px;
+  height: 95px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.impact-icon-wrapper svg {
+  width: 100%;
+  height: 100%;
+  stroke: #0c2340; /* Azul oscuro institucional para el trazo */
+  color: #0c2340;
+}
+
+/* CONTENIDO DE TEXTO */
+.impact-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.impact-title {
+  color: #0c2340;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.impact-description {
+  color: #1e3a5f;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .impact-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+    gap: 20px;
+  }
+
+  .impact-icon-wrapper {
+    width: 75px;
+    height: 75px;
+  }
+
+  .impact-title {
+    font-size: 1.15rem;
+  }
+
+  .impact-description {
+    font-size: 0.92rem;
+  }
+}
+.impact-icon-wrapper {
+  flex-shrink: 0;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.impact-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+@media (max-width: 600px) {
+  .about-title {
+    font-size: 2rem;
+  }
+
+  .about-stats-section {
+    grid-template-columns: 1fr;
+  }
+}

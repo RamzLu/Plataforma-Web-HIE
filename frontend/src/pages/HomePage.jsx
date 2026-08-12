@@ -5,6 +5,7 @@ import NewsSection from "../components/NewsSection";
 import PatientInfoSection from "../components/PatientInfoSection";
 import AprendeSection from "../components/AprendeSection";
 import HomeMapBanner from "../components/HomeMapBanner";
+import AboutPage from "./AboutPage";
 
 const HomePage = () => {
   return (
