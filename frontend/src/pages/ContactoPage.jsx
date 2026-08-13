@@ -136,7 +136,7 @@ const ContactoPage = () => {
               <div className="map-frame-box">
                 <iframe
                   title="Ubicación Hospital Interdistrital Evita"
-                  src="https://maps.google.com/maps?q=-26.17885,-58.19795(Hospital%20Interdistrital%20Evita)&t=&z=17&ie=UTF8&iwloc=B&output=embed"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.4956280419283!2d-58.200738424696475!3d-26.180550877091186!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945caf5c8f477e01%3A0x3ad3344cf5acca56!2sHospital%20Interdistrital%20Evita!5e0!3m2!1ses-419!2sar!4v1786646051414!5m2!1ses-419!2sar"
                   className="map-iframe"
                   allowFullScreen=""
                   loading="lazy"
