@@ -20,7 +20,6 @@ const Header = () => {
   return (
     <header className="main-header">
       <div className="header-container">
-        {/* LOGO E IDENTIDAD INSTITUCIONAL */}
         <Link to="/" className="header-brand" onClick={closeMenu}>
           <img src={logoIcon} alt="Hospital Evita" className="header-logo" />
           <div className="brand-text">
@@ -28,8 +27,6 @@ const Header = () => {
             <span className="brand-subtitle">EVITA</span>
           </div>
         </Link>
-
-        {/* BOTÓN HAMBURGUESA (SÓLO VISIBLE EN MÓVILES) */}
         <button
           className={`hamburger-btn ${isMenuOpen ? "open" : ""}`}
           onClick={toggleMenu}
@@ -40,7 +37,6 @@ const Header = () => {
           <span className="hamburger-bar"></span>
         </button>
 
-        {/* MENÚ DE NAVEGACIÓN */}
         <nav className={`nav-menu ${isMenuOpen ? "active" : ""}`}>
           <ul className="nav-list">
             <li>
@@ -108,8 +104,8 @@ const Header = () => {
             </li>
             <li>
               <Link
-                to="/acerca de"
-                className={`nav-link ${isActive("/contacto") ? "active" : ""}`}
+                to="/acerca-de"
+                className={`nav-link ${isActive("/acerca-de") ? "active" : ""}`}
                 onClick={closeMenu}
               >
                 ACERCA DE

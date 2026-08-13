@@ -56,7 +56,6 @@ const ContactoPage = () => {
       </div>
 
       <section className="location-fullwidth-section">
-        {/* BLOQUE SUPERIOR CON FACHADA */}
         <div
           className="location-hero-banner"
           style={{ backgroundImage: `url(${fotoFachadaHIE})` }}
@@ -132,7 +131,6 @@ const ContactoPage = () => {
                 </div>
               </div>
 
-              {/* MAPA GOOGLE */}
               <div className="map-frame-box">
                 <iframe
                   title="Ubicación Hospital Interdistrital Evita"
@@ -144,8 +142,6 @@ const ContactoPage = () => {
                 ></iframe>
               </div>
             </div>
-
-            {/* SECCIÓN TRANSPORTE */}
             <div className="transport-unified-card">
               <div className="transport-col">
                 <div className="transport-col-header">

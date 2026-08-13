@@ -53,9 +53,9 @@
 }
 
 .timeline-header-caption {
-  font-size: 0.95rem;
-  font-weight: 300;
-  color: #64748b;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #23344c;
   font-style: italic;
   margin: 0;
   max-width: 380px;
@@ -71,13 +71,12 @@
 
 .year-tab-btn {
   background-color: #ffffff;
-  color: #334155;
+  color: #0a2c5d;
   border: 1px solid #cbd5e1;
   padding: 10px 24px;
-  border-radius: 30px;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -97,12 +96,12 @@
 .year-tab-btn:hover {
   border-color: var(--accent-color, #2b5b94);
   color: var(--accent-color, #2b5b94);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .year-tab-btn.active {
-  background-color: #ffffff;
-  border: 2px solid var(--accent-color, #2b5b94);
+  background-color: #bfe1f7;
+  border: 2px solid var(--accent-color, #6caeff);
   color: #0c2340;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
@@ -111,7 +110,6 @@
   transform: scale(1.3);
 }
 
-/* GRILLA PRINCIPAL */
 .timeline-interactive-grid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -119,13 +117,8 @@
   align-items: stretch;
 }
 
-/* VISOR DE IMAGEN (LADO IZQUIERDO) */
 .timeline-image-viewer {
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   position: relative;
   display: flex;
   align-items: center;
@@ -137,14 +130,13 @@
   position: absolute;
   top: 15px;
   left: 15px;
-  background-color: rgba(12, 35, 64, 0.85);
+  background-color: rgba(2, 31, 66, 0.764);
   backdrop-filter: blur(4px);
   color: #ffffff;
   font-size: 0.78rem;
   font-weight: 600;
   padding: 6px 14px;
-  border-radius: 20px;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   z-index: 2;
 }
 
@@ -157,7 +149,6 @@
   transition: opacity 0.3s ease;
 }
 
-/* TARJETA DE DETALLE (LADO DERECHO) */
 .timeline-detail-col {
   display: flex;
 }
@@ -166,7 +157,6 @@
   width: 100%;
   background-color: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   display: flex;
@@ -195,9 +185,9 @@
   font-size: 1rem;
   font-weight: 700;
   padding: 4px 14px;
-  border-radius: 20px;
+  border-radius: 5px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 .detail-body {
@@ -209,7 +199,7 @@
 }
 
 .detail-category {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -218,20 +208,19 @@
 .detail-title {
   color: #0c2340;
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
   line-height: 1.3;
 }
 
 .detail-desc {
-  color: #334155;
-  font-size: 0.95rem;
+  color: #092249;
+  font-size: 1.4rem;
   font-weight: 300;
   line-height: 1.6;
   margin: 6px 0 0 0;
 }
 
-/* RESPONSIVIDAD */
 @media (max-width: 992px) {
   .timeline-interactive-header {
     flex-direction: column;

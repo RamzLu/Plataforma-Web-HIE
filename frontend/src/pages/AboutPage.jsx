@@ -1,418 +1,388 @@
-import React from "react";
+import React, { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import "./AboutPage.css";
 import Breadcrumb from "../components/Breadcrumb";
-import InteractiveTimelineSection from "../components/InteractiveTimelineSection";
+import ReactCountUp from "react-countup";
+const CountUp = ReactCountUp.default || ReactCountUp;
 
 // IMÁGENES INSTITUCIONALES
-import iconImpacto from "../assets/iconImpacto.png";
-import fotoFachada from "../assets/fotoFachadaHIE2.jpg";
-import fotoAtencion from "../assets/fotoContacto.jpg";
-import fotoQuirurgico from "../assets/imagenPacientes.jpg";
-import fotoInternacion from "../assets/fondoHospitalCarrusel1.jpg";
+import fotoHeroHeader from "../assets/foto-sede.jpg";
+import fotoVideoCover from "../assets/fondoHospitalCarrusel1.jpg";
+
+// VIDEO INSTITUCIONAL
+import videoInstitucional from "../assets/video-hospital-evita.mp4";
+
+// COMPONENTES
+import InteractiveTimelineSection from "../components/InteractiveTimelineSection";
+
+// Fotos de autoridades
+import fotoDirector from "../assets/imagen-temporal-autoridades.jpg";
+
+const AUTORIDADES = [
+  {
+    cargo: "DIRECTORA GENERAL",
+    nombre: "Dra. Paula Ramírez",
+    especialidad:
+      "Gestión médica, formación de residentes y telemedicina provincial.",
+    foto: fotoDirector,
+  },
+  {
+    cargo: "SUBDIRECTORA DE GESTIÓN ADMINISTRATIVA",
+    nombre: "Dra. Silvia Aquino",
+    especialidad: "Contadora Pública",
+    foto: fotoDirector,
+  },
+  {
+    cargo: "SUBDIRECTOR DE MANTENIMIENTO Y SERVICIOS GENERALES",
+    nombre: "Ing. Santiago Jojot",
+    especialidad:
+      "Ingeniería clínica y gestión de infraestructura hospitalaria.",
+    foto: fotoDirector,
+  },
+];
+
+const VALORES_INSTITUCIONALES = [
+  {
+    titulo: "Excelencia y Calidez",
+    descripcion:
+      "Brindamos atención médica de máxima calidad profesional, priorizando el trato humano, empático y respetuoso hacia el paciente y su familia.",
+    icono: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+      </svg>
+    ),
+  },
+  {
+    titulo: "Equidad e Inclusión",
+    descripcion:
+      "Garantizamos el acceso universal, público y gratuito a la salud de alta complejidad para toda la comunidad formoseña sin distinción.",
+    icono: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+        <path d="M2 12h20"></path>
+      </svg>
+    ),
+  },
+  {
+    titulo: "Innovación y Compromiso",
+    descripcion:
+      "Apostamos a la tecnología médica de vanguardia, la capacitación continua, la investigación y la ética profesional constante.",
+    icono: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+      </svg>
+    ),
+  },
+];
 
 const AboutPage = () => {
+  const videoSectionRef = useRef(null);
+  const htmlVideoRef = useRef(null);
+  const autoridadesRef = useRef(null);
+  const valoresRef = useRef(null);
+
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlayVideo = () => {
+    setIsPlaying(true);
+    if (videoSectionRef.current) {
+      videoSectionRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+    setTimeout(() => {
+      if (htmlVideoRef.current) {
+        htmlVideoRef.current.play();
+      }
+    }, 300);
+  };
+
+  const scrollToAutoridades = (e) => {
+    e.preventDefault();
+    if (autoridadesRef.current) {
+      autoridadesRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const scrollToValores = (e) => {
+    e.preventDefault();
+    if (valoresRef.current) {
+      valoresRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <main className="about-page">
-      <div className="about-container">
-        {/* =========================================
-            1. HERO / PRESENTACIÓN INSTITUCIONAL
-        ========================================= */}
-        <section className="about-hero">
-          <div className="about-hero-left">
-            <Breadcrumb currentPage="Institucional" />
-            <span className="about-subtitle">
-              Población, Red Sanitaria y Excelencia
-            </span>
-            <h1 className="about-title">HOSPITAL INTERDISTRITAL EVITA</h1>
-            <p className="about-lead">
-              Pilar fundamental del Polo Sanitario de la Provincia de Formosa,
-              brindando atención médica integral, gratuita y de alta complejidad
-              mediante convenios de cooperación interinstitucional.
-            </p>
+    <main className="about-page-clean">
+      <section className="about-hero-banner">
+        <img
+          src={fotoHeroHeader}
+          alt="Hospital Interdistrital Evita"
+          className="hero-banner-img"
+        />
+        <button className="hero-video-btn" onClick={handlePlayVideo}>
+          <span>Ver video</span>
+          <span className="play-triangle">▶</span>
+        </button>
+      </section>
+
+      <div className="about-main-wrapper">
+        <div className="about-top-grid">
+          <div className="about-left-content">
+            <Breadcrumb currentPage="ACERCA DEL HIE" />
+            <h1 className="about-clean-title">ACERCA DEL HIE</h1>
+
+            <div className="about-text-columns">
+              <p>
+                El <strong>Hospital Interdistrital Evita</strong> es un centro
+                de <strong>alta complejidad</strong> referente en la provincia
+                de Formosa y la región, asentado sobre una moderna
+                infraestructura de{" "}
+                <strong>19.000 metros cuadrados cubiertos</strong> proyectada
+                bajo rigurosas normas sanitarias internacionales.
+              </p>
+              <p>
+                Concebido como un pilar fundamental del{" "}
+                <strong>Polo Sanitario</strong>, ofrece soluciones médicas
+                especializadas, equipamiento de última generación y un
+                compromiso inquebrantable con la{" "}
+                <strong>salud pública, gratuita y de calidad</strong>.
+              </p>
+              <p>
+                Cuenta con <strong>quirófanos inteligentes</strong>, centro de
+                esterilización con tecnología de plasma de peróxido, unidades de
+                terapia intensiva y una red de conectividad por{" "}
+                <strong>fibra óptica provincial</strong> para la gestión
+                integral de la Historia Clínica Digital.
+              </p>
+              <p>
+                A su vez, promueve la <strong>Docencia e Investigación</strong>{" "}
+                a través de residencias médicas y convenios interinstitucionales
+                de cooperación técnica y académica.
+              </p>
+            </div>
           </div>
 
-          <div className="about-hero-right">
-            <div className="about-hero-image-box">
-              <img
-                src={fotoFachada}
-                alt="Fachada Hospital Interdistrital Evita"
-                className="about-hero-img"
+          <aside className="about-right-sidebar">
+            <ul className="sidebar-menu-list">
+              <li>
+                <a href="#autoridades" onClick={scrollToAutoridades}>
+                  <span>AUTORIDADES</span>
+                  <span className="arrow">→</span>
+                </a>
+              </li>
+              <li>
+                <Link to="/profesionales">
+                  <span>COMITÉS MÉDICOS</span>
+                  <span className="arrow">→</span>
+                </Link>
+              </li>
+              <li>
+                <a href="#valores" onClick={scrollToValores}>
+                  <span>NUESTROS VALORES</span>
+                  <span className="arrow">→</span>
+                </a>
+              </li>
+            </ul>
+          </aside>
+        </div>
+        <section className="about-stats-clean">
+          <div className="stat-clean-item">
+            <span className="stat-clean-num">
+              <CountUp
+                prefix="+"
+                end={49200}
+                separator="."
+                duration={2.5}
+                enableScrollSpy
+                scrollSpyOnce
               />
-            </div>
-          </div>
-        </section>
-        {/* =========================================
-            2. CIFRAS CLAVE DE INFRAESTRUCTURA
-        ========================================= */}
-        <section className="about-stats-section">
-          <div className="about-stat-card">
-            <span className="stat-number">19.000 m²</span>
-            <span className="stat-label">
-              Superficie Cubierta Diseñada bajo Normas Internacionales
+            </span>
+            <span className="stat-clean-text">
+              ATENCIONES MÉDICAS ANUALES ESTIMADAS
             </span>
           </div>
-          <div className="about-stat-card">
-            <span className="stat-number">+200</span>
-            <span className="stat-label">
-              Camas de Terapia Intensiva y Soporte Crítico
+
+          <div className="stat-clean-item">
+            <span className="stat-clean-num">
+              <CountUp
+                prefix="+"
+                end={200}
+                duration={2.5}
+                enableScrollSpy
+                scrollSpyOnce
+              />
+            </span>
+            <span className="stat-clean-text">
+              CAMAS DE INTERNACIÓN Y CUIDADOS CRÍTICOS
             </span>
           </div>
-          <div className="about-stat-card">
-            <span className="stat-number">100%</span>
-            <span className="stat-label">
-              Salud Pública, Gratuita e Inclusiva
+
+          <div className="stat-clean-item">
+            <span className="stat-clean-num">
+              <CountUp
+                end={19000}
+                separator="."
+                duration={2.5}
+                enableScrollSpy
+                scrollSpyOnce
+              />
             </span>
+            <span className="stat-clean-text">METROS CUADRADOS CUBIERTOS</span>
           </div>
-          <div className="about-stat-card">
-            <span className="stat-number">Fibra Óptica</span>
-            <span className="stat-label">
-              Red Provincial e Historia Clínica Digital
+
+          <div className="stat-clean-item">
+            <span className="stat-clean-num">
+              <CountUp
+                end={100}
+                suffix="%"
+                duration={2.5}
+                enableScrollSpy
+                scrollSpyOnce
+              />
             </span>
+            <span className="stat-clean-text">SALUD PÚBLICA Y GRATUITA</span>
           </div>
         </section>
-        {/* =========================================
-            3. HISTORIA, PANDEMIA Y TRANSICIÓN POLIVALENTE
-        ========================================= */}
-        <section className="about-history-section">
-          <div className="about-section-header">
-            <span className="header-tag">TRAYECTORIA Y COMPROMISO</span>
-            <h2 className="header-title">
-              ORIGEN, RESPUESTA SANITARIA Y PRESENTE
-            </h2>
-          </div>
-
-          <div className="history-timeline">
-            {/* HITO 1 */}
-            <div className="timeline-item">
-              <div className="timeline-badge-col">
-                <div className="timeline-dot"></div>
-                <span className="timeline-period">Infraestructura</span>
-              </div>
-              <div className="timeline-content-card">
-                <h3>Diseño y Dotación Sanitaria Inicial</h3>
-                <p>
-                  La institución se asienta sobre una moderna infraestructura de
-                  aproximadamente{" "}
-                  <strong>17.000 a 19.000 metros cuadrados cubiertos</strong>,
-                  diseñada bajo rigurosas normas sanitarias internacionales.
-                  Desde su inicio, contó con una capacidad de 124 camas para
-                  pacientes moderados y 36 camas de cuidados críticos, cada una
-                  equipada con respiradores mecánicos de última generación.
-                </p>
-              </div>
-            </div>
-
-            {/* HITO 2 */}
-            <div className="timeline-item">
-              <div className="timeline-badge-col">
-                <div className="timeline-dot"></div>
-                <span className="timeline-period">Respuesta Crítica</span>
-              </div>
-              <div className="timeline-content-card">
-                <h3>Pilar Sanitario en la Emergencia</h3>
-                <p>
-                  A medida que avanzaba la pandemia, el hospital expandió
-                  rápidamente su capacidad operativa hasta{" "}
-                  <strong>superar las 200 camas de terapia intensiva</strong>,
-                  constituyéndose en el bastión neurálgico de contención,
-                  asistencia respiratoria y monitoreo de pacientes críticos en
-                  toda la región.
-                </p>
-              </div>
-            </div>
-
-            {/* HITO 3 */}
-            <div className="timeline-item">
-              <div className="timeline-badge-col">
-                <div className="timeline-dot"></div>
-                <span className="timeline-period">Actualidad</span>
-              </div>
-              <div className="timeline-content-card">
-                <h3>Transición al Modelo Polivalente y Polo Sanitario</h3>
-                <p>
-                  Tras la disminución de la presión de emergencia, el hospital
-                  consolidó con éxito su función original como{" "}
-                  <strong>hospital polivalente de alta complejidad</strong>. Hoy
-                  en día, es un pilar del Polo Sanitario de Formosa, brindando
-                  cobertura médica de vanguardia mediante convenios de
-                  cooperación formalizados a partir de 2021.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-        {/* =========================================
-            4. EQUIPAMIENTO TECNOLÓGICO DE PUNTA
-        ========================================= */}
-        <section className="about-tech-section">
-          <div className="about-section-header">
-            <span className="header-tag">VANGUARDIA MÉDICA</span>
-            <h2 className="header-title">TECNOLOGÍA DE ÚLTIMA GENERACIÓN</h2>
-          </div>
-
-          <div className="tech-cards-grid">
-            <div className="tech-card">
-              <div className="tech-icon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                </svg>
-              </div>
-              <h4>Quirófanos Inteligentes</h4>
-              <p>
-                Salas de cirugía de alta precisión y un centro de esterilización
-                avanzado con tecnología de <strong>plasma de peróxido</strong>.
-              </p>
-            </div>
-
-            <div className="tech-card">
-              <div className="tech-icon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                  <line x1="8" y1="21" x2="16" y2="21"></line>
-                  <line x1="12" y1="17" x2="12" y2="21"></line>
-                </svg>
-              </div>
-              <h4>Diagnóstico y Monitoreo</h4>
-              <p>
-                Equipos de diagnóstico por imágenes de alta resolución,
-                ecógrafos Doppler y monitores multiparamétricos en cada área
-                asistencial.
-              </p>
-            </div>
-
-            <div className="tech-card">
-              <div className="tech-icon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-                  <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
-                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-                  <line x1="12" y1="20" x2="12.01" y2="20"></line>
-                </svg>
-              </div>
-              <h4>Historia Clínica Digital</h4>
-              <p>
-                Robusta red informática conectada a la{" "}
-                <strong>red provincial de fibra óptica</strong>, garantizando
-                trazabilidad y teleconsultas interdistritales.
-              </p>
-            </div>
-          </div>
-        </section>
-        {/* =========================================
-    TARJETA DESTACADA: IMPACTO SOCIAL Y RECONOCIMIENTO
-========================================= */}
-        <section className="about-impact-section">
-          <div className="impact-card">
-            <div className="impact-icon-wrapper">
+        <section className="about-single-sede-section">
+          <div className="single-sede-card">
+            <div className="sede-img-box">
               <img
-                src={iconImpacto}
-                alt="Impacto Social y Reconocimiento"
-                className="impact-img"
+                src={fotoHeroHeader}
+                alt="Edificio Principal Hospital Evita"
               />
             </div>
 
-            <div className="impact-content">
-              <h3 className="impact-title">Impacto Social y Reconocimiento</h3>
-              <p className="impact-description">
-                El Hospital Evita ha cumplido un rol social crucial, no solo por
-                la cantidad de vidas salvadas durante la contingencia (con tasas
-                de recuperación superiores al 80% en sus primeros años), sino
-                por democratizar el acceso a tecnologías médicas avanzadas en la
-                región.
+            <div className="sede-description-box">
+              <span className="sede-tag">SEDE CENTRAL</span>
+              <h3 className="sede-title">
+                Edificio Principal - Hospital Evita
+              </h3>
+              <p className="sede-address">
+                <strong>Ubicación:</strong> Av. José de Luca Barberis N° 250,
+                Formosa, Argentina
               </p>
+              <p className="sede-desc-text">
+                Infraestructura médica de vanguardia con 19.000 m² cubiertos
+                diseñados bajo normas internacionales de arquitectura
+                hospitalaria. Alberga la Guardia Central de Urgencias (24 hs),
+                bloques quirúrgicos inteligentes, unidades de cuidados
+                intensivos y el centro de diagnóstico por imágenes.
+              </p>
+              <div className="sede-badge-list">
+                <span className="badge-item">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  Guardia Activa 24 Hs.
+                </span>
+                <span className="badge-item">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                  (3704) 436-100
+                </span>
+              </div>
             </div>
           </div>
         </section>
-        {/* =========================================
-            5. SERVICIOS Y ESPECIALIDADES POLIVALENTES
-        ========================================= */}
-        <section className="about-services-section">
-          <div className="about-section-header">
-            <span className="header-tag">CARTERA DE PRESTACIONES</span>
-            <h2 className="header-title">SERVICIOS Y UNIDADES FUNCIONALES</h2>
+        <section className="about-video-section" ref={videoSectionRef}>
+          <div className="video-frame-container">
+            {isPlaying ? (
+              <video
+                ref={htmlVideoRef}
+                src={videoInstitucional}
+                controls
+                autoPlay
+                className="video-element"
+              />
+            ) : (
+              <>
+                <img
+                  src={fotoVideoCover}
+                  alt="Video Institucional HIE"
+                  className="video-cover-img"
+                />
+                <div className="video-overlay" onClick={handlePlayVideo}>
+                  <button className="play-circle-btn">
+                    <span className="play-icon">▶</span>
+                  </button>
+                  <span className="video-caption-text">
+                    Ver video institucional
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+        <section
+          id="valores"
+          className="about-valores-section"
+          ref={valoresRef}
+        >
+          <div className="valores-header">
+            <span className="valores-tag">PRINCIPIOS INSTITUCIONALES</span>
+            <h2 className="valores-title">NUESTROS VALORES</h2>
           </div>
 
-          <div className="services-spec-grid">
-            {/* GRUPO 1: ÁREAS CRÍTICAS */}
-            <div className="spec-card">
-              <div className="spec-card-header">
-                <span className="spec-tag red">SOPORTE CRÍTICO</span>
-                <h3>Áreas Críticas</h3>
+          <div className="valores-grid">
+            {VALORES_INSTITUCIONALES.map((val, idx) => (
+              <div key={idx} className="valor-clean-card">
+                <div className="valor-icon-box">{val.icono}</div>
+                <h3 className="valor-card-title">{val.titulo}</h3>
+                <p className="valor-card-desc">{val.descripcion}</p>
               </div>
-              <ul className="spec-list">
-                <li>Terapia Intensiva (UCI Polivalente)</li>
-                <li>Unidad Coronaria (UCO)</li>
-                <li>Unidad de Quemados de Alta Complejidad</li>
-              </ul>
-            </div>
-
-            {/* GRUPO 2: ESPECIALIDADES MÉDICAS */}
-            <div className="spec-card">
-              <div className="spec-card-header">
-                <span className="spec-tag blue">CLÍNICA Y ESPECIALIDADES</span>
-                <h3>Especialidades Médicas</h3>
-              </div>
-              <ul className="spec-list">
-                <li>Cardiología y Neumonología</li>
-                <li>Infectología y Neurología</li>
-                <li>Nefrología (con Centro Integral de Diálisis)</li>
-                <li>Salud Mental y Psiquiatría</li>
-              </ul>
-            </div>
-
-            {/* GRUPO 3: SERVICIOS DE APOYO */}
-            <div className="spec-card">
-              <div className="spec-card-header">
-                <span className="spec-tag green">DIAGNÓSTICO Y APOYO</span>
-                <h3>Servicios Centrales</h3>
-              </div>
-              <ul className="spec-list">
-                <li>Laboratorio y Anatomía Patológica</li>
-                <li>Hemoterapia y Banco de Sangre</li>
-                <li>Farmacia Hospitalaria y Esterilización</li>
-                <li>Diagnóstico por Imágenes</li>
-              </ul>
-            </div>
-
-            {/* GRUPO 4: CENTRO POST-COVID */}
-            <div className="spec-card highlight">
-              <div className="spec-card-header">
-                <span className="spec-tag yellow">REHABILITACIÓN INTEGRAL</span>
-                <h3>Atención Post-COVID</h3>
-              </div>
-              <p className="spec-card-desc">
-                Centro de referencia provincial para la evaluación, seguimiento
-                y rehabilitación multidisciplinaria de secuelas respiratorias,
-                cardíacas y de salud mental.
-              </p>
-            </div>
+            ))}
           </div>
         </section>
         <InteractiveTimelineSection />
-        {/* =========================================
-            6. MISIÓN, VISIÓN Y VALORES
-        ========================================= */}
-        <section className="about-mvv-section">
-          <div className="about-section-header">
-            <span className="header-tag">IDENTIDAD Y PROPÓSITO</span>
-            <h2 className="header-title">MISIÓN, VISIÓN Y VALORES</h2>
+        <section
+          id="autoridades"
+          className="about-authorities-section"
+          ref={autoridadesRef}
+        >
+          <div className="authorities-header">
+            <span className="authorities-tag">EQUIPO DIRECTIVO</span>
+            <h2 className="authorities-title">AUTORIDADES DEL HOSPITAL</h2>
           </div>
 
-          <div className="mvv-grid">
-            <div className="mvv-card">
-              <div className="mvv-icon-box">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
-                </svg>
+          <div className="authorities-grid">
+            {AUTORIDADES.map((item, idx) => (
+              <div key={idx} className="authority-card">
+                <div className="authority-img-box">
+                  <img src={item.foto} alt={item.nombre} />
+                </div>
+                <div className="authority-info">
+                  <span className="authority-role">{item.cargo}</span>
+                  <h3 className="authority-name">{item.nombre}</h3>
+                  <p className="authority-spec">{item.especialidad}</p>
+                </div>
               </div>
-              <h3>MISIÓN</h3>
-              <p>
-                Brindar atención médica de alta complejidad con equidad, calidez
-                y excelencia profesional, garantizando el acceso universal a la
-                salud para cada habitante de la provincia.
-              </p>
-            </div>
-
-            <div className="mvv-card">
-              <div className="mvv-icon-box">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
-                  <path d="M2 12h20"></path>
-                </svg>
-              </div>
-              <h3>VISIÓN</h3>
-              <p>
-                Ser un hospital modelo en el norte argentino en gestión clínica,
-                tecnología médica, investigación y docencia continua, integrado
-                a la red provincial de salud.
-              </p>
-            </div>
-
-            <div className="mvv-card">
-              <div className="mvv-icon-box">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-              </div>
-              <h3>VALORES</h3>
-              <p>
-                Vocación de servicio, compromiso ético, trabajo en equipo,
-                respeto por la dignidad del paciente y búsqueda permanente de la
-                innovación asistencial.
-              </p>
-            </div>
-          </div>
-        </section>
-        {/* =========================================
-            7. GALERÍA EDITORIAL DE INSTALACIONES
-        ========================================= */}
-        <section className="about-gallery-section">
-          <div className="about-section-header">
-            <span className="header-tag">INFRAESTRUCTURA SANITARIA</span>
-            <h2 className="header-title">NUESTRAS INSTALACIONES</h2>
-          </div>
-
-          <div className="about-gallery-grid">
-            <div className="gallery-item large">
-              <img
-                src={fotoQuirurgico}
-                alt="Bloque Quirúrgico de Alta Complejidad"
-              />
-              <div className="gallery-caption">
-                <span>Quirófanos Inteligentes y Esterilización</span>
-              </div>
-            </div>
-
-            <div className="gallery-item">
-              <img src={fotoAtencion} alt="Sector de Consultas y Atención" />
-              <div className="gallery-caption">
-                <span>Atención Ambulatoria y Gestión Clínica</span>
-              </div>
-            </div>
-
-            <div className="gallery-item">
-              <img
-                src={fotoInternacion}
-                alt="Áreas de Internación y Cuidados Críticos"
-              />
-              <div className="gallery-caption">
-                <span>Unidades de Cuidados Críticos y Terapia</span>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
       </div>

@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import "./InteractiveTimelineSection.css";
 
-// IMPORTACIÓN DE LAS IMÁGENES DE LA LÍNEA DE TIEMPO
 import lineaGeneral from "../assets/aprendeCapacitacion.jpg";
 import linea2020 from "../assets/lineaTiempo_2020.png";
 import linea2022 from "../assets/lineaTiempo_2022.png";
 import linea2024 from "../assets/lineaTiempo_2024.png";
 import linea2026 from "../assets/lineaTiempo_2026.png";
 
-// FOTOS REALES DE CADA HITO
 import foto2020 from "../assets/fotoFachadaHIE2.jpg";
 import foto2022 from "../assets/fondoHospitalCarrusel1.jpg";
 import foto2024 from "../assets/imagenPacientes.jpg";
@@ -26,7 +24,7 @@ const HITOS_DATA = [
   },
   {
     year: "2022",
-    tagColor: "#8fa382",
+    tagColor: "#99acff",
     titulo: "Transición y Rehabilitación Post-COVID",
     descripcion:
       "Reconversión progresiva hacia un hospital polivalente e inauguración del centro de referencia para la recuperación integral de pacientes.",
@@ -35,7 +33,7 @@ const HITOS_DATA = [
   },
   {
     year: "2024",
-    tagColor: "#c27c59",
+    tagColor: "#5271ff",
     titulo: "Consolidación de Alta Complejidad",
     descripcion:
       "Plena operatividad de quirófanos inteligentes, integración a la fibra óptica provincial y convenios de atención médica integral.",
@@ -44,7 +42,7 @@ const HITOS_DATA = [
   },
   {
     year: "2026",
-    tagColor: "#c86d6d",
+    tagColor: "#157664",
     titulo: "Docencia, Vanguardia e Innovación",
     descripcion:
       "Desarrollo de nuevas especialidades, residencias médicas formativas y telemedicina interdistrital para toda la provincia.",
@@ -59,7 +57,6 @@ const InteractiveTimelineSection = () => {
   return (
     <section className="timeline-interactive-section">
       <div className="timeline-interactive-container">
-        {/* ENCABEZADO INSTITUCIONAL */}
         <div className="timeline-interactive-header">
           <div className="timeline-header-text">
             <span className="timeline-header-tag">LÍNEA DE TIEMPO</span>
@@ -72,7 +69,6 @@ const InteractiveTimelineSection = () => {
           </p>
         </div>
 
-        {/* SELECTOR DE AÑOS / BOTONES */}
         <div className="timeline-years-bar">
           {HITOS_DATA.map((hito) => {
             const isSelected = selectedHito.year === hito.year;
