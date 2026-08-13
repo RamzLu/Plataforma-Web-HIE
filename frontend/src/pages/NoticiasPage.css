@@ -4,7 +4,7 @@
 .noticias-page {
   width: 100%;
   background-color: #e9ebee;
-  padding: 0 0 80px 0; 
+  padding: 0 0 80px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -30,12 +30,12 @@
   margin-bottom: 50px;
   display: flex;
   justify-content: center;
-  padding: 120px 20px 60px 20px; 
+  padding: 120px 20px 60px 20px;
 }
 
 .news-header-inner {
   width: 100%;
-  max-width: 1500px; 
+  max-width: 1500px;
   border-left: 8px solid #2b5b94;
   padding-left: 40px;
   display: flex;
@@ -187,7 +187,7 @@
 }
 
 .hospital-avatar {
-  width: 45px; 
+  width: 45px;
   height: 45px;
   border-radius: 50%;
   background-color: #ffffff;
@@ -196,17 +196,17 @@
   align-items: center;
   border: 1px solid #e2e8f0;
   flex-shrink: 0;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .hospital-avatar img {
-  width: 100%; 
+  width: 100%;
   height: 100%;
-  object-fit: cover; 
+  object-fit: cover;
 }
 
 .post-meta h3 {
-  margin: 0 0 3px 0; 
+  margin: 0 0 3px 0;
   font-size: 0.95rem;
   color: #0c2340;
   font-weight: 700;
@@ -296,7 +296,7 @@
   display: flex;
   align-items: flex-start; /* Alinea los elementos arriba */
   justify-content: space-between;
-  gap: 50px; 
+  gap: 50px;
 }
 
 /* --- COLUMNA IZQUIERDA (Título + Carrusel) --- */
@@ -332,12 +332,12 @@
 
 .medical-title {
   color: #2b5b94;
-  font-size: 4.5rem; 
-  font-weight: 300; 
+  font-size: 4.5rem;
+  font-weight: 300;
   line-height: 1.05;
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: -1px; 
+  letter-spacing: -1px;
 }
 
 /* Tarjeta del Mini Carrusel */
@@ -368,8 +368,12 @@
 }
 
 @keyframes fadeInAlta {
-  from { opacity: 0.8; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .mini-arrow {
@@ -397,8 +401,12 @@
   color: #0c2340;
 }
 
-.mini-left { left: 10px; }
-.mini-right { right: 10px; }
+.mini-left {
+  left: 10px;
+}
+.mini-right {
+  right: 10px;
+}
 
 .mini-caption {
   margin-top: 15px;
@@ -428,12 +436,11 @@
   background-color: #475569;
 }
 
-
 /* --- COLUMNA DERECHA (Grilla) --- */
 .articles-grid {
   flex: 1.3; /* Proporción para la derecha */
   display: grid;
-  grid-template-columns: repeat(2, 1fr); 
+  grid-template-columns: repeat(2, 1fr);
   gap: 25px;
   align-items: stretch;
 }
@@ -441,7 +448,6 @@
 .article-card {
   background-color: #ffffff;
   border: 4px solid #cbd5e1; /* Borde gris-celeste sutil para enmarcar la tarjeta */
-  border-radius: 16px; /* Bordes un pelín más redondeados y modernos */
   padding: 30px 20px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Sombra base un poco más definida */
   display: flex;
@@ -461,13 +467,19 @@
 }
 
 .article-card h3 {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 1px; 
+  letter-spacing: 1px;
 }
 
 .article-icon-wrapper {
@@ -477,7 +489,7 @@
   justify-content: center;
   margin: 20px 0;
   height: 90px; /* Mantenemos la altura fija */
-  width: 100%;  /* Le damos un ancho fijo al contenedor */
+  width: 100%; /* Le damos un ancho fijo al contenedor */
   position: relative;
 }
 
@@ -498,7 +510,7 @@
      Si se ve muy grande, bájalo (ej: 0.8 o 0.7). 
      Si se ve muy chico, súbelo (ej: 1.2 o 1.3). 
      1 = tamaño original */
-  transform: scale(0.85); 
+  transform: scale(0.85);
 }
 
 /* --- ESTADO 2: ÍCONO ANIMADO (GIF) --- */
@@ -508,7 +520,7 @@
      Si se ve muy grande, bájalo (ej: 0.8 o 0.7). 
      Si se ve muy chico, súbelo (ej: 1.2 o 1.3). 
      1 = tamaño original */
-  transform: scale(1.15); 
+  transform: scale(1.15);
 }
 
 /* EFECTO HOVER */
@@ -520,229 +532,267 @@
   opacity: 1;
 }
 
+.modal-content-esp {
+  background-color: #f8fafc;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* CABECERA CON LÍNEA DE BORDE */
+.modal-header-esp {
+  background-color: #ffffff;
+  padding: 24px 35px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header-esp h2 {
+  color: #2b5b94;
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* BOTÓN DE CERRAR [X] */
+.btn-close-modal {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
 
 /* =========================================
-   ESTILOS DEL MODAL (POP-UP)
+   CONTENEDOR DEL SLIDER Y OCULTAMIENTO DE SCROLLBARS
 ========================================= */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(15, 23, 42, 0.6); 
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 2000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  animation: fadeIn 0.3s ease-out;
-}
-
-.modal-content {
-  background-color: #ffffff; 
-  width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  border-radius: 24px; 
-  padding: 50px; 
-  position: relative;
-  overflow-y: auto;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-header {
-  margin-bottom: 25px;
-  padding-right: 40px; 
-}
-
-.modal-title {
-  font-size: 2.2rem;
-  font-weight: 800;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.modal-close-btn {
-  position: absolute;
-  top: 25px;
-  right: 25px;
-  background-color: #f1f5f9;
-  color: #64748b;
-  border: none;
-  border-radius: 50%;
-  width: 42px;
-  height: 42px;
-  font-size: 1.8rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  line-height: 0;
-}
-
-.modal-close-btn:hover {
-  background-color: #fee2e2;
-  color: #ef4444; 
-  transform: rotate(90deg); 
-}
-
-.modal-body {
-  margin-bottom: 35px;
-  padding-left: 24px;
-  border-left: 4px solid #006eb3; 
-}
-
-.modal-subtitle {
-  color: #1e293b;
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-}
-
-.modal-text {
-  font-size: 1.1rem;
-  color: #334155; 
-  line-height: 1.7; 
-  margin-bottom: 12px;
-}
-
-.modal-author {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 25px;
-}
-
-.modal-author div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.modal-author .hospital-avatar {
-  width: 50px;
-  height: 50px;
-}
-
-.modal-author h3 {
-  margin: 0 0 3px 0;
-  font-size: 1.05rem; 
-  color: #0c2340;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.modal-author span {
-  font-size: 0.85rem;
-  color: #64748b;
-  font-weight: 500;
-  line-height: 1;
-}
-
 .modal-slider-container {
   position: relative;
   width: 100%;
   display: flex;
   align-items: center;
+  padding: 0 45px; /* Espacio lateral para que las flechas flotantes no pisen las imágenes */
+  box-sizing: border-box;
 }
 
+/* OCULTAR BARRAS DE DESPLAZAMIENTO EN EL SLIDER DE IMÁGENES */
 .modal-slider {
   display: flex;
   gap: 15px;
   overflow-x: auto;
   scroll-behavior: smooth;
-  scrollbar-width: none;
-  padding: 10px 0;
   width: 100%;
+  padding: 10px 0;
+  /* Ocultar barra en Firefox, IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
+/* Ocultar barra en Chrome, Safari y Opera */
 .modal-slider::-webkit-scrollbar {
   display: none;
 }
 
-.modal-campaign-img {
-  min-width: calc(33.333% - 10px);
-  max-width: calc(33.333% - 10px);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  cursor: pointer; 
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.modal-campaign-img:hover {
-  transform: scale(1.03); 
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-.modal-campaign-img img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-}
-
+/* FLECHAS CIRCULARES FLOTANTES */
 .modal-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: white;
-  color: #006eb3;
-  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #2b5b94;
+  border: 1px solid #cbd5e1;
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  font-size: 1.2rem;
+  width: 38px;
+  height: 38px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   z-index: 10;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
+  padding: 0;
+}
+
+.modal-arrow svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
 }
 
 .modal-arrow:hover {
-  background-color: #006eb3;
-  color: white;
-  border-color: #006eb3;
+  background-color: #2b5b94;
+  color: #ffffff;
+  border-color: #2b5b94;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 16px rgba(43, 91, 148, 0.3);
 }
 
 .modal-left {
-  left: -20px;
+  left: 0;
 }
+
 .modal-right {
-  right: -20px;
+  right: 0;
 }
 
-.news-modal-images-grid {
+/* ESTILIZAR / SUAVIZAR BARRA VERTICAL DEL MODAL */
+.modal-body-esp::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body-esp::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.modal-body-esp::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.modal-body-esp::-webkit-scrollbar-thumb:hover {
+  background: #2b5b94;
+}
+
+/* CUERPO DEL MODAL */
+.modal-body-esp {
+  padding: 30px 35px;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+}
+
+/* PERFIL DE LA INSTITUCIÓN */
+.modal-author-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.author-meta h3 {
+  margin: 0 0 2px 0;
+  font-size: 0.98rem;
+  color: #0c2340;
+  font-weight: 700;
+}
+
+.author-meta span {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* SECCIONES DE TEXTO */
+.article-paragraphs-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* AJUSTES PARA LOS FOLLETOS EN EL CARRUSEL */
+.modal-slider {
+  display: flex;
   gap: 15px;
-  margin-top: 10px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 10px 0;
+  width: 100%;
 }
 
-.news-modal-images-grid .modal-campaign-img {
-  flex: 1 1 calc(33.333% - 15px);
-  max-width: calc(33.333% - 15px);
-  min-width: 200px; 
-}
-
-.clickable-img {
+.modal-campaign-img {
+  min-width: 220px;
+  max-width: 220px;
+  height: 300px; /* Altura adecuada para ver folletos verticales sin distorsión */
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+  background-color: #ffffff;
 }
 
-.clickable-img:hover {
-  opacity: 0.85; 
+.modal-campaign-img:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(43, 91, 148, 0.18);
+  border-color: #2b5b94;
 }
 
+.modal-campaign-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* FOOTER CON BOTÓN ROJO DE CERRAR */
+.modal-footer-esp {
+  padding: 0 35px 30px 35px;
+  display: flex;
+  justify-content: center;
+  background-color: #f8fafc;
+}
+
+.btn-cerrar-rojo {
+  background-color: #e11d48;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 36px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-cerrar-rojo:hover {
+  background-color: #be123c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);
+}
+
+/* ADAPTACIÓN EN DISPOSITIVOS MÓVILES */
+@media (max-width: 768px) {
+  .modal-header-esp {
+    padding: 18px 20px;
+  }
+
+  .modal-body-esp,
+  .modal-footer-esp {
+    padding: 20px;
+  }
+
+  .modal-campaign-img {
+    min-width: 180px;
+    max-width: 180px;
+    height: 240px;
+  }
+}
 /* =========================================
    LIGHTBOX (VISOR ESTILO FACEBOOK)
 ========================================= */
@@ -752,10 +802,10 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.85); 
+  background-color: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  z-index: 3000; 
+  z-index: 3000;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -793,7 +843,7 @@
 .lightbox-img {
   max-width: 100%;
   max-height: 90vh;
-  object-fit: contain; 
+  object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
@@ -829,8 +879,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* =========================================

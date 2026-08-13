@@ -60,7 +60,12 @@ const medicalArticles = [
     description: [
       "Mantener una dieta equilibrada, hacer ejercicio regularmente y controlar tu presión arterial son pasos clave para un corazón sano.",
     ],
-    campaignImages: [folletoEjemplo, folletoEjemplo, folletoEjemplo],
+    campaignImages: [
+      folletoEjemplo,
+      folletoEjemplo,
+      folletoEjemplo,
+      folletoCD2,
+    ],
   },
   {
     id: 3,
@@ -377,82 +382,118 @@ const NoticiasPage = () => {
         </section>
       </div>
 
-      {/* =========================================
-          POP-UP PARA ARTÍCULOS MÉDICOS
-      ========================================= */}
       {selectedArticle && (
         <div className="modal-overlay" onClick={() => setSelectedArticle(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close-btn"
-              onClick={() => setSelectedArticle(null)}
-            >
-              &times;
-            </button>
-
-            <div className="modal-author">
-              <div className="hospital-avatar">
-                <img src={avatarHospital} alt="Avatar Hospital" />
-              </div>
-              <div>
-                <h3>Hospital Interdistrital Evita Formosa</h3>
-                <span>Artículo de Salud • 🌎</span>
-              </div>
-            </div>
-
-            <div className="modal-header">
-              <h2
-                className="modal-title"
-                style={{ color: selectedArticle.color }}
+          <div
+            className="modal-content-esp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* CABECERA ESTILIZADA DE LA VENTANA */}
+            <div className="modal-header-esp">
+              <h2>{selectedArticle.title}</h2>
+              <button
+                className="btn-close-modal"
+                onClick={() => setSelectedArticle(null)}
+                title="Cerrar ventana"
               >
-                {selectedArticle.title}
-              </h2>
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+              </button>
             </div>
 
-            <div
-              className="modal-body"
-              style={{ borderLeftColor: selectedArticle.color }}
-            >
-              <h3 className="modal-subtitle">{selectedArticle.subtitle}</h3>
-              {selectedArticle.description.map((paragraph, idx) => (
-                <p key={idx} className="modal-text">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-
-            <div className="modal-slider-container">
-              {selectedArticle.campaignImages.length > 3 && (
-                <button
-                  className="modal-arrow modal-left"
-                  onClick={() => scrollModal("left")}
-                >
-                  &#10094;
-                </button>
-              )}
-
-              <div className="modal-slider" ref={modalSliderRef}>
-                {selectedArticle.campaignImages.map((img, idx) => (
-                  <div
-                    className="modal-campaign-img"
-                    key={idx}
-                    onClick={() =>
-                      openLightbox(selectedArticle.campaignImages, idx)
-                    }
-                  >
-                    <img src={img} alt={`Campaña ${idx + 1}`} />
-                  </div>
-                ))}
+            {/* CUERPO DEL ARTÍCULO */}
+            <div className="modal-body-esp">
+              {/* AUTOR / PERFIL DE LA INSTITUCIÓN */}
+              <div className="modal-author-row">
+                <div className="hospital-avatar">
+                  <img src={avatarHospital} alt="Avatar Hospital" />
+                </div>
+                <div className="author-meta">
+                  <h3>Hospital Interdistrital Evita Formosa</h3>
+                  <span>Espacio de Educación en Salud • 🌎</span>
+                </div>
               </div>
 
-              {selectedArticle.campaignImages.length > 3 && (
-                <button
-                  className="modal-arrow modal-right"
-                  onClick={() => scrollModal("right")}
-                >
-                  &#10095;
-                </button>
-              )}
+              {/* DESCRIPCIÓN Y SUBTÍTULO */}
+              <div className="info-section">
+                <h4 className="info-title">
+                  <span className="info-icon">
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  {selectedArticle.subtitle}
+                </h4>
+
+                <div className="article-paragraphs-box">
+                  {selectedArticle.description.map((paragraph, idx) => (
+                    <p key={idx} className="info-text">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {/* CARRUSEL DE FOLLETOS / MATERIAL CAMPAÑA */}
+              {selectedArticle.campaignImages &&
+                selectedArticle.campaignImages.length > 0 && (
+                  <div className="info-section">
+                    <h4 className="info-title">
+                      <span className="info-icon">
+                        <svg viewBox="0 0 24 24">
+                          <rect
+                            x="3"
+                            y="3"
+                            width="18"
+                            height="18"
+                            rx="2"
+                            ry="2"
+                          ></rect>
+                          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                          <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                      </span>
+                      MATERIAL INFORMATIVO Y FOLLETERÍA
+                    </h4>
+
+                    <div className="modal-slider-container">
+                      {selectedArticle.campaignImages.length > 3 && (
+                        <button
+                          className="modal-arrow modal-left"
+                          onClick={() => scrollModal("left")}
+                        >
+                          &#10094;
+                        </button>
+                      )}
+
+                      <div className="modal-slider" ref={modalSliderRef}>
+                        {selectedArticle.campaignImages.map((img, idx) => (
+                          <div
+                            className="modal-campaign-img"
+                            key={idx}
+                            onClick={() =>
+                              openLightbox(selectedArticle.campaignImages, idx)
+                            }
+                          >
+                            <img src={img} alt={`Folleto ${idx + 1}`} />
+                          </div>
+                        ))}
+                      </div>
+
+                      {selectedArticle.campaignImages.length > 3 && (
+                        <button
+                          className="modal-arrow modal-right"
+                          onClick={() => scrollModal("right")}
+                        >
+                          &#10095;
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         </div>
