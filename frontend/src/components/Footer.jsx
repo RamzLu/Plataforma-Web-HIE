@@ -1,16 +1,13 @@
 import React from "react";
 import "./Footer.css";
 
-// Importa el logo del hospital y el de los ministerios/gobierno
-// Asegúrate de tener estas imágenes en tu carpeta frontend/src/assets/
 import logoHospital from "../assets/pngIcon.png";
-import logosGobierno from "../assets/logosGobierno.png"; // Reemplaza con el nombre de tu archivo
+import logosGobierno from "../assets/logosGobierno.png";
 
 const Footer = () => {
   return (
     <footer className="main-footer">
       <div className="footer-container">
-        {/* Columna 1: Identidad del Hospital */}
         <div className="footer-col brand-col">
           <img
             src={logoHospital}
@@ -23,7 +20,6 @@ const Footer = () => {
           </p>
         </div>
 
-        {/* Columna 2: Vías de Contacto de alta legibilidad */}
         <div className="footer-col contact-col">
           <h3 className="footer-heading">INFORMACIÓN DE CONTACTO</h3>
           <ul className="footer-contact-list">
@@ -91,7 +87,6 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* Columna 3: Logos Gubernamentales */}
         <div className="footer-col gov-col">
           <h3 className="footer-heading">RESPALDO INSTITUCIONAL</h3>
           <img
@@ -102,7 +97,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Barra de copyright inferior */}
       <div className="footer-bottom">
         <p>
           © {new Date().getFullYear()} Hospital Interdistrital Evita - Formosa.

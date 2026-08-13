@@ -30,7 +30,6 @@
   justify-content: space-between;
 }
 
-/* BRANDING Y LOGO */
 .header-brand {
   display: flex;
   align-items: center;
@@ -65,7 +64,6 @@
   letter-spacing: 1px;
 }
 
-/* NAVEGACIÓN DESKTOP */
 .nav-list {
   display: flex;
   list-style: none;
@@ -100,7 +98,6 @@
   background-color: #2b5b94;
 }
 
-/* BOTÓN HAMBURGUESA (Oculto en pantallas grandes) */
 .hamburger-btn {
   display: none;
   flex-direction: column;
@@ -122,7 +119,6 @@
   transition: all 0.3s ease;
 }
 
-/* ANIMACIÓN TRANSFORMACIÓN BOTÓN X AL ABRIR */
 .hamburger-btn.open .hamburger-bar:nth-child(1) {
   transform: translateY(8px) rotate(45deg);
 }

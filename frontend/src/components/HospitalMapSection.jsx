@@ -2,15 +2,9 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./HospitalMapSection.css";
 
-// IMPORTACIÓN DE IMÁGENES DEL PLANO
 import planoGeneral from "../assets/planoHospital.jpg";
 import planoBloqueQuirurgico from "../assets/plano_bloque_quirurgico.jpg";
 import planoObstetrico from "../assets/plano_obstetrico.jpg";
-/* 
-import planoUCI from "../assets/plano_uci.jpg";
-import planoAmbulatorio from "../assets/plano_ambulatorio.jpg";
-import planoGabinetes from "../assets/plano_gabinetes.jpg";
-*/
 
 const AREAS_HOSPITAL = [
   {
@@ -21,7 +15,6 @@ const AREAS_HOSPITAL = [
     acceso: "Entrada Este - Ascensores Médicos",
     descripcion:
       "Área de quirófanos de alta complejidad equipados para cirugías generales, traumatología y procedimientos de urgencia.",
-    // Cuando tengas la imagen editada, reemplazas planoGeneral por su import
     imagen: planoBloqueQuirurgico,
   },
   {
@@ -88,7 +81,6 @@ const HospitalMapSection = () => {
   return (
     <section id="plano-hospital" className="hospital-map-section">
       <div className="hospital-map-container">
-        {/* ENCABEZADO EDITORIAL */}
         <div className="hospital-map-header">
           <div className="map-title-group">
             <span className="map-subtitle">GUÍA DE INSTALACIONES</span>
@@ -100,7 +92,6 @@ const HospitalMapSection = () => {
           </p>
         </div>
 
-        {/* SELECTOR DE BLOQUES */}
         <div className="map-filter-tabs">
           {["TODOS", "Bloque 1", "Bloque 2", "Bloque 3"].map((bloque) => (
             <button
@@ -113,11 +104,8 @@ const HospitalMapSection = () => {
           ))}
         </div>
 
-        {/* GRILLA INTERACTIVA PRINCIPAL */}
         <div className="hospital-map-grid">
-          {/* LADO IZQUIERDO: SELECTOR DE ÁREAS Y FICHA INFORMATIVA */}
           <div className="map-controls-col">
-            {/* LISTA DE TARJETAS DE ÁREAS */}
             <div className="areas-list-grid">
               {areasFiltradas.map((area) => {
                 const isActive = areaSeleccionada.id === area.id;
@@ -139,7 +127,6 @@ const HospitalMapSection = () => {
               })}
             </div>
 
-            {/* FICHA INFORMATIVA DEL ÁREA ACTIVA */}
             <div className="area-info-card">
               <div className="info-badge-header">
                 <span className="tag-live">SECTOR SELECCIONADO</span>
@@ -189,7 +176,6 @@ const HospitalMapSection = () => {
             </div>
           </div>
 
-          {/* LADO DERECHO: VISOR DE IMAGEN DEL PLANO DINÁMICO */}
           <div className="map-viewer-col">
             <div className="map-image-frame">
               <div className="map-view-badge">

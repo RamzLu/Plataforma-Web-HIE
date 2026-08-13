@@ -9,7 +9,6 @@ const HomeNewsPreview = () => {
   return (
     <section className="home-news-preview">
       <div className="preview-container">
-        {/* ENCABEZADO INSTITUCIONAL EDITORIAL */}
         <div className="preview-header">
           <div className="preview-title-group">
             <span className="preview-subtitle">NOVEDADES INSTITUCIONALES</span>
@@ -28,7 +27,6 @@ const HomeNewsPreview = () => {
           </Link>
         </div>
 
-        {/* CONTENEDOR CON SCROLL HORIZONTAL EN MÓVIL */}
         <div className="preview-scroll-wrapper">
           <div className="preview-grid">
             {latestNews.map((news) => (

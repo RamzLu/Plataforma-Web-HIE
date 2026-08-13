@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import "./PatientInfoSection.css";
 
-// Importación de imágenes
 import imgAtencion from "../assets/imagenPacientes.jpg";
 import imgVisita from "../assets/imgVisita.jpg";
 import imgAdmision from "../assets/imgAdmision.jpg";
@@ -54,17 +53,13 @@ const PatientInfoSection = () => {
   return (
     <section className="patient-section">
       <div className="patient-container">
-        {/* ENCABEZADO EDITORIAL CON FUENTE FINA Y AZUL INSTITUCIONAL */}
         <div className="patient-section-header">
           <span className="subtitle-dark">INFORMACIÓN PARA</span>
           <h2 className="title-blue">PACIENTES</h2>
         </div>
 
-        {/* TARJETA BLANCA PRINCIPAL */}
         <div className="patient-main-card">
-          {/* LADO IZQUIERDO: CONTENIDO Y ACORDEÓN */}
           <div className="patient-content-left">
-            {/* BOX DE RESERVA WHATSAPP EDITORIAL */}
             <div className="turnos-box">
               <div className="turnos-text-wrapper">
                 <p className="turnos-text">
@@ -85,7 +80,6 @@ const PatientInfoSection = () => {
               </a>
             </div>
 
-            {/* ACORDEÓN TIPO REFERENCIA */}
             <div className="accordion-wrapper">
               {accordionItems.map((item, index) => {
                 const isOpen = openIndex === index;
@@ -120,7 +114,6 @@ const PatientInfoSection = () => {
             </div>
           </div>
 
-          {/* LADO DERECHO: IMAGEN INSTITUCIONAL */}
           <div className="patient-image-right">
             <img
               src={currentImage}

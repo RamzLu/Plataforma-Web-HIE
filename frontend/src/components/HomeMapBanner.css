@@ -104,7 +104,6 @@
   object-fit: contain;
 }
 
-/* COMPENSACIÓN DEL HEADER FIJO AL HACER SCROLL POR ANCLA */
 .hospital-map-section {
   scroll-margin-top: 80px;
   width: 100%;

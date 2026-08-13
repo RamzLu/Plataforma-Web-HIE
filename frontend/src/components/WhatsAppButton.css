@@ -1,4 +1,4 @@
-/* Contenedor principal anclado a la esquina inferior derecha */
+/* El círculo verde claro que contiene el SVG */
 .whatsapp-float-container {
   position: fixed;
   bottom: 30px;

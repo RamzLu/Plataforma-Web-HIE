@@ -8,7 +8,6 @@ const HomeMapBanner = () => {
     <section className="home-map-banner-section">
       <div className="home-map-banner-container">
         <div className="home-map-banner-card">
-          {/* LADO IZQUIERDO: TEXTO Y LLAMADO A LA ACCIÓN */}
           <div className="home-map-banner-text">
             <span className="banner-tag">INSTALACIONES Y SERVICIOS</span>
             <h2 className="banner-title">PLANO Y DISTRIBUCIÓN POR ÁREAS</h2>
@@ -23,7 +22,6 @@ const HomeMapBanner = () => {
             </Link>
           </div>
 
-          {/* LADO DERECHO: MINIATURA EDITORIAL DEL PLANO */}
           <div className="home-map-banner-preview">
             <img src={planoThumb} alt="Distribución y Plano del Hospital" />
           </div>

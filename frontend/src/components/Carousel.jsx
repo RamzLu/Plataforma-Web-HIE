@@ -27,7 +27,6 @@ const Carousel = () => {
     setCurrentIndex(slideIndex);
   };
 
-  // Movimiento automático lento cada 5 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       goToNext();

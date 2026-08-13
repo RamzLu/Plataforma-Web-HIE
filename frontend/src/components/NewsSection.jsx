@@ -8,28 +8,14 @@ const NewsSection = () => {
   return (
     <section className="news-section">
       <div className="news-container">
-        {/* CABECERA CON ESTILO LIMPIO */}
         <div className="news-header">
           <div className="news-title-group">
             <span className="news-subtitle">REQUISITOS Y PROCEDIMIENTOS</span>
             <h2 className="news-title">CÓMO SACAR TURNO</h2>
           </div>
-          <a href="#ver-mas" className="news-ver-mas">
-            <span>VER MÁS</span>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </a>
         </div>
 
-        {/* GRILLA DE TARJETAS BLANCAS */}
         <div className="news-cards-grid">
-          {/* TARJETA 1: PRIMERA VEZ */}
           <div className="news-card">
             <div className="card-header-line">
               <span className="card-tag">SISTEMA DE TURNOS</span>
@@ -64,7 +50,6 @@ const NewsSection = () => {
             </div>
           </div>
 
-          {/* TARJETA 2: REACREDITACIÓN / PACIENTE EXISTENTE */}
           <div className="news-card">
             <div className="card-header-line">
               <span className="card-tag">TURNO PRESENCIAL</span>
@@ -148,7 +133,6 @@ const NewsSection = () => {
             </div>
           </div>
 
-          {/* TARJETA 3: INFORMACIÓN IMPORTANTE */}
           <div className="news-card">
             <div className="card-header-line">
               <span className="card-tag alert">RECOMENDACIÓN</span>

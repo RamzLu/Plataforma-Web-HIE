@@ -51,7 +51,6 @@
   transition: background-image 0.5s ease-in-out;
 }
 
-/* Capa superpuesta para oscurecer la imagen y destacar el texto */
 .carousel-overlay {
   position: absolute;
   top: 0;
