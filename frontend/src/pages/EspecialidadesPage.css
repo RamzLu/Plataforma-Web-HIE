@@ -134,48 +134,59 @@
 /* =========================================
    VISTA 2: GRILLA DE ESPECIALIDADES
 ========================================= */
+/* =========================================
+   VISTA 2: CABECERA DE LA GRILLA (LAYOUT FLEXIBLE)
+========================================= */
 .esp-grid-header {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
+  flex-direction: column; /* Apila el botón arriba y el texto abajo */
+  align-items: flex-start;
+  gap: 16px;
   width: 100%;
+  margin-bottom: 35px;
   position: relative;
 }
 
 .btn-volver {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #2e5388;
-  font-size: 1.5rem;
-  font-weight: 600;
-  display: flex;
+  position: relative; /* ¡SIN position: absolute! */
+  top: auto;
+  left: auto;
+  transform: none;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #2b5b94;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: color 0.2s;
-  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
 }
 
 .btn-volver:hover {
-  color: #0f3563;
-  transform: translateY(-50%) translateX(-2px);
+  color: #0c2340;
+  background-color: #f1f5f9;
+  border-color: #2b5b94;
+  transform: translateX(-3px);
 }
 
 .btn-volver svg {
   width: 20px;
   height: 20px;
+  stroke-width: 2.5;
 }
 
 .esp-instruction {
   color: #334155;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 500;
   margin: 0;
+  line-height: 1.4;
+  text-align: left;
 }
 
 .specialties-grid {
@@ -421,60 +432,40 @@
   .esp-header-fluid {
     padding: 100px 20px 40px 20px;
   }
+
   .esp-header-inner {
     border-left-width: 5px;
     padding-left: 20px;
   }
+
   .esp-main-title {
     font-size: 2.2rem;
   }
+
   .esp-main-menu {
     grid-template-columns: 1fr;
   }
+
+  /* Ajustes del header en móviles sin solapamientos */
   .esp-grid-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-  }
-  .btn-volver {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #2b5b94; /* Azul por defecto para mayor contraste */
-    font-size: 1.35rem; /* Letra mucho más grande y legible */
-    font-weight: 700; /* Texto más grueso */
-    display: flex;
-    align-items: center;
-    gap: 12px; /* Más respiro entre la flecha y la palabra */
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 15px 25px 15px 0; /* Área de clic súper amplia para facilitar la interacción */
+    gap: 14px;
+    margin-bottom: 25px;
   }
 
-  .btn-volver:hover {
-    color: #0c2340; /* Se oscurece al pasar el ratón */
-    transform: translateY(-50%) translateX(-3px); /* Pequeño movimiento hacia atrás para indicar "volver" */
-  }
-
-  .btn-volver svg {
-    width: 28px; /* Icono mucho más grande */
-    height: 28px;
-  }
   .esp-instruction {
-    font-size: 1.1rem;
-    text-align: center;
+    font-size: 1.05rem;
     width: 100%;
   }
+
   .modal-content-esp {
     max-height: 90vh;
     overflow-y: auto;
   }
+
   .modal-header-esp {
     padding: 20px 25px;
   }
+
   .modal-body-esp,
   .modal-footer-esp {
     padding: 25px;

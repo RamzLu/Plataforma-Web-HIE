@@ -186,17 +186,14 @@ const serviciosData = [
 ];
 
 const EspecialidadesPage = () => {
-  // Maneja la vista actual: 'menu', 'grilla-esp' (Especialidades), o 'grilla-serv' (Servicios)
   const [currentView, setCurrentView] = useState("menu");
 
-  // Maneja el ítem seleccionado para abrir el modal genérico
   const [selectedItem, setSelectedItem] = useState(null);
 
   const closeModal = () => setSelectedItem(null);
 
   return (
     <main className="especialidades-page">
-      {/* BANNER SUPERIOR CON IMAGEN */}
       <div
         className="esp-header-fluid"
         style={{
@@ -214,7 +211,6 @@ const EspecialidadesPage = () => {
       </div>
 
       <div className="especialidades-container">
-        {/* VISTA 1: MENÚ PRINCIPAL */}
         {currentView === "menu" && (
           <div className="esp-main-menu">
             <div
@@ -263,7 +259,6 @@ const EspecialidadesPage = () => {
           </div>
         )}
 
-        {/* VISTA 2: GRILLAS */}
         {(currentView === "grilla-esp" || currentView === "grilla-serv") && (
           <>
             <div className="esp-grid-header">
@@ -306,10 +301,6 @@ const EspecialidadesPage = () => {
           </>
         )}
       </div>
-
-      {/* =========================================
-          MODAL (POP-UP) GENÉRICO
-      ========================================= */}
       {selectedItem && (
         <div className="modal-overlay" onClick={closeModal}>
           <div
@@ -336,7 +327,6 @@ const EspecialidadesPage = () => {
               <div className="info-section">
                 <h4 className="info-title">
                   <span className="info-icon">
-                    {/* Icono de Información / Qué hacemos */}
                     <svg viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10"></circle>
                       <line x1="12" y1="16" x2="12" y2="12"></line>
