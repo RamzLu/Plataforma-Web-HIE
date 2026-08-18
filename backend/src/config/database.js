@@ -15,11 +15,11 @@ export const sequelize = new Sequelize(
       underscored: true,
       freezeTableName: true,
     },
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-    },
+    // pool: {
+    //   max: 5,
+    //   min: 0,
+    //   acquire: 30000,
+    //   idle: 10000,
+    // },
   },
 );
