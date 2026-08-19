@@ -1,6 +1,5 @@
 import "dotenv/config.js";
 
-console.log(process.env.DATABASE_URL);
 const requiredVariables = ["PORT", "NODE_ENV", "DATABASE_URL", "JWT_SECRET"];
 
 requiredVariables.forEach((variable) => {
