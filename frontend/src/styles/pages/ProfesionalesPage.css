@@ -173,17 +173,16 @@
   background: rgba(255, 255, 255, 0.7);
 }
 
-/* El bloque blanco que envuelve al carrusel */
 .specialty-block {
-  background-color: #ffffff;
+  background-color: #ffffffe0;
   border-radius: 12px;
   padding: 25px 30px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  position: relative; /* Necesario para ubicar las flechas afuera */
+  position: relative;
 }
 
 .specialty-title {
-  color: #1e3a5f;
+  color: #0c1e36;
   font-size: 1.25rem;
   font-weight: 800;
   text-transform: uppercase;

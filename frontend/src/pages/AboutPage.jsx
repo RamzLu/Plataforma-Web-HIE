@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import "./AboutPage.css";
+import "../styles/pages/AboutPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 import ReactCountUp from "react-countup";
 const CountUp = ReactCountUp.default || ReactCountUp;
+import AnimatedContent from "../components/AnimatedContent";
 
 // IMÁGENES INSTITUCIONALES
 import fotoHeroHeader from "../assets/foto-sede.jpg";
@@ -258,86 +259,90 @@ const AboutPage = () => {
           </div>
         </section>
         <section className="about-single-sede-section">
-          <div className="single-sede-card">
-            <div className="sede-img-box">
-              <img
-                src={fotoHeroHeader}
-                alt="Edificio Principal Hospital Evita"
-              />
-            </div>
-
-            <div className="sede-description-box">
-              <span className="sede-tag">SEDE CENTRAL</span>
-              <h3 className="sede-title">
-                Edificio Principal - Hospital Evita
-              </h3>
-              <p className="sede-address">
-                <strong>Ubicación:</strong> Av. José de Luca Barberis N° 250,
-                Formosa, Argentina
-              </p>
-              <p className="sede-desc-text">
-                Infraestructura médica de vanguardia con 19.000 m² cubiertos
-                diseñados bajo normas internacionales de arquitectura
-                hospitalaria. Alberga la Guardia Central de Urgencias (24 hs),
-                bloques quirúrgicos inteligentes, unidades de cuidados
-                intensivos y el centro de diagnóstico por imágenes.
-              </p>
-              <div className="sede-badge-list">
-                <span className="badge-item">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                  Guardia Activa 24 Hs.
-                </span>
-                <span className="badge-item">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                  </svg>
-                  (3704) 436-100
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section className="about-video-section" ref={videoSectionRef}>
-          <div className="video-frame-container">
-            {isPlaying ? (
-              <video
-                ref={htmlVideoRef}
-                src={videoInstitucional}
-                controls
-                autoPlay
-                className="video-element"
-              />
-            ) : (
-              <>
+          <AnimatedContent distance={50} direction="vertical" delay={0.1}>
+            <div className="single-sede-card">
+              <div className="sede-img-box">
                 <img
-                  src={fotoVideoCover}
-                  alt="Video Institucional HIE"
-                  className="video-cover-img"
+                  src={fotoHeroHeader}
+                  alt="Edificio Principal Hospital Evita"
                 />
-                <div className="video-overlay" onClick={handlePlayVideo}>
-                  <button className="play-circle-btn">
-                    <span className="play-icon">▶</span>
-                  </button>
-                  <span className="video-caption-text">
-                    Ver video institucional
+              </div>
+
+              <div className="sede-description-box">
+                <span className="sede-tag">SEDE CENTRAL</span>
+                <h3 className="sede-title">
+                  Edificio Principal - Hospital Evita
+                </h3>
+                <p className="sede-address">
+                  <strong>Ubicación:</strong> Av. José de Luca Barberis N° 250,
+                  Formosa, Argentina
+                </p>
+                <p className="sede-desc-text">
+                  Infraestructura médica de vanguardia con 19.000 m² cubiertos
+                  diseñados bajo normas internacionales de arquitectura
+                  hospitalaria. Alberga la Guardia Central de Urgencias (24 hs),
+                  bloques quirúrgicos inteligentes, unidades de cuidados
+                  intensivos y el centro de diagnóstico por imágenes.
+                </p>
+                <div className="sede-badge-list">
+                  <span className="badge-item">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Guardia Activa 24 Hs.
+                  </span>
+                  <span className="badge-item">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    (3704) 436-100
                   </span>
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </div>
+          </AnimatedContent>
+        </section>
+        <section className="about-video-section" ref={videoSectionRef}>
+          <AnimatedContent distance={50} direction="vertical" delay={0.1}>
+            <div className="video-frame-container">
+              {isPlaying ? (
+                <video
+                  ref={htmlVideoRef}
+                  src={videoInstitucional}
+                  controls
+                  autoPlay
+                  className="video-element"
+                />
+              ) : (
+                <>
+                  <img
+                    src={fotoVideoCover}
+                    alt="Video Institucional HIE"
+                    className="video-cover-img"
+                  />
+                  <div className="video-overlay" onClick={handlePlayVideo}>
+                    <button className="play-circle-btn">
+                      <span className="play-icon">▶</span>
+                    </button>
+                    <span className="video-caption-text">
+                      Ver video institucional
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          </AnimatedContent>
         </section>
         <section
           id="valores"
@@ -351,11 +356,18 @@ const AboutPage = () => {
 
           <div className="valores-grid">
             {VALORES_INSTITUCIONALES.map((val, idx) => (
-              <div key={idx} className="valor-clean-card">
-                <div className="valor-icon-box">{val.icono}</div>
-                <h3 className="valor-card-title">{val.titulo}</h3>
-                <p className="valor-card-desc">{val.descripcion}</p>
-              </div>
+              <AnimatedContent
+                key={idx}
+                distance={50}
+                delay={idx * 0.15}
+                scale={0.96}
+              >
+                <div key={idx} className="valor-clean-card">
+                  <div className="valor-icon-box">{val.icono}</div>
+                  <h3 className="valor-card-title">{val.titulo}</h3>
+                  <p className="valor-card-desc">{val.descripcion}</p>
+                </div>
+              </AnimatedContent>
             ))}
           </div>
         </section>
@@ -372,16 +384,23 @@ const AboutPage = () => {
 
           <div className="authorities-grid">
             {AUTORIDADES.map((item, idx) => (
-              <div key={idx} className="authority-card">
-                <div className="authority-img-box">
-                  <img src={item.foto} alt={item.nombre} />
+              <AnimatedContent
+                key={idx}
+                distance={50}
+                delay={idx * 0.15}
+                scale={0.96}
+              >
+                <div key={idx} className="authority-card">
+                  <div className="authority-img-box">
+                    <img src={item.foto} alt={item.nombre} />
+                  </div>
+                  <div className="authority-info">
+                    <span className="authority-role">{item.cargo}</span>
+                    <h3 className="authority-name">{item.nombre}</h3>
+                    <p className="authority-spec">{item.especialidad}</p>
+                  </div>
                 </div>
-                <div className="authority-info">
-                  <span className="authority-role">{item.cargo}</span>
-                  <h3 className="authority-name">{item.nombre}</h3>
-                  <p className="authority-spec">{item.especialidad}</p>
-                </div>
-              </div>
+              </AnimatedContent>
             ))}
           </div>
         </section>

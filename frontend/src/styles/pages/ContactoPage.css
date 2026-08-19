@@ -10,7 +10,6 @@
     "Segoe UI",
     Roboto,
     sans-serif;
-  overflow-x: hidden;
 }
 
 .contacto-container {
@@ -120,7 +119,7 @@
 .location-banner-overlay {
   width: 100%;
   height: 100%;
-  background: rgba(12, 35, 64, 0.4);
+  background: rgb(12 35 64 / 59%);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -135,19 +134,11 @@
 }
 
 .location-banner-text h2 {
-  font-size: 2.2rem;
-  font-weight: 300;
+  font-size: 5rem;
+  font-weight: 600;
   letter-spacing: 2px;
-  margin: 0 0 10px 0;
+  margin: 55px 0 10px 0;
   text-transform: uppercase;
-}
-
-.location-banner-text p {
-  font-size: 1rem;
-  font-weight: 300;
-  font-style: italic;
-  margin: 0;
-  opacity: 0.9;
 }
 
 .location-wave-divider {
@@ -303,6 +294,10 @@
     align-items: flex-start;
     gap: 20px;
   }
+  .location-banner-text h2 {
+    margin: 10px 0;
+    font-size: 2.5rem;
+  }
 
   .split-left {
     align-items: flex-start;
@@ -452,6 +447,10 @@
   .contacto-hero {
     grid-template-columns: 1fr;
     padding: 30px;
+  }
+
+  .location-banner-text p {
+    margin-top: 130px;
   }
 
   .contacto-hero-right {

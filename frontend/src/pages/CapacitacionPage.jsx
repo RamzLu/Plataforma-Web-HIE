@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import "./CapacitacionPage.css";
+import "../styles/pages/CapacitacionPage.css";
+import AnimatedContent from "../components/AnimatedContent";
 
 import Breadcrumb from "../components/Breadcrumb";
 
@@ -145,37 +146,45 @@ const CapacitacionPage = () => {
           </div>
         </div>
         <div className="cap-grid">
-          {capacitacionesData.map((item) => (
-            <div key={item.id} className="cap-card">
-              {item.imagen ? (
-                <div
-                  className="cap-card-bg"
-                  style={{ backgroundImage: `url(${item.imagen})` }}
-                >
-                  <div className="cap-card-overlay">
+          {capacitacionesData.map((item, index) => (
+            <AnimatedContent
+              key={item.id}
+              distance={40}
+              direction="vertical"
+              delay={index * 0.08} // Efecto cascada entre tarjetas
+              threshold={0.1}
+            >
+              <div className="cap-card">
+                {item.imagen ? (
+                  <div
+                    className="cap-card-bg"
+                    style={{ backgroundImage: `url(${item.imagen})` }}
+                  >
+                    <div className="cap-card-overlay">
+                      <h3>{item.titulo}</h3>
+                      <p>{item.modalidadCorta}</p>
+                      <button
+                        className="cap-btn-vermas"
+                        onClick={() => setSelectedCurso(item)}
+                      >
+                        VER MÁS
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="cap-card-empty">
                     <h3>{item.titulo}</h3>
                     <p>{item.modalidadCorta}</p>
                     <button
-                      className="cap-btn-vermas"
+                      className="cap-btn-vermas outline"
                       onClick={() => setSelectedCurso(item)}
                     >
                       VER MÁS
                     </button>
                   </div>
-                </div>
-              ) : (
-                <div className="cap-card-empty">
-                  <h3>{item.titulo}</h3>
-                  <p>{item.modalidadCorta}</p>
-                  <button
-                    className="cap-btn-vermas outline"
-                    onClick={() => setSelectedCurso(item)}
-                  >
-                    VER MÁS
-                  </button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </AnimatedContent>
           ))}
         </div>
 

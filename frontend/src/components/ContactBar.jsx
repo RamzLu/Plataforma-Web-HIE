@@ -1,5 +1,5 @@
 import React from "react";
-import "./ContactBar.css";
+import "../styles/components/ContactBar.css";
 
 const ContactBar = () => {
   return (

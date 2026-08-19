@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import "./WhatsAppButton.css";
+import "../styles/components/WhatsAppButton.css";
 
 const WhatsAppButton = () => {
   const location = useLocation();

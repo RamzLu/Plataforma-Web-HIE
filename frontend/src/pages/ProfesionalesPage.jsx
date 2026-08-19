@@ -7,7 +7,7 @@ import { Autoplay, FreeMode } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/autoplay";
-import "./ProfesionalesPage.css";
+import "../styles/pages/ProfesionalesPage.css";
 
 import fondoProfesionales from "../assets/fondo-pagina-profesional.jpg";
 import docEjemplo1 from "../assets/foto-doctor-ejemplo.jpg";
