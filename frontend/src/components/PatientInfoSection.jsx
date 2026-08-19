@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../styles/components/PatientInfoSection.css";
+import AnimatedContent from "./AnimatedContent";
 
 import imgAtencion from "../assets/imagenPacientes.jpg";
 import imgVisita from "../assets/imgVisita.jpg";
@@ -53,13 +54,21 @@ const PatientInfoSection = () => {
   return (
     <section className="patient-section">
       <div className="patient-container">
-        <div className="patient-section-header">
-          <span className="subtitle-dark">INFORMACIÓN PARA</span>
-          <h2 className="title-blue">PACIENTES</h2>
-        </div>
+        <AnimatedContent distance={40} direction="vertical" delay={0.1}>
+          <div className="patient-section-header">
+            <span className="subtitle-dark">INFORMACIÓN PARA</span>
+            <h2 className="title-blue">PACIENTES</h2>
+          </div>
+        </AnimatedContent>
 
         <div className="patient-main-card">
-          <div className="patient-content-left">
+          <AnimatedContent
+            className="patient-content-left"
+            distance={50}
+            direction="horizontal"
+            reverse={true}
+            delay={0.2}
+          >
             <div className="turnos-box">
               <div className="turnos-text-wrapper">
                 <p className="turnos-text">
@@ -112,15 +121,19 @@ const PatientInfoSection = () => {
                 );
               })}
             </div>
-          </div>
-
-          <div className="patient-image-right">
+          </AnimatedContent>
+          <AnimatedContent
+            className="patient-image-right"
+            distance={50}
+            direction="horizontal"
+            delay={0.4}
+          >
             <img
               src={currentImage}
               alt="Información para Pacientes"
               className="patient-img"
             />
-          </div>
+          </AnimatedContent>
         </div>
       </div>
     </section>
