@@ -445,6 +445,10 @@
     padding: 30px;
   }
 
+  .location-banner-text p {
+    margin-top: 130px;
+  }
+
   .contacto-hero-right {
     justify-content: center;
   }
