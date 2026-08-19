@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { envs } from "./config/env.js";
-import { env } from "@tensorflow/tfjs-core";
+import { envs } from "./src/config/env.js";
 
 const app = express();
+
+console.log("Configurando app Express...");
 
 //midlewares globales
 app.use(cors());
@@ -14,4 +15,5 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/ping", (req, res) => {
   res.status(200).json({ message: "pong", env: envs.NODE_ENV });
 });
+
 export default app;
