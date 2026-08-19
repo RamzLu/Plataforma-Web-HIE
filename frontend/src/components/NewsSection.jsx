@@ -1,5 +1,5 @@
 import React from "react";
-import "./NewsSection.css";
+import "../styles/components/NewsSection.css";
 
 import mapaFormosa from "../assets/mapaFormosaParaNewsSection.png";
 import logosGobierno from "../assets/logosGobierno.png";

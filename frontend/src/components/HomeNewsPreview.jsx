@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { newsData } from "../data/newsData";
-import "./HomeNewsPreview.css";
+import "../styles/components/HomeNewsPreview.css";
 
 const HomeNewsPreview = () => {
   const latestNews = newsData.slice(0, 3);

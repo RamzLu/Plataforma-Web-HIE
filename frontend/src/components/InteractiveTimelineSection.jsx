@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./InteractiveTimelineSection.css";
+import "../styles/components/InteractiveTimelineSection.css";
 
 import lineaGeneral from "../assets/aprendeCapacitacion.jpg";
 import linea2020 from "../assets/lineaTiempo_2020.png";
