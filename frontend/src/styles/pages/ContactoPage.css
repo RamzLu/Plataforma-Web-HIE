@@ -135,18 +135,10 @@
 
 .location-banner-text h2 {
   font-size: 2.2rem;
-  font-weight: 300;
+  font-weight: 600;
   letter-spacing: 2px;
   margin: 0 0 10px 0;
   text-transform: uppercase;
-}
-
-.location-banner-text p {
-  font-size: 1rem;
-  font-weight: 300;
-  font-style: italic;
-  margin: 0;
-  opacity: 0.9;
 }
 
 .location-wave-divider {

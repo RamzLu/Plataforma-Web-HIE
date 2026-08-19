@@ -64,10 +64,6 @@ const ContactoPage = () => {
           <div className="location-banner-overlay">
             <div className="location-banner-text">
               <h2>CÓMO LLEGAR Y CANALES OFICIALES</h2>
-              <p>
-                Visite nuestras instalaciones o reciba asistencia a través de
-                nuestros medios de comunicación habilitados.
-              </p>
             </div>
           </div>
         </div>
