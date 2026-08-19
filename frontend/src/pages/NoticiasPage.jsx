@@ -502,50 +502,72 @@ const NoticiasPage = () => {
       {/* =========================================
           POP-UP PARA NOTICIAS
       ========================================= */}
+      {/* =========================================
+    POP-UP PARA NOTICIAS (ESTILO ADAPTADO)
+========================================= */}
       {selectedNews && (
         <div className="modal-overlay" onClick={() => setSelectedNews(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close-btn"
-              onClick={() => setSelectedNews(null)}
-            >
-              &times;
-            </button>
-
-            <div className="modal-author">
-              <div className="hospital-avatar">
-                <img src={avatarHospital} alt="Avatar Hospital" />
-              </div>
-              <div>
-                <h3>Hospital Interdistrital Evita Formosa</h3>
-                <span>{selectedNews.date} • 🌎</span>
-              </div>
+          <div
+            className="modal-content-esp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* CABECERA */}
+            <div className="modal-header-esp">
+              <h2>COMUNICADO INSTITUCIONAL</h2>
+              <button
+                className="btn-close-modal"
+                onClick={() => setSelectedNews(null)}
+                title="Cerrar ventana"
+              >
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+              </button>
             </div>
 
-            <div className="modal-header">
-              <h2 className="modal-title" style={{ color: "#006eb3" }}>
-                {selectedNews.title}
-              </h2>
-            </div>
-
-            <div className="modal-body" style={{ borderLeftColor: "#006eb3" }}>
-              {selectedNews.body.map((paragraph, idx) => (
-                <p key={idx} className="modal-text">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-
-            <div className="news-modal-images-grid">
-              {selectedNews.images.map((img, idx) => (
-                <div
-                  className="modal-campaign-img"
-                  key={idx}
-                  onClick={() => openLightbox(selectedNews.images, idx)}
-                >
-                  <img src={img} alt={`Imagen noticia ${idx + 1}`} />
+            {/* CUERPO DE LA NOTICIA */}
+            <div className="modal-body-esp">
+              {/* PERFIL / FECHA */}
+              <div className="modal-author-row">
+                <div className="hospital-avatar">
+                  <img src={avatarHospital} alt="Avatar Hospital" />
                 </div>
-              ))}
+                <div className="author-meta">
+                  <h3>Hospital Interdistrital Evita Formosa</h3>
+                  <span>{selectedNews.date} • 🌎</span>
+                </div>
+              </div>
+
+              {/* TÍTULO DE LA NOTICIA */}
+              <div className="news-modal-headline">
+                <h3 className="news-modal-title">{selectedNews.title}</h3>
+              </div>
+
+              {/* PÁRRAFOS */}
+              <div className="news-modal-body-text">
+                {selectedNews.body.map((paragraph, idx) => (
+                  <p key={idx} className="info-text">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+
+              {/* FOTOS DE LA NOTICIA */}
+              {selectedNews.images && selectedNews.images.length > 0 && (
+                <div className="news-modal-images-section">
+                  <div className="news-modal-images-grid">
+                    {selectedNews.images.map((img, idx) => (
+                      <div
+                        className="modal-news-img-box"
+                        key={idx}
+                        onClick={() => openLightbox(selectedNews.images, idx)}
+                      >
+                        <img src={img} alt={`Foto noticia ${idx + 1}`} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
