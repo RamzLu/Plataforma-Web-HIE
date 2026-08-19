@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./CapacitacionPage.css";
+import "../styles/pages/CapacitacionPage.css";
 
 import Breadcrumb from "../components/Breadcrumb";
 

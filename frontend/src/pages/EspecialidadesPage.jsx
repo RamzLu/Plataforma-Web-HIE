@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./EspecialidadesPage.css";
+import "../styles/pages/EspecialidadesPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 import fondoBannerEsp from "../assets/banner_especialidades.png";
 

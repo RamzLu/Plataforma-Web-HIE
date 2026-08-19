@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import "./ContactoPage.css";
+import "../styles/pages/ContactoPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 import HospitalMapSection from "../components/HospitalMapSection";
 

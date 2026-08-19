@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import "./AboutPage.css";
+import "../styles/pages/AboutPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 import ReactCountUp from "react-countup";
 const CountUp = ReactCountUp.default || ReactCountUp;

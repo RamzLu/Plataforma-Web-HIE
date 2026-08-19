@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./DocumentacionPage.css";
+import "../styles/pages/DocumentacionPage.css";
 import { documentosData } from "../data/documentos";
 
 import Breadcrumb from "../components/Breadcrumb";
@@ -65,7 +65,7 @@ const DocumentacionPage = () => {
         }}
       >
         <div className="doc-header-inner">
-            <Breadcrumb currentPage="documentación" />
+          <Breadcrumb currentPage="documentación" />
           <h1 className="doc-title">REPOSITORIO DE DOCUMENTOS</h1>
           <div className="doc-info-wrapper">
             <div className="doc-info-labels">

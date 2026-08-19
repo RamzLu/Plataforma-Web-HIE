@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { newsData } from "../data/newsData";
-import "./NoticiasPage.css";
+import "../styles/pages/NoticiasPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 
 // Íconos animados
