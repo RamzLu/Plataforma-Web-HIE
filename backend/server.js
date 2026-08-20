@@ -1,17 +1,19 @@
 import app from "./app.js";
 import { envs } from "./src/config/env.js";
-import { sequelize } from "./src/config/database.js";
+import { prisma } from "./src/config/prisma.js";
 
 const PORT = envs.PORT || 3000;
 
 const startServer = async () => {
   try {
-    await sequelize.authenticate();
+    await prisma.$connect();
 
     console.log("Conexion a PosgreSQL correctamente.");
+
     if (envs.NODE_ENV === "development") {
       console.log("Modo desarrollo: migraciones no async automatico");
     }
+
     app.listen(PORT, () => {
       console.log(`\nServidor corriendo en ${PORT}`);
       console.log(`\nEntorno: ${envs.NODE_ENV}`);

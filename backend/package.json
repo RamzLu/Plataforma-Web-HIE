@@ -9,14 +9,15 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "pg": "^8.23.0",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.8"
+    "pg": "^8.23.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "prisma": "^7.9.1"
   }
 }

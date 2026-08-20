@@ -1,16 +1,7 @@
-import "dotenv/config.js";
-
-const requiredVariables = ["PORT", "NODE_ENV", "DATABASE_URL", "JWT_SECRET"];
-
-requiredVariables.forEach((variable) => {
-  if (!process.env[variable]) {
-    throw new Error(`Variable de entorno ${variable} no esta definida.`);
-  }
-});
+import "dotenv/config";
 
 export const envs = {
-  PORT: process.env.PORT,
-  NODE_ENV: process.env.NODE_ENV,
-  DATABASE_URL: process.env.DATABASE_URL,
-  JWT_SECRET: process.env.JWT_SECRET,
+  PORT: Number(process.env.PORT ?? 3000),
+  NODE_ENV: process.env.NODE_ENV ?? "development",
+  JWT_SECRET: process.env.JWT_SECRET ?? "dev-local-secret",
 };
