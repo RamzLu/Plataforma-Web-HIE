@@ -6,10 +6,6 @@ const PORT = envs.PORT || 3000;
 
 const startServer = async () => {
   try {
-    await prisma.$connect();
-
-    console.log("Conexion a PosgreSQL correctamente.");
-
     if (envs.NODE_ENV === "development") {
       console.log("Modo desarrollo: migraciones no async automatico");
     }
