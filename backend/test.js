@@ -1,36 +1,25 @@
-import pg from 'pg'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@prisma/client'
-
-// Node v20+ permite cargar el archivo .env de forma nativa sin librerías de terceros
-process.loadEnvFile()
-
-// 1. Configuramos el Pool de conexiones nativo de Postgres usando tu URL de Supabase
-const { Pool } = pg
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-
-// 2. Le pasamos el Pool al adaptador de Prisma
-const adapter = new PrismaPg(pool)
-
-// 3. Instanciamos Prisma con el adaptador
-const prisma = new PrismaClient({ adapter })
+import prisma from './src/config/database.js'
 
 async function main() {
-  console.log('Conectando a Supabase...')
+  console.log('Probando conexión modularizada a Supabase...\n')
   
   const roles = await prisma.rol.findMany()
-  console.log('Roles en la base de datos:', roles)
   
+  // Imprimimos usando JSON.stringify para comprobar que el parche del BigInt funciona
+  console.log('Roles:', JSON.stringify(roles, null, 2))
+  
+  console.log('\n----------------------------------------\n')
+
   const usuario = await prisma.usuario.findUnique({
     where: { username: 'admin' }
   })
-  console.log('Usuario admin:', usuario)
+  console.log('Usuario admin:', JSON.stringify(usuario, null, 2))
 }
 
 main()
   .catch(console.error)
   .finally(async () => {
-    // Es buena práctica cerrar tanto Prisma como el Pool de Postgres
     await prisma.$disconnect()
-    await pool.end()
+    // Forzamos el cierre del proceso para no dejar el Pool de pg colgando en scripts aislados
+    process.exit(0) 
   })
