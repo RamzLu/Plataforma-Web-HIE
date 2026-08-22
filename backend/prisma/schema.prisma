@@ -1,0 +1,330 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model archivo {
+  id                  BigInt                @id @default(autoincrement())
+  nombreOriginal      String                @db.VarChar(255)
+  nombreArchivo       String                @db.VarChar(255)
+  ruta                String                @db.VarChar(500)
+  extension           String                @db.VarChar(10)
+  mimeType            String                @db.VarChar(100)
+  tamanioBytes        BigInt
+  createdAt           DateTime              @default(now())
+  banner              banner[]
+  documento           documento[]
+  noticia_archivo     noticia_archivo[]
+  profesional         profesional[]
+  publicacion_archivo publicacion_archivo[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model area {
+  id               BigInt             @id @default(autoincrement())
+  nombre           String             @unique @db.VarChar(150)
+  descripcion      String?
+  ubicacion        String?            @db.VarChar(255)
+  activo           Boolean            @default(true)
+  profesional_area profesional_area[]
+  servicio         servicio[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model auditoria {
+  id          BigInt   @id @default(autoincrement())
+  usuarioId   String   @db.Uuid
+  accion      String   @db.VarChar(50)
+  entidad     String   @db.VarChar(100)
+  entidadId   String?  @db.VarChar(100)
+  descripcion String?
+  fechaHora   DateTime @default(now())
+  usuario     usuario  @relation(fields: [usuarioId], references: [id])
+
+  @@index([entidad, entidadId])
+  @@index([usuarioId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model banner {
+  id                                BigInt   @id @default(autoincrement())
+  titulo                            String   @db.VarChar(150)
+  descripcion                       String?
+  enlace                            String?  @db.VarChar(500)
+  archivoId                         BigInt
+  createdBy                         String   @db.Uuid
+  updatedBy                         String?  @db.Uuid
+  orden                             Int
+  activo                            Boolean  @default(true)
+  createdAt                         DateTime @default(now())
+  updatedAt                         DateTime
+  archivo                           archivo  @relation(fields: [archivoId], references: [id])
+  usuario_banner_createdByTousuario usuario  @relation("banner_createdByTousuario", fields: [createdBy], references: [id])
+  usuario_banner_updatedByTousuario usuario? @relation("banner_updatedByTousuario", fields: [updatedBy], references: [id])
+
+  @@index([archivoId])
+  @@index([createdBy])
+  @@index([updatedBy])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model categoria_documento {
+  id          BigInt      @id @default(autoincrement())
+  nombre      String      @unique @db.VarChar(100)
+  descripcion String?     @db.VarChar(255)
+  activo      Boolean     @default(true)
+  documento   documento[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model categoria_noticia {
+  id          BigInt    @id @default(autoincrement())
+  nombre      String    @unique @db.VarChar(100)
+  descripcion String?   @db.VarChar(255)
+  activo      Boolean   @default(true)
+  noticia     noticia[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model configuracion {
+  id          BigInt   @id @default(autoincrement())
+  clave       String   @unique @db.VarChar(100)
+  valor       String
+  descripcion String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model contacto_institucional {
+  id                        BigInt                    @id @default(autoincrement())
+  institucionId             BigInt
+  tipo                      TipoContacto
+  valor                     String                    @db.VarChar(255)
+  descripcion               String?                   @db.VarChar(255)
+  orden                     Int                       @default(0)
+  activo                    Boolean                   @default(true)
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime
+  informacion_institucional informacion_institucional @relation(fields: [institucionId], references: [id], onDelete: Cascade)
+
+  @@index([institucionId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model documento {
+  id                                   BigInt              @id @default(autoincrement())
+  titulo                               String              @db.VarChar(200)
+  descripcion                          String?
+  categoriaId                          BigInt
+  archivoId                            BigInt
+  createdBy                            String              @db.Uuid
+  updatedBy                            String?             @db.Uuid
+  estado                               EstadoEditorial
+  createdAt                            DateTime            @default(now())
+  updatedAt                            DateTime
+  archivo                              archivo             @relation(fields: [archivoId], references: [id])
+  categoria_documento                  categoria_documento @relation(fields: [categoriaId], references: [id])
+  usuario_documento_createdByTousuario usuario             @relation("documento_createdByTousuario", fields: [createdBy], references: [id])
+  usuario_documento_updatedByTousuario usuario?            @relation("documento_updatedByTousuario", fields: [updatedBy], references: [id])
+
+  @@index([archivoId])
+  @@index([categoriaId])
+  @@index([createdBy])
+  @@index([estado])
+  @@index([updatedBy])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model especialidad {
+  id          BigInt        @id @default(autoincrement())
+  nombre      String        @unique @db.VarChar(150)
+  descripcion String?
+  activo      Boolean       @default(true)
+  profesional profesional[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model informacion_institucional {
+  id                     BigInt                   @id @default(autoincrement())
+  nombre                 String                   @db.VarChar(200)
+  descripcion            String?
+  direccion              String                   @db.VarChar(255)
+  localidad              String                   @db.VarChar(100)
+  provincia              String                   @db.VarChar(100)
+  codigoPostal           String?                  @db.VarChar(20)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime
+  contacto_institucional contacto_institucional[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model noticia {
+  id                                 BigInt            @id @default(autoincrement())
+  titulo                             String            @db.VarChar(200)
+  contenido                          String
+  categoriaId                        BigInt
+  createdBy                          String            @db.Uuid
+  updatedBy                          String?           @db.Uuid
+  estado                             EstadoEditorial
+  fechaPublicacion                   DateTime?
+  createdAt                          DateTime          @default(now())
+  updatedAt                          DateTime
+  categoria_noticia                  categoria_noticia @relation(fields: [categoriaId], references: [id])
+  usuario_noticia_createdByTousuario usuario           @relation("noticia_createdByTousuario", fields: [createdBy], references: [id])
+  usuario_noticia_updatedByTousuario usuario?          @relation("noticia_updatedByTousuario", fields: [updatedBy], references: [id])
+  noticia_archivo                    noticia_archivo[]
+
+  @@index([categoriaId])
+  @@index([createdBy])
+  @@index([estado])
+  @@index([updatedBy])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model noticia_archivo {
+  noticiaId BigInt
+  archivoId BigInt
+  archivo   archivo @relation(fields: [archivoId], references: [id], onDelete: Cascade)
+  noticia   noticia @relation(fields: [noticiaId], references: [id], onDelete: Cascade)
+
+  @@id([noticiaId, archivoId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model profesional {
+  id               BigInt             @id @default(autoincrement())
+  nombre           String             @db.VarChar(100)
+  apellido         String             @db.VarChar(100)
+  matricula        String?            @db.VarChar(50)
+  cargo            String?            @db.VarChar(100)
+  especialidadId   BigInt
+  archivoId        BigInt?
+  descripcion      String?
+  activo           Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  archivo          archivo?           @relation(fields: [archivoId], references: [id])
+  especialidad     especialidad       @relation(fields: [especialidadId], references: [id])
+  profesional_area profesional_area[]
+
+  @@index([archivoId])
+  @@index([especialidadId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model profesional_area {
+  profesionalId BigInt
+  areaId        BigInt
+  area          area        @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  profesional   profesional @relation(fields: [profesionalId], references: [id], onDelete: Cascade)
+
+  @@id([profesionalId, areaId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model publicacion_academica {
+  id                                               BigInt                   @id @default(autoincrement())
+  titulo                                           String                   @db.VarChar(200)
+  descripcion                                      String?
+  tipo                                             TipoPublicacionAcademica
+  fechaEvento                                      DateTime?
+  estado                                           EstadoEditorial
+  createdBy                                        String                   @db.Uuid
+  updatedBy                                        String?                  @db.Uuid
+  createdAt                                        DateTime                 @default(now())
+  updatedAt                                        DateTime
+  usuario_publicacion_academica_createdByTousuario usuario                  @relation("publicacion_academica_createdByTousuario", fields: [createdBy], references: [id])
+  usuario_publicacion_academica_updatedByTousuario usuario?                 @relation("publicacion_academica_updatedByTousuario", fields: [updatedBy], references: [id])
+  publicacion_archivo                              publicacion_archivo[]
+
+  @@index([createdBy])
+  @@index([estado])
+  @@index([updatedBy])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model publicacion_archivo {
+  publicacionId         BigInt
+  archivoId             BigInt
+  archivo               archivo               @relation(fields: [archivoId], references: [id], onDelete: Cascade)
+  publicacion_academica publicacion_academica @relation(fields: [publicacionId], references: [id], onDelete: Cascade)
+
+  @@id([publicacionId, archivoId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model rol {
+  id          BigInt    @id @default(autoincrement())
+  nombre      String    @unique @db.VarChar(50)
+  descripcion String?   @db.VarChar(255)
+  usuario     usuario[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model servicio {
+  id                     BigInt  @id @default(autoincrement())
+  nombre                 String  @db.VarChar(150)
+  descripcion            String?
+  requisitos             String?
+  documentacionNecesaria String?
+  horarios               String?
+  informacionDerivacion  String?
+  ubicacion              String?
+  areaId                 BigInt
+  activo                 Boolean @default(true)
+  area                   area    @relation(fields: [areaId], references: [id])
+
+  @@index([areaId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model usuario {
+  id                                                             String                  @id @db.Uuid
+  keycloakId                                                     String                  @unique @db.Uuid
+  username                                                       String                  @unique @db.VarChar(100)
+  email                                                          String                  @unique @db.VarChar(150)
+  nombre                                                         String                  @db.VarChar(100)
+  apellido                                                       String                  @db.VarChar(100)
+  rolId                                                          BigInt
+  activo                                                         Boolean                 @default(true)
+  createdAt                                                      DateTime                @default(now())
+  updatedAt                                                      DateTime
+  auditoria                                                      auditoria[]
+  banner_banner_createdByTousuario                               banner[]                @relation("banner_createdByTousuario")
+  banner_banner_updatedByTousuario                               banner[]                @relation("banner_updatedByTousuario")
+  documento_documento_createdByTousuario                         documento[]             @relation("documento_createdByTousuario")
+  documento_documento_updatedByTousuario                         documento[]             @relation("documento_updatedByTousuario")
+  noticia_noticia_createdByTousuario                             noticia[]               @relation("noticia_createdByTousuario")
+  noticia_noticia_updatedByTousuario                             noticia[]               @relation("noticia_updatedByTousuario")
+  publicacion_academica_publicacion_academica_createdByTousuario publicacion_academica[] @relation("publicacion_academica_createdByTousuario")
+  publicacion_academica_publicacion_academica_updatedByTousuario publicacion_academica[] @relation("publicacion_academica_updatedByTousuario")
+  rol                                                            rol                     @relation(fields: [rolId], references: [id])
+
+  @@index([rolId])
+}
+
+enum EstadoEditorial {
+  BORRADOR
+  PUBLICADO
+  ARCHIVADO
+}
+
+enum TipoContacto {
+  TELEFONO
+  EMAIL
+  RED_SOCIAL
+  OTRO
+}
+
+enum TipoPublicacionAcademica {
+  CURSO
+  JORNADA
+  CONGRESO
+  PROYECTO_INVESTIGACION
+  CONVOCATORIA
+}
