@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import rolesRoutes from './routes/roles.routes.js'
+import adminRoutes from './routes/admin.routes.js';
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -22,6 +23,7 @@ app.get('/api/health', (req, res) => {
 
 // Conectamos las rutas de roles
 app.use('/api/roles', rolesRoutes)
+app.use('/api/admin', adminRoutes);
 
 // --- Iniciar Servidor ---
 app.listen(PORT, () => {
