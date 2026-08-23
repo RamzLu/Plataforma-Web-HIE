@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import "./App.css";
 
 // Componentes Globales
@@ -17,13 +22,18 @@ import ProfesionalesPage from "./pages/ProfesionalesPage";
 import CapacitacionPage from "./pages/CapacitacionPage";
 import ContactoPage from "./pages/ContactoPage";
 import AboutPage from "./pages/AboutPage";
-import CmsPage from './pages/CmsPage';
+import CmsPage from "./pages/CmsPage";
 
-const App = () => {
+const AppLayout = () => {
+  const location = useLocation();
+  const isCmsRoute = location.pathname.startsWith("/cms");
+
   return (
-    <Router>
+    <>
       <ScrollToTop />
-      <Header />
+
+      {/* Solo mostramos el Header público si NO estamos en el CMS */}
+      {!isCmsRoute && <Header />}
 
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -31,10 +41,11 @@ const App = () => {
         <Route path="/noticias" element={<NoticiasPage />} />
         <Route path="/documentacion" element={<DocumentacionPage />} />
         <Route path="/profesionales" element={<ProfesionalesPage />} />
-        <Route path="/capacitacion" element={<CapacitacionPage />} />{" "}
+        <Route path="/capacitacion" element={<CapacitacionPage />} />
         <Route path="/contacto" element={<ContactoPage />} />
         <Route path="/acerca-de" element={<AboutPage />} />
         <Route path="/cms" element={<CmsPage />} />
+
         <Route
           path="*"
           element={
@@ -56,8 +67,20 @@ const App = () => {
         />
       </Routes>
 
-      <WhatsAppButton />
-      <Footer />
+      {!isCmsRoute && (
+        <>
+          <WhatsAppButton />
+          <Footer />
+        </>
+      )}
+    </>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <AppLayout />
     </Router>
   );
 };

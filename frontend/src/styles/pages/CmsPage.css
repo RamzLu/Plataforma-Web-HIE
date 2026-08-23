@@ -809,3 +809,37 @@
     grid-template-columns: 1fr;
   }
 }
+/* =========================================
+   ESTILOS PARA EL MODAL DE LOGOUT
+========================================= */
+.logout-modal {
+  max-width: 450px !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.logout-footer {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn-cancelar-gris {
+  background-color: #cbd5e1;
+  color: #1e293b;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 28px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancelar-gris:hover {
+  background-color: #94a3b8;
+}
