@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import keycloak from "../config/keycloak";
 import "../styles/pages/CmsPage.css";
 
-// IMPORTAMOS LA BASE DE DATOS Y EL AVATAR
+// IMPORTAMOS LAS BASES DE DATOS REALES Y EL AVATAR
 import { newsData } from "../data/newsData";
+import { documentosData } from "../data/documentos";
 import avatarHospital from "../assets/iconEVITAface.jpg";
 
 const CmsPage = () => {
@@ -16,12 +17,22 @@ const CmsPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("Usuario CMS");
 
-  // Estados para el Modal de Noticias y Visor de Fotos (Lightbox)
+  // ==========================================
+  // ESTADOS DE LA INTERFAZ
+  // ==========================================
   const [selectedNews, setSelectedNews] = useState(null);
   const [lightbox, setLightbox] = useState({
     isOpen: false,
     images: [],
     index: 0,
+  });
+
+  // Estado dinámico inicializado en 0 (Nada hardcodeado)
+  const [dashboardStats, setDashboardStats] = useState({
+    contenidoPublicado: 0,
+    borradores: 0,
+    documentosActivos: 0,
+    visitas: "0",
   });
 
   useEffect(() => {
@@ -39,6 +50,22 @@ const CmsPage = () => {
           keycloak.tokenParsed?.preferred_username ||
           "Editor CMS";
         setUserName(name);
+
+        // ==========================================
+        // CÁLCULO DE ESTADÍSTICAS REALES
+        // ==========================================
+        const publicadas = newsData.filter((news) => !news.isDraft).length;
+        const borradoresPendientes = newsData.filter(
+          (news) => news.isDraft,
+        ).length;
+        const totalDocumentos = documentosData ? documentosData.length : 0;
+
+        setDashboardStats({
+          contenidoPublicado: publicadas,
+          borradores: borradoresPendientes,
+          documentosActivos: totalDocumentos,
+          visitas: "0", // Iniciado en 0 hasta tener Google Analytics o métricas del backend
+        });
       }
     });
   }, []);
@@ -59,7 +86,9 @@ const CmsPage = () => {
     }
   };
 
-  // Lógica del Lightbox
+  // ==========================================
+  // LÓGICA DEL LIGHTBOX
+  // ==========================================
   const openLightbox = (images, index) =>
     setLightbox({ isOpen: true, images, index });
   const closeLightbox = () =>
@@ -81,6 +110,9 @@ const CmsPage = () => {
     }));
   };
 
+  // ==========================================
+  // PROTECCIÓN DE RUTAS
+  // ==========================================
   if (!initialized) {
     return <div className="cms-loading">Cargando plataforma...</div>;
   }
@@ -99,9 +131,6 @@ const CmsPage = () => {
     );
   }
 
-  // ==========================================
-  // OBTENER LAS ÚLTIMAS 4 NOTICIAS REALES
-  // ==========================================
   const latestNews = [...newsData].sort((a, b) => b.id - a.id).slice(0, 4);
 
   return (
@@ -335,7 +364,10 @@ const CmsPage = () => {
             </p>
           </div>
 
-          <div className="cms-dashboard-card">
+          {/* =========================================
+              TARJETAS DE NOTICIAS (ARRIBA)
+          ========================================= */}
+          <div className="cms-dashboard-card" style={{ marginBottom: "30px" }}>
             <h3 className="cms-card-title">Últimas Noticias del Portal</h3>
 
             <div className="cms-news-grid">
@@ -360,7 +392,6 @@ const CmsPage = () => {
                     <h4 className="cms-real-news-title">{news.title}</h4>
                     <p>{news.body[0].substring(0, 80)}...</p>
 
-                    {/* BOTÓN ACTUALIZADO PARA ABRIR MODAL */}
                     <button
                       className="cms-btn-ver-mas"
                       onClick={() => setSelectedNews(news)}
@@ -371,6 +402,41 @@ const CmsPage = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* =========================================
+              PANELES DE ESTADÍSTICAS (DEBAJO)
+          ========================================= */}
+          <div className="cms-stats-grid">
+            <div className="cms-stat-card">
+              <span className="cms-stat-title">Contenido publicado</span>
+              <span className="cms-stat-value">
+                {dashboardStats.contenidoPublicado}
+              </span>
+              <span className="cms-stat-subtitle">+0% este mes</span>
+            </div>
+
+            <div className="cms-stat-card">
+              <span className="cms-stat-title">Borradores guardados</span>
+              <span className="cms-stat-value">
+                {String(dashboardStats.borradores).padStart(2, "0")}
+              </span>
+              <span className="cms-stat-subtitle">Edición en progreso</span>
+            </div>
+
+            <div className="cms-stat-card">
+              <span className="cms-stat-title">Documentos activos</span>
+              <span className="cms-stat-value">
+                {dashboardStats.documentosActivos}
+              </span>
+              <span className="cms-stat-subtitle">+0 esta semana</span>
+            </div>
+
+            <div className="cms-stat-card">
+              <span className="cms-stat-title">Visitas al portal</span>
+              <span className="cms-stat-value">{dashboardStats.visitas}</span>
+              <span className="cms-stat-subtitle">+0% este mes</span>
             </div>
           </div>
         </main>
