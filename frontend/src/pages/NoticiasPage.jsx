@@ -147,16 +147,14 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
       </div>
 
       <div className="full-news-images">
-        {news.images &&
-          news.images.map((img, index) => (
-            <img
-              key={index}
-              src={img}
-              alt={`${news.title} - foto ${index + 1}`}
-              className="clickable-img"
-              onClick={() => onOpenLightbox(news.images, index)}
-            />
-          ))}
+        {news.images && news.images.length > 0 && (
+          <img
+            src={news.images[0]}
+            alt={`${news.title} - foto principal`}
+            className="clickable-img"
+            onClick={() => onOpenLightbox(news.images, 0)}
+          />
+        )}
       </div>
     </article>
   );
@@ -564,18 +562,60 @@ const NoticiasPage = () => {
               </div>
 
               {/* FOTOS DE LA NOTICIA */}
+              {/* FOTOS DE LA NOTICIA EN FORMATO CARRUSEL */}
               {selectedNews.images && selectedNews.images.length > 0 && (
-                <div className="news-modal-images-section">
-                  <div className="news-modal-images-grid">
-                    {selectedNews.images.map((img, idx) => (
-                      <div
-                        className="modal-news-img-box"
-                        key={idx}
-                        onClick={() => openLightbox(selectedNews.images, idx)}
+                <div className="info-section" style={{ marginTop: "20px" }}>
+                  <h4 className="info-title">
+                    <span className="info-icon">
+                      <svg viewBox="0 0 24 24">
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        ></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                      </svg>
+                    </span>
+                    GALERÍA DE IMÁGENES
+                  </h4>
+
+                  <div className="modal-slider-container">
+                    {/* Botón izquierdo (se muestra si hay más de 3 imágenes) */}
+                    {selectedNews.images.length > 3 && (
+                      <button
+                        className="modal-arrow modal-left"
+                        onClick={() => scrollModal("left")}
                       >
-                        <img src={img} alt={`Foto noticia ${idx + 1}`} />
-                      </div>
-                    ))}
+                        &#10094;
+                      </button>
+                    )}
+
+                    {/* Contenedor del Slider */}
+                    <div className="modal-slider" ref={modalSliderRef}>
+                      {selectedNews.images.map((img, idx) => (
+                        <div
+                          className="modal-campaign-img"
+                          key={idx}
+                          onClick={() => openLightbox(selectedNews.images, idx)}
+                        >
+                          <img src={img} alt={`Foto noticia ${idx + 1}`} />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Botón derecho (se muestra si hay más de 3 imágenes) */}
+                    {selectedNews.images.length > 3 && (
+                      <button
+                        className="modal-arrow modal-right"
+                        onClick={() => scrollModal("right")}
+                      >
+                        &#10095;
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

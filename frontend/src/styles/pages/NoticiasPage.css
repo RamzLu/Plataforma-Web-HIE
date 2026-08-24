@@ -326,47 +326,56 @@
   line-height: 1.35;
   margin: 0;
 }
+.news-modal-title,
+.news-modal-headline h3 {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap; /* Mantiene los saltos de línea pero fuerza el corte */
+  width: 100%;
+}
 
 .news-modal-body-text {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
-.news-modal-images-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+.news-modal-body-text .info-text {
+  word-break: break-word;
+  overflow-wrap: break-word;
   width: 100%;
-  margin-top: 10px;
+}
+.news-modal-images-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Espacio pequeño y controlado entre imágenes */
+  justify-content: flex-start; /* Alineadas a la izquierda */
+  margin-top: 15px;
 }
 
+/* Caja de cada miniatura en el modal */
 .modal-news-img-box {
-  height: 190px;
-  border-radius: 10px;
+  width: 170px; /* Aumentamos el ancho de 100px a 170px (puedes ajustarlo a tu gusto) */
+  height: 110px; /* Mantenemos una altura proporcional y cómoda */
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid #cbd5e1;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
-  background-color: #ffffff;
 }
 
 .modal-news-img-box:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 18px rgba(43, 91, 148, 0.18);
-  border-color: #2b5b94;
+  transform: scale(1.02);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .modal-news-img-box img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  display: block;
+  object-fit: cover; /* Llena el cuadro rectangular perfectamente */
 }
-
 .modal-footer-esp {
   padding: 20px 35px 25px 35px; /* Espaciado superior e inferior generoso */
   display: flex;

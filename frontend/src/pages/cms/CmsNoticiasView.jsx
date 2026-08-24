@@ -7,15 +7,19 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
   const [titulo, setTitulo] = useState("");
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("Noticias");
-  const [imagenUrl, setImagenUrl] = useState("");
+  const [imagenesUrls, setImagenesUrls] = useState([]); // Array para múltiples imágenes
 
-  // Manejo de carga de imagen de portada de la noticia
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setImagenUrl(imageUrl);
+  // Manejo de carga de múltiples imágenes
+  const handleMultipleImagesUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      const newUrls = files.map((file) => URL.createObjectURL(file));
+      setImagenesUrls((prev) => [...prev, ...newUrls]); // Acumula las imágenes seleccionadas
     }
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    setImagenesUrls((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleSave = (e) => {
@@ -28,18 +32,17 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
     const nuevaNoticia = {
       id: Date.now(),
       title: titulo,
-      // Guardamos el HTML enriquecido generado por CKEditor 5
       body: [cuerpoHtml],
       date: "Ahora",
       category: categoria,
       isDraft: false,
-      images: imagenUrl ? [imagenUrl] : [],
+      images: imagenesUrls, // Guardamos todas las imágenes subidas
     };
 
     onAddNewNews(nuevaNoticia);
     setTitulo("");
     setCuerpoHtml("");
-    setImagenUrl("");
+    setImagenesUrls([]);
     setShowModal(false);
   };
 
@@ -146,6 +149,17 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
                 </div>
                 <div>
                   <span className="activity-title">{news.title}</span>
+                  {news.images && news.images.length > 1 && (
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "#64748b",
+                        display: "block",
+                      }}
+                    >
+                      +{news.images.length - 1} imágenes más
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="col-fecha">{news.date || "Ahora"}</div>
@@ -184,12 +198,12 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
         </div>
       </div>
 
-      {/* MODAL DE CREAR NOTICIA CON CKEDITOR 5 */}
+      {/* MODAL DE CREAR NOTICIA CON MULTIPLES IMÁGENES */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div
             className="modal-content-esp"
-            style={{ maxWidth: "800px" }}
+            style={{ maxWidth: "800px", maxHeight: "90vh", overflowY: "auto" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header-esp">
@@ -210,7 +224,8 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
               style={{ gap: "20px" }}
             >
               <p style={{ margin: 0, fontSize: "0.85rem", color: "#64748b" }}>
-                Edite y programe una publicación con formato enriquecido.
+                Edite y publique contenido institucional con soporte multimedia
+                múltiple.
               </p>
 
               <div>
@@ -279,26 +294,74 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
                     marginBottom: "8px",
                   }}
                 >
-                  Imagen de portada
+                  Imágenes adjuntas (Seleccione una o varias)
                 </label>
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={handleImageUpload}
-                  style={{ marginBottom: "10px" }}
+                  multiple // <-- Permite seleccionar múltiples archivos
+                  onChange={handleMultipleImagesUpload}
+                  style={{ marginBottom: "12px" }}
                 />
-                {imagenUrl && (
-                  <div>
-                    <img
-                      src={imagenUrl}
-                      alt="Preview"
-                      style={{
-                        width: "60px",
-                        height: "60px",
-                        objectFit: "cover",
-                        borderRadius: "6px",
-                      }}
-                    />
+
+                {/* Galería de vistas previas con opción de eliminar individualmente */}
+                {imagenesUrls.length > 0 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "10px",
+                      background: "#f8fafc",
+                      padding: "10px",
+                      borderRadius: "8px",
+                      border: "1px solid #cbd5e1",
+                    }}
+                  >
+                    {imagenesUrls.map((url, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          position: "relative",
+                          width: "70px",
+                          height: "70px",
+                        }}
+                      >
+                        <img
+                          src={url}
+                          alt={`Preview ${idx}`}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            borderRadius: "6px",
+                            border: "1px solid #94a3b8",
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(idx)}
+                          style={{
+                            position: "absolute",
+                            top: "-6px",
+                            right: "-6px",
+                            background: "#ef4444",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "50%",
+                            width: "20px",
+                            height: "20px",
+                            fontSize: "11px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                          title="Eliminar imagen"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -314,7 +377,6 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
                 >
                   Cuerpo de la noticia
                 </label>
-                {/* Editor CKEditor 5 con Negrita, Cursiva, Listas de viñetas y numéricas */}
                 <div
                   className="ckeditor-wrapper"
                   style={{
