@@ -324,3 +324,7 @@
 .btn-crear-noticia-header:hover {
   background-color: #1a2b4c;
 }
+
+.ck.ck-balloon-panel {
+  z-index: 99999 !important;
+}

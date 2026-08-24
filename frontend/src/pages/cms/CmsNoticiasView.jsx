@@ -385,14 +385,33 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
                     overflow: "hidden",
                   }}
                 >
-                  <CKEditor
-                    editor={ClassicEditor}
-                    data={cuerpoHtml}
-                    onChange={(event, editor) => {
-                      const data = editor.getData();
-                      setCuerpoHtml(data);
-                    }}
-                  />
+<CKEditor
+  editor={ClassicEditor}
+  data={cuerpoHtml}
+  config={{
+    toolbar: [
+      'heading',
+      '|',
+      'bold',
+      'italic',
+      'link',
+      'bulletedList',
+      'numberedList',
+      'blockQuote',
+      'undo',
+      'redo'
+    ],
+
+    link: {
+      addTargetToExternalLinks: true, 
+      defaultProtocol: 'https://'    
+    }
+  }}
+  onChange={(event, editor) => {
+    const data = editor.getData();
+    setCuerpoHtml(data);
+  }}
+/>
                 </div>
               </div>
 
