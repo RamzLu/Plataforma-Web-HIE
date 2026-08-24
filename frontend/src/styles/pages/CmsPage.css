@@ -843,3 +843,84 @@
 .btn-cancelar-gris:hover {
   background-color: #94a3b8;
 }
+/* =========================================
+   ESTILOS PARA ACCESOS RÁPIDOS
+========================================= */
+.quick-access-card {
+  margin-top: 30px;
+}
+
+.quick-access-header {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 15px;
+}
+
+.quick-access-subtitle {
+  color: #475569;
+  font-size: 0.9rem;
+  margin: -15px 0 0 0;
+}
+
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.quick-access-item {
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 20px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 110px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-access-item:hover {
+  border-color: #0c2340;
+  box-shadow: 0 4px 12px rgba(12, 35, 64, 0.08);
+  transform: translateY(-2px);
+}
+
+.quick-access-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: #0c2340;
+}
+
+.quick-access-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.quick-access-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0c2340;
+}
+
+.quick-access-plus {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0c2340;
+  line-height: 1;
+}
+
+/* Responsividad para grilla de accesos rápidos */
+@media (max-width: 1200px) {
+  .quick-access-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .quick-access-grid {
+    grid-template-columns: 1fr;
+  }
+}

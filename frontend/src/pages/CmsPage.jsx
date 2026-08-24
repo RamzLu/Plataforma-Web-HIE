@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
 import keycloak from "../config/keycloak";
-import "../styles/pages/CmsPage.css";
+
+// Importación de los Estilos Modulares del CMS
+import "../styles/components/cms/CmsLayout.css";
+import "../styles/components/cms/CmsDashboard.css";
+import "../styles/components/cms/CmsModals.css";
 
 // Componentes modularizados
 import CmsSidebar from "../components/cms/CmsSidebar";
 import CmsHeader from "../components/cms/CmsHeader";
+
+// Vistas modulares del CMS
+import CmsDashboardView from "./cms/CmsDashboardView";
 
 // Bases de datos y recursos
 import { newsData } from "../data/newsData";
@@ -18,10 +25,7 @@ const CmsPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("Usuario CMS");
 
-  // Navegación interna del Dashboard
   const [activeTab, setActiveTab] = useState("dashboard");
-
-  // Estados de modales e imágenes
   const [selectedNews, setSelectedNews] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [lightbox, setLightbox] = useState({
@@ -106,6 +110,10 @@ const CmsPage = () => {
     }));
   };
 
+  const handleQuickAction = (actionId) => {
+    console.log(`Acción rápida seleccionada: ${actionId}`);
+  };
+
   if (!initialized) {
     return <div className="cms-loading">Cargando plataforma...</div>;
   }
@@ -148,80 +156,14 @@ const CmsPage = () => {
             </p>
           </div>
 
-          {/* Renderizado dinámico según la pestaña seleccionada en el menú */}
+          {/* Renderizado modular de vistas */}
           {activeTab === "dashboard" && (
-            <>
-              {/* Noticias Recientes */}
-              <div
-                className="cms-dashboard-card"
-                style={{ marginBottom: "30px" }}
-              >
-                <h3 className="cms-card-title">Últimas Noticias del Portal</h3>
-                <div className="cms-news-grid">
-                  {latestNews.map((news) => (
-                    <div key={news.id} className="cms-news-item">
-                      <div className="cms-news-img-placeholder">
-                        {news.images && news.images.length > 0 ? (
-                          <img
-                            src={news.images[0]}
-                            alt={news.title}
-                            className="cms-real-news-img"
-                          />
-                        ) : (
-                          <div className="cms-news-img-mock">
-                            <span className="gold-text">HIE</span>
-                            <span className="blue-sub">Sin imagen</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="cms-news-content">
-                        <h4 className="cms-real-news-title">{news.title}</h4>
-                        <p>{news.body[0].substring(0, 80)}...</p>
-                        <button
-                          className="cms-btn-ver-mas"
-                          onClick={() => setSelectedNews(news)}
-                        >
-                          VER MÁS
-                        </button>
-                        <span className="cms-news-time">{news.date}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Estadísticas */}
-              <div className="cms-stats-grid">
-                <div className="cms-stat-card">
-                  <span className="cms-stat-title">Contenido publicado</span>
-                  <span className="cms-stat-value">
-                    {dashboardStats.contenidoPublicado}
-                  </span>
-                  <span className="cms-stat-subtitle">+0% este mes</span>
-                </div>
-                <div className="cms-stat-card">
-                  <span className="cms-stat-title">Borradores guardados</span>
-                  <span className="cms-stat-value">
-                    {String(dashboardStats.borradores).padStart(2, "0")}
-                  </span>
-                  <span className="cms-stat-subtitle">Edición en progreso</span>
-                </div>
-                <div className="cms-stat-card">
-                  <span className="cms-stat-title">Documentos activos</span>
-                  <span className="cms-stat-value">
-                    {dashboardStats.documentosActivos}
-                  </span>
-                  <span className="cms-stat-subtitle">+0 esta semana</span>
-                </div>
-                <div className="cms-stat-card">
-                  <span className="cms-stat-title">Visitas al portal</span>
-                  <span className="cms-stat-value">
-                    {dashboardStats.visitas}
-                  </span>
-                  <span className="cms-stat-subtitle">+0% este mes</span>
-                </div>
-              </div>
-            </>
+            <CmsDashboardView
+              latestNews={latestNews}
+              dashboardStats={dashboardStats}
+              setSelectedNews={setSelectedNews}
+              handleQuickAction={handleQuickAction}
+            />
           )}
 
           {activeTab !== "dashboard" && (
@@ -349,9 +291,6 @@ const CmsPage = () => {
       )}
 
       {/* LIGHTBOX */}
-      {/* =========================================
-          LIGHTBOX (VISOR DE IMÁGENES)
-      ========================================= */}
       {lightbox.isOpen && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>

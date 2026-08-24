@@ -1,0 +1,250 @@
+/* Modales, Lightbox y Logout */
+.modal-overlay,
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modal-content-esp {
+  background-color: #f8fafc;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  border-radius: 16px;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header-esp {
+  background-color: #ffffff;
+  padding: 24px 35px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header-esp h2 {
+  color: #2b5b94;
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.btn-close-modal {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.btn-close-modal:hover {
+  background-color: #fee2e2;
+  color: #e11d48;
+}
+
+.btn-close-modal svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
+.modal-body-esp {
+  padding: 30px 35px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+}
+
+.modal-author-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.hospital-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.hospital-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.author-meta h3 {
+  margin: 0 0 2px 0;
+  font-size: 0.98rem;
+  color: #0c2340;
+  font-weight: 700;
+}
+
+.author-meta span {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.news-modal-title {
+  color: #2b5b94;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.info-text {
+  font-size: 1rem;
+  color: #334155;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.news-modal-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.modal-news-img-box {
+  height: 190px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+}
+
+.modal-news-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-footer-esp {
+  padding: 20px 35px;
+  display: flex;
+  justify-content: center;
+  background-color: #ffffff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-cerrar-rojo {
+  background-color: #e11d48;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 36px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btn-cerrar-rojo:hover {
+  background-color: #be123c;
+}
+
+.logout-modal {
+  max-width: 450px !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.logout-footer {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn-cancelar-gris {
+  background-color: #cbd5e1;
+  color: #1e293b;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 28px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btn-cancelar-gris:hover {
+  background-color: #94a3b8;
+}
+
+/* Lightbox */
+.lightbox-close {
+  position: absolute;
+  top: 25px;
+  right: 40px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 3.5rem;
+  cursor: pointer;
+  z-index: 3010;
+}
+
+.lightbox-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.lb-left {
+  left: -90px;
+}
+.lb-right {
+  right: -90px;
+}
