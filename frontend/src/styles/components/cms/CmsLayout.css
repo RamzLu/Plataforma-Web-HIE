@@ -1,4 +1,6 @@
-/* Layout General y Sidebar */
+/* =========================================
+   LAYOUT GENERAL Y SIDEBAR FIJO
+========================================= */
 .cms-layout {
   display: flex;
   min-height: 100vh;
@@ -11,6 +13,7 @@
     "Segoe UI",
     Roboto,
     sans-serif;
+  position: relative;
 }
 
 .cms-sidebar {
@@ -20,6 +23,14 @@
   flex-direction: column;
   flex-shrink: 0;
   border-right: 1px solid #bce3f4;
+
+  /* Hacemos que el Sidebar sea fijo a la izquierda */
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
 }
 
 .cms-logo-container {
@@ -111,14 +122,41 @@
   stroke: #0c2340;
 }
 
+/* =========================================
+   CONTENEDOR PRINCIPAL Y HEADER FIJO
+========================================= */
 .cms-main-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
+
+  /* Desplazamos el contenido a la derecha para dejar espacio al sidebar fijo */
+  margin-left: 260px;
+}
+
+.cms-header {
+  height: 80px;
+  background-color: #1a2b4c;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  flex-shrink: 0;
+
+  /* Hacemos que el Header sea fijo arriba, ocupando el espacio restante */
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 260px;
+  z-index: 99;
 }
 
 .cms-content {
   padding: 40px;
+
+  /* Añadimos un margen superior para que el contenido no quede oculto detrás del header fijo */
+  margin-top: 80px;
 }
 
 .cms-page-title {
@@ -145,18 +183,7 @@
   margin: 0;
 }
 
-/* Header */
-.cms-header {
-  height: 80px;
-  background-color: #1a2b4c;
-  color: #ffffff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 30px;
-  flex-shrink: 0;
-}
-
+/* Resto de estilos del Header */
 .cms-header-left {
   display: flex;
   align-items: center;
