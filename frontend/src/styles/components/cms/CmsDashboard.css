@@ -328,3 +328,39 @@
 .ck.ck-balloon-panel {
   z-index: 99999 !important;
 }
+/* Contenedor principal de la imagen en la tarjeta del CMS */
+.cms-news-img-placeholder {
+  width: 100%;
+  height: 160px; /* Alto fijo para que todas las tarjetas midan igual */
+  overflow: hidden;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f1f5f9; /* Color de fondo base */
+}
+
+/* El reemplazo cuando no hay foto */
+.cms-news-img-mock {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Estilos para las letras del mock */
+.cms-news-img-mock .gold-text {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #94a3b8; /* Un gris sutil para que no resalte demasiado */
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.cms-news-img-mock .blue-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 5px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
