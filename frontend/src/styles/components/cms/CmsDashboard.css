@@ -52,8 +52,11 @@
   margin: 0 0 8px 0;
   font-weight: 700;
   line-height: 1.2;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  width: 100%;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 2; /* Limita el título a máximo 2 líneas */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -305,4 +308,19 @@
   font-size: 0.9rem;
   color: #475569;
   font-weight: 500;
+}
+.btn-crear-noticia-header {
+  background-color: #0c2340;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-crear-noticia-header:hover {
+  background-color: #1a2b4c;
 }

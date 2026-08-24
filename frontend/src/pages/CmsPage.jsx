@@ -1,19 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import keycloak from "../config/keycloak";
 
-// Importación de los Estilos Modulares del CMS
 import "../styles/components/cms/CmsLayout.css";
 import "../styles/components/cms/CmsDashboard.css";
 import "../styles/components/cms/CmsModals.css";
 
-// Componentes modularizados
 import CmsSidebar from "../components/cms/CmsSidebar";
 import CmsHeader from "../components/cms/CmsHeader";
-
-// Vistas modulares del CMS
 import CmsDashboardView from "./cms/CmsDashboardView";
+import CmsNoticiasView from "./cms/CmsNoticiasView";
 
-// Bases de datos y recursos
 import { newsData } from "../data/newsData";
 import { documentosData } from "../data/documentos";
 import avatarHospital from "../assets/iconEVITAface.jpg";
@@ -33,7 +29,7 @@ const CmsPage = () => {
     images: [],
     index: 0,
   });
-
+  const [newsList, setNewsList] = useState(newsData);
   const [dashboardStats, setDashboardStats] = useState({
     contenidoPublicado: 0,
     borradores: 0,
@@ -41,37 +37,89 @@ const CmsPage = () => {
     visitas: "0",
   });
 
+  const isKeycloakInitialized = useRef(false);
+
   useEffect(() => {
-    keycloak.init({ onLoad: "login-required" }).then((auth) => {
-      setInitialized(true);
-      setAuthenticated(auth);
-      if (auth) {
+    // Si ya está inicializado o autenticado por Keycloak previamente, evitamos reiniciarlo
+    if (isKeycloakInitialized.current || keycloak.authenticated) {
+      if (keycloak.authenticated) {
+        setInitialized(true);
+        setAuthenticated(true);
         setIsCms(
           keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"),
         );
         setIsAdmin(keycloak.hasRealmRole("admin"));
-
         const name =
           keycloak.tokenParsed?.name ||
           keycloak.tokenParsed?.preferred_username ||
           "Editor CMS";
         setUserName(name);
-
-        const publicadas = newsData.filter((news) => !news.isDraft).length;
-        const borradoresPendientes = newsData.filter(
-          (news) => news.isDraft,
-        ).length;
-        const totalDocumentos = documentosData ? documentosData.length : 0;
-
-        setDashboardStats({
-          contenidoPublicado: publicadas,
-          borradores: borradoresPendientes,
-          documentosActivos: totalDocumentos,
-          visitas: "0",
-        });
+        updateStats(newsList);
       }
+      return;
+    }
+
+    isKeycloakInitialized.current = true;
+
+    keycloak
+      .init({ onLoad: "login-required", checkLoginIframe: false })
+      .then((auth) => {
+        setInitialized(true);
+        setAuthenticated(auth);
+        if (auth) {
+          setIsCms(
+            keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"),
+          );
+          setIsAdmin(keycloak.hasRealmRole("admin"));
+
+          const name =
+            keycloak.tokenParsed?.name ||
+            keycloak.tokenParsed?.preferred_username ||
+            "Editor CMS";
+          setUserName(name);
+
+          updateStats(newsList);
+        }
+      })
+      .catch((err) => {
+        console.error("Error al inicializar Keycloak:", err);
+      });
+  }, [newsList]);
+
+  const updateStats = (currentNews) => {
+    const publicadas = currentNews.filter((news) => !news.isDraft).length;
+    const borradoresPendientes = currentNews.filter(
+      (news) => news.isDraft,
+    ).length;
+    const totalDocumentos = documentosData ? documentosData.length : 0;
+
+    setDashboardStats({
+      contenidoPublicado: publicadas,
+      borradores: borradoresPendientes,
+      documentosActivos: totalDocumentos,
+      visitas: "0",
     });
-  }, []);
+  };
+
+  // Función para agregar noticia y colocarla en la primera posición
+  const handleAddNewNews = (nuevaNoticia) => {
+    const updatedList = [nuevaNoticia, ...newsList];
+    setNewsList(updatedList);
+
+    // Guardamos en localStorage para persistencia entre páginas (CMS y Portal Público)
+    localStorage.setItem("portal_news_data", JSON.stringify(updatedList));
+
+    alert("¡Noticia creada y publicada con éxito en el portal!");
+  };
+
+  const handleDeleteNews = (id) => {
+    if (window.confirm("¿Estás seguro de eliminar esta noticia?")) {
+      const filtered = newsList.filter((n) => n.id !== id);
+      setNewsList(filtered);
+      const indexInOriginal = newsData.findIndex((n) => n.id === id);
+      if (indexInOriginal !== -1) newsData.splice(indexInOriginal, 1);
+    }
+  };
 
   const testBackendConnection = async () => {
     try {
@@ -110,10 +158,6 @@ const CmsPage = () => {
     }));
   };
 
-  const handleQuickAction = (actionId) => {
-    console.log(`Acción rápida seleccionada: ${actionId}`);
-  };
-
   if (!initialized) {
     return <div className="cms-loading">Cargando plataforma...</div>;
   }
@@ -132,7 +176,7 @@ const CmsPage = () => {
     );
   }
 
-  const latestNews = [...newsData].sort((a, b) => b.id - a.id).slice(0, 4);
+  const latestNews = [...newsList].sort((a, b) => b.id - a.id).slice(0, 4);
 
   return (
     <div className="cms-layout">
@@ -149,24 +193,38 @@ const CmsPage = () => {
         <main className="cms-content">
           <div className="cms-page-title">
             <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
-            <h1>Panel de administración</h1>
+            <h1>
+              {activeTab === "noticias"
+                ? "Gestión de Noticias"
+                : "Panel de administración"}
+            </h1>
             <p>
               Administre de forma segura la información pública del Portal Red
               Evita Formosa.
             </p>
           </div>
 
-          {/* Renderizado modular de vistas */}
+          {/* VISTA: DASHBOARD */}
           {activeTab === "dashboard" && (
             <CmsDashboardView
               latestNews={latestNews}
               dashboardStats={dashboardStats}
               setSelectedNews={setSelectedNews}
-              handleQuickAction={handleQuickAction}
+              handleQuickAction={() => setActiveTab("noticias")}
             />
           )}
 
-          {activeTab !== "dashboard" && (
+          {/* VISTA: NOTICIAS (FUNCIONAL) */}
+          {activeTab === "noticias" && (
+            <CmsNoticiasView
+              newsList={newsList}
+              onAddNewNews={handleAddNewNews}
+              onDeleteNews={handleDeleteNews}
+            />
+          )}
+
+          {/* OTRAS VISTAS EN DESARROLLO */}
+          {activeTab !== "dashboard" && activeTab !== "noticias" && (
             <div className="cms-dashboard-card">
               <h3 className="cms-card-title">
                 Módulo de {activeTab.toUpperCase()}
@@ -224,7 +282,7 @@ const CmsPage = () => {
         </div>
       )}
 
-      {/* MODAL DE NOTICIAS */}
+      {/* MODAL DE VISTA PREVIA DE NOTICIA */}
       {selectedNews && (
         <div className="modal-overlay" onClick={() => setSelectedNews(null)}>
           <div
@@ -257,9 +315,11 @@ const CmsPage = () => {
               </div>
               <div className="news-modal-body-text">
                 {selectedNews.body.map((paragraph, idx) => (
-                  <p key={idx} className="info-text">
-                    {paragraph}
-                  </p>
+                  <div
+                    key={idx}
+                    className="info-text"
+                    dangerouslySetInnerHTML={{ __html: paragraph }}
+                  />
                 ))}
               </div>
               {selectedNews.images && selectedNews.images.length > 0 && (
@@ -268,7 +328,7 @@ const CmsPage = () => {
                     {selectedNews.images.map((img, idx) => (
                       <div
                         className="modal-news-img-box"
-                        key={idx}
+                        key5={idx}
                         onClick={() => openLightbox(selectedNews.images, idx)}
                       >
                         <img src={img} alt={`Foto noticia ${idx + 1}`} />

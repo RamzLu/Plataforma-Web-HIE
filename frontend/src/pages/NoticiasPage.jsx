@@ -114,10 +114,16 @@ const miniCarouselData = [
   { id: 3, img: imgAlta3 },
   { id: 4, img: imgAlta4 },
 ];
-
+const cleanHtmlText = (html) => {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>?/gm, "") // Elimina todas las etiquetas HTML (<p>, <strong>, etc.)
+    .replace(/&nbsp;/g, " ") // Reemplaza los espacios vacíos de CKEditor por espacios normales
+    .replace(/\s+/g, " ") // Agrupa múltiples espacios o saltos de línea en uno solo
+    .trim(); // Elimina espacios al inicio y al final
+};
 const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
-  const isLong = news.body.length > 1 || news.body[0].length > 120;
-
+  const plainText = cleanHtmlText(news.body[0]);
   return (
     <article className="full-news-card">
       <div className="full-news-header">
@@ -132,13 +138,12 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
 
       <div className="full-news-body">
         <h4 className="full-news-title">{news.title}</h4>
-        <p className="clamped-text">{news.body[0]}</p>
+        <p className="clamped-text">{plainText}</p>
 
-        {isLong && (
-          <button className="read-more-btn" onClick={() => onOpenNews(news)}>
-            Ver más
-          </button>
-        )}
+        {/* EL BOTÓN SE MUESTRA SIEMPRE */}
+        <button className="read-more-btn" onClick={() => onOpenNews(news)}>
+          Ver más
+        </button>
       </div>
 
       <div className="full-news-images">
@@ -164,6 +169,7 @@ const NoticiasPage = () => {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedNews, setSelectedNews] = useState(null);
   const [altaIndex, setAltaIndex] = useState(0);
+  const [noticias, setNoticias] = useState([]);
 
   const [lightbox, setLightbox] = useState({
     isOpen: false,
@@ -171,7 +177,7 @@ const NoticiasPage = () => {
     index: 0,
   });
 
-  const sortedNews = [...newsData].sort((a, b) => b.id - a.id);
+  const sortedNews = [...noticias].sort((a, b) => b.id - a.id);
 
   const scrollNews = (direction) => {
     if (sliderRef.current) {
@@ -205,12 +211,14 @@ const NoticiasPage = () => {
 
   // Movimiento automático lento para el mini carrusel cada 5 segundos[cite: 8]
   useEffect(() => {
-    const interval = setInterval(() => {
-      nextAltaSlide();
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [altaIndex]);
+    // Intentamos cargar las noticias desde el localStorage (creadas desde el CMS)
+    const savedNews = localStorage.getItem("portal_news_data");
+    if (savedNews) {
+      setNoticias(JSON.parse(savedNews));
+    } else {
+      setNoticias(newsData); // <-- USAMOS newsData QUE SÍ ESTÁ IMPORTADO
+    }
+  }, []);
 
   const openLightbox = (images, index) =>
     setLightbox({ isOpen: true, images, index });
@@ -544,11 +552,14 @@ const NoticiasPage = () => {
               </div>
 
               {/* PÁRRAFOS */}
+              {/* PÁRRAFOS CON SOPORTE DE HTML (CKEDITOR 5) */}
               <div className="news-modal-body-text">
                 {selectedNews.body.map((paragraph, idx) => (
-                  <p key={idx} className="info-text">
-                    {paragraph}
-                  </p>
+                  <div
+                    key={idx}
+                    className="info-text"
+                    dangerouslySetInnerHTML={{ __html: paragraph }}
+                  />
                 ))}
               </div>
 

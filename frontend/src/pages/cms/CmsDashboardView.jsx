@@ -1,6 +1,15 @@
 import React from "react";
 import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
-import CmsRecentActivity from "../../components/cms/CmsRecentActivity"; // <-- NUEVO IMPORT
+import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
+
+const cleanHtmlText = (html) => {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>?/gm, "") // Elimina etiquetas HTML (<p>, <strong>, etc.)
+    .replace(/&nbsp;/g, " ") // Reemplaza espacios vacíos
+    .replace(/\s+/g, " ") // Agrupa espacios múltiples
+    .trim(); // Limpia extremos
+};
 
 const CmsDashboardView = ({
   latestNews,
@@ -32,7 +41,17 @@ const CmsDashboardView = ({
               </div>
               <div className="cms-news-content">
                 <h4 className="cms-real-news-title">{news.title}</h4>
-                <p>{news.body[0].substring(0, 80)}...</p>
+
+                {/* APLICAMOS LA FUNCIÓN Y EL AJUSTE AQUÍ */}
+                <p
+                  style={{
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                  }}
+                >
+                  {cleanHtmlText(news.body[0]).substring(0, 80)}...
+                </p>
+
                 <button
                   className="cms-btn-ver-mas"
                   onClick={() => setSelectedNews(news)}
@@ -79,7 +98,7 @@ const CmsDashboardView = ({
       {/* 3. Accesos Rápidos */}
       <CmsQuickAccess onActionClick={handleQuickAction} />
 
-      {/* 4. Actividad Reciente (NUEVO BLOQUE) */}
+      {/* 4. Actividad Reciente */}
       <CmsRecentActivity />
     </>
   );
