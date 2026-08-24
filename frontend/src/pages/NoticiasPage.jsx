@@ -116,11 +116,27 @@ const miniCarouselData = [
 ];
 const cleanHtmlText = (html) => {
   if (!html) return "";
-  return html
-    .replace(/<[^>]*>?/gm, "") // Elimina todas las etiquetas HTML (<p>, <strong>, etc.)
-    .replace(/&nbsp;/g, " ") // Reemplaza los espacios vacíos de CKEditor por espacios normales
-    .replace(/\s+/g, " ") // Agrupa múltiples espacios o saltos de línea en uno solo
-    .trim(); // Elimina espacios al inicio y al final
+
+  let text = html;
+
+  text = text.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (match, innerOl) => {
+    let count = 1;
+    return innerOl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
+      return `\n${count++}. ${innerLi}`;
+    });
+  });
+  text = text.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (match, innerUl) => {
+    return innerUl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
+      return `\n• ${innerLi}`;
+    });
+  });
+  return text
+    .replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n") // Saltos de línea al terminar párrafos
+    .replace(/<[^>]*>?/gm, "")                  // Elimina cualquier otra etiqueta HTML
+    .replace(/&nbsp;/g, " ")                    // Quita los espacios codificados
+    .replace(/[ \t]+/g, " ")                    // Agrupa espacios horizontales vacíos
+    .replace(/\n\s*\n/g, "\n")                  // Evita que queden dobles saltos de línea gigantes
+    .trim();                                    // Limpia los bordes
 };
 const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
   const plainText = cleanHtmlText(news.body[0]);

@@ -364,3 +364,28 @@
   text-transform: uppercase;
   font-weight: 600;
 }
+/* Restaurar viñetas y números dentro de CKEditor */
+.ck-content ul {
+  list-style-type: disc !important;
+  margin-left: 25px !important;
+  margin-bottom: 10px !important;
+}
+
+.ck-content ol {
+  list-style-type: decimal !important;
+  margin-left: 25px !important;
+  margin-bottom: 10px !important;
+}
+
+/* Restaurar viñetas y números en los modales de lectura */
+.news-modal-body-text ul {
+  list-style-type: disc;
+  margin-left: 25px;
+  margin-bottom: 10px;
+}
+
+.news-modal-body-text ol {
+  list-style-type: decimal;
+  margin-left: 25px;
+  margin-bottom: 10px;
+}

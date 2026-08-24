@@ -4,13 +4,34 @@ import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
 
 const cleanHtmlText = (html) => {
   if (!html) return "";
-  return html
-    .replace(/<[^>]*>?/gm, "") // Elimina etiquetas HTML (<p>, <strong>, etc.)
-    .replace(/&nbsp;/g, " ") // Reemplaza espacios vacíos
-    .replace(/\s+/g, " ") // Agrupa espacios múltiples
-    .trim(); // Limpia extremos
-};
 
+  let text = html;
+
+  // 1. Detectar listas ordenadas (<ol>) y aplicar un contador
+  text = text.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (match, innerOl) => {
+    let count = 1;
+    // Por cada <li> dentro de este <ol>, ponemos el número actual y sumamos 1
+    return innerOl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
+      return `\n${count++}. ${innerLi}`;
+    });
+  });
+
+  // 2. Detectar listas desordenadas (<ul>) y aplicar viñetas
+  text = text.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (match, innerUl) => {
+    return innerUl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
+      return `\n• ${innerLi}`;
+    });
+  });
+
+  // 3. Limpiar el resto del HTML y emprolijar los espacios
+  return text
+    .replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n") // Saltos de línea al terminar párrafos
+    .replace(/<[^>]*>?/gm, "")                  // Elimina cualquier otra etiqueta HTML
+    .replace(/&nbsp;/g, " ")                    // Quita los espacios codificados
+    .replace(/[ \t]+/g, " ")                    // Agrupa espacios horizontales vacíos
+    .replace(/\n\s*\n/g, "\n")                  // Evita que queden dobles saltos de línea gigantes
+    .trim();                                    // Limpia los bordes
+};
 const CmsDashboardView = ({
   latestNews,
   dashboardStats,
