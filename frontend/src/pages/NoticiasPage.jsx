@@ -220,13 +220,29 @@ const NoticiasPage = () => {
     );
   };
 
-  useEffect(() => {
-    const savedNews = localStorage.getItem("portal_news_data");
-    if (savedNews) {
-      setNoticias(JSON.parse(savedNews));
-    } else {
-      setNoticias(newsData); 
-    }
+useEffect(() => {
+    const fetchNoticiasPublicas = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/cms/noticias");
+        if (!response.ok) throw new Error("Error al obtener noticias");
+        const data = await response.json();
+
+        const noticiasFormateadas = data.map(noticia => ({
+          id: noticia.id,
+          title: noticia.titulo || noticia.title,
+          body: [noticia.contenido || noticia.body],
+          date: noticia.createdAt ? new Date(noticia.createdAt).toLocaleDateString("es-AR") : "Hoy",
+          category: "Noticias",
+          images: noticia.images || []
+        }));
+
+        setNoticias(noticiasFormateadas); // Asegúrate de que 'setNoticias' sea el nombre de tu estado actual
+      } catch (error) {
+        console.error("Error al cargar noticias en el portal:", error);
+      }
+    };
+
+    fetchNoticiasPublicas();
   }, []);
 
   const openLightbox = (images, index) =>

@@ -197,3 +197,99 @@ export const eliminarNoticia = async (req, res) => {
     return res.status(500).json({ error: 'Error al eliminar: ' + error.message });
   }
 };
+export const actualizarNoticia = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titulo, contenido, imagenesExistentes } = req.body;
+    const archivosSubidos = req.files || [];
+
+    const noticiaExistente = await prisma.noticia.findUnique({
+      where: { id: BigInt(id) },
+      include: {
+        noticia_archivo: { include: { archivo: true } }
+      }
+    });
+
+    if (!noticiaExistente) {
+      return res.status(404).json({ error: 'Noticia no encontrada.' });
+    }
+
+    // 1. Actualizamos texto y título
+    const noticiaActualizada = await prisma.noticia.update({
+      where: { id: BigInt(id) },
+      data: {
+        titulo: titulo || noticiaExistente.titulo,
+        contenido: contenido || noticiaExistente.contenido,
+        updatedAt: new Date()
+      }
+    });
+
+    // 2. Sincronizamos las imágenes existentes que el usuario decidió conservar
+    const urlsConservadas = imagenesExistentes ? JSON.parse(imagenesExistentes) : [];
+
+    for (const na of noticiaExistente.noticia_archivo) {
+      const archivo = na.archivo;
+      const { data } = supabase.storage.from('noticias-imagenes').getPublicUrl(archivo.nombreArchivo);
+      
+      // Si la imagen vieja ya no está en la lista que conservó el usuario, la borramos
+      if (!urlsConservadas.includes(data.publicUrl)) {
+        await supabase.storage.from('noticias-imagenes').remove([archivo.nombreArchivo]);
+        await prisma.noticia_archivo.deleteMany({ where: { archivoId: archivo.id } });
+        await prisma.archivo.delete({ where: { id: archivo.id } });
+      }
+    }
+
+    // 3. Si se subieron archivos nuevos, los agregamos
+    for (const file of archivosSubidos) {
+      const nombreUnico = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
+      
+      await supabase.storage.from('noticias-imagenes').upload(nombreUnico, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false
+      });
+
+      const archivoDb = await prisma.archivo.create({
+        data: {
+          nombreOriginal: file.originalname,
+          nombreArchivo: nombreUnico,
+          ruta: `noticias-imagenes/${nombreUnico}`,
+          extension: file.originalname.split('.').pop(),
+          mimeType: file.mimetype,
+          tamanioBytes: BigInt(file.size)
+        }
+      });
+
+      await prisma.noticia_archivo.create({
+        data: {
+          noticiaId: noticiaActualizada.id,
+          archivoId: archivoDb.id
+        }
+      });
+    }
+
+    // 4. Devolvemos la lista final limpia
+    const noticiaConArchivos = await prisma.noticia.findUnique({
+      where: { id: BigInt(id) },
+      include: { noticia_archivo: { include: { archivo: true } } }
+    });
+
+    const imgs = noticiaConArchivos.noticia_archivo.map(na => {
+      const { data } = supabase.storage.from('noticias-imagenes').getPublicUrl(na.archivo.nombreArchivo);
+      return data.publicUrl;
+    });
+
+    return res.status(200).json({
+      message: '¡Noticia y galería actualizadas correctamente!',
+      noticia: {
+        ...noticiaActualizada,
+        id: noticiaActualizada.id.toString(),
+        categoriaId: noticiaActualizada.categoriaId.toString(),
+        images: imgs
+      }
+    });
+
+  } catch (error) {
+    console.error('Error al actualizar la noticia:', error);
+    return res.status(500).json({ error: 'Error al actualizar: ' + error.message });
+  }
+};
