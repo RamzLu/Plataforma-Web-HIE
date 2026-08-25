@@ -3,27 +3,24 @@ import { newsData } from "../data/newsData";
 import "../styles/pages/NoticiasPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 
-// Íconos animados
 import iconMama from "../assets/icon-mama.png";
 import iconCorazon from "../assets/icon-corazon.png";
 import iconDonacion from "../assets/icon-donacion-de-sangre.png";
 import iconDengue from "../assets/icon-dengue.png";
 import avatarHospital from "../assets/iconEVITAface.jpg";
-//Iconos estaticos
+
 import iconMamaStatic from "../assets/icon-mama-estatico.png";
 import iconCorazonStatic from "../assets/icon-corazon-estatico.png";
 import iconDonacionStatic from "../assets/icon-donacion-de-sangre-estatico.png";
 import iconDengueStatic from "../assets/icon-dengue-estatico.png";
-// Banner de Últimas Publicaciones
+
 import fondoBannerNoticias from "../assets/banner_noticias.png";
 
-// Imágenes para el Mini Carrusel
 import imgAlta1 from "../assets/fondoCARRUSELnoticiasCM.jpg";
 import imgAlta2 from "../assets/fondoCARRUSELnoticias2.jpg";
 import imgAlta3 from "../assets/fondoCARRUSELnoticias3.jpg";
 import imgAlta4 from "../assets/fondoCARRUSELnoticias4.jpg";
 
-// Imágenes de los folletos
 import folletoCD1 from "../assets/folletoCD1.jpg";
 import folletoCD2 from "../assets/folletoCD2.jpg";
 import folletoCD3 from "../assets/folletoCD3.jpg";
@@ -107,7 +104,6 @@ const medicalArticles = [
   },
 ];
 
-// Data para el Mini Carrusel bajo el título
 const miniCarouselData = [
   { id: 1, img: imgAlta1 },
   { id: 2, img: imgAlta2 },
@@ -115,7 +111,7 @@ const miniCarouselData = [
   { id: 4, img: imgAlta4 },
 ];
 const cleanHtmlText = (html) => {
-  if (!html) return "";
+  if (!html || typeof html !== "string") return "";
 
   let text = html;
 
@@ -125,18 +121,20 @@ const cleanHtmlText = (html) => {
       return `\n${count++}. ${innerLi}`;
     });
   });
+
   text = text.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (match, innerUl) => {
     return innerUl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
       return `\n• ${innerLi}`;
     });
   });
+
   return text
-    .replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n") // Saltos de línea al terminar párrafos
-    .replace(/<[^>]*>?/gm, "")                  // Elimina cualquier otra etiqueta HTML
-    .replace(/&nbsp;/g, " ")                    // Quita los espacios codificados
-    .replace(/[ \t]+/g, " ")                    // Agrupa espacios horizontales vacíos
-    .replace(/\n\s*\n/g, "\n")                  // Evita que queden dobles saltos de línea gigantes
-    .trim();                                    // Limpia los bordes
+    .replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]*>?/gm, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n/g, "\n")
+    .trim();
 };
 const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
   const plainText = cleanHtmlText(news.body[0]);
@@ -156,7 +154,6 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
         <h4 className="full-news-title">{news.title}</h4>
         <p className="clamped-text">{plainText}</p>
 
-        {/* EL BOTÓN SE MUESTRA SIEMPRE */}
         <button className="read-more-btn" onClick={() => onOpenNews(news)}>
           Ver más
         </button>
@@ -223,14 +220,12 @@ const NoticiasPage = () => {
     );
   };
 
-  // Movimiento automático lento para el mini carrusel cada 5 segundos[cite: 8]
   useEffect(() => {
-    // Intentamos cargar las noticias desde el localStorage (creadas desde el CMS)
     const savedNews = localStorage.getItem("portal_news_data");
     if (savedNews) {
       setNoticias(JSON.parse(savedNews));
     } else {
-      setNoticias(newsData); // <-- USAMOS newsData QUE SÍ ESTÁ IMPORTADO
+      setNoticias(newsData); 
     }
   }, []);
 
@@ -257,7 +252,6 @@ const NoticiasPage = () => {
 
   return (
     <main className="noticias-page">
-      {/* BANNER FULL WIDTH: Últimas Publicaciones */}
       <div
         className="news-header-fluid"
         style={{
@@ -282,7 +276,6 @@ const NoticiasPage = () => {
       </div>
 
       <div className="noticias-page-container">
-        {/* SLIDER DE NOTICIAS FACEBOOK */}
         <div className="slider-wrapper">
           <button
             className="slider-arrow left-arrow"
@@ -308,9 +301,7 @@ const NoticiasPage = () => {
           </button>
         </div>
 
-        {/* SECCIÓN DE ARTÍCULOS MÉDICOS (Diseño 2 columnas según la imagen) */}
         <section className="medical-articles-section">
-          {/* COLUMNA IZQUIERDA: Títulos y Mini Carrusel */}
           <div className="medical-left-column">
             <div className="medical-header">
               <h4 className="medical-subtitle">
@@ -335,7 +326,7 @@ const NoticiasPage = () => {
                 <img
                   src={miniCarouselData[altaIndex].img}
                   alt={miniCarouselData[altaIndex].caption}
-                  key={altaIndex} // Fuerza el re-render para la animación de fade
+                  key={altaIndex} 
                 />
                 <button
                   className="mini-arrow mini-right"
@@ -410,7 +401,6 @@ const NoticiasPage = () => {
             className="modal-content-esp"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* CABECERA ESTILIZADA DE LA VENTANA */}
             <div className="modal-header-esp">
               <h2>{selectedArticle.title}</h2>
               <button
@@ -424,9 +414,7 @@ const NoticiasPage = () => {
               </button>
             </div>
 
-            {/* CUERPO DEL ARTÍCULO */}
             <div className="modal-body-esp">
-              {/* AUTOR / PERFIL DE LA INSTITUCIÓN */}
               <div className="modal-author-row">
                 <div className="hospital-avatar">
                   <img src={avatarHospital} alt="Avatar Hospital" />
@@ -437,7 +425,6 @@ const NoticiasPage = () => {
                 </div>
               </div>
 
-              {/* DESCRIPCIÓN Y SUBTÍTULO */}
               <div className="info-section">
                 <h4 className="info-title">
                   <span className="info-icon">
@@ -459,7 +446,6 @@ const NoticiasPage = () => {
                 </div>
               </div>
 
-              {/* CARRUSEL DE FOLLETOS / MATERIAL CAMPAÑA */}
               {selectedArticle.campaignImages &&
                 selectedArticle.campaignImages.length > 0 && (
                   <div className="info-section">
@@ -520,20 +506,13 @@ const NoticiasPage = () => {
           </div>
         </div>
       )}
-
-      {/* =========================================
-          POP-UP PARA NOTICIAS
-      ========================================= */}
-      {/* =========================================
-    POP-UP PARA NOTICIAS (ESTILO ADAPTADO)
-========================================= */}
       {selectedNews && (
         <div className="modal-overlay" onClick={() => setSelectedNews(null)}>
           <div
             className="modal-content-esp"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* CABECERA */}
+
             <div className="modal-header-esp">
               <h2>COMUNICADO INSTITUCIONAL</h2>
               <button
@@ -547,9 +526,7 @@ const NoticiasPage = () => {
               </button>
             </div>
 
-            {/* CUERPO DE LA NOTICIA */}
             <div className="modal-body-esp">
-              {/* PERFIL / FECHA */}
               <div className="modal-author-row">
                 <div className="hospital-avatar">
                   <img src={avatarHospital} alt="Avatar Hospital" />
@@ -560,13 +537,10 @@ const NoticiasPage = () => {
                 </div>
               </div>
 
-              {/* TÍTULO DE LA NOTICIA */}
               <div className="news-modal-headline">
                 <h3 className="news-modal-title">{selectedNews.title}</h3>
               </div>
 
-              {/* PÁRRAFOS */}
-              {/* PÁRRAFOS CON SOPORTE DE HTML (CKEDITOR 5) */}
               <div className="news-modal-body-text">
                 {selectedNews.body.map((paragraph, idx) => (
                   <div
@@ -577,8 +551,6 @@ const NoticiasPage = () => {
                 ))}
               </div>
 
-              {/* FOTOS DE LA NOTICIA */}
-              {/* FOTOS DE LA NOTICIA EN FORMATO CARRUSEL */}
               {selectedNews.images && selectedNews.images.length > 0 && (
                 <div className="info-section" style={{ marginTop: "20px" }}>
                   <h4 className="info-title">
@@ -600,7 +572,6 @@ const NoticiasPage = () => {
                   </h4>
 
                   <div className="modal-slider-container">
-                    {/* Botón izquierdo (se muestra si hay más de 3 imágenes) */}
                     {selectedNews.images.length > 3 && (
                       <button
                         className="modal-arrow modal-left"
@@ -610,7 +581,6 @@ const NoticiasPage = () => {
                       </button>
                     )}
 
-                    {/* Contenedor del Slider */}
                     <div className="modal-slider" ref={modalSliderRef}>
                       {selectedNews.images.map((img, idx) => (
                         <div
@@ -623,7 +593,6 @@ const NoticiasPage = () => {
                       ))}
                     </div>
 
-                    {/* Botón derecho (se muestra si hay más de 3 imágenes) */}
                     {selectedNews.images.length > 3 && (
                       <button
                         className="modal-arrow modal-right"
@@ -640,9 +609,6 @@ const NoticiasPage = () => {
         </div>
       )}
 
-      {/* =========================================
-          LIGHTBOX UNIVERSAL (VISOR DE IMÁGENES)
-      ========================================= */}
       {lightbox.isOpen && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>
