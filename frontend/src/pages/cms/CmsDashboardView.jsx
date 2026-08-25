@@ -3,14 +3,14 @@ import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
 import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
 
 const cleanHtmlText = (html) => {
-  if (!html) return "";
+  // Blindaje: si no es un string (es undefined, null o un array), devolvemos string vacío
+  if (!html || typeof html !== "string") return "";
 
   let text = html;
 
   // 1. Detectar listas ordenadas (<ol>) y aplicar un contador
   text = text.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (match, innerOl) => {
     let count = 1;
-    // Por cada <li> dentro de este <ol>, ponemos el número actual y sumamos 1
     return innerOl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
       return `\n${count++}. ${innerLi}`;
     });
@@ -25,12 +25,12 @@ const cleanHtmlText = (html) => {
 
   // 3. Limpiar el resto del HTML y emprolijar los espacios
   return text
-    .replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n") // Saltos de línea al terminar párrafos
-    .replace(/<[^>]*>?/gm, "")                  // Elimina cualquier otra etiqueta HTML
-    .replace(/&nbsp;/g, " ")                    // Quita los espacios codificados
-    .replace(/[ \t]+/g, " ")                    // Agrupa espacios horizontales vacíos
-    .replace(/\n\s*\n/g, "\n")                  // Evita que queden dobles saltos de línea gigantes
-    .trim();                                    // Limpia los bordes
+    .replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]*>?/gm, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n/g, "\n")
+    .trim();
 };
 const CmsDashboardView = ({
   latestNews,

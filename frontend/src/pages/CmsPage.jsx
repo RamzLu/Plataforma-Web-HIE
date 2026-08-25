@@ -43,28 +43,31 @@ const CmsPage = () => {
   const isKeycloakInitialized = useRef(false);
 
   // --- NUEVA FUNCIÓN: TRAER NOTICIAS DE SUPABASE ---
-  const fetchNoticias = async () => {
+const fetchNoticias = async () => {
     try {
       const response = await fetch("http://localhost:3000/api/cms/noticias");
-      if (!response.ok) throw new Error("Error al obtener noticias");
+      if (!response.ok) throw new Error("Error al obtener noticias del servidor");
       const data = await response.json();
 
-      // Mapeamos los datos de la base de datos al formato que espera tu frontend
-      const noticiasFormateadas = data.map(noticia => ({
-        id: noticia.id,
-        title: noticia.titulo,
-        body: [noticia.contenido], 
-        date: new Date(noticia.createdAt).toLocaleDateString("es-AR"), // Formato DD/MM/AAAA
-        category: "Noticias",
-        isDraft: noticia.estado !== "PUBLICADO",
-        images: [] // Se puede integrar galería luego
-      }));
-
-      setNewsList(noticiasFormateadas);
+      if (data && data.length > 0) {
+        // Mapeamos los datos asegurándonos de que coincidan con lo que el diseño espera
+        const noticiasFormateadas = data.map(noticia => ({
+          id: noticia.id,
+          title: noticia.titulo || noticia.title,         // Soporta ambos nombres
+          body: [noticia.contenido || noticia.body],      // Asegura que sea un array para el modal
+          date: noticia.createdAt ? new Date(noticia.createdAt).toLocaleDateString("es-AR") : (noticia.date || "Hoy"),
+          category: "Noticias",
+          isDraft: noticia.estado !== "PUBLICADO",
+          images: noticia.images || []                    // URLs de las imágenes que vienen del bucket
+        }));
+        
+        setNewsList(noticiasFormateadas);
+      } else {
+        setNewsList([]);
+      }
     } catch (error) {
-      console.error("Error cargando noticias desde la BD:", error);
-      // Si el servidor falla, cargamos las de prueba
-      setNewsList(newsData);
+      console.error("Error conectando al backend para leer noticias:", error);
+      setNewsList([]);
     }
   };
 

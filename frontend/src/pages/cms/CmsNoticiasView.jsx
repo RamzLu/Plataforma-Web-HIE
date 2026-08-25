@@ -24,7 +24,7 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("Noticias");
   const [imagenesUrls, setImagenesUrls] = useState([]); // Array para múltiples imágenes
-  const [loading, setLoading] = useState(false); // <--- ¡AQUÍ ESTABA EL ERROR (Faltaba declarar esto)!
+  const [loading, setLoading] = useState(false);
 
   // Manejo de carga de múltiples imágenes
   const handleMultipleImagesUpload = (e) => {
@@ -58,17 +58,27 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
         return;
       }
 
-      // 2. Enviamos los datos REALES a tu servidor Node.js
+      // 2. Usamos FormData para enviar el texto y los archivos binarios juntos
+      const formData = new FormData();
+      formData.append('titulo', titulo);
+      formData.append('contenido', cuerpoHtml);
+
+      // Adjuntamos cada archivo seleccionado al FormData
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput && fileInput.files) {
+        for (let i = 0; i < fileInput.files.length; i++) {
+          formData.append('imagenes', fileInput.files[i]);
+        }
+      }
+
+      // 3. Enviamos los datos al backend
       const response = await fetch('http://localhost:3000/api/cms/noticias', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
+          // OJO: No se incluye 'Content-Type' para que el navegador gestione el FormData automáticamente
         },
-        body: JSON.stringify({
-          titulo: titulo,
-          contenido: cuerpoHtml
-        })
+        body: formData
       });
 
       const data = await response.json();
@@ -77,25 +87,25 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
         throw new Error(data.error || "Error al guardar en el servidor");
       }
 
-      // 3. Si Supabase lo guardó con éxito, actualizamos tu diseño visual
+      // 4. Si se guardó con éxito en Supabase y la BD, actualizamos la vista
       const nuevaNoticia = {
         id: data.noticia?.id || Date.now(),
         title: titulo,
         body: [cuerpoHtml], 
-        date: new Date().toLocaleDateString("es-AR"), // Fecha actual formato DD/MM/AAAA
+        date: new Date().toLocaleDateString("es-AR"),
         category: categoria || "Noticias",
         isDraft: false,
-        images: imagenesUrls || [],
+        images: data.noticia?.images || imagenesUrls || [],
       };
 
       onAddNewNews(nuevaNoticia);
       
-      // 4. Limpiamos el formulario
+      // 5. Limpiamos el formulario
       setTitulo("");
       setCuerpoHtml("");
-      if (typeof setImagenesUrls === "function") setImagenesUrls([]);
+      setImagenesUrls([]);
       setShowModal(false);
-      alert("¡Noticia creada y publicada con éxito en Supabase!");
+      alert("¡Noticia e imágenes respaldadas con éxito en Supabase y la BD!");
 
     } catch (error) {
       console.error("❌ Error al comunicarse con el backend:", error);

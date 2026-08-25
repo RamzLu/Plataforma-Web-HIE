@@ -1,14 +1,15 @@
 import { Router } from 'express';
-// Agregamos obtenerNoticias a la importación
+import multer from 'multer';
 import { crearNoticia, obtenerNoticias } from '../controller/cms.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage() }); // Guarda temporalmente en memoria para procesarlo
 
-// Ruta para CREAR una noticia (POST)
-router.post('/noticias', verifyToken, crearNoticia);
+// Ruta POST con 'upload.array('imagenes', 10)' para recibir hasta 10 fotos
+router.post('/noticias', verifyToken, upload.array('imagenes', 10), crearNoticia);
 
-// NUEVA Ruta para LEER las noticias (GET) - La dejamos pública para que el portal pueda verlas
+// Ruta GET para leer noticias con sus imágenes de respaldo
 router.get('/noticias', obtenerNoticias);
 
 export default router;

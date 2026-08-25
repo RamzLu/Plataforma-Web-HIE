@@ -1,10 +1,17 @@
 import { prisma } from '../config/prisma.js';
+import { createClient } from '@supabase/supabase-js';
+
+// Conexión oficial a Supabase Storage (asegúrate de tener tu SUPABASE_URL y ANON_KEY o usa credenciales directas)
+const supabase = createClient(
+  'https://ipwupwmbygtyiluezzle.supabase.co', 
+  process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' // O tu clave anónima del proyecto
+);
 
 export const crearNoticia = async (req, res) => {
   try {
     const { titulo, contenido } = req.body;
+    const archivosSubidos = req.files || [];
     
-    // Extraemos los datos de tu sesión de Keycloak
     const keycloakSub = req.user.keycloakId;
     const username = req.user.username || `user_${Date.now()}`;
     const name = req.user.name || 'Editor CMS';
@@ -13,28 +20,19 @@ export const crearNoticia = async (req, res) => {
       return res.status(400).json({ error: 'Faltan campos obligatorios: titulo y contenido.' });
     }
 
-    // 1. AUTO-CREAR CATEGORÍA SI NO EXISTE EN SUPABASE
-    let categoria = await prisma.categoria_noticia.findFirst({
-      where: { nombre: 'Noticias' }
-    });
-    
+    // 1. Categoría por defecto
+    let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: 'Noticias' } });
     if (!categoria) {
-      categoria = await prisma.categoria_noticia.create({
-        data: { nombre: 'Noticias', descripcion: 'Categoría por defecto' }
-      });
+      categoria = await prisma.categoria_noticia.create({ data: { nombre: 'Noticias', descripcion: 'Por defecto' } });
     }
 
-    // 2. AUTO-CREAR ROL Y TU USUARIO SI NO EXISTEN EN SUPABASE
-    let usuarioLocal = await prisma.usuario.findUnique({
-      where: { keycloakId: keycloakSub }
-    });
-
+    // 2. Usuario por defecto
+    let usuarioLocal = await prisma.usuario.findUnique({ where: { keycloakId: keycloakSub } });
     if (!usuarioLocal) {
       let rolAdmin = await prisma.rol.findFirst({ where: { nombre: 'ADMIN' }});
       if (!rolAdmin) {
-        rolAdmin = await prisma.rol.create({ data: { nombre: 'ADMIN', descripcion: 'Administrador' } });
+        rolAdmin = await prisma.rol.create({ data: { nombre: 'ADMIN', descripcion: 'Admin' } });
       }
-
       usuarioLocal = await prisma.usuario.create({
         data: {
           id: keycloakSub, 
@@ -49,7 +47,7 @@ export const crearNoticia = async (req, res) => {
       });
     }
 
-    // 3. AHORA SÍ, CREAR LA NOTICIA EN LA NUBE
+    // 3. Crear Noticia
     const nuevaNoticia = await prisma.noticia.create({
       data: {
         titulo,
@@ -61,37 +59,101 @@ export const crearNoticia = async (req, res) => {
       }
     });
 
-    // Convertimos los IDs (BigInt) a texto para que React los pueda leer sin errores
+    const imagenesUrlsGuardadas = [];
+
+    // 4. SUBIDA REAL AL BUCKET DE SUPABASE Y RESPALDO EN BD
+    for (const file of archivosSubidos) {
+      const nombreUnico = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
+      
+      // Subimos el archivo físicamente al Bucket 'noticias-imagenes'
+      const { data: storageData, error: storageError } = await supabase.storage
+        .from('noticias-imagenes')
+        .upload(nombreUnico, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        });
+
+      if (storageError) {
+        console.error("⚠️ Error subiendo al bucket de Supabase:", storageError.message);
+      }
+
+      // Guardamos metadatos en la tabla 'archivo'
+      const archivoDb = await prisma.archivo.create({
+        data: {
+          nombreOriginal: file.originalname,
+          nombreArchivo: nombreUnico,
+          ruta: `noticias-imagenes/${nombreUnico}`,
+          extension: file.originalname.split('.').pop(),
+          mimeType: file.mimetype,
+          tamanioBytes: BigInt(file.size)
+        }
+      });
+
+      // Vinculamos en la tabla intermedia 'noticia_archivo'
+      await prisma.noticia_archivo.create({
+        data: {
+          noticiaId: nuevaNoticia.id,
+          archivoId: archivoDb.id
+        }
+      });
+
+      // Obtenemos la URL pública oficial desde Supabase
+      const { data: publicUrlData } = supabase.storage
+        .from('noticias-imagenes')
+        .getPublicUrl(nombreUnico);
+
+      imagenesUrlsGuardadas.push(publicUrlData.publicUrl);
+    }
+
     const noticiaResponse = {
       ...nuevaNoticia,
       id: nuevaNoticia.id.toString(),
-      categoriaId: nuevaNoticia.categoriaId.toString()
+      categoriaId: nuevaNoticia.categoriaId.toString(),
+      images: imagenesUrlsGuardadas
     };
 
     return res.status(201).json({
-      message: '¡Noticia creada y persistida con éxito en Supabase!',
+      message: '¡Noticia y archivos subidos al Bucket y respaldados en la BD!',
       noticia: noticiaResponse
     });
 
   } catch (error) {
-    console.error('Error al crear la noticia:', error);
+    console.error('Error al crear la noticia con archivos:', error);
     return res.status(500).json({ error: 'Error interno: ' + error.message });
   }
 };
-// Agrega esto al final de tu cms.controller.js
+
 export const obtenerNoticias = async (req, res) => {
   try {
-    // Buscamos todas las noticias en Supabase, ordenadas por la más reciente
     const noticias = await prisma.noticia.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: {
+        noticia_archivo: {
+          include: {
+            archivo: true
+          }
+        }
+      }
     });
 
-    // Convertimos los IDs (BigInt) a texto para evitar errores de JSON
-    const noticiasFormateadas = noticias.map(noticia => ({
-      ...noticia,
-      id: noticia.id.toString(),
-      categoriaId: noticia.categoriaId.toString()
-    }));
+    const noticiasFormateadas = noticias.map(noticia => {
+      const imgs = noticia.noticia_archivo.map(na => {
+        const { data } = supabase.storage
+          .from('noticias-imagenes')
+          .getPublicUrl(na.archivo.nombreArchivo);
+        return data.publicUrl;
+      });
+
+      return {
+        id: noticia.id.toString(),
+        title: noticia.titulo,
+        body: [noticia.contenido],
+        date: new Date(noticia.createdAt).toLocaleDateString("es-AR"),
+        category: "Noticias",
+        isDraft: noticia.estado !== "PUBLICADO",
+        images: imgs
+      };
+    });
 
     return res.status(200).json(noticiasFormateadas);
   } catch (error) {
