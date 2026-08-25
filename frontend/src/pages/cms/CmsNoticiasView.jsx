@@ -42,20 +42,23 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews, onUpdateNews })
     setImagenesUrls(news.images || []);
     setShowModal(true);
   };
+const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
 
-  const handleMultipleImagesUpload = (e) => {
+const handleMultipleImagesUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
+      // Creamos las URLs para la vista previa
       const newUrls = files.map((file) => URL.createObjectURL(file));
+      
+      // Acumulamos tanto las previsualizaciones como los archivos físicos reales
       setImagenesUrls((prev) => [...prev, ...newUrls]);
+      setArchivosSeleccionados((prev) => [...prev, ...files]);
     }
   };
 
-const handleRemoveImage = (indexToRemove) => {
+  const handleRemoveImage = (indexToRemove) => {
     setImagenesUrls((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-
-    const fileInput = document.querySelector('input[type="file"]');
-    if (fileInput) fileInput.value = "";
+    setArchivosSeleccionados((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
 const handleSave = async (e) => {
@@ -87,12 +90,9 @@ const formData = new FormData();
 
       formData.append('imagenesExistentes', JSON.stringify(imagenesUrls));
 
-      const fileInput = document.querySelector('input[type="file"]');
-      if (fileInput && fileInput.files) {
-        for (let i = 0; i < fileInput.files.length; i++) {
-          formData.append('imagenes', fileInput.files[i]);
-        }
-      }
+  archivosSeleccionados.forEach((file) => {
+  formData.append('imagenes', file);
+});
 
       const url = editingId 
         ? `http://localhost:3000/api/cms/noticias/${editingId}`
@@ -232,7 +232,13 @@ const formData = new FormData();
 
               <div>
                 <label style={{ display: "block", fontWeight: "700", color: "#0c2340", marginBottom: "8px" }}>Imágenes adjuntas</label>
-                <input type="file" accept="image/*" multiple onChange={handleMultipleImagesUpload} style={{ marginBottom: "12px" }} />
+<input 
+  type="file" 
+  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" 
+  multiple 
+  onChange={handleMultipleImagesUpload} 
+  style={{ marginBottom: "12px" }} 
+/>
 
                 {imagenesUrls.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
