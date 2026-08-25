@@ -10,6 +10,7 @@ import CmsHeader from "../components/cms/CmsHeader";
 import CmsDashboardView from "./cms/CmsDashboardView";
 import CmsNoticiasView from "./cms/CmsNoticiasView";
 
+// Mantenemos tus datos de prueba por si el backend está apagado
 import { newsData } from "../data/newsData";
 import { documentosData } from "../data/documentos";
 import avatarHospital from "../assets/iconEVITAface.jpg";
@@ -29,7 +30,9 @@ const CmsPage = () => {
     images: [],
     index: 0,
   });
-  const [newsList, setNewsList] = useState(newsData);
+  
+  // 1. Iniciamos la lista vacía (se llenará con la BD)
+  const [newsList, setNewsList] = useState([]); 
   const [dashboardStats, setDashboardStats] = useState({
     contenidoPublicado: 0,
     borradores: 0,
@@ -39,22 +42,52 @@ const CmsPage = () => {
 
   const isKeycloakInitialized = useRef(false);
 
+  // --- NUEVA FUNCIÓN: TRAER NOTICIAS DE SUPABASE ---
+  const fetchNoticias = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/cms/noticias");
+      if (!response.ok) throw new Error("Error al obtener noticias");
+      const data = await response.json();
+
+      // Mapeamos los datos de la base de datos al formato que espera tu frontend
+      const noticiasFormateadas = data.map(noticia => ({
+        id: noticia.id,
+        title: noticia.titulo,
+        body: [noticia.contenido], 
+        date: new Date(noticia.createdAt).toLocaleDateString("es-AR"), // Formato DD/MM/AAAA
+        category: "Noticias",
+        isDraft: noticia.estado !== "PUBLICADO",
+        images: [] // Se puede integrar galería luego
+      }));
+
+      setNewsList(noticiasFormateadas);
+    } catch (error) {
+      console.error("Error cargando noticias desde la BD:", error);
+      // Si el servidor falla, cargamos las de prueba
+      setNewsList(newsData);
+    }
+  };
+
+  // 2. Al cargar el componente por primera vez, pedimos las noticias al backend
   useEffect(() => {
-    // Si ya está inicializado o autenticado por Keycloak previamente, evitamos reiniciarlo
+    fetchNoticias();
+  }, []);
+
+  // 3. Efecto para mantener las estadísticas actualizadas cuando cambia newsList
+  useEffect(() => {
+    updateStats(newsList);
+  }, [newsList]);
+
+  // Manejo de Keycloak
+  useEffect(() => {
     if (isKeycloakInitialized.current || keycloak.authenticated) {
       if (keycloak.authenticated) {
         setInitialized(true);
         setAuthenticated(true);
-        setIsCms(
-          keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"),
-        );
+        setIsCms(keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"));
         setIsAdmin(keycloak.hasRealmRole("admin"));
-        const name =
-          keycloak.tokenParsed?.name ||
-          keycloak.tokenParsed?.preferred_username ||
-          "Editor CMS";
+        const name = keycloak.tokenParsed?.name || keycloak.tokenParsed?.preferred_username || "Editor CMS";
         setUserName(name);
-        updateStats(newsList);
       }
       return;
     }
@@ -67,30 +100,20 @@ const CmsPage = () => {
         setInitialized(true);
         setAuthenticated(auth);
         if (auth) {
-          setIsCms(
-            keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"),
-          );
+          setIsCms(keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"));
           setIsAdmin(keycloak.hasRealmRole("admin"));
-
-          const name =
-            keycloak.tokenParsed?.name ||
-            keycloak.tokenParsed?.preferred_username ||
-            "Editor CMS";
+          const name = keycloak.tokenParsed?.name || keycloak.tokenParsed?.preferred_username || "Editor CMS";
           setUserName(name);
-
-          updateStats(newsList);
         }
       })
       .catch((err) => {
         console.error("Error al inicializar Keycloak:", err);
       });
-  }, [newsList]);
+  }, []);
 
   const updateStats = (currentNews) => {
     const publicadas = currentNews.filter((news) => !news.isDraft).length;
-    const borradoresPendientes = currentNews.filter(
-      (news) => news.isDraft,
-    ).length;
+    const borradoresPendientes = currentNews.filter((news) => news.isDraft).length;
     const totalDocumentos = documentosData ? documentosData.length : 0;
 
     setDashboardStats({
@@ -101,14 +124,11 @@ const CmsPage = () => {
     });
   };
 
-  // Función para agregar noticia y colocarla en la primera posición
   const handleAddNewNews = (nuevaNoticia) => {
     const updatedList = [nuevaNoticia, ...newsList];
     setNewsList(updatedList);
-
-    // Guardamos en localStorage para persistencia entre páginas (CMS y Portal Público)
+    // Opcional: localStorage
     localStorage.setItem("portal_news_data", JSON.stringify(updatedList));
-
     alert("¡Noticia creada y publicada con éxito en el portal!");
   };
 
@@ -116,17 +136,13 @@ const CmsPage = () => {
     if (window.confirm("¿Estás seguro de eliminar esta noticia?")) {
       const filtered = newsList.filter((n) => n.id !== id);
       setNewsList(filtered);
-      const indexInOriginal = newsData.findIndex((n) => n.id === id);
-      if (indexInOriginal !== -1) newsData.splice(indexInOriginal, 1);
     }
   };
 
   const testBackendConnection = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/cms", {
-        headers: {
-          Authorization: `Bearer ${keycloak.token}`,
-        },
+      const response = await fetch("http://localhost:3000/api/cms/noticias", {
+        headers: { Authorization: `Bearer ${keycloak.token}` },
       });
       const data = await response.json();
       console.log("Respuesta del Backend:", data);
@@ -137,35 +153,21 @@ const CmsPage = () => {
     }
   };
 
-  const openLightbox = (images, index) =>
-    setLightbox({ isOpen: true, images, index });
-  const closeLightbox = () =>
-    setLightbox({ isOpen: false, images: [], index: 0 });
+  const openLightbox = (images, index) => setLightbox({ isOpen: true, images, index });
+  const closeLightbox = () => setLightbox({ isOpen: false, images: [], index: 0 });
 
   const nextLightboxImage = (e) => {
     e.stopPropagation();
-    setLightbox((prev) => ({
-      ...prev,
-      index: (prev.index + 1) % prev.images.length,
-    }));
+    setLightbox((prev) => ({ ...prev, index: (prev.index + 1) % prev.images.length }));
   };
 
   const prevLightboxImage = (e) => {
     e.stopPropagation();
-    setLightbox((prev) => ({
-      ...prev,
-      index: (prev.index - 1 + prev.images.length) % prev.images.length,
-    }));
+    setLightbox((prev) => ({ ...prev, index: (prev.index - 1 + prev.images.length) % prev.images.length }));
   };
 
-  if (!initialized) {
-    return <div className="cms-loading">Cargando plataforma...</div>;
-  }
-
-  if (!authenticated) {
-    return <div className="cms-loading">No autenticado. Redirigiendo...</div>;
-  }
-
+  if (!initialized) return <div className="cms-loading">Cargando plataforma...</div>;
+  if (!authenticated) return <div className="cms-loading">No autenticado. Redirigiendo...</div>;
   if (!isCms) {
     return (
       <div className="cms-unauthorized">
@@ -181,7 +183,6 @@ const CmsPage = () => {
   return (
     <div className="cms-layout">
       <CmsSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-
       <div className="cms-main-wrapper">
         <CmsHeader
           userName={userName}
@@ -189,22 +190,13 @@ const CmsPage = () => {
           testBackendConnection={testBackendConnection}
           onLogoutClick={() => setShowLogoutModal(true)}
         />
-
         <main className="cms-content">
           <div className="cms-page-title">
             <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
-            <h1>
-              {activeTab === "noticias"
-                ? "Gestión de Noticias"
-                : "Panel de administración"}
-            </h1>
-            <p>
-              Administre de forma segura la información pública del Portal Red
-              Evita Formosa.
-            </p>
+            <h1>{activeTab === "noticias" ? "Gestión de Noticias" : "Panel de administración"}</h1>
+            <p>Administre de forma segura la información pública del Portal Red Evita Formosa.</p>
           </div>
 
-          {/* VISTA: DASHBOARD */}
           {activeTab === "dashboard" && (
             <CmsDashboardView
               latestNews={latestNews}
@@ -214,7 +206,6 @@ const CmsPage = () => {
             />
           )}
 
-          {/* VISTA: NOTICIAS (FUNCIONAL) */}
           {activeTab === "noticias" && (
             <CmsNoticiasView
               newsList={newsList}
@@ -223,88 +214,47 @@ const CmsPage = () => {
             />
           )}
 
-          {/* OTRAS VISTAS EN DESARROLLO */}
           {activeTab !== "dashboard" && activeTab !== "noticias" && (
             <div className="cms-dashboard-card">
-              <h3 className="cms-card-title">
-                Módulo de {activeTab.toUpperCase()}
-              </h3>
-              <p>
-                Próximamente interfaz de gestión operativa para {activeTab}.
-              </p>
+              <h3 className="cms-card-title">Módulo de {activeTab.toUpperCase()}</h3>
+              <p>Próximamente interfaz de gestión operativa para {activeTab}.</p>
             </div>
           )}
         </main>
       </div>
 
-      {/* MODAL DE LOGOUT */}
       {showLogoutModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowLogoutModal(false)}
-        >
-          <div
-            className="modal-content-esp logout-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
+          <div className="modal-content-esp logout-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-esp">
               <h2>CERRAR SESIÓN</h2>
-              <button
-                className="btn-close-modal"
-                onClick={() => setShowLogoutModal(false)}
-              >
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12"></path>
-                </svg>
+              <button className="btn-close-modal" onClick={() => setShowLogoutModal(false)}>
+                <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg>
               </button>
             </div>
             <div className="modal-body-esp text-center">
-              <p className="info-text">
-                ¿Estás seguro de que deseas cerrar tu sesión en el panel de
-                administración?
-              </p>
+              <p className="info-text">¿Estás seguro de que deseas cerrar tu sesión en el panel de administración?</p>
             </div>
             <div className="modal-footer-esp logout-footer">
-              <button
-                className="btn-cancelar-gris"
-                onClick={() => setShowLogoutModal(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="btn-cerrar-rojo"
-                onClick={() => keycloak.logout()}
-              >
-                Sí, Salir
-              </button>
+              <button className="btn-cancelar-gris" onClick={() => setShowLogoutModal(false)}>Cancelar</button>
+              <button className="btn-cerrar-rojo" onClick={() => keycloak.logout()}>Sí, Salir</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL DE VISTA PREVIA DE NOTICIA */}
       {selectedNews && (
         <div className="modal-overlay" onClick={() => setSelectedNews(null)}>
-          <div
-            className="modal-content-esp"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal-content-esp" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-esp">
               <h2>COMUNICADO INSTITUCIONAL</h2>
-              <button
-                className="btn-close-modal"
-                onClick={() => setSelectedNews(null)}
-              >
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12"></path>
-                </svg>
+              <button className="btn-close-modal" onClick={() => setSelectedNews(null)}>
+                <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg>
               </button>
             </div>
             <div className="modal-body-esp">
               <div className="modal-author-row">
-                <div className="hospital-avatar">
-                  <img src={avatarHospital} alt="Avatar Hospital" />
-                </div>
+                <div className="hospital-avatar"><img src={avatarHospital} alt="Avatar Hospital" /></div>
                 <div className="author-meta">
                   <h3>Hospital Interdistrital Evita Formosa</h3>
                   <span>{selectedNews.date} • 🌎</span>
@@ -315,22 +265,14 @@ const CmsPage = () => {
               </div>
               <div className="news-modal-body-text">
                 {selectedNews.body.map((paragraph, idx) => (
-                  <div
-                    key={idx}
-                    className="info-text"
-                    dangerouslySetInnerHTML={{ __html: paragraph }}
-                  />
+                  <div key={idx} className="info-text" dangerouslySetInnerHTML={{ __html: paragraph }} />
                 ))}
               </div>
               {selectedNews.images && selectedNews.images.length > 0 && (
                 <div className="news-modal-images-section">
                   <div className="news-modal-images-grid">
                     {selectedNews.images.map((img, idx) => (
-                      <div
-                        className="modal-news-img-box"
-                        key5={idx}
-                        onClick={() => openLightbox(selectedNews.images, idx)}
-                      >
+                      <div className="modal-news-img-box" key={idx} onClick={() => openLightbox(selectedNews.images, idx)}>
                         <img src={img} alt={`Foto noticia ${idx + 1}`} />
                       </div>
                     ))}
@@ -339,47 +281,22 @@ const CmsPage = () => {
               )}
             </div>
             <div className="modal-footer-esp">
-              <button
-                className="btn-cerrar-rojo"
-                onClick={() => setSelectedNews(null)}
-              >
-                Cerrar Noticia
-              </button>
+              <button className="btn-cerrar-rojo" onClick={() => setSelectedNews(null)}>Cerrar Noticia</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* LIGHTBOX */}
       {lightbox.isOpen && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
-          <button className="lightbox-close" onClick={closeLightbox}>
-            &times;
-          </button>
-          <div
-            className="lightbox-content"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <button className="lightbox-close" onClick={closeLightbox}>&times;</button>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             {lightbox.images.length > 1 && (
-              <button
-                className="lightbox-arrow lb-left"
-                onClick={prevLightboxImage}
-              >
-                &#10094;
-              </button>
+              <button className="lightbox-arrow lb-left" onClick={prevLightboxImage}>&#10094;</button>
             )}
-            <img
-              src={lightbox.images[lightbox.index]}
-              alt="Ampliada"
-              className="lightbox-img"
-            />
+            <img src={lightbox.images[lightbox.index]} alt="Ampliada" className="lightbox-img" />
             {lightbox.images.length > 1 && (
-              <button
-                className="lightbox-arrow lb-right"
-                onClick={nextLightboxImage}
-              >
-                &#10095;
-              </button>
+              <button className="lightbox-arrow lb-right" onClick={nextLightboxImage}>&#10095;</button>
             )}
           </div>
         </div>

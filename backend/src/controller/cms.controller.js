@@ -1,67 +1,101 @@
-import { prisma } from "../config/prisma.js";
+import { prisma } from '../config/prisma.js';
 
-// Obtener todas las publicaciones (puede ser público o privado según lo que necesites)
-export const obtenerPublicacionesCMS = async (req, res) => {
+export const crearNoticia = async (req, res) => {
   try {
-    const publicaciones = await prisma.post.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    res.json(publicaciones);
-  } catch (error) {
-    console.error("Error al obtener publicaciones:", error);
-    res
-      .status(500)
-      .json({ error: "Error al obtener las publicaciones del CMS." });
-  }
-};
+    const { titulo, contenido } = req.body;
+    
+    // Extraemos los datos de tu sesión de Keycloak
+    const keycloakSub = req.user.keycloakId;
+    const username = req.user.username || `user_${Date.now()}`;
+    const name = req.user.name || 'Editor CMS';
 
-// Crear una nueva publicación (Exclusivo para CMD y Admin)
-export const crearPublicacionCMS = async (req, res) => {
-  try {
-    const { title, content, category } = req.body;
-
-    if (!title || !content) {
-      return res
-        .status(400)
-        .json({ error: "El título y el contenido son obligatorios." });
+    if (!titulo || !contenido) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios: titulo y contenido.' });
     }
 
-    // Obtenemos el ID del usuario directamente del Token JWT que validó Keycloak
-    const authorId = req.auth?.payload?.sub;
+    // 1. AUTO-CREAR CATEGORÍA SI NO EXISTE EN SUPABASE
+    let categoria = await prisma.categoria_noticia.findFirst({
+      where: { nombre: 'Noticias' }
+    });
+    
+    if (!categoria) {
+      categoria = await prisma.categoria_noticia.create({
+        data: { nombre: 'Noticias', descripcion: 'Categoría por defecto' }
+      });
+    }
 
-    const nuevaPublicacion = await prisma.post.create({
+    // 2. AUTO-CREAR ROL Y TU USUARIO SI NO EXISTEN EN SUPABASE
+    let usuarioLocal = await prisma.usuario.findUnique({
+      where: { keycloakId: keycloakSub }
+    });
+
+    if (!usuarioLocal) {
+      let rolAdmin = await prisma.rol.findFirst({ where: { nombre: 'ADMIN' }});
+      if (!rolAdmin) {
+        rolAdmin = await prisma.rol.create({ data: { nombre: 'ADMIN', descripcion: 'Administrador' } });
+      }
+
+      usuarioLocal = await prisma.usuario.create({
+        data: {
+          id: keycloakSub, 
+          keycloakId: keycloakSub,
+          username: username,
+          email: `${username}@hospital.com`, 
+          nombre: name,
+          apellido: 'Sistema',
+          rolId: rolAdmin.id,
+          updatedAt: new Date()
+        }
+      });
+    }
+
+    // 3. AHORA SÍ, CREAR LA NOTICIA EN LA NUBE
+    const nuevaNoticia = await prisma.noticia.create({
       data: {
-        title,
-        content,
-        category: category || "General",
-        authorId: authorId || "desconocido",
-      },
+        titulo,
+        contenido,
+        categoriaId: categoria.id,
+        createdBy: usuarioLocal.id,
+        estado: 'PUBLICADO',
+        updatedAt: new Date()
+      }
     });
 
-    res.status(201).json({
-      mensaje: "Publicación creada exitosamente",
-      publicacion: nuevaPublicacion,
+    // Convertimos los IDs (BigInt) a texto para que React los pueda leer sin errores
+    const noticiaResponse = {
+      ...nuevaNoticia,
+      id: nuevaNoticia.id.toString(),
+      categoriaId: nuevaNoticia.categoriaId.toString()
+    };
+
+    return res.status(201).json({
+      message: '¡Noticia creada y persistida con éxito en Supabase!',
+      noticia: noticiaResponse
     });
+
   } catch (error) {
-    console.error("Error al crear publicación:", error);
-    res
-      .status(500)
-      .json({ error: "Error al guardar la publicación en la base de datos." });
+    console.error('Error al crear la noticia:', error);
+    return res.status(500).json({ error: 'Error interno: ' + error.message });
   }
 };
-
-// Eliminar una publicación (Idealmente solo para Admin o el creador)
-export const eliminarPublicacionCMS = async (req, res) => {
+// Agrega esto al final de tu cms.controller.js
+export const obtenerNoticias = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    await prisma.post.delete({
-      where: { id: Number(id) },
+    // Buscamos todas las noticias en Supabase, ordenadas por la más reciente
+    const noticias = await prisma.noticia.findMany({
+      orderBy: { createdAt: 'desc' }
     });
 
-    res.json({ mensaje: "Publicación eliminada correctamente" });
+    // Convertimos los IDs (BigInt) a texto para evitar errores de JSON
+    const noticiasFormateadas = noticias.map(noticia => ({
+      ...noticia,
+      id: noticia.id.toString(),
+      categoriaId: noticia.categoriaId.toString()
+    }));
+
+    return res.status(200).json(noticiasFormateadas);
   } catch (error) {
-    console.error("Error al eliminar publicación:", error);
-    res.status(500).json({ error: "No se pudo eliminar la publicación." });
+    console.error('Error al obtener las noticias:', error);
+    return res.status(500).json({ error: 'Error al cargar las noticias.' });
   }
 };

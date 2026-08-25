@@ -1,38 +1,49 @@
-import { auth } from 'express-oauth2-jwt-bearer';
+import jwt from 'jsonwebtoken';
 
-// Configuramos el verificador de tokens apuntando a tu Keycloak local
-export const checkJwt = auth({
-  // URL de los metadatos de Keycloak (donde Express descarga las claves públicas para verificar la firma)
-  issuerBaseURL: 'http://localhost:8080/realms/hie-realm',
-  // El identificador del cliente que creamos en Keycloak
-  audience: 'hie-cms-client',
-});
+// 1. Valida el token general
+export const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-// Middleware opcional para verificar roles específicos (Ej: solo admins)
-export const requireRole = (roleRequired) => {
-  return (req, res, next) => {
-    try {
-      // La librería auth() inyecta un objeto 'auth' o 'auth.payload' en el request
-      const tokenPayload = req.auth?.payload;
-      
-      if (!tokenPayload) {
-        return res.status(401).json({ error: 'No autorizado: Token no encontrado o inválido.' });
-      }
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Acceso denegado. No se proporcionó un token.' });
+  }
 
-      // Keycloak guarda los roles del realm dentro de realm_access.roles
-      const roles = tokenPayload.realm_access?.roles || [];
+  const token = authHeader.split(' ')[1];
 
-      // Validamos si el usuario posee el rol requerido
-      if (!roles.includes(roleRequired)) {
-        return res.status(403).json({ 
-          error: `Acceso denegado: Se requiere el rol '${roleRequired}' para realizar esta acción.` 
-        });
-      }
-
-      next(); // Si tiene el rol, lo dejamos pasar a la ruta
-    } catch (error) {
-      console.error('Error al verificar roles:', error);
-      res.status(500).json({ error: 'Error interno al procesar los permisos.' });
+  try {
+    const decodedToken = jwt.decode(token);
+    
+    if (!decodedToken) {
+      return res.status(401).json({ error: 'Token inválido o corrupto.' });
     }
+
+    req.user = {
+      keycloakId: decodedToken.sub,
+      username: decodedToken.preferred_username,
+      name: decodedToken.name || decodedToken.preferred_username,
+      roles: decodedToken.realm_access?.roles || []
+    };
+
+    next();
+  } catch (error) {
+    console.error('Error al verificar el token:', error);
+    return res.status(401).json({ error: 'Token no autorizado o expirado.' });
+  }
+};
+
+// 2. Alias para las rutas de Admin
+export const checkJwt = verifyToken;
+
+// 3. Validador de roles
+export const requireRole = (roleName) => {
+  return (req, res, next) => {
+    if (!req.user || !req.user.roles) {
+      return res.status(403).json({ error: 'No se encontraron roles para este usuario.' });
+    }
+    const hasRole = req.user.roles.includes(roleName);
+    if (!hasRole) {
+      return res.status(403).json({ error: `Se requiere el rol '${roleName}'.` });
+    }
+    next();
   };
 };

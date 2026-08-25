@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
+// Importamos la configuración de Keycloak para el token de seguridad
+import keycloak from "../../config/keycloak";
 // Importamos todo desde el paquete unificado
 import {
   ClassicEditor,
@@ -16,43 +18,13 @@ import {
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css"; // Estilos obligatorios del editor
 
-// Función auxiliar para limpiar el texto en el resumen del CMS
-const cleanHtmlText = (html) => {
-  if (!html) return "";
-
-  let text = html;
-
-  // 1. Detectar listas ordenadas (<ol>) y aplicar un contador
-  text = text.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (match, innerOl) => {
-    let count = 1;
-    return innerOl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
-      return `\n${count++}. ${innerLi}`;
-    });
-  });
-
-  // 2. Detectar listas desordenadas (<ul>) y aplicar viñetas
-  text = text.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (match, innerUl) => {
-    return innerUl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
-      return `\n• ${innerLi}`;
-    });
-  });
-
-  // 3. Limpiar el resto del HTML y emprolijar los espacios
-  return text
-    .replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n")
-    .replace(/<[^>]*>?/gm, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/[ \t]+/g, " ")
-    .replace(/\n\s*\n/g, "\n")
-    .trim();
-};
-
 const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
   const [showModal, setShowModal] = useState(false);
   const [titulo, setTitulo] = useState("");
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("Noticias");
   const [imagenesUrls, setImagenesUrls] = useState([]); // Array para múltiples imágenes
+  const [loading, setLoading] = useState(false); // <--- ¡AQUÍ ESTABA EL ERROR (Faltaba declarar esto)!
 
   // Manejo de carga de múltiples imágenes
   const handleMultipleImagesUpload = (e) => {
@@ -67,28 +39,70 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
     setImagenesUrls((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
+    
     if (!titulo.trim() || !cuerpoHtml.trim()) {
       alert("Por favor completa el título y el contenido de la noticia.");
       return;
     }
 
-    const nuevaNoticia = {
-      id: Date.now(),
-      title: titulo,
-      body: [cuerpoHtml], 
-      date: "Ahora",
-      category: categoria,
-      isDraft: false,
-      images: imagenesUrls, // Guardamos todas las imágenes subidas
-    };
+    setLoading(true);
 
-    onAddNewNews(nuevaNoticia);
-    setTitulo("");
-    setCuerpoHtml("");
-    setImagenesUrls([]);
-    setShowModal(false);
+    try {
+      // 1. Verificamos la seguridad con Keycloak
+      const token = keycloak.token;
+      if (!token) {
+        alert("Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");
+        keycloak.login();
+        return;
+      }
+
+      // 2. Enviamos los datos REALES a tu servidor Node.js
+      const response = await fetch('http://localhost:3000/api/cms/noticias', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          titulo: titulo,
+          contenido: cuerpoHtml
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al guardar en el servidor");
+      }
+
+      // 3. Si Supabase lo guardó con éxito, actualizamos tu diseño visual
+      const nuevaNoticia = {
+        id: data.noticia?.id || Date.now(),
+        title: titulo,
+        body: [cuerpoHtml], 
+        date: new Date().toLocaleDateString("es-AR"), // Fecha actual formato DD/MM/AAAA
+        category: categoria || "Noticias",
+        isDraft: false,
+        images: imagenesUrls || [],
+      };
+
+      onAddNewNews(nuevaNoticia);
+      
+      // 4. Limpiamos el formulario
+      setTitulo("");
+      setCuerpoHtml("");
+      if (typeof setImagenesUrls === "function") setImagenesUrls([]);
+      setShowModal(false);
+      alert("¡Noticia creada y publicada con éxito en Supabase!");
+
+    } catch (error) {
+      console.error("❌ Error al comunicarse con el backend:", error);
+      alert(`No se pudo guardar la noticia: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -225,53 +239,51 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews }) => {
               <div>
                 <label style={{ display: "block", fontWeight: "700", color: "#0c2340", marginBottom: "8px" }}>Cuerpo de la noticia</label>
                 <div className="ckeditor-wrapper" style={{ border: "1px solid #cbd5e1", borderRadius: "8px", overflow: "hidden" }}>
-                 <CKEditor
-  editor={ClassicEditor}
-  data={cuerpoHtml}
-  config={{
-
-    licenseKey: 'GPL', 
-    
-    plugins: [
-      Essentials, Paragraph, Heading, Bold, Italic, 
-      Link, List, BlockQuote, Undo, Alignment
-    ],
-    toolbar: [
-      'heading',
-      '|',
-      'bold',
-      'italic',
-      'link',
-      'bulletedList',
-      'numberedList',
-      'alignment',
-      'blockQuote',
-      '|',
-      'undo',
-      'redo'
-    ],
-    alignment: {
-      options: ['left', 'center', 'right', 'justify']
-    },
-    link: {
-      addTargetToExternalLinks: true,
-      defaultProtocol: 'https://'
-    }
-  }}
-  onChange={(event, editor) => {
-    const data = editor.getData();
-    setCuerpoHtml(data);
-  }}
-/>
+                  <CKEditor
+                    editor={ClassicEditor}
+                    data={cuerpoHtml}
+                    config={{
+                      licenseKey: 'GPL', 
+                      plugins: [
+                        Essentials, Paragraph, Heading, Bold, Italic, 
+                        Link, List, BlockQuote, Undo, Alignment
+                      ],
+                      toolbar: [
+                        'heading',
+                        '|',
+                        'bold',
+                        'italic',
+                        'link',
+                        'bulletedList',
+                        'numberedList',
+                        'alignment',
+                        'blockQuote',
+                        '|',
+                        'undo',
+                        'redo'
+                      ],
+                      alignment: {
+                        options: ['left', 'center', 'right', 'justify']
+                      },
+                      link: {
+                        addTargetToExternalLinks: true,
+                        defaultProtocol: 'https://'
+                      }
+                    }}
+                    onChange={(event, editor) => {
+                      const data = editor.getData();
+                      setCuerpoHtml(data);
+                    }}
+                  />
                 </div>
               </div>
 
               <div className="modal-footer-esp" style={{ padding: 0, background: "transparent", border: "none", justifyContent: "flex-end", gap: "15px", marginTop: "10px" }}>
-                <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)}>
+                <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)} disabled={loading}>
                   Cancelar
                 </button>
-                <button type="submit" className="btn-cerrar-rojo" style={{ backgroundColor: "#0c2340" }}>
-                  Guardar
+                <button type="submit" className="btn-cerrar-rojo" style={{ backgroundColor: "#0c2340" }} disabled={loading}>
+                  {loading ? "Guardando..." : "Guardar"}
                 </button>
               </div>
             </form>
