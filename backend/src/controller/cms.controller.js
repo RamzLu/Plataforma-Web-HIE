@@ -1,10 +1,9 @@
 import { prisma } from '../config/prisma.js';
 import { createClient } from '@supabase/supabase-js';
 
-// Conexión oficial a Supabase Storage (asegúrate de tener tu SUPABASE_URL y ANON_KEY o usa credenciales directas)
 const supabase = createClient(
   'https://ipwupwmbygtyiluezzle.supabase.co', 
-  process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' // O tu clave anónima del proyecto
+  process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' 
 );
 
 export const crearNoticia = async (req, res) => {
@@ -20,13 +19,11 @@ export const crearNoticia = async (req, res) => {
       return res.status(400).json({ error: 'Faltan campos obligatorios: titulo y contenido.' });
     }
 
-    // 1. Categoría por defecto
     let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: 'Noticias' } });
     if (!categoria) {
       categoria = await prisma.categoria_noticia.create({ data: { nombre: 'Noticias', descripcion: 'Por defecto' } });
     }
 
-    // 2. Usuario por defecto
     let usuarioLocal = await prisma.usuario.findUnique({ where: { keycloakId: keycloakSub } });
     if (!usuarioLocal) {
       let rolAdmin = await prisma.rol.findFirst({ where: { nombre: 'ADMIN' }});
@@ -47,7 +44,6 @@ export const crearNoticia = async (req, res) => {
       });
     }
 
-    // 3. Crear Noticia
     const nuevaNoticia = await prisma.noticia.create({
       data: {
         titulo,
@@ -61,11 +57,9 @@ export const crearNoticia = async (req, res) => {
 
     const imagenesUrlsGuardadas = [];
 
-    // 4. SUBIDA REAL AL BUCKET DE SUPABASE Y RESPALDO EN BD
     for (const file of archivosSubidos) {
       const nombreUnico = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
       
-      // Subimos el archivo físicamente al Bucket 'noticias-imagenes'
       const { data: storageData, error: storageError } = await supabase.storage
         .from('noticias-imagenes')
         .upload(nombreUnico, file.buffer, {
@@ -74,10 +68,9 @@ export const crearNoticia = async (req, res) => {
         });
 
       if (storageError) {
-        console.error("⚠️ Error subiendo al bucket de Supabase:", storageError.message);
+        console.error(" Error subiendo al bucket de Supabase:", storageError.message);
       }
 
-      // Guardamos metadatos en la tabla 'archivo'
       const archivoDb = await prisma.archivo.create({
         data: {
           nombreOriginal: file.originalname,
@@ -89,7 +82,6 @@ export const crearNoticia = async (req, res) => {
         }
       });
 
-      // Vinculamos en la tabla intermedia 'noticia_archivo'
       await prisma.noticia_archivo.create({
         data: {
           noticiaId: nuevaNoticia.id,
@@ -97,7 +89,6 @@ export const crearNoticia = async (req, res) => {
         }
       });
 
-      // Obtenemos la URL pública oficial desde Supabase
       const { data: publicUrlData } = supabase.storage
         .from('noticias-imagenes')
         .getPublicUrl(nombreUnico);
@@ -159,5 +150,50 @@ export const obtenerNoticias = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener las noticias:', error);
     return res.status(500).json({ error: 'Error al cargar las noticias.' });
+  }
+};
+
+export const eliminarNoticia = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const noticia = await prisma.noticia.findUnique({
+      where: { id: BigInt(id) },
+      include: {
+        noticia_archivo: {
+          include: { archivo: true }
+        }
+      }
+    });
+
+    if (!noticia) {
+      return res.status(404).json({ error: 'Noticia no encontrada.' });
+    }
+
+    for (const na of noticia.noticia_archivo) {
+      const archivo = na.archivo;
+      
+      await supabase.storage
+        .from('noticias-imagenes')
+        .remove([archivo.nombreArchivo]);
+
+      await prisma.noticia_archivo.deleteMany({
+        where: { archivoId: archivo.id }
+      });
+      
+      await prisma.archivo.delete({
+        where: { id: archivo.id }
+      });
+    }
+
+    await prisma.noticia.delete({
+      where: { id: BigInt(id) }
+    });
+
+    return res.status(200).json({ message: '¡Noticia y archivos eliminados de la base de datos y de Supabase con éxito!' });
+
+  } catch (error) {
+    console.error('Error al eliminar la noticia:', error);
+    return res.status(500).json({ error: 'Error al eliminar: ' + error.message });
   }
 };
