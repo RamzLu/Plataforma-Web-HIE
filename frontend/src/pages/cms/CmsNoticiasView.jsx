@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
+import toast from "react-hot-toast";
 import {
   ClassicEditor,
   Essentials,
@@ -34,6 +35,10 @@ const CmsNoticiasView = ({
   const [saving, setSaving] = useState(false);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [noticiaAEliminar, setNoticiaAEliminar] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+
   const handleOpenCreate = () => {
     setEditingId(null);
     setTitulo("");
@@ -61,6 +66,45 @@ const CmsNoticiasView = ({
     setShowModal(true);
   };
 
+  const handleConfirmDeleteClick = (id) => {
+    setNoticiaAEliminar(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!noticiaAEliminar) return;
+
+    const id = noticiaAEliminar;
+    setShowDeleteModal(false);
+    setDeletingId(id);
+
+    try {
+      const token = keycloak.token;
+      const response = await fetch(
+        `http://localhost:3000/api/cms/noticias/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("No se pudo eliminar en el servidor");
+      }
+
+      onDeleteNews(id);
+      toast.success("Noticia eliminada correctamente.");
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      toast.error("Ocurrió un error al intentar eliminar la noticia.");
+    } finally {
+      setDeletingId(null);
+      setNoticiaAEliminar(null);
+    }
+  };
+
   const handleMultipleImagesUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
@@ -70,8 +114,31 @@ const CmsNoticiasView = ({
       );
 
       if (tieneCaracteresEspeciaux) {
-        alert(
-          "Advertencia: Algunos archivos seleccionados contienen tildes, espacios o caracteres especiales en su nombre. El sistema los adaptará automáticamente para evitar errores en el servidor.",
+        toast(
+          "Advertencia: Algunos archivos seleccionados contienen tildes, espacios o caracteres especiales en su nombre y pueden romperse.",
+          {
+            icon: (
+              <svg
+                width="150"
+                height="150"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#f59e0b"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            ),
+            style: {
+              background: "#fff",
+              color: "#b45309",
+              border: "1px solid #f59e0b",
+            },
+          },
         );
       }
 
@@ -99,7 +166,7 @@ const CmsNoticiasView = ({
           : String(cuerpoHtml || "");
 
     if (!titulo.trim() || !textoContenido.trim()) {
-      alert("Por favor completa el título y el contenido de la noticia.");
+      toast.error("Por favor completa el título y el contenido.");
       return;
     }
 
@@ -108,7 +175,7 @@ const CmsNoticiasView = ({
     try {
       const token = keycloak.token;
       if (!token) {
-        alert("Tu sesión ha expirado.");
+        toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
       }
@@ -149,16 +216,16 @@ const CmsNoticiasView = ({
 
       if (editingId) {
         if (onUpdateNews) onUpdateNews(noticiaFormateada);
-        alert("¡Noticia actualizada con éxito!");
+        toast.success("Noticia actualizada con éxito.");
       } else {
         onAddNewNews(noticiaFormateada);
-        alert("¡Noticia creada con éxito!");
+        toast.success("Noticia creada con éxito.");
       }
 
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
-      alert(`Error: ${error.message}`);
+      toast.error(`Error: ${error.message}`);
     } finally {
       setSaving(false);
     }
@@ -300,24 +367,29 @@ const CmsNoticiasView = ({
                   </button>
                   <button
                     title="Eliminar"
-                    onClick={() => onDeleteNews(news.id)}
+                    onClick={() => handleConfirmDeleteClick(news.id)}
                     className="news-action-btn-delete"
+                    disabled={deletingId === news.id}
                   >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                      <line x1="10" y1="11" x2="10" y2="17"></line>
-                      <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
+                    {deletingId === news.id ? (
+                      <div className="cms-spinner-red"></div>
+                    ) : (
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg>
+                    )}
                   </button>
                 </div>
               </div>
@@ -325,6 +397,47 @@ const CmsNoticiasView = ({
           )}
         </div>
       </div>
+
+      {showDeleteModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            className="modal-content-esp logout-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header-esp">
+              <h2>ELIMINAR NOTICIA</h2>
+              <button
+                className="btn-close-modal"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body-esp text-center">
+              <p className="info-text">
+                ¿Estás seguro de que quieres eliminar esta noticia? Esta acción
+                no se puede deshacer.
+              </p>
+            </div>
+            <div className="modal-footer-esp logout-footer">
+              <button
+                className="btn-cancelar-gris"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancelar
+              </button>
+              <button className="btn-cerrar-rojo" onClick={handleExecuteDelete}>
+                Sí, Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>

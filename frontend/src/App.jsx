@@ -5,15 +5,14 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import "./App.css";
 
-// Componentes Globales
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import WhatsAppButton from "./components/WhatsAppButton";
 import ScrollToTop from "./components/ScrollToTop";
 
-// Páginas
 import HomePage from "./pages/HomePage";
 import EspecialidadesPage from "./pages/EspecialidadesPage";
 import NoticiasPage from "./pages/NoticiasPage";
@@ -32,7 +31,6 @@ const AppLayout = () => {
     <>
       <ScrollToTop />
 
-      {/* Solo mostramos el Header público si NO estamos en el CMS */}
       {!isCmsRoute && <Header />}
 
       <Routes>
@@ -81,6 +79,7 @@ const App = () => {
   return (
     <Router>
       <AppLayout />
+      <Toaster position="top-right" reverseOrder={false} />
     </Router>
   );
 };
