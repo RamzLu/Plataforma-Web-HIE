@@ -52,7 +52,7 @@ const CmsPage = () => {
           body: [noticia.contenido || noticia.body],
           date: noticia.createdAt ? new Date(noticia.createdAt).toLocaleDateString("es-AR") : (noticia.date || "Hoy"),
           category: "Noticias",
-          isDraft: noticia.estado !== "PUBLICADO",
+          isDraft: false,
           images: noticia.images || []
         }));
         

@@ -107,13 +107,13 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews, onUpdateNews })
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Error al guardar");
 
-      const noticiaFormateada = {
+const noticiaFormateada = {
         id: data.noticia?.id || editingId,
         title: titulo,
         body: [textoContenido], 
         date: new Date().toLocaleDateString("es-AR"),
         category: categoria || "Noticias",
-        isDraft: false,
+        isDraft: true,
         images: data.noticia?.images || imagenesUrls || [],
       };
 
