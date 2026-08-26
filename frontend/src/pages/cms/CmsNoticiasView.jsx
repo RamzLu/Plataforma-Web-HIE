@@ -116,7 +116,7 @@ const noticiaFormateada = {
         body: [textoContenido], 
         date: new Date().toLocaleDateString("es-AR"),
         category: categoria || "Noticias",
-        isDraft: true,
+        isDraft: false,
         images: data.noticia?.images || imagenesUrls || [],
       };
 
