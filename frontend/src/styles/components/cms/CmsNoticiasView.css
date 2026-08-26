@@ -41,7 +41,6 @@
   letter-spacing: 0.5px;
 }
 
-
 .news-thumb-box {
   width: 50px;
   height: 50px;
@@ -71,13 +70,13 @@
 
 .news-title-clamped {
   display: -webkit-box;
-  -webkit-line-clamp: 2; 
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis; 
-  word-break: break-word;   
+  text-overflow: ellipsis;
+  word-break: break-word;
   overflow-wrap: break-word;
-  max-width: 100%;          
+  max-width: 100%;
 }
 
 /* --- Acciones con iconos SVG --- */
@@ -240,13 +239,21 @@
 
 .activity-table-body {
   max-height: 440px;
-  overflow-y: auto;  
-  
+  overflow-y: auto;
 
-  scrollbar-width: none;  
-  -ms-overflow-style: none;  
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .activity-table-body::-webkit-scrollbar {
   display: none;
+}
+.news-title-interactive {
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.news-title-interactive:hover .news-title-clamped {
+  color: #0c2340; /* Color azul oscuro institucional */
+  text-decoration: underline;
 }

@@ -22,6 +22,7 @@ const CmsNoticiasView = ({
   onAddNewNews,
   onDeleteNews,
   onUpdateNews,
+  onViewNews,
   loading,
 }) => {
   const [showModal, setShowModal] = useState(false);
@@ -236,7 +237,13 @@ const CmsNoticiasView = ({
                       <div className="news-thumb-mock">HIE</div>
                     )}
                   </div>
-                  <div>
+
+                  <div
+                    className="news-title-interactive"
+                    onClick={() => onViewNews && onViewNews(news)}
+                    style={{ cursor: "pointer" }}
+                    title="Ver comunicado completo"
+                  >
                     <span className="activity-title news-title-clamped">
                       {news.title}
                     </span>
