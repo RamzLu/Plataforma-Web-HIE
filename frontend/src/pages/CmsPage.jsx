@@ -10,6 +10,8 @@ import CmsSidebar from "../components/cms/CmsSidebar";
 import CmsHeader from "../components/cms/CmsHeader";
 import CmsDashboardView from "./cms/CmsDashboardView";
 import CmsNoticiasView from "./cms/CmsNoticiasView";
+// IMPORTAMOS EL NUEVO COMPONENTE DE DOCUMENTACIÓN
+import CmsDocsView from "./cms/CmsDocsView";
 
 import { documentosData } from "../data/documentos";
 import avatarHospital from "../assets/iconEVITAface.jpg";
@@ -24,9 +26,11 @@ const CmsPage = () => {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("cms_active_tab") || "dashboard";
   });
+  
   useEffect(() => {
     localStorage.setItem("cms_active_tab", activeTab);
   }, [activeTab]);
+  
   const [selectedNews, setSelectedNews] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [lightbox, setLightbox] = useState({
@@ -36,6 +40,9 @@ const CmsPage = () => {
   });
 
   const [newsList, setNewsList] = useState([]);
+  // NUEVO ESTADO PARA LOS DOCUMENTOS
+  const [docsList, setDocsList] = useState([]); 
+  
   const [dashboardStats, setDashboardStats] = useState({
     contenidoPublicado: 0,
     borradores: 0,
@@ -70,22 +77,46 @@ const CmsPage = () => {
         }));
 
         setNewsList(noticiasFormateadas);
-        updateStats(noticiasFormateadas);
+        updateStats(noticiasFormateadas, docsList);
       } else {
         setNewsList([]);
-        updateStats([]);
+        updateStats([], docsList);
       }
     } catch (error) {
       console.error("Error conectando al backend para leer noticias:", error);
       setNewsList([]);
-      updateStats([]);
+      updateStats([], docsList);
     } finally {
       setLoading(false);
     }
   };
 
+  // NUEVA FUNCIÓN PARA OBTENER LOS DOCUMENTOS
+  const fetchDocs = async () => {
+    try {
+      // Mock o Fetch real hacia tu backend de documentos
+      const response = await fetch("http://localhost:3000/api/cms/documentacion");
+      if (!response.ok) throw new Error("Error al obtener documentos");
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        setDocsList(data);
+        updateStats(newsList, data);
+      } else {
+        // Fallback usando data local si el backend está vacío
+        setDocsList(documentosData || []);
+        updateStats(newsList, documentosData || []);
+      }
+    } catch (error) {
+      console.error("Error obteniendo documentos:", error);
+      setDocsList(documentosData || []);
+      updateStats(newsList, documentosData || []);
+    }
+  };
+
   useEffect(() => {
     fetchNoticias();
+    fetchDocs();
   }, []);
 
   useEffect(() => {
@@ -102,7 +133,7 @@ const CmsPage = () => {
           keycloak.tokenParsed?.preferred_username ||
           "Editor CMS";
         setUserName(name);
-        updateStats(newsList);
+        updateStats(newsList, docsList);
       }
       return;
     }
@@ -126,20 +157,21 @@ const CmsPage = () => {
             "Editor CMS";
           setUserName(name);
 
-          updateStats(newsList);
+          updateStats(newsList, docsList);
         }
       })
       .catch((err) => {
         console.error("Error al inicializar Keycloak:", err);
       });
-  }, [newsList]);
+  }, [newsList, docsList]);
 
-  const updateStats = (currentNews) => {
+  // ACTUALIZADA PARA CONTAR LOS DOCUMENTOS REALES
+  const updateStats = (currentNews, currentDocs) => {
     const publicadas = currentNews.filter((news) => !news.isDraft).length;
     const borradoresPendientes = currentNews.filter(
       (news) => news.isDraft,
     ).length;
-    const totalDocumentos = documentosData ? documentosData.length : 0;
+    const totalDocumentos = currentDocs ? currentDocs.length : 0;
 
     setDashboardStats({
       contenidoPublicado: publicadas,
@@ -149,10 +181,11 @@ const CmsPage = () => {
     });
   };
 
+  /* ----- MÉTODOS PARA NOTICIAS ----- */
   const handleAddNewNews = (nuevaNoticia) => {
     const updatedList = [nuevaNoticia, ...newsList];
     setNewsList(updatedList);
-    updateStats(updatedList);
+    updateStats(updatedList, docsList);
     localStorage.setItem("portal_news_data", JSON.stringify(updatedList));
   };
 
@@ -161,7 +194,7 @@ const CmsPage = () => {
       item.id === updatedNews.id ? updatedNews : item,
     );
     setNewsList(updatedList);
-    updateStats(updatedList);
+    updateStats(updatedList, docsList);
   };
 
   const handleDeleteNews = async (id) => {
@@ -179,7 +212,7 @@ const CmsPage = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          },
+          }
         );
 
         if (!response.ok) {
@@ -188,13 +221,62 @@ const CmsPage = () => {
 
         const filtered = newsList.filter((n) => n.id !== id);
         setNewsList(filtered);
-        updateStats(filtered);
+        updateStats(filtered, docsList);
         localStorage.setItem("portal_news_data", JSON.stringify(filtered));
 
         alert("¡Noticia eliminada correctamente de todos lados!");
       } catch (error) {
         console.error("Error al eliminar:", error);
         alert("Ocurrió un error al intentar eliminar la noticia.");
+      }
+    }
+  };
+
+  /* ----- MÉTODOS PARA DOCUMENTOS ----- */
+  const handleAddNewDoc = (nuevoDoc) => {
+    const updatedList = [nuevoDoc, ...docsList];
+    setDocsList(updatedList);
+    updateStats(newsList, updatedList);
+  };
+
+  const handleUpdateDoc = (updatedDoc) => {
+    const updatedList = docsList.map((item) =>
+      item.id === updatedDoc.id ? updatedDoc : item,
+    );
+    setDocsList(updatedList);
+    updateStats(newsList, updatedList);
+  };
+
+  const handleDeleteDoc = async (id) => {
+    if (
+      window.confirm(
+        "¿Estás seguro de eliminar este documento del repositorio?"
+      )
+    ) {
+      try {
+        const token = keycloak.token;
+        const response = await fetch(
+          `http://localhost:3000/api/cms/documentacion/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("No se pudo eliminar en el servidor");
+        }
+
+        const filtered = docsList.filter((d) => d.id !== id);
+        setDocsList(filtered);
+        updateStats(newsList, filtered);
+
+        alert("¡Documento eliminado correctamente!");
+      } catch (error) {
+        console.error("Error al eliminar documento:", error);
+        alert("Ocurrió un error al intentar eliminar el documento.");
       }
     }
   };
@@ -274,6 +356,8 @@ const CmsPage = () => {
             <h1>
               {activeTab === "noticias"
                 ? "Gestión de Noticias"
+                : activeTab === "documentacion"
+                ? "Gestión de Documentación"
                 : "Panel de administración"}
             </h1>
             <p>
@@ -303,7 +387,19 @@ const CmsPage = () => {
             />
           )}
 
-          {activeTab !== "dashboard" && activeTab !== "noticias" && (
+          {/* RENDERIZADO DEL NUEVO MÓDULO DE DOCUMENTOS */}
+          {activeTab === "documentacion" && (
+            <CmsDocsView
+              docsList={docsList}
+              onAddNewDoc={handleAddNewDoc}
+              onDeleteDoc={handleDeleteDoc}
+              onUpdateDoc={handleUpdateDoc}
+              loading={loading}
+            />
+          )}
+
+          {/* Fallback para el resto de pestañas no implementadas aún */}
+          {activeTab !== "dashboard" && activeTab !== "noticias" && activeTab !== "documentacion" && (
             <div className="cms-dashboard-card">
               <h3 className="cms-card-title">
                 Módulo de {activeTab.toUpperCase()}
@@ -316,6 +412,7 @@ const CmsPage = () => {
         </main>
       </div>
 
+      {/* MODAL CERRAR SESIÓN */}
       {showLogoutModal && (
         <div
           className="modal-overlay"
@@ -360,6 +457,7 @@ const CmsPage = () => {
         </div>
       )}
 
+      {/* MODAL DETALLE DE NOTICIA */}
       {selectedNews && (
         <div className="modal-overlay" onClick={() => setSelectedNews(null)}>
           <div
@@ -427,6 +525,7 @@ const CmsPage = () => {
         </div>
       )}
 
+      {/* LIGHTBOX GALERÍA DE IMÁGENES */}
       {lightbox.isOpen && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>

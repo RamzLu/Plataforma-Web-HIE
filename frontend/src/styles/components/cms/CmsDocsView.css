@@ -1,4 +1,7 @@
-/* ===== Header de la vista ===== */
+/* =========================================
+   ESTILOS EXCLUSIVOS PARA CmsDocsView
+========================================= */
+
 .docs-view-header {
   display: flex;
   justify-content: space-between;
@@ -24,17 +27,32 @@
   white-space: nowrap;
   transition: background 0.2s;
 }
-.btn-subir-doc-header:hover { background: #123156; }
+.btn-subir-doc-header:hover { 
+  background: #123156; 
+}
 
-/* ===== Tabla (grilla de 5 columnas) ===== */
+/* ===== Contenedor y Tabla de Documentos ===== */
+.cms-docs-table-container {
+  width: 100%;
+  background-color: #ffffff !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+  margin-top: 20px;
+}
+
 .docs-table-head,
 .docs-table-row {
   display: grid;
-  grid-template-columns: minmax(260px, 3fr) 1.2fr 1.2fr 1fr 0.9fr;
+  grid-template-columns: minmax(260px, 3fr) 1fr 1fr 1fr 1.2fr;
   align-items: center;
   gap: 12px;
 }
-.docs-table-row { padding: 14px 8px; border-bottom: 1px solid #eef2f7; }
+.docs-table-row { 
+  padding: 14px 16px; 
+  border-bottom: 1px solid #eef2f7; 
+}
 
 /* Celda de contenido: ícono + info */
 .doc-content-cell {
@@ -54,14 +72,34 @@
   justify-content: center;
   flex-shrink: 0;
 }
-.doc-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.doc-title-row { display: flex; align-items: center; gap: 8px; }
-.doc-title { font-weight: 700; color: #0c2340; }
-.doc-preview-link { color: #64748b; display: inline-flex; }
-.doc-preview-link:hover { color: #0c2340; }
-.doc-meta { color: #94a3b8; font-size: 0.8rem; }
+.doc-info { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 3px; 
+  min-width: 0; 
+}
+.doc-title-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+}
+.doc-title { 
+  font-weight: 700; 
+  color: #0c2340; 
+}
+.doc-preview-link { 
+  color: #64748b; 
+  display: inline-flex; 
+}
+.doc-preview-link:hover { 
+  color: #0c2340; 
+}
+.doc-meta { 
+  color: #94a3b8; 
+  font-size: 0.8rem; 
+}
 
-/* ===== Badge de estado (agrega "programado") ===== */
+/* ===== Badge de estado ===== */
 .status-badge.programado {
   background: #e0edff;
   color: #1d4ed8;
@@ -71,24 +109,49 @@
 .doc-actions-cell {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
 }
-.doc-action-btn-edit,
-.doc-action-btn-delete {
-  background: transparent;
+.doc-action-btn-edit {
+  background: none;
   border: none;
   cursor: pointer;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 6px;
   border-radius: 6px;
-  color: #64748b;
-  transition: background 0.15s, color 0.15s;
+  transition: background-color 0.2s;
 }
-.doc-action-btn-edit:hover { background: #eef2f7; color: #0c2340; }
-.doc-action-btn-delete:hover { background: #fde8e8; color: #dc2626; }
+.doc-action-btn-edit:hover { background-color: #e0f2fe; }
+
+.doc-action-btn-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #e11d48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+.doc-action-btn-delete:hover { background-color: #ffe4e6; }
 
 /* ===== Formulario del modal ===== */
-.docs-form-container { display: flex; flex-direction: column; gap: 18px; }
-.docs-form-row { display: flex; gap: 16px; }
+.docs-modal-content {
+  max-width: 600px;
+}
+.docs-form-container { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 18px; 
+}
+.docs-form-row { 
+  display: flex; 
+  gap: 16px; 
+}
 .docs-form-label {
   display: block;
   font-weight: 700;
@@ -163,7 +226,19 @@
   padding: 0 6px;
 }
 
-/* Responsive: en pantallas chicas, la tabla se apila */
+.docs-modal-footer {
+  padding: 0;
+  background: transparent;
+  border: none;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 10px;
+}
+.docs-btn-submit {
+  background-color: #0c2340;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .docs-table-head { display: none; }
   .docs-table-row {
