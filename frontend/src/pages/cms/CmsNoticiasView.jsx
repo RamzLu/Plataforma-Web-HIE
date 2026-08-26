@@ -12,18 +12,23 @@ import {
   List,
   BlockQuote,
   Undo,
-  Alignment
+  Alignment,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import "../../styles/components/cms/CmsNoticiasView.css";
 
-const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews, onUpdateNews }) => {
+const CmsNoticiasView = ({
+  newsList,
+  onAddNewNews,
+  onDeleteNews,
+  onUpdateNews,
+}) => {
   const [showModal, setShowModal] = useState(false);
-  const [editingId, setEditingId] = useState(null); 
+  const [editingId, setEditingId] = useState(null);
   const [titulo, setTitulo] = useState("");
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("Noticias");
-  const [imagenesUrls, setImagenesUrls] = useState([]); 
+  const [imagenesUrls, setImagenesUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
 
@@ -37,13 +42,17 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews, onUpdateNews })
     setShowModal(true);
   };
 
-const handleOpenEdit = (news) => {
+  const handleOpenEdit = (news) => {
     setEditingId(news.id);
     setTitulo(news.title || "");
-    
+
     const contenidoCrudo = news.body?.[0] || news.contenido || "";
-    setCuerpoHtml(typeof contenidoCrudo === "string" ? contenidoCrudo : String(contenidoCrudo));
-    
+    setCuerpoHtml(
+      typeof contenidoCrudo === "string"
+        ? contenidoCrudo
+        : String(contenidoCrudo),
+    );
+
     setCategoria(news.category || "Noticias");
     setImagenesUrls(news.images || []);
     setArchivosSeleccionados([]);
@@ -53,6 +62,18 @@ const handleOpenEdit = (news) => {
   const handleMultipleImagesUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
+      const regexEspeciales = /[^a-zA-Z0-9.\-_]/;
+
+      const tieneCaracteresEspeciaux = files.some((file) =>
+        regexEspeciales.test(file.name),
+      );
+
+      if (tieneCaracteresEspeciaux) {
+        alert(
+          "Advertencia: Algunos archivos seleccionados contienen tildes, espacios o caracteres especiales en su nombre. El sistema los adaptará automáticamente para evitar errores en el servidor, pero se recomienda usar nombres simples.",
+        );
+      }
+
       const newUrls = files.map((file) => URL.createObjectURL(file));
       setImagenesUrls((prev) => [...prev, ...newUrls]);
       setArchivosSeleccionados((prev) => [...prev, ...files]);
@@ -61,15 +82,20 @@ const handleOpenEdit = (news) => {
 
   const handleRemoveImage = (indexToRemove) => {
     setImagenesUrls((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-    setArchivosSeleccionados((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+    setArchivosSeleccionados((prev) =>
+      prev.filter((_, idx) => idx !== indexToRemove),
+    );
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    
-    const textoContenido = typeof cuerpoHtml === 'string' 
-      ? cuerpoHtml 
-      : (Array.isArray(cuerpoHtml) ? cuerpoHtml[0] || "" : String(cuerpoHtml || ""));
+
+    const textoContenido =
+      typeof cuerpoHtml === "string"
+        ? cuerpoHtml
+        : Array.isArray(cuerpoHtml)
+          ? cuerpoHtml[0] || ""
+          : String(cuerpoHtml || "");
 
     if (!titulo.trim() || !textoContenido.trim()) {
       alert("Por favor completa el título y el contenido de la noticia.");
@@ -87,33 +113,33 @@ const handleOpenEdit = (news) => {
       }
 
       const formData = new FormData();
-      formData.append('titulo', titulo);
-      formData.append('contenido', textoContenido);
-      formData.append('imagenesExistentes', JSON.stringify(imagenesUrls));
+      formData.append("titulo", titulo);
+      formData.append("contenido", textoContenido);
+      formData.append("imagenesExistentes", JSON.stringify(imagenesUrls));
 
       archivosSeleccionados.forEach((file) => {
-        formData.append('imagenes', file);
+        formData.append("imagenes", file);
       });
 
-      const url = editingId 
+      const url = editingId
         ? `http://localhost:3000/api/cms/noticias/${editingId}`
-        : 'http://localhost:3000/api/cms/noticias';
-      
-      const method = editingId ? 'PUT' : 'POST';
+        : "http://localhost:3000/api/cms/noticias";
+
+      const method = editingId ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Error al guardar");
 
-const noticiaFormateada = {
+      const noticiaFormateada = {
         id: data.noticia?.id || editingId,
         title: titulo,
-        body: [textoContenido], 
+        body: [textoContenido],
         date: new Date().toLocaleDateString("es-AR"),
         category: categoria || "Noticias",
         isDraft: false,
@@ -141,31 +167,48 @@ const noticiaFormateada = {
     <div className="cms-dashboard-card">
       <div className="news-view-header">
         <div>
-          <h3 className="cms-card-title news-view-title">Listado de las noticias</h3>
-          <p className="news-view-subtitle">Administre las publicaciones del portal.</p>
+          <h3 className="cms-card-title news-view-title">
+            Listado de las noticias
+          </h3>
+          <p className="news-view-subtitle">
+            Administre las publicaciones del portal.
+          </p>
         </div>
         <button className="btn-crear-noticia-header" onClick={handleOpenCreate}>
           + CREAR NOTICIA
         </button>
       </div>
 
-<div className="cms-news-table-container">
+      <div className="cms-news-table-container">
         <div className="activity-table-head news-table-head">
           <div className="col-content">CONTENIDO</div>
           <div className="col-fecha">FECHA</div>
           <div className="col-editor">EDITOR</div>
           <div className="col-categoria">CATEGORÍA</div>
           <div className="col-estado">ESTADO</div>
-          <div className="col-acciones" style={{ textAlign: "center" }}>ACCIONES</div>
+          <div className="col-acciones" style={{ textAlign: "center" }}>
+            ACCIONES
+          </div>
         </div>
 
-<div className="activity-table-body">
+        <div className="activity-table-body">
           {newsList.map((news) => (
             <div className="activity-row news-table-row" key={news.id}>
-              <div className="col-content" style={{ flexDirection: "row", alignItems: "center", gap: "15px" }}>
+              <div
+                className="col-content"
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: "15px",
+                }}
+              >
                 <div className="news-thumb-box">
                   {news.images && news.images.length > 0 ? (
-                    <img src={news.images[0]} alt="Miniatura" className="news-thumb-img" />
+                    <img
+                      src={news.images[0]}
+                      alt="Miniatura"
+                      className="news-thumb-img"
+                    />
                   ) : (
                     <div className="news-thumb-mock">HIE</div>
                   )}
@@ -176,30 +219,68 @@ const noticiaFormateada = {
                   </span>
                 </div>
               </div>
-             <div className="col-fecha">
-  {news.date || "Ahora"}
-  {news.updatedAt && news.createdAt && new Date(news.updatedAt) - new Date(news.createdAt) > 5000 && (
-    <span style={{ fontSize: "0.7rem", color: "#64748b", fontStyle: "italic", display: "block" }}>
-      (Editado)
-    </span>
-  )}
-</div>
+              <div className="col-fecha">
+                {news.date || "Ahora"}
+                {news.updatedAt &&
+                  news.createdAt &&
+                  new Date(news.updatedAt) - new Date(news.createdAt) >
+                    5000 && (
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        color: "#64748b",
+                        fontStyle: "italic",
+                        display: "block",
+                      }}
+                    >
+                      (Editado)
+                    </span>
+                  )}
+              </div>
               <div className="col-editor">Tú</div>
               <div className="col-categoria">{news.category || "Noticias"}</div>
               <div className="col-estado">
-                <span className={`status-badge ${news.isDraft ? "pendiente" : "publicado"}`}>
+                <span
+                  className={`status-badge ${news.isDraft ? "pendiente" : "publicado"}`}
+                >
                   {news.isDraft ? "Pendiente" : "Publicado"}
                 </span>
               </div>
-<div className="news-actions-cell">
-                <button title="Editar" onClick={() => handleOpenEdit(news)} className="news-action-btn-edit">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="news-actions-cell">
+                <button
+                  title="Editar"
+                  onClick={() => handleOpenEdit(news)}
+                  className="news-action-btn-edit"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                   </svg>
                 </button>
-                <button title="Eliminar" onClick={() => onDeleteNews(news.id)} className="news-action-btn-delete">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <button
+                  title="Eliminar"
+                  onClick={() => onDeleteNews(news.id)}
+                  className="news-action-btn-delete"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     <line x1="10" y1="11" x2="10" y2="17"></line>
@@ -214,15 +295,26 @@ const noticiaFormateada = {
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content-esp news-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content-esp news-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header-esp">
               <h2>{editingId ? "Editar noticia" : "Crear noticia"}</h2>
-              <button className="btn-close-modal" onClick={() => setShowModal(false)}>
-                <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+              <button
+                className="btn-close-modal"
+                onClick={() => setShowModal(false)}
+              >
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="modal-body-esp news-form-container">
+            <form
+              onSubmit={handleSave}
+              className="modal-body-esp news-form-container"
+            >
               <div>
                 <label className="news-form-label">Título de la noticia</label>
                 <input
@@ -251,19 +343,23 @@ const noticiaFormateada = {
 
               <div>
                 <label className="news-form-label">Imágenes adjuntas</label>
-                <input 
-                  type="file" 
-                  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" 
-                  multiple 
-                  onChange={handleMultipleImagesUpload} 
-                  className="news-file-input" 
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+                  multiple
+                  onChange={handleMultipleImagesUpload}
+                  className="news-file-input"
                 />
 
                 {imagenesUrls.length > 0 && (
                   <div className="news-preview-gallery">
                     {imagenesUrls.map((url, idx) => (
                       <div key={idx} className="news-preview-item">
-                        <img src={url} alt={`Preview ${idx}`} className="news-preview-img" />
+                        <img
+                          src={url}
+                          alt={`Preview ${idx}`}
+                          className="news-preview-img"
+                        />
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(idx)}
@@ -278,29 +374,86 @@ const noticiaFormateada = {
                 )}
               </div>
 
-<div>
-                <label style={{ display: "block", fontWeight: "700", color: "#0c2340", marginBottom: "8px" }}>Cuerpo de la noticia</label>
-                <div className="ckeditor-wrapper" style={{ border: "1px solid #cbd5e1", borderRadius: "8px", overflow: "hidden" }}>
-<CKEditor
-    editor={ClassicEditor}
-    data={cuerpoHtml}
-    config={{
-      licenseKey: 'GPL', 
-      plugins: [Essentials, Paragraph, Heading, Bold, Italic, Link, List, BlockQuote, Undo, Alignment],
-      toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'alignment', 'blockQuote', '|', 'undo', 'redo'],
-      alignment: { options: ['left', 'center', 'right', 'justify'] }
-    }}
-    onChange={(event, editor) => setCuerpoHtml(editor.getData())}
-  />
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "700",
+                    color: "#0c2340",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Cuerpo de la noticia
+                </label>
+                <div
+                  className="ckeditor-wrapper"
+                  style={{
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <CKEditor
+                    editor={ClassicEditor}
+                    data={cuerpoHtml}
+                    config={{
+                      licenseKey: "GPL",
+                      plugins: [
+                        Essentials,
+                        Paragraph,
+                        Heading,
+                        Bold,
+                        Italic,
+                        Link,
+                        List,
+                        BlockQuote,
+                        Undo,
+                        Alignment,
+                      ],
+                      toolbar: [
+                        "heading",
+                        "|",
+                        "bold",
+                        "italic",
+                        "link",
+                        "bulletedList",
+                        "numberedList",
+                        "alignment",
+                        "blockQuote",
+                        "|",
+                        "undo",
+                        "redo",
+                      ],
+                      alignment: {
+                        options: ["left", "center", "right", "justify"],
+                      },
+                    }}
+                    onChange={(event, editor) =>
+                      setCuerpoHtml(editor.getData())
+                    }
+                  />
                 </div>
               </div>
 
               <div className="modal-footer-esp news-modal-footer">
-                <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)} disabled={loading}>
+                <button
+                  type="button"
+                  className="btn-cancelar-gris"
+                  onClick={() => setShowModal(false)}
+                  disabled={loading}
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="btn-cerrar-rojo news-btn-submit" disabled={loading}>
-                  {loading ? "Guardando..." : (editingId ? "Actualizar" : "Guardar")}
+                <button
+                  type="submit"
+                  className="btn-cerrar-rojo news-btn-submit"
+                  disabled={loading}
+                >
+                  {loading
+                    ? "Guardando..."
+                    : editingId
+                      ? "Actualizar"
+                      : "Guardar"}
                 </button>
               </div>
             </form>
