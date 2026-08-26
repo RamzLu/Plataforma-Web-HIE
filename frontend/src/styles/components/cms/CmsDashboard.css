@@ -458,3 +458,10 @@
 .cms-btn-ver-mas-fuera:active {
   transform: scale(0.98);
 }
+.cms-edited-tag {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-style: italic;
+  font-weight: 500;
+  margin-left: 4px;
+}

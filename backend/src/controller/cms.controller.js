@@ -140,8 +140,10 @@ export const obtenerNoticias = async (req, res) => {
         title: noticia.titulo,
         body: [noticia.contenido],
         date: new Date(noticia.createdAt).toLocaleDateString("es-AR"),
+        createdAt: noticia.createdAt,
+        updatedAt: noticia.updatedAt,
         category: "Noticias",
-        isDraft: true,
+        isDraft: false,
         images: imgs
       };
     });

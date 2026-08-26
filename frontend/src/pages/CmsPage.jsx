@@ -46,11 +46,13 @@ const CmsPage = () => {
       const data = await response.json();
 
       if (data && data.length > 0) {
-        const noticiasFormateadas = data.map(noticia => ({
+const noticiasFormateadas = data.map(noticia => ({
           id: noticia.id,
           title: noticia.titulo || noticia.title,
           body: [noticia.contenido || noticia.body],
-          date: noticia.createdAt ? new Date(noticia.createdAt).toLocaleDateString("es-AR") : (noticia.date || "Hoy"),
+          date: noticia.createdAt ? new Date(noticia.createdAt).toLocaleDateString("es-AR") : "Hoy",
+          createdAt: noticia.createdAt,
+          updatedAt: noticia.updatedAt, 
           category: "Noticias",
           isDraft: false,
           images: noticia.images || []

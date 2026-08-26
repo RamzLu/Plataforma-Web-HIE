@@ -173,7 +173,14 @@ const noticiaFormateada = {
                   </span>
                 </div>
               </div>
-              <div className="col-fecha">{news.date || "Ahora"}</div>
+             <div className="col-fecha">
+  {news.date || "Ahora"}
+  {news.updatedAt && news.createdAt && new Date(news.updatedAt) - new Date(news.createdAt) > 5000 && (
+    <span style={{ fontSize: "0.7rem", color: "#64748b", fontStyle: "italic", display: "block" }}>
+      (Editado)
+    </span>
+  )}
+</div>
               <div className="col-editor">Tú</div>
               <div className="col-categoria">{news.category || "Noticias"}</div>
               <div className="col-estado">
