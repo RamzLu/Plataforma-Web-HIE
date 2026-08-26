@@ -16,8 +16,9 @@
 
 .cms-news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  align-items: stretch; 
 }
 
 .cms-news-item {
@@ -388,4 +389,72 @@
   list-style-type: decimal;
   margin-left: 25px;
   margin-bottom: 10px;
+}
+.cms-news-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+  height: 100%;
+}
+
+/* Ajustes de la tarjeta de noticia para que luzca limpia */
+.cms-news-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease-in-out;
+}
+
+.cms-news-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Insignia / Etiqueta de la fecha más visible y elegante */
+.cms-news-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f1f5f9;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  width: fit-content;
+}
+
+.cms-news-date-badge svg {
+  color: #0284c7;
+}
+
+/* Botón "VER MÁS" fuera de la tarjeta principal */
+.cms-btn-ver-mas-fuera {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #0c2340;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(12, 35, 64, 0.15);
+}
+
+.cms-btn-ver-mas-fuera:hover {
+  background-color: #1d4ed8;
+}
+
+.cms-btn-ver-mas-fuera:active {
+  transform: scale(0.98);
 }

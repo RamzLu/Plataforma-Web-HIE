@@ -219,7 +219,7 @@
   /* border-radius: 12px; Bordes contenidos */
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Sombra para despegarlo del fondo */
   overflow: hidden;
-  border: 1px solid #cbd5e1; /* Borde sutil para contener la información */
+  border: 1px solid #7eade7; /* Borde sutil para contener la información */
 }
 
 .doc-table-header {

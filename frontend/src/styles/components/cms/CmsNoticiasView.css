@@ -1,0 +1,222 @@
+/* =========================================
+   ESTILOS EXCLUSIVOS PARA CmsNoticiasView
+========================================= */
+
+.news-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.news-view-title {
+  margin: 0;
+}
+
+.news-view-subtitle {
+  color: #475569;
+  font-size: 0.9rem;
+  margin: 5px 0 0 0;
+}
+
+/* --- Tabla de Noticias con relieve y contraste del fondo --- */
+.doc-table-container {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+  margin-top: 20px;
+}
+
+.activity-table-head {
+  background-color: #f1f5f9 !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+  font-weight: 700;
+  color: #0c2340;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1.2fr;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.activity-row {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.15s ease;
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1.2fr;
+  align-items: center;
+}
+
+.activity-row:hover {
+  background-color: #f8fafc !important;
+}
+
+.news-thumb-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid #cbd5e1;
+}
+
+.news-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.news-thumb-mock {
+  background: #e2e8f0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #94a3b8;
+}
+
+.news-title-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --- Acciones con iconos SVG --- */
+.news-actions-cell {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.news-action-btn-edit {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.news-action-btn-edit:hover {
+  background-color: #e0f2fe;
+}
+
+.news-action-btn-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #e11d48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.news-action-btn-delete:hover {
+  background-color: #ffe4e6;
+}
+
+/* --- Formulario y Modales internos --- */
+.news-modal-content {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.news-form-container {
+  gap: 20px;
+}
+
+.news-form-label {
+  display: block;
+  font-weight: 700;
+  color: #0c2340;
+  margin-bottom: 8px;
+}
+
+.news-form-input,
+.news-form-select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  background-color: #fff;
+}
+
+.news-file-input {
+  margin-bottom: 12px;
+}
+
+.news-preview-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+.news-preview-item {
+  position: relative;
+  width: 70px;
+  height: 70px;
+}
+
+.news-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #94a3b8;
+}
+
+.news-preview-remove-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.news-editor-wrapper {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.news-modal-footer {
+  padding: 0;
+  background: transparent;
+  border: none;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.news-btn-submit {
+  background-color: #0c2340;
+}

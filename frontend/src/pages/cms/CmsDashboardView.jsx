@@ -3,12 +3,9 @@ import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
 import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
 
 const cleanHtmlText = (html) => {
-  // Blindaje: si no es un string (es undefined, null o un array), devolvemos string vacío
   if (!html || typeof html !== "string") return "";
-
   let text = html;
 
-  // 1. Detectar listas ordenadas (<ol>) y aplicar un contador
   text = text.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (match, innerOl) => {
     let count = 1;
     return innerOl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
@@ -16,14 +13,12 @@ const cleanHtmlText = (html) => {
     });
   });
 
-  // 2. Detectar listas desordenadas (<ul>) y aplicar viñetas
   text = text.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (match, innerUl) => {
     return innerUl.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (m, innerLi) => {
       return `\n• ${innerLi}`;
     });
   });
 
-  // 3. Limpiar el resto del HTML y emprolijar los espacios
   return text
     .replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n")
     .replace(/<[^>]*>?/gm, "")
@@ -32,6 +27,7 @@ const cleanHtmlText = (html) => {
     .replace(/\n\s*\n/g, "\n")
     .trim();
 };
+
 const CmsDashboardView = ({
   latestNews,
   dashboardStats,
@@ -45,42 +41,59 @@ const CmsDashboardView = ({
         <h3 className="cms-card-title">Últimas Noticias del Portal</h3>
         <div className="cms-news-grid">
           {latestNews.map((news) => (
-            <div key={news.id} className="cms-news-item">
-              <div className="cms-news-img-placeholder">
-                {news.images && news.images.length > 0 ? (
-                  <img
-                    src={news.images[0]}
-                    alt={news.title}
-                    className="cms-real-news-img"
-                  />
-                ) : (
-                  <div className="cms-news-img-mock">
-                    <span className="gold-text">HIE</span>
-                    <span className="blue-sub">Sin imagen</span>
+            <div key={news.id} className="cms-news-card-wrapper">
+              <div className="cms-news-item">
+                <div className="cms-news-img-placeholder">
+                  {news.images && news.images.length > 0 ? (
+                    <img
+                      src={news.images[0]}
+                      alt={news.title}
+                      className="cms-real-news-img"
+                    />
+                  ) : (
+                    <div className="cms-news-img-mock">
+                      <span className="gold-text">HIE</span>
+                      <span className="blue-sub">Sin imagen</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="cms-news-content">
+                  {/* Fecha destacada con un diseño de insignia o etiqueta superior */}
+                  <div className="cms-news-date-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>{news.date}</span>
                   </div>
-                )}
-              </div>
-              <div className="cms-news-content">
-                <h4 className="cms-real-news-title">{news.title}</h4>
 
-                {/* APLICAMOS LA FUNCIÓN Y EL AJUSTE AQUÍ */}
-                <p
-                  style={{
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                  }}
-                >
-                  {cleanHtmlText(news.body[0]).substring(0, 80)}...
-                </p>
+                  <h4 className="cms-real-news-title">{news.title}</h4>
 
-                <button
-                  className="cms-btn-ver-mas"
-                  onClick={() => setSelectedNews(news)}
-                >
-                  VER MÁS
-                </button>
-                <span className="cms-news-time">{news.date}</span>
+                  <p
+                    style={{
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {cleanHtmlText(news.body[0]).substring(0, 80)}...
+                  </p>
+                </div>
               </div>
+
+              {/* Botón "VER MÁS" fuera de la tarjeta, actuando como un pie de página o botón de acción flotante */}
+              <button
+                className="cms-btn-ver-mas-fuera"
+                onClick={() => setSelectedNews(news)}
+              >
+                <span>Ver comunicado completo</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
             </div>
           ))}
         </div>

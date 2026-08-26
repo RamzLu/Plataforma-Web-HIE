@@ -15,6 +15,7 @@ import {
   Alignment
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
+import "../../styles/components/cms/CmsNoticiasView.css";
 
 const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews, onUpdateNews }) => {
   const [showModal, setShowModal] = useState(false);
@@ -24,6 +25,7 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews, onUpdateNews })
   const [categoria, setCategoria] = useState("Noticias");
   const [imagenesUrls, setImagenesUrls] = useState([]); 
   const [loading, setLoading] = useState(false);
+  const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
 
   const handleOpenCreate = () => {
     setEditingId(null);
@@ -31,6 +33,7 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews, onUpdateNews })
     setCuerpoHtml("");
     setCategoria("Noticias");
     setImagenesUrls([]);
+    setArchivosSeleccionados([]);
     setShowModal(true);
   };
 
@@ -40,17 +43,14 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews, onUpdateNews })
     setCuerpoHtml(news.body?.[0] || "");
     setCategoria(news.category || "Noticias");
     setImagenesUrls(news.images || []);
+    setArchivosSeleccionados([]);
     setShowModal(true);
   };
-const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
 
-const handleMultipleImagesUpload = (e) => {
+  const handleMultipleImagesUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
-      // Creamos las URLs para la vista previa
       const newUrls = files.map((file) => URL.createObjectURL(file));
-      
-      // Acumulamos tanto las previsualizaciones como los archivos físicos reales
       setImagenesUrls((prev) => [...prev, ...newUrls]);
       setArchivosSeleccionados((prev) => [...prev, ...files]);
     }
@@ -61,10 +61,9 @@ const handleMultipleImagesUpload = (e) => {
     setArchivosSeleccionados((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
-const handleSave = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     
-    // Blindamos la conversión a string por si viene en formato de arreglo u otro tipo
     const textoContenido = typeof cuerpoHtml === 'string' 
       ? cuerpoHtml 
       : (Array.isArray(cuerpoHtml) ? cuerpoHtml[0] || "" : String(cuerpoHtml || ""));
@@ -84,15 +83,14 @@ const handleSave = async (e) => {
         return;
       }
 
-const formData = new FormData();
+      const formData = new FormData();
       formData.append('titulo', titulo);
       formData.append('contenido', textoContenido);
-
       formData.append('imagenesExistentes', JSON.stringify(imagenesUrls));
 
-  archivosSeleccionados.forEach((file) => {
-  formData.append('imagenes', file);
-});
+      archivosSeleccionados.forEach((file) => {
+        formData.append('imagenes', file);
+      });
 
       const url = editingId 
         ? `http://localhost:3000/api/cms/noticias/${editingId}`
@@ -138,18 +136,18 @@ const formData = new FormData();
 
   return (
     <div className="cms-dashboard-card">
-      <div className="cms-news-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+      <div className="news-view-header">
         <div>
-          <h3 className="cms-card-title" style={{ margin: 0 }}>Listado de las noticias</h3>
-          <p style={{ color: "#475569", fontSize: "0.9rem", margin: "5px 0 0 0" }}>Administre las publicaciones del portal.</p>
+          <h3 className="cms-card-title news-view-title">Listado de las noticias</h3>
+          <p className="news-view-subtitle">Administre las publicaciones del portal.</p>
         </div>
         <button className="btn-crear-noticia-header" onClick={handleOpenCreate}>
           + CREAR NOTICIA
         </button>
       </div>
 
-      <div className="doc-table-container">
-        <div className="activity-table-head" style={{ gridTemplateColumns: "2.5fr 1fr 1fr 1fr 1fr 1.2fr" }}>
+<div className="cms-news-table-container">
+        <div className="activity-table-head news-table-head">
           <div className="col-content">CONTENIDO</div>
           <div className="col-fecha">FECHA</div>
           <div className="col-editor">EDITOR</div>
@@ -158,19 +156,19 @@ const formData = new FormData();
           <div className="col-acciones" style={{ textAlign: "center" }}>ACCIONES</div>
         </div>
 
-        <div className="activity-table-body">
+<div className="activity-table-body">
           {newsList.map((news) => (
-            <div className="activity-row" key={news.id} style={{ gridTemplateColumns: "2.5fr 1fr 1fr 1fr 1fr 1.2fr" }}>
+            <div className="activity-row news-table-row" key={news.id}>
               <div className="col-content" style={{ flexDirection: "row", alignItems: "center", gap: "15px" }}>
-                <div style={{ width: "50px", height: "50px", borderRadius: "6px", overflow: "hidden", flexShrink: 0, border: "1px solid #cbd5e1" }}>
+                <div className="news-thumb-box">
                   {news.images && news.images.length > 0 ? (
-                    <img src={news.images[0]} alt="Miniatura" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={news.images[0]} alt="Miniatura" className="news-thumb-img" />
                   ) : (
-                    <div style={{ background: "#e2e8f0", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: "bold", color: "#94a3b8" }}>HIE</div>
+                    <div className="news-thumb-mock">HIE</div>
                   )}
                 </div>
                 <div>
-                  <span className="activity-title" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  <span className="activity-title news-title-clamped">
                     {news.title}
                   </span>
                 </div>
@@ -183,10 +181,21 @@ const formData = new FormData();
                   {news.isDraft ? "Pendiente" : "Publicado"}
                 </span>
               </div>
-              <div className="col-acciones" style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
-                <button title="Editar" onClick={() => handleOpenEdit(news)} style={{ background: "none", border: "none", cursor: "pointer", color: "#0284c7", fontSize: "1.1rem" }}>✏️</button>
-
-                <button title="Eliminar" onClick={() => onDeleteNews(news.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#e11d48", fontSize: "1.1rem" }}>🗑️</button>
+<div className="news-actions-cell">
+                <button title="Editar" onClick={() => handleOpenEdit(news)} className="news-action-btn-edit">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button title="Eliminar" onClick={() => onDeleteNews(news.id)} className="news-action-btn-delete">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                </button>
               </div>
             </div>
           ))}
@@ -195,7 +204,7 @@ const formData = new FormData();
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content-esp" style={{ maxWidth: "800px", maxHeight: "90vh", overflowY: "auto" }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content-esp news-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-esp">
               <h2>{editingId ? "Editar noticia" : "Crear noticia"}</h2>
               <button className="btn-close-modal" onClick={() => setShowModal(false)}>
@@ -203,25 +212,25 @@ const formData = new FormData();
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="modal-body-esp" style={{ gap: "20px" }}>
+            <form onSubmit={handleSave} className="modal-body-esp news-form-container">
               <div>
-                <label style={{ display: "block", fontWeight: "700", color: "#0c2340", marginBottom: "8px" }}>Título de la noticia</label>
+                <label className="news-form-label">Título de la noticia</label>
                 <input
                   type="text"
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
                   placeholder="Ingrese el título..."
-                  style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "1rem" }}
+                  className="news-form-input"
                   required
                 />
               </div>
 
               <div>
-                <label style={{ display: "block", fontWeight: "700", color: "#0c2340", marginBottom: "8px" }}>Categoría</label>
+                <label className="news-form-label">Categoría</label>
                 <select
                   value={categoria}
                   onChange={(e) => setCategoria(e.target.value)}
-                  style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "1rem", backgroundColor: "#fff" }}
+                  className="news-form-select"
                 >
                   <option value="Noticias">Noticias</option>
                   <option value="Articulos">Artículos</option>
@@ -231,24 +240,25 @@ const formData = new FormData();
               </div>
 
               <div>
-                <label style={{ display: "block", fontWeight: "700", color: "#0c2340", marginBottom: "8px" }}>Imágenes adjuntas</label>
-<input 
-  type="file" 
-  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" 
-  multiple 
-  onChange={handleMultipleImagesUpload} 
-  style={{ marginBottom: "12px" }} 
-/>
+                <label className="news-form-label">Imágenes adjuntas</label>
+                <input 
+                  type="file" 
+                  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" 
+                  multiple 
+                  onChange={handleMultipleImagesUpload} 
+                  className="news-file-input" 
+                />
 
                 {imagenesUrls.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
+                  <div className="news-preview-gallery">
                     {imagenesUrls.map((url, idx) => (
-                      <div key={idx} style={{ position: "relative", width: "70px", height: "70px" }}>
-                        <img src={url} alt={`Preview ${idx}`} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "6px", border: "1px solid #94a3b8" }} />
+                      <div key={idx} className="news-preview-item">
+                        <img src={url} alt={`Preview ${idx}`} className="news-preview-img" />
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(idx)}
-                          style={{ position: "absolute", top: "-6px", right: "-6px", background: "#ef4444", color: "#fff", border: "none", borderRadius: "50%", width: "20px", height: "20px", fontSize: "11px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                          className="news-preview-remove-btn"
+                          title="Eliminar imagen"
                         >
                           &times;
                         </button>
@@ -259,8 +269,8 @@ const formData = new FormData();
               </div>
 
               <div>
-                <label style={{ display: "block", fontWeight: "700", color: "#0c2340", marginBottom: "8px" }}>Cuerpo de la noticia</label>
-                <div className="ckeditor-wrapper" style={{ border: "1px solid #cbd5e1", borderRadius: "8px", overflow: "hidden" }}>
+                <label className="news-form-label">Cuerpo de la noticia</label>
+                <div className="news-editor-wrapper">
                   <CKEditor
                     editor={ClassicEditor}
                     data={cuerpoHtml}
@@ -275,13 +285,13 @@ const formData = new FormData();
                 </div>
               </div>
 
-              <div className="modal-footer-esp" style={{ padding: 0, background: "transparent", border: "none", justifyContent: "flex-end", gap: "15px", marginTop: "10px" }}>
+              <div className="modal-footer-esp news-modal-footer">
                 <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)} disabled={loading}>
                   Cancelar
                 </button>
-<button type="submit" className="btn-cerrar-rojo" style={{ backgroundColor: "#0c2340" }} disabled={loading}>
-  {loading ? "Guardando..." : (editingId ? "Actualizar" : "Guardar")}
-</button>
+                <button type="submit" className="btn-cerrar-rojo news-btn-submit" disabled={loading}>
+                  {loading ? "Guardando..." : (editingId ? "Actualizar" : "Guardar")}
+                </button>
               </div>
             </form>
           </div>
