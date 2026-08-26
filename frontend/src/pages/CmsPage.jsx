@@ -164,39 +164,11 @@ const CmsPage = () => {
     updateStats(updatedList);
   };
 
-  const handleDeleteNews = async (id) => {
-    if (
-      window.confirm(
-        "¿Estás seguro de eliminar esta noticia de la base de datos y del portal?",
-      )
-    ) {
-      try {
-        const token = keycloak.token;
-        const response = await fetch(
-          `http://localhost:3000/api/cms/noticias/${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error("No se pudo eliminar en el servidor");
-        }
-
-        const filtered = newsList.filter((n) => n.id !== id);
-        setNewsList(filtered);
-        updateStats(filtered);
-        localStorage.setItem("portal_news_data", JSON.stringify(filtered));
-
-        alert("¡Noticia eliminada correctamente de todos lados!");
-      } catch (error) {
-        console.error("Error al eliminar:", error);
-        alert("Ocurrió un error al intentar eliminar la noticia.");
-      }
-    }
+  const handleDeleteNews = (id) => {
+    const filtered = newsList.filter((n) => n.id !== id);
+    setNewsList(filtered);
+    updateStats(filtered);
+    localStorage.setItem("portal_news_data", JSON.stringify(filtered));
   };
 
   const testBackendConnection = async () => {

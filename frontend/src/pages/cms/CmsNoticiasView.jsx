@@ -35,6 +35,10 @@ const CmsNoticiasView = ({
   const [saving, setSaving] = useState(false);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [noticiaAEliminar, setNoticiaAEliminar] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+
   const handleOpenCreate = () => {
     setEditingId(null);
     setTitulo("");
@@ -60,6 +64,45 @@ const CmsNoticiasView = ({
     setImagenesUrls(news.images || []);
     setArchivosSeleccionados([]);
     setShowModal(true);
+  };
+
+  const handleConfirmDeleteClick = (id) => {
+    setNoticiaAEliminar(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!noticiaAEliminar) return;
+
+    const id = noticiaAEliminar;
+    setShowDeleteModal(false);
+    setDeletingId(id);
+
+    try {
+      const token = keycloak.token;
+      const response = await fetch(
+        `http://localhost:3000/api/cms/noticias/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("No se pudo eliminar en el servidor");
+      }
+
+      onDeleteNews(id);
+      toast.success("Noticia eliminada correctamente.");
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      toast.error("Ocurrió un error al intentar eliminar la noticia.");
+    } finally {
+      setDeletingId(null);
+      setNoticiaAEliminar(null);
+    }
   };
 
   const handleMultipleImagesUpload = (e) => {
@@ -324,24 +367,29 @@ const CmsNoticiasView = ({
                   </button>
                   <button
                     title="Eliminar"
-                    onClick={() => onDeleteNews(news.id)}
+                    onClick={() => handleConfirmDeleteClick(news.id)}
                     className="news-action-btn-delete"
+                    disabled={deletingId === news.id}
                   >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                      <line x1="10" y1="11" x2="10" y2="17"></line>
-                      <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
+                    {deletingId === news.id ? (
+                      <div className="cms-spinner-red"></div>
+                    ) : (
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg>
+                    )}
                   </button>
                 </div>
               </div>
@@ -349,6 +397,47 @@ const CmsNoticiasView = ({
           )}
         </div>
       </div>
+
+      {showDeleteModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            className="modal-content-esp logout-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header-esp">
+              <h2>ELIMINAR NOTICIA</h2>
+              <button
+                className="btn-close-modal"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body-esp text-center">
+              <p className="info-text">
+                ¿Estás seguro de que quieres eliminar esta noticia? Esta acción
+                no se puede deshacer.
+              </p>
+            </div>
+            <div className="modal-footer-esp logout-footer">
+              <button
+                className="btn-cancelar-gris"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancelar
+              </button>
+              <button className="btn-cerrar-rojo" onClick={handleExecuteDelete}>
+                Sí, Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
