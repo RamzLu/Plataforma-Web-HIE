@@ -22,6 +22,7 @@ const CmsNoticiasView = ({
   onAddNewNews,
   onDeleteNews,
   onUpdateNews,
+  loading,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -29,7 +30,7 @@ const CmsNoticiasView = ({
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("Noticias");
   const [imagenesUrls, setImagenesUrls] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
 
   const handleOpenCreate = () => {
@@ -63,14 +64,13 @@ const CmsNoticiasView = ({
     const files = Array.from(e.target.files);
     if (files.length > 0) {
       const regexEspeciales = /[^a-zA-Z0-9.\-_]/;
-
       const tieneCaracteresEspeciaux = files.some((file) =>
         regexEspeciales.test(file.name),
       );
 
       if (tieneCaracteresEspeciaux) {
         alert(
-          "Advertencia: Algunos archivos seleccionados contienen tildes, espacios o caracteres especiales en su nombre. El sistema los adaptará automáticamente para evitar errores en el servidor, pero se recomienda usar nombres simples.",
+          "Advertencia: Algunos archivos seleccionados contienen tildes, espacios o caracteres especiales en su nombre. El sistema los adaptará automáticamente para evitar errores en el servidor.",
         );
       }
 
@@ -102,7 +102,7 @@ const CmsNoticiasView = ({
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
 
     try {
       const token = keycloak.token;
@@ -159,7 +159,7 @@ const CmsNoticiasView = ({
       console.error("Error en handleSave:", error);
       alert(`Error: ${error.message}`);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -192,104 +192,130 @@ const CmsNoticiasView = ({
         </div>
 
         <div className="activity-table-body">
-          {newsList.map((news) => (
-            <div className="activity-row news-table-row" key={news.id}>
+          {loading ? (
+            <div
+              style={{
+                padding: "40px",
+                textAlign: "center",
+                gridColumn: "1 / -1",
+              }}
+            >
               <div
-                className="col-content"
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: "15px",
-                }}
-              >
-                <div className="news-thumb-box">
-                  {news.images && news.images.length > 0 ? (
-                    <img
-                      src={news.images[0]}
-                      alt="Miniatura"
-                      className="news-thumb-img"
-                    />
-                  ) : (
-                    <div className="news-thumb-mock">HIE</div>
-                  )}
+                className="cms-spinner"
+                style={{ margin: "0 auto 10px auto" }}
+              ></div>
+              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
+                Cargando listado de noticias...
+              </span>
+            </div>
+          ) : newsList.length === 0 ? (
+            <div
+              style={{ padding: "40px", textAlign: "center", color: "#64748b" }}
+            >
+              No hay noticias registradas.
+            </div>
+          ) : (
+            newsList.map((news) => (
+              <div className="activity-row news-table-row" key={news.id}>
+                <div
+                  className="col-content"
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: "15px",
+                  }}
+                >
+                  <div className="news-thumb-box">
+                    {news.images && news.images.length > 0 ? (
+                      <img
+                        src={news.images[0]}
+                        alt="Miniatura"
+                        className="news-thumb-img"
+                      />
+                    ) : (
+                      <div className="news-thumb-mock">HIE</div>
+                    )}
+                  </div>
+                  <div>
+                    <span className="activity-title news-title-clamped">
+                      {news.title}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="activity-title news-title-clamped">
-                    {news.title}
+                <div className="col-fecha">
+                  {news.date || "Ahora"}
+                  {news.updatedAt &&
+                    news.createdAt &&
+                    new Date(news.updatedAt) - new Date(news.createdAt) >
+                      5000 && (
+                      <span
+                        style={{
+                          fontSize: "0.7rem",
+                          color: "#64748b",
+                          fontStyle: "italic",
+                          display: "block",
+                        }}
+                      >
+                        (Editado)
+                      </span>
+                    )}
+                </div>
+                <div className="col-editor">Tú</div>
+                <div className="col-categoria">
+                  {news.category || "Noticias"}
+                </div>
+                <div className="col-estado">
+                  <span
+                    className={`status-badge ${news.isDraft ? "pendiente" : "publicado"}`}
+                  >
+                    {news.isDraft ? "Pendiente" : "Publicado"}
                   </span>
                 </div>
-              </div>
-              <div className="col-fecha">
-                {news.date || "Ahora"}
-                {news.updatedAt &&
-                  news.createdAt &&
-                  new Date(news.updatedAt) - new Date(news.createdAt) >
-                    5000 && (
-                    <span
-                      style={{
-                        fontSize: "0.7rem",
-                        color: "#64748b",
-                        fontStyle: "italic",
-                        display: "block",
-                      }}
+                <div className="news-actions-cell">
+                  <button
+                    title="Editar"
+                    onClick={() => handleOpenEdit(news)}
+                    className="news-action-btn-edit"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
-                      (Editado)
-                    </span>
-                  )}
-              </div>
-              <div className="col-editor">Tú</div>
-              <div className="col-categoria">{news.category || "Noticias"}</div>
-              <div className="col-estado">
-                <span
-                  className={`status-badge ${news.isDraft ? "pendiente" : "publicado"}`}
-                >
-                  {news.isDraft ? "Pendiente" : "Publicado"}
-                </span>
-              </div>
-              <div className="news-actions-cell">
-                <button
-                  title="Editar"
-                  onClick={() => handleOpenEdit(news)}
-                  className="news-action-btn-edit"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  </button>
+                  <button
+                    title="Eliminar"
+                    onClick={() => onDeleteNews(news.id)}
+                    className="news-action-btn-delete"
                   >
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </button>
-                <button
-                  title="Eliminar"
-                  onClick={() => onDeleteNews(news.id)}
-                  className="news-action-btn-delete"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                  </svg>
-                </button>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -440,16 +466,16 @@ const CmsNoticiasView = ({
                   type="button"
                   className="btn-cancelar-gris"
                   onClick={() => setShowModal(false)}
-                  disabled={loading}
+                  disabled={saving}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   className="btn-cerrar-rojo news-btn-submit"
-                  disabled={loading}
+                  disabled={saving}
                 >
-                  {loading
+                  {saving
                     ? "Guardando..."
                     : editingId
                       ? "Actualizar"

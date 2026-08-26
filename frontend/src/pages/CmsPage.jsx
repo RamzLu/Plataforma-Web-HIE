@@ -298,6 +298,7 @@ const CmsPage = () => {
               onAddNewNews={handleAddNewNews}
               onDeleteNews={handleDeleteNews}
               onUpdateNews={handleUpdateNews}
+              loading={loading}
             />
           )}
 
