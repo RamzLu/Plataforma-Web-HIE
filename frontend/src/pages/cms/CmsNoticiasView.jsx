@@ -204,7 +204,7 @@ const CmsNoticiasView = ({
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Error al guardar");
 
-      const noticiaFormateada = {
+const noticiaFormateada = {
         id: data.noticia?.id || editingId,
         title: titulo,
         body: [textoContenido],
@@ -212,6 +212,7 @@ const CmsNoticiasView = ({
         category: categoria || "Noticias",
         isDraft: false,
         images: data.noticia?.images || imagenesUrls || [],
+        editor: data.noticia?.editor || "Editor CMS", 
       };
 
       if (editingId) {
@@ -334,7 +335,7 @@ const CmsNoticiasView = ({
                       </span>
                     )}
                 </div>
-                <div className="col-editor">Tú</div>
+                <div className="col-editor">{news.editor || "Editor CMS"}</div>
                 <div className="col-categoria">
                   {news.category || "Noticias"}
                 </div>

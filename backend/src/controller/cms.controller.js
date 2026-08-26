@@ -30,8 +30,14 @@ export const crearNoticia = async (req, res) => {
       });
     }
 
-    let usuarioLocal = await prisma.usuario.findUnique({
-      where: { keycloakId: keycloakSub },
+
+    let usuarioLocal = await prisma.usuario.findFirst({
+      where: { 
+        OR: [
+          { keycloakId: keycloakSub },
+          { username: username }
+        ]
+      },
     });
     if (!usuarioLocal) {
       let rolAdmin = await prisma.rol.findFirst({ where: { nombre: "ADMIN" } });
@@ -63,16 +69,16 @@ export const crearNoticia = async (req, res) => {
         estado: "PUBLICADO",
         updatedAt: new Date(),
       },
+      include: {
+        usuario_noticia_createdByTousuario: true, // 👈 Nombre corregido
+      },
     });
 
     const imagenesUrlsGuardadas = [];
 
     for (const file of archivosSubidos) {
-      // ✅ 1. Obtenemos la extensión de forma segura
       const extension =
         file.originalname.split(".").pop().toLowerCase() || "png";
-
-      // ✅ 2. Generamos un nombre 100% seguro y limpio para Supabase (sin emojis ni símbolos raros)
       const nombreUnico = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
 
       const { data: storageData, error: storageError } = await supabase.storage
@@ -92,7 +98,6 @@ export const crearNoticia = async (req, res) => {
           .json({ error: "Error al subir imagen: " + storageError.message });
       }
 
-      // ✅ 3. Guardamos el nombre original en la BD y el nombre seguro en Supabase
       const archivoDb = await prisma.archivo.create({
         data: {
           nombreOriginal: file.originalname,
@@ -118,11 +123,17 @@ export const crearNoticia = async (req, res) => {
       imagenesUrlsGuardadas.push(publicUrlData.publicUrl);
     }
 
+    // Nombre completo del editor detectado desde la BD
+    const editorNombre = nuevaNoticia.usuario_noticia_createdByTousuario
+      ? `${nuevaNoticia.usuario_noticia_createdByTousuario.nombre} ${nuevaNoticia.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
+      : "Editor CMS";
+
     const noticiaResponse = {
       ...nuevaNoticia,
       id: nuevaNoticia.id.toString(),
       categoriaId: nuevaNoticia.categoriaId.toString(),
       images: imagenesUrlsGuardadas,
+      editor: editorNombre,
     };
 
     return res.status(201).json({
@@ -140,6 +151,7 @@ export const obtenerNoticias = async (req, res) => {
     const noticias = await prisma.noticia.findMany({
       orderBy: { createdAt: "desc" },
       include: {
+        usuario_noticia_createdByTousuario: true, // 👈 Nombre corregido
         noticia_archivo: {
           include: {
             archivo: true,
@@ -156,6 +168,11 @@ export const obtenerNoticias = async (req, res) => {
         return data.publicUrl;
       });
 
+      // Mapeamos el nombre y apellido del editor correspondiente
+      const editorNombre = noticia.usuario_noticia_createdByTousuario
+        ? `${noticia.usuario_noticia_createdByTousuario.nombre} ${noticia.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
+        : "Editor CMS";
+
       return {
         id: noticia.id.toString(),
         title: noticia.titulo,
@@ -166,6 +183,7 @@ export const obtenerNoticias = async (req, res) => {
         category: "Noticias",
         isDraft: false,
         images: imgs,
+        editor: editorNombre, 
       };
     });
 
@@ -242,7 +260,6 @@ export const actualizarNoticia = async (req, res) => {
       return res.status(404).json({ error: "Noticia no encontrada." });
     }
 
-    // 1. Actualizamos texto y título
     const noticiaActualizada = await prisma.noticia.update({
       where: { id: BigInt(id) },
       data: {
@@ -250,9 +267,11 @@ export const actualizarNoticia = async (req, res) => {
         contenido: contenido || noticiaExistente.contenido,
         updatedAt: new Date(),
       },
+      include: {
+        usuario_noticia_createdByTousuario: true, // 👈 Nombre corregido
+      },
     });
 
-    // 2. Sincronizamos las imágenes existentes que el usuario decidió conservar
     const urlsConservadas = imagenesExistentes
       ? JSON.parse(imagenesExistentes)
       : [];
@@ -263,7 +282,6 @@ export const actualizarNoticia = async (req, res) => {
         .from("noticias-imagenes")
         .getPublicUrl(archivo.nombreArchivo);
 
-      // Si la imagen vieja ya no está en la lista que conservó el usuario, la borramos
       if (!urlsConservadas.includes(data.publicUrl)) {
         await supabase.storage
           .from("noticias-imagenes")
@@ -275,7 +293,6 @@ export const actualizarNoticia = async (req, res) => {
       }
     }
 
-    // 3. Subimos archivos nuevos con nombres seguros
     for (const file of archivosSubidos) {
       const extension =
         file.originalname.split(".").pop().toLowerCase() || "png";
@@ -317,10 +334,12 @@ export const actualizarNoticia = async (req, res) => {
       });
     }
 
-    // 4. Devolvemos la lista final limpia
     const noticiaConArchivos = await prisma.noticia.findUnique({
       where: { id: BigInt(id) },
-      include: { noticia_archivo: { include: { archivo: true } } },
+      include: { 
+        usuario_noticia_createdByTousuario: true, // 👈 Nombre corregido
+        noticia_archivo: { include: { archivo: true } } 
+      },
     });
 
     const imgs = noticiaConArchivos.noticia_archivo.map((na) => {
@@ -330,6 +349,10 @@ export const actualizarNoticia = async (req, res) => {
       return data.publicUrl;
     });
 
+    const editorNombre = noticiaConArchivos.usuario_noticia_createdByTousuario
+      ? `${noticiaConArchivos.usuario_noticia_createdByTousuario.nombre} ${noticiaConArchivos.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
+      : "Editor CMS";
+
     return res.status(200).json({
       message: "¡Noticia y galería actualizadas correctamente!",
       noticia: {
@@ -337,6 +360,7 @@ export const actualizarNoticia = async (req, res) => {
         id: noticiaActualizada.id.toString(),
         categoriaId: noticiaActualizada.categoriaId.toString(),
         images: imgs,
+        editor: editorNombre,
       },
     });
   } catch (error) {

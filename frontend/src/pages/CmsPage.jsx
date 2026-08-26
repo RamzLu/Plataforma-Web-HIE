@@ -24,9 +24,11 @@ const CmsPage = () => {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("cms_active_tab") || "dashboard";
   });
+  
   useEffect(() => {
     localStorage.setItem("cms_active_tab", activeTab);
   }, [activeTab]);
+  
   const [selectedNews, setSelectedNews] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [lightbox, setLightbox] = useState({
@@ -67,18 +69,13 @@ const CmsPage = () => {
           category: "Noticias",
           isDraft: false,
           images: noticia.images || [],
+          editor: noticia.editor || "Editor CMS" 
         }));
-
+        
         setNewsList(noticiasFormateadas);
-        updateStats(noticiasFormateadas);
-      } else {
-        setNewsList([]);
-        updateStats([]);
       }
     } catch (error) {
-      console.error("Error conectando al backend para leer noticias:", error);
-      setNewsList([]);
-      updateStats([]);
+      console.error(error);
     } finally {
       setLoading(false);
     }
