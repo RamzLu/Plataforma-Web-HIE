@@ -244,19 +244,6 @@
   flex-direction: column;
 }
 
-.activity-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  padding: 16px 15px;
-  align-items: center;
-  border-bottom: 1px solid #f1f5f9;
-  transition: background-color 0.15s ease;
-}
-
-.activity-row:hover {
-  background-color: #f8fafc;
-}
-
 .col-content {
   display: flex;
   flex-direction: column;
