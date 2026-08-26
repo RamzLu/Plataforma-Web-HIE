@@ -37,10 +37,13 @@ const CmsNoticiasView = ({ newsList, onAddNewNews, onDeleteNews, onUpdateNews })
     setShowModal(true);
   };
 
-  const handleOpenEdit = (news) => {
+const handleOpenEdit = (news) => {
     setEditingId(news.id);
     setTitulo(news.title || "");
-    setCuerpoHtml(news.body?.[0] || "");
+    
+    const contenidoCrudo = news.body?.[0] || news.contenido || "";
+    setCuerpoHtml(typeof contenidoCrudo === "string" ? contenidoCrudo : String(contenidoCrudo));
+    
     setCategoria(news.category || "Noticias");
     setImagenesUrls(news.images || []);
     setArchivosSeleccionados([]);
@@ -275,20 +278,20 @@ const noticiaFormateada = {
                 )}
               </div>
 
-              <div>
-                <label className="news-form-label">Cuerpo de la noticia</label>
-                <div className="news-editor-wrapper">
-                  <CKEditor
-                    editor={ClassicEditor}
-                    data={cuerpoHtml}
-                    config={{
-                      licenseKey: 'GPL', 
-                      plugins: [Essentials, Paragraph, Heading, Bold, Italic, Link, List, BlockQuote, Undo, Alignment],
-                      toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'alignment', 'blockQuote', '|', 'undo', 'redo'],
-                      alignment: { options: ['left', 'center', 'right', 'justify'] }
-                    }}
-                    onChange={(event, editor) => setCuerpoHtml(editor.getData())}
-                  />
+<div>
+                <label style={{ display: "block", fontWeight: "700", color: "#0c2340", marginBottom: "8px" }}>Cuerpo de la noticia</label>
+                <div className="ckeditor-wrapper" style={{ border: "1px solid #cbd5e1", borderRadius: "8px", overflow: "hidden" }}>
+<CKEditor
+    editor={ClassicEditor}
+    data={cuerpoHtml}
+    config={{
+      licenseKey: 'GPL', 
+      plugins: [Essentials, Paragraph, Heading, Bold, Italic, Link, List, BlockQuote, Undo, Alignment],
+      toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'alignment', 'blockQuote', '|', 'undo', 'redo'],
+      alignment: { options: ['left', 'center', 'right', 'justify'] }
+    }}
+    onChange={(event, editor) => setCuerpoHtml(editor.getData())}
+  />
                 </div>
               </div>
 
