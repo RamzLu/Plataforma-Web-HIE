@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
+import toast from "react-hot-toast";
 import {
   ClassicEditor,
   Essentials,
@@ -70,8 +71,31 @@ const CmsNoticiasView = ({
       );
 
       if (tieneCaracteresEspeciaux) {
-        alert(
-          "Advertencia: Algunos archivos seleccionados contienen tildes, espacios o caracteres especiales en su nombre. El sistema los adaptará automáticamente para evitar errores en el servidor.",
+        toast(
+          "Advertencia: Algunos archivos seleccionados contienen tildes, espacios o caracteres especiales en su nombre y pueden romperse.",
+          {
+            icon: (
+              <svg
+                width="150"
+                height="150"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#f59e0b"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            ),
+            style: {
+              background: "#fff",
+              color: "#b45309",
+              border: "1px solid #f59e0b",
+            },
+          },
         );
       }
 
@@ -99,7 +123,7 @@ const CmsNoticiasView = ({
           : String(cuerpoHtml || "");
 
     if (!titulo.trim() || !textoContenido.trim()) {
-      alert("Por favor completa el título y el contenido de la noticia.");
+      toast.error("Por favor completa el título y el contenido.");
       return;
     }
 
@@ -108,7 +132,7 @@ const CmsNoticiasView = ({
     try {
       const token = keycloak.token;
       if (!token) {
-        alert("Tu sesión ha expirado.");
+        toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
       }
@@ -149,16 +173,16 @@ const CmsNoticiasView = ({
 
       if (editingId) {
         if (onUpdateNews) onUpdateNews(noticiaFormateada);
-        alert("¡Noticia actualizada con éxito!");
+        toast.success("Noticia actualizada con éxito.");
       } else {
         onAddNewNews(noticiaFormateada);
-        alert("¡Noticia creada con éxito!");
+        toast.success("Noticia creada con éxito.");
       }
 
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
-      alert(`Error: ${error.message}`);
+      toast.error(`Error: ${error.message}`);
     } finally {
       setSaving(false);
     }
