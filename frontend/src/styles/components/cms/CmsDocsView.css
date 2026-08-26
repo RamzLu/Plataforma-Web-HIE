@@ -1,0 +1,176 @@
+/* ===== Header de la vista ===== */
+.docs-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.docs-view-subtitle {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 4px 0 0 0;
+}
+.btn-subir-doc-header {
+  background: #0c2340;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-subir-doc-header:hover { background: #123156; }
+
+/* ===== Tabla (grilla de 5 columnas) ===== */
+.docs-table-head,
+.docs-table-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 3fr) 1.2fr 1.2fr 1fr 0.9fr;
+  align-items: center;
+  gap: 12px;
+}
+.docs-table-row { padding: 14px 8px; border-bottom: 1px solid #eef2f7; }
+
+/* Celda de contenido: ícono + info */
+.doc-content-cell {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+}
+.doc-thumb-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: #eef2f7;
+  color: #0c2340;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.doc-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.doc-title-row { display: flex; align-items: center; gap: 8px; }
+.doc-title { font-weight: 700; color: #0c2340; }
+.doc-preview-link { color: #64748b; display: inline-flex; }
+.doc-preview-link:hover { color: #0c2340; }
+.doc-meta { color: #94a3b8; font-size: 0.8rem; }
+
+/* ===== Badge de estado (agrega "programado") ===== */
+.status-badge.programado {
+  background: #e0edff;
+  color: #1d4ed8;
+}
+
+/* ===== Acciones ===== */
+.doc-actions-cell {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.doc-action-btn-edit,
+.doc-action-btn-delete {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: #64748b;
+  transition: background 0.15s, color 0.15s;
+}
+.doc-action-btn-edit:hover { background: #eef2f7; color: #0c2340; }
+.doc-action-btn-delete:hover { background: #fde8e8; color: #dc2626; }
+
+/* ===== Formulario del modal ===== */
+.docs-form-container { display: flex; flex-direction: column; gap: 18px; }
+.docs-form-row { display: flex; gap: 16px; }
+.docs-form-label {
+  display: block;
+  font-weight: 700;
+  color: #0c2340;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+.docs-form-input,
+.docs-form-select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #0c2340;
+  background: #fff;
+  box-sizing: border-box;
+}
+.docs-form-input:focus,
+.docs-form-select:focus { outline: none; border-color: #0c2340; }
+
+/* ===== Zona de carga (drag & drop) ===== */
+.doc-dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 32px 20px;
+  text-align: center;
+  color: #0c2340;
+  transition: border-color 0.2s, background 0.2s;
+}
+.doc-dropzone.drag-active {
+  border-color: #0c2340;
+  background: #f5f8ff;
+}
+.doc-dropzone-icon { color: #0c2340; margin-bottom: 8px; }
+.doc-dropzone-text { font-weight: 700; margin: 6px 0; }
+.doc-dropzone-hint { color: #64748b; font-size: 0.85rem; margin-bottom: 16px; }
+.btn-seleccionar-archivo {
+  display: inline-block;
+  background: #0c2340;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-seleccionar-archivo:hover { background: #123156; }
+
+/* ===== Tarjeta de archivo seleccionado ===== */
+.doc-file-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.doc-file-info { display: flex; align-items: center; gap: 12px; color: #0c2340; }
+.doc-file-name { display: block; font-weight: 600; font-size: 0.9rem; }
+.doc-file-size { display: block; color: #64748b; font-size: 0.8rem; }
+.doc-file-remove {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+/* Responsive: en pantallas chicas, la tabla se apila */
+@media (max-width: 768px) {
+  .docs-table-head { display: none; }
+  .docs-table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    border: 1px solid #eef2f7;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+}

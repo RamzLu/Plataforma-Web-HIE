@@ -42,7 +42,11 @@ const HomeNewsPreview = () => {
                 delay={0.15 + index * 0.12}
                 threshold={0.1}
               >
-                <article className="preview-card">
+                {/* SOLUCIÓN: Agregamos flexbox en columna y alto 100% a la tarjeta */}
+                <article 
+                  className="preview-card" 
+                  style={{ display: "flex", flexDirection: "column", height: "100%" }}
+                >
                   <div className="preview-img-container">
                     {news.images && news.images.length > 0 && (
                       <img
@@ -52,13 +56,24 @@ const HomeNewsPreview = () => {
                       />
                     )}
                   </div>
-                  <div className="preview-content">
+                  
+                  {/* SOLUCIÓN: El contenedor de contenido crece para ocupar el espacio disponible */}
+                  <div 
+                    className="preview-content" 
+                    style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}
+                  >
                     <span className="preview-date">{news.date}</span>
                     <h4 className="preview-card-title">{news.title}</h4>
                     <p className="preview-excerpt">
                       {news.body[0].substring(0, 100)}...
                     </p>
-                    <Link to="/noticias" className="preview-read-more">
+                    
+                    {/* SOLUCIÓN: marginTop: 'auto' empuja el botón siempre al límite inferior */}
+                    <Link 
+                      to="/noticias" 
+                      className="preview-read-more" 
+                      style={{ marginTop: "auto" }}
+                    >
                       <span>MÁS INFORMACIÓN</span>
                       <span className="arrow">→</span>
                     </Link>
