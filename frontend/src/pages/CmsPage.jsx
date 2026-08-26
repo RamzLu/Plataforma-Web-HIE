@@ -21,7 +21,12 @@ const CmsPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("Usuario CMS");
 
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("cms_active_tab") || "dashboard";
+  });
+  useEffect(() => {
+    localStorage.setItem("cms_active_tab", activeTab);
+  }, [activeTab]);
   const [selectedNews, setSelectedNews] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [lightbox, setLightbox] = useState({
