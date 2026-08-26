@@ -1,3 +1,6 @@
+/* =========================================
+   LAYOUT GENERAL Y SIDEBAR FIJO
+========================================= */
 .cms-layout {
   display: flex;
   min-height: 100vh;
@@ -19,7 +22,7 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  border-right: 1px solid #e2e8f0;
+  border-right: 2px solid #bae6fd; /* Borde azulado para diferenciarlo del fondo */
   position: fixed;
   top: 0;
   left: 0;
@@ -55,7 +58,7 @@
 .cms-logo .logo-title {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #0c2340;
+  color: #006eb3;
   letter-spacing: 0.5px;
 }
 
@@ -70,7 +73,7 @@
   font-size: 0.7rem;
   font-weight: 700;
   color: #64748b;
-  padding: 20px 20px 10px 20px;
+  padding: 24px 20px 10px 20px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -124,6 +127,9 @@
   stroke: #006eb3;
 }
 
+/* =========================================
+   CONTENEDOR PRINCIPAL Y HEADER
+========================================= */
 .cms-main-wrapper {
   flex: 1;
   display: flex;
@@ -133,18 +139,109 @@
 
 .cms-header {
   height: 80px;
-  background-color: #1a2b4c;
+  background-color: #0c2340; /* Azul oscuro formal */
   color: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 30px;
   flex-shrink: 0;
+  border-bottom: 1px solid #1e3a8a;
   position: fixed;
   top: 0;
   right: 0;
   left: 260px;
   z-index: 99;
+}
+
+.cms-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.cms-header-left svg {
+  width: 20px;
+  height: 20px;
+  stroke: #93c5fd;
+}
+
+.cms-header-right {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.btn-test-backend,
+.cms-notification-btn,
+.cms-dropdown-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+}
+
+.btn-test-backend svg,
+.cms-notification-btn svg,
+.cms-dropdown-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: #cbd5e1;
+  transition: stroke 0.2s;
+}
+
+.btn-test-backend:hover svg,
+.cms-notification-btn:hover svg {
+  stroke: #ffffff;
+}
+
+.cms-dropdown-btn:hover svg {
+  stroke: #f87171; /* Rojo suave para el logout */
+}
+
+.cms-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.cms-avatar {
+  width: 42px;
+  height: 42px;
+  background-color: #1e3a8a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cms-avatar svg {
+  width: 24px;
+  height: 24px;
+  stroke: #ffffff;
+}
+
+.cms-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.cms-user-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+.cms-user-role {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #93c5fd;
 }
 
 .cms-content {
@@ -174,111 +271,4 @@
   color: #475569;
   font-size: 1rem;
   margin: 0;
-}
-
-.cms-header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.95rem;
-  color: #cbd5e1;
-}
-
-.cms-header-left svg {
-  width: 20px;
-  height: 20px;
-  opacity: 0.7;
-}
-
-.cms-header-right {
-  display: flex;
-  align-items: center;
-  gap: 25px;
-}
-
-.btn-test-backend {
-  background: none;
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.btn-test-backend svg {
-  width: 20px;
-  height: 20px;
-  opacity: 0.5;
-  transition: opacity 0.2s;
-}
-
-.btn-test-backend:hover svg {
-  opacity: 1;
-  color: #38bdf8;
-}
-
-.cms-notification-btn {
-  background: none;
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-  position: relative;
-}
-
-.cms-notification-btn svg {
-  width: 22px;
-  height: 22px;
-}
-
-.cms-user-profile {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.cms-avatar {
-  width: 42px;
-  height: 42px;
-  background-color: #475569;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.cms-avatar svg {
-  width: 32px;
-  height: 32px;
-  margin-top: 6px;
-}
-
-.cms-user-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.cms-user-name {
-  font-weight: 700;
-  font-size: 1rem;
-  color: #ffffff;
-}
-
-.cms-user-role {
-  font-size: 0.85rem;
-  color: #e2e8f0;
-}
-
-.cms-dropdown-btn {
-  background: none;
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-  padding: 5px;
-}
-
-.cms-dropdown-btn svg {
-  width: 20px;
-  height: 20px;
 }
