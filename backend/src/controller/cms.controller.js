@@ -68,7 +68,12 @@ export const crearNoticia = async (req, res) => {
     const imagenesUrlsGuardadas = [];
 
     for (const file of archivosSubidos) {
-      const nombreUnico = `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`;
+      // ✅ 1. Obtenemos la extensión de forma segura
+      const extension =
+        file.originalname.split(".").pop().toLowerCase() || "png";
+
+      // ✅ 2. Generamos un nombre 100% seguro y limpio para Supabase (sin emojis ni símbolos raros)
+      const nombreUnico = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
 
       const { data: storageData, error: storageError } = await supabase.storage
         .from("noticias-imagenes")
@@ -79,17 +84,21 @@ export const crearNoticia = async (req, res) => {
 
       if (storageError) {
         console.error(
-          " Error subiendo al bucket de Supabase:",
+          "❌ Error subiendo al bucket de Supabase:",
           storageError.message,
         );
+        return res
+          .status(500)
+          .json({ error: "Error al subir imagen: " + storageError.message });
       }
 
+      // ✅ 3. Guardamos el nombre original en la BD y el nombre seguro en Supabase
       const archivoDb = await prisma.archivo.create({
         data: {
           nombreOriginal: file.originalname,
           nombreArchivo: nombreUnico,
           ruta: `noticias-imagenes/${nombreUnico}`,
-          extension: file.originalname.split(".").pop(),
+          extension: extension,
           mimeType: file.mimetype,
           tamanioBytes: BigInt(file.size),
         },
@@ -215,6 +224,7 @@ export const eliminarNoticia = async (req, res) => {
       .json({ error: "Error al eliminar: " + error.message });
   }
 };
+
 export const actualizarNoticia = async (req, res) => {
   try {
     const { id } = req.params;
@@ -265,29 +275,35 @@ export const actualizarNoticia = async (req, res) => {
       }
     }
 
-    // 3. Si se subieron archivos nuevos, los agregamos
+    // 3. Subimos archivos nuevos con nombres seguros
     for (const file of archivosSubidos) {
-      // Limpiamos el nombre para quitar tildes y caracteres raros que rompen Supabase
-      const nombreLimpio = file.originalname
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-zA-Z0-9.\-_]/g, "_");
+      const extension =
+        file.originalname.split(".").pop().toLowerCase() || "png";
+      const nombreUnico = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
 
-      const nombreUnico = `${Date.now()}-${nombreLimpio}`;
-
-      await supabase.storage
+      const { data: storageData, error: storageError } = await supabase.storage
         .from("noticias-imagenes")
         .upload(nombreUnico, file.buffer, {
           contentType: file.mimetype,
-          upsert: false,
+          upsert: true,
         });
+
+      if (storageError) {
+        console.error(
+          "❌ Error subiendo al bucket de Supabase:",
+          storageError.message,
+        );
+        return res
+          .status(500)
+          .json({ error: "Error al subir imagen: " + storageError.message });
+      }
 
       const archivoDb = await prisma.archivo.create({
         data: {
           nombreOriginal: file.originalname,
           nombreArchivo: nombreUnico,
           ruta: `noticias-imagenes/${nombreUnico}`,
-          extension: file.originalname.split(".").pop(),
+          extension: extension,
           mimeType: file.mimetype,
           tamanioBytes: BigInt(file.size),
         },
