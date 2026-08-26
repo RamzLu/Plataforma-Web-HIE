@@ -4,8 +4,21 @@
   border-radius: 12px;
   padding: 30px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-  border: 1px solid #e2e8f0;
+  border: 1px solid #041021;
 }
+.activity-row {
+  padding: 14px 16px;
+  border-bottom: 1px solid #09274d43;
+  transition: background-color 0.15s ease;
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1.2fr;
+  align-items: center;
+}
+
+.activity-row:hover {
+  background-color: #f8fafc !important;
+}
+
 
 .cms-card-title {
   color: #0c2340;
