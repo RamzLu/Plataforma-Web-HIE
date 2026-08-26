@@ -1,4 +1,3 @@
-/* Dashboard, Tarjetas de Noticias, Estadísticas y Accesos Rápidos */
 .cms-dashboard-card {
   background-color: #ffffff;
   border-radius: 12px;
@@ -19,7 +18,6 @@
   background-color: #f8fafc !important;
 }
 
-
 .cms-card-title {
   color: #0c2340;
   font-size: 1.4rem;
@@ -31,7 +29,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
-  align-items: stretch; 
+  align-items: stretch;
 }
 
 .cms-news-item {
@@ -70,7 +68,7 @@
   overflow-wrap: break-word;
   width: 100%;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Limita el título a máximo 2 líneas */
+
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -89,7 +87,7 @@
   margin: 0 0 15px 0;
   line-height: 1.4;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+
   -webkit-box-orient: vertical;
   overflow: hidden;
   width: 100%;
@@ -117,7 +115,6 @@
   font-weight: 500;
 }
 
-/* Estadísticas (KPIs) */
 .cms-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -157,7 +154,6 @@
   color: #0c2340;
 }
 
-/* Accesos Rápidos */
 .quick-access-card {
   margin-top: 30px;
 }
@@ -222,9 +218,7 @@
   font-weight: 700;
   color: #0c2340;
 }
-/* =========================================
-   ESTILOS PARA ACTIVIDAD RECIENTE
-========================================= */
+
 .recent-activity-card {
   margin-top: 30px;
 }
@@ -294,7 +288,6 @@
   text-align: center;
 }
 
-/* Colores para las píldoras de estado */
 .status-badge.publicado {
   background-color: #e2e8f0;
   color: #0c2340;
@@ -329,16 +322,15 @@
 .ck.ck-balloon-panel {
   z-index: 99999 !important;
 }
-/* Contenedor principal de la imagen en la tarjeta del CMS */
+
 .cms-news-img-placeholder {
   width: 100%;
-  height: 160px; /* Alto fijo para que todas las tarjetas midan igual */
+  height: 160px;
   overflow: hidden;
   border-bottom: 1px solid #e2e8f0;
-  background-color: #f1f5f9; /* Color de fondo base */
+  background-color: #f1f5f9;
 }
 
-/* El reemplazo cuando no hay foto */
 .cms-news-img-mock {
   width: 100%;
   height: 100%;
@@ -349,11 +341,10 @@
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-/* Estilos para las letras del mock */
 .cms-news-img-mock .gold-text {
   font-size: 2rem;
   font-weight: 900;
-  color: #94a3b8; /* Un gris sutil para que no resalte demasiado */
+  color: #94a3b8;
   letter-spacing: 2px;
   line-height: 1;
 }
@@ -365,7 +356,7 @@
   text-transform: uppercase;
   font-weight: 600;
 }
-/* Restaurar viñetas y números dentro de CKEditor */
+
 .ck-content ul {
   list-style-type: disc !important;
   margin-left: 25px !important;
@@ -378,7 +369,6 @@
   margin-bottom: 10px !important;
 }
 
-/* Restaurar viñetas y números en los modales de lectura */
 .news-modal-body-text ul {
   list-style-type: disc;
   margin-left: 25px;
@@ -393,11 +383,10 @@
 .cms-news-card-wrapper {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; 
+  justify-content: space-between;
   height: 100%;
 }
 
-/* Ajustes de la tarjeta de noticia para que luzca limpia */
 .cms-news-item {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -413,7 +402,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Insignia / Etiqueta de la fecha más visible y elegante */
 .cms-news-date-badge {
   display: inline-flex;
   align-items: center;
@@ -432,7 +420,6 @@
   color: #0284c7;
 }
 
-/* Botón "VER MÁS" fuera de la tarjeta principal */
 .cms-btn-ver-mas-fuera {
   display: flex;
   align-items: center;
@@ -447,7 +434,9 @@
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
   box-shadow: 0 2px 4px rgba(12, 35, 64, 0.15);
 }
 
@@ -464,4 +453,39 @@
   font-style: italic;
   font-weight: 500;
   margin-left: 4px;
+}
+
+.cms-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+  width: 100%;
+  gap: 15px;
+  grid-column: 1 / -1;
+}
+
+.cms-spinner {
+  width: 45px;
+  height: 45px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #0c2340;
+  border-radius: 50%;
+  animation: cms-spin 0.8s linear infinite;
+}
+
+.cms-loading-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+@keyframes cms-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

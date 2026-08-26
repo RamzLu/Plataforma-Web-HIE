@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+
 import keycloak from "../config/keycloak";
 
 import "../styles/components/cms/CmsLayout.css";
@@ -28,7 +29,7 @@ const CmsPage = () => {
     images: [],
     index: 0,
   });
-  
+
   const [newsList, setNewsList] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({
     contenidoPublicado: 0,
@@ -36,28 +37,33 @@ const CmsPage = () => {
     documentosActivos: 0,
     visitas: "0",
   });
+  const [loading, setLoading] = useState(true);
 
   const isKeycloakInitialized = useRef(false);
 
   const fetchNoticias = async () => {
     try {
+      setLoading(true);
       const response = await fetch("http://localhost:3000/api/cms/noticias");
-      if (!response.ok) throw new Error("Error al obtener noticias del servidor");
+      if (!response.ok)
+        throw new Error("Error al obtener noticias del servidor");
       const data = await response.json();
 
       if (data && data.length > 0) {
-const noticiasFormateadas = data.map(noticia => ({
+        const noticiasFormateadas = data.map((noticia) => ({
           id: noticia.id,
           title: noticia.titulo || noticia.title,
           body: [noticia.contenido || noticia.body],
-          date: noticia.createdAt ? new Date(noticia.createdAt).toLocaleDateString("es-AR") : "Hoy",
+          date: noticia.createdAt
+            ? new Date(noticia.createdAt).toLocaleDateString("es-AR")
+            : "Hoy",
           createdAt: noticia.createdAt,
-          updatedAt: noticia.updatedAt, 
+          updatedAt: noticia.updatedAt,
           category: "Noticias",
           isDraft: false,
-          images: noticia.images || []
+          images: noticia.images || [],
         }));
-        
+
         setNewsList(noticiasFormateadas);
         updateStats(noticiasFormateadas);
       } else {
@@ -68,6 +74,8 @@ const noticiasFormateadas = data.map(noticia => ({
       console.error("Error conectando al backend para leer noticias:", error);
       setNewsList([]);
       updateStats([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -144,23 +152,30 @@ const noticiasFormateadas = data.map(noticia => ({
   };
 
   const handleUpdateNews = (updatedNews) => {
-    const updatedList = newsList.map((item) => 
-      item.id === updatedNews.id ? updatedNews : item
+    const updatedList = newsList.map((item) =>
+      item.id === updatedNews.id ? updatedNews : item,
     );
     setNewsList(updatedList);
     updateStats(updatedList);
   };
 
   const handleDeleteNews = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar esta noticia de la base de datos y del portal?")) {
+    if (
+      window.confirm(
+        "¿Estás seguro de eliminar esta noticia de la base de datos y del portal?",
+      )
+    ) {
       try {
         const token = keycloak.token;
-        const response = await fetch(`http://localhost:3000/api/cms/noticias/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const response = await fetch(
+          `http://localhost:3000/api/cms/noticias/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
         if (!response.ok) {
           throw new Error("No se pudo eliminar en el servidor");
@@ -268,6 +283,7 @@ const noticiasFormateadas = data.map(noticia => ({
               dashboardStats={dashboardStats}
               setSelectedNews={setSelectedNews}
               handleQuickAction={() => setActiveTab("noticias")}
+              loading={loading}
             />
           )}
 
