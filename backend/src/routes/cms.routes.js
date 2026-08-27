@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
+import { obtenerBanners, crearBanner } from "../controller/banners.controller.js";
 import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia } from '../controller/cms.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
 
@@ -11,5 +12,8 @@ router.post('/noticias', verifyToken, upload.array('imagenes', 10), crearNoticia
 router.get('/noticias', obtenerNoticias);
 router.delete('/noticias/:id', verifyToken, eliminarNoticia);
 router.put('/noticias/:id', verifyToken, upload.array('imagenes', 10), actualizarNoticia);
+
+router.get("/banners", obtenerBanners);
+router.post("/banners", verifyToken, upload.single("imagen"), crearBanner);
 
 export default router;

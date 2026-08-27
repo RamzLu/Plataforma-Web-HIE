@@ -1,0 +1,331 @@
+.cms-banners-container {
+  background: transparent;
+}
+
+.cms-banners-tabs {
+  display: flex;
+  gap: 10px;
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.cms-banner-tab {
+  flex: 1;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cms-banner-tab.active {
+  background: #0c2340;
+  color: #ffffff;
+}
+
+.cms-banners-section {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+}
+
+.cms-banners-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.cms-banners-section-header h3 {
+  margin: 0 0 5px 0;
+  color: #0c2340;
+  font-size: 1.3rem;
+}
+
+.cms-banners-section-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.cms-banners-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cms-banners-counter {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cms-btn-add-banner {
+  background-color: #0c2340;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cms-btn-add-banner:hover {
+  background-color: #1e3a8a;
+}
+
+.cms-banners-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.cms-banner-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cms-banner-image-container {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #cbd5e1;
+}
+
+.cms-banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cms-banner-order-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #0c2340;
+  color: #ffffff;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.cms-banner-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cms-banner-arrows {
+  display: flex;
+  gap: 8px;
+}
+
+.cms-arrow-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  font-weight: bold;
+}
+
+.cms-arrow-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cms-banner-crud {
+  display: flex;
+  gap: 12px;
+}
+
+.cms-btn-edit,
+.cms-btn-delete {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cms-btn-edit {
+  color: #0c2340;
+}
+
+.cms-btn-delete {
+  color: #e11d48;
+  border-color: #fecdd3;
+}
+
+.cms-btn-edit svg,
+.cms-btn-delete svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cms-banner-toggle-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cms-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.cms-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cms-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.3s;
+}
+
+.cms-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+}
+
+input:checked + .cms-slider {
+  background-color: #22c55e;
+}
+
+input:checked + .cms-slider:before {
+  transform: translateX(20px);
+}
+
+.cms-slider.round {
+  border-radius: 24px;
+}
+
+.cms-slider.round:before {
+  border-radius: 50%;
+}
+/* ... mantén tus estilos actuales hasta llegar a .cms-banners-grid ... */
+
+.cms-banners-carousel-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.cms-carousel-nav-btn {
+  background: #cbd5e1;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.cms-carousel-nav-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: #ffffff;
+}
+
+.cms-carousel-nav-btn:hover:not(:disabled) {
+  background: #94a3b8;
+}
+
+.cms-carousel-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cms-banners-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  flex: 1;
+}
+
+.cms-banner-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,43,94,0.85) 0%, rgba(0,43,94,0.4) 50%, rgba(0,212,255,0) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  color: white;
+}
+
+.cms-banner-image-overlay h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  max-width: 200px;
+  line-height: 1.2;
+}
+
+.cms-banner-image-overlay span {
+  margin-top: 10px;
+  border: 1px solid white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  width: fit-content;
+}
+

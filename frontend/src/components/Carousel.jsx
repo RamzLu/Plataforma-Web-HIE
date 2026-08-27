@@ -1,86 +1,133 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom"; // 👈 Asegúrate de tener react-router-dom configurado
 import "../styles/components/Carousel.css";
 
-import imagen1 from "../assets/fondoHospitalCarrusel1.jpg";
-import imagen2 from "../assets/fondoHospitalCarrusel2.jpg";
-import imagen3 from "../assets/fondoHospitalCarrusel3.jpg";
-import imagen4 from "../assets/fondoHospitalCarrusel4.jpg";
+import defaultImg1 from "../assets/fondoHospitalCarrusel1.jpg";
+import defaultImg2 from "../assets/fondoHospitalCarrusel2.jpg";
+import defaultImg3 from "../assets/fondoHospitalCarrusel3.jpg";
+import defaultImg4 from "../assets/fondoHospitalCarrusel4.jpg";
 
-const Carousel = () => {
-  const slides = [imagen1, imagen2, imagen3, imagen4];
+const defaultSlides = [
+  { id: "def-1", imageUrl: defaultImg1, orden: 1 },
+  { id: "def-2", imageUrl: defaultImg2, orden: 2 },
+  { id: "def-3", imageUrl: defaultImg3, orden: 3 },
+  { id: "def-4", imageUrl: defaultImg4, orden: 4 },
+];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+const Carousel = ({ page = "Inicio" }) => {
+  const [slides, setSlides] = useState(defaultSlides);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  const goToPrevious = () => {
-    const isFirstSlide = currentIndex === 0;
-    const newIndex = isFirstSlide ? slides.length - 1 : currentIndex - 1;
-    setCurrentIndex(newIndex);
+  useEffect(() => {
+    const fetchPublicBanners = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/cms/banners");
+        if (response.ok) {
+          const data = await response.json();
+          
+          const bannersFiltrados = data
+            .filter((b) => (b.page === page || !b.page) && (b.activo === true || b.isActive === true))
+            .sort((a, b) => (a.orden || 0) - (b.orden || 0));
+
+          if (bannersFiltrados.length > 0) {
+            setSlides(bannersFiltrados);
+          }
+        }
+      } catch (error) {
+        console.error("Error al cargar banners dinámicos:", error);
+      }
+    };
+
+    fetchPublicBanners();
+  }, [page]);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 7000);
+
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  const goToPrev = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
   const goToNext = () => {
-    const isLastSlide = currentIndex === slides.length - 1;
-    const newIndex = isLastSlide ? 0 : currentIndex + 1;
-    setCurrentIndex(newIndex);
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
-  const goToSlide = (slideIndex) => {
-    setCurrentIndex(slideIndex);
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      goToNext();
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [currentIndex]);
+  if (!slides || slides.length === 0) return null;
 
   return (
-    <section className="carousel-section">
-      <div className="carousel-container">
-        <button className="carousel-arrow left-arrow" onClick={goToPrevious}>
-          &#10094;
-        </button>
-
-        <div
-          className="carousel-inner"
-          style={{ backgroundImage: `url(${slides[currentIndex]})` }}
-        ></div>
-
-        <div className="carousel-overlay">
-          <div className="carousel-text-container">
-            <h1 className="carousel-title">
-              6 AÑOS DE
-              <br />
-              VOCACIÓN Y
-              <br />
-              COMPETENCIA
-              <br />
-              PROFESIONAL
-            </h1>
-            <a href="#acerca-de" className="carousel-btn">
-              CONOCENOS
-            </a>
+    <div className="carousel-container">
+      <div className="carousel-track">
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id || index}
+            className={`carousel-slide ${index === currentSlide ? "active" : ""}`}
+            style={{
+              opacity: index === currentSlide ? 1 : 0,
+              visibility: index === currentSlide ? "visible" : "hidden",
+              transition: "opacity 0.8s ease-in-out",
+            }}
+          >
+            <img
+              src={slide.imageUrl}
+              alt={`Banner ${index + 1}`}
+              className="carousel-img"
+            />
           </div>
-        </div>
+        ))}
+      </div>
 
-        <button className="carousel-arrow right-arrow" onClick={goToNext}>
-          &#10095;
-        </button>
-
-        <div className="carousel-dots-container">
-          {slides.map((slide, slideIndex) => (
-            <div
-              key={slideIndex}
-              className={`carousel-dot ${currentIndex === slideIndex ? "active" : ""}`}
-              onClick={() => goToSlide(slideIndex)}
-            >
-              &#9679;
-            </div>
-          ))}
+      {/* 👇 Capa estática superpuesta con el título institucional y el botón */}
+      <div className="carousel-static-overlay">
+        <div className="carousel-content-box">
+          <h1 className="carousel-title">
+            6 AÑOS DE <br />
+            VOCACIÓN Y <br />
+            COMPETENCIA <br />
+            PROFESIONAL
+          </h1>
+          <Link to="/acerca-de" className="carousel-btn-conocenos">
+            CONOCENOS
+          </Link>
         </div>
       </div>
-    </section>
+
+      {slides.length > 1 && (
+        <>
+          <button
+            className="carousel-arrow carousel-arrow-left"
+            onClick={goToPrev}
+            aria-label="Banner anterior"
+          >
+            &#10094;
+          </button>
+          <button
+            className="carousel-arrow carousel-arrow-right"
+            onClick={goToNext}
+            aria-label="Banner siguiente"
+          >
+            &#10095;
+          </button>
+
+          <div className="carousel-indicators">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                className={`carousel-indicator ${idx === currentSlide ? "active" : ""}`}
+                onClick={() => setCurrentSlide(idx)}
+                aria-label={`Ir al banner ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 

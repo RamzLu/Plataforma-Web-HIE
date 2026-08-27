@@ -10,6 +10,7 @@ import CmsSidebar from "../components/cms/CmsSidebar";
 import CmsHeader from "../components/cms/CmsHeader";
 import CmsDashboardView from "./cms/CmsDashboardView";
 import CmsNoticiasView from "./cms/CmsNoticiasView";
+import CmsBannersView from "./cms/CmsBannersView";
 
 import { documentosData } from "../data/documentos";
 import avatarHospital from "../assets/iconEVITAface.jpg";
@@ -271,6 +272,10 @@ const CmsPage = () => {
               onViewNews={setSelectedNews}
               loading={loading}
             />
+          )}
+
+          {activeTab === "banners" && (
+            <CmsBannersView />
           )}
 
           {activeTab !== "dashboard" && activeTab !== "noticias" && (
