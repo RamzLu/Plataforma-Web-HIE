@@ -69,7 +69,8 @@ const CmsPage = () => {
           category: "Noticias",
           isDraft: false,
           images: noticia.images || [],
-          editor: noticia.editor || "Editor CMS" 
+          editor: noticia.editor || "Editor CMS", 
+          editedBy: noticia.editedBy || null
         }));
         
         setNewsList(noticiasFormateadas);

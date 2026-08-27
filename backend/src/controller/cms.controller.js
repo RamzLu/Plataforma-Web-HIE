@@ -16,29 +16,22 @@ export const crearNoticia = async (req, res) => {
     const name = req.user.name || "Editor CMS";
 
     if (!titulo || !contenido) {
-      return res
-        .status(400)
-        .json({ error: "Faltan campos obligatorios: titulo y contenido." });
+      return res.status(400).json({ error: "Faltan campos obligatorios: titulo y contenido." });
     }
 
-    let categoria = await prisma.categoria_noticia.findFirst({
-      where: { nombre: "Noticias" },
-    });
+    let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: "Noticias" } });
     if (!categoria) {
       categoria = await prisma.categoria_noticia.create({
         data: { nombre: "Noticias", descripcion: "Por defecto" },
       });
     }
 
-
     let usuarioLocal = await prisma.usuario.findFirst({
       where: { 
-        OR: [
-          { keycloakId: keycloakSub },
-          { username: username }
-        ]
+        OR: [{ keycloakId: keycloakSub }, { username: username }]
       },
     });
+
     if (!usuarioLocal) {
       let rolAdmin = await prisma.rol.findFirst({ where: { nombre: "ADMIN" } });
       if (!rolAdmin) {
@@ -70,32 +63,23 @@ export const crearNoticia = async (req, res) => {
         updatedAt: new Date(),
       },
       include: {
-        usuario_noticia_createdByTousuario: true, // 👈 Nombre corregido
+        usuario_noticia_createdByTousuario: true,
       },
     });
 
     const imagenesUrlsGuardadas = [];
 
     for (const file of archivosSubidos) {
-      const extension =
-        file.originalname.split(".").pop().toLowerCase() || "png";
+      const extension = file.originalname.split(".").pop().toLowerCase() || "png";
       const nombreUnico = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
 
-      const { data: storageData, error: storageError } = await supabase.storage
+      const { error: storageError } = await supabase.storage
         .from("noticias-imagenes")
-        .upload(nombreUnico, file.buffer, {
-          contentType: file.mimetype,
-          upsert: true,
-        });
+        .upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
 
       if (storageError) {
-        console.error(
-          "❌ Error subiendo al bucket de Supabase:",
-          storageError.message,
-        );
-        return res
-          .status(500)
-          .json({ error: "Error al subir imagen: " + storageError.message });
+        console.error("❌ Error subiendo al bucket de Supabase:", storageError.message);
+        return res.status(500).json({ error: "Error al subir imagen: " + storageError.message });
       }
 
       const archivoDb = await prisma.archivo.create({
@@ -110,35 +94,27 @@ export const crearNoticia = async (req, res) => {
       });
 
       await prisma.noticia_archivo.create({
-        data: {
-          noticiaId: nuevaNoticia.id,
-          archivoId: archivoDb.id,
-        },
+        data: { noticiaId: nuevaNoticia.id, archivoId: archivoDb.id },
       });
 
-      const { data: publicUrlData } = supabase.storage
-        .from("noticias-imagenes")
-        .getPublicUrl(nombreUnico);
-
+      const { data: publicUrlData } = supabase.storage.from("noticias-imagenes").getPublicUrl(nombreUnico);
       imagenesUrlsGuardadas.push(publicUrlData.publicUrl);
     }
 
-    // Nombre completo del editor detectado desde la BD
     const editorNombre = nuevaNoticia.usuario_noticia_createdByTousuario
       ? `${nuevaNoticia.usuario_noticia_createdByTousuario.nombre} ${nuevaNoticia.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
       : "Editor CMS";
 
-    const noticiaResponse = {
-      ...nuevaNoticia,
-      id: nuevaNoticia.id.toString(),
-      categoriaId: nuevaNoticia.categoriaId.toString(),
-      images: imagenesUrlsGuardadas,
-      editor: editorNombre,
-    };
-
     return res.status(201).json({
       message: "¡Noticia y archivos subidos al Bucket y respaldados en la BD!",
-      noticia: noticiaResponse,
+      noticia: {
+        ...nuevaNoticia,
+        id: nuevaNoticia.id.toString(),
+        categoriaId: nuevaNoticia.categoriaId.toString(),
+        images: imagenesUrlsGuardadas,
+        editor: editorNombre,
+        editedBy: null 
+      },
     });
   } catch (error) {
     console.error("Error al crear la noticia con archivos:", error);
@@ -151,27 +127,27 @@ export const obtenerNoticias = async (req, res) => {
     const noticias = await prisma.noticia.findMany({
       orderBy: { createdAt: "desc" },
       include: {
-        usuario_noticia_createdByTousuario: true, // 👈 Nombre corregido
+        usuario_noticia_createdByTousuario: true,
+        usuario_noticia_updatedByTousuario: true, 
         noticia_archivo: {
-          include: {
-            archivo: true,
-          },
+          include: { archivo: true },
         },
       },
     });
 
     const noticiasFormateadas = noticias.map((noticia) => {
       const imgs = noticia.noticia_archivo.map((na) => {
-        const { data } = supabase.storage
-          .from("noticias-imagenes")
-          .getPublicUrl(na.archivo.nombreArchivo);
+        const { data } = supabase.storage.from("noticias-imagenes").getPublicUrl(na.archivo.nombreArchivo);
         return data.publicUrl;
       });
 
-      // Mapeamos el nombre y apellido del editor correspondiente
       const editorNombre = noticia.usuario_noticia_createdByTousuario
         ? `${noticia.usuario_noticia_createdByTousuario.nombre} ${noticia.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
         : "Editor CMS";
+
+      const editadoPorNombre = noticia.usuario_noticia_updatedByTousuario
+        ? `${noticia.usuario_noticia_updatedByTousuario.nombre} ${noticia.usuario_noticia_updatedByTousuario.apellido || ""}`.trim()
+        : null;
 
       return {
         id: noticia.id.toString(),
@@ -183,7 +159,8 @@ export const obtenerNoticias = async (req, res) => {
         category: "Noticias",
         isDraft: false,
         images: imgs,
-        editor: editorNombre, 
+        editor: editorNombre,
+        editedBy: editadoPorNombre 
       };
     });
 
@@ -197,49 +174,25 @@ export const obtenerNoticias = async (req, res) => {
 export const eliminarNoticia = async (req, res) => {
   try {
     const { id } = req.params;
-
     const noticia = await prisma.noticia.findUnique({
       where: { id: BigInt(id) },
-      include: {
-        noticia_archivo: {
-          include: { archivo: true },
-        },
-      },
+      include: { noticia_archivo: { include: { archivo: true } } },
     });
 
-    if (!noticia) {
-      return res.status(404).json({ error: "Noticia no encontrada." });
-    }
+    if (!noticia) return res.status(404).json({ error: "Noticia no encontrada." });
 
     for (const na of noticia.noticia_archivo) {
-      const archivo = na.archivo;
-
-      await supabase.storage
-        .from("noticias-imagenes")
-        .remove([archivo.nombreArchivo]);
-
-      await prisma.noticia_archivo.deleteMany({
-        where: { archivoId: archivo.id },
-      });
-
-      await prisma.archivo.delete({
-        where: { id: archivo.id },
-      });
+      await supabase.storage.from("noticias-imagenes").remove([na.archivo.nombreArchivo]);
+      await prisma.noticia_archivo.deleteMany({ where: { archivoId: na.archivo.id } });
+      await prisma.archivo.delete({ where: { id: na.archivo.id } });
     }
 
-    await prisma.noticia.delete({
-      where: { id: BigInt(id) },
-    });
+    await prisma.noticia.delete({ where: { id: BigInt(id) } });
 
-    return res.status(200).json({
-      message:
-        "¡Noticia y archivos eliminados de la base de datos y de Supabase con éxito!",
-    });
+    return res.status(200).json({ message: "¡Noticia eliminada con éxito!" });
   } catch (error) {
     console.error("Error al eliminar la noticia:", error);
-    return res
-      .status(500)
-      .json({ error: "Error al eliminar: " + error.message });
+    return res.status(500).json({ error: "Error al eliminar: " + error.message });
   }
 };
 
@@ -249,109 +202,81 @@ export const actualizarNoticia = async (req, res) => {
     const { titulo, contenido, imagenesExistentes } = req.body;
     const archivosSubidos = req.files || [];
 
-    const noticiaExistente = await prisma.noticia.findUnique({
-      where: { id: BigInt(id) },
-      include: {
-        noticia_archivo: { include: { archivo: true } },
-      },
+   
+    const keycloakSub = req.user.keycloakId;
+    const username = req.user.username || `user_${Date.now()}`;
+    const name = req.user.name || "Editor CMS";
+
+    let usuarioEditor = await prisma.usuario.findFirst({
+      where: { OR: [{ keycloakId: keycloakSub }, { username: username }] },
     });
 
-    if (!noticiaExistente) {
-      return res.status(404).json({ error: "Noticia no encontrada." });
+    if (!usuarioEditor) {
+      let rolAdmin = await prisma.rol.findFirst({ where: { nombre: "ADMIN" } });
+      if (!rolAdmin) rolAdmin = await prisma.rol.create({ data: { nombre: "ADMIN", descripcion: "Admin" } });
+      usuarioEditor = await prisma.usuario.create({
+        data: {
+          id: keycloakSub, keycloakId: keycloakSub, username: username, email: `${username}@hospital.com`,
+          nombre: name, apellido: "Sistema", rolId: rolAdmin.id, updatedAt: new Date(),
+        },
+      });
     }
 
+    const noticiaExistente = await prisma.noticia.findUnique({
+      where: { id: BigInt(id) },
+      include: { noticia_archivo: { include: { archivo: true } } },
+    });
+
+    if (!noticiaExistente) return res.status(404).json({ error: "Noticia no encontrada." });
+
+    
     const noticiaActualizada = await prisma.noticia.update({
       where: { id: BigInt(id) },
       data: {
         titulo: titulo || noticiaExistente.titulo,
         contenido: contenido || noticiaExistente.contenido,
         updatedAt: new Date(),
-      },
-      include: {
-        usuario_noticia_createdByTousuario: true, // 👈 Nombre corregido
+        updatedBy: usuarioEditor.id 
       },
     });
 
-    const urlsConservadas = imagenesExistentes
-      ? JSON.parse(imagenesExistentes)
-      : [];
-
+    const urlsConservadas = imagenesExistentes ? JSON.parse(imagenesExistentes) : [];
     for (const na of noticiaExistente.noticia_archivo) {
       const archivo = na.archivo;
-      const { data } = supabase.storage
-        .from("noticias-imagenes")
-        .getPublicUrl(archivo.nombreArchivo);
-
+      const { data } = supabase.storage.from("noticias-imagenes").getPublicUrl(archivo.nombreArchivo);
       if (!urlsConservadas.includes(data.publicUrl)) {
-        await supabase.storage
-          .from("noticias-imagenes")
-          .remove([archivo.nombreArchivo]);
-        await prisma.noticia_archivo.deleteMany({
-          where: { archivoId: archivo.id },
-        });
+        await supabase.storage.from("noticias-imagenes").remove([archivo.nombreArchivo]);
+        await prisma.noticia_archivo.deleteMany({ where: { archivoId: archivo.id } });
         await prisma.archivo.delete({ where: { id: archivo.id } });
       }
     }
 
     for (const file of archivosSubidos) {
-      const extension =
-        file.originalname.split(".").pop().toLowerCase() || "png";
+      const extension = file.originalname.split(".").pop().toLowerCase() || "png";
       const nombreUnico = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
+      const { error: storageError } = await supabase.storage.from("noticias-imagenes").upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
 
-      const { data: storageData, error: storageError } = await supabase.storage
-        .from("noticias-imagenes")
-        .upload(nombreUnico, file.buffer, {
-          contentType: file.mimetype,
-          upsert: true,
-        });
-
-      if (storageError) {
-        console.error(
-          "❌ Error subiendo al bucket de Supabase:",
-          storageError.message,
-        );
-        return res
-          .status(500)
-          .json({ error: "Error al subir imagen: " + storageError.message });
-      }
+      if (storageError) return res.status(500).json({ error: "Error al subir imagen: " + storageError.message });
 
       const archivoDb = await prisma.archivo.create({
-        data: {
-          nombreOriginal: file.originalname,
-          nombreArchivo: nombreUnico,
-          ruta: `noticias-imagenes/${nombreUnico}`,
-          extension: extension,
-          mimeType: file.mimetype,
-          tamanioBytes: BigInt(file.size),
-        },
+        data: { nombreOriginal: file.originalname, nombreArchivo: nombreUnico, ruta: `noticias-imagenes/${nombreUnico}`, extension, mimeType: file.mimetype, tamanioBytes: BigInt(file.size) },
       });
-
-      await prisma.noticia_archivo.create({
-        data: {
-          noticiaId: noticiaActualizada.id,
-          archivoId: archivoDb.id,
-        },
-      });
+      await prisma.noticia_archivo.create({ data: { noticiaId: noticiaActualizada.id, archivoId: archivoDb.id } });
     }
 
     const noticiaConArchivos = await prisma.noticia.findUnique({
       where: { id: BigInt(id) },
       include: { 
-        usuario_noticia_createdByTousuario: true, // 👈 Nombre corregido
+        usuario_noticia_createdByTousuario: true,
+        usuario_noticia_updatedByTousuario: true,
         noticia_archivo: { include: { archivo: true } } 
       },
     });
 
-    const imgs = noticiaConArchivos.noticia_archivo.map((na) => {
-      const { data } = supabase.storage
-        .from("noticias-imagenes")
-        .getPublicUrl(na.archivo.nombreArchivo);
-      return data.publicUrl;
-    });
-
-    const editorNombre = noticiaConArchivos.usuario_noticia_createdByTousuario
-      ? `${noticiaConArchivos.usuario_noticia_createdByTousuario.nombre} ${noticiaConArchivos.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
-      : "Editor CMS";
+    const imgs = noticiaConArchivos.noticia_archivo.map((na) => supabase.storage.from("noticias-imagenes").getPublicUrl(na.archivo.nombreArchivo).data.publicUrl);
+    
+    const editorOriginal = noticiaConArchivos.usuario_noticia_createdByTousuario ? `${noticiaConArchivos.usuario_noticia_createdByTousuario.nombre} ${noticiaConArchivos.usuario_noticia_createdByTousuario.apellido || ""}`.trim() : "Editor CMS";
+    const editadoPorNombre = noticiaConArchivos.usuario_noticia_updatedByTousuario ? `${noticiaConArchivos.usuario_noticia_updatedByTousuario.nombre} ${noticiaConArchivos.usuario_noticia_updatedByTousuario.apellido || ""}`.trim() : null;
 
     return res.status(200).json({
       message: "¡Noticia y galería actualizadas correctamente!",
@@ -360,13 +285,12 @@ export const actualizarNoticia = async (req, res) => {
         id: noticiaActualizada.id.toString(),
         categoriaId: noticiaActualizada.categoriaId.toString(),
         images: imgs,
-        editor: editorNombre,
+        editor: editorOriginal,
+        editedBy: editadoPorNombre 
       },
     });
   } catch (error) {
     console.error("Error al actualizar la noticia:", error);
-    return res
-      .status(500)
-      .json({ error: "Error al actualizar: " + error.message });
+    return res.status(500).json({ error: "Error al actualizar: " + error.message });
   }
 };

@@ -213,6 +213,7 @@ const noticiaFormateada = {
         isDraft: false,
         images: data.noticia?.images || imagenesUrls || [],
         editor: data.noticia?.editor || "Editor CMS", 
+        editedBy: data.noticia?.editedBy || null
       };
 
       if (editingId) {
@@ -305,16 +306,19 @@ const noticiaFormateada = {
                       <div className="news-thumb-mock">HIE</div>
                     )}
                   </div>
-
-                  <div
+<div 
                     className="news-title-interactive"
                     onClick={() => onViewNews && onViewNews(news)}
-                    style={{ cursor: "pointer" }}
                     title="Ver comunicado completo"
                   >
                     <span className="activity-title news-title-clamped">
                       {news.title}
                     </span>
+                    {news.editedBy && (
+                      <span style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "4px" }}>
+                        Editado por {news.editedBy}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="col-fecha">
