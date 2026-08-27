@@ -181,6 +181,7 @@ const NoticiasPage = () => {
   const [selectedNews, setSelectedNews] = useState(null);
   const [altaIndex, setAltaIndex] = useState(0);
   const [noticias, setNoticias] = useState([]);
+  const [loading, setLoading] = useState(true); // 👈 Añadido el estado de carga
 
   const [lightbox, setLightbox] = useState({
     isOpen: false,
@@ -222,6 +223,7 @@ const NoticiasPage = () => {
 
 useEffect(() => {
     const fetchNoticiasPublicas = async () => {
+      setLoading(true); // 👈 Iniciar la carga
       try {
         const response = await fetch("http://localhost:3000/api/cms/noticias");
         if (!response.ok) throw new Error("Error al obtener noticias");
@@ -236,9 +238,11 @@ useEffect(() => {
           images: noticia.images || []
         }));
 
-        setNoticias(noticiasFormateadas); // Asegúrate de que 'setNoticias' sea el nombre de tu estado actual
+        setNoticias(noticiasFormateadas);
       } catch (error) {
         console.error("Error al cargar noticias en el portal:", error);
+      } finally {
+        setLoading(false); // 👈 Finalizar la carga
       }
     };
 
@@ -292,30 +296,43 @@ useEffect(() => {
       </div>
 
       <div className="noticias-page-container">
-        <div className="slider-wrapper">
-          <button
-            className="slider-arrow left-arrow"
-            onClick={() => scrollNews("left")}
-          >
-            &#10094;
-          </button>
-          <div className="news-slider" ref={sliderRef}>
-            {sortedNews.map((news) => (
-              <NewsCard
-                key={news.id}
-                news={news}
-                onOpenNews={setSelectedNews}
-                onOpenLightbox={openLightbox}
-              />
-            ))}
+        
+        {/* Renderizado Condicional del Spinner o las Noticias */}
+        {loading ? (
+          <div style={{ padding: "80px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%" }}>
+            <div className="cms-spinner" style={{ borderColor: "#cbd5e1", borderTopColor: "#006eb3" }}></div>
+            <p style={{ marginTop: "15px", color: "#64748b", fontWeight: "600" }}>Cargando últimas noticias...</p>
           </div>
-          <button
-            className="slider-arrow right-arrow"
-            onClick={() => scrollNews("right")}
-          >
-            &#10095;
-          </button>
-        </div>
+        ) : sortedNews.length > 0 ? (
+          <div className="slider-wrapper">
+            <button
+              className="slider-arrow left-arrow"
+              onClick={() => scrollNews("left")}
+            >
+              &#10094;
+            </button>
+            <div className="news-slider" ref={sliderRef}>
+              {sortedNews.map((news) => (
+                <NewsCard
+                  key={news.id}
+                  news={news}
+                  onOpenNews={setSelectedNews}
+                  onOpenLightbox={openLightbox}
+                />
+              ))}
+            </div>
+            <button
+              className="slider-arrow right-arrow"
+              onClick={() => scrollNews("right")}
+            >
+              &#10095;
+            </button>
+          </div>
+        ) : (
+          <div style={{ padding: "60px 0", textAlign: "center", color: "#64748b", width: "100%" }}>
+            No hay publicaciones recientes.
+          </div>
+        )}
 
         <section className="medical-articles-section">
           <div className="medical-left-column">
