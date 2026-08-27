@@ -6,7 +6,7 @@ const DATOS_INSTITUCIONALES = {
   historia: {
     titulo: "ACERCA DEL HIE",
     cuerpo:
-      "Acá va toda la historia actual que se muestra en el portal, con un color clarito para que simule que está bloqueado hasta que se toca Editar.",
+      "El Hospital Interdistrital Evita es un centro de alta complejidad referente en la provincia de Formosa y la región, asentado sobre una moderna infraestructura de 19.000 metros cuadrados cubiertos proyectada bajo rigurosas normas sanitarias internacionales. Cuenta con quirófanos inteligentes, centro de esterilización con tecnología de plasma de peróxido, unidades de terapia intensiva y una red de conectividad por fibra óptica provincial para la gestión integral de la Historia Clínica Digital.",
     estado: "Publicado",
     ultimaEdicion: "22 de agosto de 2026 · 10:42 hs",
   },
