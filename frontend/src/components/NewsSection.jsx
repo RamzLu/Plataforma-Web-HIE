@@ -20,7 +20,8 @@ const NewsSection = () => {
 
         <div className="news-cards-grid">
           <AnimatedContent distance={50} direction="vertical" delay={0.15}>
-            <div className="news-card">
+            {/* SOLUCIÓN: Agregamos flexbox en columna y alto 100% a la tarjeta */}
+            <div className="news-card" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <div className="card-header-line">
                 <span className="card-tag">SISTEMA DE TURNOS</span>
                 <h4>
@@ -37,7 +38,8 @@ const NewsSection = () => {
                 emitido por el Centro de Salud más cercano a tu domicilio.
               </p>
 
-              <div className="card-map-placeholder">
+              {/* SOLUCIÓN: marginTop: 'auto' empuja el mapa y los logos al límite inferior */}
+              <div className="card-map-placeholder" style={{ marginTop: "auto" }}>
                 <img
                   src={mapaFormosa}
                   alt="Mapa de Formosa"
@@ -56,7 +58,7 @@ const NewsSection = () => {
           </AnimatedContent>
 
           <AnimatedContent distance={50} direction="vertical" delay={0.25}>
-            <div className="news-card">
+            <div className="news-card" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <div className="card-header-line">
                 <span className="card-tag">TURNO PRESENCIAL</span>
                 <h4>Si ya sos paciente institucional</h4>
@@ -134,7 +136,8 @@ const NewsSection = () => {
                 </p>
               </div>
 
-              <div className="card-footer-text">
+              {/* SOLUCIÓN: Empujamos el footer text de la tarjeta central al fondo */}
+              <div className="card-footer-text" style={{ marginTop: "auto" }}>
                 Hospital Interdistrital <strong>Evita</strong>
               </div>
             </div>
@@ -142,7 +145,7 @@ const NewsSection = () => {
 
           {/* TARJETA 3 */}
           <AnimatedContent distance={50} direction="vertical" delay={0.35}>
-            <div className="news-card">
+            <div className="news-card" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <div className="card-header-line">
                 <span className="card-tag alert">RECOMENDACIÓN</span>
                 <h4>INFORMACIÓN IMPORTANTE</h4>
@@ -195,7 +198,8 @@ const NewsSection = () => {
                 </div>
               </div>
 
-              <div className="important-phone">
+              {/* SOLUCIÓN: Empujamos el teléfono (y consigo el footer) hacia abajo */}
+              <div className="important-phone" style={{ marginTop: "auto" }}>
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"

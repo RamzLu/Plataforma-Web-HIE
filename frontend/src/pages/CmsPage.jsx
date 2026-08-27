@@ -11,8 +11,9 @@ import CmsHeader from "../components/cms/CmsHeader";
 import CmsDashboardView from "./cms/CmsDashboardView";
 import CmsNoticiasView from "./cms/CmsNoticiasView";
 import CmsBannersView from "./cms/CmsBannersView";
-import CmsDocsView from "./cms/CmsDocsView"; // <-- AGREGADO
-import CmsInstitucionView from "./cms/CmsInstitucionView"; //vivii
+import CmsDocsView from "./cms/CmsDocsView";
+import CmsProfesionalesView from "./cms/CmsProfesionalesView"; 
+import CmsInstitucionView from "./cms/CmsInstitucionView"; 
 
 import { documentosData } from "../data/documentos";
 import avatarHospital from "../assets/iconEVITAface.jpg";
@@ -41,7 +42,7 @@ const CmsPage = () => {
   });
 
   const [newsList, setNewsList] = useState([]);
-  const [docsList, setDocsList] = useState([]); // <-- AGREGADO
+  const [docsList, setDocsList] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({
     contenidoPublicado: 0,
     borradores: 0,
@@ -86,7 +87,6 @@ const CmsPage = () => {
     }
   };
 
-  // <-- INICIO BLOQUE AGREGADO DE DOCUMENTOS -->
   const fetchDocs = async () => {
     try {
       const response = await fetch("http://localhost:3000/api/cms/documentacion");
@@ -149,11 +149,10 @@ const CmsPage = () => {
       }
     }
   };
-  // <-- FIN BLOQUE AGREGADO DE DOCUMENTOS -->
 
   useEffect(() => {
     fetchNoticias();
-    fetchDocs(); // <-- AGREGADO
+    fetchDocs();
   }, []);
 
   useEffect(() => {
@@ -202,7 +201,6 @@ const CmsPage = () => {
       });
   }, [newsList]);
 
-  // Se modificó levemente para aceptar currentDocs en lugar de la info mockeada de antes
   const updateStats = (currentNews, currentDocs = docsList) => {
     const publicadas = currentNews.filter((news) => !news.isDraft).length;
     const borradoresPendientes = currentNews.filter(
@@ -326,6 +324,10 @@ const CmsPage = () => {
                 ? "Gestión de Documentación"
                 : activeTab === "institucional"
                 ? "Gestión de Institucional"
+                : activeTab === "banners"
+                ? "Gestión de Banners"
+                : activeTab === "profesionales"
+                ? "Directorio de Profesionales" // <-- Título dinámico agregado
                 : "Panel de administración"}
             </h1>
             <p>
@@ -370,8 +372,19 @@ const CmsPage = () => {
           )}
 
         {activeTab === "institucional" && <CmsInstitucionView />}
+          
 
-          {activeTab !== "dashboard" && activeTab !== "noticias" && activeTab !== "documentacion" && (
+          {/* RENDEREIZADO DEL NUEVO MÓDULO */}
+          {activeTab === "profesionales" && (
+            <CmsProfesionalesView />
+          )}
+
+          {/* ACTUALIZADO PARA QUE NO MUESTRE "PRÓXIMAMENTE" SI ESTÁ EN PROFESIONALES */}
+          {activeTab !== "dashboard" && 
+           activeTab !== "noticias" && 
+           activeTab !== "documentacion" && 
+           activeTab !== "banners" && 
+           activeTab !== "profesionales" && (
             <div className="cms-dashboard-card">
               <h3 className="cms-card-title">
                 Módulo de {activeTab.toUpperCase()}
@@ -417,7 +430,6 @@ const CmsPage = () => {
               >
                 Cancelar
               </button>
-              {/* LÓGICA DE CIERRE DE SESIÓN SEGURA AGREGADA AQUÍ */}
               <button
                 className="btn-cerrar-rojo"
                 onClick={() => {
