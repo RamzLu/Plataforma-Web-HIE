@@ -12,6 +12,7 @@ import CmsDashboardView from "./cms/CmsDashboardView";
 import CmsNoticiasView from "./cms/CmsNoticiasView";
 import CmsBannersView from "./cms/CmsBannersView";
 import CmsDocsView from "./cms/CmsDocsView"; // <-- AGREGADO
+import CmsInstitucionView from "./cms/CmsInstitucionView"; //vivii
 
 import { documentosData } from "../data/documentos";
 import avatarHospital from "../assets/iconEVITAface.jpg";
@@ -323,6 +324,8 @@ const CmsPage = () => {
                 ? "Gestión de Noticias"
                 : activeTab === "documentacion"
                 ? "Gestión de Documentación"
+                : activeTab === "institucional"
+                ? "Gestión de Institucional"
                 : "Panel de administración"}
             </h1>
             <p>
@@ -365,6 +368,8 @@ const CmsPage = () => {
               loading={loading}
             />
           )}
+
+        {activeTab === "institucional" && <CmsInstitucionView />}
 
           {activeTab !== "dashboard" && activeTab !== "noticias" && activeTab !== "documentacion" && (
             <div className="cms-dashboard-card">
