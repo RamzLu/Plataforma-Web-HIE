@@ -14,6 +14,7 @@ import CmsBannersView from "./cms/CmsBannersView";
 import CmsDocsView from "./cms/CmsDocsView";
 import CmsProfesionalesView from "./cms/CmsProfesionalesView"; 
 import CmsInstitucionView from "./cms/CmsInstitucionView"; 
+import CmsConfiguracionView from "./cms/CmsConfiguracionView"; // <-- IMPORTACIÓN
 
 import { documentosData } from "../data/documentos";
 import avatarHospital from "../assets/iconEVITAface.jpg";
@@ -327,7 +328,9 @@ const CmsPage = () => {
                 : activeTab === "banners"
                 ? "Gestión de Banners"
                 : activeTab === "profesionales"
-                ? "Directorio de Profesionales" // <-- Título dinámico agregado
+                ? "Directorio de Profesionales" 
+                : activeTab === "configuracion"
+                ? "Gestión de Configuración" // <-- TÍTULO DINÁMICO AGREGADO
                 : "Panel de administración"}
             </h1>
             <p>
@@ -371,21 +374,27 @@ const CmsPage = () => {
             />
           )}
 
-        {activeTab === "institucional" && <CmsInstitucionView />}
+          {activeTab === "institucional" && (
+            <CmsInstitucionView />
+          )}
 
-        {activeTab === "institucional" && <CmsInstitucionView />}
-
-          {/* RENDEREIZADO DEL NUEVO MÓDULO */}
           {activeTab === "profesionales" && (
             <CmsProfesionalesView />
           )}
 
-          {/* ACTUALIZADO PARA QUE NO MUESTRE "PRÓXIMAMENTE" SI ESTÁ EN PROFESIONALES */}
+          {/* RENDERIZADO DEL NUEVO MÓDULO */}
+          {activeTab === "configuracion" && (
+            <CmsConfiguracionView />
+          )}
+
+          {/* ACTUALIZADO PARA QUE NO MUESTRE "PRÓXIMAMENTE" SI ESTÁ EN CONFIGURACIÓN NI PROFESIONALES */}
           {activeTab !== "dashboard" && 
            activeTab !== "noticias" && 
            activeTab !== "documentacion" && 
            activeTab !== "banners" && 
-           activeTab !== "profesionales" && (
+           activeTab !== "institucional" && 
+           activeTab !== "profesionales" && 
+           activeTab !== "configuracion" && (
             <div className="cms-dashboard-card">
               <h3 className="cms-card-title">
                 Módulo de {activeTab.toUpperCase()}
@@ -398,6 +407,7 @@ const CmsPage = () => {
         </main>
       </div>
 
+      {/* MODALES DE LOGOUT Y NOTICIAS... (SIN CAMBIOS) */}
       {showLogoutModal && (
         <div
           className="modal-overlay"

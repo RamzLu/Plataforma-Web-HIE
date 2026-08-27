@@ -1,0 +1,249 @@
+/* CONTENEDOR PRINCIPAL */
+.cms-config-wrapper {
+  padding: 30px;
+  background-color: #f4f7f9;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* HEADER */
+.config-header-main {
+  margin-bottom: 40px;
+}
+
+.sobretitulo {
+  font-size: 0.75rem;
+  color: #0c2340;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.titulo-principal {
+  color: #1e293b;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.subtitulo {
+  color: #0c2340;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* TARJETA DE CONFIGURACIÓN */
+.config-card {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  max-width: 900px;
+}
+
+/* HEADER DE LA TARJETA */
+.config-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.config-card-title {
+  color: #0c2340;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+}
+
+.config-card-subtitle {
+  color: #0c2340;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* BOTONES */
+.btn-config-edit {
+  background-color: #1e293b; /* Azul muy oscuro casi negro */
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 30px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-config-edit:hover {
+  background-color: #0f172a;
+}
+
+.config-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-config-cancel {
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-config-cancel:hover {
+  background-color: #f1f5f9;
+}
+
+.btn-config-save {
+  background-color: #10b981; /* Verde éxito */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-config-save:hover {
+  background-color: #059669;
+}
+
+/* SEPARADOR */
+.config-card-divider {
+  height: 1px;
+  background-color: #cbd5e1;
+  margin: 20px 0 30px 0;
+}
+
+/* FORMULARIO GRID */
+.config-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 40px;
+  row-gap: 25px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #0c2340;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.form-group input {
+  padding: 12px 16px;
+  font-size: 1rem;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #ffffff;
+}
+
+.form-group input:focus:not(:disabled) {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+/* MODO LECTURA */
+.form-group input.input-readonly {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+  cursor: default;
+}
+/* ESTILOS PARA LA GESTIÓN DEL NAVBAR */
+.badge-info-simulado {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.nav-gestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nav-gestion-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 12px 20px;
+  transition: all 0.2s ease;
+}
+
+.nav-gestion-row.disabled-row {
+  background-color: #f1f5f9;
+  opacity: 0.6;
+}
+
+.nav-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-item-name {
+  font-weight: 700;
+  color: #0c2340;
+  font-size: 0.95rem;
+}
+
+.nav-item-path {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.nav-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.order-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-input-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.order-input-group input {
+  width: 55px;
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-weight: 600;
+  background: white;
+}
