@@ -5,6 +5,10 @@ import "../styles/components/HospitalMapSection.css";
 import planoGeneral from "../assets/planoHospital.jpg";
 import planoBloqueQuirurgico from "../assets/plano_bloque_quirurgico.jpg";
 import planoObstetrico from "../assets/plano_obstetrico.jpg";
+import planoCirugiaAmbulatoria from "../assets/planoCirugiaAmbulatoria.jpeg"
+import uci from "../assets/uci.jpeg"
+import planoGabinetes from "../assets/planoGabinetes.jpeg"
+import planoAmbulatorio from "../assets/planoAmbulatorio.jpeg"
 
 const AREAS_HOSPITAL = [
   {
@@ -25,7 +29,7 @@ const AREAS_HOSPITAL = [
     acceso: "Entrada Oeste - Sector Quirúrgico",
     descripcion:
       "Sector destinado a cirugías de corta estancia, hospital de día y salas de recuperación post-anestesia inmediata.",
-    imagen: planoGeneral,
+    imagen: planoCirugiaAmbulatoria,
   },
   {
     id: "obstetrico",
@@ -45,7 +49,7 @@ const AREAS_HOSPITAL = [
     acceso: "Núcleo Central - Control de Acceso",
     descripcion:
       "Boxes de internación crítica equipados con tecnología de monitoreo hemodinámico avanzado y soporte vital continuo.",
-    imagen: planoGeneral,
+    imagen: uci,
   },
   {
     id: "gabinetes",
@@ -55,7 +59,7 @@ const AREAS_HOSPITAL = [
     acceso: "Pasillo Lateral Oeste - Bloque 2",
     descripcion:
       "Laboratorios de alta especialidad, fecundación in vitro y estudios diagnósticos de precisión asistida.",
-    imagen: planoGeneral,
+    imagen: planoGabinetes,
   },
   {
     id: "ambulatorio",
@@ -65,7 +69,7 @@ const AREAS_HOSPITAL = [
     acceso: "Entrada Principal - Planta Baja",
     descripcion:
       "Salas de espera y gabinetes de atención para turnos programados en todas las especialidades médicas del hospital.",
-    imagen: planoGeneral,
+    imagen: planoAmbulatorio,
   },
 ];
 
