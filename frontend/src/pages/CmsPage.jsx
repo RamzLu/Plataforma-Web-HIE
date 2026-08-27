@@ -10,6 +10,7 @@ import CmsSidebar from "../components/cms/CmsSidebar";
 import CmsHeader from "../components/cms/CmsHeader";
 import CmsDashboardView from "./cms/CmsDashboardView";
 import CmsNoticiasView from "./cms/CmsNoticiasView";
+import CmsDocsView from "./cms/CmsDocsView"; // <-- AGREGADO
 
 import { documentosData } from "../data/documentos";
 import avatarHospital from "../assets/iconEVITAface.jpg";
@@ -38,6 +39,7 @@ const CmsPage = () => {
   });
 
   const [newsList, setNewsList] = useState([]);
+  const [docsList, setDocsList] = useState([]); // <-- AGREGADO
   const [dashboardStats, setDashboardStats] = useState({
     contenidoPublicado: 0,
     borradores: 0,
@@ -82,8 +84,74 @@ const CmsPage = () => {
     }
   };
 
+  // <-- INICIO BLOQUE AGREGADO DE DOCUMENTOS -->
+  const fetchDocs = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/cms/documentacion");
+      if (!response.ok) throw new Error("Error al obtener documentos");
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        setDocsList(data);
+        localStorage.setItem("portal_docs_data", JSON.stringify(data));
+        updateStats(newsList, data);
+      } else {
+        const cachedDocs = JSON.parse(localStorage.getItem("portal_docs_data")) || [];
+        setDocsList(cachedDocs);
+        updateStats(newsList, cachedDocs);
+      }
+    } catch (error) {
+      console.error("Error obteniendo documentos:", error);
+      const cachedDocs = JSON.parse(localStorage.getItem("portal_docs_data")) || [];
+      setDocsList(cachedDocs);
+      updateStats(newsList, cachedDocs);
+    }
+  };
+
+  const handleAddNewDoc = (nuevoDoc) => {
+    const updatedList = [nuevoDoc, ...docsList];
+    setDocsList(updatedList);
+    updateStats(newsList, updatedList);
+    localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
+  };
+
+  const handleUpdateDoc = (updatedDoc) => {
+    const updatedList = docsList.map((item) =>
+      item.id === updatedDoc.id ? updatedDoc : item,
+    );
+    setDocsList(updatedList);
+    updateStats(newsList, updatedList);
+    localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
+  };
+
+  const handleDeleteDoc = async (id) => {
+    if (window.confirm("¿Estás seguro de eliminar este documento del repositorio?")) {
+      try {
+        const token = keycloak?.token;
+        const response = await fetch(`http://localhost:3000/api/cms/documentacion/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error("No se pudo eliminar en el servidor");
+
+        const filtered = docsList.filter((d) => d.id !== id);
+        setDocsList(filtered);
+        updateStats(newsList, filtered);
+        localStorage.setItem("portal_docs_data", JSON.stringify(filtered));
+
+        alert("¡Documento eliminado correctamente!");
+      } catch (error) {
+        console.error("Error al eliminar documento:", error);
+        alert("Ocurrió un error al intentar eliminar el documento.");
+      }
+    }
+  };
+  // <-- FIN BLOQUE AGREGADO DE DOCUMENTOS -->
+
   useEffect(() => {
     fetchNoticias();
+    fetchDocs(); // <-- AGREGADO
   }, []);
 
   useEffect(() => {
@@ -100,7 +168,7 @@ const CmsPage = () => {
           keycloak.tokenParsed?.preferred_username ||
           "Editor CMS";
         setUserName(name);
-        updateStats(newsList);
+        updateStats(newsList, docsList);
       }
       return;
     }
@@ -124,7 +192,7 @@ const CmsPage = () => {
             "Editor CMS";
           setUserName(name);
 
-          updateStats(newsList);
+          updateStats(newsList, docsList);
         }
       })
       .catch((err) => {
@@ -132,12 +200,13 @@ const CmsPage = () => {
       });
   }, [newsList]);
 
-  const updateStats = (currentNews) => {
+  // Se modificó levemente para aceptar currentDocs en lugar de la info mockeada de antes
+  const updateStats = (currentNews, currentDocs = docsList) => {
     const publicadas = currentNews.filter((news) => !news.isDraft).length;
     const borradoresPendientes = currentNews.filter(
       (news) => news.isDraft,
     ).length;
-    const totalDocumentos = documentosData ? documentosData.length : 0;
+    const totalDocumentos = currentDocs ? currentDocs.length : 0; 
 
     setDashboardStats({
       contenidoPublicado: publicadas,
@@ -150,7 +219,7 @@ const CmsPage = () => {
   const handleAddNewNews = (nuevaNoticia) => {
     const updatedList = [nuevaNoticia, ...newsList];
     setNewsList(updatedList);
-    updateStats(updatedList);
+    updateStats(updatedList, docsList);
     localStorage.setItem("portal_news_data", JSON.stringify(updatedList));
   };
 
@@ -159,13 +228,13 @@ const CmsPage = () => {
       item.id === updatedNews.id ? updatedNews : item,
     );
     setNewsList(updatedList);
-    updateStats(updatedList);
+    updateStats(updatedList, docsList);
   };
 
   const handleDeleteNews = (id) => {
     const filtered = newsList.filter((n) => n.id !== id);
     setNewsList(filtered);
-    updateStats(filtered);
+    updateStats(filtered, docsList);
     localStorage.setItem("portal_news_data", JSON.stringify(filtered));
   };
 
@@ -219,7 +288,14 @@ const CmsPage = () => {
       <div className="cms-unauthorized">
         <h2>Acceso Denegado</h2>
         <p>No tienes permisos de Redactor (CMS) para ver esta página.</p>
-        <button onClick={() => keycloak.logout()}>Cerrar Sesión</button>
+        <button onClick={() => {
+          if (keycloak && typeof keycloak.logout === 'function') {
+            keycloak.logout();
+          } else {
+            localStorage.removeItem("cms_active_tab");
+            window.location.href = "/";
+          }
+        }}>Cerrar Sesión</button>
       </div>
     );
   }
@@ -244,6 +320,8 @@ const CmsPage = () => {
             <h1>
               {activeTab === "noticias"
                 ? "Gestión de Noticias"
+                : activeTab === "documentacion"
+                ? "Gestión de Documentación"
                 : "Panel de administración"}
             </h1>
             <p>
@@ -273,7 +351,18 @@ const CmsPage = () => {
             />
           )}
 
-          {activeTab !== "dashboard" && activeTab !== "noticias" && (
+          {/* AGREGADO EL COMPONENTE DE DOCUMENTACIÓN */}
+          {activeTab === "documentacion" && (
+            <CmsDocsView
+              docsList={docsList}
+              onAddNewDoc={handleAddNewDoc}
+              onDeleteDoc={handleDeleteDoc}
+              onUpdateDoc={handleUpdateDoc}
+              loading={loading}
+            />
+          )}
+
+          {activeTab !== "dashboard" && activeTab !== "noticias" && activeTab !== "documentacion" && (
             <div className="cms-dashboard-card">
               <h3 className="cms-card-title">
                 Módulo de {activeTab.toUpperCase()}
@@ -319,9 +408,17 @@ const CmsPage = () => {
               >
                 Cancelar
               </button>
+              {/* LÓGICA DE CIERRE DE SESIÓN SEGURA AGREGADA AQUÍ */}
               <button
                 className="btn-cerrar-rojo"
-                onClick={() => keycloak.logout()}
+                onClick={() => {
+                  if (keycloak && typeof keycloak.logout === 'function') {
+                    keycloak.logout();
+                  } else {
+                    localStorage.removeItem("cms_active_tab");
+                    window.location.href = "/";
+                  }
+                }}
               >
                 Sí, Salir
               </button>
