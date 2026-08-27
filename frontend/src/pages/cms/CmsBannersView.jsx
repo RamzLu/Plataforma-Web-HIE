@@ -95,11 +95,35 @@ const CmsBannersView = () => {
 
   const handleOpenEdit = (banner) => {
     setEditingId(banner.id);
-    setFormData({ title: banner.titulo || banner.title || "", content: banner.descripcion || banner.content || "" });
+    setFormData({ 
+      title: banner.titulo || banner.title || "", 
+      content: banner.descripcion || banner.content || "" 
+    });
     setRawImageSrc(null);
     setImagePreview(banner.imageUrl || "");
     setCroppedBlob(null);
     setShowModal(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("¿Estás seguro de que deseas eliminar este banner?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/cms/banners/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Error al eliminar en el servidor");
+
+      setBanners(banners.filter((b) => b.id !== id));
+      toast.success("¡Banner eliminado con éxito!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error al eliminar el banner.");
+    }
   };
 
   // Al seleccionar archivo, cargamos la imagen para mostrar la herramienta de recorte
@@ -173,7 +197,6 @@ const CmsBannersView = () => {
     let newX = e.clientX - dragStart.x;
     let newY = e.clientY - dragStart.y;
 
-    // Limitar dentro de los bordes de la imagen visualizada
     if (newX < 0) newX = 0;
     if (newY < 0) newY = 0;
     if (newX + cropBox.width > img.clientWidth) newX = img.clientWidth - cropBox.width;
@@ -200,12 +223,15 @@ const CmsBannersView = () => {
       const dataForm = new FormData();
       dataForm.append("titulo", formData.title);
       dataForm.append("descripcion", formData.content);
-const maxOrden = filteredBanners.length > 0 
-        ? Math.max(...filteredBanners.map(b => b.orden || 0)) 
-        : 0;
-      dataForm.append("orden", maxOrden + 1);
       dataForm.append("activo", "true");
       dataForm.append("page", activeTab);
+
+      if (!editingId) {
+        const maxOrden = filteredBanners.length > 0 
+          ? Math.max(...filteredBanners.map(b => b.orden || 0)) 
+          : 0;
+        dataForm.append("orden", maxOrden + 1);
+      }
 
       if (croppedBlob) {
         dataForm.append("imagen", croppedBlob, "banner_recortado.jpg");
@@ -278,11 +304,10 @@ const maxOrden = filteredBanners.length > 0
             </button>
 
             <div className="cms-banners-grid">
-{visibleBanners.map((banner) => {
+              {visibleBanners.map((banner) => {
                 const originalIndex = filteredBanners.findIndex(b => b.id === banner.id);
                 return (
                   <div className="cms-banner-card" key={banner.id}>
-                    {/* 1. Imagen limpia arriba */}
                     <div className="cms-banner-image-container">
                       <div className="cms-banner-order-badge">{originalIndex + 1}</div>
                       <img src={banner.imageUrl} alt={`Banner ${originalIndex + 1}`} className="cms-banner-image" />
@@ -303,9 +328,17 @@ const maxOrden = filteredBanners.length > 0
                         <button className="cms-arrow-btn" disabled={originalIndex === filteredBanners.length - 1}>→</button>
                       </div>
 
-                      <div className="cms-banner-crud">
+                      {/* Botones de Editar y Eliminar funcionales */}
+                      <div className="cms-banner-crud" style={{ display: "flex", gap: "8px" }}>
                         <button className="cms-btn-edit" onClick={() => handleOpenEdit(banner)}>
                           Editar
+                        </button>
+                        <button 
+                          className="cms-btn-delete" 
+                          onClick={() => handleDelete(banner.id)}
+                          style={{ backgroundColor: "#fee2e2", color: "#991b1b", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontWeight: "600" }}
+                        >
+                          Eliminar
                         </button>
                       </div>
                     </div>
@@ -332,7 +365,7 @@ const maxOrden = filteredBanners.length > 0
             </div>
             
             <form onSubmit={handleSave} className="modal-body-esp">
-<div style={{ marginBottom: "15px" }}>
+              <div style={{ marginBottom: "15px" }}>
                 <label style={{ display: "block", fontWeight: "bold", marginBottom: "5px" }}>
                   Título / Descripción de Accesibilidad <span style={{ color: "#e11d48" }}>*</span>
                 </label>
@@ -349,7 +382,7 @@ const maxOrden = filteredBanners.length > 0
                 />
               </div>
 
-<div style={{ marginBottom: "15px" }}>
+              <div style={{ marginBottom: "15px" }}>
                 <label style={{ display: "block", fontWeight: "bold", marginBottom: "5px" }}>
                   Texto del Botón / Subtítulo <span style={{ fontWeight: "normal", color: "#64748b" }}>(Opcional)</span>
                 </label>
@@ -366,7 +399,6 @@ const maxOrden = filteredBanners.length > 0
                 <label style={{ display: "block", fontWeight: "bold", marginBottom: "5px" }}>Seleccionar Imagen (Proporción exacta 1501x641)</label>
                 <input type="file" accept="image/*" onChange={handleImageChange} style={{ width: "100%", marginBottom: "10px" }} />
 
-                {/* Herramienta Interactiva de Corte */}
                 {rawImageSrc && (
                   <div style={{ margin: "10px 0", background: "#1e293b", padding: "10px", borderRadius: "8px", textAlign: "center" }}>
                     <p style={{ color: "#fff", fontSize: "0.85rem", marginBottom: "8px" }}>Arrastrá el recuadro para encuadrar la zona exacta (1501x641):</p>
@@ -402,10 +434,9 @@ const maxOrden = filteredBanners.length > 0
                   </div>
                 )}
 
-                {/* Vista Previa del Resultado Final */}
                 {imagePreview && !rawImageSrc && (
                   <div style={{ marginTop: "10px" }}>
-                    <p style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>Vista previa recortada (1501x641):</p>
+                    <p style={{ fontSize: "0.85rem", fontWeight: "bold", color: "#475569" }}>Imagen actual / Vista previa recortada (1501x641):</p>
                     <div style={{ width: "100%", height: "140px", borderRadius: "8px", overflow: "hidden", background: "#f1f5f9", border: "1px solid #cbd5e1" }}>
                       <img src={imagePreview} alt="Preview Final" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>
@@ -415,8 +446,8 @@ const maxOrden = filteredBanners.length > 0
 
               <div className="modal-footer-esp" style={{ padding: 0, justifyContent: "flex-end" }}>
                 <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)} disabled={saving}>Cancelar</button>
-                <button type="submit" className="btn-cerrar-rojo" disabled={saving || (!croppedBlob && !editingId)} style={{ backgroundColor: "#0c2340" }}>
-                  {saving ? "Procesando y Guardando..." : "Guardar Banner"}
+                <button type="submit" className="btn-cerrar-rojo" disabled={saving} style={{ backgroundColor: "#0c2340" }}>
+                  {saving ? "Procesando y Guardando..." : (editingId ? "Actualizar Banner" : "Guardar Banner")}
                 </button>
               </div>
             </form>
