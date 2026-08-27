@@ -1,0 +1,158 @@
+/* ===== Contenedor general ===== */
+.inst-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.inst-card { padding: 24px 28px; }
+
+/* ===== Header de cada tarjeta ===== */
+.inst-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eef2f7;
+}
+.inst-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0c2340;
+  margin: 0;
+}
+.inst-card-subtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 3px 0 0 0;
+}
+
+/* ===== Campos (label + input/textarea) ===== */
+.inst-field { margin-bottom: 18px; }
+.inst-label {
+  display: block;
+  font-weight: 700;
+  color: #0c2340;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+.inst-input,
+.inst-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #334155;
+  background: #fff;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.inst-textarea { min-height: 180px; resize: vertical; line-height: 1.6; }
+
+/* Efecto "bloqueado" clarito de la historia */
+.inst-bloqueado {
+  background: #f8fafc;
+  color: #94a3b8;
+  border-style: dashed;
+}
+
+/* ===== Footer de tarjeta ===== */
+.inst-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+.inst-card-footer.center { justify-content: center; }
+.inst-ultima-edicion { font-size: 0.8rem; color: #94a3b8; }
+
+/* ===== Botón oscuro (Editar / Añadir) ===== */
+.btn-inst-oscuro {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0c2340;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-inst-oscuro:hover { background: #123156; }
+
+/* ===== Principios: pills + cajas ===== */
+.inst-valores-pills {
+  display: flex;
+  gap: 14px;
+  margin: 20px 0 14px 0;
+  flex-wrap: wrap;
+}
+.inst-valor-pill {
+  flex: 1;
+  min-width: 160px;
+  text-align: center;
+  padding: 12px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.3px;
+}
+.inst-valores-cajas {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.inst-valor-caja {
+  flex: 1;
+  min-width: 160px;
+  min-height: 150px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* ===== Autoridades: tabla simple de 3 columnas ===== */
+.inst-autoridades-tabla { display: flex; flex-direction: column; }
+.inst-autoridades-head,
+.inst-autoridades-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1.2fr 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 4px;
+}
+.inst-autoridades-head {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0c2340;
+  border-bottom: 1px solid #e2e8f0;
+  letter-spacing: 0.3px;
+}
+.inst-autoridades-row { border-bottom: 1px solid #f1f5f9; }
+.inst-aut-nombre { font-weight: 700; color: #0c2340; }
+.inst-aut-cargo { color: #b45309; }
+.inst-aut-imagen { color: #64748b; font-size: 0.9rem; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .inst-valores-pills, .inst-valores-cajas { flex-direction: column; }
+  .inst-autoridades-head { display: none; }
+  .inst-autoridades-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    border: 1px solid #eef2f7;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+}
