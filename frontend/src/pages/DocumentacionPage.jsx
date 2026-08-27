@@ -1,35 +1,67 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/pages/DocumentacionPage.css";
-import { documentosData } from "../data/documentos";
 import AnimatedContent from "../components/AnimatedContent";
-
 import Breadcrumb from "../components/Breadcrumb";
-
 import fondoBanner from "../assets/banner_documentacion.png";
 
 const DocumentacionPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("TODOS");
+  
+  // Inicializamos el estado vacío para que se llene con la Base de Datos
+  const [documentosData, setDocumentosData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const categorias = [
     "TODOS",
-    "GUÍAS Y ORIENTACIÓN",
+    "GUÍA Y ORIENTACIÓN",
     "INFORMACIÓN INSTITUCIONAL",
     "PREVENCIÓN Y SALUD",
   ];
 
+  // Llamada al Backend real
+  useEffect(() => {
+    const fetchDocumentosPublicos = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("http://localhost:3000/api/cms/documentacion");
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Documentos desde BD:", data); // Para verificar en consola F12
+          
+          // Filtramos solo los que están "publicados"
+          const docsPublicados = data.filter(
+            (doc) => (doc.status || "").toLowerCase() === "publicado"
+          );
+          setDocumentosData(docsPublicados);
+        }
+      } catch (error) {
+        console.error("Error al cargar documentos públicos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDocumentosPublicos();
+  }, []);
+
   const filteredDocs = documentosData.filter((doc) => {
-    const matchesSearch = doc.titulo
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const tituloDoc = doc.title || "";
+    const categoriaDoc = doc.category || "";
+
+    const matchesSearch = tituloDoc.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       activeCategory === "TODOS" ||
-      doc.categoria.toUpperCase() === activeCategory;
+      categoriaDoc.toUpperCase() === activeCategory.toUpperCase();
 
     return matchesSearch && matchesCategory;
   });
 
   const handleDownloadDirect = async (url, titulo) => {
+    if (!url) {
+      alert("El enlace del archivo no está disponible.");
+      return;
+    }
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -82,33 +114,20 @@ const DocumentacionPage = () => {
         </div>
       </div>
 
-      {/* CONTENEDOR CENTRAL LIMITADO (Buscador, Tabla, etc.) */}
       <div className="documentacion-container">
-        {/* Buscador */}
         <div className="doc-search-container">
-          <svg
-            className="doc-search-icon"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
+          <svg className="doc-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
           <input
             type="text"
             className="doc-search-input"
-            placeholder="Buscar documento (Ej: Dengue, organigrama, visitas...)"
+            placeholder="Buscar documento..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        {/* Filtros por Categoría */}
         <div className="doc-filters">
           {categorias.map((cat) => (
             <button
@@ -122,114 +141,67 @@ const DocumentacionPage = () => {
           ))}
         </div>
 
-        {/* Tabla de Documentos */}
         <AnimatedContent distance={40} direction="vertical" delay={0.1}>
           <div className="doc-table-container">
             <div className="doc-table-header">
               <div className="header-col">TÍTULO DEL DOCUMENTO</div>
-              <div className="header-col">
-                <svg className="header-icon" viewBox="0 0 24 24">
-                  <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-                </svg>
-                CATEGORÍA
-              </div>
-              <div className="header-col">
-                <svg className="header-icon" viewBox="0 0 24 24">
-                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
-                </svg>
-                FECHA
-              </div>
-              <div className="header-col">
-                <svg
-                  className="header-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21.3 15.3l-7.6-7.6a2 2 0 0 0-2.8 0l-1.4 1.4a2 2 0 0 0 0 2.8l7.6 7.6a2 2 0 0 0 2.8 0l1.4-1.4a2 2 0 0 0 0-2.8z"></path>
-                  <path d="M14.5 9.5L12 12"></path>
-                  <path d="M10.5 13.5L8 16"></path>
-                  <path d="M6.5 17.5L4 20"></path>
-                </svg>
-                TAMAÑO
-              </div>
-              <div className="header-col">
-                <svg className="header-icon" viewBox="0 0 24 24">
-                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                </svg>
-                DESCARGAR
-              </div>
+              <div className="header-col">CATEGORÍA</div>
+              <div className="header-col">FECHA</div>
+              <div className="header-col">TAMAÑO</div>
+              <div className="header-col">DESCARGAR</div>
             </div>
 
             <div className="doc-table-body">
-              {filteredDocs.length > 0 ? (
+              {loading ? (
+                <div style={{ padding: "60px", textAlign: "center", gridColumn: "1 / -1" }}>
+                  <div className="cms-spinner" style={{ margin: "0 auto 15px auto" }}></div>
+                  <span style={{ color: "#64748b", fontSize: "1rem", fontWeight: "600" }}>
+                    Cargando documentos desde la base de datos...
+                  </span>
+                </div>
+              ) : filteredDocs.length > 0 ? (
                 filteredDocs.map((doc) => (
                   <div className="doc-row" key={doc.id}>
                     <div className="col-titulo">
-                      <svg
-                        className="doc-file-icon"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                        ></path>
+                      <svg className="doc-file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                       </svg>
                       <p className="titulo-text">
-                        {doc.titulo}{" "}
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="leer-mas-link"
-                        >
-                          Leer mas
-                        </a>
+                        {doc.title}{" "}
+                        {doc.fileUrl && (
+                          <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="leer-mas-link">
+                            Ver documento
+                          </a>
+                        )}
                       </p>
                     </div>
 
                     <div className="col-data" data-label="Categoría">
-                      {doc.categoria}
+                      {doc.category}
                     </div>
                     <div className="col-data" data-label="Fecha">
-                      {doc.fecha}
+                      {doc.updatedAt}
                     </div>
                     <div className="col-data" data-label="Tamaño">
-                      {doc.tamañoMB} MB
+                      {doc.fileSize || "—"}
                     </div>
 
                     <div>
                       <button
                         className="btn-descargar"
-                        onClick={() =>
-                          handleDownloadDirect(doc.url, doc.titulo)
-                        }
+                        onClick={() => handleDownloadDirect(doc.fileUrl, doc.title)}
                       >
                         <svg fill="currentColor" viewBox="0 0 24 24">
                           <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
                         </svg>
-                        Bajar PDF
+                        Bajar {doc.fileType || "PDF"}
                       </button>
                     </div>
                   </div>
                 ))
               ) : (
-                <div
-                  style={{
-                    padding: "40px",
-                    textAlign: "center",
-                    color: "#64748b",
-                  }}
-                >
-                  No se encontraron documentos que coincidan con su búsqueda.
+                <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
+                  No hay documentos publicados en la base de datos.
                 </div>
               )}
             </div>
