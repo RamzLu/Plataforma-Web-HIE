@@ -1,4 +1,5 @@
 import React from "react";
+import avatarHospital from "../../assets/logoHospitalEvita.png";
 
 const CmsSidebar = ({ activeTab, setActiveTab }) => {
   const menuItems = [
@@ -152,20 +153,14 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
     <aside className="cms-sidebar">
       <div className="cms-logo-container">
         <div className="cms-logo">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-          </svg>
-          <div>
-            <span className="logo-title">Red Evita</span>
-            <span className="logo-subtitle">FORMOSA</span>
-            <span className="logo-slogan">salud pública conectada</span>
+          <img
+            src={avatarHospital}
+            alt="Logo Hospital Evita"
+            className="cms-logo-img"
+          />
+          <div className="cms-logo-text-box">
+            <span className="logo-title">HOSPITAL INTERDISTRITAL</span>
+            <span className="logo-subtitle">EVITA</span>
           </div>
         </div>
       </div>
