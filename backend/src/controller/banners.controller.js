@@ -245,6 +245,10 @@ export const eliminarBanner = async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!id || !/^\d+$/.test(id)) {
+      return res.status(400).json({ error: "ID de banner inválido o malformado." });
+    }
+
     const banner = await prisma.banner.findUnique({
       where: { id: BigInt(id) },
       include: { archivo: true },

@@ -62,8 +62,12 @@
 .carousel-container {
   position: relative;
   width: 100%;
-  max-width: 1501px; 
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
+  left: 0;
+  right: 0;
+  margin-left: 0;
+  margin-right: 0;
   aspect-ratio: 1501 / 641; 
   overflow: hidden;
   background-color: #0c2340;
