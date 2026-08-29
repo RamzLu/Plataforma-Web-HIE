@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; // 👈 Asegúrate de tener react-router-dom configurado
+import { Link } from "react-router-dom"; 
 import "../styles/components/Carousel.css";
 
 import defaultImg1 from "../assets/fondoHospitalCarrusel1.jpg";
@@ -17,8 +17,19 @@ const defaultSlides = [
 const Carousel = ({ page = "Inicio" }) => {
   const [slides, setSlides] = useState(defaultSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
+  
+  // Estados para el texto estático leídos desde LocalStorage
+  const [customTitle, setCustomTitle] = useState("6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL");
+  const [customBtn, setCustomBtn] = useState("CONOCENOS");
 
   useEffect(() => {
+    // Al montar el componente, buscamos si hay textos configurados en LocalStorage
+    const savedTitle = localStorage.getItem("hie_carousel_text");
+    const savedBtn = localStorage.getItem("hie_carousel_btn");
+    
+    if (savedTitle) setCustomTitle(savedTitle);
+    if (savedBtn) setCustomBtn(savedBtn);
+
     const fetchPublicBanners = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/cms/banners");
@@ -74,27 +85,29 @@ const Carousel = ({ page = "Inicio" }) => {
               transition: "opacity 0.8s ease-in-out",
             }}
           >
-            <img
-              src={slide.imageUrl}
-              alt={`Banner ${index + 1}`}
-              className="carousel-img"
-            />
+            {slide.imageUrl && (
+              <img
+                src={slide.imageUrl}
+                alt={`Banner ${index + 1}`}
+                className="carousel-img"
+              />
+            )}
           </div>
         ))}
       </div>
 
-      {/* 👇 Capa estática superpuesta con el título institucional y el botón */}
+      {/* Capa estática superpuesta con el título institucional y el botón independientes de la imagen */}
       <div className="carousel-static-overlay">
         <div className="carousel-content-box">
-          <h1 className="carousel-title">
-            6 AÑOS DE <br />
-            VOCACIÓN Y <br />
-            COMPETENCIA <br />
-            PROFESIONAL
-          </h1>
-          <Link to="/acerca-de" className="carousel-btn-conocenos">
-            CONOCENOS
-          </Link>
+          <h1 
+            className="carousel-title" 
+            dangerouslySetInnerHTML={{ __html: customTitle.replace(/\n/g, '<br />') }} 
+          />
+          {customBtn && (
+            <Link to="/acerca-de" className="carousel-btn-conocenos">
+              {customBtn}
+            </Link>
+          )}
         </div>
       </div>
 

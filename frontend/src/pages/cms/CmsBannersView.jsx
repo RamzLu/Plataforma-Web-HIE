@@ -9,10 +9,10 @@ import imagen3 from "../../assets/fondoHospitalCarrusel3.jpg";
 import imagen4 from "../../assets/fondoHospitalCarrusel4.jpg";
 
 const defaultInicioBanners = [
-  { id: "def-1", page: "Inicio", section: "carrusel", imageUrl: imagen1, isActive: true, order: 1, title: "6 AÑOS DE VOCACIÓN Y COMPETENCIA PROFESIONAL", content: "CONOCENOS" },
-  { id: "def-2", page: "Inicio", section: "carrusel", imageUrl: imagen2, isActive: true, order: 2, title: "", content: "" },
-  { id: "def-3", page: "Inicio", section: "carrusel", imageUrl: imagen3, isActive: true, order: 3, title: "", content: "" },
-  { id: "def-4", page: "Inicio", section: "carrusel", imageUrl: imagen4, isActive: true, order: 4, title: "", content: "" },
+  { id: "def-1", page: "Inicio", section: "carrusel", imageUrl: imagen1, isActive: true, order: 1, title: "Banner 1", content: "" },
+  { id: "def-2", page: "Inicio", section: "carrusel", imageUrl: imagen2, isActive: true, order: 2, title: "Banner 2", content: "" },
+  { id: "def-3", page: "Inicio", section: "carrusel", imageUrl: imagen3, isActive: true, order: 3, title: "Banner 3", content: "" },
+  { id: "def-4", page: "Inicio", section: "carrusel", imageUrl: imagen4, isActive: true, order: 4, title: "Banner 4", content: "" },
 ];
 
 const CmsBannersView = () => {
@@ -38,10 +38,21 @@ const CmsBannersView = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  // --- ESTADOS PARA EL TEXTO ESTÁTICO SUPERPUESTO (LOCALSTORAGE) ---
+  const [carouselText, setCarouselText] = useState(() => {
+    return localStorage.getItem("hie_carousel_text") || "6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL";
+  });
+  const [carouselBtnText, setCarouselBtnText] = useState(() => {
+    return localStorage.getItem("hie_carousel_btn") || "CONOCENOS";
+  });
+  const [isEditingText, setIsEditingText] = useState(false);
+  const [tempTitle, setTempTitle] = useState(carouselText);
+  const [tempBtn, setTempBtn] = useState(carouselBtnText);
+
   const tabs = ["Inicio", "Noticias", "Contacto", "Acerca de"];
   const maxBanners = 4;
   const itemsPerPage = 2;
-  const ASPECT_RATIO = 1501 / 641; // Relación exacta requerida
+  const ASPECT_RATIO = 1501 / 641; 
 
   const fetchBanners = async () => {
     setLoading(true);
@@ -126,7 +137,6 @@ const CmsBannersView = () => {
     }
   };
 
-  // Al seleccionar archivo, cargamos la imagen para mostrar la herramienta de recorte
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -139,7 +149,6 @@ const CmsBannersView = () => {
     }
   };
 
-  // Inicializar caja de recorte cuando la imagen carga en el modal
   const handleImageLoaded = (e) => {
     const img = e.target;
     imageRef.current = img;
@@ -155,7 +164,6 @@ const CmsBannersView = () => {
     generateCroppedImage(img, { x: 0, y: (img.clientHeight - initialHeight) / 2, width: initialWidth, height: initialHeight });
   };
 
-  // Generar el corte real a resolución 1501x641 mediante Canvas
   const generateCroppedImage = (img, currentCrop) => {
     if (!img) return;
     const canvas = document.createElement("canvas");
@@ -184,7 +192,6 @@ const CmsBannersView = () => {
     }, "image/jpeg", 0.95);
   };
 
-  // Manejo del arrastre del cuadro de recorte
   const handleMouseDown = (e) => {
     setIsDragging(true);
     setDragStart({ x: e.clientX - cropBox.x, y: e.clientY - cropBox.y });
@@ -213,10 +220,6 @@ const CmsBannersView = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!croppedBlob && !editingId) {
-      toast.error("Debes cargar y ajustar el recorte de la imagen (1501x641).");
-      return;
-    }
 
     setSaving(true);
     try {
@@ -259,14 +262,24 @@ const CmsBannersView = () => {
 
       await fetchBanners();
 
-      toast.success(editingId ? "¡Banner actualizado con éxito!" : "¡Banner creado con éxito!");
+      toast.success(editingId ? "¡Imagen del carrusel actualizada con éxito!" : "¡Imagen añadida con éxito!");
       setShowModal(false);
     } catch (error) {
       console.error(error);
-      toast.error("Error al guardar el banner.");
+      toast.error("Error al guardar la imagen.");
     } finally {
       setSaving(false);
     }
+  };
+
+  // --- HANDLER PARA GUARDAR EL TEXTO DEL CARRUSEL ---
+  const handleSaveCarouselText = () => {
+    setCarouselText(tempTitle);
+    setCarouselBtnText(tempBtn);
+    localStorage.setItem("hie_carousel_text", tempTitle);
+    localStorage.setItem("hie_carousel_btn", tempBtn);
+    setIsEditingText(false);
+    toast.success("¡Texto principal del carrusel actualizado con éxito!");
   };
 
   return (
@@ -293,7 +306,7 @@ const CmsBannersView = () => {
             <span className="cms-banners-counter">
               {filteredBanners.length} / {maxBanners} imágenes
             </span>
-            <button className="cms-btn-add-banner" onClick={handleOpenCreate}>+ CARGAR BANNER</button>
+            <button className="cms-btn-add-banner" onClick={handleOpenCreate}>+ CARGAR IMAGEN</button>
           </div>
         </div>
 
@@ -315,10 +328,10 @@ const CmsBannersView = () => {
 
                     <div className="cms-banner-info-box" style={{ padding: "8px 4px", background: "#ffffff", borderRadius: "6px" }}>
                       <h4 style={{ margin: "0 0 4px 0", fontSize: "0.95rem", color: "#0c2340", fontWeight: "700" }}>
-                        {banner.titulo || banner.title || <span style={{ color: "#94a3b8", fontStyle: "italic" }}>Sin título</span>}
+                        {banner.titulo || banner.title || <span style={{ color: "#94a3b8", fontStyle: "italic" }}>Sin texto alternativo</span>}
                       </h4>
                       <p style={{ margin: 0, fontSize: "0.85rem", color: "#64748b" }}>
-                        {banner.descripcion || banner.content || <span style={{ fontStyle: "italic" }}>Sin texto de botón / subtítulo</span>}
+                        Imagen de fondo del carrusel
                       </p>
                     </div>
 
@@ -328,7 +341,6 @@ const CmsBannersView = () => {
                         <button className="cms-arrow-btn" disabled={originalIndex === filteredBanners.length - 1}>→</button>
                       </div>
 
-                      {/* Botones de Editar y Eliminar funcionales */}
                       <div className="cms-banner-crud" style={{ display: "flex", gap: "8px" }}>
                         <button className="cms-btn-edit" onClick={() => handleOpenEdit(banner)}>
                           Editar
@@ -352,22 +364,75 @@ const CmsBannersView = () => {
             </button>
           </div>
         ) : (
-          <div className="cms-banners-empty">No hay banners registrados en esta sección.</div>
+          <div className="cms-banners-empty">No hay imágenes registradas en esta sección.</div>
         )}
       </div>
+
+      {/* --- NUEVA SECCIÓN: TEXTO PRINCIPAL DEL CARRUSEL --- */}
+      {activeTab === "Inicio" && (
+        <div className="cms-banners-section" style={{ marginTop: "40px" }}>
+          <div className="cms-banners-section-header">
+            <div>
+              <h3>Texto Principal del Carrusel (Superpuesto)</h3>
+              <p>Modificá el título de impacto y el texto del botón que flotan sobre las imágenes en el inicio.</p>
+            </div>
+            <div className="cms-banners-header-actions">
+              {!isEditingText ? (
+                <button className="cms-btn-add-banner" onClick={() => setIsEditingText(true)}>EDITAR TEXTO</button>
+              ) : (
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button className="btn-cancelar-gris" onClick={() => {
+                    setIsEditingText(false);
+                    setTempTitle(carouselText);
+                    setTempBtn(carouselBtnText);
+                  }}>
+                    Cancelar
+                  </button>
+                  <button className="cms-btn-add-banner" style={{ backgroundColor: "#10b981" }} onClick={handleSaveCarouselText}>
+                    Guardar
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ background: "#ffffff", padding: "20px", borderRadius: "8px", border: "1px solid #cbd5e1", marginTop: "15px" }}>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", fontWeight: "bold", marginBottom: "5px", fontSize: "0.9rem", color: "#0c2340" }}>Título Principal:</label>
+              <textarea
+                value={tempTitle}
+                onChange={(e) => setTempTitle(e.target.value)}
+                disabled={!isEditingText}
+                rows="4"
+                style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1", background: isEditingText ? "#fff" : "#f8fafc", color: "#334155", fontFamily: "inherit" }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontWeight: "bold", marginBottom: "5px", fontSize: "0.9rem", color: "#0c2340" }}>Texto del Botón:</label>
+              <input
+                type="text"
+                value={tempBtn}
+                onChange={(e) => setTempBtn(e.target.value)}
+                disabled={!isEditingText}
+                style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1", background: isEditingText ? "#fff" : "#f8fafc", color: "#334155", fontFamily: "inherit" }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content-esp" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "700px" }}>
             <div className="modal-header-esp">
-              <h2>{editingId ? "Editar Banner (1501x641)" : "Crear Banner (Recorte Obligatorio 1501x641)"}</h2>
+              <h2>{editingId ? "Editar Imagen (1501x641)" : "Crear Imagen (Recorte Obligatorio 1501x641)"}</h2>
               <button className="btn-close-modal" onClick={() => setShowModal(false)}>&times;</button>
             </div>
             
             <form onSubmit={handleSave} className="modal-body-esp">
               <div style={{ marginBottom: "15px" }}>
                 <label style={{ display: "block", fontWeight: "bold", marginBottom: "5px" }}>
-                  Título / Descripción de Accesibilidad <span style={{ color: "#e11d48" }}>*</span>
+                  Descripción de Accesibilidad <span style={{ color: "#e11d48" }}>*</span>
                 </label>
                 <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0 0 5px 0" }}>
                   Obligatorio para que los lectores de pantalla describan la imagen a personas no videntes.
@@ -379,19 +444,6 @@ const CmsBannersView = () => {
                   style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
                   placeholder="Ej: Vista frontal del edificio principal del hospital"
                   required 
-                />
-              </div>
-
-              <div style={{ marginBottom: "15px" }}>
-                <label style={{ display: "block", fontWeight: "bold", marginBottom: "5px" }}>
-                  Texto del Botón / Subtítulo <span style={{ fontWeight: "normal", color: "#64748b" }}>(Opcional)</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
-                  placeholder="Ej: De que se trata.."
                 />
               </div>
 
@@ -447,7 +499,7 @@ const CmsBannersView = () => {
               <div className="modal-footer-esp" style={{ padding: 0, justifyContent: "flex-end" }}>
                 <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)} disabled={saving}>Cancelar</button>
                 <button type="submit" className="btn-cerrar-rojo" disabled={saving} style={{ backgroundColor: "#0c2340" }}>
-                  {saving ? "Procesando y Guardando..." : (editingId ? "Actualizar Banner" : "Guardar Banner")}
+                  {saving ? "Procesando..." : (editingId ? "Actualizar Imagen" : "Guardar Imagen")}
                 </button>
               </div>
             </form>
