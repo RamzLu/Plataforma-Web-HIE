@@ -342,6 +342,8 @@ const CmsPage = () => {
           {activeTab === "dashboard" && (
             <CmsDashboardView
               latestNews={latestNews}
+              newsList={newsList}         
+              docsList={docsList}         
               dashboardStats={dashboardStats}
               setSelectedNews={setSelectedNews}
               handleQuickAction={() => setActiveTab("noticias")}
