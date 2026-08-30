@@ -461,7 +461,7 @@ const CmsPage = () => {
         </div>
       )}
 
-      {selectedNews && (
+{selectedNews && (
         <div className="modal-overlay" onClick={() => setSelectedNews(null)}>
           <div
             className="modal-content-esp"
@@ -479,42 +479,61 @@ const CmsPage = () => {
               </button>
             </div>
             <div className="modal-body-esp">
-              <div className="modal-author-row">
-                <div className="hospital-avatar">
-                  <img src={avatarHospital} alt="Avatar Hospital" />
-                </div>
-                <div className="author-meta">
-                  <h3>Hospital Interdistrital Evita Formosa</h3>
-                  <span>{selectedNews.date} • 🌎</span>
-                </div>
-              </div>
-              <div className="news-modal-headline">
-                <h3 className="news-modal-title">{selectedNews.title}</h3>
-              </div>
-              <div className="news-modal-body-text">
-                {selectedNews.body.map((paragraph, idx) => (
-                  <div
-                    key={idx}
-                    className="info-text"
-                    dangerouslySetInnerHTML={{ __html: paragraph }}
-                  />
-                ))}
-              </div>
-              {selectedNews.images && selectedNews.images.length > 0 && (
-                <div className="news-modal-images-section">
-                  <div className="news-modal-images-grid">
-                    {selectedNews.images.map((img, idx) => (
-                      <div
-                        className="modal-news-img-box"
-                        key={idx}
-                        onClick={() => openLightbox(selectedNews.images, idx)}
-                      >
-                        <img src={img} alt={`Foto noticia ${idx + 1}`} />
-                      </div>
-                    ))}
+              
+              <div className="modal-left-content">
+                <div className="modal-author-row">
+                  <div className="hospital-avatar">
+                    <img src="/img/hief-logo-small.png" alt="Hospital Interdistrital Evita" />
+                  </div>
+                  <div className="author-meta">
+                    <h3>Hospital Interdistrital Evita Formosa</h3>
+                    {/* Propiedad corregida: date */}
+                    <span>{selectedNews.date} • 🌎</span>
                   </div>
                 </div>
+
+                {/* Propiedad corregida: title */}
+                <h3 className="news-modal-title">{selectedNews.title}</h3>
+                
+                {/* Propiedad corregida: body (tomamos el primer elemento si es un array) */}
+                <div 
+                  className="info-text" 
+                  dangerouslySetInnerHTML={{ __html: Array.isArray(selectedNews.body) ? selectedNews.body[0] : selectedNews.body }} 
+                />
+              </div>
+
+              {/* Propiedad corregida: images */}
+              {selectedNews.images && selectedNews.images.length > 0 && (
+                <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
+                  
+                  {selectedNews.images.slice(0, 4).map((img, index) => {
+                    
+                    const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
+                    const fotosRestantes = selectedNews.images.length - 4;
+
+                    // Mapeamos las imágenes para pasárselas al visor correctamente
+                    const imageUrls = selectedNews.images.map(i => i.url || i);
+
+                    return (
+                      <div 
+                        key={index} 
+                        className="mosaic-item"
+                        // Función corregida: openLightbox requiere (imagenes, indice)
+                        onClick={() => openLightbox(imageUrls, index)} 
+                      >
+                        <img src={img.url || img} alt={`Imagen ${index + 1}`} />
+                        
+                        {isLastAndHidden && (
+                          <div className="mosaic-overlay">
+                            <span>+{fotosRestantes}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
+
             </div>
             <div className="modal-footer-esp">
               <button

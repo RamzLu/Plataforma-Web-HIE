@@ -464,34 +464,35 @@ const noticiaFormateada = {
 
             <form
               onSubmit={handleSave}
-              className="modal-body-esp news-form-container"
+              className="modal-body-form news-form-container"
             >
-              <div>
-                <label className="news-form-label">Título de la noticia</label>
-                <input
-                  type="text"
-                  value={titulo}
-                  onChange={(e) => setTitulo(e.target.value)}
-                  placeholder="Ingrese el título..."
-                  className="news-form-input"
-                  required
-                />
-              </div>
+              <div className="form-grid-row">
+                <div>
+                  <label className="news-form-label">Título de la noticia</label>
+                  <input
+                    type="text"
+                    value={titulo}
+                    onChange={(e) => setTitulo(e.target.value)}
+                    placeholder="Ingrese el título..."
+                    className="news-form-input"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="news-form-label">Categoría</label>
-                <select
-                  value={categoria}
-                  onChange={(e) => setCategoria(e.target.value)}
-                  className="news-form-select"
-                >
-                  <option value="Noticias">Noticias</option>
-                  <option value="Articulos">Artículos</option>
-                  <option value="Capacitación">Capacitación</option>
-                  <option value="Institucional">Institucional</option>
-                </select>
+                <div>
+                  <label className="news-form-label">Categoría</label>
+                  <select
+                    value={categoria}
+                    onChange={(e) => setCategoria(e.target.value)}
+                    className="news-form-select"
+                  >
+                    <option value="Noticias">Noticias</option>
+                    <option value="Articulos">Artículos</option>
+                    <option value="Capacitación">Capacitación</option>
+                    <option value="Institucional">Institucional</option>
+                  </select>
+                </div>
               </div>
-
               <div>
                 <label className="news-form-label">Imágenes adjuntas</label>
                 <input

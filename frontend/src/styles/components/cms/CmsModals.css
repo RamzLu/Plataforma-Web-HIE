@@ -68,13 +68,6 @@
   stroke-width: 2.5;
 }
 
-.modal-body-esp {
-  padding: 30px 35px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  overflow-y: auto;
-}
 
 .modal-author-row {
   display: flex;
@@ -124,24 +117,93 @@
   line-height: 1.6;
 }
 
-.news-modal-images-grid {
+/* =========================================
+   MODAL: LAYOUT DE DOS COLUMNAS
+========================================= */
+.modal-body-esp {
+  padding: 30px 40px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: 1.4fr 1fr; /* 58% para texto, 42% para mosaico */
+  gap: 40px;
+  overflow-y: auto;
+  align-items: start;
 }
 
-.modal-news-img-box {
-  height: 190px;
-  border-radius: 10px;
+@media (max-width: 900px) {
+  .modal-body-esp {
+    grid-template-columns: 1fr; /* Pasa a 1 columna en móviles */
+  }
+}
+
+.modal-left-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* =========================================
+   MOSAICO DINÁMICO DE IMÁGENES (TIPO FACEBOOK)
+========================================= */
+.mosaic-gallery {
+  display: grid;
+  gap: 4px; /* Espaciado ajustado para crear el efecto cuadrícula */
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid #cbd5e1;
-  cursor: pointer;
+  width: 100%;
+  height: 480px; /* Altura imponente para la columna derecha */
+  background-color: #f8fafc;
+  box-shadow: 0 10px 25px -5px rgba(12, 35, 64, 0.1);
+  position: sticky;
+  top: 0;
 }
 
-.modal-news-img-box img {
+.mosaic-item {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.mosaic-item::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #0c2340;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mosaic-item:hover::after {
+  opacity: 0.15;
+}
+
+.mosaic-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+/* Variantes del Mosaico según cantidad de fotos */
+.layout-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.layout-2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
+.layout-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
+.layout-3 .mosaic-item:nth-child(1) { grid-column: span 2; }
+.layout-4 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
+.layout-4 .mosaic-item:nth-child(1) { grid-column: span 3; }
+
+/* Capa oscura con el +X para la última foto */
+.mosaic-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(12, 35, 64, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 200;
+  backdrop-filter: blur(3px);
+  z-index: 10;
 }
 
 .modal-footer-esp {
@@ -247,4 +309,29 @@
 }
 .lb-right {
   right: -90px;
+}
+/* =========================================
+   MODAL DE FORMULARIOS (CREAR / EDITAR)
+========================================= */
+.modal-body-form {
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+}
+
+/* Opcional: Si quieres que los inputs se alineen en 2 columnas prolijas */
+.form-grid-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* En móviles el formulario pasa a una sola columna */
+@media (max-width: 768px) {
+  .form-grid-row {
+    grid-template-columns: 1fr;
+  }
 }
