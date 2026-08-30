@@ -368,76 +368,81 @@ select.chart-btn:hover, select.chart-btn:focus {
     grid-template-columns: 1fr;
   }
 }
-
-.quick-access-card {
-  margin-top: 30px;
-}
-
-.quick-access-header {
-  margin-bottom: 20px;
-  border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 15px;
-}
-
-.quick-access-subtitle {
-  color: #475569;
-  font-size: 0.9rem;
-  margin: -15px 0 0 0;
-}
-
-.quick-access-grid {
+/* =========================================
+   ACCESOS RÁPIDOS (TARJETAS PASTEL)
+========================================= */
+.cms-quick-access-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
 }
 
-.quick-access-item {
-  border: 1.5px solid #cbd5e1;
-  border-radius: 12px;
-  padding: 20px;
-  background-color: #ffffff;
+.quick-action-card {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 110px;
+  align-items: center;
+  padding: 16px 20px;
+  border-radius: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
 }
 
-.quick-access-item:hover {
-  border-color: #0c2340;
-  box-shadow: 0 4px 12px rgba(12, 35, 64, 0.08);
-  transform: translateY(-2px);
+.quick-action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
 }
 
-.quick-access-icon svg {
-  width: 24px;
-  height: 24px;
-  stroke: #0c2340;
-}
-
-.quick-access-bottom {
+.quick-action-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
 }
 
-.quick-access-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0c2340;
+.quick-action-icon svg { 
+  width: 20px; 
+  height: 20px; 
 }
 
-.quick-access-plus {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #0c2340;
+.quick-action-title { 
+  font-weight: 700; 
+  font-size: 0.95rem; 
+  flex-grow: 1; 
+  color: #0c2340; 
 }
 
-.recent-activity-card {
-  margin-top: 30px;
+.quick-action-plus { 
+  opacity: 0.4; 
+  transition: all 0.2s; 
+  display: flex; 
+  align-items: center; 
+  color: #0c2340; 
 }
 
+.quick-action-card:hover .quick-action-plus { 
+  opacity: 1; 
+  transform: scale(1.1); 
+}
+
+/* Variantes de Color (Pastel) */
+.quick-blue { background-color: #eff6ff; }
+.quick-blue .quick-action-icon { background-color: #dbeafe; color: #2563eb; }
+.quick-blue:hover { border-color: #bfdbfe; }
+
+.quick-purple { background-color: #faf5ff; }
+.quick-purple .quick-action-icon { background-color: #f3e8ff; color: #9333ea; }
+.quick-purple:hover { border-color: #e9d5ff; }
+
+.quick-teal { background-color: #f0fdfa; }
+.quick-teal .quick-action-icon { background-color: #ccfbf1; color: #0d9488; }
+.quick-teal:hover { border-color: #99f6e4; }
+
+.quick-indigo { background-color: #eef2ff; }
+.quick-indigo .quick-action-icon { background-color: #e0e7ff; color: #4f46e5; }
+.quick-indigo:hover { border-color: #c7d2fe; }
 .recent-activity-header {
   margin-bottom: 20px;
   border-bottom: 1px solid #e2e8f0;
