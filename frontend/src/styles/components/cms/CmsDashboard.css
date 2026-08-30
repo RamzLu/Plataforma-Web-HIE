@@ -136,18 +136,24 @@
   font-weight: 700;
   color: #0c2340;
 }
-/* --- NUEVOS ESTILOS DEL DASHBOARD (TARJETAS PASTEL) --- */
+
 .cms-dashboard-wrapper {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+.cms-dashboard-top-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr; 
+  gap: 24px;
+  margin-bottom: 10px;
+}
+
 .cms-dashboard-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
-  margin-bottom: 15px;
 }
 
 .stat-card-violet {
@@ -157,7 +163,6 @@
   display: flex;
   flex-direction: column;
   border: none;
-  box-shadow: none;
 }
 
 .stat-header {
@@ -175,7 +180,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #b1a2d4; 
+  color: #552eb0; 
 }
 
 .stat-icon svg {
@@ -188,8 +193,8 @@
   border-radius: 8px;
   font-size: 0.8rem;
   font-weight: 700;
-  display: inline-flex; 
-  width: fit-content;   
+  display: inline-flex;
+  width: fit-content; 
   align-items: center;
   gap: 6px;
 }
@@ -221,9 +226,147 @@
 
 .stat-label {
   font-size: 0.95rem;
-  color: #9f8fc3; 
+  color: #564184; 
   font-weight: 500;
   margin: 0;
+}
+
+.stat-card-chart {
+  background-color: #f8f6fc;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.chart-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.chart-btn {
+  background: transparent;
+  border: 1px solid #dcd5eb;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chart-btn:hover {
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+.chart-body {
+  position: relative;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Texto flotante en el centro de la dona */
+.chart-center-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* Permite que el hover sobre la dona funcione */
+}
+
+.chart-total-num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  line-height: 1;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.chart-total-label {
+  font-size: 0.85rem;
+  color: #9f8fc3;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Leyenda inferior de especialidades */
+.chart-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 8px;
+  margin-top: auto;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-text {
+  font-size: 0.8rem;
+  color: #4b5563;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+select.chart-btn {
+  background: #ffffff;
+  border: 1px solid #dcd5eb;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  font-family: inherit;
+}
+
+select.chart-btn:hover, select.chart-btn:focus {
+  border-color: #8b5cf6;
+  color: #1a1a1a;
+}
+
+/* Responsividad */
+@media (max-width: 1100px) {
+  .cms-dashboard-top-row {
+    grid-template-columns: 1fr; 
+  }
+}
+
+@media (max-width: 650px) {
+  .cms-dashboard-stats-grid {
+    grid-template-columns: 1fr; 
+  }
+  .chart-legend {
+    grid-template-columns: 1fr;
+  }
 }
 
 .quick-access-card {

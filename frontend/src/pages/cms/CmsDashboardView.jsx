@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
 import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
 import "../../styles/components/cms/CmsDashboard.css";
@@ -29,7 +30,6 @@ const cleanHtmlText = (html) => {
     .trim();
 };
 
-// --- LÓGICA PARA CALCULAR LA DIFERENCIA SEMANAL REAL ---
 const calculateWeeklyDelta = (list) => {
   if (!list || !Array.isArray(list)) return 0;
   
@@ -54,7 +54,6 @@ const calculateWeeklyDelta = (list) => {
   return currentWeekCount - previousWeekCount;
 };
 
-// --- COMPONENTE PARA RENDERIZAR LA PÍLDORA (BADGE) DINÁMICA ---
 const DeltaBadge = ({ diff, customText }) => {
   const isPositive = diff > 0;
   const isNeutral = diff === 0;
@@ -83,6 +82,46 @@ const DeltaBadge = ({ diff, customText }) => {
   );
 };
 
+const specialtiesData = [
+  { name: 'Clínica Médica', value: 12, color: '#6d28d9' }, // Violeta (Color base)
+  { name: 'Pediatría', value: 8, color: '#0ea5e9' },       // Azul cielo
+  { name: 'Ginecología', value: 6, color: '#10b981' },     // Verde esmeralda
+  { name: 'Traumatología', value: 7, color: '#f59e0b' },   // Ámbar / Naranja
+  { name: 'Oftalmología', value: 4, color: '#f43f5e' },    // Rojo / Rosa fuerte
+  { name: 'Cirugía General', value: 5, color: '#8b5cf6' }, // Lila claro
+];
+
+// Paleta de colores para las categorías dinámicas de documentos
+const CHART_COLORS = [
+  '#6d28d9', // Violeta
+  '#0ea5e9', // Azul
+  '#10b981', // Verde
+  '#f59e0b', // Naranja
+  '#f43f5e', // Rojo
+  '#14b8a6', // Teal / Turquesa
+  '#ec4899', // Fucsia
+];
+
+
+const processDocsData = (docs) => {
+  if (!docs || docs.length === 0) return [];
+  const counts = {};
+  
+  docs.forEach(doc => {
+    // Leemos directamente 'category', que es como lo envía el backend en docsFormateados
+    let cat = doc.category || doc.categoria || "Sin categorizar";
+    
+    // Agrupamos contando cuántos hay de cada uno
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+
+  return Object.keys(counts).map((key, index) => ({
+    name: key,
+    value: counts[key],
+    color: CHART_COLORS[index % CHART_COLORS.length]
+  }));
+};
+
 const CmsDashboardView = ({
   latestNews,
   newsList,
@@ -92,83 +131,168 @@ const CmsDashboardView = ({
   handleQuickAction,
   loading,
 }) => {
-  
+  // Estado para controlar qué muestra el gráfico
+  const [chartType, setChartType] = useState("profesionales");
+
   const noticias = dashboardStats?.contenidoPublicado || 0;
   const documentos = dashboardStats?.documentosActivos || 0;
-  const profesionales = 42; 
-
   const borradores = dashboardStats?.borradores || 0;
   const totalContenido = noticias + borradores;
   const actividadPorcentaje = totalContenido > 0 ? Math.round((noticias / totalContenido) * 100) : 0;
   
-  // Ejecutamos los cálculos reales con la data de la BD
   const noticiasDelta = calculateWeeklyDelta(newsList);
   const docsDelta = calculateWeeklyDelta(docsList);
 
+  // Determinamos los datos del gráfico según el Select
+  const currentChartData = chartType === "profesionales" 
+    ? specialtiesData 
+    : processDocsData(docsList);
+
+  const chartTotal = currentChartData.reduce((acc, curr) => acc + curr.value, 0);
+  const chartTitle = chartType === "profesionales" ? "Total Profesionales" : "Total Documentos";
+  const chartCenterLabel = chartType === "profesionales" ? "Total Prof." : "Total Docs.";
+
   return (
     <div className="cms-dashboard-wrapper">
-
-      <div className="cms-dashboard-stats-grid">
+      
+      <div className="cms-dashboard-top-row">
         
-        {/* Tarjeta 1: Noticias */}
-        <div className="stat-card-violet">
-          <div className="stat-header">
-            <div className="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+        {/* --- LADO IZQUIERDO: GRILLA 2x2 DE ESTADÍSTICAS --- */}
+        <div className="cms-dashboard-stats-grid">
+          <div className="stat-card-violet">
+            <div className="stat-header">
+              <div className="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+              </div>
+            </div>
+            <h3 className="stat-value">{noticias}</h3>
+            <p className="stat-label">Noticias publicadas</p>
+            <div style={{ marginTop: "16px" }}>
+              <DeltaBadge diff={noticiasDelta} />
             </div>
           </div>
-          <h3 className="stat-value">{noticias}</h3>
-          <p className="stat-label">Noticias publicadas</p>
-          <div style={{ marginTop: "16px" }}>
-            <DeltaBadge diff={noticiasDelta} />
+
+          <div className="stat-card-violet">
+            <div className="stat-header">
+              <div className="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              </div>
+            </div>
+            <h3 className="stat-value">{documentos}</h3>
+            <p className="stat-label">Documentos activos</p>
+            <div style={{ marginTop: "16px" }}>
+              <DeltaBadge diff={docsDelta} />
+            </div>
+          </div>
+
+          <div className="stat-card-violet">
+            <div className="stat-header">
+              <div className="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+            </div>
+            {/* El total de profesionales sí viene de la data simulada temporalmente */}
+            <h3 className="stat-value">{specialtiesData.reduce((acc, curr) => acc + curr.value, 0)}</h3>
+            <p className="stat-label">Profesionales listados</p>
+            <div style={{ marginTop: "16px" }}>
+              <DeltaBadge diff={2} customText="2 más que la sem. pasada" />
+            </div>
+          </div>
+
+          <div className="stat-card-violet">
+            <div className="stat-header">
+              <div className="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              </div>
+            </div>
+            <h3 className="stat-value">{actividadPorcentaje}%</h3>
+            <p className="stat-label">Tasa de publicación activa</p>
+            <div style={{ marginTop: "16px" }}>
+              <DeltaBadge diff={actividadPorcentaje >= 50 ? 1 : -1} customText={actividadPorcentaje >= 50 ? "Óptimo" : "Requiere atención"} />
+            </div>
           </div>
         </div>
 
-        {/* Tarjeta 2: Documentos */}
-        <div className="stat-card-violet">
-          <div className="stat-header">
-            <div className="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            </div>
+        {/* --- LADO DERECHO: GRÁFICO DINÁMICO (RECHARTS) --- */}
+        <div className="stat-card-chart">
+          <div className="chart-header">
+            <h3 className="chart-title">{chartTitle}</h3>
+            {/* Selector de categoría */}
+            <select 
+              className="chart-btn"
+              value={chartType}
+              onChange={(e) => setChartType(e.target.value)}
+            >
+              <option value="profesionales">Profesionales</option>
+              <option value="documentacion">Documentos</option>
+            </select>
           </div>
-          <h3 className="stat-value">{documentos}</h3>
-          <p className="stat-label">Documentos activos</p>
-          <div style={{ marginTop: "16px" }}>
-            <DeltaBadge diff={docsDelta} />
+          
+          <div className="chart-body">
+            {currentChartData.length > 0 ? (
+<ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+<Tooltip 
+                    wrapperStyle={{ zIndex: 100 }} /* <-- ESTA LÍNEA LO PONE AL FRENTE */
+                    contentStyle={{ 
+                      backgroundColor: '#ffffff', 
+                      borderRadius: '8px', 
+                      border: 'none', 
+                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+                      fontSize: '0.85rem',
+                      fontWeight: '600',
+                      color: '#4b5563'
+                    }}
+                    itemStyle={{ fontWeight: 'bold' }}
+                  />
+
+                  <Pie
+                    data={currentChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={65}
+                    outerRadius={85}
+                    paddingAngle={4}
+                    dataKey="value"
+                    stroke="none"
+                    cornerRadius={5}
+                  >
+                    {currentChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#9f8fc3', fontSize: '0.9rem' }}>
+                  Sin datos para graficar
+               </div>
+            )}
+            
+            {/* Texto en el centro de la dona */}
+            {currentChartData.length > 0 && (
+              <div className="chart-center-text">
+                <span className="chart-total-num">{chartTotal}</span>
+                <span className="chart-total-label">{chartCenterLabel}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Leyenda inferior dinámica */}
+          <div className="chart-legend">
+            {currentChartData.map((entry, index) => (
+              <div className="legend-item" key={index}>
+                <span className="legend-dot" style={{ backgroundColor: entry.color }}></span>
+                <span className="legend-text" title={entry.name}>{entry.name}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Tarjeta 3: Profesionales */}
-        <div className="stat-card-violet">
-          <div className="stat-header">
-            <div className="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            </div>
-          </div>
-          <h3 className="stat-value">{profesionales}</h3>
-          <p className="stat-label">Profesionales listados</p>
-          <div style={{ marginTop: "16px" }}>
-            <DeltaBadge diff={2} customText="2 más que la sem. pasada" />
-          </div>
-        </div>
-
-        {/* Tarjeta 4: Actividad CMS */}
-        <div className="stat-card-violet">
-          <div className="stat-header">
-            <div className="stat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-            </div>
-          </div>
-          <h3 className="stat-value">{actividadPorcentaje}%</h3>
-          <p className="stat-label">Tasa de publicación activa</p>
-          <div style={{ marginTop: "16px" }}>
-            <DeltaBadge diff={actividadPorcentaje >= 50 ? 1 : -1} customText={actividadPorcentaje >= 50 ? "Óptimo" : "Requiere atención"} />
-          </div>
-        </div>
       </div>
 
       {/* --- SECCIÓN ORIGINAL DE NOTICIAS --- */}
-      <div className="cms-dashboard-card" style={{ marginBottom: "30px", marginTop: "10px" }}>
+      <div className="cms-dashboard-card" style={{ marginBottom: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <h3 className="cms-card-title" style={{ margin: 0 }}>Últimas Noticias del Portal</h3>
           <button className="cms-btn-outline" onClick={handleQuickAction} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: "white", cursor: "pointer", fontWeight: "600", fontSize: "0.85rem", color: "#0c2340" }}>
