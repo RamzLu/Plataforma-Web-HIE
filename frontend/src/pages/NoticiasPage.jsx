@@ -7,7 +7,7 @@ import iconMama from "../assets/icon-mama.png";
 import iconCorazon from "../assets/icon-corazon.png";
 import iconDonacion from "../assets/icon-donacion-de-sangre.png";
 import iconDengue from "../assets/icon-dengue.png";
-import avatarHospital from "../assets/iconEVITAface.jpg";
+import avatarHospital from "../assets/logoHospitalEvita.png";
 
 import iconMamaStatic from "../assets/icon-mama-estatico.png";
 import iconCorazonStatic from "../assets/icon-corazon-estatico.png";
@@ -146,7 +146,7 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
         </div>
         <div className="post-meta">
           <h3>Hospital Interdistrital Evita Formosa</h3>
-          <span>{news.date} • 🌎</span>
+          <span>{news.date}</span>
         </div>
       </div>
 
@@ -454,7 +454,7 @@ useEffect(() => {
                 </div>
                 <div className="author-meta">
                   <h3>Hospital Interdistrital Evita Formosa</h3>
-                  <span>Espacio de Educación en Salud • 🌎</span>
+                  <span>Espacio de Educación en Salud</span>
                 </div>
               </div>
 
@@ -545,7 +545,6 @@ useEffect(() => {
             className="modal-content-esp"
             onClick={(e) => e.stopPropagation()}
           >
-
             <div className="modal-header-esp">
               <h2>COMUNICADO INSTITUCIONAL</h2>
               <button
@@ -560,83 +559,67 @@ useEffect(() => {
             </div>
 
             <div className="modal-body-esp">
-              <div className="modal-author-row">
-                <div className="hospital-avatar">
-                  <img src={avatarHospital} alt="Avatar Hospital" />
-                </div>
-                <div className="author-meta">
-                  <h3>Hospital Interdistrital Evita Formosa</h3>
-                  <span>{selectedNews.date} • 🌎</span>
-                </div>
-              </div>
-
-              <div className="news-modal-headline">
-                <h3 className="news-modal-title">{selectedNews.title}</h3>
-              </div>
-
-              <div className="news-modal-body-text">
-                {selectedNews.body.map((paragraph, idx) => (
-                  <div
-                    key={idx}
-                    className="info-text"
-                    dangerouslySetInnerHTML={{ __html: paragraph }}
-                  />
-                ))}
-              </div>
-
-              {selectedNews.images && selectedNews.images.length > 0 && (
-                <div className="info-section" style={{ marginTop: "20px" }}>
-                  <h4 className="info-title">
-                    <span className="info-icon">
-                      <svg viewBox="0 0 24 24">
-                        <rect
-                          x="3"
-                          y="3"
-                          width="18"
-                          height="18"
-                          rx="2"
-                          ry="2"
-                        ></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21 15 16 10 5 21"></polyline>
-                      </svg>
-                    </span>
-                    GALERÍA DE IMÁGENES
-                  </h4>
-
-                  <div className="modal-slider-container">
-                    {selectedNews.images.length > 3 && (
-                      <button
-                        className="modal-arrow modal-left"
-                        onClick={() => scrollModal("left")}
-                      >
-                        &#10094;
-                      </button>
-                    )}
-
-                    <div className="modal-slider" ref={modalSliderRef}>
-                      {selectedNews.images.map((img, idx) => (
-                        <div
-                          className="modal-campaign-img"
-                          key={idx}
-                          onClick={() => openLightbox(selectedNews.images, idx)}
-                        >
-                          <img src={img} alt={`Foto noticia ${idx + 1}`} />
-                        </div>
-                      ))}
-                    </div>
-
-                    {selectedNews.images.length > 3 && (
-                      <button
-                        className="modal-arrow modal-right"
-                        onClick={() => scrollModal("right")}
-                      >
-                        &#10095;
-                      </button>
-                    )}
+              
+              {/* COLUMNA IZQUIERDA: Textos y detalles */}
+              <div className="modal-left-content">
+                <div className="modal-author-row">
+                  <div className="hospital-avatar">
+                    <img src={avatarHospital} alt="Avatar Hospital" />
+                  </div>
+                  <div className="author-meta">
+                    <h3>Hospital Interdistrital Evita Formosa</h3>
+                    <span>{selectedNews.date}</span>
                   </div>
                 </div>
+
+                <h3 className="news-modal-title">{selectedNews.title}</h3>
+
+                <div className="news-modal-body-text">
+                  {selectedNews.body.map((paragraph, idx) => (
+                    <div
+                      key={idx}
+                      className="info-text"
+                      dangerouslySetInnerHTML={{ __html: paragraph }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* COLUMNA DERECHA: Mosaico Dinámico (Estilo Facebook) */}
+              {selectedNews.images && selectedNews.images.length > 0 && (
+                <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
+                  {selectedNews.images.slice(0, 4).map((img, index) => {
+                    const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
+                    const fotosRestantes = selectedNews.images.length - 4;
+
+                    return (
+                      <div 
+                        key={index} 
+                        className="mosaic-item"
+                        onClick={() => openLightbox(selectedNews.images, index)}
+                      >
+                        <img src={img} alt={`Foto noticia ${index + 1}`} />
+                        
+                        {isLastAndHidden && (
+                          <div className="mosaic-overlay">
+                            <span>+{fotosRestantes}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
+
+            </div>
+
+            <div className="modal-footer-esp">
+              <button
+                className="btn-cerrar-rojo"
+                onClick={() => setSelectedNews(null)}
+              >
+                Cerrar Noticia
+              </button>
             </div>
           </div>
         </div>

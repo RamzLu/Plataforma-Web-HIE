@@ -779,12 +779,81 @@
 
 /* CUERPO DEL MODAL */
 .modal-body-esp {
-  padding: 30px 35px;
+  padding: 30px 40px;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr; 
+  gap: 35px;
+  overflow-y: auto;
+  align-items: start;
+}
+.modal-left-content {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  overflow-y: auto;
+  gap: 20px;
 }
+
+.mosaic-gallery {
+  display: grid;
+  gap: 4px;
+  border-radius: 14px;
+  overflow: hidden;
+  width: 100%;
+  height: 440px; /* Altura compacta y elegante a la derecha */
+  background-color: #f8fafc;
+  box-shadow: 0 8px 20px -4px rgba(12, 35, 64, 0.12);
+  position: sticky;
+  top: 0;
+}
+
+.mosaic-item {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.mosaic-item::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #0c2340;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mosaic-item:hover::after {
+  opacity: 0.15;
+}
+
+.mosaic-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Variantes del Mosaico según la cantidad de imágenes */
+.layout-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.layout-2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
+.layout-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
+.layout-3 .mosaic-item:nth-child(1) { grid-column: span 2; }
+.layout-4 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
+.layout-4 .mosaic-item:nth-child(1) { grid-column: span 3; }
+
+/* Capa oscura con indicador numérico para fotos ocultas (+X) */
+.mosaic-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(12, 35, 64, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 2.2rem;
+  font-weight: 800;
+  backdrop-filter: blur(3px);
+  z-index: 10;
+}
+
 
 /* PERFIL DE LA INSTITUCIÓN */
 .modal-author-row {
@@ -1005,6 +1074,9 @@
   .lightbox-close {
     top: 15px;
     right: 20px;
+  }
+  .modal-body-esp {
+    grid-template-columns: 1fr;
   }
 }
 

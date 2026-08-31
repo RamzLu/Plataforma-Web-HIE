@@ -17,7 +17,7 @@ import CmsInstitucionView from "./cms/CmsInstitucionView";
 import CmsConfiguracionView from "./cms/CmsConfiguracionView"; // <-- IMPORTACIÓN
 
 import { documentosData } from "../data/documentos";
-import avatarHospital from "../assets/iconEVITAface.jpg";
+import avatarHospital from "../assets/logoHospitalEvita.png";
 
 const CmsPage = () => {
   const [initialized, setInitialized] = useState(false);
@@ -483,12 +483,12 @@ const CmsPage = () => {
               <div className="modal-left-content">
                 <div className="modal-author-row">
                   <div className="hospital-avatar">
-                    <img src="/img/hief-logo-small.png" alt="Hospital Interdistrital Evita" />
+                    <img src={avatarHospital} alt="Hospital Interdistrital Evita" />
                   </div>
                   <div className="author-meta">
                     <h3>Hospital Interdistrital Evita Formosa</h3>
                     {/* Propiedad corregida: date */}
-                    <span>{selectedNews.date} • 🌎</span>
+                    <span>{selectedNews.date}</span>
                   </div>
                 </div>
 

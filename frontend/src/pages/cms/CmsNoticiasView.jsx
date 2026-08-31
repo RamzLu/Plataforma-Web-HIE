@@ -14,6 +14,8 @@ import {
   BlockQuote,
   Undo,
   Alignment,
+  SpecialCharacters,
+  SpecialCharactersEssentials
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import "../../styles/components/cms/CmsNoticiasView.css";
@@ -561,6 +563,8 @@ const noticiaFormateada = {
                         BlockQuote,
                         Undo,
                         Alignment,
+                        SpecialCharacters,
+                        SpecialCharactersEssentials // Solo dejamos estos dos
                       ],
                       toolbar: [
                         "heading",
@@ -572,6 +576,7 @@ const noticiaFormateada = {
                         "numberedList",
                         "alignment",
                         "blockQuote",
+                        "specialCharacters", // El botón Ω seguirá apareciendo
                         "|",
                         "undo",
                         "redo",
