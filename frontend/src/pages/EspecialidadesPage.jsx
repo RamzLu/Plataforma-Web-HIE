@@ -315,19 +315,21 @@ const EspecialidadesPage = () => {
           </>
         )}
       </div>
+
+      {/* MODAL CON CLASES AISLADAS (.esp-aislado-...) */}
       {selectedItem && (
-        <div className="modal-overlay" onClick={closeModal}>
+        <div className="esp-aislado-overlay" onClick={closeModal}>
           <div
-            className="modal-content-esp"
+            className="esp-aislado-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-header-esp">
+            <div className="esp-aislado-header">
               <h2>
                 {selectedItem.tipo}: {selectedItem.nombre}
               </h2>
               {/* Botón X de cerrar */}
               <button
-                className="btn-close-modal"
+                className="esp-aislado-btn-close"
                 onClick={closeModal}
                 title="Cerrar ventana"
               >
@@ -337,10 +339,10 @@ const EspecialidadesPage = () => {
               </button>
             </div>
 
-            <div className="modal-body-esp">
-              <div className="info-section">
-                <h4 className="info-title">
-                  <span className="info-icon">
+            <div className="esp-aislado-body">
+              <div className="esp-aislado-info-section">
+                <h4 className="esp-aislado-info-title">
+                  <span className="esp-aislado-info-icon">
                     <svg viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10"></circle>
                       <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -349,37 +351,37 @@ const EspecialidadesPage = () => {
                   </span>
                   {selectedItem.pregunta}
                 </h4>
-                <p className="info-text italic">{selectedItem.descripcion}</p>
+                <p className="esp-aislado-info-text italic">{selectedItem.descripcion}</p>
               </div>
 
-              <div className="info-section">
-                <div className="info-row">
-                  <span className="info-icon">
+              <div className="esp-aislado-info-section">
+                <div className="esp-aislado-info-row">
+                  <span className="esp-aislado-info-icon">
                     <svg viewBox="0 0 24 24">
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                       <circle cx="12" cy="10" r="3"></circle>
                     </svg>
                   </span>
-                  <p className="info-text">
+                  <p className="esp-aislado-info-text">
                     <strong>Ubicación:</strong> {selectedItem.ubicacion}
                   </p>
                 </div>
-                <div className="info-row">
-                  <span className="info-icon">
+                <div className="esp-aislado-info-row">
+                  <span className="esp-aislado-info-icon">
                     <svg viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10"></circle>
                       <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
                   </span>
-                  <p className="info-text">
+                  <p className="esp-aislado-info-text">
                     <strong>Horarios:</strong> {selectedItem.horarios}
                   </p>
                 </div>
               </div>
 
-              <div className="info-section">
-                <h4 className="info-title">
-                  <span className="info-icon">
+              <div className="esp-aislado-info-section">
+                <h4 className="esp-aislado-info-title">
+                  <span className="esp-aislado-info-icon">
                     <svg viewBox="0 0 24 24">
                       <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                       <line x1="12" y1="9" x2="12" y2="13"></line>
@@ -388,12 +390,12 @@ const EspecialidadesPage = () => {
                   </span>
                   REQUISITOS IMPORTANTES:
                 </h4>
-                <ul className="requisitos-lista">
+                <ul className="esp-aislado-requisitos-lista">
                   {selectedItem.requisitos.map((req, index) => (
-                    <li key={index} className="info-text">
+                    <li key={index} className="esp-aislado-info-text">
                       {req.includes("DNI") ? (
                         <>
-                          <span className="text-danger">
+                          <span className="esp-aislado-text-danger">
                             Traer DNI original.
                           </span>{" "}
                           {req
@@ -409,24 +411,24 @@ const EspecialidadesPage = () => {
                 </ul>
               </div>
 
-              <div className="info-section">
-                <h4 className="info-title">
-                  <span className="info-icon">
+              <div className="esp-aislado-info-section">
+                <h4 className="esp-aislado-info-title">
+                  <span className="esp-aislado-info-icon">
                     <svg viewBox="0 0 24 24">
                       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                     </svg>
                   </span>
                   ¿CÓMO SOLICITAR TURNO?
                 </h4>
-                <p className="info-text">
+                <p className="esp-aislado-info-text">
                   Los turnos se otorgan de manera <strong>PRESENCIAL</strong> en
                   la ventanilla del sector. Para consultas:
                 </p>
                 <div
-                  className="info-row"
+                  className="esp-aislado-info-row"
                   style={{ marginTop: "10px", alignItems: "center" }}
                 >
-                  <span className="info-icon">
+                  <span className="esp-aislado-info-icon">
                     <svg
                       viewBox="0 0 24 24"
                       style={{ width: "18px", height: "18px" }}
@@ -434,15 +436,15 @@ const EspecialidadesPage = () => {
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </span>
-                  <p className="info-text text-danger">
+                  <p className="esp-aislado-info-text esp-aislado-text-danger">
                     {selectedItem.contacto}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="modal-footer-esp">
-              <button className="btn-cerrar-rojo" onClick={closeModal}>
+            <div className="esp-aislado-footer">
+              <button className="esp-aislado-btn-cerrar" onClick={closeModal}>
                 Cerrar y Volver
               </button>
             </div>
