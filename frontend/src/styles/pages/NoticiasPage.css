@@ -968,30 +968,36 @@
 /* =========================================
    LIGHTBOX (VISOR ESTILO FACEBOOK)
 ========================================= */
+/* =========================================
+   LIGHTBOX (VISOR ESTILO FACEBOOK)
+========================================= */
 .lightbox-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(0, 0, 0, 0.9);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   z-index: 3000;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
   animation: fadeIn 0.2s ease-out;
 }
 
 .lightbox-close {
   position: absolute;
   top: 25px;
-  right: 40px;
+  right: 35px;
   background: none;
   border: none;
   color: white;
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 300;
   cursor: pointer;
   z-index: 3010;
@@ -1009,53 +1015,99 @@
   align-items: center;
   justify-content: center;
   max-width: 90vw;
-  max-height: 90vh;
+  max-height: 80vh;
 }
 
 .lightbox-img {
   max-width: 100%;
-  max-height: 90vh;
+  max-height: 75vh;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
+/* Flechas en Escritorio (Flotando a los costados) */
 .lightbox-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.2);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  font-size: 1.8rem;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   transition: background-color 0.3s;
+  z-index: 3020;
 }
 
 .lightbox-arrow:hover {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.9);
   color: #0c2340;
 }
 
 .lb-left {
-  left: -90px;
+  left: -70px;
 }
 .lb-right {
-  right: -90px;
+  right: -70px;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+/* =========================================
+   ADAPTACIÓN PARA MÓVILES (FLECHAS ABAJO)
+========================================= */
+@media (max-width: 768px) {
+  .lightbox-overlay {
+    padding: 10px;
+    justify-content: center;
   }
-  to {
-    opacity: 1;
+
+  .lightbox-close {
+    top: 15px;
+    right: 20px;
+    font-size: 2.2rem;
+    position: absolute; /* Mantenemos la cruz fija arriba a la derecha */
+  }
+
+  .lightbox-content {
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .lightbox-img {
+    max-height: 62vh;
+    width: 100%;
+    object-fit: contain;
+  }
+
+  /* Ubicamos las flechas flotando a la izquierda y derecha de la foto de forma equilibrada */
+  .lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    font-size: 1.3rem;
+    background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente para máxima visibilidad */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .lb-left {
+    left: 5px !important;
+  }
+
+  .lb-right {
+    right: 5px !important;
   }
 }
 
