@@ -3,37 +3,54 @@
 ========================================= */
 .cms-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh; 
+  overflow: hidden; 
   width: 100%;
   background-color: #ffffff;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  position: relative;
-}
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+} 
 
+/* --- SIDEBAR CON ESTILO OSCURO (TIPO SHOPALL) --- */
 .cms-sidebar {
-  width: 260px;
-  background-color: #ffffff;
+  background-color: #0a162e;
+  color: #8a99af;
+  width: 280px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  border-right: 2px solid #bae6fd; /* Borde azulado para diferenciarlo del fondo */
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
+  transition: width 0.3s ease;
+  font-family: system-ui, -apple-system, sans-serif;
   overflow-y: auto;
-  z-index: 100;
+  overflow-x: hidden;
+  flex-shrink: 0; 
 }
 
-.cms-logo-container {
-  padding: 24px 20px;
-  border-bottom: 1px solid #f1f5f9;
+.cms-sidebar.collapsed {
+  width: 80px;
+}
+
+.cms-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.cms-sidebar::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+.cms-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 15px 24px 20px;
+  border-bottom: 1px solid #132342;
+  transition: all 0.3s ease; 
+}
+
+.cms-sidebar.collapsed .cms-sidebar-header {
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px 10px;
+  gap: 16px; 
 }
 
 .cms-logo {
@@ -47,6 +64,7 @@
   height: 42px;
   object-fit: contain;
   border-radius: 50%;
+  padding: 2px;
 }
 
 .cms-logo-text-box {
@@ -58,14 +76,14 @@
 .cms-logo .logo-title {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #006eb3;
+  color: #93c5fd; /* Azul más brillante para fondos oscuros */
   letter-spacing: 0.5px;
 }
 
 .cms-logo .logo-subtitle {
   font-size: 0.95rem;
   font-weight: 800;
-  color: #0c2340;
+  color: #ffffff;
   letter-spacing: 1px;
 }
 
@@ -73,58 +91,119 @@
   font-size: 0.7rem;
   font-weight: 700;
   color: #64748b;
-  padding: 24px 20px 10px 20px;
+  padding: 24px 20px 5px 20px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
+.cms-collapse-btn {
+  background: transparent;
+  border: none;
+  color: #8a99af;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.cms-collapse-btn:hover {
+  background: #1f3358;
+  color: #ffffff;
+}
+
+.cms-collapse-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* --- NAVEGACIÓN TIPO SHOPALL --- */
+.cms-nav {
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.cms-nav-group {
+  padding: 10px 0;
+  border-bottom: 1px solid #132342;
+}
+.cms-nav-group:last-child {
+  border-bottom: none;
+}
+
+.cms-nav-group-title {
+  padding: 0 20px;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
 .cms-nav ul {
   list-style: none;
-  padding: 0 12px;
+  padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .cms-nav li {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #334155;
+  padding: 10px 20px;
+  margin-right: 16px;
   cursor: pointer;
+  color: #8a99af;
   transition: all 0.2s ease;
+  border-radius: 0 8px 8px 0;
+  border-left: 3px solid transparent;
 }
 
-.cms-nav li svg {
-  width: 20px;
-  height: 20px;
-  stroke: #64748b;
-  flex-shrink: 0;
-  transition: stroke 0.2s ease;
-}
-
-.cms-nav li:hover {
-  background-color: #f8fafc;
-  color: #0c2340;
-}
-
-.cms-nav li:hover svg {
-  stroke: #0c2340;
+.cms-nav li:hover:not(.active) {
+  color: #ffffff;
+  background-color: transparent;
 }
 
 .cms-nav li.active {
-  background-color: #eff6ff;
-  color: #0c2340;
-  font-weight: 700;
+  background-color: transparent;
+  color: #ffffff;
+  border-left: 3px solid #3b82f6; 
+  font-weight: 600;
 }
 
-.cms-nav li.active svg {
-  stroke: #006eb3;
+.cms-nav-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #8a99af;
+  transition: color 0.2s;
+}
+
+.cms-nav li:hover .cms-nav-icon,
+.cms-nav li.active .cms-nav-icon {
+  color: #ffffff;
+}
+
+.cms-nav-label {
+  margin-left: 14px;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.cms-sidebar.collapsed .cms-nav li {
+  justify-content: center;
+  padding: 12px 0;
+  margin-right: 12px;
 }
 
 /* =========================================
@@ -134,48 +213,67 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: 260px;
+  height: 100vh;
+  overflow-y: auto;
+  margin-left: 0; 
+  background-color: #f8fafc; /* Fondo gris claro (hielo) para que resalte el blanco */
 }
 
+/* --- HEADER BLANCO LUMINOSO --- */
 .cms-header {
-  height: 80px;
-  background-color: #0c2340; /* Azul oscuro formal */
-  color: #ffffff;
+  height: 70px;
+  background-color: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 30px;
   flex-shrink: 0;
-  border-bottom: 1px solid #1e3a8a;
-  position: fixed;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  position: sticky;
   top: 0;
-  right: 0;
-  left: 260px;
   z-index: 99;
 }
 
 .cms-header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #ffffff;
+  gap: 12px;
 }
 
 .cms-header-left svg {
-  width: 20px;
-  height: 20px;
-  stroke: #93c5fd;
+  width: 22px;
+  height: 22px;
+  stroke: #64748b;
+}
+
+.cms-header-breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 1.20rem; 
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.breadcrumb-root {
+  color: #0284c7; 
+}
+
+.breadcrumb-separator {
+  color: #94a3b8; 
+}
+
+.breadcrumb-current {
+  color: #0f172a; 
 }
 
 .cms-header-right {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 20px;
 }
 
-.btn-test-backend,
+/* --- BOTONES DEL HEADER --- */
 .cms-notification-btn,
 .cms-dropdown-btn {
   background: none;
@@ -183,46 +281,56 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 5px;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
 }
 
-.btn-test-backend svg,
 .cms-notification-btn svg,
 .cms-dropdown-btn svg {
-  width: 22px;
-  height: 22px;
-  stroke: #cbd5e1;
+  width: 20px;
+  height: 20px;
+  stroke: #64748b;
   transition: stroke 0.2s;
 }
 
-.btn-test-backend:hover svg,
+.cms-notification-btn:hover,
+.cms-dropdown-btn:hover {
+  background-color: #f1f5f9; /* Círculo gris suave al hacer hover */
+}
+
 .cms-notification-btn:hover svg {
-  stroke: #ffffff;
+  stroke: #0f172a;
 }
 
 .cms-dropdown-btn:hover svg {
-  stroke: #f87171; /* Rojo suave para el logout */
+  stroke: #ef4444; /* Rojo al intentar cerrar sesión */
 }
 
+/* --- PERFIL DE USUARIO --- */
 .cms-user-profile {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
+  padding-left: 20px;
+  border-left: 1px solid #e2e8f0; /* Línea divisoria elegante */
 }
 
 .cms-avatar {
-  width: 42px;
-  height: 42px;
-  background-color: #1e3a8a;
+  width: 40px;
+  height: 40px;
+  background-color: #0a162e; /* Mismo azul marino del sidebar */
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 4px rgba(10, 22, 46, 0.15);
 }
 
 .cms-avatar svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   stroke: #ffffff;
 }
 
@@ -230,23 +338,25 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  line-height: 1.2;
 }
 
 .cms-user-name {
   font-weight: 700;
-  font-size: 0.95rem;
-  color: #ffffff;
+  font-size: 0.9rem;
+  color: #0f172a;
 }
 
 .cms-user-role {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #93c5fd;
+  color: #64748b;
+  margin-top: 2px;
 }
 
+/* --- TÍTULOS DEL CONTENIDO --- */
 .cms-content {
   padding: 40px;
-  margin-top: 80px;
 }
 
 .cms-page-title {
@@ -262,8 +372,8 @@
 
 .cms-page-title h1 {
   color: #0c2340;
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: 3.2rem;
+  font-weight: 200;
   margin: 5px 0;
 }
 

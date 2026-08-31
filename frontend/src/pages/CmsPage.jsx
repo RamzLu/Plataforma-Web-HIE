@@ -313,6 +313,7 @@ const CmsPage = () => {
           isAdmin={isAdmin}
           testBackendConnection={testBackendConnection}
           onLogoutClick={() => setShowLogoutModal(true)}
+          activeTab={activeTab}
         />
 
         <main className="cms-content">
