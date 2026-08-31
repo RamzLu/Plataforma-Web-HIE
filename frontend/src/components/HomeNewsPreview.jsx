@@ -82,7 +82,7 @@ const HomeNewsPreview = () => {
                     delay={0.15 + index * 0.12}
                     threshold={0.1}
                   >
-                    <article className="preview-card">
+                    <article className="preview-card" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                       <div className="preview-img-container">
                         {news.images && news.images.length > 0 && (
                           <img
@@ -92,7 +92,10 @@ const HomeNewsPreview = () => {
                           />
                         )}
                       </div>
-                      <div className="preview-content">
+                      <div 
+                    className="preview-content" 
+                    style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}
+                  >
                         <span className="preview-date">{date}</span>
                         <h4 className="preview-card-title">{news.titulo || news.title}</h4>
                         <p className="preview-excerpt">{excerpt}</p>

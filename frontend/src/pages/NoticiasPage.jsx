@@ -282,14 +282,8 @@ useEffect(() => {
           <Breadcrumb currentPage="Noticias" />
           <h1 className="news-main-title">ÚLTIMAS PUBLICACIONES</h1>
           <div className="news-info-wrapper">
-            <div className="news-info-labels">
-              <span className="news-label active">HOSPITAL</span>
-              <span className="news-label">EVITA</span>
-            </div>
-            <div className="news-info-divider"></div>
             <div className="news-info-text">
-              <p>Manténgase informado con la actualidad</p>
-              <p>y comunicados oficiales de la institución.</p>
+              <p>Manténgase informado con la actualidad y comunicados oficiales de la institución.</p>
             </div>
           </div>
         </div>
