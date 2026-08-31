@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import avatarHospital from "../../assets/logoHospitalEvita.png";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
@@ -450,7 +451,7 @@ const noticiaFormateada = {
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div
-            className="modal-content-esp news-modal-content"
+            className="modal-content-esp news-modal-content news-modal-content-wide"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header-esp">
@@ -467,131 +468,198 @@ const noticiaFormateada = {
 
             <form
               onSubmit={handleSave}
-              className="modal-body-form news-form-container"
+              style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
             >
-              <div className="form-grid-row">
-                <div>
-                  <label className="news-form-label">Título de la noticia</label>
-                  <input
-                    type="text"
-                    value={titulo}
-                    onChange={(e) => setTitulo(e.target.value)}
-                    placeholder="Ingrese el título..."
-                    className="news-form-input"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="news-form-label">Categoría</label>
-                  <select
-                    value={categoria}
-                    onChange={(e) => setCategoria(e.target.value)}
-                    className="news-form-select"
-                  >
-                    <option value="Noticias">Noticias</option>
-                    <option value="Articulos">Artículos</option>
-                    <option value="Capacitación">Capacitación</option>
-                    <option value="Institucional">Institucional</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="news-form-label">Imágenes adjuntas</label>
-                <input
-                  type="file"
-                  accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-                  multiple
-                  onChange={handleMultipleImagesUpload}
-                  className="news-file-input"
-                />
-
-                {imagenesUrls.length > 0 && (
-                  <div className="news-preview-gallery">
-                    {imagenesUrls.map((url, idx) => (
-                      <div key={idx} className="news-preview-item">
-                        <img
-                          src={url}
-                          alt={`Preview ${idx}`}
-                          className="news-preview-img"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(idx)}
-                          className="news-preview-remove-btn"
-                          title="Eliminar imagen"
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    ))}
+              <div className="modal-split-layout">
+                {/* COLUMNA IZQUIERDA: FORMULARIO */}
+                <div className="news-form-left">
+                  <div>
+                    <label className="news-form-label">Título de la noticia</label>
+                    <input
+                      type="text"
+                      value={titulo}
+                      onChange={(e) => setTitulo(e.target.value)}
+                      placeholder="Ingrese el título..."
+                      className="news-form-input"
+                      required
+                    />
                   </div>
-                )}
-              </div>
 
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontWeight: "700",
-                    color: "#0c2340",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Cuerpo de la noticia
-                </label>
-                <div
-                  className="ckeditor-wrapper"
-                  style={{
-                    border: "1px solid #cbd5e1",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                  }}
-                >
-                  <CKEditor
-                    editor={ClassicEditor}
-                    data={cuerpoHtml}
-                    config={{
-                      licenseKey: "GPL",
-                      plugins: [
-                        Essentials,
-                        Paragraph,
-                        Heading,
-                        Bold,
-                        Italic,
-                        Underline,
-                        Link,
-                        List,
-                        BlockQuote,
-                        Undo,
-                        Alignment,
-                        SpecialCharacters,
-                        SpecialCharactersEssentials // Solo dejamos estos dos
-                      ],
-                      toolbar: [
-                        "heading",
-                        "|",
-                        "bold",
-                        "italic",
-                        "underline",
-                        "link",
-                        "bulletedList",
-                        "numberedList",
-                        "alignment",
-                        "blockQuote",
-                        "specialCharacters",
-                        "|",
-                        "undo",
-                        "redo",
-                      ],
-                      alignment: {
-                        options: ["left", "center", "right", "justify"],
-                      },
-                    }}
-                    onChange={(event, editor) =>
-                      setCuerpoHtml(editor.getData())
-                    }
-                  />
+                  <div>
+                    <label className="news-form-label">Imágenes adjuntas</label>
+                    <div className="custom-file-upload-zone">
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+                        multiple
+                        onChange={handleMultipleImagesUpload}
+                        className="custom-file-input-hidden"
+                      />
+                      <div className="custom-file-upload-content">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#0ea5e9', marginBottom: '8px' }}>
+                          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        <span style={{ color: '#0284c7', fontWeight: '600' }}>Haz clic para subir imágenes</span>
+                        <span style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '4px' }}>PNG, JPG, WEBP permitidos</span>
+                      </div>
+                    </div>
+
+                    {imagenesUrls.length > 0 && (
+                      <div className="news-preview-gallery">
+                        {imagenesUrls.map((url, idx) => (
+                          <div key={idx} className="news-preview-item">
+                            <img
+                              src={url}
+                              alt={`Preview ${idx}`}
+                              className="news-preview-img"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(idx)}
+                              className="news-preview-remove-btn"
+                              title="Eliminar imagen"
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      style={{
+                        display: "block",
+                        fontWeight: "700",
+                        color: "#0c2340",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Cuerpo de la noticia
+                    </label>
+                    <div
+                      className="ckeditor-wrapper"
+                      style={{
+                        border: "1px solid #cbd5e1",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <CKEditor
+                        editor={ClassicEditor}
+                        data={cuerpoHtml}
+                        config={{
+                          licenseKey: "GPL",
+                          plugins: [
+                            Essentials,
+                            Paragraph,
+                            Heading,
+                            Bold,
+                            Italic,
+                            Underline,
+                            Link,
+                            List,
+                            BlockQuote,
+                            Undo,
+                            Alignment,
+                            SpecialCharacters,
+                            SpecialCharactersEssentials
+                          ],
+                          toolbar: [
+                            "heading",
+                            "|",
+                            "bold",
+                            "italic",
+                            "underline",
+                            "link",
+                            "bulletedList",
+                            "numberedList",
+                            "alignment",
+                            "blockQuote",
+                            "specialCharacters",
+                            "|",
+                            "undo",
+                            "redo",
+                          ],
+                          alignment: {
+                            options: ["left", "center", "right", "justify"],
+                          },
+                        }}
+                        onChange={(event, editor) =>
+                          setCuerpoHtml(editor.getData())
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="news-form-right">
+                  <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b' }}>Vista previa de la publicación</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0ea5e9', backgroundColor: '#e0f2fe', padding: '3px 10px', borderRadius: '12px' }}>100%</span>
+                  </div>
+
+                  <div className="news-preview-paper" style={{ padding: 0 }}>
+                    {/* Contenedor idéntico al modal-body-esp público */}
+                    <div className="preview-mock-modal-body">
+                      
+                      {/* Lado Izquierdo de la Preview (Cabecera, Título y Texto) */}
+                      <div className="preview-mock-left">
+                        <div className="preview-mock-author-row">
+                          <div className="preview-avatar-mock">
+                            <img src={avatarHospital} alt="Avatar Hospital" />
+                          </div>
+                          <div className="preview-mock-author-meta">
+                            <h3>Hospital Interdistrital Evita Formosa</h3>
+                            <span>{new Date().toLocaleDateString("es-AR")}</span>
+                          </div>
+                        </div>
+
+                        <h3 className="preview-mock-title">
+                          {titulo || "El título de la noticia aparecerá aquí..."}
+                        </h3>
+
+                        <div className="preview-mock-text ck-content">
+                          {cuerpoHtml ? (
+                            <div dangerouslySetInnerHTML={{ __html: cuerpoHtml }} />
+                          ) : (
+                            <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>El contenido de la noticia comenzará a aparecer aquí a medida que escribas en el editor.</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Lado Derecho de la Preview (Mosaico Dinámico de Imágenes) */}
+                      {imagenesUrls.length > 0 ? (
+                        <div className={`preview-mosaic-gallery layout-${imagenesUrls.length >= 4 ? 4 : imagenesUrls.length}`}>
+                          {imagenesUrls.slice(0, 4).map((img, index) => {
+                            const isLastAndHidden = index === 3 && imagenesUrls.length > 4;
+                            const fotosRestantes = imagenesUrls.length - 4;
+                            
+                            return (
+                              <div key={index} className="preview-mosaic-item">
+                                <img src={img} alt={`Preview foto ${index + 1}`} />
+                                {isLastAndHidden && (
+                                  <div className="preview-mosaic-overlay">
+                                    <span>+{fotosRestantes}</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="preview-mosaic-empty">
+                          <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ opacity: 0.4, marginBottom: '10px' }}>
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                          </svg>
+                          [Área del mosaico de imágenes]
+                        </div>
+                      )}
+                      
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -609,11 +677,7 @@ const noticiaFormateada = {
                   className="btn-cerrar-rojo news-btn-submit"
                   disabled={saving}
                 >
-                  {saving
-                    ? "Guardando..."
-                    : editingId
-                      ? "Actualizar"
-                      : "Guardar"}
+                  {saving ? "Guardando..." : editingId ? "Actualizar" : "Guardar"}
                 </button>
               </div>
             </form>
