@@ -792,13 +792,34 @@
   gap: 20px;
 }
 
+/* =========================================
+   MODAL DE LECTURA: ESTRUCTURA FLUIDA
+========================================= */
+.modal-body-esp {
+  padding: 30px 40px;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr; /* Escritorio: Texto izq, Mosaico der */
+  gap: 35px;
+  overflow-y: auto;
+  align-items: start;
+}
+
+.modal-left-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* =========================================
+   MOSAICO DINÁMICO DE IMÁGENES
+========================================= */
 .mosaic-gallery {
   display: grid;
   gap: 4px;
   border-radius: 14px;
   overflow: hidden;
   width: 100%;
-  height: 440px; /* Altura compacta y elegante a la derecha */
+  height: 440px;
   background-color: #f8fafc;
   box-shadow: 0 8px 20px -4px rgba(12, 35, 64, 0.12);
   position: sticky;
@@ -831,7 +852,6 @@
   display: block;
 }
 
-/* Variantes del Mosaico según la cantidad de imágenes */
 .layout-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
 .layout-2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
 .layout-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
@@ -839,7 +859,6 @@
 .layout-4 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
 .layout-4 .mosaic-item:nth-child(1) { grid-column: span 3; }
 
-/* Capa oscura con indicador numérico para fotos ocultas (+X) */
 .mosaic-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -854,7 +873,54 @@
   z-index: 10;
 }
 
+/* =========================================
+   ADAPTACIÓN PERFECTA PARA MÓVILES
+========================================= */
+/* =========================================
+   ADAPTACIÓN PERFECTA PARA MÓVILES
+========================================= */
+@media (max-width: 900px) {
+  .modal-body-esp {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
 
+  /* 1. Autor y Fecha arriba */
+  .modal-author-row {
+    order: 1;
+  }
+
+  /* 2. Título de la noticia */
+  .news-modal-title {
+    order: 2;
+  }
+
+  /* 3. Galería de imágenes fluida y sin desbordes */
+  .mosaic-gallery {
+    order: 3;
+    position: relative;
+    height: auto !important; /* Altura automática según el contenido */
+    max-height: none !important;
+    /* Creamos una grilla adaptable de 2 columnas automáticas de 140px de alto */
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-rows: repeat(2, 140px) !important;
+    gap: 4px;
+  }
+
+  /* Aseguramos que los elementos respeten la nueva grilla móvil */
+  .mosaic-item {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    height: 140px;
+  }
+
+  /* 4. Cuerpo de texto al final */
+  .news-modal-body-text {
+    order: 4;
+  }
+}
 /* PERFIL DE LA INSTITUCIÓN */
 .modal-author-row {
   display: flex;
