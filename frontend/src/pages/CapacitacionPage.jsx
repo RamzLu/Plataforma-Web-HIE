@@ -109,16 +109,10 @@ const CapacitacionPage = () => {
       >
         <div className="cap-header-inner">
           <Breadcrumb currentPage="capacitación" />
-          <h1 className="cap-title">CAPACITACIÓN, DOCENCIA E INVESTIGACIÓN</h1>
+          <h1 className="cap-title">CAPACITACIÓN</h1>
           <div className="cap-info-wrapper">
-            <div className="cap-info-labels">
-              <span className="cap-label active">HOSPITAL</span>
-              <span className="cap-label">EVITA</span>
-            </div>
-            <div className="cap-info-divider"></div>
             <div className="cap-info-text">
-              <p>Formación continua para profesionales</p>
-              <p>y el equipo de salud institucional.</p>
+              <p>Formación continua para profesionales y el equipo de salud institucional.</p>
             </div>
           </div>
         </div>

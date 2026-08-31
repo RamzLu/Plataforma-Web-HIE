@@ -1,22 +1,15 @@
 .capacitacion-page {
   width: 100%;
-  min-height: calc(100vh - 80px);
-  background-color: #eaf6fc;
-  padding: 80px 0 100px 0;
+  background-color: #e9ebee;
+  padding: 0 0 80px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  min-height: calc(100vh - 80px);
 }
 
 .capacitacion-container {
-  max-width: 1100px;
+  max-width: 1200px;
   width: 100%;
   padding: 0 20px;
   display: flex;
@@ -24,14 +17,16 @@
   align-items: center;
 }
 
+/* SECCION DE BANNER */
 .cap-header-fluid {
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  margin-bottom: 50px;
-  justify-content: center;
-  padding: 70px 20px;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    margin-bottom: 60px;
+    justify-content: center;
+    padding: 120px 20px 60px 20px;
 }
 
 .cap-header-inner {
@@ -49,56 +44,18 @@
   font-size: 3.2rem;
   font-weight: 300;
   text-transform: uppercase;
-  margin-bottom: 25px;
+  margin-bottom: 15px;
   letter-spacing: 1px;
 }
 
-.cap-info-wrapper {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.cap-info-labels {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: right;
-  justify-content: center;
-}
-
-.cap-label {
-  color: #003a86;
-  font-size: 1.1rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.cap-label.active {
-  font-weight: 700;
-}
-
-.cap-info-divider {
-  width: 1.5px;
-  background-color: #2b5b94;
-  align-self: stretch;
-}
-
-.cap-info-text {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
 .cap-info-text p {
-  color: #1c1e21;
-  font-size: 1.15rem;
-  font-weight: 300;
-  margin: 0;
-  line-height: 1.4;
+    color: #64748b;
+    font-size: 1.15rem;
+    font-weight: 400;
+    margin: 0;
 }
 
+/* //seccion del banner */
 .cap-banner-box {
   width: 100%;
   background: linear-gradient(135deg, #d3e5f8 0%, #2b5b94 100%);
@@ -474,27 +431,26 @@
   .cap-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
 
-  .cap-header-fluid {
-    padding: 30px 20px;
-  }
-
-  .cap-header-inner {
+/* Responsividad de la cabecera */
+@media (max-width: 768px) {
+.cap-header-inner {
     border-left-width: 5px;
     padding-left: 20px;
-  }
+}
 
-  .cap-title {
+.cap-title {
     font-size: 2rem;
-  }
 
-  .cap-info-wrapper {
+}
+  .doc-info-wrapper {
     align-items: flex-start;
   }
 
-  .cap-info-text p {
+.cap-info-text p {
     font-size: 0.95rem;
-  }
+}
 }
 
 @media (max-width: 600px) {

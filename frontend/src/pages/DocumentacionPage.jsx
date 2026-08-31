@@ -99,16 +99,10 @@ const DocumentacionPage = () => {
       >
         <div className="doc-header-inner">
           <Breadcrumb currentPage="documentación" />
-          <h1 className="doc-title">REPOSITORIO DE DOCUMENTOS</h1>
+          <h1 className="doc-title-page">REPOSITORIO DE DOCUMENTOS</h1>
           <div className="doc-info-wrapper">
-            <div className="doc-info-labels">
-              <span className="doc-label active">HOSPITAL</span>
-              <span className="doc-label">EVITA</span>
-            </div>
-            <div className="doc-info-divider"></div>
             <div className="doc-info-text">
-              <p>Acceda a manuales, guías e información oficial</p>
-              <p>disponible para toda la comunidad.</p>
+              <p>Acceda a manuales, guías e información oficial disponible para toda la comunidad.</p>
             </div>
           </div>
         </div>

@@ -22,84 +22,42 @@
    BANNER FULL WIDTH: ÚLTIMAS PUBLICACIONES
 ========================================= */
 .news-header-fluid {
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  margin-bottom: 50px;
-  display: flex;
-  justify-content: center;
-  padding: 120px 20px 60px 20px;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    margin-bottom: 60px;
+    justify-content: center;
+    padding: 120px 20px 60px 20px;
 }
 
 .news-header-inner {
-  width: 100%;
-  max-width: 1500px;
-  border-left: 8px solid #2b5b94;
-  padding-left: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+    width: 100%;
+    max-width: 1200px;
+    border-left: 8px solid #2b5b94;
+    padding-left: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-.news-header-inner .breadcrumb-container {
-  margin-bottom: 15px;
-}
 
 .news-main-title {
-  color: #2b5b94;
-  font-size: 3.2rem;
-  font-weight: 300;
-  text-transform: uppercase;
-  margin-bottom: 25px;
-  letter-spacing: 1px;
+    color: #2b5b94;
+    font-size: 3.2rem;
+    font-weight: 300;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
 }
 
-.news-info-wrapper {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.news-info-labels {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: right;
-  justify-content: center;
-}
-
-.news-label {
-  color: #2b5b94;
-  font-size: 1.1rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.news-label.active {
-  font-weight: 700;
-}
-
-.news-info-divider {
-  width: 1.5px;
-  background-color: #2b5b94;
-  align-self: stretch;
-}
-
-.news-info-text {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
 
 .news-info-text p {
-  color: #1c1e21;
-  font-size: 1.15rem;
-  font-weight: 300;
-  margin: 0;
-  line-height: 1.4;
+    color: #64748b;
+    font-size: 1.15rem;
+    font-weight: 400;
+    margin: 0;
 }
 
 /* =========================================
