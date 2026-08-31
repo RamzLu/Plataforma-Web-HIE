@@ -75,11 +75,10 @@ const CmsNoticiasView = ({
     setShowDeleteModal(true);
   };
 
-  const handleExecuteDelete = async () => {
+const handleExecuteDelete = async () => {
     if (!noticiaAEliminar) return;
 
     const id = noticiaAEliminar;
-    setShowDeleteModal(false);
     setDeletingId(id);
 
     try {
@@ -100,15 +99,16 @@ const CmsNoticiasView = ({
 
       onDeleteNews(id);
       toast.success("Noticia eliminada correctamente.");
+      
+      setShowDeleteModal(false);
+      setNoticiaAEliminar(null);
     } catch (error) {
       console.error("Error al eliminar:", error);
       toast.error("Ocurrió un error al intentar eliminar la noticia.");
     } finally {
       setDeletingId(null);
-      setNoticiaAEliminar(null);
     }
   };
-
   const handleMultipleImagesUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
@@ -407,41 +407,67 @@ const noticiaFormateada = {
         </div>
       </div>
 
-      {showDeleteModal && (
+{showDeleteModal && (
         <div
           className="modal-overlay"
           onClick={() => setShowDeleteModal(false)}
         >
           <div
-            className="modal-content-esp logout-modal"
+            className="modal-content-esp delete-modal-global"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-header-esp">
-              <h2>ELIMINAR NOTICIA</h2>
-              <button
-                className="btn-close-modal"
-                onClick={() => setShowDeleteModal(false)}
-              >
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12"></path>
+            {/* Botón X flotante */}
+            <button
+              className="btn-close-floating"
+              onClick={() => setShowDeleteModal(false)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            <div className="delete-modal-body">
+              {/* Ícono de Advertencia */}
+              <div className="delete-icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
-              </button>
-            </div>
-            <div className="modal-body-esp text-center">
-              <p className="info-text">
-                ¿Estás seguro de que quieres eliminar esta noticia? Esta acción
-                no se puede deshacer.
+              </div>
+
+              <h2 className="delete-modal-title">Estás a punto de eliminar este elemento</h2>
+              
+              {/* Líneas decorativas (opcional, como en tu imagen) */}
+              <div className="delete-modal-divider"></div>
+
+              <p className="delete-modal-text">
+                Esta acción es <strong>permanente</strong> y no se puede deshacer. Los datos se borrarán de inmediato.
               </p>
             </div>
-            <div className="modal-footer-esp logout-footer">
+
+            <div className="delete-modal-footer">
               <button
                 className="btn-cancelar-gris"
                 onClick={() => setShowDeleteModal(false)}
+                disabled={deletingId === noticiaAEliminar}
               >
                 Cancelar
               </button>
-              <button className="btn-cerrar-rojo" onClick={handleExecuteDelete}>
-                Sí, Eliminar
+              <button 
+                className="btn-cerrar-rojo" 
+                onClick={handleExecuteDelete}
+                disabled={deletingId === noticiaAEliminar}
+              >
+                {deletingId === noticiaAEliminar ? (
+                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px" }}></div>
+                    Eliminando...
+                  </span>
+                ) : (
+                  "Eliminar"
+                )}
               </button>
             </div>
           </div>

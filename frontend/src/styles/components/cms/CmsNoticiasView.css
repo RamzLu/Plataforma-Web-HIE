@@ -423,6 +423,125 @@
 .preview-mosaic-gallery.layout-4 .preview-mosaic-item:nth-child(1) { grid-column: span 3; }
 
 
+/* =========================================
+   MODAL GLOBAL DE ELIMINACIÓN (ESTILO MODERNO)
+========================================= */
+.delete-modal-global {
+  max-width: 400px !important;
+  padding: 35px 25px 25px 25px !important; /* Más relleno, sin borde superior */
+  position: relative;
+  border-radius: 16px !important; /* Bordes más redondeados */
+}
+
+/* Botón X superior derecho */
+.btn-close-floating {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.2s;
+}
+
+.btn-close-floating:hover {
+  color: #0f172a;
+}
+
+.btn-close-floating svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Contenido Central */
+.delete-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Ícono Rojo */
+.delete-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background-color: #fee2e2;
+  color: #ef4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.delete-icon-wrapper svg {
+  width: 24px;
+  height: 24px;
+}
+
+.delete-modal-title {
+  font-size: 1.90rem;
+  font-weight: 200;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+/* Barras decorativas simuladas */
+.delete-modal-divider {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 5px 0 0;
+}
+
+.delete-modal-divider::before {
+  content: "";
+  width: 80%;
+  height: 8px;
+  background-color: #f1f5f9;
+  border-radius: 10px;
+}
+
+.delete-modal-divider::after {
+  content: "";
+  width: 50%;
+  height: 8px;
+  background-color: #f1f5f9;
+  border-radius: 10px;
+}
+
+.delete-modal-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 25px 0;
+  line-height: 1.5;
+}
+
+.delete-modal-text strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Footer de botones simétricos */
+.delete-modal-footer {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.delete-modal-footer button {
+  flex: 1; /* Obliga a ambos botones a medir exactamente el 50% */
+  padding: 12px 0;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 @media (max-width: 1400px) {
   .preview-mock-modal-body {
     grid-template-columns: 1fr;
