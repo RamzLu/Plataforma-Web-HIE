@@ -2,18 +2,13 @@
    ESTRUCTURA BASE Y FONDO
 ========================================= */
 .profesionales-page {
-  position: relative;
   width: 100%;
-  height: 110vh; /* Fija la altura exactamente al tamaño de la pantalla */
-  overflow: hidden; /* Evita que toda la página web se mueva hacia abajo */
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-color: #2b5b94;
-  padding: 100px 20px 20px 20px; /* Reduje el padding inferior */
+  background-color: #e9ebee; 
+  padding: 0 0 80px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: calc(100vh - 80px);
   font-family:
     system-ui,
     -apple-system,
@@ -22,249 +17,247 @@
     Roboto,
     sans-serif;
 }
-.prof-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
+
+/* =========================================
+   CABECERA (HEADER FLUIDO)
+========================================= */
+.prof-header-fluid {
   width: 100%;
-  height: 100%;
-  backdrop-filter: blur(
-    8px
-  ); /* Cambia este número para más o menos desenfoque */
-  -webkit-backdrop-filter: blur(8px);
-  background-color: rgba(
-    12,
-    35,
-    64,
-    0.4
-  ); /* Tinte azul oscuro sutil para oscurecer el fondo un poco */
-  z-index: 1; /* Se pone por encima de la imagen de fondo */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-bottom: 0; 
+  display: flex;
+  padding: 120px 20px 60px 20px;
 }
 
-/* Forzamos a que el contenido esté por encima de la capa borrosa */
-.prof-header,
-.prof-container {
-  position: relative;
-  z-index: 2;
-}
-/* =========================================
-   CABECERA Y BUSCADOR (Header)
-========================================= */
-.prof-header {
-  text-align: center;
-  margin-bottom: 40px;
-  color: #ffffff; /* Letras blancas para contrastar con el fondo oscuro */
+.prof-header-inner {
+  width: 100%;
+  max-width: 1200px;
+  border-left: 8px solid #2b5b94;
+  padding-left: 40px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
 }
 
-.prof-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0 0 10px 0;
+.prof-main-title {
+  color: #2b5b94;
+  font-size: 3.2rem;
+  font-weight: 300;
   text-transform: uppercase;
+  margin-bottom: 15px;
   letter-spacing: 1px;
 }
 
-.prof-header p {
-  font-size: 1rem;
-  font-style: italic;
+.prof-subtitle {
+  color: #64748b;
+  font-size: 1.15rem;
   font-weight: 400;
-  margin: 0 0 30px 0;
-  opacity: 0.9;
+  margin: 0;
 }
 
-/* Barra de Búsqueda estilo píldora */
+/* =========================================
+   CONTENEDOR DEL BUSCADOR EXTRAÍDO (MINIMALISTA)
+========================================= */
+.prof-search-container {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px; 
+  margin-bottom: 30px; 
+  position: relative;
+  z-index: 10;
+}
+
 .prof-search-bar {
   display: flex;
   align-items: center;
   background-color: #ffffff;
+  border: 1px solid #e2e8f0; 
   border-radius: 50px;
-  padding: 8px 8px 8px 20px;
+  padding: 6px 8px 6px 20px; 
   width: 100%;
-  max-width: 600px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  max-width: 650px; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); 
+  transition: all 0.3s ease;
+}
+
+.prof-search-bar:focus-within {
+  box-shadow: 0 6px 15px rgba(43, 91, 148, 0.08);
+  border-color: #cbd5e1;
 }
 
 .search-icon {
-  width: 20px;
-  height: 20px;
-  color: #64748b;
-  margin-right: 10px;
+  width: 18px; 
+  height: 18px;
+  color: #94a3b8; 
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
 .prof-search-bar input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 1rem;
+  font-size: 0.95rem; 
   color: #334155;
   background: transparent;
+  width: 100%;
 }
 
 .prof-search-bar input::placeholder {
-  color: #94a3b8;
-  font-style: italic;
+  color: #cbd5e1;
+  font-style: normal; 
+  font-weight: 300;
 }
 
 .prof-filter-select {
-  background-color: #67a6a6; /* Color verde/teal del diseño */
-  color: #ffffff;
-  border: none;
+  background-color: #f8fafc; 
+  color: #475569;
+  border: 1px solid #e2e8f0;
   outline: none;
   border-radius: 30px;
-  padding: 10px 20px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  padding: 8px 20px;
+  font-size: 0.85rem; 
+  font-weight: 500;
   cursor: pointer;
-  appearance: none; /* Quita la flecha por defecto en algunos navegadores */
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  appearance: none; 
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
   background-repeat: no-repeat;
-  background-position: right 15px top 50%;
+  background-position: right 12px top 50%;
   background-size: 10px auto;
   padding-right: 35px;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin-left: 10px;
 }
 
 .prof-filter-select:hover {
-  background-color: #558c8c;
-}
-
-.prof-filter-select option {
-  background-color: #ffffff;
-  color: #334155;
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
 /* =========================================
-   CONTENEDOR DE ESPECIALIDADES
-========================================= */
-/* =========================================
-   CONTENEDOR CON SCROLL INTERNO
+   CONTENEDOR DE ESPECIALIDADES SEAMLESS
 ========================================= */
 .prof-container {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1800px;
   display: flex;
   flex-direction: column;
-  gap: 40px;
-  flex: 1; /* Ocupa todo el espacio que sobra debajo del buscador */
-  overflow-y: auto; /* Habilita el scroll SOLO en esta zona */
-  padding-right: 15px; /* Deja espacio para la barra */
+  gap: 50px; 
+  flex: 1; 
+  padding-right: 15px; 
   padding-bottom: 60px;
-}
-
-/* Estilizamos la barra de scroll para que se vea profesional */
-.prof-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.prof-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-
-.prof-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-}
-
-.prof-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.7);
+  overflow-x: hidden;
 }
 
 .specialty-block {
-  background-color: #ffffffe0;
-  border-radius: 12px;
-  padding: 25px 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  background-color: transparent; 
+  border-radius: 0;
+  padding: 0; 
+  box-shadow: none; 
   position: relative;
 }
 
 .specialty-title {
-  color: #0c1e36;
-  font-size: 1.25rem;
-  font-weight: 800;
+  color: #2b5b94; 
+  font-size: 1.4rem; 
+  font-weight: 300; 
   text-transform: uppercase;
+  text-align: center;
   margin: 0 0 20px 0;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.5px;
 }
 
 /* =========================================
-   CARRUSEL HORIZONTAL
+   CARRUSEL, TARJETAS Y CONTROLES
 ========================================= */
 .carousel-wrapper {
   position: relative;
   width: 100%;
+  padding: 0 60px; /* Más espacio lateral para las flechas */
 }
 
-.carousel-track {
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scrollbar-width: none; /* Oculta scrollbar Firefox */
-  -ms-overflow-style: none; /* Oculta scrollbar IE/Edge */
-  padding-bottom: 10px; /* Espacio para la sombra de las tarjetas */
+.mySwiper {
+  width: 100%;
+  padding: 50px 0 70px 0; /* Padding gigante arriba y abajo para que las sombras grandes no se corten */
+  overflow: visible; 
 }
 
-.carousel-track::-webkit-scrollbar {
-  display: none; /* Oculta scrollbar Chrome/Safari */
-}
-
-/* Flechas de navegación (Flotan por fuera del bloque blanco) */
-/* Flechas de navegación (Ahora flotan por dentro del bloque para no ser cortadas) */
-.carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: #ffffff; /* Fondo sólido para que las tarjetas de atrás no se transparenten */
-  color: #1e3a5f;
-  border: none;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  font-size: 1.5rem;
+.swiper-slide {
   display: flex;
   justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25); /* Sombra más definida para que resalten */
-  transition: all 0.2s ease;
+  transition: transform 0.4s ease;
 }
 
-.carousel-arrow:hover {
-  background-color: #f1f5f9;
+/* Botones de navegación ultra transparentes */
+.swiper-button-next,
+.swiper-button-prev {
+  background-color: rgba(255, 255, 255, 0.7); 
+  color: #1e3a5f;
+  border-radius: 50%;
+  width: 50px !important;
+  height: 50px !important;
+  transition: all 0.3s ease;
+  margin-top: -25px;
+  opacity: 0.05; /* Casi invisible hasta hacer hover */
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background-color: #ffffff;
   color: #0c2340;
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
+  opacity: 1; /* 100% visible */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Las posicionamos justo en el borde interno del carrusel */
-.carousel-arrow.left {
-  left: -15px;
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 1.4rem !important;
+  font-weight: bold;
 }
 
-.carousel-arrow.right {
-  right: -15px;
-}
-
-/* =========================================
-   TARJETAS DE PROFESIONALES
-========================================= */
+/* Tarjetas más grandes (280x380) */
 .prof-card {
-  min-width: 220px;
-  max-width: 220px;
-  height: 320px;
-  border-radius: 12px;
+  min-width: 280px;
+  max-width: 280px;
+  height: 380px;
+  border-radius: 16px; 
   overflow: hidden;
   position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0; /* Evita que se aplasten */
-  border: 1px solid #e2e8f0; /* Borde muy sutil simulando el diseño */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0; 
+  border: 1px solid rgba(255, 255, 255, 0.5); 
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+  cursor: pointer;
 }
 
-/* Si no hay foto, le damos un fondo gris claro */
+.prof-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(12, 35, 64, 0.6); 
+  z-index: 2;
+  transition: background-color 0.4s ease;
+  pointer-events: none;
+}
+
+.swiper-slide-active .prof-card {
+  transform: scale(1.15); /* Expansión para efecto foco */
+  box-shadow: 0 20px 45px rgba(12, 35, 64, 0.25); /* Sombra amplia y elegante */
+  border: 2px solid #ffffff; /* Borde estrictamente blanco brilloso */
+  z-index: 10;
+}
+
+.swiper-slide-active .prof-card::after {
+  background-color: transparent; 
+}
+
 .prof-card-bg {
   width: 100%;
   height: 100%;
@@ -278,7 +271,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top; /* Centra la cara del doctor */
+  object-position: top; 
 }
 
 .prof-info {
@@ -286,99 +279,230 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  /* Degradado blanco desde abajo hacia arriba para leer bien el texto */
   background: linear-gradient(
     to top,
-    rgba(255, 255, 255, 1) 40%,
-    rgba(255, 255, 255, 0.7) 80%,
+    rgba(255, 255, 255, 1) 45%,
+    rgba(255, 255, 255, 0.8) 85%,
     rgba(255, 255, 255, 0) 100%
   );
-  padding: 30px 15px 15px 15px;
+  padding: 30px 15px 20px 15px;
   text-align: center;
+  z-index: 3; 
 }
 
 .prof-info h4 {
   color: #1e293b;
-  font-size: 1.05rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 2px 0;
+}
+
+.prof-info span {
+  display: block;
+  color: #006eb3;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+/* Simulador de Matrícula */
+.prof-matricula {
+  display: inline-block;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: rgba(226, 232, 240, 0.6);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* =========================================
+   MODAL FULL-SCREEN (VISTA DE DETALLE)
+========================================= */
+.prof-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(12, 35, 64, 0.6); 
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 3000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: fadeInModal 0.3s ease-out forwards;
+}
+
+.prof-modal-content {
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 100%;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  transform: scale(0.95);
+  animation: scaleUpModal 0.3s ease-out forwards;
+}
+
+.prof-modal-photo {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #f8fafc;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+  background-color: #f1f5f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.prof-modal-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.prof-modal-name {
+  color: #0c2340;
+  font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 5px 0;
 }
 
-.prof-info span {
-  color: #006eb3;
+.prof-modal-title {
+  color: #2b5b94;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 5px 0;
+}
+
+.prof-modal-matricula-text {
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+  background-color: #f1f5f9;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.prof-modal-specialty {
+  background-color: #eef2f7;
+  color: #64748b;
+  padding: 6px 16px;
+  border-radius: 20px;
   font-size: 0.85rem;
-  font-weight: 500;
-  font-style: italic;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
 }
 
-/* Ajustes para que Swiper funcione de manera fluida en las filas */
-.mySwiper {
-  width: 100%;
-  padding: 10px 0;
-  overflow: hidden;
+.prof-modal-desc {
+  color: #475569;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  font-weight: 300;
+  margin: 0 0 30px 0;
 }
 
-.swiper-wrapper {
-  transition-timing-function: linear !important; /* Hace que el movimiento automático sea constante y sin aceleraciones extrañas */
-}
-@media (max-width: 1300px) {
-  .carousel-arrow.left {
-    left: -20px;
-  }
-  .carousel-arrow.right {
-    right: -20px;
-  }
+.btn-cerrar-modal {
+  background-color: #2b5b94;
+  color: #ffffff;
+  border: none;
+  padding: 12px 35px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(43, 91, 148, 0.2);
 }
 
+.btn-cerrar-modal:hover {
+  background-color: #1e4474;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(43, 91, 148, 0.3);
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUpModal {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* =========================================
+   RESPONSIVIDAD
+========================================= */
 @media (max-width: 900px) {
-  /* Hacemos el buscador más compacto usando Grid para que no ocupe 3 renglones */
+  .prof-search-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
   .prof-search-bar {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 12px;
-    border-radius: 16px;
-    padding: 12px 18px;
+    gap: 15px;
+    border-radius: 20px;
+    padding: 12px 15px;
   }
   .search-icon {
     margin: 0;
-    align-self: center; /* Centra la lupa junto al texto */
-  }
-  .prof-search-bar input {
-    width: 100%;
-    text-align: left;
+    align-self: center; 
   }
   .prof-filter-select {
-    grid-column: 1 / -1; /* Hace que el botón verde ocupe todo el ancho pero solo en la fila de abajo */
+    grid-column: 1 / -1;
     width: 100%;
+    margin-left: 0;
     text-align: center;
-    background-position: calc(100% - 15px) center;
+    background-position: calc(100% - 20px) center;
   }
 }
 
 @media (max-width: 768px) {
-  /* Reducimos los márgenes gigantes para que el carrusel tenga más espacio vertical */
-  .profesionales-page {
-    padding-top: 85px;
+  .prof-header-fluid {
+    padding: 100px 20px 40px 20px;
   }
-  .prof-header {
-    margin-bottom: 20px;
+  .prof-header-inner {
+    border-left-width: 5px;
+    padding-left: 20px;
   }
-  .prof-header h1 {
-    font-size: 1.7rem;
-    margin-bottom: 5px;
-  }
-  .prof-header p {
-    font-size: 0.95rem;
-    margin-bottom: 15px;
+  .prof-main-title {
+    font-size: 2.2rem;
   }
   .prof-container {
-    gap: 25px; /* Menos espacio muerto entre una especialidad y otra */
-    padding-bottom: 120px; /* Damos margen al final para que el WhatsApp no tape las tarjetas */
+    gap: 25px; 
+    padding-bottom: 120px; 
   }
-  .specialty-block {
-    padding: 15px;
+  .prof-modal-content {
+    padding: 30px 20px;
   }
-  .carousel-arrow {
-    display: none; /* En el celular la gente scrollea con el dedo */
+  .carousel-wrapper {
+    padding: 0 20px;
+  }
+  .swiper-button-next,
+  .swiper-button-prev {
+    display: none; 
   }
 }
