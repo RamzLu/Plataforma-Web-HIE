@@ -54,10 +54,11 @@ const CmsPage = () => {
 
   const isKeycloakInitialized = useRef(false);
 
-  const fetchNoticias = async () => {
+const fetchNoticias = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3000/api/cms/noticias");
+      // Se agrega el parámetro ?admin=true
+      const response = await fetch("http://localhost:3000/api/cms/noticias?admin=true");
       if (!response.ok)
         throw new Error("Error al obtener noticias del servidor");
       const data = await response.json();
@@ -73,7 +74,8 @@ const CmsPage = () => {
           createdAt: noticia.createdAt,
           updatedAt: noticia.updatedAt,
           category: "Noticias",
-          isDraft: false,
+          estado: noticia.estado || "PUBLICADO",
+          isDraft: noticia.isDraft || false,
           images: noticia.images || [],
           editor: noticia.editor || "Editor CMS", 
           editedBy: noticia.editedBy || null
