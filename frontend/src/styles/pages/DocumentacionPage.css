@@ -11,60 +11,64 @@
 .documentacion-container {
   max-width: 1100px;
   width: 100%;
-  padding: 0 20px; /* Le devolvemos el padding lateral a los elementos internos */
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-
-/* 
-SECCION DEL HEADER */
+/* =========================================
+   SECCIÓN DEL HEADER
+========================================= */
 .doc-header-fluid {
-    width: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    margin-bottom: 60px;
-    justify-content: center;
-    padding: 120px 20px 60px 20px;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin-bottom: 60px;
+  justify-content: center;
+  padding: 120px 20px 60px 20px;
+  display: flex; /* Asegura el centrado si es necesario */
 }
 
 .doc-header-inner {
-    width: 100%;
-    max-width: 1200px;
-    border-left: 8px solid #2b5b94;
-    padding-left: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  width: 100%;
+  max-width: 1200px;
+  border-left: 8px solid #2b5b94;
+  padding-left: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .doc-title-page {
-    color: #2b5b94;
-    font-size: 3.2rem;
-    font-weight: 300;
-    text-transform: uppercase;
-    margin-bottom: 15px;
-    letter-spacing: 1px;
+  color: #2b5b94;
+  font-size: 3.2rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
 }
 
+.doc-info-wrapper {
+  display: flex;
+  flex-direction: column;
+}
 
 .doc-info-text p {
-    color: #64748b;
-    font-size: 1.15rem;
-    font-weight: 400;
-    margin: 0;
+  color: #64748b;
+  font-size: 1.15rem;
+  font-weight: 400;
+  margin: 0;
 }
 
-/* Responsividad de la cabecera */
 @media (max-width: 768px) {
   .doc-header-inner {
     border-left-width: 5px;
     padding-left: 20px;
   }
-  .doc-title {
+  .doc-title-page {
     font-size: 2rem;
   }
   .doc-info-wrapper {
@@ -74,60 +78,65 @@ SECCION DEL HEADER */
     font-size: 0.95rem;
   }
 }
-/* --- BUSCADOR --- */
+
+/* =========================================
+   BUSCADOR (ESTILO PÍLDORA COMPACTO)
+========================================= */
 .doc-search-container {
   display: flex;
   align-items: center;
   background-color: #ffffff;
-  border: 2px solid #2b5b94;
-  border-radius: 50px; /* Bordes totalmente redondeados */
-  padding: 14px 25px; /* Un poco más de padding vertical */
+  border: 1px solid #e2e8f0; /* Borde sutil */
+  border-radius: 50px; 
+  padding: 6px 8px 6px 20px; /* Padding reducido, igual a Profesionales */
   width: 100%;
-  max-width: 800px; /* Un poco más ancho para mayor respiro */
+  max-width: 650px; /* Ancho máximo reducido */
   margin-bottom: 25px;
-  box-shadow: 0 2px 10px rgba(26, 0, 255, 0.02);
-  transition:
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); /* Sombra ultra suave */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .doc-search-container:focus-within {
-  border-color: #2b5b94; /* Azul institucional al hacer foco */
-  box-shadow: 0 4px 15px rgba(43, 91, 148, 0.1);
+  box-shadow: 0 6px 15px rgba(43, 91, 148, 0.08);
+  border-color: #cbd5e1;
 }
 
 .doc-search-icon {
-  width: 22px;
-  height: 22px;
-  color: #1762cb;
-  margin-right: 15px;
+  width: 18px; /* Icono levemente más chico */
+  height: 18px;
+  color: #94a3b8; /* Gris suave */
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
 .doc-search-input {
+  flex: 1;
   border: none;
   outline: none;
-  width: 100%;
-  font-size: 1.05rem;
-  color: #1c1e21;
+  font-size: 0.95rem; /* Letra un poco más chica y elegante */
+  color: #334155;
   background: transparent;
   font-family: inherit;
+  width: 100%;
 }
 
 .doc-search-input::placeholder {
-  color: #000000;
-  font-style: italic;
+  color: #cbd5e1;
+  font-style: normal; /* Sin cursiva */
   font-weight: 300;
 }
 
-/* --- FILTROS (CHIPS) --- */
+/* =========================================
+   FILTROS SIN BORDES (CHIPS)
+========================================= */
 .doc-filters {
   display: flex;
-  gap: 12px; /* Reducimos un poco el gap para que se vean como un grupo */
+  gap: 12px; 
   margin-bottom: 40px;
   flex-wrap: wrap;
   justify-content: center;
   width: 100%;
-  max-width: 800px; /* Mismo ancho que el buscador */
+  max-width: 800px; 
 }
 
 .filter-chip {
@@ -135,199 +144,212 @@ SECCION DEL HEADER */
   align-items: center;
   justify-content: center;
   background-color: #ffffff;
-  border: 2px solid #2b5b94; /* Mismo borde que el buscador */
+  border: none; /* Se elimina el borde */
   padding: 10px 22px;
-  border-radius: 50px; /* Mismo radio que el buscador */
+  border-radius: 50px; /* Forma de píldora */
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #64748b; /* Gris texto sutil por defecto */
+  color: #64748b; 
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* Sombra muy suave base */
 }
 
+/* Efectos de Interacción */
 .filter-chip:hover {
-  border-color: #94a3b8;
-  color: #052f61;
+  background-color: #f1f5f9;
+  color: #2b5b94;
+  transform: translateY(-1px);
 }
 
 .filter-chip.active {
-  background-color: #2b5b94; /* Fondo azul institucional */
-  color: #ffffff; /* Texto blanco */
-  border-color: #2b5b94;
-  box-shadow: 0 4px 10px rgba(43, 91, 148, 0.2);
+  background-color: #2b5b94; 
+  color: #ffffff; 
+  box-shadow: 0 4px 10px rgba(43, 91, 148, 0.2); /* Sombra resaltada */
 }
 
-/* Ocultamos el radio button visual, ya no es necesario con este diseño de "botón" */
 .chip-radio {
   display: none;
 }
 
-/* --- TABLA DE DOCUMENTOS --- */
+/* =========================================
+   LISTA DE TARJETAS DE DOCUMENTOS (REDISEÑO)
+========================================= */
 .doc-table-container {
   width: 100%;
-  background-color: #ffffff; /* Fondo blanco puro para máxima legibilidad */
-  /* border-radius: 12px; Bordes contenidos */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Sombra para despegarlo del fondo */
-  overflow: hidden;
-  border: 1px solid #7eade7; /* Borde sutil para contener la información */
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Separación sutil entre tarjetas */
 }
 
+/* --- Cabecera Rediseñada --- */
 .doc-table-header {
   display: grid;
-  grid-template-columns: 2fr 1fr 0.8fr 0.6fr 0.8fr;
-  background-color: #2b5b94; /* Color de fondo fuerte para resaltar el índice */
-  padding: 20px 25px;
+  /* GRID PERFECTO PARA ALINEACIÓN */
+  grid-template-columns: 2.5fr 1.2fr 0.8fr 0.8fr 1.5fr; 
+  padding: 0 25px 10px 25px;
   align-items: center;
   gap: 15px;
+  border-bottom: 2px solid #e2e8f0; /* Línea separadora sutil */
+  margin-bottom: 5px;
+  background-color: transparent; /* Sin fondo pesado */
 }
 
 .header-col {
-  color: #ffffff; /* Texto blanco para contrastar con el fondo azul */
-  font-weight: 700;
-  font-size: 1.05rem; /* Letra un poco más grande */
+  color: #64748b; /* Gris azulado sutil */
+  font-weight: 600; /* Menos peso que antes */
+  font-size: 0.85rem; /* Letra un poco más pequeña */
   display: flex;
   align-items: center;
-  gap: 8px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.header-icon {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
+  letter-spacing: 1px; /* Mayor espaciado */
 }
 
 .doc-table-body {
   display: flex;
   flex-direction: column;
+  gap: 16px; /* Espacio entre documentos */
 }
 
+/* --- Fila Convertida en Tarjeta 'Soft' --- */
 .doc-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 0.8fr 0.6fr 0.8fr;
-  padding: 20px 25px;
+  /* EL MISMO GRID QUE LA CABECERA */
+  grid-template-columns: 2.5fr 1.2fr 0.8fr 0.8fr 1.5fr;
+  padding: 22px 25px;
   align-items: center;
   gap: 15px;
-  border-bottom: 1px solid #e2e8f0;
-  transition: background-color 0.2s;
+  background-color: #ffffff;
+  border-radius: 16px; /* Bordes suavizados (Soft UI) */
+  border: 1px solid #f1f5f9; /* Borde imperceptible */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02); /* Sombra base */
+  transition: all 0.3s ease; /* Transición fluida solicitada */
 }
 
-.doc-row:last-child {
-  border-bottom: none;
-}
-
-/* Efecto cebra: intercala un fondo muy suave para ayudar a la vista a seguir el renglón */
-.doc-row:nth-child(even) {
-  background-color: #f8fafc;
-}
-
+/* Efecto Hover Solicitado */
 .doc-row:hover {
-  background-color: #f1f5f9;
+  transform: translateY(-2px); 
+  box-shadow: 0 12px 25px -5px rgba(43, 91, 148, 0.15); 
+  border-color: #cbd5e1;
 }
 
+/* --- Información Interna --- */
 .col-titulo {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
 }
 
 .doc-file-icon {
-  width: 24px; /* Ícono un poco más grande */
-  height: 24px;
+  width: 28px; 
+  height: 28px;
   color: #2b5b94;
   margin-top: 2px;
   flex-shrink: 0;
 }
 
+.titulo-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .titulo-text {
-  color: #1c1e21; /* Texto casi negro para contraste máximo */
-  font-size: 1.1rem; /* Tamaño de fuente mayor para adultos mayores */
-  font-weight: 500;
-  line-height: 1.4;
+  color: #0f172a; 
+  font-size: 1.15rem; 
+  font-weight: 600;
+  line-height: 1.3;
   margin: 0;
 }
 
 .leer-mas-link {
-  color: #2b5b94;
-  font-weight: 700;
-  font-style: italic;
-  text-decoration: underline;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 0.95rem;
-  margin-left: 8px;
+  color: #3b82f6;
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-decoration: none;
   transition: color 0.2s;
 }
 
 .leer-mas-link:hover {
-  color: #5ab1db;
+  color: #2563eb;
+  text-decoration: underline;
 }
 
 .col-data {
-  color: #334155; /* Texto oscuro y legible */
+  color: #475569;
   font-size: 1rem;
   font-weight: 400;
-  border-left: 1px solid #cbd5e1; /* Línea vertical divisoria */
-  padding-left: 15px;
-  height: 100%;
   display: flex;
   align-items: center;
 }
 
-/* Botón Descargar */
-.btn-descargar {
-  background-color: transparent;
-  color: #e8453c;
-  text-decoration: none;
-  padding: 10px 15px; /* Más área para hacer clic */
-  border-radius: 30px;
-  border: 2px solid #e8453c; /* Borde más grueso */
+.category-pill {
+  background-color: #f8fafc;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 50px; /* Estilo píldora */
+  border: 1px solid #e2e8f0;
+  display: inline-block;
+  text-transform: capitalize;
+}
+
+.date-text {
+  font-weight: 500;
+}
+
+.col-acciones {
+  display: flex;
+  justify-content: flex-end; /* Acciones agrupadas a la derecha */
+  gap: 10px;
+}
+
+/* Botón Acción (Pill-shaped) */
+.btn-descargar-pill {
+  background-color: #eaf6fc;
+  color: #2b5b94;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 50px; /* Estilo píldora */
   font-weight: 700;
   font-size: 0.9rem;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   cursor: pointer;
 }
 
-.btn-descargar:hover {
-  background-color: #e8453c;
+.btn-descargar-pill:hover {
+  background-color: #2b5b94;
   color: #ffffff;
+  box-shadow: 0 6px 15px rgba(43, 91, 148, 0.25);
+  transform: translateY(-1px);
 }
 
-.btn-descargar svg {
+.btn-descargar-pill svg {
   width: 18px;
   height: 18px;
 }
 
-/* --- RESPONSIVIDAD DE LA TABLA --- */
+/* =========================================
+   RESPONSIVIDAD MÓVIL
+========================================= */
 @media (max-width: 992px) {
   .doc-table-header {
-    display: none;
+    display: none; /* Se oculta la cabecera en móviles */
   }
 
   .doc-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Colapsa la grilla */
     gap: 15px;
     padding: 25px 20px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #cbd5e1;
-    margin-bottom: 15px;
-  }
-
-  /* Se anula el efecto cebra en móviles porque son tarjetas separadas */
-  .doc-row:nth-child(even) {
-    background-color: #ffffff;
   }
 
   .col-titulo {
@@ -335,8 +357,6 @@ SECCION DEL HEADER */
   }
 
   .col-data {
-    border-left: none; /* Quitamos la línea vertical en móviles */
-    padding-left: 0;
     height: auto;
   }
 
@@ -347,8 +367,12 @@ SECCION DEL HEADER */
     margin-right: 8px;
   }
 
-  .btn-descargar {
-    margin-top: 15px;
-    width: 100%; /* Botón ancho completo en móviles para que sea fácil de tocar */
+  .col-acciones {
+    justify-content: flex-start;
+    margin-top: 10px;
+  }
+
+  .btn-descargar-pill {
+    width: 100%; 
   }
 }
