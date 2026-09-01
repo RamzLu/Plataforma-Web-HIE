@@ -29,6 +29,21 @@ const ContactoPage = () => {
 
   return (
     <main className="contacto-page">
+      {/* 1. BANNER MOVIDO A LA PARTE SUPERIOR */}
+      <section className="top-banner-section">
+        <div
+          className="location-hero-banner"
+          style={{ backgroundImage: `url(${fotoFachadaHIE})` }}
+        >
+          <div className="location-banner-overlay">
+            <div className="location-banner-text">
+              <h2>CÓMO LLEGAR Y CANALES OFICIALES</h2>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. TEXTO PRINCIPAL DE CONTACTO CON IMAGEN ORIGINAL */}
       <div className="contacto-container">
         <section className="contacto-hero">
           <div className="contacto-hero-left">
@@ -56,18 +71,8 @@ const ContactoPage = () => {
         </section>
       </div>
 
+      {/* 3. SECCIÓN AZUL INSTITUCIONAL (MAPA Y TRANSPORTE) */}
       <section className="location-fullwidth-section">
-        <div
-          className="location-hero-banner"
-          style={{ backgroundImage: `url(${fotoFachadaHIE})` }}
-        >
-          <div className="location-banner-overlay">
-            <div className="location-banner-text">
-              <h2>CÓMO LLEGAR Y CANALES OFICIALES</h2>
-            </div>
-          </div>
-        </div>
-
         <div className="location-bottom-content">
           <div className="location-bottom-inner">
             <div className="location-grid-top">
@@ -130,98 +135,107 @@ const ContactoPage = () => {
                 </div>
               </AnimatedContent>
 
-              <div className="map-frame-box">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7160.991248531538!2d-58.19816300000001!3d-26.180551000000005!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945caf5c8f477e01%3A0x3ad3344cf5acca56!2sHospital%20Interdistrital%20Evita!5e0!3m2!1ses-419!2sar!4v1786650025635!5m2!1ses-419!2sar"
-                  width="635"
-                  height="450"
-                  loading="eager"
-                ></iframe>
-              </div>
+              {/* MAPA AHORA ENVUELTO EN ANIMACIÓN */}
+              <AnimatedContent distance={50} direction="vertical" delay={0.3}>
+                <div className="map-frame-box">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7160.991248531538!2d-58.19816300000001!3d-26.180551000000005!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945caf5c8f477e01%3A0x3ad3344cf5acca56!2sHospital%20Interdistrital%20Evita!5e0!3m2!1ses-419!2sar!4v1786650025635!5m2!1ses-419!2sar"
+                    width="100%"
+                    height="100%"
+                    loading="eager"
+                    title="Mapa del Hospital"
+                  ></iframe>
+                </div>
+              </AnimatedContent>
             </div>
-            <div className="transport-unified-card">
-              <div className="transport-col">
-                <div className="transport-col-header">
-                  <svg
-                    className="transport-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                  >
-                    <rect x="3" y="3" width="18" height="16" rx="2"></rect>
-                    <path d="M3 11h18"></path>
-                    <path d="M19 19v2a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-2"></path>
-                    <path d="M7 19v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2"></path>
-                    <circle cx="7.5" cy="15.5" r="1.5"></circle>
-                    <circle cx="16.5" cy="15.5" r="1.5"></circle>
-                  </svg>
-                  <h3>EN COLECTIVO</h3>
+            
+            {/* TARJETA DE TRANSPORTE AHORA ENVUELTA EN ANIMACIÓN */}
+            <AnimatedContent distance={60} direction="vertical" delay={0.4}>
+              <div className="transport-unified-card">
+                <div className="transport-col">
+                  <div className="transport-col-header">
+                    <svg
+                      className="transport-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <rect x="3" y="3" width="18" height="16" rx="2"></rect>
+                      <path d="M3 11h18"></path>
+                      <path d="M19 19v2a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-2"></path>
+                      <path d="M7 19v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2"></path>
+                      <circle cx="7.5" cy="15.5" r="1.5"></circle>
+                      <circle cx="16.5" cy="15.5" r="1.5"></circle>
+                    </svg>
+                    <h3>EN COLECTIVO</h3>
+                  </div>
+
+                  <ul className="transport-list">
+                    <li>
+                      <span className="line-tag">LÍNEA B</span>
+                      <p>
+                        Lo deja justo en la <strong>puerta principal</strong>.
+                      </p>
+                    </li>
+                    <li>
+                      <span className="line-tag">LÍNEA D</span>
+                      <p>
+                        Lo deja a <strong>dos cuadras</strong>, caminando por una
+                        vereda amplia y segura.
+                      </p>
+                    </li>
+                    <li>
+                      <span className="line-tag">LÍNEA E</span>
+                      <p>
+                        Lo deja por la <strong>C. Juan Manuel de Rosas</strong> (a
+                        dos cuadras de la Av. Barberis).
+                      </p>
+                    </li>
+                    <li>
+                      <span className="line-tag">LÍNEA K</span>
+                      <p>
+                        Lo deja en la esquina de{" "}
+                        <strong>Av. Néstor Kirchner y Barberis</strong>.
+                      </p>
+                    </li>
+                  </ul>
                 </div>
 
-                <ul className="transport-list">
-                  <li>
-                    <span className="line-tag">LÍNEA B</span>
+                <div className="transport-col-divider"></div>
+
+                <div className="transport-col">
+                  <div className="transport-col-header">
+                    <svg
+                      className="transport-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <path d="M18.5 9l-1.8-3.6C16.4 4.8 15.8 4.5 15 4.5H9c-.8 0-1.4.3-1.7.9L5.5 9H3v7h2c0 1.1.9 2 2 2s2-.9 2-2h6c0 1.1.9 2 2 2s2-.9 2-2h2V9h-2.5z"></path>
+                      <circle cx="7.5" cy="13.5" r="1.5"></circle>
+                      <circle cx="16.5" cy="13.5" r="1.5"></circle>
+                    </svg>
+                    <h3>EN REMÍS O TAXI</h3>
+                  </div>
+
+                  <div className="taxi-info-box">
                     <p>
-                      Lo deja justo en la <strong>puerta principal</strong>.
+                      Indíquele al chofer que su destino es el{" "}
+                      <strong>Hospital Interdistrital Evita</strong>, ingresando
+                      por la{" "}
+                      <strong>entrada principal sobre la Avenida Barberis</strong>
+                      .
                     </p>
-                  </li>
-                  <li>
-                    <span className="line-tag">LÍNEA D</span>
-                    <p>
-                      Lo deja a <strong>dos cuadras</strong>, caminando por una
-                      vereda amplia y segura.
-                    </p>
-                  </li>
-                  <li>
-                    <span className="line-tag">LÍNEA E</span>
-                    <p>
-                      Lo deja por la <strong>C. Juan Manuel de Rosas</strong> (a
-                      dos cuadras de la Av. Barberis).
-                    </p>
-                  </li>
-                  <li>
-                    <span className="line-tag">LÍNEA K</span>
-                    <p>
-                      Lo deja en la esquina de{" "}
-                      <strong>Av. Néstor Kirchner y Barberis</strong>.
-                    </p>
-                  </li>
-                </ul>
+                  </div>
+                </div>
               </div>
-
-              <div className="transport-col-divider"></div>
-
-              <div className="transport-col">
-                <div className="transport-col-header">
-                  <svg
-                    className="transport-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                  >
-                    <path d="M18.5 9l-1.8-3.6C16.4 4.8 15.8 4.5 15 4.5H9c-.8 0-1.4.3-1.7.9L5.5 9H3v7h2c0 1.1.9 2 2 2s2-.9 2-2h6c0 1.1.9 2 2 2s2-.9 2-2h2V9h-2.5z"></path>
-                    <circle cx="7.5" cy="13.5" r="1.5"></circle>
-                    <circle cx="16.5" cy="13.5" r="1.5"></circle>
-                  </svg>
-                  <h3>EN REMÍS O TAXI</h3>
-                </div>
-
-                <div className="taxi-info-box">
-                  <p>
-                    Indíquele al chofer que su destino es el{" "}
-                    <strong>Hospital Interdistrital Evita</strong>, ingresando
-                    por la{" "}
-                    <strong>entrada principal sobre la Avenida Barberis</strong>
-                    .
-                  </p>
-                </div>
-              </div>
-            </div>
+            </AnimatedContent>
           </div>
         </div>
       </section>
+      
       <AnimatedContent distance={70} duration={1} threshold={0.2}>
         <HospitalMapSection />
       </AnimatedContent>
