@@ -8,7 +8,8 @@ const supabase = createClient(
 
 export const crearNoticia = async (req, res) => {
   try {
-    const { titulo, contenido } = req.body;
+    // 🔥 1. Agregamos 'estado' a la extracción
+    const { titulo, contenido, estado } = req.body; 
     const archivosSubidos = req.files || [];
 
     const keycloakSub = req.user.keycloakId;
@@ -18,6 +19,9 @@ export const crearNoticia = async (req, res) => {
     if (!titulo || !contenido) {
       return res.status(400).json({ error: "Faltan campos obligatorios: titulo y contenido." });
     }
+
+    // 🔥 2. Evaluamos el estado que llega del frontend
+    const estadoFinal = estado ? estado.toUpperCase() : "BORRADOR";
 
     let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: "Noticias" } });
     if (!categoria) {
@@ -59,7 +63,8 @@ export const crearNoticia = async (req, res) => {
         contenido,
         categoriaId: categoria.id,
         createdBy: usuarioLocal.id,
-        estado: "PUBLICADO",
+        // 🔥 3. Usamos la variable dinámica en lugar de "PUBLICADO"
+        estado: estadoFinal, 
         updatedAt: new Date(),
       },
       include: {
@@ -111,6 +116,8 @@ export const crearNoticia = async (req, res) => {
         ...nuevaNoticia,
         id: nuevaNoticia.id.toString(),
         categoriaId: nuevaNoticia.categoriaId.toString(),
+        estado: nuevaNoticia.estado, // Devolvemos el estado al frontend
+        isDraft: nuevaNoticia.estado === "BORRADOR",
         images: imagenesUrlsGuardadas,
         editor: editorNombre,
         editedBy: null 
@@ -124,14 +131,16 @@ export const crearNoticia = async (req, res) => {
 
 export const obtenerNoticias = async (req, res) => {
   try {
+    const { admin } = req.query;
+    const whereClause = admin === "true" ? {} : { estado: "PUBLICADO" };
+
     const noticias = await prisma.noticia.findMany({
+      where: whereClause,
       orderBy: { createdAt: "desc" },
       include: {
         usuario_noticia_createdByTousuario: true,
         usuario_noticia_updatedByTousuario: true, 
-        noticia_archivo: {
-          include: { archivo: true },
-        },
+        noticia_archivo: { include: { archivo: true } },
       },
     });
 
@@ -157,7 +166,8 @@ export const obtenerNoticias = async (req, res) => {
         createdAt: noticia.createdAt,
         updatedAt: noticia.updatedAt,
         category: "Noticias",
-        isDraft: false,
+        estado: noticia.estado,
+        isDraft: noticia.estado === "BORRADOR",
         images: imgs,
         editor: editorNombre,
         editedBy: editadoPorNombre 
@@ -166,7 +176,6 @@ export const obtenerNoticias = async (req, res) => {
 
     return res.status(200).json(noticiasFormateadas);
   } catch (error) {
-    console.error("Error al obtener las noticias:", error);
     return res.status(500).json({ error: "Error al cargar las noticias." });
   }
 };
@@ -191,7 +200,6 @@ export const eliminarNoticia = async (req, res) => {
 
     return res.status(200).json({ message: "¡Noticia eliminada con éxito!" });
   } catch (error) {
-    console.error("Error al eliminar la noticia:", error);
     return res.status(500).json({ error: "Error al eliminar: " + error.message });
   }
 };
@@ -199,10 +207,10 @@ export const eliminarNoticia = async (req, res) => {
 export const actualizarNoticia = async (req, res) => {
   try {
     const { id } = req.params;
-    const { titulo, contenido, imagenesExistentes } = req.body;
+    // 🔥 1. Agregamos 'estado' a la extracción
+    const { titulo, contenido, imagenesExistentes, estado } = req.body;
     const archivosSubidos = req.files || [];
 
-   
     const keycloakSub = req.user.keycloakId;
     const username = req.user.username || `user_${Date.now()}`;
     const name = req.user.name || "Editor CMS";
@@ -229,15 +237,19 @@ export const actualizarNoticia = async (req, res) => {
 
     if (!noticiaExistente) return res.status(404).json({ error: "Noticia no encontrada." });
 
-    
+    // 🔥 2. Preparamos el objeto de datos dinámico
+    const dataUpdate = {
+      titulo: titulo || noticiaExistente.titulo,
+      contenido: contenido || noticiaExistente.contenido,
+      updatedAt: new Date(),
+      updatedBy: usuarioEditor.id 
+    };
+
+    if (estado) dataUpdate.estado = estado.toUpperCase();
+
     const noticiaActualizada = await prisma.noticia.update({
       where: { id: BigInt(id) },
-      data: {
-        titulo: titulo || noticiaExistente.titulo,
-        contenido: contenido || noticiaExistente.contenido,
-        updatedAt: new Date(),
-        updatedBy: usuarioEditor.id 
-      },
+      data: dataUpdate,
     });
 
     const urlsConservadas = imagenesExistentes ? JSON.parse(imagenesExistentes) : [];
@@ -284,6 +296,8 @@ export const actualizarNoticia = async (req, res) => {
         ...noticiaActualizada,
         id: noticiaActualizada.id.toString(),
         categoriaId: noticiaActualizada.categoriaId.toString(),
+        estado: noticiaActualizada.estado,
+        isDraft: noticiaActualizada.estado === "BORRADOR",
         images: imgs,
         editor: editorOriginal,
         editedBy: editadoPorNombre 
