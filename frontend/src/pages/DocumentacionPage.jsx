@@ -89,6 +89,16 @@ const DocumentacionPage = () => {
     }
   };
 
+  // Helper para pintar las píldoras dependiendo de la categoría
+  const getCategoryColorClass = (categoria) => {
+    if (!categoria) return "cat-default";
+    const catLower = categoria.toLowerCase();
+    if (catLower.includes("guía") || catLower.includes("guia")) return "cat-guia";
+    if (catLower.includes("institucional")) return "cat-inst";
+    if (catLower.includes("prevención") || catLower.includes("prevencion")) return "cat-prev";
+    return "cat-default";
+  };
+
   return (
     <main className="documentacion-page">
       <div
@@ -140,13 +150,14 @@ const DocumentacionPage = () => {
         <AnimatedContent distance={40} direction="vertical" delay={0.1}>
           {/* LISTA DE TARJETAS / LIST-VIEW */}
           <div className="doc-table-container">
-            {/* CABECERA REDISEÑADA Y SUTIL */}
+            {/* CABECERA REDISEÑADA Y SUTIL (Sin el centrado inline de Categoría) */}
             <div className="doc-table-header">
               <div className="header-col">TÍTULO DEL DOCUMENTO</div>
               <div className="header-col">CATEGORÍA</div>
               <div className="header-col">FECHA</div>
               <div className="header-col">TAMAÑO</div>
-              <div className="header-col" style={{ justifyContent: "flex-end" }}>ACCIONES</div>
+              {/* Acciones ya no tiene justify-content: flex-end para que se acerque a Tamaño */}
+              <div className="header-col">ACCIONES</div>
             </div>
 
             <div className="doc-table-body">
@@ -165,7 +176,7 @@ const DocumentacionPage = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                       </svg>
                       <div className="titulo-wrapper">
-                        <p className="titulo-text">{doc.title}</p>
+                        <p className="titulo-text" title={doc.title}>{doc.title}</p>
                         {doc.fileUrl && (
                           <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="leer-mas-link">
                             Ver documento en navegador
@@ -174,8 +185,11 @@ const DocumentacionPage = () => {
                       </div>
                     </div>
 
-                    <div className="col-data" data-label="Categoría">
-                      <span className="category-pill">{doc.category}</span>
+                    {/* Nueva clase col-categoria-data para forzar su centrado dentro de la fila */}
+                    <div className="col-data col-categoria-data" data-label="Categoría">
+                      <span className={`category-pill ${getCategoryColorClass(doc.category)}`}>
+                        {doc.category}
+                      </span>
                     </div>
                     <div className="col-data date-text" data-label="Fecha">
                       {doc.updatedAt}

@@ -9,7 +9,7 @@
 }
 
 .documentacion-container {
-  max-width: 1100px;
+  max-width: 1500px;
   width: 100%;
   padding: 0 20px;
   display: flex;
@@ -29,12 +29,12 @@
   margin-bottom: 60px;
   justify-content: center;
   padding: 120px 20px 60px 20px;
-  display: flex; /* Asegura el centrado si es necesario */
+  display: flex; 
 }
 
 .doc-header-inner {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1500px;
   border-left: 8px solid #2b5b94;
   padding-left: 40px;
   display: flex;
@@ -86,13 +86,13 @@
   display: flex;
   align-items: center;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0; /* Borde sutil */
+  border: 1px solid #e2e8f0; 
   border-radius: 50px; 
-  padding: 6px 8px 6px 20px; /* Padding reducido, igual a Profesionales */
+  padding: 6px 8px 6px 20px; 
   width: 100%;
-  max-width: 650px; /* Ancho máximo reducido */
+  max-width: 800px; 
   margin-bottom: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); /* Sombra ultra suave */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); 
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -102,9 +102,9 @@
 }
 
 .doc-search-icon {
-  width: 18px; /* Icono levemente más chico */
+  width: 18px; 
   height: 18px;
-  color: #94a3b8; /* Gris suave */
+  color: #94a3b8; 
   margin-right: 12px;
   flex-shrink: 0;
 }
@@ -113,7 +113,7 @@
   flex: 1;
   border: none;
   outline: none;
-  font-size: 0.95rem; /* Letra un poco más chica y elegante */
+  font-size: 0.95rem; 
   color: #334155;
   background: transparent;
   font-family: inherit;
@@ -122,7 +122,7 @@
 
 .doc-search-input::placeholder {
   color: #cbd5e1;
-  font-style: normal; /* Sin cursiva */
+  font-style: normal; 
   font-weight: 300;
 }
 
@@ -136,7 +136,7 @@
   flex-wrap: wrap;
   justify-content: center;
   width: 100%;
-  max-width: 800px; 
+  max-width: 1000px; 
 }
 
 .filter-chip {
@@ -144,9 +144,9 @@
   align-items: center;
   justify-content: center;
   background-color: #ffffff;
-  border: none; /* Se elimina el borde */
+  border: none; 
   padding: 10px 22px;
-  border-radius: 50px; /* Forma de píldora */
+  border-radius: 50px; 
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
@@ -154,10 +154,9 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* Sombra muy suave base */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); 
 }
 
-/* Efectos de Interacción */
 .filter-chip:hover {
   background-color: #f1f5f9;
   color: #2b5b94;
@@ -167,7 +166,7 @@
 .filter-chip.active {
   background-color: #2b5b94; 
   color: #ffffff; 
-  box-shadow: 0 4px 10px rgba(43, 91, 148, 0.2); /* Sombra resaltada */
+  box-shadow: 0 4px 10px rgba(43, 91, 148, 0.2); 
 }
 
 .chip-radio {
@@ -175,101 +174,109 @@
 }
 
 /* =========================================
-   LISTA DE TARJETAS DE DOCUMENTOS (REDISEÑO)
+   LISTA DE TARJETAS DE DOCUMENTOS 
 ========================================= */
 .doc-table-container {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px; /* Separación sutil entre tarjetas */
+  gap: 16px; 
 }
 
 /* --- Cabecera Rediseñada --- */
 .doc-table-header {
   display: grid;
-  /* GRID PERFECTO PARA ALINEACIÓN */
-  grid-template-columns: 2.5fr 1.2fr 0.8fr 0.8fr 1.5fr; 
-  padding: 0 25px 10px 25px;
+  /* Proporción ajustada para acercar ACCIONES a TAMAÑO */
+  grid-template-columns: minmax(0, 3.5fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1.5fr);
+  padding: 16px 30px;
   align-items: center;
   gap: 15px;
-  border-bottom: 2px solid #e2e8f0; /* Línea separadora sutil */
+  background-color: #2b5b94;
+  border-radius: 12px;
   margin-bottom: 5px;
-  background-color: transparent; /* Sin fondo pesado */
+  box-shadow: 0 4px 12px rgba(43, 91, 148, 0.15);
 }
 
 .header-col {
-  color: #64748b; /* Gris azulado sutil */
-  font-weight: 600; /* Menos peso que antes */
-  font-size: 0.85rem; /* Letra un poco más pequeña */
+  color: #ffffff; 
+  font-weight: 600; 
+  font-size: 0.85rem; 
   display: flex;
   align-items: center;
   text-transform: uppercase;
-  letter-spacing: 1px; /* Mayor espaciado */
+  letter-spacing: 1px; 
 }
 
 .doc-table-body {
   display: flex;
   flex-direction: column;
-  gap: 16px; /* Espacio entre documentos */
+  gap: 16px; 
 }
 
 /* --- Fila Convertida en Tarjeta 'Soft' --- */
 .doc-row {
   display: grid;
-  /* EL MISMO GRID QUE LA CABECERA */
-  grid-template-columns: 2.5fr 1.2fr 0.8fr 0.8fr 1.5fr;
-  padding: 22px 25px;
+  /* GRID EXACTO A LA CABECERA PARA ALINEACIÓN PERFECTA */
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1.5fr);
+  padding: 22px 80px; 
   align-items: center;
   gap: 15px;
   background-color: #ffffff;
-  border-radius: 16px; /* Bordes suavizados (Soft UI) */
-  border: 1px solid #f1f5f9; /* Borde imperceptible */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02); /* Sombra base */
-  transition: all 0.3s ease; /* Transición fluida solicitada */
+  border-radius: 16px; 
+  border: 1px solid #f1f5f9; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02); 
+  transition: all 0.3s ease; 
 }
 
-/* Efecto Hover Solicitado */
+/* Efecto Hover */
 .doc-row:hover {
   transform: translateY(-2px); 
   box-shadow: 0 12px 25px -5px rgba(43, 91, 148, 0.15); 
   border-color: #cbd5e1;
 }
 
-/* --- Información Interna --- */
+/* --- Control Estricto de Textos Largos --- */
 .col-titulo {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 14px;
+  overflow: hidden; 
 }
 
 .doc-file-icon {
   width: 28px; 
   height: 28px;
   color: #2b5b94;
-  margin-top: 2px;
-  flex-shrink: 0;
+  flex-shrink: 0; 
 }
 
 .titulo-wrapper {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow: hidden; 
+  width: 100%;
 }
 
 .titulo-text {
   color: #0f172a; 
-  font-size: 1.15rem; 
+  font-size: 1.1rem; 
   font-weight: 600;
-  line-height: 1.3;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
 }
 
 .leer-mas-link {
   color: #3b82f6;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-decoration: none;
   transition: color 0.2s;
+  white-space: nowrap;
 }
 
 .leer-mas-link:hover {
@@ -283,18 +290,54 @@
   font-weight: 400;
   display: flex;
   align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Clase para centrar solo el contenido de la categoría en las filas */
+.col-categoria-data {
+  justify-content: center;
 }
 
 .category-pill {
-  background-color: #f8fafc;
-  color: #334155;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   padding: 6px 16px;
-  border-radius: 50px; /* Estilo píldora */
-  border: 1px solid #e2e8f0;
+  border-radius: 50px; 
+  border: 1px solid transparent;
   display: inline-block;
-  text-transform: capitalize;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* COLORES PASTEL (SOFT UI) PARA LAS CATEGORÍAS */
+.cat-guia {
+  background-color: #fffbeb !important; /* Amarillo muy suave */
+  color: #b45309 !important; /* Texto ocre oscuro */
+  border-color: #fde68a !important;
+}
+
+.cat-inst {
+  background-color: #f0f9ff !important; /* Celeste muy suave */
+  color: #0369a1 !important; /* Texto azul fuerte */
+  border-color: #bae6fd !important;
+}
+
+.cat-prev {
+  background-color: #f0fdf4 !important; /* Verde muy suave */
+  color: #15803d !important; /* Texto verde oscuro */
+  border-color: #bbf7d0 !important;
+}
+
+.cat-default {
+  background-color: #f8fafc !important; 
+  color: #475569 !important; 
+  border-color: #e2e8f0 !important;
 }
 
 .date-text {
@@ -303,7 +346,7 @@
 
 .col-acciones {
   display: flex;
-  justify-content: flex-end; /* Acciones agrupadas a la derecha */
+  justify-content: flex-start; /* Alineado a la izquierda para acercarlo a Tamaño */
   gap: 10px;
 }
 
@@ -313,9 +356,9 @@
   color: #2b5b94;
   border: none;
   padding: 10px 24px;
-  border-radius: 50px; /* Estilo píldora */
+  border-radius: 50px; 
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: flex;
@@ -324,6 +367,7 @@
   gap: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .btn-descargar-pill:hover {
@@ -343,17 +387,25 @@
 ========================================= */
 @media (max-width: 992px) {
   .doc-table-header {
-    display: none; /* Se oculta la cabecera en móviles */
+    display: none; 
   }
 
   .doc-row {
-    grid-template-columns: 1fr; /* Colapsa la grilla */
+    grid-template-columns: 1fr; 
     gap: 15px;
-    padding: 25px 20px;
+    padding: 25px 20px; 
   }
 
   .col-titulo {
     margin-bottom: 10px;
+  }
+  
+  .col-categoria-data {
+    justify-content: flex-start; /* Reseteamos el centrado en móvil */
+  }
+
+  .titulo-text {
+    white-space: normal; 
   }
 
   .col-data {
