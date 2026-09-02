@@ -234,7 +234,7 @@ const CmsProfesionalesView = () => {
             {/* Header del Modal de Referencia */}
             <header className="modal-header">
               <div className="header-content">
-                <h1 className="modal-title">Añadir Profesional</h1>
+                <h1 className="modal-title">AÑADIR PROFESIONAL</h1>
                 <p className="modal-subtitle">Completá los datos del profesional para registrarlo en el sistema.</p>
               </div>
               <button type="button" className="close-button" onClick={() => setIsModalOpen(false)} aria-label="Cerrar">
