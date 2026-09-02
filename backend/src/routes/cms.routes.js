@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { obtenerBanners, crearBanner,actualizarBanner, eliminarBanner } from "../controller/banners.controller.js";
-import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia } from '../controller/cms.controller.js';
+import { obtenerBanners, crearBanner,actualizarBanner, eliminarBanner } from "../controller/cms-controllers/cms.banners.controller.js";;
+import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia } from "../controller/cms-controllers/cms.noticia.controller.js";
 import { verifyToken } from '../middlewares/auth.middleware.js';
-import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento } from '../controller/cms-controllers/doc.controler.js';
+import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento } from "../controller/cms-controllers/cms.doc.controller.js";
 
 
 const router = Router();
