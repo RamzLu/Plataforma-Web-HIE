@@ -15,7 +15,7 @@
 /* --- NUEVO CONTENEDOR PARA EL BANNER SUPERIOR --- */
 .top-banner-section {
   width: 100vw;
-   height: 400px;
+  /* SOLUCIÓN AL ESPACIO BLANCO: Se eliminó el height: 400px fijo para que la caja se adapte al tamaño real del banner en celulares */
   position: relative;
   left: 50%;
   margin-left: -50vw;
@@ -119,7 +119,7 @@
 
 .location-hero-banner {
   width: 100%;
-  height: 400px; /* Reducido de 500px para que funcione mejor como cabecera */
+  height: 400px; 
   background-size: cover;
   background-position: center;
   position: relative;
@@ -130,7 +130,7 @@
   height: 100%;
   background: rgb(12 35 64 / 59%);
   display: flex;
-  align-items: center; /* Centrado vertical */
+  align-items: center; 
   justify-content: center;
 }
 
@@ -139,14 +139,21 @@
   color: #ffffff;
   max-width: 900px;
   padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* --- SOLUCIÓN AL TEXTO RESPONSIVE Y CENTRADO --- */
 .location-banner-text h2 {
-  font-size: 4rem; /* Ligeramente ajustado */
-  font-weight: 600;
+  font-size: clamp(1.8rem, 6vw, 4rem); /* Se adapta automáticamente a cualquier pantalla */
+  font-weight: 400;
   letter-spacing: 2px;
-  margin: 0; 
+  margin: 50px; /* Fundamental: elimina márgenes globales que empujaban el texto hacia arriba */
+  margin-bottom: -5px; /* Ajuste fino para centrar verticalmente */
   text-transform: uppercase;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .location-wave-divider {
@@ -167,7 +174,7 @@
 .location-bottom-content {
   width: 100%;
   background-color: #0d4077;
-  padding: 80px 20px 80px 20px; /* Aumentado padding top para separar de la sección de arriba */
+  padding: 80px 20px 80px 20px; 
   display: flex;
   justify-content: center;
 }
@@ -303,10 +310,6 @@
     align-items: flex-start;
     gap: 20px;
   }
-  .location-banner-text h2 {
-    margin: 10px 0;
-    font-size: 2.2rem; /* Achicado para celular */
-  }
 
   .split-left {
     align-items: flex-start;
@@ -319,6 +322,7 @@
     height: 1px;
   }
 }
+
 .address-sub {
   font-size: 0.95rem;
   font-weight: 300;
