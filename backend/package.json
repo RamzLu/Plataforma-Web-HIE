@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --env-file=.env src/server.js",
-    "db": "npx prisma db push"
+    "db-pull": "npx prisma@7.10.0 db pull",
+    "db-generate": "npx prisma@7.10.0 generate"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
     "pg": "^8.23.0"
   },
   "devDependencies": {
+    "@types/node": "^26.4.1",
     "nodemon": "^3.1.14",
     "prisma": "^8.0.0-rc.12"
   }
