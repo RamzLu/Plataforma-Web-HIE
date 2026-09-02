@@ -2,7 +2,7 @@
   width: 100%;
   min-height: calc(100vh - 80px);
   background-color: #ffffff;
-  padding-top: 100px;
+  /* Se elimina el padding-top para que el banner toque el borde superior */
   font-family:
     system-ui,
     -apple-system,
@@ -12,43 +12,52 @@
     sans-serif;
 }
 
+/* --- NUEVO CONTENEDOR PARA EL BANNER SUPERIOR --- */
+.top-banner-section {
+  width: 100vw;
+   height: 400px;
+  position: relative;
+  left: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  background-color: transparent;
+}
+
 .contacto-container {
   max-width: 1100px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 40px 20px 80px 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .contacto-hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 50px;
-  align-items: center;
-  margin-bottom: 80px;
+  gap: 30px;
 }
 
 .contacto-hero-left {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
 }
 
 .contacto-title {
   color: #2b5b94;
-  font-size: 3rem;
+  font-size: 2.3rem;
   font-weight: 300;
-  letter-spacing: 2px;
-  margin: 15px 0 20px 0;
+  letter-spacing: 1.5px;
+  margin: 10px 0 30px 0;
   text-transform: uppercase;
 }
 
 .contacto-description {
   color: #233245;
-  font-size: 1.15rem;
-  font-weight: 300;
-  line-height: 1.6;
-  margin-bottom: 20px;
-  letter-spacing: 0.2px;
+  font-size: 1.2rem;
+  font-weight: 350;
+  line-height: 1.65;
+  margin: 0 0 16px 0;
 }
 
 .contacto-description strong {
@@ -110,7 +119,7 @@
 
 .location-hero-banner {
   width: 100%;
-  height: 500px;
+  height: 400px; /* Reducido de 500px para que funcione mejor como cabecera */
   background-size: cover;
   background-position: center;
   position: relative;
@@ -121,9 +130,8 @@
   height: 100%;
   background: rgb(12 35 64 / 59%);
   display: flex;
-  align-items: flex-start;
+  align-items: center; /* Centrado vertical */
   justify-content: center;
-  padding-top: 60px;
 }
 
 .location-banner-text {
@@ -134,10 +142,10 @@
 }
 
 .location-banner-text h2 {
-  font-size: 5rem;
+  font-size: 4rem; /* Ligeramente ajustado */
   font-weight: 600;
   letter-spacing: 2px;
-  margin: 55px 0 10px 0;
+  margin: 0; 
   text-transform: uppercase;
 }
 
@@ -159,7 +167,7 @@
 .location-bottom-content {
   width: 100%;
   background-color: #0d4077;
-  padding: 20px 20px 80px 20px;
+  padding: 80px 20px 80px 20px; /* Aumentado padding top para separar de la sección de arriba */
   display: flex;
   justify-content: center;
 }
@@ -179,6 +187,7 @@
   gap: 30px;
   align-items: center;
 }
+
 /* BLOQUE DE CONTACTO TRANSPARENTE EN AZUL INSTITUCIONAL */
 .contact-info-split-transparent {
   background: transparent;
@@ -296,7 +305,7 @@
   }
   .location-banner-text h2 {
     margin: 10px 0;
-    font-size: 2.5rem;
+    font-size: 2.2rem; /* Achicado para celular */
   }
 
   .split-left {
@@ -317,6 +326,7 @@
   color: #64748b;
 }
 
+/* --- MAPA CON EFECTOS SOFT --- */
 .map-frame-box {
   width: 100%;
   height: 320px;
@@ -324,6 +334,13 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   overflow: hidden;
   border: 1px solid #cbd5e1;
+  transition: all 0.4s ease; /* Transición fluida */
+}
+
+.map-frame-box:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+  border-color: #2b5b94; /* Borde institucional al hacer foco */
 }
 
 .map-iframe {
@@ -332,20 +349,33 @@
   border: 0;
 }
 
-/* --- TARJETA UNIFICADA DE TRANSPORTE (NUEVO DISEÑO LIMPIO) --- */
+/* --- TARJETA UNIFICADA DE TRANSPORTE CON EFECTOS MODERNOS --- */
 .transport-unified-card {
   background-color: #ffffff;
   padding: 35px 40px;
+  border-radius: 12px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
   display: grid;
   grid-template-columns: 1fr 1px 1fr;
   gap: 40px;
   align-items: stretch;
+  transition: all 0.4s ease; /* Animación para el hover de la tarjeta */
+}
+
+.transport-unified-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
 }
 
 .transport-col {
   display: flex;
   flex-direction: column;
+}
+
+/* Efecto mágico: al pasar el mouse por la columna, el ícono correspondiente cobra vida */
+.transport-col:hover .transport-icon {
+  transform: scale(1.25) translateY(-3px);
+  color: #0d4077;
 }
 
 .transport-col-header {
@@ -362,6 +392,7 @@
   height: 24px;
   color: #2b5b94;
   flex-shrink: 0;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efecto de rebote sutil */
 }
 
 .transport-col-header h3 {
@@ -449,16 +480,12 @@
     padding: 30px;
   }
 
-  .location-banner-text p {
-    margin-top: 130px;
-  }
-
   .contacto-hero-right {
     justify-content: center;
   }
 
   .location-hero-banner {
-    height: 420px;
+    height: 350px;
   }
 
   .location-wave-divider {
@@ -495,7 +522,7 @@
   }
 
   .location-hero-banner {
-    height: 350px;
+    height: 250px;
   }
 
   .location-wave-divider {
