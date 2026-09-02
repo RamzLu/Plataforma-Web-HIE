@@ -303,7 +303,10 @@ const fetchNoticias = async () => {
     );
   }
 
-  const latestNews = [...newsList].sort((a, b) => b.id - a.id).slice(0, 4);
+ const latestNews = newsList
+    .filter((news) => news.estado?.toUpperCase() === "PUBLICADO" || (!news.isDraft && !news.estado))
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 4);
 
   return (
     <div className="cms-layout">
