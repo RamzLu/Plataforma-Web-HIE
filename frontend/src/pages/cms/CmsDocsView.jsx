@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import keycloak from "../../config/keycloak";
 import "../../styles/components/cms/CmsDocsView.css";
 
-// CORRECCIÓN DE REGLAS DE NEGOCIO: Categorías y Estados exactos
 const CATEGORIAS = [
-  "Guía y orientación", 
   "Información institucional", 
-  "Prevención y salud"
+  "Guías Clínicas", 
+  "Protocolos",
+  "Administración"
 ];
-const ESTADOS = ["Publicado", "Programado", "Borrador"];
+const ESTADOS = ["Publicado", "En revisión", "Borrador"];
 const EXTENSIONES_VALIDAS = ["pdf", "docx"];
 const MAX_MB = 10;
 
@@ -21,13 +21,15 @@ const CmsDocsView = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  
   const [titulo, setTitulo] = useState("");
   const [categoria, setCategoria] = useState("Información institucional");
   const [estado, setEstado] = useState("Borrador");
   const [archivo, setArchivo] = useState(null);
   const [nombreArchivoActual, setNombreArchivoActual] = useState("");
-  const [dragActive, setDragActive] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleOpenCreate = () => {
     setEditingId(null);
@@ -44,10 +46,10 @@ const CmsDocsView = ({
     setTitulo(doc.title || "");
     setCategoria(doc.category || "Información institucional");
     
-    // Formateo seguro del estado al abrir el editor
-    const estadoFormateado = doc.status 
-      ? doc.status.charAt(0).toUpperCase() + doc.status.slice(1).toLowerCase() 
-      : "Borrador";
+    let estadoFormateado = "Borrador";
+    if (doc.status?.toLowerCase() === "publicado") estadoFormateado = "Publicado";
+    if (doc.status?.toLowerCase() === "en revisión" || doc.status?.toLowerCase() === "programado") estadoFormateado = "En revisión";
+    
     setEstado(estadoFormateado);
     setArchivo(null);
     setNombreArchivoActual(doc.fileName || doc.title || "");
@@ -78,27 +80,32 @@ const CmsDocsView = ({
     if (!titulo.trim()) setTitulo(file.name.replace(/\.[^.]+$/, ""));
   };
 
-  const handleFileSelect = (e) => procesarArchivo(e.target.files?.[0]);
+  const handleFileSelect = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      procesarArchivo(e.target.files[0]);
+    }
+  };
+
+  const handleBrowseClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleDragOver = (e) => { 
     e.preventDefault(); 
-    setDragActive(true); 
+    setIsDragging(true); 
   };
   
   const handleDragLeave = (e) => { 
     e.preventDefault(); 
-    setDragActive(false); 
+    setIsDragging(false); 
   };
   
   const handleDrop = (e) => {
     e.preventDefault();
-    setDragActive(false);
-    procesarArchivo(e.dataTransfer.files?.[0]);
-  };
-
-  const handleRemoveFile = () => {
-    setArchivo(null);
-    setNombreArchivoActual("");
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      procesarArchivo(e.dataTransfer.files[0]);
+    }
   };
 
   const handleSave = async (e) => {
@@ -108,7 +115,7 @@ const CmsDocsView = ({
       alert("Por favor ingresá un título para el documento.");
       return;
     }
-    if (!editingId && !archivo) {
+    if (!editingId && !archivo && !nombreArchivoActual) {
       alert("Seleccioná un archivo PDF o DOCX para subir.");
       return;
     }
@@ -125,7 +132,12 @@ const CmsDocsView = ({
       const formData = new FormData();
       formData.append("titulo", titulo);
       formData.append("categoria", categoria);
-      formData.append("estado", estado.toUpperCase()); // Se envía en mayúsculas al backend
+      
+      let estadoPrisma = "BORRADOR";
+      if (estado === "Publicado") estadoPrisma = "PUBLICADO";
+      if (estado === "En revisión") estadoPrisma = "PROGRAMADO"; 
+      
+      formData.append("estado", estadoPrisma);
       if (archivo) formData.append("archivo", archivo);
 
       const url = editingId
@@ -146,7 +158,7 @@ const CmsDocsView = ({
         id: data.documento?.id || editingId,
         title: titulo,
         category: categoria,
-        status: estado.toLowerCase(), // Normalizado para CSS
+        status: estado.toLowerCase(),
         editor: "Tú",
         fileName: archivo?.name || nombreArchivoActual,
         fileType: (archivo?.name || nombreArchivoActual || "").split(".").pop().toUpperCase(),
@@ -176,6 +188,7 @@ const CmsDocsView = ({
 
   return (
     <div className="cms-dashboard-card">
+      {/* HEADER DE LA VISTA GENERAL */}
       <div className="docs-view-header">
         <div>
           <h3 className="cms-card-title docs-view-title">Documentos publicados</h3>
@@ -183,11 +196,12 @@ const CmsDocsView = ({
             Protocolos y formularios disponibles en el portal.
           </p>
         </div>
-        <button className="btn-subir-doc-header" onClick={handleOpenCreate}>
+        <button type="button" className="btn-subir-doc-header" onClick={handleOpenCreate}>
           ⬆ SUBIR ARCHIVO
         </button>
       </div>
 
+      {/* TABLA PRINCIPAL */}
       <div className="cms-docs-table-container">
         <div className="activity-table-head docs-table-head">
           <div className="col-content">CONTENIDO</div>
@@ -201,9 +215,7 @@ const CmsDocsView = ({
           {loading ? (
             <div style={{ padding: "40px", textAlign: "center", gridColumn: "1 / -1" }}>
               <div className="cms-spinner" style={{ margin: "0 auto 10px auto" }}></div>
-              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
-                Cargando listado de documentos...
-              </span>
+              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>Cargando listado de documentos...</span>
             </div>
           ) : docsList.length === 0 ? (
             <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
@@ -267,80 +279,149 @@ const CmsDocsView = ({
         </div>
       </div>
 
+      {/* NUEVO MODAL DE CARGA/EDICIÓN DE DOCUMENTOS */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content-esp docs-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header-esp">
-              <h2>{editingId ? "Editar documento" : "Carga de documentación"}</h2>
-              <button className="btn-close-modal" onClick={() => setShowModal(false)}>
-                <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+        <div className="modal-overlay-docs" onClick={() => setShowModal(false)}>
+          <div className="modal-container-docs" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+            {/* Header del Modal */}
+            <header className="modal-header-docs">
+              <div className="header-content-docs">
+                <h1 className="modal-title-docs">{editingId ? "Editar Documentación" : "Carga de Documentación"}</h1>
+                <p className="modal-subtitle-docs">Completá los datos del archivo para registrarlo en el sistema.</p>
+              </div>
+              <button type="button" className="close-button-docs" onClick={() => setShowModal(false)} aria-label="Cerrar modal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
-            </div>
+            </header>
 
-            <form onSubmit={handleSave} className="modal-body-esp docs-form-container">
-              <div>
-                <label className="docs-form-label">Título del documento</label>
-                <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ej: Protocolos PDF 2026" className="docs-form-input" required />
+            {/* Form Body */}
+            <form className="modal-body-docs" onSubmit={handleSave}>
+              {/* Título del documento */}
+              <div className="form-group-docs">
+                <label htmlFor="doc-title" className="field-label-docs">
+                  Título del documento <span className="field-required-docs">*</span>
+                </label>
+                <input
+                  id="doc-title"
+                  type="text"
+                  className="text-input-docs"
+                  placeholder="Ej: Protocolos PDF 2026"
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  required
+                />
               </div>
 
-              <div className="docs-form-row">
-                <div style={{ flex: 1 }}>
-                  <label className="docs-form-label">Categoría</label>
-                  <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="docs-form-select">
-                    {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
+              {/* Categoría y Estado */}
+              <div className="form-row-grid-docs">
+                <div className="form-group-docs">
+                  <label htmlFor="doc-category" className="field-label-docs">Categoría</label>
+                  <div className="select-wrapper-docs">
+                    <select
+                      id="doc-category"
+                      className="custom-select-docs"
+                      value={categoria}
+                      onChange={(e) => setCategoria(e.target.value)}
+                    >
+                      {CATEGORIAS.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    <div className="select-arrow-docs" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label className="docs-form-label">Estado</label>
-                  <select value={estado} onChange={(e) => setEstado(e.target.value)} className="docs-form-select">
-                    {ESTADOS.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
+
+                <div className="form-group-docs">
+                  <label htmlFor="doc-status" className="field-label-docs">Estado</label>
+                  <div className="select-wrapper-docs">
+                    <select
+                      id="doc-status"
+                      className="custom-select-docs"
+                      value={estado}
+                      onChange={(e) => setEstado(e.target.value)}
+                    >
+                      {ESTADOS.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <div className="select-arrow-docs" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="docs-form-label">Archivo</label>
-                <div className={`doc-dropzone ${dragActive ? "drag-active" : ""}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
-                  <div className="doc-dropzone-icon">
-                    <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              {/* Archivo Adjunto (Dropzone) */}
+              <div className="form-group-docs">
+                <label className="field-label-docs">
+                  Archivo adjunto {editingId ? "" : <span className="field-required-docs">*</span>}
+                </label>
+                
+                <div
+                  className={`dropzone-container-docs ${isDragging ? 'is-dragging' : ''}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={handleBrowseClick}
+                >
+                  <div className="upload-icon-wrapper-docs" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                       <polyline points="17 8 12 3 7 8"></polyline>
                       <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
                   </div>
-                  <p className="doc-dropzone-text">Arrastre sus archivos aquí</p>
-                  <p className="doc-dropzone-hint">Formatos aceptados: PDF, DOCX. Tamaño máximo: {MAX_MB} MB.</p>
-                  <label className="btn-seleccionar-archivo">
-                    ⬆ Seleccione archivo
-                    <input type="file" accept=".pdf,.docx" onChange={handleFileSelect} style={{ display: "none" }} />
-                  </label>
+
+                  <p className="dropzone-text-primary-docs">
+                    {archivo ? archivo.name : (nombreArchivoActual || 'Arrastrá tus archivos aquí')}
+                  </p>
+                  <p className="dropzone-text-secondary-docs">
+                    Formatos aceptados: PDF, DOCX. Tamaño máximo: 10 MB.
+                  </p>
+
+                  <button
+                    type="button"
+                    className="dropzone-select-button-docs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBrowseClick();
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="19" x2="12" y2="5"></line>
+                      <polyline points="5 12 12 5 19 12"></polyline>
+                    </svg>
+                    {archivo || nombreArchivoActual ? "CAMBIAR ARCHIVO" : "SELECCIONAR ARCHIVO"}
+                  </button>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden-file-input-docs"
+                    accept=".pdf,.docx"
+                    onChange={handleFileSelect}
+                  />
                 </div>
-
-                {(archivo || nombreArchivoActual) && (
-                  <div className="doc-file-card">
-                    <div className="doc-file-info">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                      </svg>
-                      <div>
-                        <span className="doc-file-name">{archivo ? archivo.name : nombreArchivoActual}</span>
-                        <span className="doc-file-size">{archivo ? formatearTamano(archivo.size) : "Archivo actual"}</span>
-                      </div>
-                    </div>
-                    <button type="button" className="doc-file-remove" onClick={handleRemoveFile} title="Quitar archivo">&times;</button>
-                  </div>
-                )}
               </div>
 
-              <div className="modal-footer-esp docs-modal-footer">
-                <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)} disabled={saving}>
-                  Cancelar
+              {/* Footer Actions */}
+              <footer className="modal-footer-docs">
+                <button type="button" className="btn-secondary-docs" onClick={() => setShowModal(false)} disabled={saving}>
+                  CANCELAR
                 </button>
-                <button type="submit" className="btn-cerrar-rojo docs-btn-submit" disabled={saving}>
-                  {saving ? "Guardando..." : editingId ? "Actualizar" : "Guardar"}
+                <button type="submit" className="btn-primary-docs" disabled={saving}>
+                  {saving ? "GUARDANDO..." : "GUARDAR DOCUMENTO"}
                 </button>
-              </div>
+              </footer>
             </form>
           </div>
         </div>
