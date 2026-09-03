@@ -528,145 +528,7 @@ const CmsNoticiasView = ({
         </div>
       )}
 
-      {showConfirmDraftModal && (
-        <div className="modal-overlay" style={{ zIndex: 3000, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
-          <div 
-            style={{ 
-              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
-              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
-              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
-              position: "relative", zIndex: 3001, display: "flex", flexDirection: "column"
-            }}
-          >
-            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
-              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
-                Guardar como borrador
-              </h2>
-              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
-                El estado de esta noticia es Borrador. No será visible en el portal público hasta que la publiques. ¿Deseas continuar?
-              </p>
-            </div>
-            
-            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <button 
-                type="button" 
-                onClick={(e) => handleSave(e, "BORRADOR", true)}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
-                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#0d223f"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#000b20"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Sí, guardar borrador
-              </button>
-              
-              <button 
-                type="button" 
-                onClick={() => setShowConfirmDraftModal(false)}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
-                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#e0e3e5"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#d8e0ed"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Revisar Estado
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 🔥 MODAL: CAMBIOS SIN GUARDAR */}
-      {showUnsavedModal && (
-        <div className="modal-overlay" style={{ zIndex: 3000, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
-          <div 
-            style={{ 
-              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
-              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
-              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
-              position: "relative", zIndex: 3001, display: "flex", flexDirection: "column"
-            }}
-          >
-            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
-              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "200", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
-                Hay cambios sin guardar
-              </h2>
-              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
-                ¿Qué deseas hacer con la noticia actual?
-              </p>
-            </div>
-            
-            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <button 
-                type="button" 
-                onClick={(e) => handleSave(e, "BORRADOR", true)}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
-                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#0d223f"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#000b20"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Guardar como borrador
-              </button>
-              
-              <button 
-                type="button" 
-                onClick={handleForceClose}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", 
-                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#4d0003"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#ba1a1a"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Descartar cambios
-              </button>
-              
-              <button 
-                type="button" 
-                onClick={() => setShowUnsavedModal(false)}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
-                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#e0e3e5"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#d8e0ed"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Seguir editando
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* EL MODAL PRINCIPAL SE MUEVE ARRIBA DE LOS MODALES DE CONFIRMACIÓN */}
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseAttempt}>
           <div
@@ -919,6 +781,147 @@ const CmsNoticiasView = ({
           </div>
         </div>
       )}
+
+      {/* LOS MODALES DE ADVERTENCIA SE RENDERIZAN AL FINAL Y CON Z-INDEX MÁS ALTO */}
+      {showConfirmDraftModal && (
+        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
+          <div 
+            style={{ 
+              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
+              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative", zIndex: 999999, display: "flex", flexDirection: "column"
+            }}
+          >
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
+                Guardar como borrador
+              </h2>
+              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
+                El estado de esta noticia es Borrador. No será visible en el portal público hasta que la publiques. ¿Deseas continuar?
+              </p>
+            </div>
+            
+            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <button 
+                type="button" 
+                onClick={(e) => handleSave(e, "BORRADOR", true)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
+                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = "#0d223f"}
+                onMouseOut={(e) => e.target.style.backgroundColor = "#000b20"}
+                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
+                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
+              >
+                Sí, guardar borrador
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setShowConfirmDraftModal(false)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
+                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = "#e0e3e5"}
+                onMouseOut={(e) => e.target.style.backgroundColor = "#d8e0ed"}
+                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
+                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
+              >
+                Revisar Estado
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔥 MODAL: CAMBIOS SIN GUARDAR */}
+      {showUnsavedModal && (
+        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
+          <div 
+            style={{ 
+              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
+              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative", zIndex: 999999, display: "flex", flexDirection: "column"
+            }}
+          >
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
+                Hay cambios sin guardar
+              </h2>
+              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
+                ¿Qué deseas hacer con la noticia actual?
+              </p>
+            </div>
+            
+            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <button 
+                type="button" 
+                onClick={(e) => handleSave(e, "BORRADOR", true)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = "#0d223f"}
+                onMouseOut={(e) => e.target.style.backgroundColor = "#000b20"}
+                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
+                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
+              >
+                Guardar como borrador
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={handleForceClose}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = "#4d0003"}
+                onMouseOut={(e) => e.target.style.backgroundColor = "#ba1a1a"}
+                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
+                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
+              >
+                Descartar cambios
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setShowUnsavedModal(false)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = "#e0e3e5"}
+                onMouseOut={(e) => e.target.style.backgroundColor = "#d8e0ed"}
+                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
+                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
+              >
+                Seguir editando
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
