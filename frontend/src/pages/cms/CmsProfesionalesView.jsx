@@ -1,30 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import keycloak from "../../config/keycloak";
+import toast from "react-hot-toast";
 import "../../styles/components/cms/CmsProfesionalesView.css";
-
-// --- DATOS HARDCODEADOS (Mock) ---
-const mockProfesionales = [
-  { id: 1, nombre: "Marcela", apellido: "Ferreyra", matricula: "MP 12.487", cargo: "Jefa de Área", tipo: "Especialidad médica", area: "Clínica Médica", publicado: true },
-  { id: 2, nombre: "Julián", apellido: "Sosa", matricula: "MP 15.902", cargo: "Médico de Guardia", tipo: "Especialidad médica", area: "Traumatología", publicado: true },
-  { id: 3, nombre: "Rocío", apellido: "Benítez", matricula: "MP 08.331", cargo: "Bioquímica de Guardia", tipo: "Servicio de apoyo", area: "Laboratorio", publicado: true },
-  { id: 4, nombre: "Hernán", apellido: "Cabrera", matricula: "TC 4.120", cargo: "Técnico Radiólogo", tipo: "Servicio de apoyo", area: "Radiología", publicado: true },
-  { id: 5, nombre: "Valeria", apellido: "Ojeda", matricula: "MP 17.664", cargo: "Médica de Planta", tipo: "Especialidad médica", area: "Pediatría", publicado: true },
-  { id: 6, nombre: "Diego", apellido: "Almirón", matricula: "MP 09.845", cargo: "Kinesiólogo", tipo: "Servicio de apoyo", area: "Kinesiología", publicado: true },
-];
 
 const AREAS_ESPECIALIDAD = ["Clínica Médica", "Traumatología", "Pediatría", "Cardiología", "Cirugía General"];
 const AREAS_APOYO = ["Laboratorio", "Radiología", "Kinesiología", "Farmacia", "Nutrición"];
 
 const CmsProfesionalesView = () => {
-  // Estados de la vista
-  const [profesionales, setProfesionales] = useState(mockProfesionales);
+  const [profesionales, setProfesionales] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("Todos");
+  const [loading, setLoading] = useState(true);
 
-  // Estados del Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
   
-  // Estado del Formulario
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
@@ -34,74 +23,122 @@ const CmsProfesionalesView = () => {
     cargo: "",
     descripcion: ""
   });
+  const [archivoFoto, setArchivoFoto] = useState(null);
 
-  // --- FUNCIONES DE FILTRADO ---
+  const fetchProfesionales = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:3000/api/cms/profesionales");
+      if (response.ok) {
+        const data = await response.json();
+        setProfesionales(data);
+      }
+    } catch (error) {
+      console.error("Error al obtener profesionales:", error);
+      toast.error("Error al cargar el directorio.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfesionales();
+  }, []);
+
   const profesionalesFiltrados = profesionales.filter(prof => {
     const coincideBusqueda = `${prof.nombre} ${prof.apellido}`.toLowerCase().includes(searchTerm.toLowerCase());
     const coincideTipo = filtroTipo === "Todos" || prof.tipo === filtroTipo;
     return coincideBusqueda && coincideTipo;
   });
 
-  // --- FUNCIONES CRUD (Simuladas en Memoria) ---
   const handleOpenCreate = () => {
-    setEditingId(null);
     setFormData({ nombre: "", apellido: "", matricula: "", tipo: "Especialidad médica", area: "", cargo: "", descripcion: "" });
+    setArchivoFoto(null);
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (prof) => {
-    setEditingId(prof.id);
-    setFormData({ ...prof, descripcion: prof.descripcion || "" });
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("¿Estás seguro de eliminar a este profesional?")) {
-      setProfesionales(profesionales.filter(p => p.id !== id));
+      try {
+        const token = keycloak?.token;
+        const response = await fetch(`http://localhost:3000/api/cms/profesionales/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error("Error al eliminar en el servidor");
+
+        setProfesionales(profesionales.filter(p => p.id !== id));
+        toast.success("Profesional eliminado correctamente.");
+      } catch (error) {
+        console.error("Error al eliminar:", error);
+        toast.error("No se pudo eliminar el profesional.");
+      }
     }
   };
 
-  const handleTogglePublish = (id) => {
-    setProfesionales(profesionales.map(p => p.id === id ? { ...p, publicado: !p.publicado } : p));
-  };
-
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      // Editar existente
-      setProfesionales(profesionales.map(p => p.id === editingId ? { ...formData, id: editingId, publicado: p.publicado } : p));
-    } else {
-      // Crear nuevo
-      setProfesionales([...profesionales, { ...formData, id: Date.now(), publicado: true }]);
+    try {
+      const token = keycloak?.token;
+      const dataForm = new FormData();
+      dataForm.append("nombre", formData.nombre);
+      dataForm.append("apellido", formData.apellido);
+      dataForm.append("matricula", formData.matricula);
+      dataForm.append("cargo", formData.cargo);
+      dataForm.append("descripcion", formData.descripcion);
+      dataForm.append("especialidadNombre", formData.tipo);
+      dataForm.append("areaNombre", formData.area);
+      if (archivoFoto) {
+        dataForm.append("archivo", archivoFoto);
+      }
+
+      const response = await fetch("http://localhost:3000/api/cms/profesionales", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: dataForm
+      });
+
+      if (!response.ok) throw new Error("Error al guardar en el servidor");
+
+      const resultado = await response.json();
+      setProfesionales([resultado.profesional, ...profesionales]);
+      toast.success("¡Profesional creado con éxito!");
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      toast.error("Ocurrió un error al guardar el profesional.");
     }
-    setIsModalOpen(false);
   };
 
-  // Helper para las iniciales del Avatar
   const getIniciales = (nombre, apellido) => {
-    return `${nombre.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
+    return `${nombre?.charAt(0) || ""}${apellido?.charAt(0) || ""}`.toUpperCase();
   };
 
   return (
-    <div className="cms-profesionales-wrapper">
-      {/* HEADER */}
-      <div className="profesionales-header">
+    <div className="cms-dashboard-card">
+      <div className="news-view-header">
         <div>
-          <span className="sobretitulo">CONTENIDO INSTITUCIONAL</span>
-          <h1 className="titulo-principal">Directorio de Profesionales</h1>
-          <p className="subtitulo">Administrá el equipo de salud publicado en el portal: especialidades médicas y servicios de apoyo técnico.</p>
+          <h3 className="cms-card-title news-view-title">
+            Listado del personal
+          </h3>
+          <p className="news-view-subtitle">
+            Gestione las fichas de los profesionales de la institución.
+          </p>
         </div>
-        <button className="btn-add-profesional" onClick={handleOpenCreate}>
-          + Añadir Profesional
+        <button type="button" className="btn-crear-noticia-header news-btn-submit" onClick={handleOpenCreate}>
+          + AÑADIR PROFESIONAL
         </button>
       </div>
 
-      {/* FILTROS */}
       <div className="profesionales-filtros">
         <div className="filtro-busqueda">
           <label>Buscar profesional</label>
           <div className="input-icon-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
             <input 
               type="text" 
               placeholder="Buscar por nombre o apellido..." 
@@ -120,168 +157,233 @@ const CmsProfesionalesView = () => {
         </div>
       </div>
 
-      {/* TABLA */}
-      <div className="profesionales-tabla-container">
-        <div className="tabla-header">
-          <div className="col-profesional">PROFESIONAL</div>
+      <div className="cms-news-table-container">
+        <div className="activity-table-head news-table-head">
+          <div className="col-content">PROFESIONAL</div>
           <div className="col-cargo">CARGO O FUNCIÓN</div>
           <div className="col-area">ÁREA</div>
-          <div className="col-acciones">ACCIONES</div>
+          <div className="col-acciones" style={{ textAlign: "center" }}>ACCIONES</div>
         </div>
 
-        <div className="tabla-body">
-          {profesionalesFiltrados.length > 0 ? profesionalesFiltrados.map(prof => (
-            <div className="tabla-row" key={prof.id}>
-              {/* Columna 1: Avatar e Info */}
-              <div className="col-profesional">
-                <div className="avatar-circulo">{getIniciales(prof.nombre, prof.apellido)}</div>
-                <div className="info-texto">
-                  <strong>{prof.nombre} {prof.apellido}</strong>
-                  <span>{prof.matricula}</span>
-                </div>
-              </div>
-
-              {/* Columna 2: Cargo */}
-              <div className="col-cargo">
-                <span className="texto-oscuro">{prof.cargo}</span>
-              </div>
-
-              {/* Columna 3: Área */}
-              <div className="col-area">
-                <div className={`badge-area ${prof.tipo === 'Especialidad médica' ? 'badge-medica' : 'badge-apoyo'}`}>
-                  <span className="dot"></span> {prof.area}
-                </div>
-                <span className="tipo-area-texto">{prof.tipo}</span>
-              </div>
-
-              {/* Columna 4: Acciones */}
-              <div className="col-acciones">
-                <div className="toggle-wrapper" onClick={() => handleTogglePublish(prof.id)}>
-                  <div className={`toggle-switch ${prof.publicado ? 'active' : ''}`}>
-                    <div className="toggle-knob"></div>
-                  </div>
-                  <span className="toggle-label">Publicado</span>
-                </div>
-                
-                <button className="btn-accion edit" onClick={() => handleOpenEdit(prof)}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                  Editar
-                </button>
-                
-                <button className="btn-accion delete" onClick={() => handleDelete(prof.id)}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  Eliminar
-                </button>
-              </div>
+        <div className="activity-table-body">
+          {loading ? (
+            <div style={{ padding: "40px", textAlign: "center", gridColumn: "1 / -1" }}>
+              <div className="cms-spinner" style={{ margin: "0 auto 10px auto" }}></div>
+              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>Cargando profesionales...</span>
             </div>
-          )) : (
-            <div className="empty-state">No se encontraron profesionales.</div>
+          ) : profesionalesFiltrados.length === 0 ? (
+            <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
+              No se encontraron profesionales registrados.
+            </div>
+          ) : (
+            profesionalesFiltrados.map((prof) => (
+              <div className="activity-row news-table-row" key={prof.id}>
+                <div className="col-content" style={{ flexDirection: "row", alignItems: "center", gap: "15px" }}>
+                  <div className="news-thumb-box">
+                    {prof.imagenUrl ? (
+                      <img src={prof.imagenUrl} alt="Avatar" className="news-thumb-img" style={{ objectFit: 'cover' }} />
+                    ) : (
+                      <div className="news-thumb-mock">{getIniciales(prof.nombre, prof.apellido)}</div>
+                    )}
+                  </div>
+                  <div className="news-title-interactive">
+                    <span className="activity-title" style={{ fontWeight: "600", color: "#0c2340" }}>
+                      {prof.nombre} {prof.apellido}
+                    </span>
+                    <span style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "4px", display: "block" }}>
+                      {prof.matricula || "Sin matrícula"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="col-cargo" style={{ color: "#0f172a", fontWeight: "500" }}>
+                  {prof.cargo}
+                </div>
+
+                <div className="col-area">
+                  <div className="badge-area badge-medica" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <span className="dot" style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#0284c7" }}></span> 
+                    {prof.area}
+                  </div>
+                  <span className="tipo-area-texto" style={{ display: "block", fontSize: "0.75rem", color: "#64748b", marginTop: "3px" }}>
+                    {prof.tipo}
+                  </span>
+                </div>
+
+                <div className="news-actions-cell" style={{ justifyContent: "center" }}>
+                  <button type="button" title="Eliminar" onClick={() => handleDelete(prof.id)} className="news-action-btn-delete">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* MODAL CON ESTILO EXACTO DE REFERENCIA */}
       {isModalOpen && (
-        <div className="modal-overlay-profesional" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-content-profesional" onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-container" onClick={e => e.stopPropagation()}>
             
-            <div className="modal-header-profesional">
-              <div>
-                <h2>{editingId ? "Editar Profesional" : "Añadir Profesional"}</h2>
-                <p>Completá los datos del profesional. Se publicará en el directorio del portal público una vez guardado.</p>
+            {/* Header del Modal de Referencia */}
+            <header className="modal-header">
+              <div className="header-content">
+                <h1 className="modal-title">Añadir Profesional</h1>
+                <p className="modal-subtitle">Completá los datos del profesional para registrarlo en el sistema.</p>
               </div>
-              <button className="btn-close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
-            </div>
+              <button type="button" className="close-button" onClick={() => setIsModalOpen(false)} aria-label="Cerrar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </header>
 
-            <form className="modal-body-profesional" onSubmit={handleSave}>
-              
-              {/* SECCIÓN A */}
-              <div className="form-section">
-                <h3 className="section-title"><span className="circle-letter">A</span> DATOS PERSONALES</h3>
-                <div className="form-row-3">
-                  <div className="form-group">
-                    <label>Nombre</label>
-                    <input type="text" placeholder="Ej. Marcela" required value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
-                  </div>
-                  <div className="form-group">
-                    <label>Apellido</label>
-                    <input type="text" placeholder="Ej. Ferreyra" required value={formData.apellido} onChange={e => setFormData({...formData, apellido: e.target.value})} />
-                  </div>
-                  <div className="form-group">
-                    <label>Matrícula profesional</label>
-                    <input type="text" placeholder="MP 00.000" value={formData.matricula} onChange={e => setFormData({...formData, matricula: e.target.value})} />
-                  </div>
-                </div>
+            <form onSubmit={handleSave}>
+              <div className="modal-body">
                 
-                <div className="form-group mt-15">
-                  <label>Fotografía</label>
-                  <div className="drag-drop-zone">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                    <p><strong>Arrastrá la fotografía aquí o hacé clic para seleccionarla</strong></p>
-                    <span>Formato JPG o PNG · Vertical 600 x 800 px · Máx. 2 MB</span>
+                {/* Section A: Datos Personales */}
+                <section className="form-section">
+                  <div className="section-header">
+                    <span className="section-badge">A</span>
+                    <h2 className="section-title">DATOS PERSONALES</h2>
                   </div>
-                </div>
-              </div>
-
-              {/* SECCIÓN B */}
-              <div className="form-section">
-                <h3 className="section-title"><span className="circle-letter">B</span> ASIGNACIÓN DE ÁREA</h3>
-                <div className="tipo-cards">
-                  <div 
-                    className={`tipo-card ${formData.tipo === 'Especialidad médica' ? 'active' : ''}`}
-                    onClick={() => setFormData({...formData, tipo: 'Especialidad médica', area: ''})}
-                  >
-                    <div className="tipo-icon blue">♥</div>
-                    <div>
-                      <strong>Especialidad Médica</strong>
-                      <span>Áreas clínicas y quirúrgicas</span>
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="nombre">Nombre</label>
+                      <input 
+                        type="text" 
+                        id="nombre" 
+                        placeholder="Ej. Marcela" 
+                        required 
+                        value={formData.nombre} 
+                        onChange={e => setFormData({...formData, nombre: e.target.value})} 
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="apellido">Apellido</label>
+                      <input 
+                        type="text" 
+                        id="apellido" 
+                        placeholder="Ej. Ferreyra" 
+                        required 
+                        value={formData.apellido} 
+                        onChange={e => setFormData({...formData, apellido: e.target.value})} 
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="matricula">Matrícula</label>
+                      <input 
+                        type="text" 
+                        id="matricula" 
+                        placeholder="MP 00.000" 
+                        value={formData.matricula} 
+                        onChange={e => setFormData({...formData, matricula: e.target.value})} 
+                      />
                     </div>
                   </div>
-                  <div 
-                    className={`tipo-card ${formData.tipo === 'Servicio de apoyo' ? 'active' : ''}`}
-                    onClick={() => setFormData({...formData, tipo: 'Servicio de apoyo', area: ''})}
-                  >
-                    <div className="tipo-icon gray">⛨</div>
-                    <div>
-                      <strong>Servicio de Apoyo / Técnico</strong>
-                      <span>Diagnóstico y apoyo técnico</span>
+                </section>
+
+                {/* Fotografía */}
+                <section className="form-section">
+                  <h2 className="section-title-simple">Fotografía</h2>
+                  <div className="file-upload-container">
+                    <label className="file-upload-button">
+                      Seleccionar archivo
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden-input" 
+                        onChange={e => setArchivoFoto(e.target.files[0])} 
+                      />
+                    </label>
+                    <span className="file-status">
+                      {archivoFoto ? archivoFoto.name : "Sin archivos seleccionados"}
+                    </span>
+                  </div>
+                </section>
+
+                {/* Section B: Asignación de Área */}
+                <section className="form-section">
+                  <div className="section-header">
+                    <span className="section-badge">B</span>
+                    <h2 className="section-title">ASIGNACIÓN DE ÁREA</h2>
+                  </div>
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="tipo-area">Tipo de Área</label>
+                      <div className="select-wrapper">
+                        <select 
+                          id="tipo-area"
+                          value={formData.tipo}
+                          onChange={e => setFormData({...formData, tipo: e.target.value, area: ''})}
+                        >
+                          <option value="Especialidad médica">Especialidad médica</option>
+                          <option value="Servicio de apoyo">Servicio de apoyo</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="form-group" style={{ gridColumn: "span 2" }}>
+                      <label htmlFor="area-especifica">Área específica</label>
+                      <div className="select-wrapper">
+                        <select 
+                          id="area-especifica"
+                          required
+                          value={formData.area}
+                          onChange={e => setFormData({...formData, area: e.target.value})}
+                        >
+                          <option value="" disabled>Seleccione el área específica</option>
+                          {(formData.tipo === 'Especialidad médica' ? AREAS_ESPECIALIDAD : AREAS_APOYO).map(a => (
+                            <option key={a} value={a}>{a}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </section>
 
-                <div className="form-group mt-15">
-                  <label>Área específica</label>
-                  <select required value={formData.area} onChange={e => setFormData({...formData, area: e.target.value})}>
-                    <option value="" disabled>Seleccione el área específica</option>
-                    {(formData.tipo === 'Especialidad médica' ? AREAS_ESPECIALIDAD : AREAS_APOYO).map(a => (
-                      <option key={a} value={a}>{a}</option>
-                    ))}
-                  </select>
-                  <span className="hint">Las opciones cambian según el tipo de área seleccionado arriba.</span>
-                </div>
+                {/* Section C: Rol y Perfil */}
+                <section className="form-section">
+                  <div className="section-header">
+                    <span className="section-badge">C</span>
+                    <h2 className="section-title">ROL Y PERFIL</h2>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="cargo">Cargo o función</label>
+                    <input 
+                      type="text" 
+                      id="cargo" 
+                      placeholder="Ej. Jefa de Área" 
+                      required 
+                      value={formData.cargo} 
+                      onChange={e => setFormData({...formData, cargo: e.target.value})} 
+                    />
+                  </div>
+                  <div className="form-group margin-top-md">
+                    <label htmlFor="descripcion">Descripción</label>
+                    <textarea 
+                      id="descripcion" 
+                      placeholder="Breve reseña..." 
+                      rows="4"
+                      value={formData.descripcion}
+                      onChange={e => setFormData({...formData, descripcion: e.target.value})}
+                    ></textarea>
+                  </div>
+                </section>
+
               </div>
 
-              {/* SECCIÓN C */}
-              <div className="form-section">
-                <h3 className="section-title"><span className="circle-letter">C</span> ROL Y PERFIL</h3>
-                <div className="form-group">
-                  <label>Cargo o función</label>
-                  <input type="text" placeholder="Ej. Médico de Planta, Bioquímico de Guardia" required value={formData.cargo} onChange={e => setFormData({...formData, cargo: e.target.value})} />
-                </div>
-                <div className="form-group mt-15">
-                  <label>Descripción profesional</label>
-                  <textarea placeholder="Breve reseña: formación, trayectoria y áreas de interés (máx. 400 caracteres)." rows="3" value={formData.descripcion} onChange={e => setFormData({...formData, descripcion: e.target.value})}></textarea>
-                </div>
-              </div>
-
-              {/* FOOTER */}
-              <div className="modal-footer-profesional">
-                <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancelar</button>
-                <button type="submit" className="btn-save">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                  Guardar Profesional
-                </button>
-              </div>
+              {/* Footer Actions */}
+              <footer className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="btn-primary">GUARDAR PROFESIONAL</button>
+              </footer>
             </form>
           </div>
         </div>
