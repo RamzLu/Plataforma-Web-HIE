@@ -8,9 +8,13 @@ const DocumentacionPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("TODOS");
   
-  // Inicializamos el estado vacío para que se llene con la Base de Datos
+  // ESTADOS MANTENIDOS ESTRICTAMENTE
   const [documentosData, setDocumentosData] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // ESTADOS LOCALES DE PAGINACIÓN
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; 
 
   const categorias = [
     "TODOS",
@@ -19,7 +23,6 @@ const DocumentacionPage = () => {
     "PREVENCIÓN Y SALUD",
   ];
 
-  // Llamada al Backend real
   useEffect(() => {
     const fetchDocumentosPublicos = async () => {
       setLoading(true);
@@ -27,9 +30,8 @@ const DocumentacionPage = () => {
         const response = await fetch("http://localhost:3000/api/cms/documentacion");
         if (response.ok) {
           const data = await response.json();
-          console.log("Documentos desde BD:", data); // Para verificar en consola F12
+          console.log("Documentos desde BD:", data);
           
-          // Filtramos solo los que están "publicados"
           const docsPublicados = data.filter(
             (doc) => (doc.status || "").toLowerCase() === "publicado"
           );
@@ -57,6 +59,29 @@ const DocumentacionPage = () => {
     return matchesSearch && matchesCategory;
   });
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, activeCategory]);
+
+  const totalPages = Math.ceil(filteredDocs.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentDocs = filteredDocs.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+      window.scrollTo({ top: 300, behavior: 'smooth' }); 
+    }
+  };
+
   const handleDownloadDirect = async (url, titulo) => {
     if (!url) {
       alert("El enlace del archivo no está disponible.");
@@ -66,15 +91,12 @@ const DocumentacionPage = () => {
       const response = await fetch(url);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
-
       const a = document.createElement("a");
       a.style.display = "none";
       a.href = blobUrl;
       a.download = `${titulo}.pdf`;
-
       document.body.appendChild(a);
       a.click();
-
       window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
     } catch (error) {
@@ -89,7 +111,6 @@ const DocumentacionPage = () => {
     }
   };
 
-  // Helper para pintar las píldoras dependiendo de la categoría
   const getCategoryColorClass = (categoria) => {
     if (!categoria) return "cat-default";
     const catLower = categoria.toLowerCase();
@@ -119,21 +140,25 @@ const DocumentacionPage = () => {
       </div>
 
       <div className="documentacion-container">
-        {/* BUSCADOR COMPACTO ESTILO PROFESIONALES */}
-        <div className="doc-search-container">
-          <svg className="doc-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          <input
-            type="text"
-            className="doc-search-input"
-            placeholder="Buscar documento..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        
+        {/* BUSCADOR ESTILO PROFESIONALES CON DIV SIMULADOR */}
+        <div className="doc-search-wrapper">
+          <div className="doc-search-bar">
+            <svg className="doc-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input
+              type="text"
+              className="doc-search-input"
+              placeholder="Buscar documento..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {/* ESTE DIV SIMULA EL TAMAÑO DEL FILTRO DE PROFESIONALES */}
+            <div className="doc-search-spacer"></div>
+          </div>
         </div>
 
-        {/* FILTROS TIPO PÍLDORA SIN BORDES */}
         <div className="doc-filters">
           {categorias.map((cat) => (
             <button
@@ -147,79 +172,119 @@ const DocumentacionPage = () => {
           ))}
         </div>
 
-        <AnimatedContent distance={40} direction="vertical" delay={0.1}>
-          {/* LISTA DE TARJETAS / LIST-VIEW */}
-          <div className="doc-table-container">
-            {/* CABECERA REDISEÑADA Y SUTIL (Sin el centrado inline de Categoría) */}
-            <div className="doc-table-header">
-              <div className="header-col">TÍTULO DEL DOCUMENTO</div>
-              <div className="header-col">CATEGORÍA</div>
-              <div className="header-col">FECHA</div>
-              <div className="header-col">TAMAÑO</div>
-              {/* Acciones ya no tiene justify-content: flex-end para que se acerque a Tamaño */}
-              <div className="header-col">ACCIONES</div>
-            </div>
+        <div className="w-full-anim-wrapper">
+          <AnimatedContent distance={40} direction="vertical" delay={0.1}>
+            <div className="doc-table-container">
+              
+              <div className="doc-table-header">
+                <div className="header-col">TÍTULO DEL DOCUMENTO</div>
+                <div className="header-col" style={{ justifyContent: "center" }}>CATEGORÍA</div>
+                <div className="header-col">FECHA</div>
+                <div className="header-col">TAMAÑO</div>
+                <div className="header-col" style={{ justifyContent: "center" }}>ACCIONES</div>
+              </div>
 
-            <div className="doc-table-body">
-              {loading ? (
-                <div style={{ padding: "60px", textAlign: "center", width: "100%" }}>
-                  <div className="cms-spinner" style={{ margin: "0 auto 15px auto" }}></div>
-                  <span style={{ color: "#64748b", fontSize: "1rem", fontWeight: "600" }}>
-                    Cargando documentos desde la base de datos...
-                  </span>
-                </div>
-              ) : filteredDocs.length > 0 ? (
-                filteredDocs.map((doc) => (
-                  <div className="doc-row" key={doc.id}>
-                    <div className="col-titulo">
-                      <svg className="doc-file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                      </svg>
-                      <div className="titulo-wrapper">
-                        <p className="titulo-text" title={doc.title}>{doc.title}</p>
-                        {doc.fileUrl && (
-                          <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="leer-mas-link">
-                            Ver documento en navegador
-                          </a>
-                        )}
+              <div className="doc-table-body">
+                {loading ? (
+                  <div style={{ padding: "60px", textAlign: "center", width: "100%" }}>
+                    <div className="cms-spinner" style={{ margin: "0 auto 15px auto" }}></div>
+                    <span style={{ color: "#64748b", fontSize: "1rem", fontWeight: "600" }}>
+                      Cargando documentos desde la base de datos...
+                    </span>
+                  </div>
+                ) : currentDocs.length > 0 ? (
+                  currentDocs.map((doc) => (
+                    <div className="doc-row" key={doc.id}>
+                      <div className="col-titulo">
+                        <svg className="doc-file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        <div className="titulo-wrapper">
+                          <span className="titulo-text">
+                            {doc.title}
+                            {doc.fileUrl && (
+                              <a 
+                                href={doc.fileUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="doc-preview-eye" 
+                                title="Visualizar documento"
+                                style={{ marginLeft: "8px", verticalAlign: "middle" }}
+                              >
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </a>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="col-data col-categoria-data" data-label="Categoría">
+                        {/* ESTE DIV ENVOLTORIO PROTEGE EL TEXTO Y EL TAMAÑO */}
+                        <div className="category-pill-wrapper" title={doc.category}>
+                          <span className={`category-pill ${getCategoryColorClass(doc.category)}`}>
+                            {doc.category}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="col-data date-text" data-label="Fecha">
+                        {doc.updatedAt}
+                      </div>
+                      <div className="col-data" data-label="Tamaño">
+                        {doc.fileSize || "—"}
+                      </div>
+
+                      <div className="col-acciones">
+                        <button
+                          className="btn-descargar-pill"
+                          onClick={() => handleDownloadDirect(doc.fileUrl, doc.title)}
+                        >
+                          <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                          </svg>
+                          {doc.fileType || "PDF"}
+                        </button>
                       </div>
                     </div>
-
-                    {/* Nueva clase col-categoria-data para forzar su centrado dentro de la fila */}
-                    <div className="col-data col-categoria-data" data-label="Categoría">
-                      <span className={`category-pill ${getCategoryColorClass(doc.category)}`}>
-                        {doc.category}
-                      </span>
-                    </div>
-                    <div className="col-data date-text" data-label="Fecha">
-                      {doc.updatedAt}
-                    </div>
-                    <div className="col-data" data-label="Tamaño">
-                      {doc.fileSize || "—"}
-                    </div>
-
-                    <div className="col-acciones">
-                      {/* BOTÓN ESTILO PÍLDORA */}
-                      <button
-                        className="btn-descargar-pill"
-                        onClick={() => handleDownloadDirect(doc.fileUrl, doc.title)}
-                      >
-                        <svg fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                        </svg>
-                        Descargar {doc.fileType || "PDF"}
-                      </button>
-                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: "40px", textAlign: "center", color: "#64748b", width: "100%" }}>
+                    No hay documentos publicados en la categoría seleccionada.
                   </div>
-                ))
-              ) : (
-                <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
-                  No hay documentos publicados en la base de datos.
-                </div>
-              )}
+                )}
+              </div>
+
+              {/* PAGINACIÓN */}
+              <div className="doc-pagination-container">
+                <button 
+                  className="btn-paginacion-arrow" 
+                  onClick={handlePrevPage} 
+                  disabled={currentPage === 1 || totalPages === 0}
+                  title="Página Anterior"
+                >
+                  &lt;
+                </button>
+                
+                <span className="pagination-info">
+                  Página {totalPages === 0 ? 0 : currentPage} de {totalPages}
+                </span>
+
+                <button 
+                  className="btn-paginacion-arrow" 
+                  onClick={handleNextPage} 
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  title="Página Siguiente"
+                >
+                  &gt;
+                </button>
+              </div>
+              
             </div>
-          </div>
-        </AnimatedContent>
+          </AnimatedContent>
+        </div>
       </div>
     </main>
   );

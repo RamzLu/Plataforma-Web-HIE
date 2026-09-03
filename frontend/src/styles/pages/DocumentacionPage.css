@@ -25,11 +25,9 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  margin-bottom: 60px;
-  justify-content: center;
+  margin-bottom: 0; 
+  display: flex;
   padding: 120px 20px 60px 20px;
-  display: flex; 
 }
 
 .doc-header-inner {
@@ -80,23 +78,34 @@
 }
 
 /* =========================================
-   BUSCADOR (ESTILO PÍLDORA COMPACTO)
+   BUSCADOR (ESTILO PÍLDORA - PROPORCIÓN EXACTA A PROFESIONALES)
 ========================================= */
-.doc-search-container {
+.doc-search-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px; 
+  margin-bottom: 30px; 
+  position: relative;
+  z-index: 10;
+}
+
+.doc-search-bar {
   display: flex;
   align-items: center;
   background-color: #ffffff;
   border: 1px solid #e2e8f0; 
-  border-radius: 50px; 
-  padding: 6px 8px 6px 20px; 
+  border-radius: 50px;
+  padding: 13px 10px 12px 20px; 
   width: 100%;
-  max-width: 800px; 
-  margin-bottom: 25px;
+  max-width: 650px; /* Mismo tamaño estricto que Profesionales */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); 
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-.doc-search-container:focus-within {
+.doc-search-bar:focus-within {
   box-shadow: 0 6px 15px rgba(43, 91, 148, 0.08);
   border-color: #cbd5e1;
 }
@@ -123,7 +132,13 @@
 .doc-search-input::placeholder {
   color: #cbd5e1;
   font-style: normal; 
-  font-weight: 300;
+  font-weight: 400;
+}
+
+/* Espaciador simulado para que el input quede del mismo tamaño que en Profesionales */
+.doc-search-spacer {
+  width: 250px; 
+  flex-shrink: 0;
 }
 
 /* =========================================
@@ -174,27 +189,38 @@
 }
 
 /* =========================================
+   SOLUCIÓN AL ACHICAMIENTO HORIZONTAL
+========================================= */
+.w-full-anim-wrapper {
+  width: 100%;
+}
+
+.w-full-anim-wrapper > div {
+  width: 100% !important; 
+}
+
+/* =========================================
    LISTA DE TARJETAS DE DOCUMENTOS 
 ========================================= */
 .doc-table-container {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px; 
 }
 
 /* --- Cabecera Rediseñada --- */
 .doc-table-header {
+  width: 100%; 
   display: grid;
-  /* Proporción ajustada para acercar ACCIONES a TAMAÑO */
-  grid-template-columns: minmax(0, 3.5fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1.5fr);
-  padding: 16px 30px;
+  grid-template-columns: minmax(0, 2.5fr) minmax(0, 1.3fr) minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1.1fr);
+  padding: 16px 80px;
   align-items: center;
   gap: 15px;
   background-color: #2b5b94;
   border-radius: 12px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   box-shadow: 0 4px 12px rgba(43, 91, 148, 0.15);
+  box-sizing: border-box; 
 }
 
 .header-col {
@@ -208,6 +234,7 @@
 }
 
 .doc-table-body {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px; 
@@ -215,8 +242,8 @@
 
 /* --- Fila Convertida en Tarjeta 'Soft' --- */
 .doc-row {
+  width: 100%;
   display: grid;
-  /* GRID EXACTO A LA CABECERA PARA ALINEACIÓN PERFECTA */
   grid-template-columns: minmax(0, 3fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1.5fr);
   padding: 22px 80px; 
   align-items: center;
@@ -226,21 +253,20 @@
   border: 1px solid #f1f5f9; 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02); 
   transition: all 0.3s ease; 
+  box-sizing: border-box;
 }
 
-/* Efecto Hover */
 .doc-row:hover {
   transform: translateY(-2px); 
   box-shadow: 0 12px 25px -5px rgba(43, 91, 148, 0.15); 
   border-color: #cbd5e1;
 }
 
-/* --- Control Estricto de Textos Largos --- */
+/* --- TÍTULO MULTILÍNEA --- */
 .col-titulo {
   display: flex;
-  align-items: center;
+  align-items: flex-start; 
   gap: 14px;
-  overflow: hidden; 
 }
 
 .doc-file-icon {
@@ -248,13 +274,14 @@
   height: 28px;
   color: #2b5b94;
   flex-shrink: 0; 
+  margin-top: 2px; 
 }
 
 .titulo-wrapper {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  overflow: hidden; 
+  align-items: center; 
+  flex-wrap: wrap; 
+  gap: 8px;
   width: 100%;
 }
 
@@ -263,25 +290,27 @@
   font-size: 1.1rem; 
   font-weight: 600;
   margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-  width: 100%;
+  line-height: 1.4;
+  word-break: break-word; 
+  display: inline;
 }
 
-.leer-mas-link {
-  color: #3b82f6;
-  font-weight: 500;
-  font-size: 0.85rem;
-  text-decoration: none;
-  transition: color 0.2s;
-  white-space: nowrap;
+.doc-preview-eye {
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
 }
 
-.leer-mas-link:hover {
-  color: #2563eb;
-  text-decoration: underline;
+.doc-preview-eye:hover {
+  color: #2b5b94;
+  transform: scale(1.1);
+}
+
+.doc-preview-eye svg {
+  width: 20px;
+  height: 20px;
 }
 
 .col-data {
@@ -290,47 +319,53 @@
   font-weight: 400;
   display: flex;
   align-items: center;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
-/* Clase para centrar solo el contenido de la categoría en las filas */
+/* --- CATEGORÍAS ADAPTATIVAS (CON DIV ENVOLTORIO) --- */
 .col-categoria-data {
   justify-content: center;
 }
 
-.category-pill {
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 6px 16px;
-  border-radius: 50px; 
-  border: 1px solid transparent;
-  display: inline-block;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+.category-pill-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
-/* COLORES PASTEL (SOFT UI) PARA LAS CATEGORÍAS */
+.category-pill {
+  display: inline-block;
+  text-align: center; 
+  font-size: 0.7rem; /* Reducido para que se lea completo sin cortar */
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 50px; 
+  border: 1px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  /* Estas tres líneas permiten que el texto baje de línea si es muy largo sin deformar la caja */
+  white-space: normal; 
+  word-wrap: break-word;
+  line-height: 1.2;
+  max-width: 160px; 
+}
+
+/* COLORES ESTILO CAPTURA (CELSTE / VERDE / AMARILLO PASTEL) */
 .cat-guia {
-  background-color: #fffbeb !important; /* Amarillo muy suave */
-  color: #b45309 !important; /* Texto ocre oscuro */
+  background-color: #fffbeb !important; 
+  color: #d97706 !important; 
   border-color: #fde68a !important;
 }
 
 .cat-inst {
-  background-color: #f0f9ff !important; /* Celeste muy suave */
-  color: #0369a1 !important; /* Texto azul fuerte */
+  background-color: #f0f9ff !important; 
+  color: #0284c7 !important; 
   border-color: #bae6fd !important;
 }
 
 .cat-prev {
-  background-color: #f0fdf4 !important; /* Verde muy suave */
-  color: #15803d !important; /* Texto verde oscuro */
+  background-color: #f0fdf4 !important; 
+  color: #16a34a !important; 
   border-color: #bbf7d0 !important;
 }
 
@@ -346,16 +381,16 @@
 
 .col-acciones {
   display: flex;
-  justify-content: flex-start; /* Alineado a la izquierda para acercarlo a Tamaño */
-  gap: 10px;
+  justify-content: center; 
 }
 
-/* Botón Acción (Pill-shaped) */
+/* --- BOTÓN DE DESCARGA SIMÉTRICO --- */
 .btn-descargar-pill {
+  width: 140px; 
   background-color: #eaf6fc;
   color: #2b5b94;
   border: none;
-  padding: 10px 24px;
+  padding: 10px 0; 
   border-radius: 50px; 
   font-weight: 700;
   font-size: 0.85rem;
@@ -367,7 +402,6 @@
   gap: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
-  white-space: nowrap;
 }
 
 .btn-descargar-pill:hover {
@@ -383,48 +417,82 @@
 }
 
 /* =========================================
+   PAGINACIÓN (SIEMPRE VISIBLE AL FINAL)
+========================================= */
+.doc-pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+  margin-top: 25px; 
+  padding-bottom: 20px;
+}
+
+.btn-paginacion-arrow {
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #2b5b94;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-paginacion-arrow:hover:not(:disabled) {
+  background-color: #2b5b94;
+  color: #ffffff;
+  border-color: #2b5b94;
+}
+
+.btn-paginacion-arrow:disabled {
+  color: #cbd5e1;
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #475569;
+  font-size: 1.05rem;
+  font-weight: 600;
+  background-color: #ffffff;
+  padding: 8px 20px;
+  border-radius: 50px;
+  border: 1px solid #e2e8f0;
+}
+
+/* =========================================
    RESPONSIVIDAD MÓVIL
 ========================================= */
 @media (max-width: 992px) {
-  .doc-table-header {
-    display: none; 
-  }
-
+  .doc-table-header { display: none; }
   .doc-row {
     grid-template-columns: 1fr; 
     gap: 15px;
     padding: 25px 20px; 
   }
-
-  .col-titulo {
-    margin-bottom: 10px;
-  }
-  
-  .col-categoria-data {
-    justify-content: flex-start; /* Reseteamos el centrado en móvil */
-  }
-
-  .titulo-text {
-    white-space: normal; 
-  }
-
-  .col-data {
-    height: auto;
-  }
-
+  .doc-search-spacer { display: none; } /* En móvil se oculta el espaciador */
+  .col-titulo { margin-bottom: 10px; }
+  .col-categoria-data { justify-content: flex-start; }
+  .category-pill-wrapper { justify-content: flex-start; }
+  .category-pill { max-width: 100%; }
+  .col-data { height: auto; }
   .col-data::before {
     content: attr(data-label) ": ";
     font-weight: 700;
     color: #2b5b94;
     margin-right: 8px;
   }
-
   .col-acciones {
     justify-content: flex-start;
     margin-top: 10px;
   }
-
-  .btn-descargar-pill {
-    width: 100%; 
-  }
+  .btn-descargar-pill { width: 100%; }
 }
