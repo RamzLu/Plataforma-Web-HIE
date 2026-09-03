@@ -288,7 +288,7 @@ const formatearTamano = (bytes) => {
           <div className="modal-container-wide" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <header className="modal-header-docs">
               <div className="header-content-docs">
-                <h1 className="modal-title-docs">{editingId ? "Editar Documentación" : "Carga de Documentación"}</h1>
+                <h1 className="modal-title-docs">{editingId ? "EDITAR DOCUMENTOS" : "CARGA DE DOCUMENTACIÓN"}</h1>
                 <p className="modal-subtitle-docs">Completá los datos del archivo para registrarlo en el sistema.</p>
               </div>
               <button type="button" className="close-button-docs" onClick={() => setShowModal(false)} aria-label="Cerrar modal">

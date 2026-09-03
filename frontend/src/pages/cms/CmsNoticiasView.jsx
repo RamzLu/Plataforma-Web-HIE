@@ -675,6 +675,7 @@ const CmsNoticiasView = ({
           >
             <div className="modal-header-esp">
               <h2>{editingId ? "Editar noticia" : "Crear noticia"}</h2>
+              <p className="modal-subtitle-docs">Completá los datos del archivo para registrarlo en el sistema.</p>
               <button
                 type="button"
                 className="btn-close-modal"
@@ -834,7 +835,6 @@ const CmsNoticiasView = ({
                 <div className="news-form-right">
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b' }}>Vista previa de la publicación</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0ea5e9', backgroundColor: '#e0f2fe', padding: '3px 10px', borderRadius: '12px' }}>100%</span>
                   </div>
 
                   <div className="news-preview-paper" style={{ padding: 0 }}>
@@ -889,7 +889,7 @@ const CmsNoticiasView = ({
                             <circle cx="8.5" cy="8.5" r="1.5"></circle>
                             <polyline points="21 15 16 10 5 21"></polyline>
                           </svg>
-                          [Área del mosaico de imágenes]
+                          [Imágenes]
                         </div>
                       )}
                       

@@ -181,11 +181,11 @@
 }
 
 .modal-title-docs {
-  font-size: 24px;
-  font-weight: 700;
-  color: #0d223f;
-  margin: 0;
-  letter-spacing: -0.02em;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--primary-dark);
+  margin: 0 0 6px 0;
+  color: #2b5b94
 }
 
 .modal-subtitle-docs {
@@ -242,11 +242,9 @@
 }
 
 .field-label-docs {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #0d223f;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgb(100, 116, 139);
 }
 
 .field-required-docs { color: #e11d48; margin-left: 3px; }

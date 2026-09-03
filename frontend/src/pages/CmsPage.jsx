@@ -415,42 +415,50 @@ const fetchNoticias = async () => {
         </main>
       </div>
 
-      {/* MODALES DE LOGOUT Y NOTICIAS... (SIN CAMBIOS) */}
+{/* MODAL DE CERRAR SESIÓN (LOGOUT) ACTUALIZADO */}
       {showLogoutModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowLogoutModal(false)}
-        >
-          <div
-            className="modal-content-esp logout-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header-esp">
-              <h2>CERRAR SESIÓN</h2>
-              <button
-                className="btn-close-modal"
-                onClick={() => setShowLogoutModal(false)}
-              >
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12"></path>
+        <div className="modal-overlay-logout" onClick={() => setShowLogoutModal(false)} role="dialog" aria-modal="true" aria-labelledby="logout-title">
+          <div className="modal-card-logout" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="close-button-logout" onClick={() => setShowLogoutModal(false)} aria-label="Cerrar modal">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            <div className="logout-header-flex">
+              <div className="icon-badge-logout">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
-              </button>
+              </div>
+              <div className="logout-text-content">
+                <h2 id="logout-title" className="modal-title-logout">Cerrar sesión</h2>
+                <p className="modal-description-logout">
+                  ¿Estás seguro de que deseas cerrar tu sesión en el panel de administración?
+                </p>
+              </div>
             </div>
-            <div className="modal-body-esp text-center">
-              <p className="info-text">
-                ¿Estás seguro de que deseas cerrar tu sesión en el panel de
-                administración?
-              </p>
+
+            <div className="session-info-badge-logout">
+              <span className="session-label">Sesión actual:</span>
+              <div className="session-user-details">
+                <span className="user-dot"></span>
+                <span className="user-text-logout">
+                  <strong>{isAdmin ? "Administrador" : "Redactor"}</strong> ({keycloak?.tokenParsed?.email || userName})
+                </span>
+              </div>
             </div>
-            <div className="modal-footer-esp logout-footer">
-              <button
-                className="btn-cancelar-gris"
-                onClick={() => setShowLogoutModal(false)}
-              >
-                Cancelar
+
+            <div className="modal-actions-logout">
+              <button type="button" className="btn-cancel-logout" onClick={() => setShowLogoutModal(false)}>
+                CANCELAR
               </button>
               <button
-                className="btn-cerrar-rojo"
+                type="button"
+                className="btn-confirm-logout"
                 onClick={() => {
                   if (keycloak && typeof keycloak.logout === 'function') {
                     keycloak.logout();
@@ -460,7 +468,7 @@ const fetchNoticias = async () => {
                   }
                 }}
               >
-                Sí, Salir
+                SÍ, SALIR
               </button>
             </div>
           </div>
