@@ -578,7 +578,6 @@ const CmsNoticiasView = ({
                       >
                         <option value="PUBLICADO">Publicado</option>
                         <option value="BORRADOR">Borrador</option>
-                        <option value="ARCHIVADO">Archivado</option>
                       </select>
                     </div>
                   </div>
