@@ -15,6 +15,7 @@
     "ckeditor5": "^48.4.0",
     "framer-motion": "^13.1.0",
     "keycloak-js": "^26.2.4",
+    "lucide-react": "^1.40.0",
     "react": "^19.2.8",
     "react-countup": "^6.5.3",
     "react-dom": "^19.2.8",

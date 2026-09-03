@@ -1,0 +1,236 @@
+/* =========================================
+   TÍTULOS DE PÁGINA (ESTILO CMS)
+========================================= */
+.admin-page-title {
+  margin-bottom: 30px;
+}
+.admin-overtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.admin-page-title h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 5px 0;
+}
+.admin-page-title p {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* =========================================
+   CONTENEDOR PRINCIPAL DEL DASHBOARD
+========================================= */
+.admin-dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  padding-bottom: 40px;
+}
+
+/* =========================================
+   TOP GRID: 4 KPIs (Izquierda) + Gráfico (Derecha)
+========================================= */
+.dashboard-top-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 24px;
+  width: 100%;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* --- Tarjetas KPI (Soft UI) --- */
+.kpi-card {
+  background-color: #ffffff; 
+  border-radius: 24px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); 
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+}
+
+.kpi-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.kpi-value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.kpi-label {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 20px;
+}
+
+/* --- Pastillas de Tendencia (Trend Pills) --- */
+.kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.kpi-trend.positive {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+.kpi-trend.neutral {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+/* --- Tarjeta del Gráfico (Derecha) --- */
+.chart-card {
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 30px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.chart-header h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.donut-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 30px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.donut-center-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.donut-center-text .value {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+.donut-center-text .label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+/* --- Leyenda del Gráfico --- */
+.chart-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 10px;
+  margin-top: auto;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #475569;
+  font-weight: 500;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   SECCIÓN INFERIOR
+========================================= */
+.dashboard-bottom-section {
+  width: 100%;
+}
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.section-header-row h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+.btn-gestionar-todas {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-gestionar-todas:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+/* =========================================
+   RESPONSIVIDAD MÓVIL
+========================================= */
+@media (max-width: 1100px) {
+  .dashboard-top-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
