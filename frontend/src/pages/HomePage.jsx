@@ -11,8 +11,8 @@ const HomePage = () => {
   return (
     <main>
       <Carousel />
-      <HomeNewsPreview />
       <NewsSection />
+      <HomeNewsPreview />
       <PatientInfoSection />
       <AprendeSection />
       <HomeMapBanner />

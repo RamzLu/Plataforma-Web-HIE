@@ -1,22 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+// Importamos Link solo para las rutas puras (sin hash) para evitar recargas innecesarias
+import { Link } from "react-router-dom"; 
 import "../styles/components/NewsSection.css";
 import AnimatedContent from "./AnimatedContent";
 
-// IMPORTACIÓN DE ICONOS DE REACT
-import { 
-  FiMapPin, 
-  FiCalendar, 
-  FiBell, 
-  FiPhone, 
-  FiInfo, 
-  FiNavigation 
-} from "react-icons/fi";
+// Íconos de react-icons/fi para el banner inferior
+import { FiMapPin, FiInfo, FiNavigation } from "react-icons/fi";
 
 const NewsSection = () => {
   return (
     <section className="news-section">
       <div className="news-container">
+        {/* ENCABEZADO */}
         <AnimatedContent distance={40} direction="vertical" delay={0.1}>
           <div className="news-header">
             <div className="news-title-group">
@@ -26,113 +21,129 @@ const NewsSection = () => {
           </div>
         </AnimatedContent>
 
-        {/* GRILLA DE TARJETAS ACCESIBLES */}
-        <div className="cards-grid" aria-label="Modalidades de atención y turnos">
-          {/* TARJETA 1: Primera vez */}
+        <main className="editorial-columns-grid" aria-label="Información y Servicios Hospitalarios">
+          
+          {/* COLUMNA 1: ¿VENÍS POR PRIMERA VEZ? */}
           <AnimatedContent distance={50} direction="vertical" delay={0.15}>
-            <article className="accessible-card">
-              <span className="card-category-label">Inicio de trámite</span>
-
-              <h2 className="card-title">¿Es su primera vez en este hospital?</h2>
-
-              <div className="highlight-soft-box">
-                <p>
-                  Debe acudir primero a la salita o centro de salud más cercano
-                  a su barrio.
-                </p>
+            <section className="editorial-column  ">
+              <div className="column-top-meta">
+                <span className="category-tag">DERIVACIÓN</span>
               </div>
 
-              <p className="card-body-text">
-                Allí el médico evaluará su caso y le entregará el papel de
-                derivación con el que podrá ser atendido en nuestro hospital.
+              <h2 className="editorial-title">
+                ¿VENÍS POR<br />
+                <span className="title-light-blue">PRIMERA VEZ?</span>
+              </h2>
+
+              <p className="editorial-lead-text">
+                Para la atención en consultorios de las diferentes especialidades, los pedidos son solicitados por sistema de <strong>referencia y contrarreferencia</strong> emitido por el Centro de Salud más cercano a tu domicilio.
               </p>
 
-              <div className="card-bottom-pill">
-                <span>Presentarse con la orden de derivación</span>
-              </div>
-            </article>
+              <nav className="editorial-links-list" aria-label="Enlaces de derivación">
+                {/* Usamos etiqueta <a> para garantizar el salto hacia el #autoridades */}
+                <a href="/acerca-de#autoridades" className="editorial-sublink">
+                  <span>CONOCÉ NUESTRAS AUTORIDADES</span>
+                  <span className="link-arrow" aria-hidden="true">→</span>
+                </a>
+                
+                {/* Como no tiene hash, usamos Link de React Router */}
+                <Link to="/noticias" className="editorial-sublink">
+                  <span>NUESTRAS NOTICIAS</span>
+                  <span className="link-arrow" aria-hidden="true">→</span>
+                </Link>
+              </nav>
+
+            </section>
           </AnimatedContent>
 
-          {/* TARJETA 2: Pacientes del hospital (Destacada) */}
+          {/* COLUMNA 2: PACIENTES INSTITUCIONALES */}
           <AnimatedContent distance={50} direction="vertical" delay={0.25}>
-            <article className="accessible-card card-highlight">
-              <span className="card-category-label">Gestión presencial</span>
+            <section className="editorial-column ">
+              <div className="column-top-meta">
+                <span className="category-tag">PRESENCIAL</span>
+              </div>
 
-              <h2 className="card-title">Turnos para pacientes del hospital</h2>
+              <h2 className="editorial-title">
+                PACIENTES<br />
+                <span className="title-light-blue">INSTITUCIONALES</span>
+              </h2>
 
-              <p className="card-body-text">
-                Si ya se atiende en el hospital y necesita continuar su
-                tratamiento, solicite su turno por ventanilla presentando:
+              <p className="editorial-lead-text">
+                Se brindan turnos con cada especialista según nuestro calendario mensual. Para su gestión presencial debés presentar:
               </p>
 
-              <div className="requirements-list">
-                <div className="requirement-item">
-                  <span className="requirement-number">1</span>
-                  <div className="requirement-content">
-                    <span className="requirement-tag">DOCUMENTO DE IDENTIDAD</span>
-                    <span className="requirement-title">D.N.I. original en mano</span>
-                  </div>
+              <div className="meta-info-grid">
+                <div className="meta-card">
+                  <span className="meta-label">DOCUMENTO</span>
+                  <span className="meta-value">D.N.I. del paciente</span>
                 </div>
-
-                <div className="requirement-item">
-                  <span className="requirement-number">2</span>
-                  <div className="requirement-content">
-                    <span className="requirement-tag">INDICACIÓN DEL MÉDICO</span>
-                    <span className="requirement-title">Orden médica o interconsulta</span>
-                  </div>
+                <div className="meta-card">
+                  <span className="meta-label">ORDEN</span>
+                  <span className="meta-value">Interconsulta</span>
                 </div>
-              </div>
-
-              <div className="card-bottom-info">
-                <div className="bottom-info-tag">HORARIO Y LUGAR DE ATENCIÓN</div>
-                <div className="bottom-info-value">
-                  De 06:00 a 13:00 hs. por ventanilla
+                <div className="meta-card">
+                  <span className="meta-label">HORARIO</span>
+                  <span className="meta-value">Desde las 06:00 Hs.</span>
+                </div>
+                <div className="meta-card">
+                  <span className="meta-label">VENTANILLA</span>
+                  <span className="meta-value">Av. 28 de Junio Nº 250</span>
                 </div>
               </div>
-            </article>
+
+              <nav className="editorial-links-list" aria-label="Especialidades">
+                <Link to="/especialidades" className="editorial-sublink">
+                  <span>ESPECIALIDADES MÉDICAS ACTIVAS</span>
+                  <span className="link-arrow" aria-hidden="true">→</span>
+                </Link>
+              </nav>
+
+            </section>
           </AnimatedContent>
 
+          {/* COLUMNA 3: INFORMACIÓN IMPORTANTE */}
           <AnimatedContent distance={50} direction="vertical" delay={0.35}>
-            <article className="accessible-card">
-              <span className="card-category-label category-alert">
-                Avisos y cambios
-              </span>
+            <section className="editorial-column">
+              <div className="column-top-meta">
+                <span className="category-tag alert-tag">PROTOCOLO</span>
+              </div>
 
-              <h2 className="card-title">Cancelar o cambiar su turno</h2>
+              <h2 className="editorial-title">
+                INFORMACIÓN<br />
+                <span className="title-light-red">IMPORTANTE</span>
+              </h2>
 
-              {/* Contenedor que absorbe y distribuye el espacio en blanco elegantemente */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '20px' }}>
-                <div className="alert-notice-box" style={{ margin: 0 }}>
-                  <div className="alert-heading">IMPORTANTE</div>
-                  <p className="alert-text-bold">
-                    Los turnos médicos NO se solicitan por teléfono.
-                  </p>
-                  <p className="alert-text-sub">
-                    El pedido siempre debe realizarse de forma presencial.
-                  </p>
-                </div>
-
-                <p className="card-body-text" style={{ margin: 0 }}>
-                  Para reagendar un turno, debés dar aviso presencial o telefónico
-                  con al menos 24 hs. de anticipación.
+              <div className="editorial-alert-box">
+                <p className="alert-text">
+                  Los turnos <strong>NO SE BRINDAN TELEFÓNICAMENTE</strong> a pacientes.
                 </p>
               </div>
 
-              {/* Pastilla de teléfono rediseñada para ocupar mejor el espacio */}
-              <div className="card-bottom-pill-phone">
-                <FiPhone className="pill-icon-phone" size={22} strokeWidth={2.5} />
-                <span>4445561-4445541</span>
-              </div>
-            </article>
+              <p className="editorial-lead-text">
+                Para reagendar o cancelar un turno otorgado, debés dar aviso presencial o telefónico con al menos <strong>24 hs. de anticipación</strong> para disponer del cupo.
+              </p>
+
+              <nav className="editorial-links-list" aria-label="Enlaces institucionales">
+                <a href="/noticias#articulos-medicos" className="editorial-sublink">
+                  <span>ARTÍCULOS MÉDICOS</span>
+                  <span className="link-arrow" aria-hidden="true">→</span>
+                </a>
+                <a href="/acerca-de#video" className="editorial-sublink">
+                  <span>VIDEO INSTITUCIONAL</span>
+                  <span className="link-arrow" aria-hidden="true">→</span>
+                </a>
+              </nav>
+
+            </section>
           </AnimatedContent>
-        </div>
+        </main>
 
         {/* BANNER DE SEDE CENTRAL */}
         <AnimatedContent distance={50} direction="vertical" delay={0.45}>
           <section className="location-banner" aria-label="Información de la sede">
             <div className="location-left-group">
               <div className="location-icon-bubble" aria-hidden="true">
-                <FiMapPin size={24} strokeWidth={2.2} />
+                <FiMapPin size={22} strokeWidth={2.2} />
               </div>
               <div className="location-text-group">
                 <span className="location-subtitle">SEDE HOSPITALARIA CENTRAL</span>
@@ -144,18 +155,19 @@ const NewsSection = () => {
             </div>
 
             <div className="location-actions">
-              <Link to="/acerca-de#sede-central" className="btn-building-info" style={{ textDecoration: 'none' }}>
-                <FiInfo size={18} strokeWidth={2.2} />
+              <a href="/acerca-de#sede-central" className="btn-building-info" style={{ textDecoration: 'none' }}>
+                <FiInfo size={16} strokeWidth={2.2} />
                 Información del Edificio
-              </Link>
+              </a>
 
-              <Link to="/contacto#transporte-mapa" className="btn-how-to-arrive" style={{ textDecoration: 'none' }}>
-                <FiNavigation size={18} strokeWidth={2.2} />
+              <a href="/contacto#transporte-mapa" className="btn-how-to-arrive" style={{ textDecoration: 'none' }}>
+                <FiNavigation size={16} strokeWidth={2.2} />
                 Cómo llegar
-              </Link>
+              </a>
             </div>
           </section>
         </AnimatedContent>
+
       </div>
     </section>
   );

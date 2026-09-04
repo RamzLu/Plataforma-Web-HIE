@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from "react"; // <-- Importamos useEffect
-import { Link, useLocation } from "react-router-dom"; // <-- Importamos useLocation
+import React, { useRef, useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "../styles/pages/AboutPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 import ReactCountUp from "react-countup";
@@ -73,22 +73,27 @@ const VALORES_INSTITUCIONALES = [
 ];
 
 const AboutPage = () => {
-  const { hash } = useLocation(); // <-- Intercepta el Hash de la URL
+  const { hash } = useLocation();
 
   const videoSectionRef = useRef(null);
   const htmlVideoRef = useRef(null);
   const autoridadesRef = useRef(null);
   const valoresRef = useRef(null);
-  const sedeCentralRef = useRef(null); // <-- Referencia para la sede central
+  const sedeCentralRef = useRef(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // EFECTO PARA HACER SCROLL AUTOMÁTICO SI LA URL TIENE UN HASH
+  // EFECTO PARA HACER SCROLL AUTOMÁTICO GENERALIZADO
   useEffect(() => {
-    if (hash === '#sede-central' && sedeCentralRef.current) {
+    if (hash) {
       setTimeout(() => {
-        sedeCentralRef.current.scrollIntoView({ behavior: 'smooth' });
-      }, 100); // Un pequeño retraso asegura que el DOM esté listo
+        const element = document.getElementById(hash.replace('#', ''));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300); 
+    } else {
+      window.scrollTo(0, 0);
     }
   }, [hash]);
 
@@ -223,7 +228,7 @@ const AboutPage = () => {
         </section>
 
         {/* ========================================================= */}
-        {/* SECCIÓN SEDE CENTRAL CON EL ID Y LA REFERENCIA AGREGADA   */}
+        {/* SECCIÓN SEDE CENTRAL                                      */}
         {/* ========================================================= */}
         <section 
           id="sede-central" 
@@ -275,7 +280,10 @@ const AboutPage = () => {
           </AnimatedContent>
         </section>
 
-        <section className="about-video-section" ref={videoSectionRef}>
+        {/* ========================================================= */}
+        {/* SECCIÓN VIDEO (Ahora con id="video")                      */}
+        {/* ========================================================= */}
+        <section id="video" className="about-video-section" ref={videoSectionRef}>
           <AnimatedContent distance={50} direction="vertical" delay={0.1}>
             <div className="video-frame-container">
               {isPlaying ? (
@@ -306,6 +314,7 @@ const AboutPage = () => {
             </div>
           </AnimatedContent>
         </section>
+
         <section
           id="valores"
           className="about-valores-section"
@@ -333,7 +342,9 @@ const AboutPage = () => {
             ))}
           </div>
         </section>
+        
         <InteractiveTimelineSection />
+        
         <section
           id="autoridades"
           className="about-authorities-section"

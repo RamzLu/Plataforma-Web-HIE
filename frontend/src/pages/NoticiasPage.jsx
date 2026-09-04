@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import { newsData } from "../data/newsData";
+import { useLocation } from "react-router-dom";
 import "../styles/pages/NoticiasPage.css";
 import Breadcrumb from "../components/Breadcrumb";
-
 import iconMama from "../assets/icon-mama.png";
 import iconCorazon from "../assets/icon-corazon.png";
 import iconDonacion from "../assets/icon-donacion-de-sangre.png";
@@ -176,6 +175,7 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
 const NoticiasPage = () => {
   const sliderRef = useRef(null);
   const modalSliderRef = useRef(null);
+  const { hash } = useLocation();
 
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedNews, setSelectedNews] = useState(null);
@@ -220,7 +220,18 @@ const NoticiasPage = () => {
       (prev) => (prev - 1 + miniCarouselData.length) % miniCarouselData.length,
     );
   };
-
+useEffect(() => {
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash.replace('#', ''));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300); // Esperamos 300ms para que las noticias carguen
+    } else {
+      window.scrollTo(0, 0); // Si entras normal, empieza arriba
+    }
+  }, [hash]);
 useEffect(() => {
     const fetchNoticiasPublicas = async () => {
       setLoading(true); // 👈 Iniciar la carga
@@ -328,7 +339,7 @@ useEffect(() => {
           </div>
         )}
 
-        <section className="medical-articles-section">
+        <section id="articulos-medicos" className="medical-articles-section">
           <div className="medical-left-column">
             <div className="medical-header">
               <h4 className="medical-subtitle">
