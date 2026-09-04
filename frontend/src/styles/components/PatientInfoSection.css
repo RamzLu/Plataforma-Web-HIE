@@ -1,16 +1,10 @@
 .patient-section {
   width: 100%;
-  background-color: #f8fafc; /* Fondo gris claro idéntico a las secciones internas */
+  background-color: #ffffff; /* Se adapta a blanco puro como la referencia */
   padding: 80px 20px;
   display: flex;
   justify-content: center;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
 }
 
 .patient-container {
@@ -18,7 +12,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 50px; /* Mayor separación entre el título y el contenido */
 }
 
 .patient-section-header {
@@ -45,191 +39,207 @@
   text-transform: uppercase;
 }
 
-/* TARJETA PRINCIPAL BLANCA */
-.patient-main-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #cbd5e1;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+/* NUEVO LAYOUT DIVIDIDO */
+.patient-split-layout {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  overflow: hidden;
+  grid-template-columns: 1fr 1.2fr; /* Columna de imagen ligeramente más ancha */
+  gap: 60px;
+  align-items: start;
 }
 
-/* LADO IZQUIERDO */
 .patient-content-left {
-  padding: 35px 30px;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 35px;
 }
 
-/* BANNER INTERNO DE WHATSAPP */
-.turnos-box {
-  background-color: #f1f5f9;
-  border-radius: 8px;
-  padding: 16px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #e2e8f0;
-}
-
-.turnos-text-wrapper {
+/* BOTÓN WHATSAPP Y TEXTO */
+.cta-turnos-clean {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.turnos-text {
-  color: #0c2340;
+.cta-turnos-text h3 {
+  font-size: 1.15rem;
   font-weight: 600;
+  color: #0c2340;
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+}
+
+.cta-turnos-text p {
   font-size: 0.95rem;
+  color: #64748b;
   margin: 0;
 }
 
-.turnos-time {
-  color: #64748b;
-  font-size: 0.82rem;
-  font-weight: 300;
-}
-
-.btn-whatsapp-outline {
-  background-color: #2b5b94;
-  color: #ffffff;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 8px 18px;
-  border-radius: 20px;
-  display: flex;
+/* Estilo Outline inspirado en el botón "QUIERO AFILIARME" */
+.btn-outline-whatsapp {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  transition: background-color 0.2s ease;
-  flex-shrink: 0;
-}
-
-.btn-whatsapp-outline:hover {
-  background-color: #1c4373;
-}
-
-.btn-whatsapp-outline svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* ACORDEÓN MINIMALISTA ESTILO FOTO DE REFERENCIA */
-.accordion-wrapper {
-  display: flex;
-  flex-direction: column;
   gap: 10px;
+  padding: 12px 32px;
+  border: 1.5px solid #e11d48; /* Borde rojo */
+  color: #e11d48; /* Texto rojo */
+  background-color: transparent;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
-.accordion-item {
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  overflow: hidden;
-  transition: border-color 0.2s ease;
-}
-
-.accordion-item.active {
-  border-color: #2b5b94;
-}
-
-.accordion-header {
-  width: 100%;
-  background-color: #ffffff;
-  color: #1c1e21;
-  border: none;
-  padding: 16px 20px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
-  text-align: left;
-}
-
-/* Estado activo del acordeón (Fondo azul fuerte con texto blanco) */
-.accordion-item.active .accordion-header {
-  background-color: #2b5b94;
+.btn-outline-whatsapp:hover {
+  background-color: #e11d48;
   color: #ffffff;
 }
 
-.accordion-arrow {
+.btn-outline-whatsapp svg {
   width: 18px;
   height: 18px;
-  stroke: #2b5b94;
-  transition:
-    transform 0.3s ease,
-    stroke 0.2s;
 }
 
-.accordion-item.active .accordion-arrow {
-  transform: rotate(180deg);
-  stroke: #ffffff;
+/* ACORDEÓN MINIMALISTA */
+.accordion-clean-wrapper {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #819ec6;
 }
 
-.accordion-content {
-  background-color: #ffffff;
-  color: #334155;
-  font-size: 0.92rem;
-  font-weight: 300;
+.accordion-clean-item {
+  border-bottom: 1px solid #819ec6;
+}
+
+
+.accordion-clean-item:hover {
+  border-bottom-color: #0284c7; 
+}
+
+.accordion-clean-wrapper:hover {
+  border-top-color: #0284c7; 
+}
+
+.accordion-clean-header {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 22px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.accordion-clean-header span {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.accordion-clean-header:hover span {
+  transform: translateX(8px);
+}
+
+.accordion-clean-header:hover {
+  color: #0c2340;
+}
+
+.accordion-clean-item.active .accordion-clean-header {
+  color: #1b477f;
+  font-weight: 700;
+}
+
+.accordion-clean-arrow {
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+  transition: transform 0.3s ease, color 0.2s ease;
+}
+
+.accordion-clean-header:hover .accordion-clean-arrow {
+  transform: translateX(8px);
+}
+
+.accordion-clean-item.active .accordion-clean-arrow {
+  transform: rotate(90deg);
+  color: #0c2340;
+}
+
+.accordion-clean-item.active .accordion-clean-header:hover .accordion-clean-arrow {
+  transform: translateX(8px) rotate(90deg);
+}
+
+.accordion-clean-content {
+  padding: 0 0 24px 0;
+  color: #64748b;
+  font-size: 0.95rem;
   line-height: 1.6;
-  padding: 20px;
-  border-top: 1px solid #e2e8f0;
 }
 
-.accordion-content p {
+.accordion-clean-content p {
   margin: 0;
 }
 
-/* LADO DERECHO: IMAGEN SIN SESGOS */
+/* LADO DERECHO: IMAGEN FLUIDA */
 .patient-image-right {
   width: 100%;
   height: 100%;
-  position: relative;
-  overflow: hidden;
-  background-color: #e2e8f0;
+  min-height: 520px;
 }
 
-.patient-img {
+.patient-img-clean {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
   display: block;
+  border-radius: 8px; /* Bordes levemente suavizados para no ser toscos */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* =========================================
+   ANIMACIÓN SUAVE PARA CAMBIO DE IMAGEN
+   ========================================= */
+
+.img-smooth-swap {
+  animation: smoothImageSwap 0.45s ease-out forwards;
+}
+
+@keyframes smoothImageSwap {
+  0% {
+    opacity: 0.1;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* RESPONSIVIDAD */
 @media (max-width: 992px) {
-  .patient-main-card {
+  .patient-split-layout {
     grid-template-columns: 1fr;
+    gap: 40px;
   }
-
   .patient-image-right {
-    height: 300px;
+    min-height: 350px;
   }
 }
 
 @media (max-width: 600px) {
-  .turnos-box {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-
-  .btn-whatsapp-outline {
+  .btn-outline-whatsapp {
     width: 100%;
     justify-content: center;
-  }
-
-  .patient-content-left {
-    padding: 25px 20px;
   }
 }
