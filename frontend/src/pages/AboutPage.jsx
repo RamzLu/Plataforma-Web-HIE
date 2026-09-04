@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useRef, useState, useEffect } from "react"; // <-- Importamos useEffect
+import { Link, useLocation } from "react-router-dom"; // <-- Importamos useLocation
 import "../styles/pages/AboutPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 import ReactCountUp from "react-countup";
@@ -23,8 +23,7 @@ const AUTORIDADES = [
   {
     cargo: "DIRECTORA GENERAL",
     nombre: "Dra. Paula Ramírez",
-    especialidad:
-      "Gestión médica, formación de residentes y telemedicina provincial.",
+    especialidad: "Gestión médica, formación de residentes y telemedicina provincial.",
     foto: fotoDirector,
   },
   {
@@ -36,8 +35,7 @@ const AUTORIDADES = [
   {
     cargo: "SUBDIRECTOR DE MANTENIMIENTO Y SERVICIOS GENERALES",
     nombre: "Ing. Santiago Jojot",
-    especialidad:
-      "Ingeniería clínica y gestión de infraestructura hospitalaria.",
+    especialidad: "Ingeniería clínica y gestión de infraestructura hospitalaria.",
     foto: fotoDirector,
   },
 ];
@@ -45,30 +43,18 @@ const AUTORIDADES = [
 const VALORES_INSTITUCIONALES = [
   {
     titulo: "Excelencia y Calidez",
-    descripcion:
-      "Brindamos atención médica de máxima calidad profesional, priorizando el trato humano, empático y respetuoso hacia el paciente y su familia.",
+    descripcion: "Brindamos atención médica de máxima calidad profesional, priorizando el trato humano, empático y respetuoso hacia el paciente y su familia.",
     icono: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
       </svg>
     ),
   },
   {
     titulo: "Equidad e Inclusión",
-    descripcion:
-      "Garantizamos el acceso universal, público y gratuito a la salud de alta complejidad para toda la comunidad formoseña sin distinción.",
+    descripcion: "Garantizamos el acceso universal, público y gratuito a la salud de alta complejidad para toda la comunidad formoseña sin distinción.",
     icono: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
         <path d="M2 12h20"></path>
@@ -77,15 +63,9 @@ const VALORES_INSTITUCIONALES = [
   },
   {
     titulo: "Innovación y Compromiso",
-    descripcion:
-      "Apostamos a la tecnología médica de vanguardia, la capacitación continua, la investigación y la ética profesional constante.",
+    descripcion: "Apostamos a la tecnología médica de vanguardia, la capacitación continua, la investigación y la ética profesional constante.",
     icono: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
       </svg>
     ),
@@ -93,12 +73,24 @@ const VALORES_INSTITUCIONALES = [
 ];
 
 const AboutPage = () => {
+  const { hash } = useLocation(); // <-- Intercepta el Hash de la URL
+
   const videoSectionRef = useRef(null);
   const htmlVideoRef = useRef(null);
   const autoridadesRef = useRef(null);
   const valoresRef = useRef(null);
+  const sedeCentralRef = useRef(null); // <-- Referencia para la sede central
 
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // EFECTO PARA HACER SCROLL AUTOMÁTICO SI LA URL TIENE UN HASH
+  useEffect(() => {
+    if (hash === '#sede-central' && sedeCentralRef.current) {
+      setTimeout(() => {
+        sedeCentralRef.current.scrollIntoView({ behavior: 'smooth' });
+      }, 100); // Un pequeño retraso asegura que el DOM esté listo
+    }
+  }, [hash]);
 
   const handlePlayVideo = () => {
     setIsPlaying(true);
@@ -203,62 +195,41 @@ const AboutPage = () => {
         <section className="about-stats-clean">
           <div className="stat-clean-item">
             <span className="stat-clean-num">
-              <CountUp
-                prefix="+"
-                end={49200}
-                separator="."
-                duration={2.5}
-                enableScrollSpy
-                scrollSpyOnce
-              />
+              <CountUp prefix="+" end={49200} separator="." duration={2.5} enableScrollSpy scrollSpyOnce />
             </span>
-            <span className="stat-clean-text">
-              ATENCIONES MÉDICAS ANUALES ESTIMADAS
-            </span>
+            <span className="stat-clean-text">ATENCIONES MÉDICAS ANUALES ESTIMADAS</span>
           </div>
 
           <div className="stat-clean-item">
             <span className="stat-clean-num">
-              <CountUp
-                prefix="+"
-                end={200}
-                duration={2.5}
-                enableScrollSpy
-                scrollSpyOnce
-              />
+              <CountUp prefix="+" end={200} duration={2.5} enableScrollSpy scrollSpyOnce />
             </span>
-            <span className="stat-clean-text">
-              CAMAS DE INTERNACIÓN Y CUIDADOS CRÍTICOS
-            </span>
+            <span className="stat-clean-text">CAMAS DE INTERNACIÓN Y CUIDADOS CRÍTICOS</span>
           </div>
 
           <div className="stat-clean-item">
             <span className="stat-clean-num">
-              <CountUp
-                end={19000}
-                separator="."
-                duration={2.5}
-                enableScrollSpy
-                scrollSpyOnce
-              />
+              <CountUp end={19000} separator="." duration={2.5} enableScrollSpy scrollSpyOnce />
             </span>
             <span className="stat-clean-text">METROS CUADRADOS CUBIERTOS</span>
           </div>
 
           <div className="stat-clean-item">
             <span className="stat-clean-num">
-              <CountUp
-                end={100}
-                suffix="%"
-                duration={2.5}
-                enableScrollSpy
-                scrollSpyOnce
-              />
+              <CountUp end={100} suffix="%" duration={2.5} enableScrollSpy scrollSpyOnce />
             </span>
             <span className="stat-clean-text">SALUD PÚBLICA Y GRATUITA</span>
           </div>
         </section>
-        <section className="about-single-sede-section">
+
+        {/* ========================================================= */}
+        {/* SECCIÓN SEDE CENTRAL CON EL ID Y LA REFERENCIA AGREGADA   */}
+        {/* ========================================================= */}
+        <section 
+          id="sede-central" 
+          ref={sedeCentralRef} 
+          className="about-single-sede-section"
+        >
           <AnimatedContent distance={50} direction="vertical" delay={0.1}>
             <div className="single-sede-card">
               <div className="sede-img-box">
@@ -286,24 +257,14 @@ const AboutPage = () => {
                 </p>
                 <div className="sede-badge-list">
                   <span className="badge-item">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10"></circle>
                       <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
                     Guardia Activa 24 Hs.
                   </span>
                   <span className="badge-item">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                     </svg>
                     (3704) 436-100
@@ -313,6 +274,7 @@ const AboutPage = () => {
             </div>
           </AnimatedContent>
         </section>
+
         <section className="about-video-section" ref={videoSectionRef}>
           <AnimatedContent distance={50} direction="vertical" delay={0.1}>
             <div className="video-frame-container">

@@ -1,6 +1,12 @@
+@keyframes subtleGradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .news-section {
   width: 100%;
-  background-color: #f8fafc; /* Fondo gris claro suave idéntico a las páginas internas */
+  background-color: #f8fafc; 
   padding: 80px 20px;
   display: flex;
   justify-content: center;
@@ -14,24 +20,12 @@
 }
 
 .news-container {
-  max-width: 1100px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
+  max-width: 1240px;
+  margin: 0 auto;
 }
-
+/* Encabezado Principal */
 .news-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  border-bottom: 1px solid #cbd5e1;
-  padding-bottom: 18px;
-}
-
-.news-title-group {
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 40px;
 }
 
 .news-subtitle {
@@ -40,7 +34,8 @@
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  display: block;
+  margin-bottom: 8px;
 }
 
 .news-title {
@@ -49,258 +44,365 @@
   font-weight: 300;
   letter-spacing: 1.5px;
   margin: 0;
-  text-transform: uppercase;
 }
 
-.news-ver-mas {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #2b5b94;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
-  transition: color 0.2s ease;
-}
-
-.news-ver-mas:hover {
-  color: #1c4373;
-}
-
-.news-ver-mas svg {
-  width: 18px;
-  height: 18px;
-}
-
-/* --- GRILLA DE TARJETAS --- */
-.news-cards-grid {
+/* =========================================================
+   GRILLA DE TARJETAS ACCESIBLES
+   ========================================================= */
+.cards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  align-items: stretch; /* Fuerza a que todas las columnas midan lo mismo */
+  gap: 28px;
+  margin-top: 40px; 
+  margin-bottom: 36px;
+  align-items: stretch; 
 }
 
-/* Solución para que AnimatedContent no rompa la estructura flexible */
-.news-cards-grid > div {
+.accessible-card {
+  background: linear-gradient(120deg, #eef5ff, #fdfdff, #d8edf9, #ffffff);
+  background-size: 300% 300%;
+  animation: subtleGradientMove 14s ease infinite; 
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 32px 28px;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  box-shadow: 0 4px 20px -2px rgba(13, 34, 63, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* --- ESTILO DE TARJETA BLANCA INSTITUCIONAL --- */
-.news-card {
-  background-color: #e3e5f6;
-  border-radius: 12px;
-  padding: 30px 25px;
-  display: flex;
-  flex-direction: column;
-  height: 100%; /* Ocupa el 100% de la altura de la grilla */
-  border: 1px solid #cbd5e1;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+.accessible-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 30px -4px rgba(13, 34, 63, 0.08);
 }
 
-.news-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-}
-
-.card-header-line {
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.card-tag {
-  display: inline-block;
-  font-size: 0.75rem;
+.card-category-label {
+  font-size: 18px;
   font-weight: 700;
+  color: #0284c7;
+  margin-bottom: 16px;
+  letter-spacing: 0.01em;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.card-category-label.category-alert {
+  color: #e11d48;
+}
+
+.card-title {
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.25;
   color: #2b5b94;
-  letter-spacing: 0.5px;
+  margin: 0 0 20px 0;
+}
+
+.card-body-text {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #0f3872;
+}
+
+/* Bloque destacado suave (Paso 1) */
+.highlight-soft-box {
+  background-color: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+.highlight-soft-box p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 600;
+  color: #0c2340;
+}
+
+/* Requisitos con numeración grande y clara (Paso 2) */
+.requirements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.requirement-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e0f2fe;
+  color: #0284c7;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.requirement-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.requirement-tag {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #64748b;
   text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.requirement-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0c2340;
+}
+
+/* Caja de alerta destacada (Paso 3) */
+.alert-notice-box {
+  background-color: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.alert-heading {
+  font-size: 12px;
+  font-weight: 800;
+  color: #e11d48;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.alert-text-bold {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #0c2340;
+  margin: 0 0 6px 0;
+}
+
+.alert-text-sub {
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: #4b5563;
+  margin: 0;
+}
+
+/* Pie de tarjeta con información clave */
+.card-bottom-info {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #edf2f7;
+}
+
+.bottom-info-tag {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0284c7;
   margin-bottom: 4px;
 }
 
-.card-tag.alert {
-  color: #e8453c;
+.bottom-info-value {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0c2340;
 }
 
-.card-header-line h4 {
-  font-size: 1.1rem;
-  font-weight: 300;
-  color: #1c1e21;
-  margin: 0;
-}
-
-.card-question {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #2b5b94;
-  margin: 0 0 12px 0;
-}
-
-.card-paragraph {
-  font-size: 1rem; /* Ajustado proporcionalmente para que respete el diseño sin desbordar */
-  color: #2e3745;
-  font-weight: 300;
-  line-height: 1.5;
-  margin: 0 0 20px 0;
-  flex-grow: 1; /* Permite que el texto expanda y alinee los elementos inferiores */
-}
-
-/* Imágenes Placeholder */
-.card-map-placeholder {
+.card-bottom-pill {
   margin-top: auto;
-  padding: 15px 0;
-  display: flex;
-  justify-content: center;
-}
-
-.map-image,
-.logos-image {
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
-.card-logos-placeholder {
-  margin-top: auto; /* Empuja los logos siempre hacia abajo de manera uniforme */
-}
-
-/* Lista de viñetas limpia */
-.card-list-item {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.bullet-icon {
-  color: #2b5b94;
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-.card-list-item p {
-  font-size: 1rem;
-  color: #2e3745;
-  font-weight: 300;
-  line-height: 1.4;
-  margin: 0;
-}
-
-/* Grilla de Chips / Píldoras informativas */
-.info-pills-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 15px 0 20px 0;
-}
-
-.info-pill {
-  background-color: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 0.78rem;
-  color: #1c1e21;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 400;
+  gap: 10px;
+  padding: 14px 18px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  color: #166534;
+  font-size: 14.5px;
+  font-weight: 700;
 }
 
-.info-pill svg {
-  width: 16px;
-  height: 16px;
-  stroke: #2b5b94;
+.pill-icon {
+  flex-shrink: 0;
+  color: #15803d;
+}
+
+/* =========================================================
+   SECCIÓN INFERIOR: UBICACIÓN E INFORMACIÓN DE SEDE
+   ========================================================= */
+.location-banner {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-shadow: 0 2px 8px rgba(13, 34, 63, 0.03);
+}
+
+.location-left-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.location-icon-bubble {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0c2340;
   flex-shrink: 0;
 }
 
-/* Bloque Importante */
-.important-items {
+.location-text-group {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  margin-bottom: 25px;
-  flex-grow: 1;
 }
 
-.important-item {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+.location-subtitle {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0284c7;
+  margin-bottom: 4px;
 }
 
-.imp-icon-circle {
-  width: 32px;
-  height: 32px;
-  background-color: #fef2f2;
-  border-radius: 50%;
+.location-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0c2340;
+  margin: 0 0 4px 0;
+}
+
+.location-address {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.location-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 14px;
   flex-shrink: 0;
 }
 
-.imp-icon-circle svg {
-  width: 16px;
-  height: 16px;
-  stroke: #e8453c;
+.btn-building-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 22px;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9999px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0c2340;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.important-item p {
-  font-size: 1rem;
-  color: #2e3745;
-  font-weight: 300;
-  line-height: 1.4;
-  margin: 0;
-}
-
-/* Bloque de Teléfono */
-.important-phone {
+.btn-building-info:hover {
   background-color: #f1f5f9;
-  border-radius: 30px;
-  padding: 10px 18px;
+  border-color: #94a3b8;
+}
+
+.btn-how-to-arrive {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 26px;
+  background-color: #0c2340;
+  border: 1.5px solid #0c2340;
+  border-radius: 9999px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-how-to-arrive:hover {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.card-bottom-pill-phone {
+  margin-top: 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: auto;
-  color: #2b5b94;
-  font-size: 1.05rem;
-  font-weight: 700;
-  border: 1px solid #cbd5e1;
+  justify-content: center; 
+  gap: 12px;
+  padding: 18px 24px; 
+  background-color: #f0f9ff; 
+  border: 2px dashed #bae6fd; 
+  border-radius: 12px;
+  color: #0c2340;
+  font-size: 18px; 
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
-.important-phone svg {
-  width: 18px;
-  height: 18px;
-  stroke: #2b5b94;
+.pill-icon-phone {
+  flex-shrink: 0;
+  color: #0284c7;
 }
 
-.card-footer-text {
-  margin-top: 15px;
-  text-align: center;
-  font-size: 0.8rem;
-  color: #94a3b8;
-  font-weight: 300;
-}
-
-/* RESPONSIVIDAD */
-@media (max-width: 992px) {
-  .news-cards-grid {
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 1024px) {
+  .cards-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  .info-pills-grid {
-    grid-template-columns: 1fr;
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .news-title {
-    font-size: 1.7rem;
+  .location-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .location-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .btn-building-info,
+  .btn-how-to-arrive {
+    width: 100%;
+    justify-content: center;
   }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import "../styles/pages/ContactoPage.css";
 import Breadcrumb from "../components/Breadcrumb";
@@ -10,22 +10,26 @@ import fotoAtencion from "../assets/fotoContacto.jpg";
 import fotoFachadaHIE from "../assets/fotoFachadaHIE2.jpg";
 
 const ContactoPage = () => {
-  const location = useLocation();
+  const { hash } = useLocation();
+  const mapaTransporteRef = useRef(null);
 
+  // EFECTO PARA HACER SCROLL AUTOMÁTICO AL MAPA SI LA URL TIENE EL HASH
   useEffect(() => {
-    if (location.hash) {
-      const targetElement = document.getElementById(
-        location.hash.replace("#", ""),
-      );
-      if (targetElement) {
-        setTimeout(() => {
-          targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 150);
-      }
-    } else {
+    if (hash === '#transporte-mapa' && mapaTransporteRef.current) {
+      setTimeout(() => {
+        const offset = 80; // Margen superior para no quedar pegado al Navbar
+        const elementPosition = mapaTransporteRef.current.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.scrollY - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        });
+      }, 150);
+    } else if (!hash) {
       window.scrollTo(0, 0);
     }
-  }, [location]);
+  }, [hash]);
 
   return (
     <main className="contacto-page">
@@ -72,7 +76,11 @@ const ContactoPage = () => {
       </div>
 
       {/* 3. SECCIÓN AZUL INSTITUCIONAL (MAPA Y TRANSPORTE) */}
-      <section className="location-fullwidth-section">
+      <section 
+        id="transporte-mapa" 
+        ref={mapaTransporteRef} 
+        className="location-fullwidth-section"
+      >
         <div className="location-bottom-content">
           <div className="location-bottom-inner">
             <div className="location-grid-top">
