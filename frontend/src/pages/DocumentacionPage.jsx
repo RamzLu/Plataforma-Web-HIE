@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getDocumentos } from "../api/documentos.api.js";
 import "../styles/pages/DocumentacionPage.css";
-import AnimatedContent from "../components/AnimatedContent";
+import AnimatedContent from "../components/ui/AnimatedContent";
 import Breadcrumb from "../components/Breadcrumb";
 import fondoBanner from "../assets/banner_documentacion.png";
 

@@ -2,7 +2,7 @@ import React from "react";
 // Importamos Link solo para las rutas puras (sin hash) para evitar recargas innecesarias
 import { Link } from "react-router-dom"; 
 import "../styles/components/NewsSection.css";
-import AnimatedContent from "./AnimatedContent";
+import AnimatedContent from "../components/ui/AnimatedContent";
 
 // Íconos de react-icons/fi para el banner inferior
 import { FiMapPin, FiInfo, FiNavigation } from "react-icons/fi";

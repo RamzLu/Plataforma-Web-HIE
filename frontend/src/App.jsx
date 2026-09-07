@@ -8,10 +8,10 @@ import {
 import { Toaster } from "react-hot-toast";
 import "./App.css";
 
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import WhatsAppButton from "./components/WhatsAppButton";
-import ScrollToTop from "./components/ScrollToTop";
+import Header from "./components/layout/Header";
+import Footer from "./components/layout/Footer";
+import WhatsAppButton from "./components/ui/WhatsAppButton";
+import ScrollToTop from "./components/ui/ScrollToTop";
 
 import HomePage from "./pages/HomePage";
 import EspecialidadesPage from "./pages/EspecialidadesPage";

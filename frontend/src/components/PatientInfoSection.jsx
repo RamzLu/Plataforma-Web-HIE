@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../styles/components/PatientInfoSection.css";
-import AnimatedContent from "./AnimatedContent";
+import AnimatedContent from "../components/ui/AnimatedContent";
 
 import imgAtencion from "../assets/imagenPacientes.jpg";
 import imgVisita from "../assets/imgVisita.jpg";

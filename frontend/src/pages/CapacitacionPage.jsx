@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../styles/pages/CapacitacionPage.css";
-import AnimatedContent from "../components/AnimatedContent";
+import AnimatedContent from "../components/ui/AnimatedContent";
 
 import Breadcrumb from "../components/Breadcrumb";
 

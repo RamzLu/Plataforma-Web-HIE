@@ -4,7 +4,7 @@ import "../styles/pages/AboutPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 import ReactCountUp from "react-countup";
 const CountUp = ReactCountUp.default || ReactCountUp;
-import AnimatedContent from "../components/AnimatedContent";
+import AnimatedContent from "../components/ui/AnimatedContent";
 
 // IMÁGENES INSTITUCIONALES
 import fotoHeroHeader from "../assets/foto-sede.jpg";
