@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getDocumentos } from "../api/documentos.api.js";
 import "../styles/pages/DocumentacionPage.css";
 import AnimatedContent from "../components/AnimatedContent";
 import Breadcrumb from "../components/Breadcrumb";
@@ -8,11 +9,9 @@ const DocumentacionPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("TODOS");
   
-  // ESTADOS MANTENIDOS ESTRICTAMENTE
   const [documentosData, setDocumentosData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ESTADOS LOCALES DE PAGINACIÓN
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6; 
 
@@ -27,16 +26,12 @@ const DocumentacionPage = () => {
     const fetchDocumentosPublicos = async () => {
       setLoading(true);
       try {
-        const response = await fetch("http://localhost:3000/api/cms/documentacion");
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Documentos desde BD:", data);
-          
-          const docsPublicados = data.filter(
-            (doc) => (doc.status || "").toLowerCase() === "publicado"
-          );
-          setDocumentosData(docsPublicados);
-        }
+        const data = await getDocumentos();
+        
+        const docsPublicados = data.filter(
+          (doc) => (doc.status || "").toLowerCase() === "publicado"
+        );
+        setDocumentosData(docsPublicados);
       } catch (error) {
         console.error("Error al cargar documentos públicos:", error);
       } finally {
@@ -141,7 +136,6 @@ const DocumentacionPage = () => {
 
       <div className="documentacion-container">
         
-        {/* BUSCADOR ESTILO PROFESIONALES CON DIV SIMULADOR */}
         <div className="doc-search-wrapper">
           <div className="doc-search-bar">
             <svg className="doc-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -154,7 +148,6 @@ const DocumentacionPage = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            {/* ESTE DIV SIMULA EL TAMAÑO DEL FILTRO DE PROFESIONALES */}
             <div className="doc-search-spacer"></div>
           </div>
         </div>
@@ -222,7 +215,6 @@ const DocumentacionPage = () => {
                       </div>
 
                       <div className="col-data col-categoria-data" data-label="Categoría">
-                        {/* ESTE DIV ENVOLTORIO PROTEGE EL TEXTO Y EL TAMAÑO */}
                         <div className="category-pill-wrapper" title={doc.category}>
                           <span className={`category-pill ${getCategoryColorClass(doc.category)}`}>
                             {doc.category}
@@ -257,7 +249,6 @@ const DocumentacionPage = () => {
                 )}
               </div>
 
-              {/* PAGINACIÓN */}
               <div className="doc-pagination-container">
                 <button 
                   className="btn-paginacion-arrow" 

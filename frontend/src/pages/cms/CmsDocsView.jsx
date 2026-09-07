@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { createDocumento, updateDocumento } from "../../api/documentos.api.js";
 import keycloak from "../../config/keycloak";
 import "../../styles/components/cms/CmsDocsView.css";
 
@@ -27,7 +28,7 @@ const CmsDocsView = ({
   const [estado, setEstado] = useState("Borrador");
   const [archivo, setArchivo] = useState(null);
   const [nombreArchivoActual, setNombreArchivoActual] = useState("");
-  const [previewUrl, setPreviewUrl] = useState(""); // <-- NUEVO ESTADO PARA PREVISUALIZACIÓN REAL
+  const [previewUrl, setPreviewUrl] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
@@ -55,17 +56,15 @@ const CmsDocsView = ({
     setEstado(estadoFormateado);
     setArchivo(null);
     setNombreArchivoActual(doc.fileName || doc.title || "");
-    setPreviewUrl(doc.fileUrl || ""); // <-- Cargar la URL real del archivo si existe
+    setPreviewUrl(doc.fileUrl || "");
     setShowModal(true);
   };
 
-const formatearTamano = (bytes) => {
+  const formatearTamano = (bytes) => {
     if (bytes === undefined || bytes === null || isNaN(bytes)) return "";
-    
     if (bytes < 1024 * 1024) {
       return `${(bytes / 1024).toFixed(1)} KB`;
     }
-    
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
@@ -87,7 +86,6 @@ const formatearTamano = (bytes) => {
     setArchivo(file);
     if (!titulo.trim()) setTitulo(file.name.replace(/\.[^.]+$/, ""));
     
-    // Generar URL local para mostrar la vista previa del archivo inmediatamente
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
   };
@@ -147,19 +145,12 @@ const formatearTamano = (bytes) => {
       formData.append("estado", estadoPrisma);
       if (archivo) formData.append("archivo", archivo);
 
-      const url = editingId
-        ? `http://localhost:3000/api/cms/documentacion/${editingId}`
-        : "http://localhost:3000/api/cms/documentacion";
-      const method = editingId ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error al guardar");
+      let data;
+      if (editingId) {
+        data = await updateDocumento(editingId, formData, token);
+      } else {
+        data = await createDocumento(formData, token);
+      }
 
       const docFormateado = {
         id: data.documento?.id || editingId,
@@ -185,7 +176,8 @@ const formatearTamano = (bytes) => {
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
-      alert(`Error: ${error.message}`);
+      const backendError = error.response?.data?.error || error.message || "Error al guardar";
+      alert(`Error: ${backendError}`);
     } finally {
       setSaving(false);
     }
@@ -209,7 +201,6 @@ const formatearTamano = (bytes) => {
         </button>
       </div>
 
-      {/* TABLA PRINCIPAL */}
       <div className="cms-docs-table-container">
         <div className="activity-table-head docs-table-head">
           <div className="col-content">CONTENIDO</div>
@@ -300,7 +291,6 @@ const formatearTamano = (bytes) => {
             </header>
 
             <form className="modal-body-split" onSubmit={handleSave}>
-              {/* LADO IZQUIERDO: FORMULARIO */}
               <div className="form-column">
                 <div className="form-group-docs">
                   <label htmlFor="doc-title" className="field-label-docs">
@@ -390,7 +380,6 @@ const formatearTamano = (bytes) => {
                 </div>
               </div>
 
-              {/* LADO DERECHO: VISTA PREVIA REAL */}
               <div className="preview-column">
                 <div className="preview-header">
                   <div className="preview-heading-group">

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { getNoticias } from "../api/noticias.api.js";
 import "../styles/pages/NoticiasPage.css";
 import Breadcrumb from "../components/Breadcrumb";
 import iconMama from "../assets/icon-mama.png";
@@ -109,6 +110,7 @@ const miniCarouselData = [
   { id: 3, img: imgAlta3 },
   { id: 4, img: imgAlta4 },
 ];
+
 const cleanHtmlText = (html) => {
   if (!html || typeof html !== "string") return "";
 
@@ -135,6 +137,7 @@ const cleanHtmlText = (html) => {
     .replace(/\n\s*\n/g, "\n")
     .trim();
 };
+
 const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
   const plainText = cleanHtmlText(news.body[0]);
   return (
@@ -181,7 +184,7 @@ const NoticiasPage = () => {
   const [selectedNews, setSelectedNews] = useState(null);
   const [altaIndex, setAltaIndex] = useState(0);
   const [noticias, setNoticias] = useState([]);
-  const [loading, setLoading] = useState(true); // 👈 Añadido el estado de carga
+  const [loading, setLoading] = useState(true); 
 
   const [lightbox, setLightbox] = useState({
     isOpen: false,
@@ -220,31 +223,35 @@ const NoticiasPage = () => {
       (prev) => (prev - 1 + miniCarouselData.length) % miniCarouselData.length,
     );
   };
-useEffect(() => {
+
+  useEffect(() => {
     if (hash) {
       setTimeout(() => {
         const element = document.getElementById(hash.replace('#', ''));
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 300); // Esperamos 300ms para que las noticias carguen
+      }, 300);
     } else {
-      window.scrollTo(0, 0); // Si entras normal, empieza arriba
+      window.scrollTo(0, 0); 
     }
   }, [hash]);
-useEffect(() => {
-    const fetchNoticiasPublicas = async () => {
-      setLoading(true); // 👈 Iniciar la carga
-      try {
-        const response = await fetch("http://localhost:3000/api/cms/noticias");
-        if (!response.ok) throw new Error("Error al obtener noticias");
-        const data = await response.json();
 
+  useEffect(() => {
+    const fetchNoticiasPublicas = async () => {
+      setLoading(true);
+      try {
+        // Usamos nuestra capa de API limpia
+        const data = await getNoticias(false);
+
+        // Ya no necesitamos tanto formateo porque nuestro nuevo backend 
+        // devuelve los datos exactamente como los espera el frontend,
+        // pero mantenemos un mapeo de seguridad:
         const noticiasFormateadas = data.map(noticia => ({
           id: noticia.id,
-          title: noticia.titulo || noticia.title,
-          body: [noticia.contenido || noticia.body],
-          date: noticia.createdAt ? new Date(noticia.createdAt).toLocaleDateString("es-AR") : "Hoy",
+          title: noticia.title || noticia.titulo,
+          body: noticia.body || [noticia.contenido],
+          date: noticia.date || "Hoy",
           category: "Noticias",
           images: noticia.images || []
         }));
@@ -253,7 +260,7 @@ useEffect(() => {
       } catch (error) {
         console.error("Error al cargar noticias en el portal:", error);
       } finally {
-        setLoading(false); // 👈 Finalizar la carga
+        setLoading(false);
       }
     };
 
@@ -302,7 +309,6 @@ useEffect(() => {
 
       <div className="noticias-page-container">
         
-        {/* Renderizado Condicional del Spinner o las Noticias */}
         {loading ? (
           <div style={{ padding: "80px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%" }}>
             <div className="cms-spinner" style={{ borderColor: "#cbd5e1", borderTopColor: "#006eb3" }}></div>

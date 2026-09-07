@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
@@ -118,19 +119,13 @@ const CmsNoticiasView = ({
 
     try {
       const token = keycloak.token;
-      const response = await fetch(
-        `http://localhost:3000/api/cms/noticias/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("No se pudo eliminar en el servidor");
+      if (!token) {
+        toast.error("Tu sesión ha expirado.");
+        keycloak.login();
+        return;
       }
+
+      await deleteNoticia(id, token);
 
       onDeleteNews(id);
       toast.success("Noticia eliminada correctamente.");
@@ -139,7 +134,8 @@ const CmsNoticiasView = ({
       setNoticiaAEliminar(null);
     } catch (error) {
       console.error("Error al eliminar:", error);
-      toast.error("Ocurrió un error al intentar eliminar la noticia.");
+      const backendError = error.response?.data?.error?.message || "Ocurrió un error al intentar eliminar la noticia.";
+      toast.error(backendError);
     } finally {
       setDeletingId(null);
     }
@@ -227,20 +223,15 @@ const CmsNoticiasView = ({
         formData.append("imagenes", file);
       });
 
-      const url = editingId
-        ? `http://localhost:3000/api/cms/noticias/${editingId}`
-        : "http://localhost:3000/api/cms/noticias";
-
-      const method = editingId ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error al guardar");
+      let data;
+      
+      if (editingId) {
+        data = await updateNoticia(editingId, formData, token);
+        toast.success("Noticia actualizada con éxito.");
+      } else {
+        data = await createNoticia(formData, token);
+        toast.success("Noticia creada con éxito.");
+      }
 
       const noticiaFormateada = {
         id: data.noticia?.id || editingId,
@@ -257,10 +248,8 @@ const CmsNoticiasView = ({
 
       if (editingId) {
         if (onUpdateNews) onUpdateNews(noticiaFormateada);
-        toast.success("Noticia actualizada con éxito.");
       } else {
         if (onAddNewNews) onAddNewNews(noticiaFormateada);
-        toast.success("Noticia creada con éxito.");
       }
 
       setHasUnsavedChanges(false);
@@ -269,7 +258,8 @@ const CmsNoticiasView = ({
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
-      toast.error(`Error: ${error.message}`);
+      const backendError = error.response?.data?.error?.message || error.message || "Error al guardar";
+      toast.error(`Error: ${backendError}`);
     } finally {
       setSaving(false);
     }
@@ -528,7 +518,6 @@ const CmsNoticiasView = ({
         </div>
       )}
 
-      {/* EL MODAL PRINCIPAL SE MUEVE ARRIBA DE LOS MODALES DE CONFIRMACIÓN */}
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseAttempt}>
           <div
@@ -554,7 +543,6 @@ const CmsNoticiasView = ({
               style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
             >
               <div className="modal-split-layout">
-                {/* COLUMNA IZQUIERDA: FORMULARIO */}
                 <div className="news-form-left">
                   <div>
                     <label className="news-form-label">Título de la noticia</label>
@@ -692,7 +680,6 @@ const CmsNoticiasView = ({
                   </div>
                 </div>
 
-                {/* COLUMNA DERECHA: VISTA PREVIA */}
                 <div className="news-form-right">
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b' }}>Vista previa de la publicación</span>
@@ -781,7 +768,6 @@ const CmsNoticiasView = ({
         </div>
       )}
 
-      {/* LOS MODALES DE ADVERTENCIA SE RENDERIZAN AL FINAL Y CON Z-INDEX MÁS ALTO */}
       {showConfirmDraftModal && (
         <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
           <div 
@@ -812,10 +798,6 @@ const CmsNoticiasView = ({
                   transition: "background-color 0.15s ease, transform 0.15s ease",
                   fontFamily: "'Manrope', sans-serif"
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#0d223f"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#000b20"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
               >
                 Sí, guardar borrador
               </button>
@@ -830,10 +812,6 @@ const CmsNoticiasView = ({
                   transition: "background-color 0.15s ease, transform 0.15s ease",
                   fontFamily: "'Manrope', sans-serif"
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#e0e3e5"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#d8e0ed"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
               >
                 Revisar Estado
               </button>
@@ -842,7 +820,6 @@ const CmsNoticiasView = ({
         </div>
       )}
 
-      {/* 🔥 MODAL: CAMBIOS SIN GUARDAR */}
       {showUnsavedModal && (
         <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
           <div 
@@ -873,10 +850,6 @@ const CmsNoticiasView = ({
                   transition: "background-color 0.15s ease, transform 0.15s ease",
                   fontFamily: "'Manrope', sans-serif"
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#0d223f"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#000b20"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
               >
                 Guardar como borrador
               </button>
@@ -891,10 +864,6 @@ const CmsNoticiasView = ({
                   transition: "background-color 0.15s ease, transform 0.15s ease",
                   fontFamily: "'Manrope', sans-serif"
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#4d0003"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#ba1a1a"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
               >
                 Descartar cambios
               </button>
@@ -909,10 +878,6 @@ const CmsNoticiasView = ({
                   transition: "background-color 0.15s ease, transform 0.15s ease",
                   fontFamily: "'Manrope', sans-serif"
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#e0e3e5"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#d8e0ed"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
               >
                 Seguir editando
               </button>
