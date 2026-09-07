@@ -1,5 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 import { createClient } from "@supabase/supabase-js";
+import { generarNombreUnico } from "../../utils/file.utils.js";
 
 const supabase = createClient(
   "https://ipwupwmbygtyiluezzle.supabase.co",
@@ -56,6 +57,7 @@ class CmsProfesionalService {
     let especialidad = await prisma.especialidad.findFirst({
       where: { nombre: especialidadNombre || "Especialidad médica" }
     });
+    
     if (!especialidad) {
       especialidad = await prisma.especialidad.create({
         data: { nombre: especialidadNombre || "Especialidad médica", descripcion: "Creada automáticamente" }
@@ -65,8 +67,7 @@ class CmsProfesionalService {
     let archivoId = null;
 
     if (file) {
-      const extension = file.originalname.split(".").pop().toLowerCase() || "png";
-      const nombreUnico = `prof_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
+      const { nombreUnico, extension } = generarNombreUnico(file.originalname, 'prof');
 
       const { error: storageError } = await supabase.storage
         .from("noticias-imagenes")
@@ -83,11 +84,12 @@ class CmsProfesionalService {
           nombreOriginal: file.originalname,
           nombreArchivo: nombreUnico,
           ruta: `noticias-imagenes/${nombreUnico}`,
-          extension,
+          extension: extension,
           mimeType: file.mimetype,
           tamanioBytes: BigInt(file.size),
         },
       });
+      
       archivoId = archivoDb.id;
     }
 

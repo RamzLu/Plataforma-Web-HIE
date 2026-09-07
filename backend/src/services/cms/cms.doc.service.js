@@ -1,6 +1,9 @@
 import { prisma } from "../../config/prisma.js";
 import { createClient } from "@supabase/supabase-js";
 
+import { generarNombreUnico } from "../../utils/file.utils.js";
+import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+
 const supabase = createClient(
   "https://ipwupwmbygtyiluezzle.supabase.co",
   process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -42,9 +45,6 @@ class CmsDocService {
 
   async crearDocumento(data, archivoSubido, user) {
     const { titulo, categoria, estado } = data;
-    const keycloakSub = user?.keycloakId;
-    const username = user?.username || `user_${Date.now()}`;
-    const name = user?.name || "Editor CMS";
 
     if (!titulo || !archivoSubido) {
       const error = new Error("El título y el archivo son obligatorios.");
@@ -63,28 +63,9 @@ class CmsDocService {
       });
     }
 
-    let usuarioLocal = await prisma.usuario.findFirst({
-      where: { OR: [{ keycloakId: keycloakSub }, { username: username }] },
-    });
+    const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
 
-    if (!usuarioLocal) {
-      let rolAdmin = await prisma.rol.findFirst({ where: { nombre: "ADMIN" } });
-      usuarioLocal = await prisma.usuario.create({
-        data: {
-          id: keycloakSub,
-          keycloakId: keycloakSub,
-          username: username,
-          email: `${username}@hospital.com`,
-          nombre: name,
-          apellido: "Sistema",
-          rolId: rolAdmin?.id,
-          updatedAt: new Date(),
-        },
-      });
-    }
-
-    const extension = archivoSubido.originalname.split(".").pop().toLowerCase();
-    const nombreUnico = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
+    const { nombreUnico, extension } = generarNombreUnico(archivoSubido.originalname, 'doc');
 
     const { error: storageError } = await supabase.storage
       .from("documentos")
@@ -168,8 +149,7 @@ class CmsDocService {
         oldArchivoId = docExistente.archivoId; 
       }
 
-      const extension = archivoSubido.originalname.split(".").pop().toLowerCase();
-      const nombreUnico = `doc_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
+      const { nombreUnico, extension } = generarNombreUnico(archivoSubido.originalname, 'doc');
 
       const { error: storageError } = await supabase.storage
         .from("documentos")

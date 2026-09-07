@@ -1,19 +1,16 @@
 import { prisma } from "../../config/prisma.js";
 import { createClient } from "@supabase/supabase-js";
+import { generarNombreUnico } from "../../utils/file.utils.js";
+import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 
-// Instancia de Supabase (podrías mover esto a un utils/supabase.js luego)
 const supabase = createClient(
   "https://ipwupwmbygtyiluezzle.supabase.co",
   process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 );
 
 class CmsNoticiaService {
-  
   async crearNoticia(data, archivosSubidos, user) {
     const { titulo, contenido, estado } = data;
-    const keycloakSub = user.keycloakId;
-    const username = user.username || `user_${Date.now()}`;
-    const name = user.name || "Editor CMS";
 
     if (!titulo || !contenido) {
       const error = new Error("Faltan campos obligatorios: titulo y contenido.");
@@ -30,22 +27,7 @@ class CmsNoticiaService {
       });
     }
 
-    let usuarioLocal = await prisma.usuario.findFirst({
-      where: { OR: [{ keycloakId: keycloakSub }, { username: username }] },
-    });
-
-    if (!usuarioLocal) {
-      let rolAdmin = await prisma.rol.findFirst({ where: { nombre: "ADMIN" } });
-      if (!rolAdmin) {
-        rolAdmin = await prisma.rol.create({ data: { nombre: "ADMIN", descripcion: "Admin" } });
-      }
-      usuarioLocal = await prisma.usuario.create({
-        data: {
-          id: keycloakSub, keycloakId: keycloakSub, username, email: `${username}@hospital.com`,
-          nombre: name, apellido: "Sistema", rolId: rolAdmin.id, updatedAt: new Date(),
-        },
-      });
-    }
+    const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
 
     const nuevaNoticia = await prisma.noticia.create({
       data: {
@@ -56,8 +38,7 @@ class CmsNoticiaService {
 
     const imagenesUrlsGuardadas = [];
     for (const file of archivosSubidos) {
-      const extension = file.originalname.split(".").pop().toLowerCase() || "png";
-      const nombreUnico = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
+      const { nombreUnico, extension } = generarNombreUnico(file.originalname, 'img');
 
       const { error: storageError } = await supabase.storage
         .from("noticias-imagenes")
@@ -169,24 +150,8 @@ class CmsNoticiaService {
 
   async actualizarNoticia(id, data, archivosSubidos, user) {
     const { titulo, contenido, imagenesExistentes, estado } = data;
-    const keycloakSub = user.keycloakId;
-    const username = user.username || `user_${Date.now()}`;
-    const name = user.name || "Editor CMS";
-
-    let usuarioEditor = await prisma.usuario.findFirst({
-      where: { OR: [{ keycloakId: keycloakSub }, { username: username }] },
-    });
-
-    if (!usuarioEditor) {
-      let rolAdmin = await prisma.rol.findFirst({ where: { nombre: "ADMIN" } });
-      if (!rolAdmin) rolAdmin = await prisma.rol.create({ data: { nombre: "ADMIN", descripcion: "Admin" } });
-      usuarioEditor = await prisma.usuario.create({
-        data: {
-          id: keycloakSub, keycloakId: keycloakSub, username, email: `${username}@hospital.com`,
-          nombre: name, apellido: "Sistema", rolId: rolAdmin.id, updatedAt: new Date(),
-        },
-      });
-    }
+    
+    const usuarioEditor = await obtenerOCrearUsuarioLocal(user);
 
     const noticiaExistente = await prisma.noticia.findUnique({
       where: { id: BigInt(id) },
@@ -226,8 +191,8 @@ class CmsNoticiaService {
     }
 
     for (const file of archivosSubidos) {
-      const extension = file.originalname.split(".").pop().toLowerCase() || "png";
-      const nombreUnico = `img_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
+      const { nombreUnico, extension } = generarNombreUnico(file.originalname, 'img');
+      
       const { error: storageError } = await supabase.storage.from("noticias-imagenes").upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
 
       if (storageError) {

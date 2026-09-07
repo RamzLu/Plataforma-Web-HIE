@@ -1,6 +1,9 @@
 import { prisma } from "../../config/prisma.js";
 import { createClient } from "@supabase/supabase-js";
 
+import { generarNombreUnico } from "../../utils/file.utils.js";
+import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+
 const supabase = createClient(
   process.env.SUPABASE_URL || "https://ipwupwmbygtyiluezzle.supabase.co",
   process.env.SUPABASE_ANON_KEY
@@ -56,13 +59,9 @@ class CmsBannersService {
       throw error;
     }
 
-    const keycloakSub = user.keycloakId;
-    let usuarioLocal = await prisma.usuario.findFirst({
-      where: { keycloakId: keycloakSub },
-    });
+    const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
 
-    const extension = file.originalname.split(".").pop().toLowerCase() || "png";
-    const nombreUnico = `banner_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
+    const { nombreUnico, extension } = generarNombreUnico(file.originalname, 'banner');
 
     const { error: storageError } = await supabase.storage
       .from("banners-imagenes")
@@ -146,8 +145,7 @@ class CmsBannersService {
     let nuevoArchivoId = bannerExistente.archivoId;
 
     if (file) {
-      const extension = file.originalname.split(".").pop().toLowerCase() || "png";
-      const nombreUnico = `banner_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
+      const { nombreUnico, extension } = generarNombreUnico(file.originalname, 'banner');
 
       const { error: storageError } = await supabase.storage
         .from("banners-imagenes")
