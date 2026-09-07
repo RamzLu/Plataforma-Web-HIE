@@ -22,16 +22,19 @@ import CapacitacionPage from "./pages/CapacitacionPage";
 import ContactoPage from "./pages/ContactoPage";
 import AboutPage from "./pages/AboutPage";
 import CmsPage from "./pages/CmsPage";
+import AdminPage from './pages/AdminPage';
 
 const AppLayout = () => {
   const location = useLocation();
-  const isCmsRoute = location.pathname.startsWith("/cms");
+  
+  // FIX: Agrupamos ambas áreas protegidas para ocultar los componentes públicos
+  const isPrivatePanel = location.pathname.startsWith("/cms") || location.pathname.startsWith("/admin");
 
   return (
     <>
       <ScrollToTop />
 
-      {!isCmsRoute && <Header />}
+      {!isPrivatePanel && <Header />}
 
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -43,6 +46,7 @@ const AppLayout = () => {
         <Route path="/contacto" element={<ContactoPage />} />
         <Route path="/acerca-de" element={<AboutPage />} />
         <Route path="/cms" element={<CmsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
 
         <Route
           path="*"
@@ -65,7 +69,7 @@ const AppLayout = () => {
         />
       </Routes>
 
-      {!isCmsRoute && (
+      {!isPrivatePanel && (
         <>
           <WhatsAppButton />
           <Footer />
