@@ -225,12 +225,20 @@ const CmsNoticiasView = ({
 
       let data;
       
-      if (editingId) {
+if (editingId) {
         data = await updateNoticia(editingId, formData, token);
-        toast.success("Noticia actualizada con éxito.");
+        if (estadoFinal === "BORRADOR") {
+          toast.success("Borrador actualizado con éxito.");
+        } else {
+          toast.success("Noticia actualizada con éxito.");
+        }
       } else {
         data = await createNoticia(formData, token);
-        toast.success("Noticia creada con éxito.");
+        if (estadoFinal === "BORRADOR") {
+          toast.success("Borrador guardado con éxito.");
+        } else {
+          toast.success("Noticia creada con éxito.");
+        }
       }
 
       const noticiaFormateada = {
