@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import AdminSidebar from '../components/admin/AdminSidebar';
-import AdminHeader from '../components/admin/AdminHeader';
-import '../styles/pages/AdminPage.css'; 
+import AdminSidebar from '../../components/admin/AdminSidebar';
+import AdminHeader from '../../components/admin/AdminHeader';
+import '../../styles/pages/AdminPage.css'; 
 
-import keycloak from '../config/keycloak';
+import keycloak from '../../config/keycloak';
 
 // IMPORTAMOS TUS NUEVAS VISTAS MODULARES
-import AdminDashboardView from './admin/AdminDashboardView';
+import AdminDashboardView from '../admin/AdminDashboardView';
 // import AdminUsuariosView from './admin/AdminUsuariosView';
 // import AdminRolesView from './admin/AdminRolesView';
 // import AdminAuditoriaView from './admin/AdminAuditoriaView';

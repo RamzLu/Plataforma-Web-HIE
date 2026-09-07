@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import "../styles/pages/ContactoPage.css";
-import Breadcrumb from "../components/Breadcrumb";
-import HospitalMapSection from "../components/HospitalMapSection";
-import AnimatedContent from "../components/ui/AnimatedContent";
+import "../../styles/pages/ContactoPage.css";
+import Breadcrumb from "../../components/Breadcrumb";
+import HospitalMapSection from "../../components/HospitalMapSection";
+import AnimatedContent from "../../components/ui/AnimatedContent";
 
 // Imágenes institucionales
-import fotoAtencion from "../assets/fotoContacto.jpg";
-import fotoFachadaHIE from "../assets/fotoFachadaHIE2.jpg";
+import fotoAtencion from "../../assets/fotoContacto.jpg";
+import fotoFachadaHIE from "../../assets/fotoFachadaHIE2.jpg";
 
 const ContactoPage = () => {
   const { hash } = useLocation();

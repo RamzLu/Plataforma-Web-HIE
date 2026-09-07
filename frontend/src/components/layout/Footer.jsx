@@ -1,5 +1,5 @@
 import React from "react";
-import "../../styles/components/Footer.css";
+import "../../styles/layout/Footer.css";
 
 import logoHospital from "../../assets/pngIcon.png";
 import logosGobierno from "../../assets/logosGobierno.png";

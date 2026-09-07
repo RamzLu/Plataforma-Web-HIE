@@ -1,23 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import keycloak from "../config/keycloak";
+import keycloak from "../../config/keycloak";
 
-import "../styles/components/cms/CmsLayout.css";
-import "../styles/components/cms/CmsDashboard.css";
-import "../styles/components/cms/CmsModals.css";
+import "../../styles/components/cms/CmsLayout.css";
+import "../../styles/components/cms/CmsDashboard.css";
+import "../../styles/components/cms/CmsModals.css";
 
-import CmsSidebar from "../components/cms/CmsSidebar";
-import CmsHeader from "../components/cms/CmsHeader";
-import CmsDashboardView from "./cms/CmsDashboardView";
-import CmsNoticiasView from "./cms/CmsNoticiasView";
-import CmsBannersView from "./cms/CmsBannersView";
-import CmsDocsView from "./cms/CmsDocsView";
-import CmsProfesionalesView from "./cms/CmsProfesionalesView"; 
-import CmsInstitucionView from "./cms/CmsInstitucionView"; 
-import CmsConfiguracionView from "./cms/CmsConfiguracionView"; // <-- IMPORTACIÓN
+import CmsSidebar from "../../components/cms/CmsSidebar";
+import CmsHeader from "../../components/cms/CmsHeader";
+import CmsDashboardView from "../cms/CmsDashboardView";
+import CmsNoticiasView from "../cms/CmsNoticiasView";
+import CmsBannersView from "../cms/CmsBannersView";
+import CmsDocsView from "../cms/CmsDocsView";
+import CmsProfesionalesView from "../cms/CmsProfesionalesView"; 
+import CmsInstitucionView from "../cms/CmsInstitucionView"; 
+import CmsConfiguracionView from "../cms/CmsConfiguracionView";
 
-import { documentosData } from "../data/documentos";
-import avatarHospital from "../assets/logoHospitalEvita.png";
+import { documentosData } from "../../data/documentos";
+import avatarHospital from "../../assets/logoHospitalEvita.png";
 
 const CmsPage = () => {
   const [initialized, setInitialized] = useState(false);

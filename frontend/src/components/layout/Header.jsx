@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import "../../styles/components/Header.css";
+import "../../styles/layout/Header.css";
 import logoIcon from "../../assets/logoHospitalEvita.png";
 
 const Header = () => {

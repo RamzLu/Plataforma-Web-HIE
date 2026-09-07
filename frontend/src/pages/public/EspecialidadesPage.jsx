@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import "../styles/pages/EspecialidadesPage.css";
-import Breadcrumb from "../components/Breadcrumb";
-import fondoBannerEsp from "../assets/banner_especialidades.png";
-import AnimatedContent from "../components/ui/AnimatedContent";
+import "../../styles/pages/EspecialidadesPage.css";
+import Breadcrumb from "../../components/Breadcrumb";
+import fondoBannerEsp from "../../assets/banner_especialidades.png";
+import AnimatedContent from "../../components/ui/AnimatedContent";
 
 // =========================================
 // BASE DE DATOS: ESPECIALIDADES

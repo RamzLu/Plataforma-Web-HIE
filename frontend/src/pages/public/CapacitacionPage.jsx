@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import "../styles/pages/CapacitacionPage.css";
-import AnimatedContent from "../components/ui/AnimatedContent";
+import "../../styles/pages/CapacitacionPage.css";
+import AnimatedContent from "../../components/ui/AnimatedContent";
 
-import Breadcrumb from "../components/Breadcrumb";
+import Breadcrumb from "../../components/Breadcrumb";
 
-import logoHospital from "../assets/logoHospitalEvita.png";
-import fondoBanner from "../assets/banner_capacitaciones.png";
-import imgCapacitacion1 from "../assets/fondoCARRUSELnoticias2.jpg";
-import imgCapacitacion2 from "../assets/fondoCARRUSELnoticias3.jpg";
+import logoHospital from "../../assets/logoHospitalEvita.png";
+import fondoBanner from "../../assets/banner_capacitaciones.png";
+import imgCapacitacion1 from "../../assets/fondoCARRUSELnoticias2.jpg";
+import imgCapacitacion2 from "../../assets/fondoCARRUSELnoticias3.jpg";
 
 const capacitacionesData = [
   {

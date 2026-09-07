@@ -1,32 +1,32 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { getNoticias } from "../api/noticias.api.js";
-import "../styles/pages/NoticiasPage.css";
-import Breadcrumb from "../components/Breadcrumb";
-import iconMama from "../assets/icon-mama.png";
-import iconCorazon from "../assets/icon-corazon.png";
-import iconDonacion from "../assets/icon-donacion-de-sangre.png";
-import iconDengue from "../assets/icon-dengue.png";
-import avatarHospital from "../assets/logoHospitalEvita.png";
+import { getNoticias } from "../../api/noticias.api.js";
+import "../../styles/pages/NoticiasPage.css";
+import Breadcrumb from "../../components/Breadcrumb";
+import iconMama from "../../assets/icon-mama.png";
+import iconCorazon from "../../assets/icon-corazon.png";
+import iconDonacion from "../../assets/icon-donacion-de-sangre.png";
+import iconDengue from "../../assets/icon-dengue.png";
+import avatarHospital from "../../assets/logoHospitalEvita.png";
 
-import iconMamaStatic from "../assets/icon-mama-estatico.png";
-import iconCorazonStatic from "../assets/icon-corazon-estatico.png";
-import iconDonacionStatic from "../assets/icon-donacion-de-sangre-estatico.png";
-import iconDengueStatic from "../assets/icon-dengue-estatico.png";
+import iconMamaStatic from "../../assets/icon-mama-estatico.png";
+import iconCorazonStatic from "../../assets/icon-corazon-estatico.png";
+import iconDonacionStatic from "../../assets/icon-donacion-de-sangre-estatico.png";
+import iconDengueStatic from "../../assets/icon-dengue-estatico.png";
 
-import fondoBannerNoticias from "../assets/banner_noticias.png";
+import fondoBannerNoticias from "../../assets/banner_noticias.png";
 
-import imgAlta1 from "../assets/fondoCARRUSELnoticiasCM.jpg";
-import imgAlta2 from "../assets/fondoCARRUSELnoticias2.jpg";
-import imgAlta3 from "../assets/fondoCARRUSELnoticias3.jpg";
-import imgAlta4 from "../assets/fondoCARRUSELnoticias4.jpg";
+import imgAlta1 from "../../assets/fondoCARRUSELnoticiasCM.jpg";
+import imgAlta2 from "../../assets/fondoCARRUSELnoticias2.jpg";
+import imgAlta3 from "../../assets/fondoCARRUSELnoticias3.jpg";
+import imgAlta4 from "../../assets/fondoCARRUSELnoticias4.jpg";
 
-import folletoCD1 from "../assets/folletoCD1.jpg";
-import folletoCD2 from "../assets/folletoCD2.jpg";
-import folletoCD3 from "../assets/folletoCD3.jpg";
-import folletoCD4 from "../assets/folletoCD4.jpg";
-import folletoCD5 from "../assets/folletoCD5.jpg";
-import folletoEjemplo from "../assets/folletoCD5.jpg";
+import folletoCD1 from "../../assets/folletoCD1.jpg";
+import folletoCD2 from "../../assets/folletoCD2.jpg";
+import folletoCD3 from "../../assets/folletoCD3.jpg";
+import folletoCD4 from "../../assets/folletoCD4.jpg";
+import folletoCD5 from "../../assets/folletoCD5.jpg";
+import folletoEjemplo from "../../assets/folletoCD5.jpg";
 
 const medicalArticles = [
   {

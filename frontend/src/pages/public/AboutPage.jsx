@@ -1,23 +1,23 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import "../styles/pages/AboutPage.css";
-import Breadcrumb from "../components/Breadcrumb";
+import "../../styles/pages/AboutPage.css";
+import Breadcrumb from "../../components/Breadcrumb";
 import ReactCountUp from "react-countup";
 const CountUp = ReactCountUp.default || ReactCountUp;
-import AnimatedContent from "../components/ui/AnimatedContent";
+import AnimatedContent from "../../components/ui/AnimatedContent";
 
 // IMÁGENES INSTITUCIONALES
-import fotoHeroHeader from "../assets/foto-sede.jpg";
-import fotoVideoCover from "../assets/fondoHospitalCarrusel1.jpg";
+import fotoHeroHeader from "../../assets/foto-sede.jpg";
+import fotoVideoCover from "../../assets/fondoHospitalCarrusel1.jpg";
 
 // VIDEO INSTITUCIONAL
-import videoInstitucional from "../assets/video-hospital-evita.mp4";
+import videoInstitucional from "../../assets/video-hospital-evita.mp4";
 
 // COMPONENTES
-import InteractiveTimelineSection from "../components/InteractiveTimelineSection";
+import InteractiveTimelineSection from "../../components/InteractiveTimelineSection";
 
 // Fotos de autoridades
-import fotoDirector from "../assets/imagen-temporal-autoridades.jpg";
+import fotoDirector from "../../assets/imagen-temporal-autoridades.jpg";
 
 const AUTORIDADES = [
   {

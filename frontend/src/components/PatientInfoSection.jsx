@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../styles/components/PatientInfoSection.css";
+import "../styles/sections/PatientInfoSection.css";
 import AnimatedContent from "../components/ui/AnimatedContent";
 
 import imgAtencion from "../assets/imagenPacientes.jpg";

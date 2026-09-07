@@ -7,11 +7,11 @@ import { Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/autoplay";
 import "swiper/css/navigation"; 
-import "../styles/pages/ProfesionalesPage.css";
+import "../../styles/pages/ProfesionalesPage.css";
 
-import docEjemplo1 from "../assets/foto-doctor-ejemplo.jpg";
-import docEjemplo2 from "../assets/foto-doctora-ejemplo.jpg";
-import Breadcrumb from "../components/Breadcrumb";
+import docEjemplo1 from "../../assets/foto-doctor-ejemplo.jpg";
+import docEjemplo2 from "../../assets/foto-doctora-ejemplo.jpg";
+import Breadcrumb from "../../components/Breadcrumb";
 
 // Base de datos con descripciones y M.P (Matrículas Profesionales) añadidas
 const equipoMedicoData = [
