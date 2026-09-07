@@ -1,5 +1,5 @@
 /* =========================================
-   1. LAYOUT PRINCIPAL (SHELL)
+   1. LAYOUT PRINCIPAL (SHELL ADMIN)
 ========================================= */
 .admin-layout {
   display: flex;
@@ -14,7 +14,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; 
+  min-width: 0;
+  overflow: hidden;
 }
 
 .admin-content-area {
@@ -25,18 +26,19 @@
 }
 
 /* =========================================
-   2. SIDEBAR (MENÚ LATERAL AZUL MARINO)
+   2. SIDEBAR (MENÚ LATERAL - ESTILO CMS)
 ========================================= */
 .admin-sidebar {
   width: 280px;
   height: 100vh;
-  background-color: #0c2340; /* Azul institucional */
+  background-color: #0c2340; /* Azul marino institucional */
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   color: #ffffff;
   box-shadow: 2px 0 15px rgba(0,0,0,0.1);
   z-index: 50;
+  transition: width 0.3s ease;
 }
 
 .admin-sidebar-logo-area {
@@ -85,6 +87,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow-y: auto;
 }
 
 .admin-nav-title {
@@ -127,10 +130,12 @@
 
 .admin-nav-btn svg {
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
 }
 
 /* =========================================
-   3. HEADER (CABECERA SUPERIOR BLANCA)
+   3. HEADER (CABECERA SUPERIOR - ESTILO CMS)
 ========================================= */
 .admin-header {
   height: 80px;
