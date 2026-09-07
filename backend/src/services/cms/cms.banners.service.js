@@ -6,16 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
-export const obtenerBanners = async (req, res) => {
-  try {
+class CmsBannersService {
+  async obtenerBanners() {
     const banners = await prisma.banner.findMany({
       orderBy: { orden: "asc" },
-      include: {
-        archivo: true,
-      },
+      include: { archivo: true },
     });
 
-    const bannersFormateados = banners.map((banner) => {
+    return banners.map((banner) => {
       let imageUrl = null;
       if (banner.archivo) {
         const { data } = supabase.storage
@@ -41,28 +39,24 @@ export const obtenerBanners = async (req, res) => {
         imageUrl,
       };
     });
-
-    return res.status(200).json(bannersFormateados);
-  } catch (error) {
-    console.error("Error al obtener banners:", error);
-    return res.status(500).json({ error: "Error al obtener banners" });
   }
-};
 
-export const crearBanner = async (req, res) => {
-  try {
-    const { titulo, descripcion, enlace, page, orden, activo } = req.body;
-    const file = req.file;
+  async crearBanner(data, file, user) {
+    const { titulo, descripcion, enlace, page, orden, activo } = data;
 
     if (!titulo || titulo.trim() === "") {
-      return res.status(400).json({ error: "El título del banner es obligatorio para garantizar la accesibilidad." });
+      const error = new Error("El título del banner es obligatorio para garantizar la accesibilidad.");
+      error.statusCode = 400;
+      throw error;
     }
 
     if (!file) {
-      return res.status(400).json({ error: "Es obligatorio subir una imagen para el banner." });
+      const error = new Error("Es obligatorio subir una imagen para el banner.");
+      error.statusCode = 400;
+      throw error;
     }
 
-    const keycloakSub = req.user.keycloakId;
+    const keycloakSub = user.keycloakId;
     let usuarioLocal = await prisma.usuario.findFirst({
       where: { keycloakId: keycloakSub },
     });
@@ -78,8 +72,9 @@ export const crearBanner = async (req, res) => {
       });
 
     if (storageError) {
-      console.error("❌ Error en Supabase:", storageError.message);
-      return res.status(500).json({ error: "Error al subir imagen: " + storageError.message });
+      const error = new Error("Error al subir imagen a Supabase: " + storageError.message);
+      error.statusCode = 500;
+      throw error;
     }
 
     const archivoDb = await prisma.archivo.create({
@@ -108,26 +103,20 @@ export const crearBanner = async (req, res) => {
         enlace: enlace || null,
         orden: nuevoOrden,
         activo: activo === "true" || activo === true,
-        archivo: {
-          connect: { id: archivoDb.id }
-        },
+        archivo: { connect: { id: archivoDb.id } },
         ...(usuarioLocal && {
-          usuario_banner_createdByTousuario: {
-            connect: { id: usuarioLocal.id }
-          }
+          usuario_banner_createdByTousuario: { connect: { id: usuarioLocal.id } }
         }),
         updatedAt: new Date(),
       },
-      include: {
-        archivo: true,
-      },
+      include: { archivo: true },
     });
 
     const { data: publicUrlData } = supabase.storage
       .from("banners-imagenes")
       .getPublicUrl(nombreUnico);
 
-    return res.status(201).json({
+    return {
       message: "¡Banner creado exitosamente!",
       banner: {
         ...nuevoBanner,
@@ -137,18 +126,11 @@ export const crearBanner = async (req, res) => {
         page: targetPage,
         imageUrl: publicUrlData.publicUrl,
       },
-    });
-  } catch (error) {
-    console.error("Error al crear banner:", error);
-    return res.status(500).json({ error: "Error interno al crear el banner." });
+    };
   }
-};
 
-export const actualizarBanner = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { titulo, descripcion, enlace, page, activo } = req.body;
-    const file = req.file;
+  async actualizarBanner(id, data, file) {
+    const { titulo, descripcion, enlace, page, activo } = data;
 
     const bannerExistente = await prisma.banner.findUnique({
       where: { id: BigInt(id) },
@@ -156,12 +138,13 @@ export const actualizarBanner = async (req, res) => {
     });
 
     if (!bannerExistente) {
-      return res.status(404).json({ error: "Banner no encontrado." });
+      const error = new Error("Banner no encontrado.");
+      error.statusCode = 404;
+      throw error;
     }
 
     let nuevoArchivoId = bannerExistente.archivoId;
 
-    // Si el usuario subió una nueva imagen recortada, reemplazamos la anterior en Supabase y BD
     if (file) {
       const extension = file.originalname.split(".").pop().toLowerCase() || "png";
       const nombreUnico = `banner_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${extension}`;
@@ -174,10 +157,11 @@ export const actualizarBanner = async (req, res) => {
         });
 
       if (storageError) {
-        return res.status(500).json({ error: "Error al subir nueva imagen: " + storageError.message });
+        const error = new Error("Error al subir nueva imagen: " + storageError.message);
+        error.statusCode = 500;
+        throw error;
       }
 
-      // Creamos el nuevo archivo
       const nuevoArchivoDb = await prisma.archivo.create({
         data: {
           nombreOriginal: file.originalname,
@@ -191,7 +175,6 @@ export const actualizarBanner = async (req, res) => {
 
       nuevoArchivoId = nuevoArchivoDb.id;
 
-      // Opcional: Borramos el archivo viejo de Supabase si existía
       if (bannerExistente.archivo) {
         await supabase.storage.from("banners-imagenes").remove([bannerExistente.archivo.nombreArchivo]);
         await prisma.archivo.delete({ where: { id: bannerExistente.archivo.id } }).catch(() => {});
@@ -208,9 +191,7 @@ export const actualizarBanner = async (req, res) => {
         descripcion: descripcionConPage,
         enlace: enlace !== undefined ? enlace : bannerExistente.enlace,
         activo: activo !== undefined ? (activo === "true" || activo === true) : bannerExistente.activo,
-        archivo: {
-          connect: { id: nuevoArchivoId }
-        },
+        archivo: { connect: { id: nuevoArchivoId } },
         updatedAt: new Date(),
       },
       include: { archivo: true },
@@ -224,7 +205,7 @@ export const actualizarBanner = async (req, res) => {
       imageUrl = data.publicUrl;
     }
 
-    return res.status(200).json({
+    return {
       message: "¡Banner actualizado correctamente!",
       banner: {
         ...bannerActualizado,
@@ -234,19 +215,14 @@ export const actualizarBanner = async (req, res) => {
         page: targetPage,
         imageUrl,
       },
-    });
-  } catch (error) {
-    console.error("Error al actualizar banner:", error);
-    return res.status(500).json({ error: "Error al actualizar el banner: " + error.message });
+    };
   }
-};
 
-export const eliminarBanner = async (req, res) => {
-  try {
-    const { id } = req.params;
-
+  async eliminarBanner(id) {
     if (!id || !/^\d+$/.test(id)) {
-      return res.status(400).json({ error: "ID de banner inválido o malformado." });
+      const error = new Error("ID de banner inválido o malformado.");
+      error.statusCode = 400;
+      throw error;
     }
 
     const banner = await prisma.banner.findUnique({
@@ -255,27 +231,25 @@ export const eliminarBanner = async (req, res) => {
     });
 
     if (!banner) {
-      return res.status(404).json({ error: "Banner no encontrado." });
+      const error = new Error("Banner no encontrado.");
+      error.statusCode = 404;
+      throw error;
     }
 
-    // Borramos el archivo físico en Supabase si existe asociado
     if (banner.archivo) {
       await supabase.storage.from("banners-imagenes").remove([banner.archivo.nombreArchivo]);
     }
 
-    // Eliminamos el banner de la base de datos
     await prisma.banner.delete({
       where: { id: BigInt(id) },
     });
 
-    // Limpiamos la tabla archivo asociada si es necesario
     if (banner.archivo) {
       await prisma.archivo.delete({ where: { id: banner.archivo.id } }).catch(() => {});
     }
 
-    return res.status(200).json({ message: "¡Banner eliminado con éxito!" });
-  } catch (error) {
-    console.error("Error al eliminar banner:", error);
-    return res.status(500).json({ error: "Error al eliminar el banner: " + error.message });
+    return { message: "¡Banner eliminado con éxito!" };
   }
-};
+}
+
+export default new CmsBannersService();

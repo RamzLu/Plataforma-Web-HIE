@@ -1,31 +1,26 @@
 import { prisma } from "../../config/prisma.js";
 import { createClient } from "@supabase/supabase-js";
 
-// Conexión a Supabase
 const supabase = createClient(
   "https://ipwupwmbygtyiluezzle.supabase.co",
   process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 );
 
-// ==========================================
-// 1. OBTENER DOCUMENTOS
-// ==========================================
-export const obtenerDocumentos = async (req, res) => {
-  try {
+class CmsDocService {
+  async obtenerDocumentos() {
     const documentos = await prisma.documento.findMany({
       orderBy: { createdAt: "desc" },
-      include: { 
-        archivo: true, 
-        categoria_documento: true 
+      include: {
+        archivo: true,
+        categoria_documento: true
       }
     });
 
-    const docsFormateados = documentos.map(doc => {
+    return documentos.map(doc => {
       const pubUrl = doc.archivo 
         ? supabase.storage.from("documentos").getPublicUrl(doc.archivo.nombreArchivo).data.publicUrl 
         : "";
 
-      // Mapeo defensivo de los estados
       let mappedStatus = "Borrador";
       if (doc.estado === "PUBLICADO") mappedStatus = "Publicado";
       if (doc.estado === "PROGRAMADO") mappedStatus = "Programado";
@@ -43,28 +38,18 @@ export const obtenerDocumentos = async (req, res) => {
         updatedAt: new Date(doc.updatedAt || doc.createdAt).toLocaleDateString("es-AR")
       };
     });
-
-    return res.status(200).json(docsFormateados);
-  } catch (error) {
-    console.error("Error crítico al obtener documentos:", error);
-    return res.status(500).json({ error: "Error interno del servidor: " + error.message });
   }
-};
 
-// ==========================================
-// 2. CREAR DOCUMENTO
-// ==========================================
-export const crearDocumento = async (req, res) => {
-  try {
-    const { titulo, categoria, estado } = req.body;
-    const archivoSubido = req.file;
-
-    const keycloakSub = req.user?.keycloakId;
-    const username = req.user?.username || `user_${Date.now()}`;
-    const name = req.user?.name || "Editor CMS";
+  async crearDocumento(data, archivoSubido, user) {
+    const { titulo, categoria, estado } = data;
+    const keycloakSub = user?.keycloakId;
+    const username = user?.username || `user_${Date.now()}`;
+    const name = user?.name || "Editor CMS";
 
     if (!titulo || !archivoSubido) {
-      return res.status(400).json({ error: "El título y el archivo son obligatorios." });
+      const error = new Error("El título y el archivo son obligatorios.");
+      error.statusCode = 400;
+      throw error;
     }
 
     let estadoPrisma = "BORRADOR";
@@ -106,7 +91,9 @@ export const crearDocumento = async (req, res) => {
       .upload(nombreUnico, archivoSubido.buffer, { contentType: archivoSubido.mimetype, upsert: true });
 
     if (storageError) {
-      return res.status(500).json({ error: "Error subiendo a Supabase: " + storageError.message });
+      const error = new Error("Error subiendo a Supabase: " + storageError.message);
+      error.statusCode = 500;
+      throw error;
     }
 
     const { data: publicUrlData } = supabase.storage.from("documentos").getPublicUrl(nombreUnico);
@@ -133,29 +120,18 @@ export const crearDocumento = async (req, res) => {
       }
     });
 
-    return res.status(201).json({
+    return {
       message: "¡Documento subido y guardado con éxito!",
       documento: {
         id: nuevoDocumento.id.toString(),
         fileUrl: publicUrlData.publicUrl,
         fileSize: `${(archivoSubido.size / (1024 * 1024)).toFixed(1)} MB`
       }
-    });
-
-  } catch (error) {
-    console.error("Error al crear documento:", error);
-    return res.status(500).json({ error: "Error interno: " + error.message });
+    };
   }
-};
 
-// ==========================================
-// 3. ACTUALIZAR DOCUMENTO
-// ==========================================
-export const actualizarDocumento = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { titulo, categoria, estado } = req.body;
-    const archivoSubido = req.file;
+  async actualizarDocumento(id, data, archivoSubido) {
+    const { titulo, categoria, estado } = data;
 
     let estadoPrisma = "BORRADOR";
     if (estado?.toLowerCase() === "publicado") estadoPrisma = "PUBLICADO";
@@ -167,21 +143,23 @@ export const actualizarDocumento = async (req, res) => {
     });
 
     if (!docExistente) {
-      return res.status(404).json({ error: "Documento no encontrado." });
+      const error = new Error("Documento no encontrado.");
+      error.statusCode = 404;
+      throw error;
     }
 
     let archivoId = docExistente.archivoId;
     let oldArchivoId = null;
-
     let categoriaId = docExistente.categoriaId;
+
     if (categoria) {
-        let categoriaDb = await prisma.categoria_documento.findFirst({ where: { nombre: categoria } });
-        if (!categoriaDb) {
-          categoriaDb = await prisma.categoria_documento.create({
-            data: { nombre: categoria, descripcion: "Generada automáticamente", activo: true },
-          });
-        }
-        categoriaId = categoriaDb.id;
+      let categoriaDb = await prisma.categoria_documento.findFirst({ where: { nombre: categoria } });
+      if (!categoriaDb) {
+        categoriaDb = await prisma.categoria_documento.create({
+          data: { nombre: categoria, descripcion: "Generada automáticamente", activo: true },
+        });
+      }
+      categoriaId = categoriaDb.id;
     }
 
     if (archivoSubido) {
@@ -198,7 +176,9 @@ export const actualizarDocumento = async (req, res) => {
         .upload(nombreUnico, archivoSubido.buffer, { contentType: archivoSubido.mimetype, upsert: true });
 
       if (storageError) {
-        return res.status(500).json({ error: "Error subiendo archivo nuevo: " + storageError.message });
+        const error = new Error("Error subiendo archivo nuevo: " + storageError.message);
+        error.statusCode = 500;
+        throw error;
       }
 
       const nuevoArchivoDb = await prisma.archivo.create({
@@ -230,29 +210,18 @@ export const actualizarDocumento = async (req, res) => {
       await prisma.archivo.delete({ where: { id: oldArchivoId } });
     }
 
-    let statusResponse = documentoActualizado.estado.toLowerCase();
-    
-    return res.status(200).json({
+    return {
       message: "¡Documento actualizado con éxito!",
       documento: {
         id: documentoActualizado.id.toString(),
         title: documentoActualizado.titulo,
-        status: statusResponse,
+        status: documentoActualizado.estado.toLowerCase(),
         fileSize: documentoActualizado.archivo?.tamanioBytes ? `${(Number(documentoActualizado.archivo.tamanioBytes) / (1024 * 1024)).toFixed(1)} MB` : ""
       }
-    });
-  } catch (error) {
-    console.error("Error al actualizar documento:", error);
-    return res.status(500).json({ error: "Error al actualizar: " + error.message });
+    };
   }
-};
 
-// ==========================================
-// 4. ELIMINAR DOCUMENTO
-// ==========================================
-export const eliminarDocumento = async (req, res) => {
-  try {
-    const { id } = req.params;
+  async eliminarDocumento(id) {
     const doc = await prisma.documento.findUnique({
       where: { id: BigInt(id) },
       include: { archivo: true }
@@ -268,10 +237,14 @@ export const eliminarDocumento = async (req, res) => {
       if (doc.archivoId) {
         await prisma.archivo.delete({ where: { id: doc.archivoId } });
       }
+    } else {
+      const error = new Error("Documento no encontrado.");
+      error.statusCode = 404;
+      throw error;
     }
-    return res.status(200).json({ message: "Documento eliminado con éxito" });
-  } catch (error) {
-    console.error("Error al eliminar documento:", error);
-    return res.status(500).json({ error: "Error al eliminar: " + error.message });
+
+    return { message: "Documento eliminado con éxito" };
   }
-};
+}
+
+export default new CmsDocService();
