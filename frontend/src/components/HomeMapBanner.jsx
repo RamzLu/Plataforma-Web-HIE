@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "../styles/components/HomeMapBanner.css";
+import "../styles/sections/HomeMapBanner.css";
 import planoThumb from "../assets/planoHospital.jpg";
 
 const HomeMapBanner = () => {

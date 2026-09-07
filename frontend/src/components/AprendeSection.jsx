@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "../styles/components/AprendeSection.css";
+import "../styles/sections/AprendeSection.css";
 
 import aprendeMainImg from "../assets/aprendeMain.jpg";
 import tipDengueImg from "../assets/aprendeDengue.jpg";

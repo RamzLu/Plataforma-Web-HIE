@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
@@ -118,19 +119,13 @@ const CmsNoticiasView = ({
 
     try {
       const token = keycloak.token;
-      const response = await fetch(
-        `http://localhost:3000/api/cms/noticias/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("No se pudo eliminar en el servidor");
+      if (!token) {
+        toast.error("Tu sesión ha expirado.");
+        keycloak.login();
+        return;
       }
+
+      await deleteNoticia(id, token);
 
       onDeleteNews(id);
       toast.success("Noticia eliminada correctamente.");
@@ -139,7 +134,8 @@ const CmsNoticiasView = ({
       setNoticiaAEliminar(null);
     } catch (error) {
       console.error("Error al eliminar:", error);
-      toast.error("Ocurrió un error al intentar eliminar la noticia.");
+      const backendError = error.response?.data?.error?.message || "Ocurrió un error al intentar eliminar la noticia.";
+      toast.error(backendError);
     } finally {
       setDeletingId(null);
     }
@@ -227,20 +223,15 @@ const CmsNoticiasView = ({
         formData.append("imagenes", file);
       });
 
-      const url = editingId
-        ? `http://localhost:3000/api/cms/noticias/${editingId}`
-        : "http://localhost:3000/api/cms/noticias";
-
-      const method = editingId ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error al guardar");
+      let data;
+      
+      if (editingId) {
+        data = await updateNoticia(editingId, formData, token);
+        toast.success("Noticia actualizada con éxito.");
+      } else {
+        data = await createNoticia(formData, token);
+        toast.success("Noticia creada con éxito.");
+      }
 
       const noticiaFormateada = {
         id: data.noticia?.id || editingId,
@@ -257,10 +248,8 @@ const CmsNoticiasView = ({
 
       if (editingId) {
         if (onUpdateNews) onUpdateNews(noticiaFormateada);
-        toast.success("Noticia actualizada con éxito.");
       } else {
         if (onAddNewNews) onAddNewNews(noticiaFormateada);
-        toast.success("Noticia creada con éxito.");
       }
 
       setHasUnsavedChanges(false);
@@ -269,7 +258,8 @@ const CmsNoticiasView = ({
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
-      toast.error(`Error: ${error.message}`);
+      const backendError = error.response?.data?.error?.message || error.message || "Error al guardar";
+      toast.error(`Error: ${backendError}`);
     } finally {
       setSaving(false);
     }
@@ -528,145 +518,6 @@ const CmsNoticiasView = ({
         </div>
       )}
 
-      {showConfirmDraftModal && (
-        <div className="modal-overlay" style={{ zIndex: 3000, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
-          <div 
-            style={{ 
-              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
-              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
-              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
-              position: "relative", zIndex: 3001, display: "flex", flexDirection: "column"
-            }}
-          >
-            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
-              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
-                Guardar como borrador
-              </h2>
-              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
-                El estado de esta noticia es Borrador. No será visible en el portal público hasta que la publiques. ¿Deseas continuar?
-              </p>
-            </div>
-            
-            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <button 
-                type="button" 
-                onClick={(e) => handleSave(e, "BORRADOR", true)}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
-                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#0d223f"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#000b20"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Sí, guardar borrador
-              </button>
-              
-              <button 
-                type="button" 
-                onClick={() => setShowConfirmDraftModal(false)}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
-                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#e0e3e5"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#d8e0ed"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Revisar Estado
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 🔥 MODAL: CAMBIOS SIN GUARDAR */}
-      {showUnsavedModal && (
-        <div className="modal-overlay" style={{ zIndex: 3000, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
-          <div 
-            style={{ 
-              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
-              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
-              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
-              position: "relative", zIndex: 3001, display: "flex", flexDirection: "column"
-            }}
-          >
-            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
-              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "200", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
-                Hay cambios sin guardar
-              </h2>
-              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
-                ¿Qué deseas hacer con la noticia actual?
-              </p>
-            </div>
-            
-            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <button 
-                type="button" 
-                onClick={(e) => handleSave(e, "BORRADOR", true)}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
-                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#0d223f"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#000b20"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Guardar como borrador
-              </button>
-              
-              <button 
-                type="button" 
-                onClick={handleForceClose}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", 
-                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#4d0003"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#ba1a1a"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Descartar cambios
-              </button>
-              
-              <button 
-                type="button" 
-                onClick={() => setShowUnsavedModal(false)}
-                style={{ 
-                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
-                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
-                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
-                  transition: "background-color 0.15s ease, transform 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif"
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = "#e0e3e5"}
-                onMouseOut={(e) => e.target.style.backgroundColor = "#d8e0ed"}
-                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
-                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
-              >
-                Seguir editando
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseAttempt}>
           <div
@@ -675,6 +526,7 @@ const CmsNoticiasView = ({
           >
             <div className="modal-header-esp">
               <h2>{editingId ? "Editar noticia" : "Crear noticia"}</h2>
+              <p className="modal-subtitle-docs">Completá los datos del archivo para registrarlo en el sistema.</p>
               <button
                 type="button"
                 className="btn-close-modal"
@@ -691,7 +543,6 @@ const CmsNoticiasView = ({
               style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
             >
               <div className="modal-split-layout">
-                {/* COLUMNA IZQUIERDA: FORMULARIO */}
                 <div className="news-form-left">
                   <div>
                     <label className="news-form-label">Título de la noticia</label>
@@ -715,7 +566,6 @@ const CmsNoticiasView = ({
                       >
                         <option value="PUBLICADO">Publicado</option>
                         <option value="BORRADOR">Borrador</option>
-                        <option value="ARCHIVADO">Archivado</option>
                       </select>
                     </div>
                   </div>
@@ -830,11 +680,9 @@ const CmsNoticiasView = ({
                   </div>
                 </div>
 
-                {/* COLUMNA DERECHA: VISTA PREVIA */}
                 <div className="news-form-right">
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b' }}>Vista previa de la publicación</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0ea5e9', backgroundColor: '#e0f2fe', padding: '3px 10px', borderRadius: '12px' }}>100%</span>
                   </div>
 
                   <div className="news-preview-paper" style={{ padding: 0 }}>
@@ -889,7 +737,7 @@ const CmsNoticiasView = ({
                             <circle cx="8.5" cy="8.5" r="1.5"></circle>
                             <polyline points="21 15 16 10 5 21"></polyline>
                           </svg>
-                          [Área del mosaico de imágenes]
+                          [Imágenes]
                         </div>
                       )}
                       
@@ -919,6 +767,125 @@ const CmsNoticiasView = ({
           </div>
         </div>
       )}
+
+      {showConfirmDraftModal && (
+        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
+          <div 
+            style={{ 
+              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
+              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative", zIndex: 999999, display: "flex", flexDirection: "column"
+            }}
+          >
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
+                Guardar como borrador
+              </h2>
+              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
+                El estado de esta noticia es Borrador. No será visible en el portal público hasta que la publiques. ¿Deseas continuar?
+              </p>
+            </div>
+            
+            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <button 
+                type="button" 
+                onClick={(e) => handleSave(e, "BORRADOR", true)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
+                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Sí, guardar borrador
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setShowConfirmDraftModal(false)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
+                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Revisar Estado
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUnsavedModal && (
+        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
+          <div 
+            style={{ 
+              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
+              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative", zIndex: 999999, display: "flex", flexDirection: "column"
+            }}
+          >
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
+                Hay cambios sin guardar
+              </h2>
+              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
+                ¿Qué deseas hacer con la noticia actual?
+              </p>
+            </div>
+            
+            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <button 
+                type="button" 
+                onClick={(e) => handleSave(e, "BORRADOR", true)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Guardar como borrador
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={handleForceClose}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Descartar cambios
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setShowUnsavedModal(false)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Seguir editando
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

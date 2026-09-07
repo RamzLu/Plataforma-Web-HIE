@@ -8,21 +8,21 @@ import {
 import { Toaster } from "react-hot-toast";
 import "./App.css";
 
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import WhatsAppButton from "./components/WhatsAppButton";
-import ScrollToTop from "./components/ScrollToTop";
+import Header from "./components/layout/Header";
+import Footer from "./components/layout/Footer";
+import WhatsAppButton from "./components/ui/WhatsAppButton";
+import ScrollToTop from "./components/ui/ScrollToTop";
 
-import HomePage from "./pages/HomePage";
-import EspecialidadesPage from "./pages/EspecialidadesPage";
-import NoticiasPage from "./pages/NoticiasPage";
-import DocumentacionPage from "./pages/DocumentacionPage";
-import ProfesionalesPage from "./pages/ProfesionalesPage";
-import CapacitacionPage from "./pages/CapacitacionPage";
-import ContactoPage from "./pages/ContactoPage";
-import AboutPage from "./pages/AboutPage";
-import CmsPage from "./pages/CmsPage";
-import AdminPage from './pages/AdminPage';
+import HomePage from "./pages/public/HomePage";
+import EspecialidadesPage from "./pages/public/EspecialidadesPage";
+import NoticiasPage from "./pages/public/NoticiasPage";
+import DocumentacionPage from "./pages/public/DocumentacionPage";
+import ProfesionalesPage from "./pages/public/ProfesionalesPage";
+import CapacitacionPage from "./pages/public/CapacitacionPage";
+import ContactoPage from "./pages/public/ContactoPage";
+import AboutPage from "./pages/public/AboutPage";
+import CmsPage from "./pages/cms/CmsPage";
+import AdminPage from './pages/admin/AdminPage';
 
 const AppLayout = () => {
   const location = useLocation();

@@ -177,6 +177,9 @@
   max-width: 200px;
   line-height: 1.35;
 }
+#sede-central {
+  scroll-margin-top: 170px;
+}
 
 @media (max-width: 992px) {
   .about-stats-clean {

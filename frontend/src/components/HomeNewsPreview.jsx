@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "../styles/components/HomeNewsPreview.css";
-import AnimatedContent from "./AnimatedContent";
+import "../styles/sections/HomeNewsPreview.css";
+import AnimatedContent from "../components/ui/AnimatedContent";
 
 // Función sencilla para limpiar el HTML que viene del editor de texto del CMS
 const cleanHtmlText = (html) => {
