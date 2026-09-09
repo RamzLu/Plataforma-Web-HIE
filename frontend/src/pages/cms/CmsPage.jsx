@@ -129,30 +129,12 @@ const fetchNoticias = async () => {
     localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
   };
 
-  const handleDeleteDoc = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este documento del repositorio?")) {
-      try {
-        const token = keycloak?.token;
-        const response = await fetch(`http://localhost:3000/api/cms/documentacion/${id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) throw new Error("No se pudo eliminar en el servidor");
-
-        const filtered = docsList.filter((d) => d.id !== id);
-        setDocsList(filtered);
-        updateStats(newsList, filtered);
-        localStorage.setItem("portal_docs_data", JSON.stringify(filtered));
-
-        alert("¡Documento eliminado correctamente!");
-      } catch (error) {
-        console.error("Error al eliminar documento:", error);
-        alert("Ocurrió un error al intentar eliminar el documento.");
-      }
-    }
+const handleDeleteDoc = (id) => {
+    const filtered = docsList.filter((d) => d.id !== id);
+    setDocsList(filtered);
+    updateStats(newsList, filtered);
+    localStorage.setItem("portal_docs_data", JSON.stringify(filtered));
   };
-
   useEffect(() => {
     fetchNoticias();
     fetchDocs();

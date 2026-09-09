@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
-import toast from "react-hot-toast";
-import { createDocumento, updateDocumento } from "../../api/documentos.api.js";
+import { createDocumento, updateDocumento, deleteDocumento } from "../../api/documentos.api.js";
 import keycloak from "../../config/keycloak";
+import toast from "react-hot-toast";
 import "../../styles/components/cms/CmsDocsView.css";
 
 const CATEGORIAS = [
@@ -24,10 +24,15 @@ const CmsDocsView = ({
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
-  // Estados para control de cambios sin guardar
+  // Estados para control de cambios sin guardar y borradores
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [showConfirmDraftModal, setShowConfirmDraftModal] = useState(false);
+  
+  // Estados para control de eliminación
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [docAEliminar, setDocAEliminar] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   
   const [titulo, setTitulo] = useState("");
   const [categoria, setCategoria] = useState("Información institucional");
@@ -47,7 +52,7 @@ const CmsDocsView = ({
     setArchivo(null);
     setNombreArchivoActual("");
     setPreviewUrl("");
-    setHasUnsavedChanges(false); // Reiniciamos cambios
+    setHasUnsavedChanges(false);
     setShowModal(true);
   };
 
@@ -64,7 +69,7 @@ const CmsDocsView = ({
     setArchivo(null);
     setNombreArchivoActual(doc.fileName || doc.title || "");
     setPreviewUrl(doc.fileUrl || "");
-    setHasUnsavedChanges(false); // Reiniciamos cambios
+    setHasUnsavedChanges(false);
     setShowModal(true);
   };
 
@@ -80,6 +85,41 @@ const CmsDocsView = ({
     setShowUnsavedModal(false);
     setShowModal(false);
     setHasUnsavedChanges(false);
+  };
+
+  const handleConfirmDeleteClick = (id) => {
+    setDocAEliminar(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!docAEliminar) return;
+
+    const id = docAEliminar;
+    setDeletingId(id);
+
+    try {
+      const token = keycloak.token;
+      if (!token) {
+        toast.error("Tu sesión ha expirado.");
+        keycloak.login();
+        return;
+      }
+
+      await deleteDocumento(id, token);
+
+      if (onDeleteDoc) onDeleteDoc(id);
+      toast.success("Documento eliminado correctamente.");
+      
+      setShowDeleteModal(false);
+      setDocAEliminar(null);
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      const backendError = error.response?.data?.error?.message || "Ocurrió un error al intentar eliminar el documento.";
+      toast.error(backendError);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const formatearTamano = (bytes) => {
@@ -106,7 +146,7 @@ const CmsDocsView = ({
   const procesarArchivo = (file) => {
     if (!file || !validarArchivo(file)) return;
     setArchivo(file);
-    setHasUnsavedChanges(true); // Registramos cambio
+    setHasUnsavedChanges(true); 
     if (!titulo.trim()) setTitulo(file.name.replace(/\.[^.]+$/, ""));
     
     const url = URL.createObjectURL(file);
@@ -134,10 +174,10 @@ const CmsDocsView = ({
     setArchivo(null);
     setNombreArchivoActual("");
     setPreviewUrl("");
-    setHasUnsavedChanges(true); // Registramos cambio al eliminar
+    setHasUnsavedChanges(true);
   };
 
-const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
+  const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
 
     if (!titulo.trim()) {
@@ -208,7 +248,7 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
 
       setHasUnsavedChanges(false);
       setShowUnsavedModal(false);
-      setShowConfirmDraftModal(false); // <--- CERRAMOS EL MODAL TRAS GUARDAR
+      setShowConfirmDraftModal(false);
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
@@ -295,13 +335,22 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                   </button>
-                  <button title="Eliminar" onClick={() => onDeleteDoc(doc.id)} className="doc-action-btn-delete">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                      <line x1="10" y1="11" x2="10" y2="17"></line>
-                      <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
+                  <button 
+                    title="Eliminar" 
+                    onClick={() => handleConfirmDeleteClick(doc.id)} 
+                    className="doc-action-btn-delete"
+                    disabled={deletingId === doc.id}
+                  >
+                    {deletingId === doc.id ? (
+                      <div className="cms-spinner-red"></div>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg>
+                    )}
                   </button>
                 </div>
               </div>
@@ -310,6 +359,7 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
         </div>
       </div>
 
+      {/* MODAL PRINCIPAL DE DOCUMENTOS */}
       {showModal && (
         <div className="modal-overlay-docs" onClick={handleCloseAttempt}>
           <div className="modal-container-wide" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
@@ -339,7 +389,7 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
                     value={titulo}
                     onChange={(e) => {
                       setTitulo(e.target.value);
-                      setHasUnsavedChanges(true); // Registra cambio
+                      setHasUnsavedChanges(true);
                     }}
                     placeholder="Ej: Protocolos Clínicos y Asistenciales 2026"
                     required
@@ -356,7 +406,7 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
                         value={categoria} 
                         onChange={(e) => {
                           setCategoria(e.target.value);
-                          setHasUnsavedChanges(true); // Registra cambio
+                          setHasUnsavedChanges(true);
                         }}
                       >
                         {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -376,7 +426,7 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
                         value={estado} 
                         onChange={(e) => {
                           setEstado(e.target.value);
-                          setHasUnsavedChanges(true); // Registra cambio
+                          setHasUnsavedChanges(true);
                         }}
                       >
                         {ESTADOS.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -505,6 +555,64 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
         </div>
       )}
 
+      {/* MODAL DE ELIMINACIÓN */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content-esp delete-modal-global" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="btn-close-floating" onClick={() => setShowDeleteModal(false)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            <div className="delete-modal-body">
+              <div className="delete-icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </div>
+
+              <h2 className="delete-modal-title">Estás a punto de eliminar este elemento</h2>
+              <div className="delete-modal-divider"></div>
+
+              <p className="delete-modal-text">
+                Esta acción es <strong>permanente</strong> y no se puede deshacer. Los datos se borrarán de inmediato.
+              </p>
+            </div>
+
+            <div className="delete-modal-footer">
+              <button
+                type="button"
+                className="btn-cancelar-gris"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deletingId === docAEliminar}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button"
+                className="btn-cerrar-rojo" 
+                onClick={handleExecuteDelete}
+                disabled={deletingId === docAEliminar}
+              >
+                {deletingId === docAEliminar ? (
+                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px" }}></div>
+                    Eliminando...
+                  </span>
+                ) : (
+                  "Eliminar"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CAMBIOS SIN GUARDAR */}
       {showUnsavedModal && (
         <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
           <div 
@@ -572,6 +680,7 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
         </div>
       )}
 
+      {/* MODAL CONFIRMAR BORRADOR */}
       {showConfirmDraftModal && (
         <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
           <div 
