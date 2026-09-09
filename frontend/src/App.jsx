@@ -27,7 +27,7 @@ import AdminPage from './pages/admin/AdminPage';
 const AppLayout = () => {
   const location = useLocation();
   
-  // FIX: Agrupamos ambas áreas protegidas para ocultar los componentes públicos
+  // Agrupamos ambas áreas protegidas para ocultar los componentes públicos
   const isPrivatePanel = location.pathname.startsWith("/cms") || location.pathname.startsWith("/admin");
 
   return (
@@ -83,7 +83,13 @@ const App = () => {
   return (
     <Router>
       <AppLayout />
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster 
+        position="top-right" 
+        reverseOrder={false} 
+        containerStyle={{
+          zIndex: 99999,
+        }}
+      />
     </Router>
   );
 };

@@ -17,8 +17,6 @@ import {
   BlockQuote,
   Undo,
   Alignment,
-  SpecialCharacters,
-  SpecialCharactersEssentials
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import "../../styles/components/cms/CmsNoticiasView.css";
@@ -656,8 +654,6 @@ if (editingId) {
                             BlockQuote,
                             Undo,
                             Alignment,
-                            SpecialCharacters,
-                            SpecialCharactersEssentials
                           ],
                           toolbar: [
                             "heading",
@@ -668,9 +664,13 @@ if (editingId) {
                             "link",
                             "bulletedList",
                             "numberedList",
-                            "alignment",
+                            "|",
+                            "alignment:left",
+                            "alignment:center",
+                            "alignment:right",
+                            "alignment:justify",
+                            "|",
                             "blockQuote",
-                            "specialCharacters",
                             "|",
                             "undo",
                             "redo",
