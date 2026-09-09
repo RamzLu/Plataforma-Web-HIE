@@ -1,236 +1,574 @@
-/* =========================================
-   TÍTULOS DE PÁGINA (ESTILO CMS)
-========================================= */
-/* .admin-page-title {
-  margin-bottom: 30px;
-} */
-/* .admin-overtitle {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #94a3b8;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-.admin-page-title h1 {
-  font-size: 2rem;
-  font-weight: 200;
-  color: #0f172a;
-  margin: 5px 0;
-}
-.admin-page-title p {
-  color: #64748b;
-  font-size: 1rem;
-  margin: 0;
-} */
+/* ==========================================================================
+   ADMIN DASHBOARD VIEW - CSS COMPLETO Y ADAPTADO
+   Adaptado a la estructura de AdminDashboardView_Optimized.jsx
+   ========================================================================== */
 
-/* =========================================
-   CONTENEDOR PRINCIPAL DEL DASHBOARD
-========================================= */
+/* -----------------------------------------
+   1. CONTENEDOR PRINCIPAL
+----------------------------------------- */
 .admin-dashboard-container {
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  width: 100%;
-  padding-bottom: 40px;
-}
-
-/* =========================================
-   TOP GRID: 4 KPIs (Izquierda) + Gráfico (Derecha)
-========================================= */
-.dashboard-top-grid {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
   gap: 24px;
   width: 100%;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-
-/* --- Tarjetas KPI (Soft UI) --- */
-.kpi-card {
-  background-color: #ffffff; 
-  border-radius: 24px;
-  padding: 30px;
+/* -----------------------------------------
+   2. ENCABEZADO Y TÍTULO DE PÁGINA
+----------------------------------------- */
+.admin-page-title {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); 
-  border: 1px solid #f1f5f9;
-  transition: transform 0.2s ease;
+  gap: 4px;
+  margin-bottom: 4px;
 }
 
-.kpi-card:hover {
-  transform: translateY(-4px);
+.admin-title-badge {
+  font-size: 0.75rem;
+  color: #64748b;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.kpi-icon-wrapper {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background-color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.kpi-value {
-  font-size: 3rem;
+.admin-page-title h1 {
+  font-size: 3.2rem;
   font-weight: 800;
   color: #0f172a;
-  line-height: 1;
-  margin-bottom: 8px;
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
-.kpi-label {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 20px;
-}
-
-/* --- Pastillas de Tendencia (Trend Pills) --- */
-.kpi-trend {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 50px;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-.kpi-trend.positive {
-  background-color: #dcfce7;
-  color: #16a34a;
-}
-.kpi-trend.neutral {
-  background-color: #f1f5f9;
+.admin-page-title p {
   color: #64748b;
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.5;
 }
 
-/* --- Tarjeta del Gráfico (Derecha) --- */
-.chart-card {
+/* -----------------------------------------
+   3. SECCIÓN SUPERIOR: GRID DE 6 KPIS
+----------------------------------------- */
+.dashboard-kpis-section {
+  width: 100%;
+}
+
+.kpi-grid-redesigned {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.kpi-card-refined {
   background-color: #ffffff;
-  border-radius: 24px;
-  padding: 30px;
+  border-radius: 18px;
+  padding: 20px;
   border: 1px solid #f1f5f9;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.chart-header {
+.kpi-card-refined:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.kpi-card-refined.alert-highlight {
+  border-left: 4px solid #f59e0b;
+  background: linear-gradient(180deg, #ffffff 0%, #fffcf5 100%);
+}
+
+.kpi-card-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 12px;
 }
-.chart-header h3 {
-  font-size: 1.2rem;
+
+.kpi-card-top .kpi-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.kpi-card-top .kpi-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-value-row {
+  margin-bottom: 8px;
+}
+
+.kpi-value-row .kpi-value {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+/* Pastillas de tendencia / Estado KPI */
+.kpi-footer-trend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: auto;
+}
+
+.trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.trend-badge.neutral-pill {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.trend-badge.warning-pill {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.trend-text {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* -----------------------------------------
+   4. FILA INTERMEDIA: ESTADÍSTICAS Y ACCESOS RÁPIDOS
+----------------------------------------- */
+.dashboard-analytics-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 20px;
+  width: 100%;
+}
+
+.chart-card-proportional,
+.quick-nav-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header-clean {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.card-header-clean h3 {
+  font-size: 1.15rem;
   font-weight: 800;
   color: #0f172a;
   margin: 0;
 }
 
-.donut-container {
+.card-subtitle {
+  font-size: 0.83rem;
+  color: #64748b;
+  margin: 3px 0 0 0;
+}
+
+.status-indicator-pill {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0ea5e9;
+  background-color: rgba(14, 165, 233, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* Gráfico de Anillo Proporcional + Lista de Desglose */
+.chart-body-layout {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex: 1;
+}
+
+.donut-wrapper-square {
   position: relative;
-  width: 220px;
-  height: 220px;
-  margin: 0 auto 30px auto;
+  width: 150px;
+  height: 150px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.donut-center-text {
+
+.donut-svg-element {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-center-content {
   position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
 }
-.donut-center-text .value {
-  font-size: 2.8rem;
+
+.donut-center-number {
+  font-size: 1.65rem;
   font-weight: 800;
   color: #0f172a;
-  line-height: 1.1;
-}
-.donut-center-text .label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #94a3b8;
+  line-height: 1;
 }
 
-/* --- Leyenda del Gráfico --- */
-.chart-legend {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px 10px;
-  margin-top: auto;
+.donut-center-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 3px;
 }
-.legend-item {
+
+.breakdown-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.breakdown-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.breakdown-info {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.85rem;
-  color: #475569;
-  font-weight: 500;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
 }
-.legend-dot {
+
+.breakdown-item .dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-/* =========================================
-   SECCIÓN INFERIOR
-========================================= */
+.breakdown-numbers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.breakdown-numbers .count {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background-color: #f1f5f9;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+/* Lista de Accesos Directos */
+.quick-nav-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.nav-shortcut-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.18s ease;
+}
+
+.nav-shortcut-btn:hover {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateX(4px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
+}
+
+.shortcut-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.shortcut-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.shortcut-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.shortcut-sub {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.arrow-icon {
+  color: #94a3b8;
+  transition: transform 0.18s ease;
+}
+
+.nav-shortcut-btn:hover .arrow-icon {
+  transform: translateX(2px);
+  color: #0ea5e9;
+}
+
+/* -----------------------------------------
+   5. SECCIÓN INFERIOR: SOLICITUDES Y FILTROS
+----------------------------------------- */
 .dashboard-bottom-section {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
   width: 100%;
 }
-.section-header-row {
+
+.section-header-modern {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-}
-.section-header-row h2 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
-}
-.btn-gestionar-todas {
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #0f172a;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.btn-gestionar-todas:hover {
-  background-color: #f1f5f9;
-  border-color: #94a3b8;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #f8fafc;
 }
 
-/* =========================================
-   RESPONSIVIDAD MÓVIL
-========================================= */
-@media (max-width: 1100px) {
-  .dashboard-top-grid {
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title-wrap h2 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.badge-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: #fef3c7;
+  color: #b45309;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+.section-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Lista / Tabla de solicitudes */
+.admin-pending-card {
+  width: 100%;
+}
+
+.pending-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.pending-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 16px;
+}
+
+.pending-list-row:last-child {
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+
+.pending-item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pending-primary-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pending-module-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pending-title {
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.pending-secondary-row {
+  font-size: 0.8rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meta-author strong {
+  color: #334155;
+}
+
+.meta-separator {
+  color: #cbd5e1;
+}
+
+.meta-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-review-action {
+  background-color: #f0f9ff;
+  color: #0284c7;
+  border: 1px solid #e0f2fe;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 15px;
+  border-radius: 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-review-action:hover {
+  background-color: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.2);
+}
+
+/* -----------------------------------------
+   6. RESPONSIVIDAD Y BREAKPOINTS
+----------------------------------------- */
+@media (max-width: 1080px) {
+  .dashboard-analytics-row {
     grid-template-columns: 1fr;
   }
 }
+
 @media (max-width: 768px) {
-  .kpi-grid {
-    grid-template-columns: 1fr;
+  .admin-dashboard-container {
+    padding: 16px;
+    gap: 18px;
+  }
+
+  .chart-body-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .breakdown-list {
+    width: 100%;
+  }
+
+  .section-header-modern {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pending-list-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .btn-review-action {
+    width: 100%;
+    justify-content: center;
   }
 }
