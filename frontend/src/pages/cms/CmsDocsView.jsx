@@ -20,6 +20,7 @@ const CmsDocsView = ({
   onDeleteDoc,
   onUpdateDoc,
   loading,
+  userName,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -230,7 +231,8 @@ const CmsDocsView = ({
         title: titulo,
         category: categoria,
         status: estadoFinal.toLowerCase(),
-        editor: "Tú",
+        editor: data.documento?.editor || (editingId ? docsList.find(d => d.id === editingId)?.editor : userName),
+        editedBy: data.documento?.editedBy || (editingId ? userName : null), 
         fileName: archivo?.name || nombreArchivoActual,
         fileType: (archivo?.name || nombreArchivoActual || "").split(".").pop().toUpperCase(),
         fileSize: archivo ? formatearTamano(archivo.size) : data.documento?.fileSize || "",
@@ -316,13 +318,21 @@ const CmsDocsView = ({
                         </a>
                       )}
                     </div>
+                    
+                    {doc.editedBy && (
+                      <span style={{ fontSize: "0.75rem", color: "#64748b", display: "block", marginTop: "2px", marginBottom: "2px" }}>
+                        Editado por {doc.editedBy}
+                      </span>
+                    )}
+
                     <span className="doc-meta">
                       {(doc.fileType || "PDF")} · {(doc.fileSize || "—")} · {(doc.updatedAt || "Actualizado hoy")}
                     </span>
                   </div>
                 </div>
+                
+                <div className="col-editor">{doc.editor || userName || "Usuario CMS"}</div>
 
-                <div className="col-editor">{doc.editor || "Tú"}</div>
                 <div className="col-categoria">{doc.category || "Información institucional"}</div>
                 <div className="col-estado">
                   <span className={`status-badge ${doc.status || "borrador"}`}>{textoEstado(doc.status || "Borrador")}</span>
@@ -549,7 +559,16 @@ const CmsDocsView = ({
 
             <footer className="modal-footer-docs">
               <button type="button" className="btn-secondary-docs" onClick={handleCloseAttempt} disabled={saving}>CANCELAR</button>
-              <button type="submit" className="btn-primary-docs" onClick={handleSave} disabled={saving}>{saving ? "GUARDANDO..." : "GUARDAR DOCUMENTO"}</button>
+              <button 
+                  type="submit" 
+                  className="btn-primary-docs" 
+                  onClick={handleSave} 
+                  disabled={saving}
+                >
+                  {saving 
+                    ? (editingId ? "ACTUALIZANDO..." : "GUARDANDO...") 
+                    : (editingId ? "ACTUALIZAR DOCUMENTO" : "GUARDAR DOCUMENTO")}
+                </button>
             </footer>
           </div>
         </div>

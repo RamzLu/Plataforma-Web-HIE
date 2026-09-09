@@ -361,6 +361,7 @@ const handleDeleteDoc = (id) => {
               onDeleteDoc={handleDeleteDoc}
               onUpdateDoc={handleUpdateDoc}
               loading={loading}
+              userName={userName}
             />
           )}
 
