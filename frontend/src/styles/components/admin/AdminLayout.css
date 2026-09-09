@@ -1,4 +1,16 @@
 /* =========================================
+   LAYOUT GENERAL ADMIN
+========================================= */
+.admin-layout {
+  display: flex;
+  height: 100vh; 
+  overflow: hidden; 
+  width: 100%;
+  background-color: #ffffff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+} 
+
+/* =========================================
    SIDEBAR ADMIN (TIPO SHOPALL - OSCURO)
 ========================================= */
 .admin-sidebar {
@@ -194,4 +206,168 @@
   justify-content: center;
   padding: 12px 0;
   margin-right: 12px;
+}
+
+/* =========================================
+   CONTENEDOR PRINCIPAL Y HEADER ADMIN
+========================================= */
+.admin-main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  margin-left: 0; 
+  background-color: #f8fafc; 
+}
+
+/* --- HEADER BLANCO LUMINOSO --- */
+.admin-header {
+  height: 70px;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.admin-header-left svg {
+  width: 22px;
+  height: 22px;
+  stroke: #64748b;
+}
+/* --- BREADCRUMB --- */
+.admin-header-breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 1.20rem; 
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.breadcrumb-root {
+  color: #0284c7; 
+}
+
+.breadcrumb-separator {
+  color: #94a3b8; 
+}
+
+.breadcrumb-current {
+  color: #0f172a; 
+}
+
+.admin-header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* --- BOTONES DEL HEADER --- */
+.admin-notification-btn,
+.admin-dropdown-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  color: #64748b;
+}
+
+.admin-notification-btn:hover,
+.admin-dropdown-btn:hover {
+  background-color: #f1f5f9; 
+}
+
+.admin-notification-btn:hover {
+  color: #0f172a;
+}
+
+.admin-dropdown-btn:hover {
+  color: #ef4444; 
+}
+
+/* --- PERFIL DE USUARIO --- */
+.admin-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 20px;
+  border-left: 1px solid #e2e8f0; 
+}
+
+.admin-user-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #0a162e; 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(10, 22, 46, 0.15);
+  color: #ffffff;
+}
+
+.admin-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.admin-user-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.admin-user-role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* --- TÍTULOS DEL CONTENIDO (Para usar en tus vistas) --- */
+.admin-content {
+  padding: 40px;
+}
+
+.admin-page-title {
+  margin-bottom: 30px;
+}
+
+.admin-overtitle {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.admin-page-title h1 {
+  color: #0c2340;
+  font-size: 3.2rem;
+  font-weight: 200;
+  margin: 5px 0;
+}
+
+.admin-page-title p {
+  color: #475569;
+  font-size: 1rem;
+  margin: 0;
 }
