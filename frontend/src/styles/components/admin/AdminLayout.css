@@ -362,7 +362,7 @@
 .admin-page-title h1 {
   color: #0c2340;
   font-size: 3.2rem;
-  font-weight: 200;
+  font-weight: 200 !important;
   margin: 5px 0;
 }
 

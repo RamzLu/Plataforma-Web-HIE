@@ -1,10 +1,10 @@
 /* =========================================
    TÍTULOS DE PÁGINA (ESTILO CMS)
 ========================================= */
-.admin-page-title {
+/* .admin-page-title {
   margin-bottom: 30px;
-}
-.admin-overtitle {
+} */
+/* .admin-overtitle {
   font-size: 0.75rem;
   font-weight: 700;
   color: #94a3b8;
@@ -13,7 +13,7 @@
 }
 .admin-page-title h1 {
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: 200;
   color: #0f172a;
   margin: 5px 0;
 }
@@ -21,7 +21,7 @@
   color: #64748b;
   font-size: 1rem;
   margin: 0;
-}
+} */
 
 /* =========================================
    CONTENEDOR PRINCIPAL DEL DASHBOARD
