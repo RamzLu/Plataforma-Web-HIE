@@ -376,7 +376,6 @@ const CmsDocsView = ({
             <header className="modal-header-docs">
               <div className="header-content-docs">
                 <h1 className="modal-title-docs">{editingId ? "EDITAR DOCUMENTO" : "CARGA DE DOCUMENTACIÓN"}</h1>
-                <p className="modal-subtitle-docs">Completá los datos del archivo para registrarlo en el sistema.</p>
               </div>
               <button type="button" className="close-button-docs" onClick={handleCloseAttempt} aria-label="Cerrar modal">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

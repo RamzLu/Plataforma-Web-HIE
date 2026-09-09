@@ -599,7 +599,6 @@ const CmsNoticiasView = ({
           >
             <div className="modal-header-esp">
               <h2>{editingId ? "Editar noticia" : "Crear noticia"}</h2>
-              <p className="modal-subtitle-docs">Completá los datos del archivo para registrarlo en el sistema.</p>
               <button
                 type="button"
                 className="btn-close-modal"
