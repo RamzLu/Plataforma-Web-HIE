@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import toast from "react-hot-toast";
 import { createDocumento, updateDocumento } from "../../api/documentos.api.js";
 import keycloak from "../../config/keycloak";
 import "../../styles/components/cms/CmsDocsView.css";
@@ -92,11 +93,11 @@ const CmsDocsView = ({
   const validarArchivo = (file) => {
     const ext = file.name.split(".").pop().toLowerCase();
     if (!EXTENSIONES_VALIDAS.includes(ext)) {
-      alert("Formato no permitido. Solo se aceptan PDF o DOCX.");
+      toast.error("Formato no permitido. Solo se aceptan PDF o DOCX.");
       return false;
     }
     if (file.size > MAX_MB * 1024 * 1024) {
-      alert(`El archivo supera el tamaño máximo de ${MAX_MB} MB.`);
+      toast.error(`El archivo supera el tamaño máximo de ${MAX_MB} MB.`);
       return false;
     }
     return true;
@@ -140,12 +141,12 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
 
     if (!titulo.trim()) {
-      alert("Por favor ingresá un título para el documento.");
+      toast.error("Por favor ingresá un título para el documento.");
       setShowUnsavedModal(false);
       return;
     }
     if (!editingId && !archivo && !nombreArchivoActual) {
-      alert("Seleccioná un archivo PDF o DOCX para subir.");
+      toast.error("Seleccioná un archivo PDF o DOCX para subir.");
       setShowUnsavedModal(false);
       return;
     }
@@ -161,7 +162,7 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     try {
       const token = keycloak.token;
       if (!token) {
-        alert("Tu sesión ha expirado.");
+        toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
       }
@@ -199,10 +200,10 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
 
       if (editingId) {
         if (onUpdateDoc) onUpdateDoc(docFormateado);
-        alert(estadoFinal === "Borrador" ? "Borrador actualizado con éxito" : "¡Documento actualizado con éxito!");
+        toast.success(estadoFinal === "Borrador" ? "Borrador actualizado con éxito." : "Documento actualizado con éxito.");
       } else {
         if (onAddNewDoc) onAddNewDoc(docFormateado);
-        alert(estadoFinal === "Borrador" ? "Borrador guardado con éxito" : "¡Documento subido con éxito!");
+        toast.success(estadoFinal === "Borrador" ? "Borrador guardado con éxito." : "Documento subido con éxito.");
       }
 
       setHasUnsavedChanges(false);
@@ -212,7 +213,7 @@ const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     } catch (error) {
       console.error("Error en handleSave:", error);
       const backendError = error.response?.data?.error || error.message || "Error al guardar";
-      alert(`Error: ${backendError}`);
+      toast.error(`Error: ${backendError}`);
     } finally {
       setSaving(false);
     }
