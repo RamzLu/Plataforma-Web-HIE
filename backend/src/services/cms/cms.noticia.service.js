@@ -10,7 +10,8 @@ const supabase = createClient(
 
 class CmsNoticiaService {
   async crearNoticia(data, archivosSubidos, user) {
-    const { titulo, contenido, estado } = data;
+    // NUEVO: Extraemos fechaPublicacion
+    const { titulo, contenido, estado, fechaPublicacion } = data;
 
     if (!titulo || !contenido) {
       const error = new Error("Faltan campos obligatorios: titulo y contenido.");
@@ -29,9 +30,16 @@ class CmsNoticiaService {
 
     const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
 
+    // NUEVO: Agregamos fechaPublicacion si el estado es PROGRAMADO
     const nuevaNoticia = await prisma.noticia.create({
       data: {
-        titulo, contenido, categoriaId: categoria.id, createdBy: usuarioLocal.id, estado: estadoFinal, updatedAt: new Date(),
+        titulo, 
+        contenido, 
+        categoriaId: categoria.id, 
+        createdBy: usuarioLocal.id, 
+        estado: estadoFinal, 
+        updatedAt: new Date(),
+        ...(estadoFinal === "PROGRAMADO" && fechaPublicacion ? { fechaPublicacion: new Date(fechaPublicacion) } : {})
       },
       include: { usuario_noticia_createdByTousuario: true },
     });
@@ -114,6 +122,7 @@ class CmsNoticiaService {
         title: noticia.titulo,
         body: [noticia.contenido],
         date: new Date(noticia.createdAt).toLocaleDateString("es-AR"),
+        fechaPublicacion: noticia.fechaPublicacion, // Agregado para el frontend
         createdAt: noticia.createdAt,
         updatedAt: noticia.updatedAt,
         category: "Noticias",
@@ -149,7 +158,8 @@ class CmsNoticiaService {
   }
 
   async actualizarNoticia(id, data, archivosSubidos, user) {
-    const { titulo, contenido, imagenesExistentes, estado } = data;
+    // NUEVO: Extraemos fechaPublicacion
+    const { titulo, contenido, imagenesExistentes, estado, fechaPublicacion } = data;
     
     const usuarioEditor = await obtenerOCrearUsuarioLocal(user);
 
@@ -171,7 +181,16 @@ class CmsNoticiaService {
       updatedBy: usuarioEditor.id
     };
 
-    if (estado) dataUpdate.estado = estado.toUpperCase();
+    if (estado) {
+      dataUpdate.estado = estado.toUpperCase();
+    }
+    
+    // NUEVO: Guardar fechaPublicacion si se reprograma
+    if (dataUpdate.estado === "PROGRAMADO" && fechaPublicacion) {
+      dataUpdate.fechaPublicacion = new Date(fechaPublicacion);
+    } else if (dataUpdate.estado !== "PROGRAMADO") {
+      dataUpdate.fechaPublicacion = null; // Limpiar si se pasa a publicado/borrador
+    }
 
     const noticiaActualizada = await prisma.noticia.update({
       where: { id: BigInt(id) },
@@ -234,6 +253,25 @@ class CmsNoticiaService {
         editedBy: editadoPorNombre
       },
     };
+  }
+
+  async publicarNoticiasProgramadas() {
+    try {
+      const ahora = new Date();
+      const result = await prisma.noticia.updateMany({
+        where: {
+          estado: "PROGRAMADO",
+          fechaPublicacion: { lte: ahora },
+        },
+        data: { estado: "PUBLICADO" },
+      });
+
+      if (result.count > 0) {
+        console.log(`⏰ [CRON] Se publicaron automáticamente ${result.count} noticias programadas.`);
+      }
+    } catch (error) {
+      console.error("❌ [CRON] Error al ejecutar publicación programada:", error);
+    }
   }
 }
 

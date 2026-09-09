@@ -45,6 +45,7 @@ const CmsNoticiasView = ({
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("Noticias");
   const [estado, setEstado] = useState("BORRADOR");
+  const [fechaProgramada, setFechaProgramada] = useState("");
   const [imagenesUrls, setImagenesUrls] = useState([]);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -65,6 +66,7 @@ const CmsNoticiasView = ({
     setCuerpoHtml("");
     setCategoria("Noticias");
     setEstado("BORRADOR");
+    setFechaProgramada("");
     setImagenesUrls([]);
     setArchivosSeleccionados([]);
     setHasUnsavedChanges(false);
@@ -88,6 +90,14 @@ const CmsNoticiasView = ({
     setArchivosSeleccionados([]);
     setHasUnsavedChanges(false);
     setShowModal(true);
+
+    if (news.fechaPublicacion) {
+      const d = new Date(news.fechaPublicacion);
+      const localIso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      setFechaProgramada(localIso);
+    } else {
+      setFechaProgramada("");
+    }
   };
 
   const handleCloseAttempt = () => {
@@ -190,6 +200,13 @@ const CmsNoticiasView = ({
           
     const estadoFinal = forcedEstado || estado;
 
+
+    if (estadoFinal === "PROGRAMADO" && !fechaProgramada) {
+      toast.error("Por favor, selecciona una fecha y hora para programar la publicación.");
+      setShowUnsavedModal(false);
+      return;
+    }
+
     if (!titulo.trim() || !textoContenido.trim()) {
       toast.error("Por favor completa el título y el contenido.");
       setShowUnsavedModal(false);
@@ -216,6 +233,10 @@ const CmsNoticiasView = ({
       formData.append("contenido", textoContenido);
       formData.append("estado", estadoFinal);
       formData.append("imagenesExistentes", JSON.stringify(imagenesUrls));
+
+      if (estadoFinal === "PROGRAMADO" && fechaProgramada) {
+        formData.append("fechaPublicacion", new Date(fechaProgramada).toISOString());
+      }
 
       archivosSeleccionados.forEach((file) => {
         formData.append("imagenes", file);
@@ -287,7 +308,7 @@ if (editingId) {
         </button>
       </div>
 
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+<div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
         <button
           type="button"
           onClick={() => setViewTab("PUBLICADO")}
@@ -301,6 +322,13 @@ if (editingId) {
           style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: viewTab === "BORRADOR" ? "#0c2340" : "#fff", color: viewTab === "BORRADOR" ? "#fff" : "#334155", fontWeight: "600", cursor: "pointer" }}
         >
           Borradores
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewTab("PROGRAMADO")}
+          style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: viewTab === "PROGRAMADO" ? "#0c2340" : "#fff", color: viewTab === "PROGRAMADO" ? "#fff" : "#334155", fontWeight: "600", cursor: "pointer" }}
+        >
+          Programados
         </button>
       </div>
 
@@ -398,10 +426,16 @@ if (editingId) {
                 <div className="col-categoria">
                   {news.category || "Noticias"}
                 </div>
-                <div className="col-estado">
-                  <span className={`status-badge ${news.estado?.toLowerCase() === "publicado" || (!news.isDraft && !news.estado) ? "publicado" : "pendiente"}`}>
-                    {news.estado || (news.isDraft ? "Borrador" : "Publicado")}
+<div className="col-estado">
+                  <span className={`status-badge ${news.estado?.toLowerCase() === "publicado" || (!news.isDraft && !news.estado) ? "publicado" : news.estado?.toLowerCase() === "programado" ? "programado" : "pendiente"}`}>
+                    {news.estado === "PROGRAMADO" ? "Programado" : (news.estado || (news.isDraft ? "Borrador" : "Publicado"))}
                   </span>
+                
+                  {news.estado === "PROGRAMADO" && news.fechaPublicacion && (
+                    <span style={{ fontSize: "0.7rem", color: "#64748b", display: "block", marginTop: "4px" }}>
+                      Para: {new Date(news.fechaPublicacion).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}
+                    </span>
+                  )}
                 </div>
                 <div className="news-actions-cell">
                   <button
@@ -567,13 +601,32 @@ if (editingId) {
                       <label className="news-form-label">Estado</label>
                       <select 
                         value={estado} 
-                        onChange={(e) => { setEstado(e.target.value); setHasUnsavedChanges(true); }} 
+                        onChange={(e) => { 
+                          setEstado(e.target.value); 
+                          setHasUnsavedChanges(true); 
+                          if (e.target.value !== "PROGRAMADO") setFechaProgramada("");
+                        }} 
                         className="news-form-input"
                       >
                         <option value="PUBLICADO">Publicado</option>
                         <option value="BORRADOR">Borrador</option>
+                        <option value="PROGRAMADO">Programado</option>
                       </select>
                     </div>
+
+                    {estado === "PROGRAMADO" && (
+                      <div style={{ flex: 1 }}>
+                        <label className="news-form-label">Publicar el:</label>
+                        <input
+                          type="datetime-local"
+                          value={fechaProgramada}
+                          min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                          onChange={(e) => { setFechaProgramada(e.target.value); setHasUnsavedChanges(true); }}
+                          className="news-form-input"
+                          required
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div>

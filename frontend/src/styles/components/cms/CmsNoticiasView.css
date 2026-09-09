@@ -542,6 +542,12 @@
   align-items: center;
 }
 
+.status-badge.programado {
+  background-color: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #d8b4fe;
+}
+
 @media (max-width: 1400px) {
   .preview-mock-modal-body {
     grid-template-columns: 1fr;

@@ -5,16 +5,17 @@ import adminRoutes from './routes/admin.routes.js';
 import cmsRoutes from './routes/cms.routes.js';
 import errorHandler from './middlewares/error.middleware.js';
 
+// Importaciones para el CRON JOB
+import cron from 'node-cron';
+import CmsNoticiaService from './services/cms/cms.noticia.service.js';
+
 const app = express()
 const PORT = process.env.PORT || 3000
 const PORT_frontend = process.env.PORT_FRONTEND || 5173
 
 // --- Middlewares ---
-// Permite peticiones desde el frontend (React)
 app.use(cors())
-// Permite que Express entienda el JSON que envíes en peticiones POST/PUT
 app.use(express.json())
-
 
 // Conectamos las rutas
 app.use('/api/roles', rolesRoutes)
@@ -22,6 +23,11 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/cms', cmsRoutes);
 
 app.use(errorHandler);
+
+// --- TAREAS PROGRAMADAS (CRON JOB) ---
+cron.schedule('* * * * *', async () => {
+  await CmsNoticiaService.publicarNoticiasProgramadas();
+});
 
 // --- Iniciar Servidor ---
 app.listen(PORT, () => {
