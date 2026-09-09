@@ -90,12 +90,19 @@
 }
 
 .stat-card-violet {
-  background-color: #f3f3f3; /* Lavanda hiper claro */
-  border-radius: 20px;
-  padding: 24px;
+  background-color: #ffffff; 
+  border-radius: 24px;
+  padding: 30px;
   display: flex;
   flex-direction: column;
-  border: none;
+  align-items: flex-start;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); 
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s ease;
+}
+.stat-card-violet:hover {
+   transform: translateY(-4px);
+
 }
 
 .stat-header {
