@@ -9,7 +9,6 @@ html, body {
   width: 100%;
   min-height: 100vh;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: #1a1a1a; /* El color oscuro que tienes de fondo actualmente */
   overflow-x: hidden; /* Evita scroll horizontal indeseado */
 }
 

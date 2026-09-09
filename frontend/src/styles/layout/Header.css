@@ -20,6 +20,7 @@
   background: linear-gradient(90deg, #2b5b94 0%, #8de4fe 100%);
   pointer-events: none;
 }
+
 .header-container {
   max-width: 1200px;
   height: 100%;
@@ -60,46 +61,169 @@
 .brand-subtitle {
   color: #2b5b94;
   font-size: 1.1rem;
-  font-weight: 300;
-  letter-spacing: 1px;
+  font-weight: 900;
+  color: #0284c7;
+  line-height: 1;
 }
 
-.nav-list {
-  display: flex;
-  list-style: none;
-  gap: 24px;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  text-decoration: none;
-  color: #334155;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: color 0.2s ease;
-  padding: 8px 0;
+.header-search-container {
   position: relative;
+  flex: 1;
+  max-width: 500px; /* Respeta tu ancho actual */
+  margin: 0 20px;
 }
 
-.nav-link:hover,
-.nav-link.active {
-  color: #2b5b94;
+.header-search-form {
+  display: flex;
+  align-items: center;
+  background: #f3f3f6; /* Fondo gris claro translúcido */
+  border-radius: 14px; /* Bordes redondeados suaves */
+  padding: 8px 12px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.2s ease;
 }
 
-.nav-link.active::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
+.header-search-form:focus-within {
+  background: #ffffff;
+  border-color: #d1d5db;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08); /* Sombra flotante delicada */
+}
+
+.header-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
   width: 100%;
-  height: 2px;
-  background-color: #2b5b94;
+  font-size: 14px;
+  color: #1f2937;
+  font-family: inherit;
+  padding-left: 6px;
 }
 
+.header-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.header-search-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b7280;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+}
+
+.header-search-form::after {
+  content: "⌘ K";
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  background: #e5e7eb;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  margin-left: 8px;
+  letter-spacing: 0.5px;
+}
+
+.search-history-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  z-index: 1200;
+  padding: 6px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #9ca3af;
+  border-bottom: 1px solid #f3f4f6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.clear-history-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.search-history-dropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0;
+}
+
+.search-history-dropdown li {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #374155;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-history-dropdown li:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.search-history-dropdown li::after {
+  content: "↗";
+  font-size: 12px;
+  color: #9ca3af;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.search-history-dropdown li:hover::after {
+  opacity: 1;
+}
+
+.search-icon-wrapper {
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+  margin-right: 8px;
+}
+
+/* Reemplaza o ajusta la visualización de la flecha en la lista de temas */
+.search-history-dropdown li .topic-arrow {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.search-history-dropdown li:hover .topic-arrow {
+  opacity: 1;
+}
+
+/* Ocultar el atajo "⌘ K" anterior si ya no lo deseas */
+.header-search-form::after {
+  display: none; 
+}
+
+/* --- BOTÓN HAMBURGUESA (SIEMPRE VISIBLE) --- */
 .hamburger-btn {
-  display: none;
+  display: flex; /* Cambiado de 'none' a 'flex' para que siempre se vea */
   flex-direction: column;
   justify-content: space-around;
   width: 30px;
@@ -108,7 +232,7 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  z-index: 1001;
+  z-index: 1251; /* Alto para que quede por encima del panel */
 }
 
 .hamburger-bar {
@@ -120,7 +244,7 @@
 }
 
 .hamburger-btn.open .hamburger-bar:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
+  transform: translateY(10.5px) rotate(45deg);
 }
 
 .hamburger-btn.open .hamburger-bar:nth-child(2) {
@@ -128,49 +252,175 @@
 }
 
 .hamburger-btn.open .hamburger-bar:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
+  transform: translateY(-10.5px) rotate(-45deg);
 }
 
-/* --- ADAPTACIÓN RESPONSIVE (MÓVILES Y TABLETS) --- */
-@media (max-width: 992px) {
-  .hamburger-btn {
-    display: flex;
-  }
+/* --- MENÚ DESPLEGABLE LATERAL (SIEMPRE TIPO HAMBURGUESA) --- */
+.nav-menu {
+  position: fixed;
+  top: 0;
+  right: -300px; /* Escondido a la derecha por defecto */
+  width: 300px;
+  height: 100vh;
+  background-color: #ffffff;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+  padding: 80px 24px 24px 24px;
+  transition: right 0.3s ease-in-out;
+  z-index: 1250;
+  overflow-y: auto;
+}
 
-  .nav-menu {
-    position: fixed;
-    top: 80px;
-    left: 0;
-    width: 100%;
-    height: calc(100vh - 80px);
-    background-color: #ffffff;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
-  }
+.nav-menu.active {
+  right: 0; /* Desliza hacia adentro cuando está activo */
+}
 
-  .nav-menu.active {
-    transform: translateX(0);
-  }
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+}
 
-  .nav-list {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    gap: 20px;
-  }
+.nav-link {
+  text-decoration: none;
+  color: #334155;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, color 0.2s;
+  padding: 12px 16px;
+  display: block;
+  border-radius: 8px;
+}
 
-  .nav-link {
-    font-size: 1.1rem;
-    font-weight: 400;
-    letter-spacing: 1px;
-    padding: 10px;
-  }
+.nav-link:hover,
+.nav-link.active {
+  background-color: #f1f5f9;
+  color: #2b5b94;
+}
 
-  .nav-link.active::after {
-    display: none;
+/* Ocultar la línea azul inferior del nav-link.active ya que ahora es menú lateral */
+.nav-link.active::after {
+  display: none;
+}
+
+/* --- CORRECCIÓN DE ESTILOS PARA EL DESPLEGABLE DE BÚSQUEDA --- */
+.search-dropdown-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 1200;
+  padding: 8px;
+}
+
+.dropdown-section-title {
+  padding: 8px 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* Forzar que la lista no tenga viñetas y se vea limpia */
+.search-dropdown-results ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 4px 0 0 0 !important;
+}
+
+.search-dropdown-results li {
+  list-style-type: none !important;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #374155;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-dropdown-results li:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.suggestion-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Espaciado correcto para la etiqueta tipo badge */
+.suggestion-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #475569;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.suggestion-text {
+  font-weight: 500;
+}
+
+.suggestion-arrow {
+  color: #9ca3af;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.search-dropdown-results li:hover .suggestion-arrow {
+  opacity: 1;
+}
+
+.global-search-option {
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  font-weight: 500;
+  color: #0284c7 !important;
+  margin-top: 4px;
+  border-radius: 0 0 10px 10px !important;
+}
+
+.global-search-option:hover {
+  background: #e0f2fe !important;
+}
+
+.no-results {
+  padding: 15px;
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* --- ADAPTACIONES PARA PANTALLAS CHICAS --- */
+@media (max-width: 968px) {
+  .header-search-container {
+    max-width: 250px;
+    margin: 0 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Si no quieres que la barra de búsqueda estorbe en celulares pequeños, puedes ocultarla o moverla */
+  .header-search-container {
+    display: none; 
   }
 }

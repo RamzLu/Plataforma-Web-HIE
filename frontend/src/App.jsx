@@ -23,6 +23,7 @@ import ContactoPage from "./pages/public/ContactoPage";
 import AboutPage from "./pages/public/AboutPage";
 import CmsPage from "./pages/cms/CmsPage";
 import AdminPage from './pages/admin/AdminPage';
+import SearchResultsPage from "./pages/public/SearchResultsPage";
 
 const AppLayout = () => {
   const location = useLocation();
@@ -47,6 +48,7 @@ const AppLayout = () => {
         <Route path="/acerca-de" element={<AboutPage />} />
         <Route path="/cms" element={<CmsPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/buscar" element={<SearchResultsPage />} />
 
         <Route
           path="*"

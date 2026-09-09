@@ -1,0 +1,118 @@
+/* --- ESTILOS DE LA PÁGINA DE RESULTADOS (ESTILO HOSPITALARIO) --- */
+.search-results-container {
+  padding: 40px 20px;
+  max-width: 950px;
+  margin: 0 auto;
+  min-height: 80vh;
+  font-family: inherit;
+  margin-top: 90px; /* Espacio para que no lo tape el header fijo */
+  background-color: #f8fafc;
+  border-radius: 16px;
+  padding-bottom: 60px;
+}
+
+.search-results-breadcrumb {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.search-results-breadcrumb a {
+  color: #0284c7;
+  text-decoration: none;
+}
+
+.search-results-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.search-results-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0c2340;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Tarjeta individual idéntica a la referencia */
+.search-result-card {
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.search-result-card:hover {
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+}
+
+.search-result-category {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b; /* Gris tenue institucional */
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.search-result-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.search-result-card h3 a {
+  color: #0c2340;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.search-result-card h3 a:hover {
+  color: #0284c7;
+}
+
+.search-result-card p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.search-no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: #475569;
+  font-size: 1.1rem;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.search-back-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: #0c2340;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.search-back-btn:hover {
+  background: #0284c7;
+}
