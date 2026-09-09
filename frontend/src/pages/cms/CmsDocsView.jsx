@@ -23,6 +23,11 @@ const CmsDocsView = ({
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
+  // Estados para control de cambios sin guardar
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [showConfirmDraftModal, setShowConfirmDraftModal] = useState(false);
+  
   const [titulo, setTitulo] = useState("");
   const [categoria, setCategoria] = useState("Información institucional");
   const [estado, setEstado] = useState("Borrador");
@@ -41,6 +46,7 @@ const CmsDocsView = ({
     setArchivo(null);
     setNombreArchivoActual("");
     setPreviewUrl("");
+    setHasUnsavedChanges(false); // Reiniciamos cambios
     setShowModal(true);
   };
 
@@ -57,7 +63,22 @@ const CmsDocsView = ({
     setArchivo(null);
     setNombreArchivoActual(doc.fileName || doc.title || "");
     setPreviewUrl(doc.fileUrl || "");
+    setHasUnsavedChanges(false); // Reiniciamos cambios
     setShowModal(true);
+  };
+
+  const handleCloseAttempt = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedModal(true);
+    } else {
+      setShowModal(false);
+    }
+  };
+
+  const handleForceClose = () => {
+    setShowUnsavedModal(false);
+    setShowModal(false);
+    setHasUnsavedChanges(false);
   };
 
   const formatearTamano = (bytes) => {
@@ -84,6 +105,7 @@ const CmsDocsView = ({
   const procesarArchivo = (file) => {
     if (!file || !validarArchivo(file)) return;
     setArchivo(file);
+    setHasUnsavedChanges(true); // Registramos cambio
     if (!titulo.trim()) setTitulo(file.name.replace(/\.[^.]+$/, ""));
     
     const url = URL.createObjectURL(file);
@@ -111,18 +133,28 @@ const CmsDocsView = ({
     setArchivo(null);
     setNombreArchivoActual("");
     setPreviewUrl("");
+    setHasUnsavedChanges(true); // Registramos cambio al eliminar
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
+const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
+    if (e) e.preventDefault();
 
     if (!titulo.trim()) {
       alert("Por favor ingresá un título para el documento.");
+      setShowUnsavedModal(false);
       return;
     }
     if (!editingId && !archivo && !nombreArchivoActual) {
       alert("Seleccioná un archivo PDF o DOCX para subir.");
+      setShowUnsavedModal(false);
       return;
+    }
+
+    const estadoFinal = forcedEstado || estado;
+
+    if (estadoFinal === "Borrador" && !bypassDraftWarning) {
+      setShowConfirmDraftModal(true);
+      return; 
     }
 
     setSaving(true);
@@ -139,8 +171,8 @@ const CmsDocsView = ({
       formData.append("categoria", categoria);
       
       let estadoPrisma = "BORRADOR";
-      if (estado === "Publicado") estadoPrisma = "PUBLICADO";
-      if (estado === "En revisión") estadoPrisma = "PROGRAMADO"; 
+      if (estadoFinal === "Publicado") estadoPrisma = "PUBLICADO";
+      if (estadoFinal === "En revisión") estadoPrisma = "PROGRAMADO"; 
       
       formData.append("estado", estadoPrisma);
       if (archivo) formData.append("archivo", archivo);
@@ -156,7 +188,7 @@ const CmsDocsView = ({
         id: data.documento?.id || editingId,
         title: titulo,
         category: categoria,
-        status: estado.toLowerCase(),
+        status: estadoFinal.toLowerCase(),
         editor: "Tú",
         fileName: archivo?.name || nombreArchivoActual,
         fileType: (archivo?.name || nombreArchivoActual || "").split(".").pop().toUpperCase(),
@@ -167,12 +199,15 @@ const CmsDocsView = ({
 
       if (editingId) {
         if (onUpdateDoc) onUpdateDoc(docFormateado);
-        alert("¡Documento actualizado con éxito!");
+        alert(estadoFinal === "Borrador" ? "Borrador actualizado con éxito" : "¡Documento actualizado con éxito!");
       } else {
         if (onAddNewDoc) onAddNewDoc(docFormateado);
-        alert("¡Documento subido con éxito!");
+        alert(estadoFinal === "Borrador" ? "Borrador guardado con éxito" : "¡Documento subido con éxito!");
       }
 
+      setHasUnsavedChanges(false);
+      setShowUnsavedModal(false);
+      setShowConfirmDraftModal(false); // <--- CERRAMOS EL MODAL TRAS GUARDAR
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
@@ -275,14 +310,14 @@ const CmsDocsView = ({
       </div>
 
       {showModal && (
-        <div className="modal-overlay-docs" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay-docs" onClick={handleCloseAttempt}>
           <div className="modal-container-wide" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <header className="modal-header-docs">
               <div className="header-content-docs">
-                <h1 className="modal-title-docs">{editingId ? "EDITAR DOCUMENTOS" : "CARGA DE DOCUMENTACIÓN"}</h1>
+                <h1 className="modal-title-docs">{editingId ? "EDITAR DOCUMENTO" : "CARGA DE DOCUMENTACIÓN"}</h1>
                 <p className="modal-subtitle-docs">Completá los datos del archivo para registrarlo en el sistema.</p>
               </div>
-              <button type="button" className="close-button-docs" onClick={() => setShowModal(false)} aria-label="Cerrar modal">
+              <button type="button" className="close-button-docs" onClick={handleCloseAttempt} aria-label="Cerrar modal">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -301,7 +336,10 @@ const CmsDocsView = ({
                     type="text"
                     className="text-input-docs"
                     value={titulo}
-                    onChange={(e) => setTitulo(e.target.value)}
+                    onChange={(e) => {
+                      setTitulo(e.target.value);
+                      setHasUnsavedChanges(true); // Registra cambio
+                    }}
                     placeholder="Ej: Protocolos Clínicos y Asistenciales 2026"
                     required
                   />
@@ -311,7 +349,15 @@ const CmsDocsView = ({
                   <div className="form-group-docs">
                     <label htmlFor="doc-category" className="field-label-docs">CATEGORÍA</label>
                     <div className="select-wrapper-docs">
-                      <select id="doc-category" className="custom-select-docs" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+                      <select 
+                        id="doc-category" 
+                        className="custom-select-docs" 
+                        value={categoria} 
+                        onChange={(e) => {
+                          setCategoria(e.target.value);
+                          setHasUnsavedChanges(true); // Registra cambio
+                        }}
+                      >
                         {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
                       </select>
                       <span className="select-arrow-docs" aria-hidden="true">
@@ -323,7 +369,15 @@ const CmsDocsView = ({
                   <div className="form-group-docs">
                     <label htmlFor="doc-status" className="field-label-docs">ESTADO</label>
                     <div className="select-wrapper-docs">
-                      <select id="doc-status" className="custom-select-docs" value={estado} onChange={(e) => setEstado(e.target.value)}>
+                      <select 
+                        id="doc-status" 
+                        className="custom-select-docs" 
+                        value={estado} 
+                        onChange={(e) => {
+                          setEstado(e.target.value);
+                          setHasUnsavedChanges(true); // Registra cambio
+                        }}
+                      >
                         {ESTADOS.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>
                       <span className="select-arrow-docs" aria-hidden="true">
@@ -443,9 +497,129 @@ const CmsDocsView = ({
             </form>
 
             <footer className="modal-footer-docs">
-              <button type="button" className="btn-secondary-docs" onClick={() => setShowModal(false)} disabled={saving}>CANCELAR</button>
+              <button type="button" className="btn-secondary-docs" onClick={handleCloseAttempt} disabled={saving}>CANCELAR</button>
               <button type="submit" className="btn-primary-docs" onClick={handleSave} disabled={saving}>{saving ? "GUARDANDO..." : "GUARDAR DOCUMENTO"}</button>
             </footer>
+          </div>
+        </div>
+      )}
+
+      {showUnsavedModal && (
+        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
+          <div 
+            style={{ 
+              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
+              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative", zIndex: 999999, display: "flex", flexDirection: "column"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
+                Hay cambios sin guardar
+              </h2>
+              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
+                ¿Qué deseas hacer con el documento actual?
+              </p>
+            </div>
+            
+            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <button 
+                type="button" 
+                onClick={(e) => handleSave(e, "Borrador")}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Guardar como borrador
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={handleForceClose}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Descartar cambios
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setShowUnsavedModal(false)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Seguir editando
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showConfirmDraftModal && (
+        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
+          <div 
+            style={{ 
+              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
+              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative", zIndex: 999999, display: "flex", flexDirection: "column"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
+                Guardar como borrador
+              </h2>
+              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
+                El estado de este documento es Borrador. No será visible en el portal público hasta que lo publiques. ¿Deseas continuar?
+              </p>
+            </div>
+            
+            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <button 
+                type="button" 
+                onClick={(e) => handleSave(e, "Borrador", true)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
+                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Sí, guardar borrador
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setShowConfirmDraftModal(false)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
+                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Revisar Estado
+              </button>
+            </div>
           </div>
         </div>
       )}
