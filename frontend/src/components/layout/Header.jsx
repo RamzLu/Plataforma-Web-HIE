@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FiSearch, FiArrowUpRight } from "react-icons/fi";
 import "../../styles/layout/Header.css";
-import logoIcon from "../../assets/logoHospitalEvita.png";
+import logoCompleto from "../../assets/logo-completo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,15 +30,27 @@ const Header = () => {
         item.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
 
-  useEffect(() => {
+useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
     };
+    
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
+
+  useEffect(() => {
+    if (location.pathname !== "/buscar") {
+      setSearchTerm("");
+    }
+  }, [location.pathname]);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
@@ -67,17 +79,13 @@ const Header = () => {
     <header className="main-header">
       <div className="header-container">
         <Link to="/" className="header-brand" onClick={closeMenu}>
-          <img src={logoIcon} alt="Hospital Evita" className="header-logo" />
-          <div className="brand-text">
-            <span className="brand-title">HOSPITAL INTERDISTRITAL</span>
-            <span className="brand-subtitle">EVITA</span>
-          </div>
+          <img src={logoCompleto} alt="Hospital Evita" className="header-logo" />
         </Link>
 
         <div className="header-search-container" ref={searchRef}>
           <form onSubmit={handleSearchSubmit} className="header-search-form">
             <span className="search-icon-wrapper">
-              <FiSearch size={16} />
+            <FiSearch className="search-icon-svg" />
             </span>
             <input
               type="text"
@@ -88,6 +96,11 @@ const Header = () => {
                 setShowDropdown(true);
               }}
               onFocus={() => setShowDropdown(true)}
+              onBlur={() => {
+                setTimeout(() => {
+                  setShowDropdown(false);
+                }, 200);
+              }}
               className="header-search-input"
             />
           </form>

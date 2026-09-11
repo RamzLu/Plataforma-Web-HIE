@@ -1,11 +1,12 @@
-/* --- ESTILOS DE LA PÁGINA DE RESULTADOS (ESTILO HOSPITALARIO) --- */
+
 .search-results-container {
-  padding: 40px 20px;
-  max-width: 950px;
+  padding: 40px 50px; 
+  width: 95%; 
+  max-width: 1400px; 
   margin: 0 auto;
   min-height: 80vh;
   font-family: inherit;
-  margin-top: 90px; /* Espacio para que no lo tape el header fijo */
+  margin-top: 90px; 
   background-color: #f8fafc;
   border-radius: 16px;
   padding-bottom: 60px;
@@ -13,8 +14,10 @@
 
 .search-results-breadcrumb {
   font-size: 0.85rem;
-  color: #64748b;
+  color: #1f2e44;
   margin-bottom: 12px;
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
 .search-results-breadcrumb a {
@@ -27,9 +30,9 @@
 }
 
 .search-results-title {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #0c2340;
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: #2a68b5;
   text-transform: uppercase;
   margin-bottom: 30px;
   letter-spacing: 0.5px;
@@ -40,10 +43,12 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%; 
 }
 
 /* Tarjeta individual idéntica a la referencia */
 .search-result-card {
+  width: 100%; 
   padding: 24px;
   background: #ffffff;
   border-radius: 8px;
@@ -59,9 +64,9 @@
 
 .search-result-category {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: #64748b; /* Gris tenue institucional */
+  color: #1382a0; 
   letter-spacing: 0.8px;
   text-transform: uppercase;
   margin-bottom: 6px;
@@ -69,13 +74,14 @@
 
 .search-result-card h3 {
   margin: 0 0 8px 0;
-  font-size: 1.15rem;
+  font-size: 1.9rem;
   font-weight: 700;
 }
 
 .search-result-card h3 a {
-  color: #0c2340;
+  color: #0a3364;
   text-decoration: none;
+   font-weight: 400;
   transition: color 0.15s;
 }
 
@@ -85,8 +91,8 @@
 
 .search-result-card p {
   margin: 0;
-  color: #475569;
-  font-size: 0.92rem;
+  color: #141d2b;
+  font-size: 1.15rem;
   line-height: 1.5;
 }
 
@@ -116,3 +122,26 @@
 .search-back-btn:hover {
   background: #0284c7;
 }
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-result-card {
+  opacity: 0; 
+  animation: fadeInUp 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.search-result-card:nth-child(1) { animation-delay: 0.05s; }
+.search-result-card:nth-child(2) { animation-delay: 0.1s; }
+.search-result-card:nth-child(3) { animation-delay: 0.15s; }
+.search-result-card:nth-child(4) { animation-delay: 0.2s; }
+.search-result-card:nth-child(5) { animation-delay: 0.25s; }
+.search-result-card:nth-child(n+6) { animation-delay: 0.3s; } 

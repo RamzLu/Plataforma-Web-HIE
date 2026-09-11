@@ -1,8 +1,7 @@
 .main-header {
   width: 100%;
-  height: 80px;
+  height: 90px;
   background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
   position: fixed;
   top: 0;
   left: 0;
@@ -17,7 +16,7 @@
   left: 0;
   width: 100%;
   height: 5px;
-  background: linear-gradient(90deg, #2b5b94 0%, #8de4fe 100%);
+  background: linear-gradient(90deg, #275083 0%, #08bef5 100%);
   pointer-events: none;
 }
 
@@ -39,10 +38,14 @@
 }
 
 .header-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
+  height: 55px; 
+  margin-bottom: 15px;
+  margin-top: 10px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  transform: scale(1.3);
+  transform-origin: left center;
 }
 
 .brand-text {
@@ -59,9 +62,8 @@
 }
 
 .brand-subtitle {
-  color: #2b5b94;
-  font-size: 1.1rem;
-  font-weight: 900;
+  font-size: 1.9rem;
+  font-weight: 500;
   color: #0284c7;
   line-height: 1;
 }
@@ -69,24 +71,30 @@
 .header-search-container {
   position: relative;
   flex: 1;
-  max-width: 500px; /* Respeta tu ancho actual */
+  max-width: 500px; 
   margin: 0 20px;
 }
 
 .header-search-form {
   display: flex;
   align-items: center;
-  background: #f3f3f6; /* Fondo gris claro translúcido */
-  border-radius: 14px; /* Bordes redondeados suaves */
+  background: #f3f3f6; 
+  border-radius: 20px; 
   padding: 8px 12px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid rgba(16, 102, 216, 0.8);
   transition: all 0.2s ease;
+  position: relative; 
 }
 
 .header-search-form:focus-within {
+  position: relative; 
+  top: auto;
+  height: auto;
   background: #ffffff;
   border-color: #d1d5db;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08); /* Sombra flotante delicada */
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 8px 12px;
 }
 
 .header-search-input {
@@ -116,197 +124,9 @@
 }
 
 .header-search-form::after {
-  content: "⌘ K";
-  font-size: 11px;
-  font-weight: 600;
-  color: #9ca3af;
-  background: #e5e7eb;
-  padding: 2px 6px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  margin-left: 8px;
-  letter-spacing: 0.5px;
-}
-
-.search-history-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 16px;
-  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  z-index: 1200;
-  padding: 6px;
-}
-
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #9ca3af;
-  border-bottom: 1px solid #f3f4f6;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.clear-history-btn {
-  background: none;
-  border: none;
-  color: #ef4444;
-  cursor: pointer;
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.search-history-dropdown ul {
-  list-style: none;
-  padding: 0;
-  margin: 4px 0;
-}
-
-.search-history-dropdown li {
-  padding: 10px 12px;
-  font-size: 14px;
-  color: #374155;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.search-history-dropdown li:hover {
-  background: #f3f4f6;
-  color: #111827;
-}
-
-.search-history-dropdown li::after {
-  content: "↗";
-  font-size: 12px;
-  color: #9ca3af;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.search-history-dropdown li:hover::after {
-  opacity: 1;
-}
-
-.search-icon-wrapper {
-  display: flex;
-  align-items: center;
-  color: #6b7280;
-  margin-right: 8px;
-}
-
-/* Reemplaza o ajusta la visualización de la flecha en la lista de temas */
-.search-history-dropdown li .topic-arrow {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.search-history-dropdown li:hover .topic-arrow {
-  opacity: 1;
-}
-
-/* Ocultar el atajo "⌘ K" anterior si ya no lo deseas */
-.header-search-form::after {
   display: none; 
 }
 
-/* --- BOTÓN HAMBURGUESA (SIEMPRE VISIBLE) --- */
-.hamburger-btn {
-  display: flex; /* Cambiado de 'none' a 'flex' para que siempre se vea */
-  flex-direction: column;
-  justify-content: space-around;
-  width: 30px;
-  height: 24px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  z-index: 1251; /* Alto para que quede por encima del panel */
-}
-
-.hamburger-bar {
-  width: 100%;
-  height: 3px;
-  background-color: #2b5b94;
-  border-radius: 2px;
-  transition: all 0.3s ease;
-}
-
-.hamburger-btn.open .hamburger-bar:nth-child(1) {
-  transform: translateY(10.5px) rotate(45deg);
-}
-
-.hamburger-btn.open .hamburger-bar:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger-btn.open .hamburger-bar:nth-child(3) {
-  transform: translateY(-10.5px) rotate(-45deg);
-}
-
-/* --- MENÚ DESPLEGABLE LATERAL (SIEMPRE TIPO HAMBURGUESA) --- */
-.nav-menu {
-  position: fixed;
-  top: 0;
-  right: -300px; /* Escondido a la derecha por defecto */
-  width: 300px;
-  height: 100vh;
-  background-color: #ffffff;
-  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
-  padding: 80px 24px 24px 24px;
-  transition: right 0.3s ease-in-out;
-  z-index: 1250;
-  overflow-y: auto;
-}
-
-.nav-menu.active {
-  right: 0; /* Desliza hacia adentro cuando está activo */
-}
-
-.nav-list {
-  display: flex;
-  flex-direction: column;
-  list-style: none;
-  gap: 16px;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  text-decoration: none;
-  color: #334155;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: background 0.2s, color 0.2s;
-  padding: 12px 16px;
-  display: block;
-  border-radius: 8px;
-}
-
-.nav-link:hover,
-.nav-link.active {
-  background-color: #f1f5f9;
-  color: #2b5b94;
-}
-
-/* Ocultar la línea azul inferior del nav-link.active ya que ahora es menú lateral */
-.nav-link.active::after {
-  display: none;
-}
-
-/* --- CORRECCIÓN DE ESTILOS PARA EL DESPLEGABLE DE BÚSQUEDA --- */
 .search-dropdown-results {
   position: absolute;
   top: calc(100% + 8px);
@@ -331,7 +151,6 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
-/* Forzar que la lista no tenga viñetas y se vea limpia */
 .search-dropdown-results ul {
   list-style: none !important;
   padding: 0 !important;
@@ -362,7 +181,6 @@
   gap: 10px;
 }
 
-/* Espaciado correcto para la etiqueta tipo badge */
 .suggestion-badge {
   font-size: 0.65rem;
   font-weight: 700;
@@ -410,17 +228,219 @@
   font-style: italic;
 }
 
-/* --- ADAPTACIONES PARA PANTALLAS CHICAS --- */
+.search-icon-wrapper {
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+  margin-right: 8px;
+}
+
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1251; 
+}
+
+.hamburger-bar {
+  width: 100%;
+  height: 3px;
+  background-color: #2b5b94;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn.open .hamburger-bar:nth-child(1) {
+  transform: translateY(10.5px) rotate(45deg);
+}
+
+.hamburger-btn.open .hamburger-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.open .hamburger-bar:nth-child(3) {
+  transform: translateY(-10.5px) rotate(-45deg);
+}
+
+.nav-menu {
+  position: fixed;
+  top: 0;
+  right: -300px; 
+  width: 300px;
+  height: 100vh;
+  background-color: #ffffff;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+  padding: 80px 24px 24px 24px;
+  transition: right 0.3s ease-in-out;
+  z-index: 1250;
+  overflow-y: auto;
+}
+
+.nav-menu.active {
+  right: 0; 
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #334155;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, color 0.2s;
+  padding: 12px 16px;
+  display: block;
+  border-radius: 8px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background-color: #f1f5f9;
+  color: #2b5b94;
+}
+
+.nav-link.active::after {
+  display: none;
+}
+
+.search-icon-svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5; 
+  color: #0284c7;
+  transition: all 0.2s ease;
+}
+
+/* =========================================
+   MEDIA QUERIES 
+========================================= */
+
+/* Tablets / Pantallas medianas */
 @media (max-width: 968px) {
   .header-search-container {
     max-width: 250px;
     margin: 0 10px;
   }
+  
+  .header-logo {
+    height: 55px; 
+  }
 }
 
+/* Celulares */
 @media (max-width: 768px) {
-  /* Si no quieres que la barra de búsqueda estorbe en celulares pequeños, puedes ocultarla o moverla */
+
+  .search-icon-svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .header-search-form:focus-within .search-icon-svg {
+    width: 18px;
+    height: 18px;
+    color: #6b7280;
+  }
+
   .header-search-container {
-    display: none; 
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 15px 0 auto;
+    position: static; 
+    flex-shrink: 0;
+  }
+
+  .header-brand {
+    flex: 1; 
+    min-width: 0; 
+  }
+
+  .header-search-form {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 60%;
+    justify-content: center;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .search-icon-wrapper {
+    margin: 0;
+    color: #2b5b94;
+    cursor: pointer;
+  }
+
+  .header-search-input {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    opacity: 0;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .header-search-form:focus-within {
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 56px; /* CORREGIDO: Alto estricto para empalmar con los resultados */
+    display: flex; /* CORREGIDO: Alineación del input */
+    align-items: center; /* CORREGIDO */
+    max-width: none;
+    background: #ffffff;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    box-shadow: none; /* CORREGIDO: Sin sombra para que se fusione abajo */
+    padding: 0 24px;
+    border-radius: 0; 
+    z-index: 1050;
+  }
+
+  .header-search-form:focus-within .header-search-input {
+    position: static;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    cursor: text;
+    padding-left: 12px;
+    font-size: 16px;
+  }
+
+  .search-dropdown-results {
+    position: absolute;
+    top: calc(100% + 56px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 0 0 16px 16px;
+    border: none;
+    box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.15); 
+    margin-top: 0; 
+  }
+
+  .header-logo {
+    height: auto;
+    max-height: 45px; 
+    max-width: 100%; 
+    object-fit: contain;
+    object-position: left center;
   }
 }
