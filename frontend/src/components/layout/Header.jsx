@@ -1,162 +1,74 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FiSearch, FiArrowUpRight } from "react-icons/fi";
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { FiMapPin, FiMap, FiMenu, FiX } from "react-icons/fi";
 import "../../styles/layout/Header.css";
 import logoCompleto from "../../assets/logo-completo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
-  
   const location = useLocation();
-  const navigate = useNavigate();
-  const searchRef = useRef(null);
-
-  // Secciones eINFORMACIÓN importante del sitio web del hospital
-  const searchDatabase = [
-    { title: "Especialidades médicas y servicios", type: "SECCIÓN", path: "/especialidades" },
-    { title: "Últimas noticias y comunicados", type: "SECCIÓN", path: "/noticias" },
-    { title: "Documentación y trámites", type: "SECCIÓN", path: "/documentacion" },
-    { title: "Capacitaciones institucionales", type: "SECCIÓN", path: "/capacitacion" },
-    { title: "Plantel de profesionales médicos", type: "SECCIÓN", path: "/profesionales" },
-    { title: "Información de contacto y guardias", type: "SECCIÓN", path: "/contacto" },
-    { title: "Acerca del Hospital Interdistrital Evita", type: "SECCIÓN", path: "/acerca-de" }
-  ];
-
-  const filteredSuggestions = searchTerm.trim() === "" 
-    ? searchDatabase.slice(0, 5) 
-    : searchDatabase.filter(item => 
-        item.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowDropdown(false);
-      }
-    };
-    
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
-    
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (location.pathname !== "/buscar") {
-      setSearchTerm("");
-    }
-  }, [location.pathname]);
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const closeMenu = () => setIsMenuOpen(false);
   const isActive = (path) => location.pathname === path;
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (!searchTerm.trim()) return;
-    setShowDropdown(false);
-    navigate(`/buscar?q=${encodeURIComponent(searchTerm.trim())}`);
-  };
-
-  const handleSelectSuggestion = (path) => {
-    setShowDropdown(false);
-    setSearchTerm("");
-    navigate(path);
-  };
-
-  const handleGlobalSearchClick = () => {
-    if (!searchTerm.trim()) return;
-    setShowDropdown(false);
-    navigate(`/buscar?q=${encodeURIComponent(searchTerm.trim())}`);
+  const handleNavClick = () => {
+    window.scrollTo(0, 0);
+    setIsMenuOpen(false);
   };
 
   return (
-    <header className="main-header">
-      <div className="header-container">
-        <Link to="/" className="header-brand" onClick={closeMenu}>
-          <img src={logoCompleto} alt="Hospital Evita" className="header-logo" />
+    <header className="hospital-header-container">
+      <div className="hospital-main-nav">
+        <Link to="/" className="brand-container" onClick={handleNavClick}>
+          <img src={logoCompleto} alt="Hospital Evita" className="header-logo-img" />
         </Link>
 
-        <div className="header-search-container" ref={searchRef}>
-          <form onSubmit={handleSearchSubmit} className="header-search-form">
-            <span className="search-icon-wrapper">
-            <FiSearch className="search-icon-svg" />
-            </span>
-            <input
-              type="text"
-              placeholder="Buscar secciones, servicios..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setShowDropdown(true);
-              }}
-              onFocus={() => setShowDropdown(true)}
-              onBlur={() => {
-                setTimeout(() => {
-                  setShowDropdown(false);
-                }, 200);
-              }}
-              className="header-search-input"
-            />
-          </form>
-
-          {showDropdown && (
-            <div className="search-dropdown-results">
-              <div className="dropdown-section-title">Secciones principales</div>
-              <ul>
-                {filteredSuggestions.length > 0 ? (
-                  filteredSuggestions.map((item, index) => (
-                    <li key={index} onClick={() => handleSelectSuggestion(item.path)}>
-                      <div className="suggestion-info">
-                        <span className="suggestion-badge">{item.type}</span>
-                        <span className="suggestion-text">{item.title}</span>
-                      </div>
-                      <FiArrowUpRight className="suggestion-arrow" size={14} />
-                    </li>
-                  ))
-                ) : (
-                  <li className="no-results">No se encontraron secciones directas</li>
-                )}
-
-                {searchTerm.trim() !== "" && (
-                  <li className="global-search-option" onClick={handleGlobalSearchClick}>
-                    <FiSearch size={14} style={{ marginRight: '8px' }} />
-                    <span>Buscar <strong>"{searchTerm}"</strong> en todo el sitio...</span>
-                  </li>
-                )}
-              </ul>
-            </div>
-          )}
+        <div className={`nav-content-wrapper ${isMenuOpen ? "active" : ""}`}>
+          <nav aria-label="Menú principal">
+            <ul className="nav-menu-list">
+              <li><Link to="/" onClick={handleNavClick} className={`nav-link-item ${isActive("/") ? "active" : ""}`}>INICIO</Link></li>
+              <li><Link to="/especialidades" onClick={handleNavClick} className={`nav-link-item ${isActive("/especialidades") ? "active" : ""}`}>ESPECIALIDADES</Link></li>
+              <li><Link to="/noticias" onClick={handleNavClick} className={`nav-link-item ${isActive("/noticias") ? "active" : ""}`}>NOTICIAS</Link></li>
+              <li><Link to="/documentacion" onClick={handleNavClick} className={`nav-link-item ${isActive("/documentacion") ? "active" : ""}`}>DOCUMENTACIÓN</Link></li>
+              <li><Link to="/capacitacion" onClick={handleNavClick} className={`nav-link-item ${isActive("/capacitacion") ? "active" : ""}`}>CAPACITACIÓN</Link></li>
+              <li><Link to="/residencias" onClick={handleNavClick} className={`nav-link-item ${isActive("/residencias") ? "active" : ""}`}>RESIDENCIAS</Link></li>
+              <li><Link to="/profesionales" onClick={handleNavClick} className={`nav-link-item ${isActive("/profesionales") ? "active" : ""}`}>PROFESIONALES</Link></li>
+              <li><Link to="/contacto" onClick={handleNavClick} className={`nav-link-item ${isActive("/contacto") ? "active" : ""}`}>CONTACTO</Link></li>
+              <li><Link to="/acerca-de" onClick={handleNavClick} className={`nav-link-item ${isActive("/acerca-de") ? "active" : ""}`}>ACERCA DE</Link></li>
+            </ul>
+          </nav>
         </div>
 
-        <button
-          className={`hamburger-btn ${isMenuOpen ? "open" : ""}`}
-          onClick={toggleMenu}
-          aria-label="Toggle Navigation Menu"
-        >
-          <span className="hamburger-bar"></span>
-          <span className="hamburger-bar"></span>
-          <span className="hamburger-bar"></span>
-        </button>
+        <div className="header-controls">
+          <div className="nav-actions-group">
+            <Link to="/ubicacion" onClick={handleNavClick} className="btn-location-action" title="Ubicación">
+              <div className="action-icon-bubble">
+                <FiMapPin size={15} strokeWidth={2.5} />
+              </div>
+              <div className="action-text-wrapper">
+                <span className="action-eyebrow">ACCESO</span>
+                <span className="action-title">Ubicación</span>
+              </div>
+            </Link>
 
-        <nav className={`nav-menu ${isMenuOpen ? "active" : ""}`}>
-          <ul className="nav-list">
-            <li><Link to="/" className={`nav-link ${isActive("/") ? "active" : ""}`} onClick={closeMenu}>INICIO</Link></li>
-            <li><Link to="/especialidades" className={`nav-link ${isActive("/especialidades") ? "active" : ""}`} onClick={closeMenu}>ESPECIALIDADES</Link></li>
-            <li><Link to="/noticias" className={`nav-link ${isActive("/noticias") ? "active" : ""}`} onClick={closeMenu}>NOTICIAS</Link></li>
-            <li><Link to="/documentacion" className={`nav-link ${isActive("/documentacion") ? "active" : ""}`} onClick={closeMenu}>DOCUMENTACIÓN</Link></li>
-            <li><Link to="/capacitacion" className={`nav-link ${isActive("/capacitacion") ? "active" : ""}`} onClick={closeMenu}>CAPACITACIÓN</Link></li>
-            <li><Link to="/profesionales" className={`nav-link ${isActive("/profesionales") ? "active" : ""}`} onClick={closeMenu}>PROFESIONALES</Link></li>
-            <li><Link to="/contacto" className={`nav-link ${isActive("/contacto") ? "active" : ""}`} onClick={closeMenu}>CONTACTO</Link></li>
-            <li><Link to="/acerca-de" className={`nav-link ${isActive("/acerca-de") ? "active" : ""}`} onClick={closeMenu}>ACERCA DE</Link></li>
-          </ul>
-        </nav>
+            <Link to="/plano" onClick={handleNavClick} className="btn-blueprint-action" title="Plano Institucional">
+              <FiMap size={18} strokeWidth={2.2} className="blueprint-icon" />
+              <div className="action-text-wrapper">
+                <span className="action-eyebrow">EDIFICIO</span>
+                <span className="action-title">Plano Institucional</span>
+              </div>
+            </Link>
+          </div>
+
+          <button 
+            className="mobile-menu-btn" 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Alternar menú"
+          >
+            {isMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+          </button>
+        </div>
       </div>
+
+      <div className="hospital-bottom-gradient-border"></div>
     </header>
   );
 };
