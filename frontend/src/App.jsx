@@ -23,11 +23,12 @@ import ContactoPage from "./pages/public/ContactoPage";
 import AboutPage from "./pages/public/AboutPage";
 import CmsPage from "./pages/cms/CmsPage";
 import AdminPage from './pages/admin/AdminPage';
+import PlanoInstitucionalPage from "./pages/public/PlanoInstitucionalPage";
 
 const AppLayout = () => {
   const location = useLocation();
   
-  // FIX: Agrupamos ambas áreas protegidas para ocultar los componentes públicos
+  // Agrupamos ambas áreas protegidas para ocultar los componentes públicos
   const isPrivatePanel = location.pathname.startsWith("/cms") || location.pathname.startsWith("/admin");
 
   return (
@@ -45,6 +46,7 @@ const AppLayout = () => {
         <Route path="/capacitacion" element={<CapacitacionPage />} />
         <Route path="/contacto" element={<ContactoPage />} />
         <Route path="/acerca-de" element={<AboutPage />} />
+        <Route path="/plano" element={<PlanoInstitucionalPage />} />
         <Route path="/cms" element={<CmsPage />} />
         <Route path="/admin" element={<AdminPage />} />
 
@@ -83,7 +85,13 @@ const App = () => {
   return (
     <Router>
       <AppLayout />
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster 
+        position="top-right" 
+        reverseOrder={false} 
+        containerStyle={{
+          zIndex: 99999,
+        }}
+      />
     </Router>
   );
 };

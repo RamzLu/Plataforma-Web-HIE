@@ -636,19 +636,29 @@ const NoticiasPage = () => {
         </div>
       )}
 
-      {lightbox.isOpen && (
-        <div className="lightbox-overlay" onClick={closeLightbox}>
-          <button className="lightbox-close" onClick={closeLightbox}>
+{lightbox.isOpen && (
+        <div 
+          className="lightbox-overlay" 
+          style={{ zIndex: 999999 }} 
+          onClick={closeLightbox}
+        >
+          <button 
+            className="lightbox-close" 
+            style={{ zIndex: 9999999 }} 
+            onClick={closeLightbox}
+          >
             &times;
           </button>
 
           <div
             className="lightbox-content"
+            style={{ zIndex: 9999999 }}
             onClick={(e) => e.stopPropagation()}
           >
             {lightbox.images.length > 1 && (
               <button
                 className="lightbox-arrow lb-left"
+                style={{ zIndex: 9999999 }}
                 onClick={prevLightboxImage}
               >
                 &#10094;
@@ -664,6 +674,7 @@ const NoticiasPage = () => {
             {lightbox.images.length > 1 && (
               <button
                 className="lightbox-arrow lb-right"
+                style={{ zIndex: 9999999 }}
                 onClick={nextLightboxImage}
               >
                 &#10095;

@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --env-file=.env src/server.js",
     "db-pull": "npx prisma@7.10.0 db pull",
+    "db-push": "npx prisma@7.10.0 db push",
     "db-generate": "npx prisma@7.10.0 generate"
   },
   "keywords": [],
@@ -23,6 +24,7 @@
     "express-oauth2-jwt-bearer": "^1.10.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
+    "node-cron": "^4.6.0",
     "pg": "^8.23.0"
   },
   "devDependencies": {

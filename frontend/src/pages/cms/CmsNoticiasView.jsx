@@ -4,6 +4,13 @@ import avatarHospital from "../../assets/logoHospitalEvita.png";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
+
+// Importaciones del Calendario Moderno
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { isToday } from "date-fns";
+import es from "date-fns/locale/es";
+
 import {
   ClassicEditor,
   Essentials,
@@ -17,11 +24,34 @@ import {
   BlockQuote,
   Undo,
   Alignment,
-  SpecialCharacters,
-  SpecialCharactersEssentials
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import "../../styles/components/cms/CmsNoticiasView.css";
+
+registerLocale("es", es);
+
+// Componente visual para los botones del calendario/hora estilo píldora
+const CustomScheduleInput = React.forwardRef(({ value, onClick, icon, placeholder, isDate }, ref) => {
+  let displayValue = value || placeholder;
+  
+  if (isDate && value) {
+    const [dia, mes, anio] = value.split("/");
+    const dateObj = new Date(parseInt(anio), parseInt(mes) - 1, parseInt(dia));
+    if (!isNaN(dateObj) && isToday(dateObj)) {
+      displayValue = "Hoy";
+    }
+  }
+
+  return (
+    <button className="schedule-custom-btn" onClick={onClick} ref={ref} type="button">
+      <span className="schedule-icon">{icon}</span>
+      <span className="schedule-text">{displayValue}</span>
+      <svg className="schedule-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+  );
+});
 
 const CmsNoticiasView = ({
   newsList,
@@ -47,6 +77,10 @@ const CmsNoticiasView = ({
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("Noticias");
   const [estado, setEstado] = useState("BORRADOR");
+  
+  // Cambiado a null para el DatePicker moderno
+  const [fechaProgramada, setFechaProgramada] = useState(null);
+  
   const [imagenesUrls, setImagenesUrls] = useState([]);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -67,6 +101,7 @@ const CmsNoticiasView = ({
     setCuerpoHtml("");
     setCategoria("Noticias");
     setEstado("BORRADOR");
+    setFechaProgramada(null);
     setImagenesUrls([]);
     setArchivosSeleccionados([]);
     setHasUnsavedChanges(false);
@@ -90,6 +125,12 @@ const CmsNoticiasView = ({
     setArchivosSeleccionados([]);
     setHasUnsavedChanges(false);
     setShowModal(true);
+
+    if (news.fechaPublicacion) {
+      setFechaProgramada(new Date(news.fechaPublicacion));
+    } else {
+      setFechaProgramada(null);
+    }
   };
 
   const handleCloseAttempt = () => {
@@ -192,6 +233,12 @@ const CmsNoticiasView = ({
           
     const estadoFinal = forcedEstado || estado;
 
+    if (estadoFinal === "PROGRAMADO" && !fechaProgramada) {
+      toast.error("Por favor, selecciona una fecha y hora para programar la publicación.");
+      setShowUnsavedModal(false);
+      return;
+    }
+
     if (!titulo.trim() || !textoContenido.trim()) {
       toast.error("Por favor completa el título y el contenido.");
       setShowUnsavedModal(false);
@@ -219,6 +266,10 @@ const CmsNoticiasView = ({
       formData.append("estado", estadoFinal);
       formData.append("imagenesExistentes", JSON.stringify(imagenesUrls));
 
+      if (estadoFinal === "PROGRAMADO" && fechaProgramada) {
+        formData.append("fechaPublicacion", fechaProgramada.toISOString());
+      }
+
       archivosSeleccionados.forEach((file) => {
         formData.append("imagenes", file);
       });
@@ -227,10 +278,18 @@ const CmsNoticiasView = ({
       
       if (editingId) {
         data = await updateNoticia(editingId, formData, token);
-        toast.success("Noticia actualizada con éxito.");
+        if (estadoFinal === "BORRADOR") {
+          toast.success("Borrador actualizado con éxito.");
+        } else {
+          toast.success("Noticia actualizada con éxito.");
+        }
       } else {
         data = await createNoticia(formData, token);
-        toast.success("Noticia creada con éxito.");
+        if (estadoFinal === "BORRADOR") {
+          toast.success("Borrador guardado con éxito.");
+        } else {
+          toast.success("Noticia creada con éxito.");
+        }
       }
 
       const noticiaFormateada = {
@@ -243,7 +302,8 @@ const CmsNoticiasView = ({
         isDraft: estadoFinal === "BORRADOR",
         images: data.noticia?.images || imagenesUrls || [],
         editor: data.noticia?.editor || "Editor CMS", 
-        editedBy: data.noticia?.editedBy || null
+        editedBy: data.noticia?.editedBy || null,
+        fechaPublicacion: data.noticia?.fechaPublicacion || null
       };
 
       if (editingId) {
@@ -295,6 +355,13 @@ const CmsNoticiasView = ({
           style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: viewTab === "BORRADOR" ? "#0c2340" : "#fff", color: viewTab === "BORRADOR" ? "#fff" : "#334155", fontWeight: "600", cursor: "pointer" }}
         >
           Borradores
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewTab("PROGRAMADO")}
+          style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: viewTab === "PROGRAMADO" ? "#0c2340" : "#fff", color: viewTab === "PROGRAMADO" ? "#fff" : "#334155", fontWeight: "600", cursor: "pointer" }}
+        >
+          Programados
         </button>
       </div>
 
@@ -393,9 +460,15 @@ const CmsNoticiasView = ({
                   {news.category || "Noticias"}
                 </div>
                 <div className="col-estado">
-                  <span className={`status-badge ${news.estado?.toLowerCase() === "publicado" || (!news.isDraft && !news.estado) ? "publicado" : "pendiente"}`}>
-                    {news.estado || (news.isDraft ? "Borrador" : "Publicado")}
+                  <span className={`status-badge ${news.estado?.toLowerCase() === "publicado" || (!news.isDraft && !news.estado) ? "publicado" : news.estado?.toLowerCase() === "programado" ? "programado" : "pendiente"}`}>
+                    {news.estado === "PROGRAMADO" ? "Programado" : (news.estado || (news.isDraft ? "Borrador" : "Publicado"))}
                   </span>
+                  
+                  {news.estado === "PROGRAMADO" && news.fechaPublicacion && (
+                    <span style={{ fontSize: "0.75rem", color: "#64748b", display: "block", marginTop: "6px", whiteSpace: "nowrap" }}>
+                      Para:  {new Date(news.fechaPublicacion).toLocaleDateString('es-AR')} - {new Date(news.fechaPublicacion).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })} hs
+                    </span>
+                  )}
                 </div>
                 <div className="news-actions-cell">
                   <button
@@ -526,7 +599,6 @@ const CmsNoticiasView = ({
           >
             <div className="modal-header-esp">
               <h2>{editingId ? "Editar noticia" : "Crear noticia"}</h2>
-              <p className="modal-subtitle-docs">Completá los datos del archivo para registrarlo en el sistema.</p>
               <button
                 type="button"
                 className="btn-close-modal"
@@ -561,13 +633,63 @@ const CmsNoticiasView = ({
                       <label className="news-form-label">Estado</label>
                       <select 
                         value={estado} 
-                        onChange={(e) => { setEstado(e.target.value); setHasUnsavedChanges(true); }} 
+                        onChange={(e) => { 
+                          setEstado(e.target.value); 
+                          setHasUnsavedChanges(true); 
+                          if (e.target.value !== "PROGRAMADO") setFechaProgramada(null);
+                        }} 
                         className="news-form-input"
                       >
                         <option value="PUBLICADO">Publicado</option>
                         <option value="BORRADOR">Borrador</option>
+                        <option value="PROGRAMADO">Programado</option>
                       </select>
                     </div>
+
+                    {estado === "PROGRAMADO" && (
+                      <div style={{ flex: 1 }}>
+                        <label className="news-form-label" style={{ display: 'block', marginBottom: '8px' }}>Publicar el:</label>
+                        <div className="schedule-picker-container">
+                          <DatePicker
+                            selected={fechaProgramada}
+                            onChange={(date) => { 
+                              if (fechaProgramada && date) {
+                                date.setHours(fechaProgramada.getHours());
+                                date.setMinutes(fechaProgramada.getMinutes());
+                              }
+                              setFechaProgramada(date); 
+                              setHasUnsavedChanges(true); 
+                            }}
+                            minDate={new Date()}
+                            locale="es"
+                            dateFormat="dd/MM/yyyy"
+                            customInput={
+                              <CustomScheduleInput 
+                                isDate={true}
+                                placeholder="Elegir fecha" 
+                                icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>}
+                              />
+                            }
+                          />
+
+                          <DatePicker
+                            selected={fechaProgramada}
+                            onChange={(date) => { setFechaProgramada(date); setHasUnsavedChanges(true); }}
+                            showTimeSelect
+                            showTimeSelectOnly
+                            timeIntervals={5}
+                            timeCaption="Hora"
+                            dateFormat="HH:mm"
+                            customInput={
+                              <CustomScheduleInput 
+                                placeholder="Elegir hora" 
+                                icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>}
+                              />
+                            }
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -623,17 +745,10 @@ const CmsNoticiasView = ({
                     >
                       Cuerpo de la noticia
                     </label>
-                    <div
-                      className="ckeditor-wrapper"
-                      style={{
-                        border: "1px solid #cbd5e1",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                      }}
-                    >
+                    <div className="custom-ckeditor-container">
                       <CKEditor
                         editor={ClassicEditor}
-                        data={cuerpoHtml}
+                        data={cuerpoHtml || ""}
                         config={{
                           licenseKey: "GPL",
                           plugins: [
@@ -648,8 +763,6 @@ const CmsNoticiasView = ({
                             BlockQuote,
                             Undo,
                             Alignment,
-                            SpecialCharacters,
-                            SpecialCharactersEssentials
                           ],
                           toolbar: [
                             "heading",
@@ -660,9 +773,13 @@ const CmsNoticiasView = ({
                             "link",
                             "bulletedList",
                             "numberedList",
-                            "alignment",
+                            "|",
+                            "alignment:left",
+                            "alignment:center",
+                            "alignment:right",
+                            "alignment:justify",
+                            "|",
                             "blockQuote",
-                            "specialCharacters",
                             "|",
                             "undo",
                             "redo",
@@ -885,7 +1002,6 @@ const CmsNoticiasView = ({
           </div>
         </div>
       )}
-
     </div>
   );
 };

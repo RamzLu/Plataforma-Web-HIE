@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import "../../styles/pages/ContactoPage.css";
 import Breadcrumb from "../../components/Breadcrumb";
-import HospitalMapSection from "../../components/HospitalMapSection";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 
 // Imágenes institucionales
@@ -33,20 +32,6 @@ const ContactoPage = () => {
 
   return (
     <main className="contacto-page">
-      {/* 1. BANNER MOVIDO A LA PARTE SUPERIOR */}
-      <section className="top-banner-section">
-        <div
-          className="location-hero-banner"
-          style={{ backgroundImage: `url(${fotoFachadaHIE})` }}
-        >
-          <div className="location-banner-overlay">
-            <div className="location-banner-text">
-              <h2>CÓMO LLEGAR Y CANALES OFICIALES</h2>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* 2. TEXTO PRINCIPAL DE CONTACTO CON IMAGEN ORIGINAL */}
       <div className="contacto-container">
         <section className="contacto-hero">
@@ -244,9 +229,6 @@ const ContactoPage = () => {
         </div>
       </section>
       
-      <AnimatedContent distance={70} duration={1} threshold={0.2}>
-        <HospitalMapSection />
-      </AnimatedContent>
     </main>
   );
 };

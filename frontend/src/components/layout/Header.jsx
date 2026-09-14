@@ -1,119 +1,88 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { FiMapPin, FiMap, FiMenu, FiX } from "react-icons/fi";
 import "../../styles/layout/Header.css";
-import logoIcon from "../../assets/logoHospitalEvita.png";
+import logoCompleto from "../../assets/logo-completo.png";
+import HospitalLocationModal from "../ui/HospitalLocationModal"; 
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false); 
   const location = useLocation();
+  const isActive = (path) => location.pathname === path;
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
+  const handleNavClick = () => {
+    window.scrollTo(0, 0);
     setIsMenuOpen(false);
   };
 
-  const isActive = (path) => location.pathname === path;
-
   return (
-    <header className="main-header">
-      <div className="header-container">
-        <Link to="/" className="header-brand" onClick={closeMenu}>
-          <img src={logoIcon} alt="Hospital Evita" className="header-logo" />
-          <div className="brand-text">
-            <span className="brand-title">HOSPITAL INTERDISTRITAL</span>
-            <span className="brand-subtitle">EVITA</span>
-          </div>
+    <header className="hospital-header-container">
+      <div className="hospital-main-nav">
+        <Link to="/" className="brand-container" onClick={handleNavClick}>
+          <img src={logoCompleto} alt="Hospital Evita" className="header-logo-img" />
         </Link>
-        <button
-          className={`hamburger-btn ${isMenuOpen ? "open" : ""}`}
-          onClick={toggleMenu}
-          aria-label="Toggle Navigation Menu"
-        >
-          <span className="hamburger-bar"></span>
-          <span className="hamburger-bar"></span>
-          <span className="hamburger-bar"></span>
-        </button>
 
-        <nav className={`nav-menu ${isMenuOpen ? "active" : ""}`}>
-          <ul className="nav-list">
-            <li>
-              <Link
-                to="/"
-                className={`nav-link ${isActive("/") ? "active" : ""}`}
-                onClick={closeMenu}
-              >
-                INICIO
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/especialidades"
-                className={`nav-link ${isActive("/especialidades") ? "active" : ""}`}
-                onClick={closeMenu}
-              >
-                ESPECIALIDADES
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/noticias"
-                className={`nav-link ${isActive("/noticias") ? "active" : ""}`}
-                onClick={closeMenu}
-              >
-                NOTICIAS
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/documentacion"
-                className={`nav-link ${isActive("/documentacion") ? "active" : ""}`}
-                onClick={closeMenu}
-              >
-                DOCUMENTACIÓN
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/capacitacion"
-                className={`nav-link ${isActive("/capacitacion") ? "active" : ""}`}
-                onClick={closeMenu}
-              >
-                CAPACITACIÓN
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/profesionales"
-                className={`nav-link ${isActive("/profesionales") ? "active" : ""}`}
-                onClick={closeMenu}
-              >
-                PROFESIONALES
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/contacto"
-                className={`nav-link ${isActive("/contacto") ? "active" : ""}`}
-                onClick={closeMenu}
-              >
-                CONTACTO
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/acerca-de"
-                className={`nav-link ${isActive("/acerca-de") ? "active" : ""}`}
-                onClick={closeMenu}
-              >
-                ACERCA DE
-              </Link>
-            </li>
-          </ul>
-        </nav>
+        <div className={`nav-content-wrapper ${isMenuOpen ? "active" : ""}`}>
+          <nav aria-label="Menú principal">
+            <ul className="nav-menu-list">
+              <li><Link to="/" onClick={handleNavClick} className={`nav-link-item ${isActive("/") ? "active" : ""}`}>INICIO</Link></li>
+              <li><Link to="/especialidades" onClick={handleNavClick} className={`nav-link-item ${isActive("/especialidades") ? "active" : ""}`}>ESPECIALIDADES</Link></li>
+              <li><Link to="/noticias" onClick={handleNavClick} className={`nav-link-item ${isActive("/noticias") ? "active" : ""}`}>NOTICIAS</Link></li>
+              <li><Link to="/documentacion" onClick={handleNavClick} className={`nav-link-item ${isActive("/documentacion") ? "active" : ""}`}>DOCUMENTACIÓN</Link></li>
+              <li><Link to="/capacitacion" onClick={handleNavClick} className={`nav-link-item ${isActive("/capacitacion") ? "active" : ""}`}>CAPACITACIÓN</Link></li>
+              <li><Link to="/residencias" onClick={handleNavClick} className={`nav-link-item ${isActive("/residencias") ? "active" : ""}`}>RESIDENCIAS</Link></li>
+              <li><Link to="/profesionales" onClick={handleNavClick} className={`nav-link-item ${isActive("/profesionales") ? "active" : ""}`}>PROFESIONALES</Link></li>
+              <li><Link to="/contacto" onClick={handleNavClick} className={`nav-link-item ${isActive("/contacto") ? "active" : ""}`}>CONTACTO</Link></li>
+              <li><Link to="/acerca-de" onClick={handleNavClick} className={`nav-link-item ${isActive("/acerca-de") ? "active" : ""}`}>ACERCA DE</Link></li>
+            </ul>
+          </nav>
+        </div>
+
+        <div className="header-controls">
+          <div className="nav-actions-group">
+            <button 
+              type="button"
+              onClick={() => {
+                handleNavClick(); 
+                setIsLocationModalOpen(true); 
+              }} 
+              className="btn-location-action" 
+              title="Ubicación"
+            >
+              <div className="action-icon-bubble">
+                <FiMapPin size={15} strokeWidth={2.5} />
+              </div>
+              <div className="action-text-wrapper">
+                <span className="action-eyebrow">ACCESO</span>
+                <span className="action-title">Ubicación</span>
+              </div>
+            </button>
+
+            <Link to="/plano" onClick={handleNavClick} className="btn-blueprint-action" title="Plano Institucional">
+              <FiMap size={18} strokeWidth={2.2} className="blueprint-icon" />
+              <div className="action-text-wrapper">
+                <span className="action-eyebrow">EDIFICIO</span>
+                <span className="action-title">Plano Institucional</span>
+              </div>
+            </Link>
+          </div>
+
+          <button 
+            className="mobile-menu-btn" 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Alternar menú"
+          >
+            {isMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+          </button>
+        </div>
       </div>
+
+      <div className="hospital-bottom-gradient-border"></div>
+      <HospitalLocationModal 
+        isOpen={isLocationModalOpen} 
+        onClose={() => setIsLocationModalOpen(false)} 
+      />
     </header>
   );
 };
