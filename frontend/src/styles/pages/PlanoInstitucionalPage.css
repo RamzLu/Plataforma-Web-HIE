@@ -1,0 +1,109 @@
+/* Contenedor principal de la página */
+.plano-page {
+  padding-top: 110px;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* Restricción de ancho para que coincida con el resto de la web */
+.plano-hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px 80px 20px;
+}
+
+.plano-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+}
+
+/* Columna Izquierda (Texto) */
+.plano-hero-left {
+  flex: 1;
+  max-width: 500px;
+}
+
+.plano-title {
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: #2b5b94;
+  margin: 15px 0 20px 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.plano-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #475569;
+  margin-bottom: 20px;
+}
+
+.plano-subtext {
+  font-weight: 600;
+  color: #0284c7;
+  font-size: 1.05rem;
+}
+
+/* Columna Derecha (Imagen) */
+.plano-hero-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.plano-image-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+}
+
+.plano-img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(13, 34, 63, 0.1);
+  position: relative;
+  z-index: 2; /* Mantiene la foto por encima de la caja decorativa */
+  display: block;
+}
+
+/* Caja azul decorativa detrás de la imagen (Efecto de la captura) */
+.plano-overlay-box {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  width: 80%;
+  height: 120px;
+  background-color: #2b5b94; 
+  border-radius: 8px;
+  z-index: 1;
+  opacity: 0.95;
+}
+
+/* =========================================
+   RESPONSIVE (Celulares y Tablets)
+========================================= */
+@media (max-width: 968px) {
+  .plano-hero {
+    flex-direction: column;
+    gap: 50px;
+  }
+
+  .plano-hero-left {
+    max-width: 100%;
+  }
+
+  .plano-hero-right {
+    justify-content: center;
+    width: 100%;
+    padding-right: 20px; /* Espacio para que la caja azul no se salga de la pantalla */
+  }
+  
+  .plano-overlay-box {
+    width: 90%;
+  }
+}

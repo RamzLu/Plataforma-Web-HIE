@@ -3,9 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { FiMapPin, FiMap, FiMenu, FiX } from "react-icons/fi";
 import "../../styles/layout/Header.css";
 import logoCompleto from "../../assets/logo-completo.png";
+import HospitalLocationModal from "../ui/HospitalLocationModal"; 
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false); 
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
@@ -39,7 +41,15 @@ const Header = () => {
 
         <div className="header-controls">
           <div className="nav-actions-group">
-            <Link to="/ubicacion" onClick={handleNavClick} className="btn-location-action" title="Ubicación">
+            <button 
+              type="button"
+              onClick={() => {
+                handleNavClick(); 
+                setIsLocationModalOpen(true); 
+              }} 
+              className="btn-location-action" 
+              title="Ubicación"
+            >
               <div className="action-icon-bubble">
                 <FiMapPin size={15} strokeWidth={2.5} />
               </div>
@@ -47,7 +57,7 @@ const Header = () => {
                 <span className="action-eyebrow">ACCESO</span>
                 <span className="action-title">Ubicación</span>
               </div>
-            </Link>
+            </button>
 
             <Link to="/plano" onClick={handleNavClick} className="btn-blueprint-action" title="Plano Institucional">
               <FiMap size={18} strokeWidth={2.2} className="blueprint-icon" />
@@ -69,6 +79,10 @@ const Header = () => {
       </div>
 
       <div className="hospital-bottom-gradient-border"></div>
+      <HospitalLocationModal 
+        isOpen={isLocationModalOpen} 
+        onClose={() => setIsLocationModalOpen(false)} 
+      />
     </header>
   );
 };

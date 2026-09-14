@@ -147,6 +147,9 @@
 .btn-blueprint-action > svg {
   margin: 0 4px;
   transition: margin 0.4s ease;
+  flex-shrink: 0; /* CRÍTICO: Evita que el ícono colapse a un punto */
+  min-width: 18px; /* Fuerza el ancho original */
+  min-height: 18px; /* Fuerza el alto original */
 }
 
 .action-icon-bubble {
@@ -282,8 +285,9 @@
     background: transparent;
   }
   
-  .blueprint-icon {
-    margin: 0;
+ .blueprint-icon {
+    margin: 0 !important; 
+    flex-shrink: 0;
   }
 
   .nav-content-wrapper {
