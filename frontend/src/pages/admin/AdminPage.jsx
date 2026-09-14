@@ -9,6 +9,7 @@ import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminHeader from '../../components/admin/AdminHeader';
 // IMPORTAMOS TUS NUEVAS VISTAS MODULARES
 import AdminDashboardView from '../admin/AdminDashboardView';
+import AdminNoticiasView from '../admin/AdminNoticiasView';
 // import AdminUsuariosView from './admin/AdminUsuariosView';
 // import AdminRolesView from './admin/AdminRolesView';
 // import AdminAuditoriaView from './admin/AdminAuditoriaView';
@@ -125,6 +126,7 @@ const AdminPage = () => {
         <main className="admin-content-area">
           {/* RENDERIZADO MODULAR DE TUS VISTAS */}
           {activeTab === "dashboard" && <AdminDashboardView />}
+          {activeTab === "noticias" && <AdminNoticiasView />}
           {activeTab === "usuarios" && <AdminUsuariosView />}
           {activeTab === "roles" && <AdminRolesView />}
           {activeTab === "auditoria" && <AdminAuditoriaView />}

@@ -14,7 +14,7 @@ import {
   Clock,
   Filter
 } from 'lucide-react';
-import '../../styles/components/admin/AdminDashboardView.css'; 
+import '../../styles/pages/admin/AdminDashboardView.css'; 
 
 const AdminDashboardView = ({ setActiveTab }) => {
   const [filterModule, setFilterModule] = useState('all');
