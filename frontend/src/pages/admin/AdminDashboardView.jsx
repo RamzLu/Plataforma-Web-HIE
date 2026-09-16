@@ -10,52 +10,68 @@ import {
   UserCheck,
   GraduationCap,
   ChevronRight,
-  TrendingUp,
-  Clock,
-  Filter
+  Clock
 } from 'lucide-react';
+// IMPORTAMOS RECHARTS
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import '../../styles/pages/admin/AdminDashboardView.css'; 
+
+// ==============================
+// DATOS DINÁMICOS PARA EL GRÁFICO
+// ==============================
+const noticiasData = [
+  { name: 'Institucional', value: 85, color: '#0ea5e9' },
+  { name: 'Prevención', value: 35, color: '#10b981' },
+  { name: 'Guía y orientación', value: 22, color: '#7c3aed' },
+];
+
+const documentosData = [
+  { name: 'Información Institucional', value: 40, color: '#6d28d9' },
+  { name: 'Guía y orientación', value: 25, color: '#f59e0b' },
+  { name: 'Prevención Institucional', value: 20, color: '#14b8a6' },
+];
+
+const specialtiesData = [
+  { name: 'Clínica Médica', value: 12, color: '#6d28d9' },
+  { name: 'Pediatría', value: 8, color: '#0ea5e9' },
+  { name: 'Ginecología', value: 6, color: '#10b981' },
+  { name: 'Traumatología', value: 7, color: '#f59e0b' },
+  { name: 'Oftalmología', value: 4, color: '#f43f5e' },
+  { name: 'Cirugía General', value: 5, color: '#8b5cf6' },
+];
 
 const AdminDashboardView = ({ setActiveTab }) => {
   const [filterModule, setFilterModule] = useState('all');
+  
+  // ESTADO PARA EL GRÁFICO (Por defecto en Noticias)
+  const [chartType, setChartType] = useState('noticias');
+
+  // LÓGICA DE SELECCIÓN DE DATOS
+  let currentChartData = [];
+  let chartTitle = "";
+  let chartCenterLabel = "";
+
+  if (chartType === "profesionales") {
+    currentChartData = specialtiesData;
+    chartTitle = "Total Profesionales";
+    chartCenterLabel = "Total Prof.";
+  } else if (chartType === "documentacion") {
+    currentChartData = documentosData;
+    chartTitle = "Total Documentos";
+    chartCenterLabel = "Total Docs.";
+  } else {
+    currentChartData = noticiasData;
+    chartTitle = "Total Noticias";
+    chartCenterLabel = "Total Noti.";
+  }
+
+  const chartTotal = currentChartData.reduce((acc, curr) => acc + curr.value, 0);
 
   const pendingItems = [
-    {
-      id: 1,
-      title: 'Campaña Prevención Dengue 2026',
-      module: 'Noticias',
-      tabKey: 'noticias',
-      author: 'Editor CMS',
-      date: 'Hace 2 horas',
-      badgeColor: '#0ea5e9'
-    },
-    {
-      id: 2,
-      title: 'Formulario Alta Paciente V3.pdf',
-      module: 'Documentación',
-      tabKey: 'documentacion',
-      author: 'Administrador',
-      date: 'Hace 4 horas',
-      badgeColor: '#10b981'
-    },
-    {
-      id: 3,
-      title: 'Nuevo Profesional: Dr. Gómez (Cardiología)',
-      module: 'Profesionales',
-      tabKey: 'profesionales',
-      author: 'Editor CMS',
-      date: 'Ayer',
-      badgeColor: '#0284c7'
-    },
-    {
-      id: 4,
-      title: 'Curso Actualización RCP y Primeros Auxilios',
-      module: 'Capacitaciones',
-      tabKey: 'capacitaciones',
-      author: 'Coord. Docencia',
-      date: 'Ayer',
-      badgeColor: '#059669'
-    }
+    { id: 1, title: 'Campaña Prevención Dengue 2026', module: 'Noticias', tabKey: 'noticias', author: 'Editor CMS', date: 'Hace 2 horas', badgeColor: '#0ea5e9' },
+    { id: 2, title: 'Formulario Alta Paciente V3.pdf', module: 'Documentación', tabKey: 'documentacion', author: 'Administrador', date: 'Hace 4 horas', badgeColor: '#10b981' },
+    { id: 3, title: 'Nuevo Profesional: Dr. Gómez (Cardiología)', module: 'Profesionales', tabKey: 'profesionales', author: 'Editor CMS', date: 'Ayer', badgeColor: '#0284c7' },
+    { id: 4, title: 'Curso Actualización RCP y Primeros Auxilios', module: 'Capacitaciones', tabKey: 'capacitaciones', author: 'Coord. Docencia', date: 'Ayer', badgeColor: '#059669' }
   ];
 
   const filteredItems = filterModule === 'all' 
@@ -65,18 +81,36 @@ const AdminDashboardView = ({ setActiveTab }) => {
   return (
     <div className="admin-dashboard-container">
       
-      {/* TÍTULO DE LA SECCIÓN */}
+      {/* TÍTULO DE LA SECCIÓN + ALERTA SUPERIOR DE REVISIONES */}
       <div className="admin-page-title">
-        <div className="admin-title-badge">PANEL DE CONTROL</div>
-        <h1>Resumen del Portal</h1>
-        <p>Vista general del estado de los contenidos, recursos activos y solicitudes pendientes de aprobación.</p>
+        <div className="admin-title-content">
+          <div className="admin-title-badge">PANEL DE CONTROL</div>
+          <h1>Resumen del Portal</h1>
+          <p>Vista general del estado de los contenidos, recursos activos y solicitudes pendientes de aprobación.</p>
+        </div>
+
+        {/* Notificación (Aviso) a la Derecha */}
+        <div className="admin-header-alert-box">
+          <div className="alert-box-icon">
+            <AlertCircle size={24} strokeWidth={2.2} />
+          </div>
+          <div className="alert-box-data">
+            <div className="alert-box-top">
+              <span className="alert-box-num">7</span>
+              <span className="alert-box-label">Pendientes de Revisión</span>
+            </div>
+            <div className="alert-box-bottom">
+              <span className="alert-warning-pill">Acción requerida</span>
+              <span>solicitudes en cola</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* BLOQUE SUPERIOR: KPIS EN GRID BALANCEADO (6 TARJETAS EN 3 COLUMNAS / RESPONSIVE) */}
+      {/* BLOQUE SUPERIOR: KPIS EN GRID BALANCEADO (Ahora son 5) */}
       <section className="dashboard-kpis-section">
         <div className="kpi-grid-redesigned">
           
-          {/* Tarjeta 1: Noticias */}
           <div className="kpi-card-refined">
             <div className="kpi-card-top">
               <span className="kpi-label">Noticias Publicadas</span>
@@ -93,7 +127,6 @@ const AdminDashboardView = ({ setActiveTab }) => {
             </div>
           </div>
 
-          {/* Tarjeta 2: Documentos */}
           <div className="kpi-card-refined">
             <div className="kpi-card-top">
               <span className="kpi-label">Documentos Activos</span>
@@ -110,7 +143,6 @@ const AdminDashboardView = ({ setActiveTab }) => {
             </div>
           </div>
 
-          {/* Tarjeta 3: Profesionales */}
           <div className="kpi-card-refined">
             <div className="kpi-card-top">
               <span className="kpi-label">Profesionales Activos</span>
@@ -127,7 +159,6 @@ const AdminDashboardView = ({ setActiveTab }) => {
             </div>
           </div>
 
-          {/* Tarjeta 4: Capacitaciones */}
           <div className="kpi-card-refined">
             <div className="kpi-card-top">
               <span className="kpi-label">Capacitaciones</span>
@@ -144,7 +175,6 @@ const AdminDashboardView = ({ setActiveTab }) => {
             </div>
           </div>
 
-          {/* Tarjeta 5: Banners */}
           <div className="kpi-card-refined">
             <div className="kpi-card-top">
               <span className="kpi-label">Banners en Carrusel</span>
@@ -161,101 +191,86 @@ const AdminDashboardView = ({ setActiveTab }) => {
             </div>
           </div>
 
-          {/* Tarjeta 6: Solicitudes Pendientes */}
-          <div className="kpi-card-refined alert-highlight">
-            <div className="kpi-card-top">
-              <span className="kpi-label">Pendientes de Revisión</span>
-              <div className="kpi-icon-wrapper" style={{ color: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)' }}>
-                <AlertCircle size={20} strokeWidth={2.2} />
-              </div>
-            </div>
-            <div className="kpi-value-row">
-              <span className="kpi-value" style={{ color: '#d97706' }}>7</span>
-            </div>
-            <div className="kpi-footer-trend warning">
-              <span className="trend-badge warning-pill">Acción requerida</span>
-              <span className="trend-text">solicitudes en cola</span>
-            </div>
-          </div>
-
         </div>
       </section>
 
-      {/* FILA INTERMEDIA: ESTADÍSTICAS EN CONTENEDOR DEDICADO + RESUMEN OPERATIVO */}
+      {/* FILA INTERMEDIA: GRÁFICO RECHARTS + RESUMEN OPERATIVO */}
       <section className="dashboard-analytics-row">
         
-        {/* Gráfico de Anillo: Distribución de Contenidos Proporcionado */}
-        <div className="chart-card-proportional">
-          <div className="card-header-clean">
-            <div>
-              <h3>Distribución de Contenidos</h3>
-              <p className="card-subtitle">Balance de recursos publicados en el portal</p>
-            </div>
-            <span className="status-indicator-pill">231 Total Activos</span>
+        {/* GRÁFICO DINÁMICO (RECHARTS) */}
+        <div className="stat-card-chart">
+          <div className="chart-header">
+            <h3 className="chart-title">{chartTitle}</h3>
+            {/* Selector de categoría */}
+            <select 
+              className="chart-btn"
+              value={chartType}
+              onChange={(e) => setChartType(e.target.value)}
+            >
+              <option value="noticias">Noticias</option>
+              <option value="documentacion">Documentos</option>
+              <option value="profesionales">Profesionales</option>
+            </select>
+          </div>
+          
+          <div className="chart-body">
+            {currentChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Tooltip 
+                    wrapperStyle={{ zIndex: 100 }}
+                    contentStyle={{ 
+                      backgroundColor: '#ffffff', 
+                      borderRadius: '8px', 
+                      border: 'none', 
+                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+                      fontSize: '0.85rem',
+                      fontWeight: '600',
+                      color: '#4b5563'
+                    }}
+                    itemStyle={{ fontWeight: 'bold' }}
+                  />
+
+                  <Pie
+                    data={currentChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={95}
+                    paddingAngle={4}
+                    dataKey="value"
+                    stroke="none"
+                    cornerRadius={5}
+                  >
+                    {currentChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#9f8fc3', fontSize: '0.9rem' }}>
+                  Sin datos para graficar
+               </div>
+            )}
+            
+            {/* Texto en el centro de la dona */}
+            {currentChartData.length > 0 && (
+              <div className="chart-center-text">
+                <span className="chart-total-num">{chartTotal}</span>
+                <span className="chart-total-label">{chartCenterLabel}</span>
+              </div>
+            )}
           </div>
 
-          <div className="chart-body-layout">
-            <div className="donut-wrapper-square">
-              <svg viewBox="0 0 100 100" className="donut-svg-element">
-                {/* Fondo sutil del círculo */}
-                <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f1f5f9" strokeWidth="10" />
-                {/* Noticias (Celeste #0ea5e9) - 60% */}
-                <circle cx="50" cy="50" r="38" fill="transparent" stroke="#0ea5e9" strokeWidth="10" strokeDasharray="143.2 95.5" strokeDashoffset="0" strokeLinecap="round" />
-                {/* Documentos (Verde #10b981) - 35% */}
-                <circle cx="50" cy="50" r="38" fill="transparent" stroke="#10b981" strokeWidth="10" strokeDasharray="83.5 155.2" strokeDashoffset="-148" strokeLinecap="round" />
-                {/* Banners (Morado #7c3aed) - 5% */}
-                <circle cx="50" cy="50" r="38" fill="transparent" stroke="#7c3aed" strokeWidth="10" strokeDasharray="12 226.7" strokeDashoffset="-236" strokeLinecap="round" />
-              </svg>
-              
-              <div className="donut-center-content">
-                <span className="donut-center-number">231</span>
-                <span className="donut-center-label">Activos</span>
+          {/* Leyenda inferior dinámica */}
+          <div className="chart-legend">
+            {currentChartData.map((entry, index) => (
+              <div className="legend-item" key={index}>
+                <span className="legend-dot" style={{ backgroundColor: entry.color }}></span>
+                <span className="legend-text" title={entry.name}>{entry.name} ({entry.value})</span>
               </div>
-            </div>
-
-            <div className="breakdown-list">
-              <div className="breakdown-item">
-                <div className="breakdown-info">
-                  <span className="dot" style={{ backgroundColor: '#0ea5e9' }}></span>
-                  <span className="name">Noticias</span>
-                </div>
-                <div className="breakdown-numbers">
-                  <span className="count">142</span>
-                  <span className="percentage">60%</span>
-                </div>
-                <div className="progress-bar-bg">
-                  <div className="progress-bar-fill" style={{ width: '60%', backgroundColor: '#0ea5e9' }}></div>
-                </div>
-              </div>
-
-              <div className="breakdown-item">
-                <div className="breakdown-info">
-                  <span className="dot" style={{ backgroundColor: '#10b981' }}></span>
-                  <span className="name">Documentos</span>
-                </div>
-                <div className="breakdown-numbers">
-                  <span className="count">85</span>
-                  <span className="percentage">35%</span>
-                </div>
-                <div className="progress-bar-bg">
-                  <div className="progress-bar-fill" style={{ width: '35%', backgroundColor: '#10b981' }}></div>
-                </div>
-              </div>
-
-              <div className="breakdown-item">
-                <div className="breakdown-info">
-                  <span className="dot" style={{ backgroundColor: '#7c3aed' }}></span>
-                  <span className="name">Banners</span>
-                </div>
-                <div className="breakdown-numbers">
-                  <span className="count">4</span>
-                  <span className="percentage">5%</span>
-                </div>
-                <div className="progress-bar-bg">
-                  <div className="progress-bar-fill" style={{ width: '5%', backgroundColor: '#7c3aed' }}></div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -328,7 +343,7 @@ const AdminDashboardView = ({ setActiveTab }) => {
 
       </section>
 
-      {/* SECCIÓN INFERIOR: Solicitudes Pendientes con Filtro y Botones Rediseñados */}
+      {/* SECCIÓN INFERIOR: Solicitudes Pendientes */}
       <section className="dashboard-bottom-section">
         <div className="section-header-modern">
           <div className="header-left">
@@ -338,11 +353,8 @@ const AdminDashboardView = ({ setActiveTab }) => {
             </div>
             <p className="section-desc">Revisa y autoriza publicaciones cargadas por los editores</p>
           </div>
-          
-
         </div>
         
-        {/* Tabla / Lista de Solicitudes Pendientes estilizada */}
         <div className="admin-pending-card">
           <div className="pending-list">
             {filteredItems.map((item, idx) => (
