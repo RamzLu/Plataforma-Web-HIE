@@ -1,38 +1,121 @@
-import React, { useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
 import "../../styles/pages/ContactoPage.css";
 import Breadcrumb from "../../components/Breadcrumb";
 import AnimatedContent from "../../components/ui/AnimatedContent";
-
-// Imágenes institucionales
 import fotoAtencion from "../../assets/fotoContacto.jpg";
-import fotoFachadaHIE from "../../assets/fotoFachadaHIE2.jpg";
 
 const ContactoPage = () => {
-  const { hash } = useLocation();
-  const mapaTransporteRef = useRef(null);
-
-  // EFECTO PARA HACER SCROLL AUTOMÁTICO AL MAPA SI LA URL TIENE EL HASH
   useEffect(() => {
-    if (hash === '#transporte-mapa' && mapaTransporteRef.current) {
-      setTimeout(() => {
-        const offset = 80; // Margen superior para no quedar pegado al Navbar
-        const elementPosition = mapaTransporteRef.current.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.scrollY - offset;
+    window.scrollTo(0, 0);
+  }, []);
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth"
-        });
-      }, 150);
-    } else if (!hash) {
-      window.scrollTo(0, 0);
-    }
-  }, [hash]);
+  const phoneCards = [
+    {
+      id: 'guardia',
+      badge: { text: '24 HS', type: 'emergency' },
+      title: 'Guardia y Urgencias',
+      description: 'Atención médica de urgencia las 24 horas del día, los 365 días del año con triage de alta complejidad e internación crítica.',
+      label: 'LÍNEA DIRECTA URGENCIAS',
+      phoneNumber: '(3704) 444-5561',
+      href: 'tel:37044445561',
+      isEmergency: true,
+      cardClass: 'emergency-card',
+      icon: 'phone-emergency',
+    },
+    {
+      id: 'conmutador',
+      title: 'Teléfono Central',
+      description: 'Para consultas generales, derivaciones, estado de trámites administrativos e información institucional del hospital.',
+      scheduleText: 'Lunes a Viernes: 06:00 a 20:00 hs',
+      label: 'CONMUTADOR OFICIAL',
+      phoneNumber: '(3704) 436-100',
+      href: 'tel:3704436100',
+      cardClass: 'standard-card',
+      icon: 'phone-switchboard',
+    },
+    {
+      id: 'red-interior',
+      title: 'Red Interior Provincial',
+      description: 'Canal exclusivo para Hospitales y Centros de Salud de los distritos del interior provincial y orientación de pacientes derivados.',
+      scheduleText: 'Recepción & WhatsApp Habilitado',
+      label: 'CANAL WHATSAPP OFICIAL',
+      phoneNumber: '+54 9 3704 43-6100',
+      href: 'https://wa.me/5493704436100',
+      isExternal: true,
+      cardClass: 'whatsapp-card',
+      icon: 'whatsapp',
+    },
+  ];
+
+  const emailCards = [
+    {
+      id: 'consultas',
+      area: 'Consultas Generales & Dirección',
+      description: 'Mesa de entradas, gestión documental oficial, notas y correspondencia con el Ministerio.',
+      email: 'info@hospitalevita.gob.ar',
+      icon: 'building',
+    },
+    {
+      id: 'docencia',
+      area: 'Docencia & Capacitación',
+      description: 'Residencias médicas provinciales, convenios universitarios, ateneos y jornadas científicas.',
+      email: 'docencia@hospitalevita.gob.ar',
+      icon: 'book',
+    },
+    {
+      id: 'rrhh',
+      area: 'Recursos Humanos',
+      description: 'Concursos profesionales, legajos de personal sanitario, certificaciones laborales y guardias.',
+      email: 'rrhh@hospitalevita.gob.ar',
+      icon: 'users',
+    },
+    {
+      id: 'atencion',
+      area: 'Atención al Paciente & Social',
+      description: 'Acompañamiento familiar, servicio social hospitalario, quejas, sugerencias y contención.',
+      email: 'atencionalpaciente@hospitalevita.gob.ar',
+      icon: 'heart',
+    },
+  ];
+
+  const socialChannels = [
+    {
+      id: 'facebook',
+      platform: 'Facebook Oficial',
+      handleOrDesc: '/HospitalInterdistritalEvita',
+      actionText: 'Seguir →',
+      url: 'https://facebook.com',
+      icon: 'facebook',
+    },
+    {
+      id: 'instagram',
+      platform: 'Instagram Oficial',
+      handleOrDesc: '@hospitalevitaformosa',
+      actionText: 'Seguir →',
+      url: 'https://instagram.com',
+      icon: 'instagram',
+    },
+    {
+      id: 'youtube',
+      platform: 'Canal YouTube',
+      handleOrDesc: 'Conferencias y Salud',
+      actionText: 'Ver →',
+      url: 'https://youtube.com',
+      icon: 'youtube',
+    },
+    {
+      id: 'boletin',
+      platform: 'Boletín Informativo',
+      handleOrDesc: 'Canal de Avisos y Novedades',
+      actionText: 'Unirse →',
+      url: 'https://whatsapp.com',
+      icon: 'bulletin',
+    },
+  ];
 
   return (
     <main className="contacto-page">
-      {/* 2. TEXTO PRINCIPAL DE CONTACTO CON IMAGEN ORIGINAL */}
+      {/* 1. HERO INTACTO */}
       <div className="contacto-container">
         <section className="contacto-hero">
           <div className="contacto-hero-left">
@@ -41,8 +124,7 @@ const ContactoPage = () => {
             <p className="contacto-description">
               Para comunicarte con las diferentes áreas del Hospital
               Interdistrital Evita, utiliza los medios oficiales habilitados.
-              Para consultas generales, llamá al teléfono central:{" "}
-              <strong>(3704) 436-100</strong>.
+              Nuestro equipo está a disposición para resolver tus consultas.
             </p>
             <p className="contacto-subtext">¡Estamos para ayudarte!</p>
           </div>
@@ -60,175 +142,281 @@ const ContactoPage = () => {
         </section>
       </div>
 
-      {/* 3. SECCIÓN AZUL INSTITUCIONAL (MAPA Y TRANSPORTE) */}
-      <section 
-        id="transporte-mapa" 
-        ref={mapaTransporteRef} 
-        className="location-fullwidth-section"
-      >
-        <div className="location-bottom-content">
-          <div className="location-bottom-inner">
-            <div className="location-grid-top">
-              <AnimatedContent distance={50} direction="vertical" delay={0.1}>
-                <div className="contact-info-split-transparent">
-                  <div className="split-left">
-                    <span className="split-title-bold">CONTACTANOS</span>
-                    <span className="split-title-light">AQUÍ</span>
-                  </div>
+      <div className="contact-page-container">
+        <AnimatedContent distance={40} direction="vertical" delay={0.1}>
 
-                  <div className="split-divider-white"></div>
-
-                  <div className="split-right">
-                    <p className="address-line-white">
-                      Avenida José de Luca Barberis al 250
-                    </p>
-                    <p className="city-line-white">Formosa, Argentina</p>
-                    <p className="phone-line-white">(3704) 436-100</p>
-
-                    <div className="social-links-box-white">
-                      <a
-                        href="https://facebook.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="social-item-white"
-                      >
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
-                        </svg>
-                        <span>Facebook</span>
-                      </a>
-
-                      <a
-                        href="https://instagram.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="social-item-white"
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <rect
-                            x="2"
-                            y="2"
-                            width="20"
-                            height="20"
-                            rx="5"
-                            ry="5"
-                          ></rect>
-                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                        </svg>
-                        <span>Instagram</span>
-                      </a>
-                    </div>
+          <section className="phone-cards-grid" aria-label="Líneas Telefónicas Directas">
+            {phoneCards.map((card) => (
+              <article key={card.id} className={`phone-card ${card.cardClass}`}>
+                
+                <div className="card-top-header">
+                  <div className={`card-icon-box icon-${card.icon}`}>
+                    {card.icon === 'phone-emergency' && (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
+                    )}
+                    {card.icon === 'phone-switchboard' && (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                      </svg>
+                    )}
+                    {card.icon === 'whatsapp' && (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                      </svg>
+                    )}
                   </div>
                 </div>
-              </AnimatedContent>
 
-              {/* MAPA AHORA ENVUELTO EN ANIMACIÓN */}
-              <AnimatedContent distance={50} direction="vertical" delay={0.3}>
-                <div className="map-frame-box">
-                  <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7160.991248531538!2d-58.19816300000001!3d-26.180551000000005!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945caf5c8f477e01%3A0x3ad3344cf5acca56!2sHospital%20Interdistrital%20Evita!5e0!3m2!1ses-419!2sar!4v1786650025635!5m2!1ses-419!2sar"
-                    width="100%"
-                    height="100%"
-                    loading="eager"
-                    title="Mapa del Hospital"
-                  ></iframe>
+                <div className="card-title-group">
+                  <h3 className="card-title">{card.title}</h3>
+                  {card.badge && (
+                    <span className={`pill-badge badge-${card.badge.type}`}>
+                      {card.badge.text}
+                    </span>
+                  )}
                 </div>
-              </AnimatedContent>
+
+                <p className="card-description">{card.description}</p>
+
+                {card.scheduleText && (
+                  <div className="schedule-bubble">
+                    {card.id === 'conmutador' ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                    ) : (
+                      <span className="dot-indicator"></span>
+                    )}
+                    <span>{card.scheduleText}</span>
+                  </div>
+                )}
+
+                <div className="card-footer-action">
+                  <div className="action-label">{card.label}</div>
+                  <a
+                    href={card.href}
+                    className="phone-link"
+                    target={card.isExternal ? '_blank' : undefined}
+                    rel={card.isExternal ? 'noopener noreferrer' : undefined}
+                  >
+                    <span className="phone-number-text">{card.phoneNumber}</span>
+                    <span className="action-icon-circle">
+                      {card.isEmergency ? (
+                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                         </svg>
+                      ) : card.isExternal ? (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          <polyline points="15 3 21 3 21 9" />
+                          <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      )}
+                    </span>
+                  </a>
+                </div>
+              </article>
+            ))}
+          </section>
+
+          <section className="institutional-emails-section" aria-labelledby="emails-heading">
+            <div className="section-title-wrapper">
+              <div>
+                <span className="section-eyebrow">DIRECCIONES Y ÁREAS ESPECÍFICAS</span>
+                <h2 id="emails-heading" className="section-heading">Canales Electrónicos Institucionales</h2>
+              </div>
+              <p className="section-note">
+                Enviá tus consultas con nombre completo, DNI y requerimiento formal para agilizar la gestión de tu nota administrativa.
+              </p>
             </div>
+
+            <div className="emails-grid">
+              {emailCards.map((emailCard) => (
+                <article key={emailCard.id} className="email-card">
+                  <div className="email-icon-box" aria-hidden="true">
+                    {emailCard.icon === 'building' && (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+                        <line x1="9" y1="22" x2="9" y2="22.01" />
+                        <line x1="15" y1="22" x2="15" y2="22.01" />
+                        <line x1="9" y1="6" x2="9" y2="6.01" />
+                        <line x1="15" y1="6" x2="15" y2="6.01" />
+                        <line x1="9" y1="10" x2="9" y2="10.01" />
+                        <line x1="15" y1="10" x2="15" y2="10.01" />
+                        <line x1="9" y1="14" x2="9" y2="14.01" />
+                        <line x1="15" y1="14" x2="15" y2="14.01" />
+                      </svg>
+                    )}
+                    {emailCard.icon === 'book' && (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                      </svg>
+                    )}
+                    {emailCard.icon === 'users' && (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                    )}
+                    {emailCard.icon === 'heart' && (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    )}
+                  </div>
+
+                  <h3 className="email-card-title">{emailCard.area}</h3>
+                  <p className="email-card-description">{emailCard.description}</p>
+                  
+                  <a href={`mailto:${emailCard.email}`} className="email-link">
+                    {emailCard.email}
+                  </a>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          {/* 4. REDES SOCIALES Y EDIFICIO PRINCIPAL */}
+          <section className="community-location-grid" aria-label="Redes Sociales y Sede Institucional">
             
-            {/* TARJETA DE TRANSPORTE AHORA ENVUELTA EN ANIMACIÓN */}
-            <AnimatedContent distance={60} direction="vertical" delay={0.4}>
-              <div className="transport-unified-card">
-                <div className="transport-col">
-                  <div className="transport-col-header">
-                    <svg
-                      className="transport-icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                    >
-                      <rect x="3" y="3" width="18" height="16" rx="2"></rect>
-                      <path d="M3 11h18"></path>
-                      <path d="M19 19v2a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-2"></path>
-                      <path d="M7 19v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2"></path>
-                      <circle cx="7.5" cy="15.5" r="1.5"></circle>
-                      <circle cx="16.5" cy="15.5" r="1.5"></circle>
-                    </svg>
-                    <h3>EN COLECTIVO</h3>
-                  </div>
-
-                  <ul className="transport-list">
-                    <li>
-                      <span className="line-tag">LÍNEA B</span>
-                      <p>
-                        Lo deja justo en la <strong>puerta principal</strong>.
-                      </p>
-                    </li>
-                    <li>
-                      <span className="line-tag">LÍNEA D</span>
-                      <p>
-                        Lo deja a <strong>dos cuadras</strong>, caminando por una
-                        vereda amplia y segura.
-                      </p>
-                    </li>
-                    <li>
-                      <span className="line-tag">LÍNEA E</span>
-                      <p>
-                        Lo deja por la <strong>C. Juan Manuel de Rosas</strong> (a
-                        dos cuadras de la Av. Barberis).
-                      </p>
-                    </li>
-                    <li>
-                      <span className="line-tag">LÍNEA K</span>
-                      <p>
-                        Lo deja en la esquina de{" "}
-                        <strong>Av. Néstor Kirchner y Barberis</strong>.
-                      </p>
-                    </li>
-                  </ul>
+            {/* Sub-tarjeta: Redes Sociales */}
+            <div className="social-panel-card">
+              <div className="panel-header">
+                <div className="panel-icon-bubble" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="18" cy="5" r="3" />
+                    <circle cx="6" cy="12" r="3" />
+                    <circle cx="18" cy="19" r="3" />
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                  </svg>
                 </div>
-
-                <div className="transport-col-divider"></div>
-
-                <div className="transport-col">
-                  <div className="transport-col-header">
-                    <svg
-                      className="transport-icon"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                    >
-                      <path d="M18.5 9l-1.8-3.6C16.4 4.8 15.8 4.5 15 4.5H9c-.8 0-1.4.3-1.7.9L5.5 9H3v7h2c0 1.1.9 2 2 2s2-.9 2-2h6c0 1.1.9 2 2 2s2-.9 2-2h2V9h-2.5z"></path>
-                      <circle cx="7.5" cy="13.5" r="1.5"></circle>
-                      <circle cx="16.5" cy="13.5" r="1.5"></circle>
-                    </svg>
-                    <h3>EN REMÍS O TAXI</h3>
-                  </div>
-
-                  <div className="taxi-info-box">
-                    <p>
-                      Indíquele al chofer que su destino es el{" "}
-                      <strong>Hospital Interdistrital Evita</strong>, ingresando
-                      por la{" "}
-                      <strong>entrada principal sobre la Avenida Barberis</strong>
-                      .
-                    </p>
-                  </div>
+                <div>
+                  <h3 className="panel-title">Redes Sociales y Comunidad Digital</h3>
+                  <p className="panel-subtitle">Seguinos para enterarte de las últimas novedades, prevención y campañas de salud.</p>
                 </div>
               </div>
-            </AnimatedContent>
-          </div>
-        </div>
-      </section>
-      
+
+              <div className="social-links-subgrid">
+                {socialChannels.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-item-row"
+                  >
+                    <div className="social-left">
+                      {/* AQUI ESTAN LOS CIRCULOS CON SUS COLORES ESPECIFICOS */}
+                      <div className={`social-network-icon icon-${item.icon}`} aria-hidden="true">
+                        {item.icon === 'facebook' && (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                          </svg>
+                        )}
+                        {item.icon === 'instagram' && (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                          </svg>
+                        )}
+                        {item.icon === 'youtube' && (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+                            <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+                          </svg>
+                        )}
+                        {item.icon === 'bulletin' && (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="social-text">
+                        <span className="platform-name">{item.platform}</span>
+                        <span className="platform-handle">{item.handleOrDesc}</span>
+                      </div>
+                    </div>
+                    <span className="social-action-btn">{item.actionText}</span>
+                  </a>
+                ))}
+              </div>
+
+              {/* LINEA SEPARADORA AÑADIDA AQUI */}
+              <div className="social-divider"></div>
+              
+              <p className="social-disclaimer">
+                Las redes sociales se gestionan a través de la Dirección de Prensa y Comunicación del Ministerio de Desarrollo Humano.
+              </p>
+            </div>
+
+            {/* Sub-tarjeta: Sede Central / Polo Sanitario */}
+            <aside className="main-building-card">
+              <span className="building-badge">SEDE HOSPITALARIA CENTRAL</span>
+              <h3 className="building-title">Edificio Principal</h3>
+
+              <div className="building-info-block">
+                <div className="info-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="10" r="3" />
+                    <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
+                  </svg>
+                </div>
+                <div className="info-content">
+                  <strong>Dirección:</strong>
+                  <p>Av. José de Luca Barberis Nº 250<br />Formosa Capital (CP 3600), República Argentina</p>
+                </div>
+              </div>
+
+              <div className="building-info-block">
+                <div className="info-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M9 3v18" />
+                    <path d="M15 3v18" />
+                  </svg>
+                </div>
+                <div className="info-content">
+                  <strong>Instalaciones:</strong>
+                  <p>19.000 m² cubiertos • Quirófanos de flujo laminar inteligente • Terapia Intensiva • Diagnóstico por Imágenes</p>
+                </div>
+              </div>
+
+              <div className="building-card-footer">
+                <span className="building-footer-query">¿Cómo llegar a la Guardia Central?</span>
+                <a
+                  href="https://maps.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-gps-route"
+                >
+                  <span>Abrir en GPS</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </a>
+              </div>
+            </aside>
+          </section>
+
+        </AnimatedContent>
+      </div>
     </main>
   );
 };
