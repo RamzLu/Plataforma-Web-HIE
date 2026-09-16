@@ -24,12 +24,11 @@ const WhatsAppButton = () => {
         className="whatsapp-capsule-btn"
         aria-label="Contactar por Atención Oficial de WhatsApp"
       >
-        {/* Círculo con Ícono Oficial */}
+
         <span className="whatsapp-icon-circle" aria-hidden="true">
-          <FaWhatsapp size={26} color="#059669" />
+          <FaWhatsapp size={26} color="#bdddd3" />
         </span>
 
-        {/* Jerarquía de Texto */}
         <span className="whatsapp-text-block">
           <span className="whatsapp-kicker">
             ATENCIÓN OFICIAL
@@ -38,7 +37,6 @@ const WhatsAppButton = () => {
           <span className="whatsapp-main-label">Nuestro WhatsApp</span>
         </span>
 
-        {/* Flecha de Acción / Indicador Direccional */}
         <span className="whatsapp-arrow-circle" aria-hidden="true">
           <svg
             width="16"
