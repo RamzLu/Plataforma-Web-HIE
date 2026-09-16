@@ -82,8 +82,8 @@
   height: 120px;
   background-color: #2b5b94; 
   border-radius: 8px;
-  z-index: 1;
-  opacity: 0.1; 
+  z-index: 2;
+  opacity: 0.5; 
 }
 
 /* =========================================================
@@ -641,14 +641,14 @@
 }
 
 .social-disclaimer {
-  font-size: 11px;
-  color: #94a3b8; /* Ligeramente más suave */
+  font-size: 13px;
+  color: #0046a7;
   margin: 0;
   line-height: 1.4;
 }
 
 .main-building-card {
-  background: linear-gradient(145deg, #183c6d 0%, #0b1c36 100%);
+  background: linear-gradient(145deg, #1f457b 0%, #0b1c36 100%);
   color: #ffffff;
   border-radius: var(--hospital-radius-xl);
   padding: 30px;
@@ -699,9 +699,9 @@
 }
 
 .info-content p {
-  font-size: 13.5px;
+  font-size: 14.5px;
   line-height: 1.5;
-  color: #94a3b8;
+  color: #a5b5cc;
   margin: 0;
 }
 
@@ -718,8 +718,19 @@
   font-size: 12.5px;
   color: #cbd5e1;
   font-weight: 500;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.2s ease;
+  text-align: left;
 }
 
+.building-footer-query:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
 .btn-gps-route {
   display: inline-flex;
   align-items: center;

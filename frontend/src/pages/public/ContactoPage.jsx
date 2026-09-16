@@ -24,7 +24,7 @@ const ContactoPage = () => {
     },
     {
       id: 'conmutador',
-      title: 'Teléfono Central',
+      title: 'Teléfono Princial',
       description: 'Para consultas generales, derivaciones, estado de trámites administrativos e información institucional del hospital.',
       scheduleText: 'Lunes a Viernes: 06:00 a 20:00 hs',
       label: 'CONMUTADOR OFICIAL',
@@ -35,7 +35,7 @@ const ContactoPage = () => {
     },
     {
       id: 'red-interior',
-      title: 'Red Interior Provincial',
+      title: 'Nuestro Whatsapp Oficial',
       description: 'Canal exclusivo para Hospitales y Centros de Salud de los distritos del interior provincial y orientación de pacientes derivados.',
       scheduleText: 'Recepción & WhatsApp Habilitado',
       label: 'CANAL WHATSAPP OFICIAL',
@@ -397,7 +397,14 @@ const ContactoPage = () => {
               </div>
 
               <div className="building-card-footer">
-                <span className="building-footer-query">¿Cómo llegar a la Guardia Central?</span>
+                <button 
+                  type="button" 
+                  className="building-footer-query"
+                  onClick={() => window.dispatchEvent(new Event("openLocationModal"))}
+                >
+                  ¿Cómo llegar a la Guardia Central?
+                </button>
+                
                 <a
                   href="https://maps.google.com"
                   target="_blank"
