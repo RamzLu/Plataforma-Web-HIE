@@ -452,8 +452,19 @@ select.chart-btn:hover, select.chart-btn:focus {
 }
 
 .status-badge.publicado {
-  background-color: #e2e8f0;
-  color: #0c2340;
+background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
 }
 
 .status-badge.pendiente {
