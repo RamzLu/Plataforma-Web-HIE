@@ -115,39 +115,45 @@ const ContactoPage = () => {
 
   return (
     <main className="contacto-page">
-      {/* 1. HERO INTACTO */}
+      {/* 1. HERO ANIMADO */}
       <div className="contacto-container">
-        <section className="contacto-hero">
-          <div className="contacto-hero-left">
-            <Breadcrumb currentPage="Contacto" />
-            <h1 className="contacto-title">CONTACTO</h1>
-            <p className="contacto-description">
-              Para comunicarte con las diferentes áreas del Hospital
-              Interdistrital Evita, utiliza los medios oficiales habilitados.
-              Nuestro equipo está a disposición para resolver tus consultas.
-            </p>
-            <p className="contacto-subtext">¡Estamos para ayudarte!</p>
-          </div>
-
-          <div className="contacto-hero-right">
-            <div className="contacto-image-wrapper">
-              <img
-                src={fotoAtencion}
-                alt="Atención al paciente - Hospital Evita"
-                className="contacto-img"
-              />
-              <div className="contacto-overlay-box"></div>
+        <AnimatedContent distance={30} direction="vertical" delay={0.1}>
+          <section className="contacto-hero">
+            <div className="contacto-hero-left">
+              <Breadcrumb currentPage="Contacto" />
+              <h1 className="contacto-title">CONTACTO</h1>
+              <p className="contacto-description">
+                Para comunicarte con las diferentes áreas del Hospital
+                Interdistrital Evita, utiliza los medios oficiales habilitados.
+                Nuestro equipo está a disposición para resolver tus consultas.
+              </p>
+              <p className="contacto-subtext">¡Estamos para ayudarte!</p>
             </div>
-          </div>
-        </section>
+
+            <div className="contacto-hero-right">
+              <div className="contacto-image-wrapper">
+                <img
+                  src={fotoAtencion}
+                  alt="Atención al paciente - Hospital Evita"
+                  className="contacto-img"
+                />
+                <div className="contacto-overlay-box"></div>
+              </div>
+            </div>
+          </section>
+        </AnimatedContent>
       </div>
 
       <div className="contact-page-container">
-        <AnimatedContent distance={40} direction="vertical" delay={0.1}>
-
-          <section className="phone-cards-grid" aria-label="Líneas Telefónicas Directas">
-            {phoneCards.map((card) => (
-              <article key={card.id} className={`phone-card ${card.cardClass}`}>
+        <section className="phone-cards-grid" aria-label="Líneas Telefónicas Directas">
+          {phoneCards.map((card, index) => (
+            <AnimatedContent 
+              key={card.id} 
+              distance={40} 
+              direction="vertical" 
+              delay={0.1 + (index * 0.15)} // El retraso se suma según la posición
+            >
+              <article className={`phone-card ${card.cardClass}`} style={{ height: '100%' }}>
                 
                 <div className="card-top-header">
                   <div className={`card-icon-box icon-${card.icon}`}>
@@ -226,9 +232,12 @@ const ContactoPage = () => {
                   </a>
                 </div>
               </article>
-            ))}
-          </section>
+            </AnimatedContent>
+          ))}
+        </section>
 
+        {/* 4. HEADER DE CORREOS */}
+        <AnimatedContent distance={40} direction="horizontal" delay={0.1}>
           <section className="institutional-emails-section" aria-labelledby="emails-heading">
             <div className="section-title-wrapper">
               <div>
@@ -240,63 +249,72 @@ const ContactoPage = () => {
               </p>
             </div>
 
+            {/* 5. GRILLA DE CORREOS CON ANIMACIÓN EN CASCADA (INDEPENDIENTE) */}
             <div className="emails-grid">
-              {emailCards.map((emailCard) => (
-                <article key={emailCard.id} className="email-card">
-                  <div className="email-icon-box" aria-hidden="true">
-                    {emailCard.icon === 'building' && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
-                        <line x1="9" y1="22" x2="9" y2="22.01" />
-                        <line x1="15" y1="22" x2="15" y2="22.01" />
-                        <line x1="9" y1="6" x2="9" y2="6.01" />
-                        <line x1="15" y1="6" x2="15" y2="6.01" />
-                        <line x1="9" y1="10" x2="9" y2="10.01" />
-                        <line x1="15" y1="10" x2="15" y2="10.01" />
-                        <line x1="9" y1="14" x2="9" y2="14.01" />
-                        <line x1="15" y1="14" x2="15" y2="14.01" />
-                      </svg>
-                    )}
-                    {emailCard.icon === 'book' && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                      </svg>
-                    )}
-                    {emailCard.icon === 'users' && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
-                    )}
-                    {emailCard.icon === 'heart' && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
-                    )}
-                  </div>
+              {emailCards.map((emailCard, index) => (
+                <AnimatedContent 
+                  key={emailCard.id} 
+                  distance={40} 
+                  direction="vertical" 
+                  delay={0.1 + (index * 0.1)} // Cascada ligeramente más rápida para correos
+                >
+                  <article className="email-card" style={{ height: '100%' }}>
+                    <div className="email-icon-box" aria-hidden="true">
+                      {emailCard.icon === 'building' && (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+                          <line x1="9" y1="22" x2="9" y2="22.01" />
+                          <line x1="15" y1="22" x2="15" y2="22.01" />
+                          <line x1="9" y1="6" x2="9" y2="6.01" />
+                          <line x1="15" y1="6" x2="15" y2="6.01" />
+                          <line x1="9" y1="10" x2="9" y2="10.01" />
+                          <line x1="15" y1="10" x2="15" y2="10.01" />
+                          <line x1="9" y1="14" x2="9" y2="14.01" />
+                          <line x1="15" y1="14" x2="15" y2="14.01" />
+                        </svg>
+                      )}
+                      {emailCard.icon === 'book' && (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                        </svg>
+                      )}
+                      {emailCard.icon === 'users' && (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                      )}
+                      {emailCard.icon === 'heart' && (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                      )}
+                    </div>
 
-                  <h3 className="email-card-title">{emailCard.area}</h3>
-                  <p className="email-card-description">{emailCard.description}</p>
-                  
-                  <a href={`mailto:${emailCard.email}`} className="email-link">
-                    {emailCard.email}
-                  </a>
-                </article>
+                    <h3 className="email-card-title">{emailCard.area}</h3>
+                    <p className="email-card-description">{emailCard.description}</p>
+                    
+                    <a href={`mailto:${emailCard.email}`} className="email-link">
+                      {emailCard.email}
+                    </a>
+                  </article>
+                </AnimatedContent>
               ))}
             </div>
           </section>
+        </AnimatedContent>
 
-          {/* 4. REDES SOCIALES Y EDIFICIO PRINCIPAL */}
-          <section className="community-location-grid" aria-label="Redes Sociales y Sede Institucional">
-            
-            {/* Sub-tarjeta: Redes Sociales */}
-            <div className="social-panel-card">
+        {/* 6. TARJETAS FINALES (REDES SOCIALES Y EDIFICIO) */}
+        <section className="community-location-grid" aria-label="Redes Sociales y Sede Institucional">
+          
+          <AnimatedContent distance={40} direction="vertical" delay={0.2}>
+            <div className="social-panel-card" style={{ height: '100%' }}>
               <div className="panel-header">
                 <div className="panel-icon-bubble" aria-hidden="true">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="18" cy="5" r="3" />
                     <circle cx="6" cy="12" r="3" />
                     <circle cx="18" cy="19" r="3" />
@@ -320,7 +338,6 @@ const ContactoPage = () => {
                     className="social-item-row"
                   >
                     <div className="social-left">
-                      {/* AQUI ESTAN LOS CIRCULOS CON SUS COLORES ESPECIFICOS */}
                       <div className={`social-network-icon icon-${item.icon}`} aria-hidden="true">
                         {item.icon === 'facebook' && (
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -356,18 +373,18 @@ const ContactoPage = () => {
                 ))}
               </div>
 
-              {/* LINEA SEPARADORA AÑADIDA AQUI */}
               <div className="social-divider"></div>
               
               <p className="social-disclaimer">
                 Las redes sociales se gestionan a través de la Dirección de Prensa y Comunicación del Ministerio de Desarrollo Humano.
               </p>
             </div>
+          </AnimatedContent>
 
-            {/* Sub-tarjeta: Sede Central / Polo Sanitario */}
-            <aside className="main-building-card">
+          <AnimatedContent distance={40} direction="horizontal" delay={0.4}>
+            <aside className="main-building-card" style={{ height: '100%' }}>
               <span className="building-badge">SEDE HOSPITALARIA CENTRAL</span>
-              <h3 className="building-title">Edificio Principal</h3>
+              <h3 className="building-title">Edificio Principal – Polo Sanitario</h3>
 
               <div className="building-info-block">
                 <div className="info-icon" aria-hidden="true">
@@ -404,7 +421,6 @@ const ContactoPage = () => {
                 >
                   ¿Cómo llegar a la Guardia Central?
                 </button>
-                
                 <a
                   href="https://maps.google.com"
                   target="_blank"
@@ -420,9 +436,10 @@ const ContactoPage = () => {
                 </a>
               </div>
             </aside>
-          </section>
+          </AnimatedContent>
 
-        </AnimatedContent>
+        </section>
+
       </div>
     </main>
   );
