@@ -1,12 +1,11 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { FaWhatsapp } from "react-icons/fa"; // Usamos react-icons
+import { FaWhatsapp } from "react-icons/fa";
 import "../../styles/ui/WhatsAppButton.css";
 
 const WhatsAppButton = () => {
   const location = useLocation();
 
-  // Si prefieres que se muestre en todas las páginas, puedes quitar este condicional
   if (location.pathname !== "/") {
     return null;
   }
@@ -24,9 +23,8 @@ const WhatsAppButton = () => {
         className="whatsapp-capsule-btn"
         aria-label="Contactar por Atención Oficial de WhatsApp"
       >
-
         <span className="whatsapp-icon-circle" aria-hidden="true">
-          <FaWhatsapp size={26} color="#bdddd3" />
+          <FaWhatsapp size={26} className="wa-icon-svg" />
         </span>
 
         <span className="whatsapp-text-block">
@@ -36,7 +34,6 @@ const WhatsAppButton = () => {
           </span>
           <span className="whatsapp-main-label">Nuestro WhatsApp</span>
         </span>
-
         <span className="whatsapp-arrow-circle" aria-hidden="true">
           <svg
             width="16"

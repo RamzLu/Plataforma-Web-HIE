@@ -2,18 +2,17 @@
   --wa-emerald-deep: #059669;
   --wa-emerald-light: #10b981;
   --wa-emerald-glow: rgba(5, 150, 105, 0.28);
-  --wa-dot-pulse: #34d399;
+  --wa-dot-pulse: #dff9ef;
 }
 
-/* Contenedor flotante fijado en la pantalla */
+
 .whatsapp-floating-container {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  z-index: 2;
+  z-index: 2; /
 }
 
-/* Diseño de la cápsula */
 .whatsapp-capsule-btn {
   display: inline-flex;
   align-items: center;
@@ -44,7 +43,7 @@
   box-shadow: 0 4px 12px -2px rgba(5, 150, 105, 0.28);
 }
 
-/* 1. Contenedor Circular del Ícono */
+
 .whatsapp-icon-circle {
   width: 44px;
   height: 44px;
@@ -58,11 +57,16 @@
   transition: transform 0.22s ease;
 }
 
+
+.wa-icon-svg {
+  fill: rgb(7, 143, 101); 
+  transition: fill 0.2s ease;
+}
+
 .whatsapp-capsule-btn:hover .whatsapp-icon-circle {
   transform: scale(1.06) rotate(6deg);
 }
 
-/* 2. Bloque de Textos */
 .whatsapp-text-block {
   display: flex;
   flex-direction: column;
@@ -75,14 +79,14 @@
   align-items: center;
   gap: 6px;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 3px;
 }
 
-/* Indicador de estado en vivo / Activo */
+
 .whatsapp-status-dot {
   width: 6px;
   height: 6px;
@@ -105,12 +109,11 @@
 
 .whatsapp-main-label {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 600;
   color: #ffffff;
   letter-spacing: -0.01em;
 }
 
-/* 3. Flecha de Acción / Indicador Direccional */
 .whatsapp-arrow-circle {
   width: 34px;
   height: 34px;
@@ -130,46 +133,46 @@
   transform: translateX(3px);
   background-color: rgba(255, 255, 255, 0.28);
 }
-/* =========================================
-   RESPONSIVE (Modo compacto para celulares)
-========================================= */
+
+
 @media (max-width: 768px) {
   .whatsapp-floating-container {
     bottom: 20px;
     right: 20px;
   }
   
-  /* Transformamos la cápsula en un círculo en móviles */
+
   .whatsapp-capsule-btn {
     padding: 0;
     width: 56px;
     height: 56px;
     justify-content: center;
-    border-radius: 50%; /* Lo hace redondo */
-    /* Mantenemos el gradiente original pero aplicado al círculo */
+    border-radius: 50%; 
     background: linear-gradient(135deg, var(--wa-emerald-deep) 0%, var(--wa-emerald-light) 100%);
   }
 
-  /* Ocultamos los textos para ahorrar espacio */
+
   .whatsapp-text-block {
     display: none;
   }
 
-  /* Ocultamos la flechita derecha */
   .whatsapp-arrow-circle {
     display: none;
   }
 
-  /* Ajustamos el contenedor del ícono para que llene el botón flotante */
+
   .whatsapp-icon-circle {
     width: 100%;
     height: 100%;
-    background-color: transparent; /* Quitamos el fondo blanco */
-    box-shadow: none; /* Quitamos la sombra interna */
-    color: #ffffff; /* Hacemos que el ícono de WhatsApp sea blanco */
+    background-color: transparent; 
+    box-shadow: none; 
+  }
+
+  .wa-icon-svg {
+    fill: #ffffff; 
   }
   
-  /* Efecto al tocar el botón en el celular */
+
   .whatsapp-capsule-btn:active .whatsapp-icon-circle {
     transform: scale(0.95);
   }
