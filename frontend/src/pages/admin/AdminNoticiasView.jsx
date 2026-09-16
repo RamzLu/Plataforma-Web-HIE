@@ -1,212 +1,214 @@
 import React, { useState } from 'react';
-import { Search, Edit3, Trash2, CheckCircle, XCircle, Image as ImageIcon, ArrowLeft, Archive, CalendarClock, Save } from 'lucide-react';
+import { Eye, X, CheckCircle, XCircle, CalendarClock, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import '../../styles/pages/admin/AdminNoticiasView.css';
 
-const initialNews = [
-  { id: 1, title: 'Inauguración de la nueva sala de pediatría', category: 'Institucional', author: 'Editor CMS', date: '14/09/2026', status: 'Publicado', content: 'Detalle de la inauguración de la sala de pediatría...' },
-  { id: 2, title: 'Campaña de Vacunación Antigripal 2026', category: 'Prevención', author: 'Editor CMS', date: '12/09/2026', status: 'Pendiente', content: 'Inicia la campaña de vacunación para grupos de riesgo.' },
-  { id: 3, title: 'Nuevos horarios de atención en consultorios', category: 'Guía y orientación', author: 'Editor CMS', date: '10/09/2026', status: 'Borrador', content: 'Los horarios se actualizarán a partir del próximo mes.' },
+// MOCK DATA: Contexto hospitalario real, cero Lorem Ipsum.
+const mockPayloadNoticias = [
+  { 
+    id: 1, 
+    title: 'Nueva sala de oncología habilitada', 
+    date: '16/09/2026', 
+    editor: 'Ana López', 
+    category: 'Institucional', 
+    status: 'Pendiente de aprobación',
+    content: 'El Hospital Interdistrital Evita Formosa ha inaugurado la nueva ala de atención oncológica, equipada con tecnología de última generación para el tratamiento ambulatorio de pacientes de toda la provincia...',
+    scheduledDate: null
+  },
+  { 
+    id: 2, 
+    title: 'Campaña de Prevención del Dengue: Medidas precautorias', 
+    date: '15/09/2026', 
+    editor: 'Carlos Ruiz', 
+    category: 'Prevención', 
+    status: 'Pendiente de aprobación',
+    content: 'Ante la llegada de las primeras lluvias de la temporada, el Ministerio recuerda las principales medidas preventivas en los hogares para evitar la proliferación del mosquito Aedes aegypti...',
+    scheduledDate: '20/09/2026 08:00 AM' 
+  },
+  { 
+    id: 3, 
+    title: 'Actualización de turnos web para consultorios externos', 
+    date: '14/09/2026', 
+    editor: 'Ana López', 
+    category: 'Guía y orientación', 
+    status: 'Aprobado',
+    content: 'A partir del próximo mes, los turnos para todas las especialidades médicas podrán solicitarse a través del nuevo portal web de la provincia de Formosa...',
+    scheduledDate: null
+  }
 ];
 
 const AdminNoticiasView = () => {
-  const [news, setNews] = useState(initialNews);
-  const [view, setView] = useState('list'); 
-  const [currentNews, setCurrentNews] = useState(null);
-
-  // ==============================
-  // NAVEGACIÓN Y APERTURA DE EDITOR ADMIN
-  // ==============================
-  const handleOpenReview = (noticia) => {
-    setCurrentNews(noticia);
-    setView('editor');
-  };
-
-  const handleClose = () => {
-    setCurrentNews(null);
-    setView('list');
-  };
-
-  // ==============================
-  // ACCIONES EXCLUSIVAS DEL ADMINISTRADOR
-  // ==============================
+  const [noticias, setNoticias] = useState(mockPayloadNoticias);
+  const [selectedNews, setSelectedNews] = useState(null);
   
-  const handleSaveChanges = () => {
-    alert("RF-011: Cambios en el texto o archivos adjuntos guardados correctamente.");
-    handleClose();
+  // Gestión del estado de flujo UX del Modal
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+
+  // ==============================
+  // FLUJO DEL MODAL Y LÓGICA
+  // ==============================
+  const handleOpenModal = (noticia) => {
+    setSelectedNews(noticia);
+    setIsRejecting(false); 
+    setRejectReason("");
   };
 
-  const handlePublish = () => {
-    alert("RF-016 / RF-019: ¡Noticia aprobada y publicada oficialmente en el portal Red Evita Formosa!");
-    handleClose();
+  const handleCloseModal = () => {
+    setSelectedNews(null);
+    setIsRejecting(false);
   };
 
-  const handleProgram = () => {
-    alert("RF-012: Noticia programada. Se publicará automáticamente en la fecha seleccionada.");
-    handleClose();
+  const handleApprove = () => {
+    alert(`Noticia "${selectedNews.title}" APROBADA exitosamente.`);
+    // Lógica futura: Actualizar estado en el backend
+    handleCloseModal();
   };
 
-  const handleReject = () => {
-    const motivo = window.prompt("RF-017: Indica el motivo del rechazo para notificar al CMS:");
-    if (motivo) {
-      alert("Noticia rechazada. Se notificó al editor con el motivo.");
-      handleClose();
+  const handleTriggerReject = () => {
+    setIsRejecting(true); // Expande el UI para justificar el rechazo
+  };
+
+  const handleConfirmReject = () => {
+    if (!rejectReason.trim()) {
+      alert("Debes ingresar obligatoriamente un motivo para enviar la corrección al Editor CMS.");
+      return;
     }
+    alert(`Noticia RECHAZADA. Motivo enviado: "${rejectReason}"`);
+    // Lógica futura: Hacer POST/PUT al backend con el rejectReason
+    handleCloseModal();
   };
 
-  const handleArchive = (id) => {
-    if (window.confirm("RF-020: ¿Seguro que deseas archivar/desactivar esta noticia? Dejará de ser pública.")) {
-      alert(`Noticia ${id} archivada correctamente.`);
-    }
+  const getBadgeClass = (status) => {
+    if (status === 'Aprobado') return 'status-aprobado';
+    if (status === 'Rechazado') return 'status-rechazado';
+    return 'status-pendiente';
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("¿Seguro que deseas eliminar definitivamente este registro del sistema?")) {
-      alert(`Noticia ${id} eliminada.`);
-    }
-  };
-
-  const getStatusClass = (status) => {
-    const s = status.toLowerCase();
-    if (s === 'borrador') return 'status-borrador';
-    if (s === 'pendiente') return 'status-pendiente';
-    if (s === 'publicado') return 'status-publicado';
-    if (s === 'programado') return 'status-programado';
-    if (s === 'rechazado') return 'status-rechazado';
-    return 'status-archivado';
-  };
-
-  // ==============================
-  // RENDER: LISTADO ADMINISTRADOR
-  // ==============================
-  if (view === 'list') {
-    return (
-      <div className="admin-noticias-container">
-        
-        <div className="noticias-header-row">
-          <div className="noticias-search">
-            <Search size={18} color="#94a3b8" />
-            <input type="text" placeholder="Buscar noticia por título..." />
-          </div>
-        </div>
-
-        <div className="noticias-list-container">
-          <div className="noticias-grid-header">
-            <div className="noticias-header-col">Título y Detalles</div>
-            <div className="noticias-header-col">Autor (CMS)</div>
-            <div className="noticias-header-col">Fecha</div>
-            <div className="noticias-header-col">Estado</div>
-            <div className="noticias-header-col" style={{ textAlign: 'right' }}>Acciones</div>
-          </div>
-
-          {news.map((item) => (
-            <div className="noticias-row" key={item.id}>
-              <div>
-                <div className="noticia-titulo">{item.title}</div>
-                <div className="noticia-meta">Categoría: {item.category}</div>
-              </div>
-              <div className="noticia-text">{item.author}</div>
-              <div className="noticia-text">{item.date}</div>
-              <div>
-                <span className={`status-pill ${getStatusClass(item.status)}`}>
-                  {item.status}
-                </span>
-              </div>
-              
-              <div className="noticias-acciones">
-                {/* RF-015: Revisión de Pendientes y Edición Total */}
-                <button className={`btn-icon-pill ${item.status === 'Pendiente' ? 'review' : ''}`} title="Revisar Solicitud / Modificar" onClick={() => handleOpenReview(item)}>
-                  {item.status === 'Pendiente' ? <><CheckCircle size={16} /> Revisar</> : <Edit3 size={16} />}
-                </button>
-                
-                {/* RF-020: Archivar/Desactivar */}
-                {(item.status === 'Publicado' || item.status === 'Programado') && (
-                  <button className="btn-icon-pill" title="Archivar/Desactivar" onClick={() => handleArchive(item.id)}>
-                    <Archive size={16} />
-                  </button>
-                )}
-
-                <button className="btn-icon-pill" title="Eliminar Definitivamente" onClick={() => handleDelete(item.id)}>
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // ==============================
-  // RENDER: EDITOR / REVISOR ADMIN
-  // ==============================
   return (
-    <div className="admin-noticias-container">
-      <div className="editor-container">
-        <div className="editor-header">
-          <h2>Revisión y Administración de Noticia</h2>
-          <button className="btn-pill outline" onClick={handleClose}>
-            <ArrowLeft size={18} /> Volver
-          </button>
-        </div>
+    <div className="admin-review-container">
+      
+      {/* HEADER SEMÁNTICO DE LA PÁGINA */}
+      <div className="admin-page-header">
+        <span className="admin-overtitle">PANEL DE CONTROL DIRECTIVO</span>
+        <h1>Revisión Editorial</h1>
+        <p>Evalúa las solicitudes de publicación enviadas por el equipo de redactores del CMS.</p>
+      </div>
 
-        {/* RF-012: Edición del estado por parte del Administrador */}
-        <div className="form-group" style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <label className="form-label" style={{ color: '#0f172a' }}>Gestión de Estado de Publicación</label>
-          <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-            <select className="form-select" defaultValue={currentNews?.status || "Borrador"}>
-              <option value="Borrador">Borrador</option>
-              <option value="Pendiente">Pendiente de Aprobación</option>
-              <option value="Publicado">Publicado</option>
-              <option value="Programado">Programado</option>
-              <option value="Archivado">Archivado</option>
-            </select>
+      {/* DASHBOARD CARD PRINCIPAL */}
+      <div className="dashboard-card">
+        <h2 className="dashboard-card-title">Liatado de las Noticias</h2>
+       <p className='news-view-subtitle-admin'>Área de Revisión: Aprobación y rechazo de notificaciones recibidas desde el CMS</p> <br />
+        {/* TABLA DE DATOS (DATA GRID) */}
+        <div className="data-table-container">
+          <div className="data-table-header">
+            <div className="data-table-col">CONTENIDO</div>
+            <div className="data-table-col">FECHA</div>
+            <div className="data-table-col">EDITOR</div>
+            <div className="data-table-col">CATEGORÍA</div>
+            <div className="data-table-col">ESTADO</div>
+            <div className="data-table-col" style={{ textAlign: 'center' }}>ACCIONES</div>
           </div>
-          <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '10px' }}>
-            Puedes forzar un estado desde aquí, o usar los botones de acción rápida al final del formulario.
-          </p>
-        </div>
 
-        {/* RF-011: Administrador puede editar el título que hizo el CMS */}
-        <div className="form-group">
-          <label className="form-label">Título de la noticia (Editable por Admin)</label>
-          <input type="text" className="form-input" defaultValue={currentNews?.title} />
-        </div>
-
-        {/* RF-011: Administrador puede editar el cuerpo que hizo el CMS */}
-        <div className="form-group">
-          <label className="form-label">Cuerpo de la noticia (Editable por Admin)</label>
-          <textarea className="form-textarea" defaultValue={currentNews?.content}></textarea>
-        </div>
-
-        {/* RF-013: Adjuntar archivos a una noticia por parte del Administrador */}
-        <div className="form-group">
-          <label className="form-label">Adjuntar Imágenes / Documentos Adicionales</label>
-          <div className="image-dropzone">
-            <ImageIcon size={32} style={{ margin: '0 auto 10px auto' }} />
-            <p style={{ fontWeight: '600', margin: '0 0 5px 0' }}>Arrastra tu imagen o documento aquí (RF-013)</p>
-            <span style={{ fontSize: '0.85rem' }}>Formatos: JPG, PNG, WEBP, PDF</span>
+          <div className="data-table-body">
+            {noticias.map((item) => (
+              <div className="data-table-row" key={item.id}>
+                <div className="col-content-title" title={item.title}>{item.title}</div>
+                <div className="col-text">{item.date}</div>
+                <div className="col-text">{item.editor}</div>
+                <div className="col-text">{item.category}</div>
+                <div>
+                  <span className={`status-pill ${getBadgeClass(item.status)}`}>
+                    {item.status}
+                  </span>
+                </div>
+                {/* RESTRICCIÓN DE NEGOCIO: Solo botón 'Ver/Expandir' permitido */}
+                <div className="col-acciones">
+                  <button className="icon-btn" title="Ver Solicitud" onClick={() => handleOpenModal(item)}>
+                    <Eye size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* BOTONES DE DECISIÓN DEL ADMINISTRADOR */}
-        <div className="editor-actions">
-          <button className="btn-pill outline" onClick={handleSaveChanges}>
-            <Save size={18} /> Guardar Cambios 
-          </button>
-          
-          <button className="btn-pill danger" onClick={handleReject}>
-            <XCircle size={18} /> Rechazar Solicitud
-          </button>
-
-          <button className="btn-pill warning" onClick={handleProgram}>
-            <CalendarClock size={18} /> Programar
-          </button>
-          
-          <button className="btn-pill success" onClick={handlePublish}>
-            <CheckCircle size={18} /> Publicar Inmediatamente
-          </button>
         </div>
       </div>
+
+      {/* MODAL DE VISUALIZACIÓN Y REVISIÓN */}
+      {selectedNews && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            
+            {/* RENDERIZADO CONDICIONAL: ALERTA DE PROGRAMACIÓN */}
+            {selectedNews.scheduledDate && (
+              <div className="scheduled-alert">
+                <CalendarClock size={20} />
+                <span>Atención: Esta noticia está programada para publicarse automáticamente el {selectedNews.scheduledDate}.</span>
+              </div>
+            )}
+
+            <div className="modal-header">
+              <h2>Revisión de Contenido</h2>
+              <button className="btn-close" onClick={handleCloseModal}><X size={24} /></button>
+            </div>
+
+            <div className="modal-body">
+              {/* PAYLOAD DE LA NOTICIA (SOLO LECTURA) */}
+              <h3 className="news-payload-title">{selectedNews.title}</h3>
+              
+              <div className="news-payload-image">
+                <ImageIcon size={48} />
+                <span style={{ marginTop: '10px' }}>Vista previa de la imagen adjunta</span>
+              </div>
+
+              <div className="news-payload-content">
+                <p style={{ margin: 0 }}>{selectedNews.content}</p>
+                <p style={{ marginTop: '15px', color: '#94a3b8', fontStyle: 'italic' }}>[Fin del contenido redactado]</p>
+              </div>
+
+              {/* FLUJO CONDICIONAL: ÁREA DE JUSTIFICACIÓN DE RECHAZO */}
+              {isRejecting && (
+                <div className="rejection-area">
+                  <label htmlFor="rejection-reason">
+                    <AlertTriangle size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> Mensaje de Justificación (Requerido):
+                  </label>
+                  <textarea 
+                    id="rejection-reason"
+                    className="rejection-textarea"
+                    placeholder="Explica al editor el motivo del rechazo para que pueda corregirlo..."
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* CONTROLES INFERIORES DEL MODAL */}
+            <div className="modal-footer">
+              {!isRejecting ? (
+                <>
+                  <button className="btn-modal btn-modal-danger" onClick={handleTriggerReject}>
+                    <XCircle size={18} /> Rechazar
+                  </button>
+                  <button className="btn-modal btn-modal-success" onClick={handleApprove}>
+                    <CheckCircle size={18} /> Aprobar {selectedNews.scheduledDate && 'y Programar'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="btn-modal btn-modal-cancel" onClick={() => setIsRejecting(false)}>
+                    Cancelar
+                  </button>
+                  <button className="btn-modal btn-modal-confirm-reject" onClick={handleConfirmReject}>
+                    Confirmar Rechazo
+                  </button>
+                </>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };
