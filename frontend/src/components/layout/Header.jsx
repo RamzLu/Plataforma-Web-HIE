@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiMapPin, FiMap, FiMenu, FiX } from "react-icons/fi";
 import "../../styles/layout/Header.css";
@@ -10,6 +10,13 @@ const Header = () => {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false); 
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
+
+useEffect(() => {
+    const handleOpenModal = () => setIsLocationModalOpen(true);
+    window.addEventListener("openLocationModal", handleOpenModal);
+    
+    return () => window.removeEventListener("openLocationModal", handleOpenModal);
+  }, []);
 
   const handleNavClick = () => {
     window.scrollTo(0, 0);
