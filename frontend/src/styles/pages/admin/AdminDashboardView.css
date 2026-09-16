@@ -1,6 +1,5 @@
 /* ==========================================================================
    ADMIN DASHBOARD VIEW - CSS COMPLETO Y ADAPTADO
-   Adaptado a la estructura de AdminDashboardView_Optimized.jsx
    ========================================================================== */
 
 /* -----------------------------------------
@@ -16,14 +15,128 @@
   box-sizing: border-box;
 }
 
+/* =========================================
+   ESTILOS DEL GRÁFICO RECHARTS
+========================================= */
+.stat-card-chart {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.chart-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chart-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.chart-body {
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 220px;
+}
+
+.chart-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.chart-total-num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.chart-total-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
 /* -----------------------------------------
-   2. ENCABEZADO Y TÍTULO DE PÁGINA
+   2. ENCABEZADO Y TÍTULO DE PÁGINA (MODIFICADO)
 ----------------------------------------- */
 .admin-page-title {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.admin-title-content {
+  display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-bottom: 4px;
 }
 
 .admin-title-badge {
@@ -48,8 +161,82 @@
   line-height: 1.5;
 }
 
+/* NUEVA NOTIFICACIÓN TIPO BADGE EN LA CABECERA */
+.admin-header-alert-box {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: linear-gradient(90deg, #fffcf5 0%, #ffffff 100%);
+  border: 1px solid #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 12px;
+  padding: 12px 20px;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+}
+.admin-header-alert-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06)
+}
+
+.alert-box-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.alert-box-data {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.alert-box-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alert-box-num {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #d97706;
+  line-height: 1;
+}
+
+.alert-box-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+}
+
+.alert-box-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.alert-warning-pill {
+  background-color: #fef3c7;
+  color: #b45309;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+
 /* -----------------------------------------
-   3. SECCIÓN SUPERIOR: GRID DE 6 KPIS
+   3. SECCIÓN SUPERIOR: GRID DE KPIS
 ----------------------------------------- */
 .dashboard-kpis-section {
   width: 100%;
@@ -77,11 +264,6 @@
 .kpi-card-refined:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-}
-
-.kpi-card-refined.alert-highlight {
-  border-left: 4px solid #f59e0b;
-  background: linear-gradient(180deg, #ffffff 0%, #fffcf5 100%);
 }
 
 .kpi-card-top {
@@ -145,11 +327,6 @@
   color: #475569;
 }
 
-.trend-badge.warning-pill {
-  background-color: #fef3c7;
-  color: #b45309;
-}
-
 .trend-text {
   color: #64748b;
   font-size: 0.8rem;
@@ -204,112 +381,6 @@
   padding: 4px 10px;
   border-radius: 20px;
   white-space: nowrap;
-}
-
-/* Gráfico de Anillo Proporcional + Lista de Desglose */
-.chart-body-layout {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  flex: 1;
-}
-
-.donut-wrapper-square {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.donut-svg-element {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.donut-center-content {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.donut-center-number {
-  font-size: 1.65rem;
-  font-weight: 800;
-  color: #0f172a;
-  line-height: 1;
-}
-
-.donut-center-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 3px;
-}
-
-.breakdown-list {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.breakdown-item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.breakdown-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.breakdown-item .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.breakdown-numbers {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  color: #64748b;
-  font-weight: 500;
-}
-
-.breakdown-numbers .count {
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.progress-bar-bg {
-  width: 100%;
-  height: 6px;
-  background-color: #f1f5f9;
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width 0.3s ease;
 }
 
 /* Lista de Accesos Directos */
@@ -546,10 +617,13 @@
     gap: 18px;
   }
 
-  .chart-body-layout {
+  .admin-page-title {
     flex-direction: column;
-    align-items: center;
-    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .admin-header-alert-box {
+    width: 100%;
   }
 
   .breakdown-list {
