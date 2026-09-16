@@ -11,16 +11,16 @@ import {
   UserCog, 
   FileClock, 
   Building,
-  ChevronDown // Agregamos la flecha desplegable
+  ChevronDown
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 
 const AdminSidebar = ({ activeTab, setActiveTab }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
-  // Estado para manejar el acordeón (por defecto abierto en Aprobación de Contenidos)
   const [expandedSection, setExpandedSection] = useState("Aprobación de Contenidos");
 
+  // Matriz de navegación con mock data (pendingCount simulado)
   const menuSections = [
     {
       title: "General",
@@ -31,10 +31,10 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
     {
       title: "Aprobación de Contenidos",
       items: [
-        { id: "noticias", label: "Noticias", icon: <FileText /> },
-        { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope /> },
-        { id: "profesionales", label: "Profesionales", icon: <Contact /> }, 
-        { id: "documentacion", label: "Documentación", icon: <FolderOpen /> },
+        { id: "noticias", label: "Noticias", icon: <FileText />, pendingCount: 9 },
+        { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope />, pendingCount: 1 },
+        { id: "profesionales", label: "Profesionales", icon: <Contact />, pendingCount: 2 }, 
+        { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: 0 },
         { id: "capacitaciones", label: "Capacitaciones Públicas", icon: <GraduationCap /> },
         { id: "residencias", label: "Residencias", icon: <Building2 /> },
         { id: "graficos", label: "Contenido Gráfico", icon: <ImageIcon /> },
@@ -55,12 +55,10 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
     },
   ];
 
-  // Función para manejar el clic en las categorías (Acordeón)
   const handleToggleSection = (title) => {
     if (isCollapsed) {
-      setIsCollapsed(false); // Expande el menú completo si estaba minimizado
+      setIsCollapsed(false); 
     }
-    // Si la categoría ya estaba abierta, la cierra; si no, la abre ocultando la anterior
     setExpandedSection((prev) => (prev === title ? null : title));
   };
 
@@ -103,21 +101,15 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
         </button>
       </div>
 
-      {/* {!isCollapsed && (
-        <div className="admin-sidebar-menu-title">PANEL DE ADMINISTRACIÓN</div>
-      )} */}
-
       {/* Navegación tipo Acordeón */}
       <nav className="admin-nav">
         {menuSections.map((section, idx) => {
-          // Lógica para excluir "General" de la mecánica del acordeón
           const isGeneral = section.title === "General";
           const isExpanded = expandedSection === section.title;
 
           return (
             <div className="admin-nav-group" key={idx}>
               
-              {/* Solo renderizamos el botón de abrir/cerrar si NO es la categoría General */}
               {!isGeneral && !isCollapsed && (
                 <div 
                   className={`admin-nav-group-header ${isExpanded ? "active" : ""}`}
@@ -128,7 +120,6 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
                 </div>
               )}
 
-              {/* Si ES general o si es la categoría abierta (expanded), la lista recibe la clase .expanded */}
               <ul className={`admin-nav-submenu ${isGeneral || isExpanded ? "expanded" : ""}`}>
                 {section.items.map((item) => (
                   <li
@@ -137,9 +128,18 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
                     onClick={() => setActiveTab(item.id)}
                     title={isCollapsed ? item.label : ""}
                   >
-                    <div className="admin-nav-icon">{item.icon}</div>
-                    {!isCollapsed && (
-                      <span className="admin-nav-label">{item.label}</span>
+                    <div className="admin-nav-item-left">
+                      <div className="admin-nav-icon">{item.icon}</div>
+                      {!isCollapsed && (
+                        <span className="admin-nav-label">{item.label}</span>
+                      )}
+                    </div>
+
+                    {/* RENDERIZADO CONDICIONAL ESTRICTO: Solo si pendingCount es mayor a 0 */}
+                    {!isCollapsed && item.pendingCount > 0 && (
+                      <span className="admin-nav-badge">
+                        {item.pendingCount > 9 ? '+9' : item.pendingCount}
+                      </span>
                     )}
                   </li>
                 ))}
