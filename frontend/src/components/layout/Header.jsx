@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiMapPin, FiMap, FiMenu, FiX } from "react-icons/fi";
 import "../../styles/layout/Header.css";
@@ -11,12 +11,35 @@ const Header = () => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
-useEffect(() => {
+  const sidebarRef = useRef(null);
+  const buttonRef = useRef(null);
+
+  useEffect(() => {
     const handleOpenModal = () => setIsLocationModalOpen(true);
     window.addEventListener("openLocationModal", handleOpenModal);
     
     return () => window.removeEventListener("openLocationModal", handleOpenModal);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        isMenuOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   const handleNavClick = () => {
     window.scrollTo(0, 0);
@@ -29,8 +52,10 @@ useEffect(() => {
         <Link to="/" className="brand-container" onClick={handleNavClick}>
           <img src={logoCompleto} alt="Hospital Evita" className="header-logo-img" />
         </Link>
-
-        <div className={`nav-content-wrapper ${isMenuOpen ? "active" : ""}`}>
+        <div 
+          ref={sidebarRef} 
+          className={`nav-content-wrapper ${isMenuOpen ? "active" : ""}`}
+        >
           <nav aria-label="Menú principal">
             <ul className="nav-menu-list">
               <li><Link to="/" onClick={handleNavClick} className={`nav-link-item ${isActive("/") ? "active" : ""}`}>INICIO</Link></li>
@@ -76,6 +101,7 @@ useEffect(() => {
           </div>
 
           <button 
+            ref={buttonRef}
             className="mobile-menu-btn" 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Alternar menú"
