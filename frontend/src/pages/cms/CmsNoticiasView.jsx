@@ -460,15 +460,19 @@ const CmsNoticiasView = ({
                   {news.category || "Noticias"}
                 </div>
                 <div className="col-estado">
-                  <span className={`status-badge ${news.estado?.toLowerCase() === "publicado" || (!news.isDraft && !news.estado) ? "publicado" : news.estado?.toLowerCase() === "programado" ? "programado" : "pendiente"}`}>
-                    {news.estado === "PROGRAMADO" ? "Programado" : (news.estado || (news.isDraft ? "Borrador" : "Publicado"))}
-                  </span>
-                  
-                  {news.estado === "PROGRAMADO" && news.fechaPublicacion && (
-                    <span style={{ fontSize: "0.75rem", color: "#64748b", display: "block", marginTop: "6px", whiteSpace: "nowrap" }}>
-                      Para:  {new Date(news.fechaPublicacion).toLocaleDateString('es-AR')} - {new Date(news.fechaPublicacion).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })} hs
+                  <div className="status-wrapper">
+                    
+                    <span className={`status-badge ${news.estado?.toLowerCase() === "publicado" || (!news.isDraft && !news.estado) ? "publicado" : news.estado?.toLowerCase() === "programado" ? "programado" : "pendiente"}`}>
+                      {news.estado === "PROGRAMADO" ? "PROGRAMADO" : (news.estado || (news.isDraft ? "BORRADOR" : "PUBLICADO")).toUpperCase()}
                     </span>
-                  )}
+                    
+                    {news.estado === "PROGRAMADO" && news.fechaPublicacion && (
+                      <span className="status-programmed-date">
+                        Para: {new Date(news.fechaPublicacion).toLocaleDateString('es-AR')} - {new Date(news.fechaPublicacion).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })} hs
+                      </span>
+                    )}
+                    
+                  </div>
                 </div>
                 <div className="news-actions-cell">
                   <button
