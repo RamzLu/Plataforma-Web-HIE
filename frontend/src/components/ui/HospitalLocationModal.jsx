@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../styles/components/HospitalLocationModal.css';
 
 const HospitalLocationModal = ({
@@ -10,6 +10,16 @@ const HospitalLocationModal = ({
   postalCode = 'P3600 Formosa',
 }) => {
   const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -35,13 +45,12 @@ const HospitalLocationModal = ({
         className="location-modal-container"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header del Modal */}
         <header className="location-modal-header">
           <div className="modal-header-left">
             <div className="hospital-symbol-box" aria-hidden="true">
               <svg
-                width="22"
-                height="22"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -49,9 +58,9 @@ const HospitalLocationModal = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <rect x="3" y="3" width="18" height="18" rx="4" />
-                <line x1="12" y1="8" x2="12" y2="16" />
-                <line x1="8" y1="12" x2="16" y2="12" />
+                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+                <line x1="9" y1="3" x2="9" y2="18"></line>
+                <line x1="15" y1="6" x2="15" y2="21"></line>
               </svg>
             </div>
             <div className="modal-header-text">
@@ -100,10 +109,8 @@ const HospitalLocationModal = ({
             </svg>
           </button>
         </header>
-
-        {/* Cuerpo del Modal: 2 Columnas */}
+        
         <div className="location-modal-body">
-          {/* Columna Izquierda: Mapa y Geolocalización */}
           <section className="location-column-left" aria-label="Visualización de Mapa">
             <div className="map-card-wrapper">
                   <iframe
@@ -133,7 +140,7 @@ const HospitalLocationModal = ({
                     aria-hidden="true"
                   >
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2-2v1" />
                   </svg>
                   <span>{copied ? '¡Copiadas!' : 'Copiar Coordenadas'}</span>
                 </button>
@@ -222,10 +229,8 @@ const HospitalLocationModal = ({
               </div>
             </div>
           </section>
-
           <section className="location-column-right" aria-label="Medios de Transporte">
             
-            {/* 1. Colectivos / Transporte Urbano (NUEVO DISEÑO) */}
             <article className="transit-card">
               <div className="transit-header">
                 <div className="transit-title-group">
@@ -252,7 +257,6 @@ const HospitalLocationModal = ({
                 </div>
               </div>
 
-              {/* Información de Línea Directa */}
               <div className="bus-direct-info">
                 <div className="bus-pill-primary">Línea B</div>
                 <p className="bus-info-text">
@@ -260,7 +264,6 @@ const HospitalLocationModal = ({
                 </p>
               </div>
 
-              {/* Información del Sistema de Trasbordo */}
               <div className="bus-transfer-info">
                 <span className="transfer-label">SISTEMA DE TRASBORDO</span>
                 <p className="bus-info-text">
@@ -269,7 +272,6 @@ const HospitalLocationModal = ({
               </div>
             </article>
 
-            {/* 2. Taxis y Remises Autorizados (RECUPERADO) */}
             <article className="transit-card">
               <div className="transit-header">
                 <div className="transit-title-group">
@@ -299,8 +301,6 @@ const HospitalLocationModal = ({
             </article>  
           </section>
         </div>
-
-        {/* Footer del Modal */}
         <footer className="location-modal-footer">
           <div className="accessibility-notice">
             <svg
