@@ -146,7 +146,7 @@
   font-size: 0.75rem;
   color: #64748b;
   font-weight: 600;
-  margin: 0;
+  margin: 0; 
   text-transform: uppercase;
   transition: color 0.2s ease;
 }
@@ -188,7 +188,7 @@
 }
 
 .admin-nav-submenu.expanded {
-  max-height: 450px
+  max-height: 450px; 
 }
 
 .admin-sidebar.collapsed .admin-nav-submenu {
@@ -197,12 +197,14 @@
 }
 
 .admin-sidebar.collapsed .admin-nav-group-header {
-  display: none;
+  display: none; 
 }
 
+/* --- DISEÑO DE LOS ITEMS DE LA LISTA --- */
 .admin-nav li {
   display: flex;
   align-items: center;
+  justify-content: space-between; 
   padding: 10px 20px;
   margin-right: 16px;
   cursor: pointer;
@@ -223,6 +225,13 @@
   border-left: 3px solid #3b82f6; 
   font-weight: 600;
 }
+
+/* Contenedor izquierdo para agrupar icono y texto */
+.admin-nav-item-left {
+  display: flex;
+  align-items: center;
+}
+
 .admin-nav-icon {
   width: 20px;
   height: 20px;
@@ -243,6 +252,32 @@
   margin-left: 14px;
   font-size: 0.95rem;
   white-space: nowrap;
+}
+
+/* ====================================================
+   NUEVO ESTILO DE BADGE (ALERTA NARANJA / AMARILLA)
+   ==================================================== */
+.admin-nav-badge {
+  background-color: #fef3c7; /* Mismo fondo de la alerta */
+  color: #b45309; /* Mismo texto oscuro de la alerta */
+  border: 1px solid #fde68a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+margin-left: revert;
+  transition: all 0.2s ease;
+}
+
+/* Inversión de colores si el ítem está activo (para que no se pierda el contraste) */
+.admin-nav li.active .admin-nav-badge {
+  background-color: #f59e0b; /* Naranja oscuro */
+  color: #ffffff;
+  border-color: #f59e0b;
 }
 
 .admin-sidebar.collapsed .admin-nav li {
@@ -281,6 +316,7 @@
   align-items: center;
   gap: 12px;
 }
+
 .admin-header-left svg {
   width: 22px;
   height: 22px;
@@ -308,7 +344,6 @@
   gap: 20px;
 }
 
-
 .admin-notification-btn,
 .admin-dropdown-btn {
   background: none;
@@ -335,7 +370,6 @@
 .admin-dropdown-btn:hover {
   color: #ef4444; 
 }
-
 
 .admin-user-profile {
   display: flex;
