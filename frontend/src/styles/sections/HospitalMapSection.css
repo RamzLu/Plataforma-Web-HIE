@@ -52,13 +52,12 @@
 }
 
 .map-caption {
-  font-size: 1.3rem;
-  font-weight: 3000;
+  font-size: 15px;
   color: #042b5b;
-  font-style: italic;
-  margin: 0;
-  max-width: 380px;
+  max-width: 450px;
   text-align: right;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .map-filter-tabs {
