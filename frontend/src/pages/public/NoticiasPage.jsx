@@ -624,14 +624,7 @@ const NoticiasPage = () => {
 
             </div>
 
-            <div className="modal-footer-esp">
-              <button
-                className="btn-cerrar-rojo"
-                onClick={() => setSelectedNews(null)}
-              >
-                Cerrar Noticia
-              </button>
-            </div>
+ 
           </div>
         </div>
       )}
