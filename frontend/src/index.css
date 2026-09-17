@@ -6,16 +6,16 @@
 }
 
 html, body {
-  width: 100%;
+  max-width: 100%; /* Cambiado de width a max-width */
   min-height: 100vh;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: #1a1a1a; /* El color oscuro que tienes de fondo actualmente */
-  overflow-x: hidden; /* Evita scroll horizontal indeseado */
+  overflow-x: hidden; 
 }
 
-/* El div raíz de React debe ocupar todo el ancho */
+/* El div raíz de React debe ocupar todo el ancho y bloquear el desbordamiento */
 #root {
-  width: 100%;
+  max-width: 100%; /* Agregado */
+  overflow-x: hidden; /* CRÍTICO: Obliga a móviles a recortar lo que sobra */
   min-height: 100vh;
   display: flex;
   flex-direction: column;

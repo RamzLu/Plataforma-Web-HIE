@@ -10,7 +10,9 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 } 
 
-/* --- SIDEBAR CON ESTILO OSCURO (TIPO SHOPALL) --- */
+/* =========================================
+   SIDEBAR CMS (TIPO SHOPALL - OSCURO)
+========================================= */
 .cms-sidebar {
   background-color: #0a162e;
   color: #8a99af;
@@ -76,7 +78,7 @@
 .cms-logo .logo-title {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #93c5fd; /* Azul más brillante para fondos oscuros */
+  color: #93c5fd; 
   letter-spacing: 0.5px;
 }
 
@@ -85,15 +87,6 @@
   font-weight: 800;
   color: #ffffff;
   letter-spacing: 1px;
-}
-
-.cms-sidebar-menu-title {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #64748b;
-  padding: 24px 20px 5px 20px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
 }
 
 .cms-collapse-btn {
@@ -112,7 +105,7 @@
 }
 
 .cms-collapse-btn:hover {
-  background: #1f3358;
+  background: #082f4e;
   color: #ffffff;
 }
 
@@ -121,7 +114,9 @@
   height: 18px;
 }
 
-/* --- NAVEGACIÓN TIPO SHOPALL --- */
+/* =========================================
+   NAVEGACIÓN Y ACORDEÓN
+========================================= */
 .cms-nav {
   padding: 10px 0;
   display: flex;
@@ -129,49 +124,129 @@
   flex-grow: 1;
 }
 
+/* Ítem standalone (Dashboard General) */
+.cms-nav-standalone {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.cms-nav-standalone.active {
+  border-left-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.cms-nav-standalone .cms-nav-icon {
+  color: #ffffff;
+}
+
+/* Grupos Acordeón */
 .cms-nav-group {
   padding: 10px 0;
   border-bottom: 1px solid #132342;
 }
+
 .cms-nav-group:last-child {
   border-bottom: none;
 }
 
+.cms-nav-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
 .cms-nav-group-title {
-  padding: 0 20px;
   font-size: 0.75rem;
   color: #64748b;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin: 0; 
+  text-transform: uppercase;
+  transition: color 0.2s ease;
 }
 
-.cms-nav ul {
+.cms-nav-group-header:hover .cms-nav-group-title,
+.cms-nav-group-header.active .cms-nav-group-title {
+  color: #ffffff;
+}
+
+/* Icono Chevron del acordeón */
+.accordion-icon {
+  color: #64748b;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease, background-color 0.2s ease;
+}
+
+.accordion-icon:hover {
+  background-color: #082f4e;
+  border-radius: 20px;
+  color: #ffffff;
+}
+
+.cms-nav-group-header.active .accordion-icon {
+  transform: rotate(180deg);
+  background-color: #3b82f6;
+  border-radius: 20px;
+  color: #ffffff;
+}
+
+/* Animación de apertura y cierre de las listas */
+.cms-nav-submenu {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.7s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.cms-nav li {
+.cms-nav-submenu.expanded {
+  max-height: 450px; 
+}
+
+/* Si el sidebar está colapsado, forzamos mostrar los iconos */
+.cms-sidebar.collapsed .cms-nav-submenu {
+  max-height: none;
+  overflow: visible;
+}
+
+.cms-sidebar.collapsed .cms-nav-group-header {
+  display: none; 
+}
+
+/* Diseño de los items de la lista */
+.cms-nav li, .cms-nav-submenu li {
   display: flex;
   align-items: center;
   padding: 10px 20px;
   margin-right: 16px;
   cursor: pointer;
   color: #8a99af;
+  font-size: 0.95rem;
   transition: all 0.2s ease;
   border-radius: 0 8px 8px 0;
   border-left: 3px solid transparent;
 }
 
-.cms-nav li:hover:not(.active) {
+.cms-nav li:hover:not(.active), .cms-nav-submenu li:hover:not(.active) {
   color: #ffffff;
   background-color: transparent;
 }
 
-.cms-nav li.active {
+.cms-nav li.active, .cms-nav-submenu li.active {
   background-color: transparent;
   color: #ffffff;
   border-left: 3px solid #3b82f6; 
@@ -187,27 +262,34 @@
   flex-shrink: 0;
   color: #8a99af;
   transition: color 0.2s;
+  margin-right: 14px; /* Separación entre icono y texto */
 }
 
 .cms-nav li:hover .cms-nav-icon,
-.cms-nav li.active .cms-nav-icon {
+.cms-nav li.active .cms-nav-icon,
+.cms-nav-submenu li:hover .cms-nav-icon,
+.cms-nav-submenu li.active .cms-nav-icon {
   color: #ffffff;
 }
 
 .cms-nav-label {
-  margin-left: 14px;
   font-size: 0.95rem;
   white-space: nowrap;
 }
 
-.cms-sidebar.collapsed .cms-nav li {
+.cms-sidebar.collapsed .cms-nav li,
+.cms-sidebar.collapsed .cms-nav-submenu li {
   justify-content: center;
   padding: 12px 0;
   margin-right: 12px;
 }
 
+.cms-sidebar.collapsed .cms-nav-icon {
+  margin-right: 0; /* Quitamos el margen del icono si no hay texto */
+}
+
 /* =========================================
-   CONTENEDOR PRINCIPAL Y HEADER
+   CONTENEDOR PRINCIPAL Y HEADER CMS
 ========================================= */
 .cms-main-wrapper {
   flex: 1;
@@ -216,7 +298,7 @@
   height: 100vh;
   overflow-y: auto;
   margin-left: 0; 
-  background-color: #f8fafc; /* Fondo gris claro (hielo) para que resalte el blanco */
+  background-color: #f8fafc; 
 }
 
 /* --- HEADER BLANCO LUMINOSO --- */
@@ -247,6 +329,7 @@
   stroke: #64748b;
 }
 
+/* --- BREADCRUMB --- */
 .cms-header-breadcrumb {
   display: flex;
   align-items: center;
@@ -285,27 +368,20 @@
   padding: 8px;
   border-radius: 50%;
   transition: all 0.2s ease;
-}
-
-.cms-notification-btn svg,
-.cms-dropdown-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: #64748b;
-  transition: stroke 0.2s;
+  color: #64748b;
 }
 
 .cms-notification-btn:hover,
 .cms-dropdown-btn:hover {
-  background-color: #f1f5f9; /* Círculo gris suave al hacer hover */
+  background-color: #f1f5f9; 
 }
 
-.cms-notification-btn:hover svg {
-  stroke: #0f172a;
+.cms-notification-btn:hover {
+  color: #0f172a;
 }
 
-.cms-dropdown-btn:hover svg {
-  stroke: #ef4444; /* Rojo al intentar cerrar sesión */
+.cms-dropdown-btn:hover {
+  color: #ef4444; 
 }
 
 /* --- PERFIL DE USUARIO --- */
@@ -314,24 +390,19 @@
   align-items: center;
   gap: 12px;
   padding-left: 20px;
-  border-left: 1px solid #e2e8f0; /* Línea divisoria elegante */
+  border-left: 1px solid #e2e8f0; 
 }
 
-.cms-avatar {
+.cms-user-avatar, .cms-avatar {
   width: 40px;
   height: 40px;
-  background-color: #0a162e; /* Mismo azul marino del sidebar */
+  background-color: #0a162e; 
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(10, 22, 46, 0.15);
-}
-
-.cms-avatar svg {
-  width: 20px;
-  height: 20px;
-  stroke: #ffffff;
+  color: #ffffff;
 }
 
 .cms-user-info {
@@ -373,7 +444,7 @@
 .cms-page-title h1 {
   color: #0c2340;
   font-size: 3.2rem;
-  font-weight: 200;
+  font-weight: 200 !important;
   margin: 5px 0;
 }
 

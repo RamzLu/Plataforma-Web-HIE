@@ -306,18 +306,29 @@
   color: #0c2340;
 }
 /* Adaptación para dispositivos móviles y pantallas pequeñas */
+/* Adaptación para dispositivos móviles y pantallas pequeñas */
 @media screen and (max-width: 768px) {
-  .carousel-container {
-    height: 320px; /* Damos un poquito más de altura para que respire bien el contenido */
+  .carousel-container,
+  .hero-carousel,
+  .carousel-section {
+    height: 380px; /* Damos un poco de altura base */
+    min-height: 380px;
     aspect-ratio: unset;
+  }
+
+  /* === SOLUCIÓN 1: DESPLAZAR LA FOTO EN MÓVILES === */
+  .carousel-inner {
+    /* Forzamos a que la imagen se alinee a la derecha. 
+       Esto "empujará" el logo del Ministerio (que está a la izquierda) 
+       fuera de la pantalla en los celulares. */
+    background-position: right center !important; 
   }
 
   .carousel-static-overlay {
     padding: 0 15px;
     text-align: center;
     justify-content: center;
-    /* Agregamos una ligera capa oscura translúcida para que el texto resalte sobre cualquier imagen */
-    background: rgba(12, 35, 64, 0.35); 
+    background: rgba(12, 35, 64, 0.45); /* Un poco más oscuro para máxima legibilidad */
   }
 
   .carousel-content-box {
@@ -328,16 +339,43 @@
   }
 
   .carousel-title {
-    font-size: 1.15rem; /* Achicamos proporcionalmente para que quepa perfecto sin salirse */
-    line-height: 1.3;
-    margin-bottom: 14px;
+    font-size: 1.4rem; /* Un tamaño ideal y muy legible para celulares */
+    line-height: 1.35;
+    margin-bottom: 20px;
+    margin-top: 20px;
     padding: 0 10px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); /* Reforzamos la sombra para máxima legibilidad */
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); 
   }
 
   .carousel-btn-conocenos {
-    padding: 8px 24px;
-    font-size: 0.8rem;
-    background-color: rgba(12, 35, 64, 0.6); /* Fondo sutil para el botón en mobile */
+    padding: 10px 26px;
+    font-size: 0.85rem;
+    background-color: rgba(12, 35, 64, 0.7);
+  }
+
+  /* === SOLUCIÓN 2: ARREGLAR LOS PUNTITOS (INDICADORES) === */
+  .carousel-dots-container,
+  .carousel-indicators {
+    display: flex !important;
+    flex-direction: row !important; /* Forza a que estén en línea horizontal */
+    justify-content: center;
+    gap: 12px !important;
+    bottom: 20px;
+  }
+
+  .carousel-dot {
+    /* Los forzamos a ser puntos redondos en vez de "palitos" verticales */
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    background-color: rgba(255, 255, 255, 0.4);
+    color: transparent; /* Oculta si es texto/icono de fuente */
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .carousel-dot.active {
+    background-color: #ffffff;
+    transform: scale(1.2);
   }
 }

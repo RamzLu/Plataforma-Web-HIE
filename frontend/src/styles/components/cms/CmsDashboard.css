@@ -90,12 +90,19 @@
 }
 
 .stat-card-violet {
-  background-color: #f3f3f3; /* Lavanda hiper claro */
-  border-radius: 20px;
-  padding: 24px;
+  background-color: #ffffff; 
+  border-radius: 24px;
+  padding: 30px;
   display: flex;
   flex-direction: column;
-  border: none;
+  align-items: flex-start;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); 
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s ease;
+}
+.stat-card-violet:hover {
+   transform: translateY(-4px);
+
 }
 
 .stat-header {
@@ -430,7 +437,10 @@ select.chart-btn:hover, select.chart-btn:focus {
 
 .col-estado {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 170px;
 }
 
 .status-badge {
@@ -442,8 +452,19 @@ select.chart-btn:hover, select.chart-btn:focus {
 }
 
 .status-badge.publicado {
-  background-color: #e2e8f0;
-  color: #0c2340;
+background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
 }
 
 .status-badge.pendiente {
