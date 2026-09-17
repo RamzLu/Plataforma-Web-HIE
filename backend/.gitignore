@@ -1,7 +1,10 @@
 # Dependencias
 node_modules/
+inventario_banners.xls/
 
 # Variables de entorno (¡NUNCA SE COMMITEAN!)
+
+
 .env
 .env.*
 
