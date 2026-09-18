@@ -16,7 +16,11 @@ const HomeMapBanner = () => {
               ambulatorios, quirófanos y accesos principales dentro del Hospital
               Interdistrital Evita.
             </p>
-            <Link to="/contacto#plano-hospital" className="banner-btn">
+            <Link 
+              to="/plano" 
+              onClick={() => window.scrollTo(0, 0)}
+              className="banner-btn"
+            >
               <span>EXPLORAR PLANO INTERACTIVO</span>
               <span className="arrow">→</span>
             </Link>
