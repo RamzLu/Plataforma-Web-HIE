@@ -20,7 +20,6 @@ const CmsConfiguracionView = () => {
   const [isEditingSocial, setIsEditingSocial] = useState(false);
   const [tempSocial, setTempSocial] = useState({ ...socialData });
 
-  // --- ESTADO TARJETA 3: NAVBAR / MENÚS (HARDCODEADO VISUAL) ---
   const [navItems, setNavItems] = useState([
     { id: 1, name: "Inicio", path: "/", visible: true, orden: 1 },
     { id: 2, name: "Especialidades", path: "/especialidades", visible: true, orden: 2 },
@@ -28,7 +27,6 @@ const CmsConfiguracionView = () => {
     { id: 4, name: "Documentación", path: "/documentacion", visible: true, orden: 4 },
     { id: 5, name: "Capacitación", path: "/capacitacion", visible: true, orden: 5 },
     { id: 6, name: "Profesionales", path: "/profesionales", visible: true, orden: 6 },
-    { id: 7, name: "Contacto", path: "/contacto", visible: true, orden: 7 },
     { id: 8, name: "Acerca de", path: "/acerca-de", visible: true, orden: 8 },
   ]);
 

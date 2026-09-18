@@ -65,7 +65,6 @@ const Header = () => {
               <li><Link to="/capacitacion" onClick={handleNavClick} className={`nav-link-item ${isActive("/capacitacion") ? "active" : ""}`}>CAPACITACIÓN</Link></li>
               <li><Link to="/residencias" onClick={handleNavClick} className={`nav-link-item ${isActive("/residencias") ? "active" : ""}`}>RESIDENCIAS</Link></li>
               <li><Link to="/profesionales" onClick={handleNavClick} className={`nav-link-item ${isActive("/profesionales") ? "active" : ""}`}>PROFESIONALES</Link></li>
-              <li><Link to="/contacto" onClick={handleNavClick} className={`nav-link-item ${isActive("/contacto") ? "active" : ""}`}>CONTACTO</Link></li>
               <li><Link to="/acerca-de" onClick={handleNavClick} className={`nav-link-item ${isActive("/acerca-de") ? "active" : ""}`}>ACERCA DE</Link></li>
             </ul>
           </nav>
