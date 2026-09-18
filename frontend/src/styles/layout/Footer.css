@@ -1,149 +1,296 @@
-.main-footer {
+:root {
+  --hf-navy-dark: #081226;
+  --hf-navy-card: #0d223f;
+  --hf-navy-border: #1a355b;
+  --hf-blue-accent: #0284c7;
+  --hf-blue-light: #38bdf8;
+  --hf-text-main: #ffffff;
+  --hf-text-secondary: #94a3b8;
+  --hf-text-muted: #64748b;
+  --hf-border-divider: rgba(255, 255, 255, 0.1);
+  --hf-radius-lg: 12px;
+  --hf-radius-md: 10px;
+}
+
+/* Contenedor Global del Footer */
+.hospital-footer {
   width: 100%;
-  background-color: #0c2340; /* Azul muy oscuro para máximo contraste */
-  color: #ffffff;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  background-color: var(--hf-navy-dark);
+  color: var(--hf-text-main);
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Línea decorativa superior */
+.footer-gradient-accent {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #0284c7 0%, #0066cc 35%, #1a56db 70%, #081226 100%);
 }
 
 .footer-container {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 30px 20px;
-  display: flex;
-  justify-content: space-between;
-  gap: 50px;
-  flex-wrap: wrap; /* Permite que las columnas bajen en pantallas chicas */
+  padding: 60px 32px 30px 32px;
+  box-sizing: border-box;
 }
 
-.footer-col {
+/* Grilla Principal de 3 Columnas */
+.footer-main-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1.2fr 1.2fr;
+  gap: 60px;
+  margin-bottom: 50px;
+}
+
+/* --- COLUMNA 1: MARCA --- */
+.footer-col-brand {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 300px; /* Asegura que no se aprieten demasiado antes de bajar */
 }
 
-/* --- Columna 1: Branding --- */
-.brand-col {
-  gap: 20px;
+.footer-logo-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-radius: var(--hf-radius-lg);
+  margin-bottom: 24px; 
+  max-width: fit-content;
+  text-decoration: none;
+  transition: transform 0.2s ease;
 }
 
-.footer-logo {
-  /* height: 150px; */
+.footer-logo-card:hover {
+  transform: translateY(-2px);
+}
+
+.footer-main-logo-img {
+  height: 110px; 
   width: auto;
   object-fit: contain;
-  filter: brightness(0) invert(1);
+  display: block;
 }
 
-.footer-description {
-  font-size: 1.15rem; /* Letra grande para adultos mayores */
+.footer-brand-mission {
+  font-size: 14px;
   line-height: 1.6;
-  opacity: 0.9;
+  color: var(--hf-text-secondary);
   margin: 0;
+  max-width: 380px;
 }
 
-/* --- Columna 2: Contacto --- */
-.footer-heading {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  margin-top: 0;
-  margin-bottom: 25px;
-  color: #a4c2d6; /* Celeste claro para diferenciar títulos */
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 10px;
-}
-
-.footer-contact-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 20px; /* Mucho espacio entre los ítems para no equivocarse al hacer clic */
-}
-
-.footer-contact-list li {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  font-size: 1.2rem; /* Texto muy legible */
-  font-weight: 500;
-}
-
-.footer-icon {
-  width: 28px;
-  height: 28px;
-  color: #83d4ae; /* Verde contrastante para los iconos */
+.logo-constellation {
+  width: 42px;
+  height: 42px;
   flex-shrink: 0;
 }
 
-.footer-contact-list a {
+.logo-text-block {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.logo-text-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #0284c7;
+}
+
+.logo-text-center {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0d223f;
+}
+
+.logo-text-bottom {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0d223f;
+}
+
+.footer-brand-mission {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--hf-text-secondary);
+  margin: 0;
+  max-width: 380px;
+}
+
+/* --- COLUMNAS 2 & 3: ENCABEZADOS --- */
+.footer-col-heading {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--hf-blue-light);
+  margin: 0 0 10px 0;
+}
+
+.footer-col-divider {
+  width: 100%;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px;
+}
+
+.footer-col-description {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--hf-text-secondary);
+  margin: 0 0 20px 0;
+}
+
+/* --- COLUMNA 2: REDES SOCIALES --- */
+.social-links-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--hf-navy-border);
+  border-radius: var(--hf-radius-md);
   color: #ffffff;
   text-decoration: none;
-  transition:
-    color 0.2s,
-    text-decoration 0.2s;
+  transition: all 0.2s ease;
 }
 
-/* Efecto hover muy evidente para accesibilidad visual */
-.footer-contact-list a:hover,
-.footer-contact-list a:focus {
-  color: #83d4ae;
-  text-decoration: underline;
-  outline: none; /* Focus gestionado por diseño */
+.social-card-btn:hover {
+  background-color: rgba(2, 132, 199, 0.08);
+  border-color: var(--hf-blue-accent);
+  transform: translateY(-2px);
 }
 
-/* --- Columna 3: Logos Gobierno --- */
-.gov-col {
-  gap: 20px;
+.social-card-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.social-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.social-card-btn.facebook-card:hover .social-icon-box {
+  background-color: #1877f2;
+}
+
+.social-card-btn.instagram-card:hover .social-icon-box {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.social-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.social-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.social-handle {
+  font-size: 11px;
+  color: var(--hf-text-secondary);
+  margin-top: 2px;
+}
+
+.social-arrow-icon {
+  color: var(--hf-text-muted);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.social-card-btn:hover .social-arrow-icon {
+  color: #ffffff;
+  transform: translateX(3px);
+}
+
+/* --- COLUMNA 3: RESPALDO GUBERNAMENTAL --- */
+.endorsement-panel {
+  display: flex;
   align-items: flex-start;
+  margin-top: 10px;
+  /* Fondo, bordes y padding eliminados para dejar solo la imagen */
 }
 
-.footer-gov-logo {
+.footer-gov-img {
   max-width: 100%;
   height: auto;
-  /* Aplica filtro blanco si el logo original es de letras oscuras */
-  filter: brightness(0) invert(1);
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+  filter: grayscale(100%) brightness(200%);
 }
 
-/* --- Barra de Copyright Inferior --- */
-.footer-bottom {
-  background-color: #061222; /* Un azul aún más oscuro para el piso */
+.footer-gov-img:hover {
+  opacity: 1;
+}
+
+/* --- BARRA INFERIOR --- */
+.footer-bottom-bar {
+  border-top: 1px solid var(--hf-border-divider);
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  padding: 20px;
+  gap: 6px;
 }
 
-.footer-bottom p {
-  margin: 0;
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.7);
+.bottom-copyright {
+  font-size: 13px;
+  color: #cbd5e1;
 }
 
-/* Responsividad para Tablets y Móviles */
-@media (max-width: 992px) {
-  .footer-container {
-    padding: 50px 20px;
+.bottom-copyright strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.bottom-subtext {
+  font-size: 11.5px;
+  color: var(--hf-text-muted);
+}
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 1024px) {
+  .footer-main-grid {
+    grid-template-columns: 1fr 1fr;
     gap: 40px;
   }
+  .footer-col-endorsement {
+    grid-column: span 2;
+  }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .footer-container {
-    flex-direction: column;
+    padding: 40px 20px 30px 20px;
   }
-
-  .footer-col {
-    min-width: 100%;
+  .footer-main-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
-
-  .footer-logo,
-  .footer-gov-logo {
-    max-width: 250px; /* Evita que los logos queden gigantes en celular */
+  .footer-col-endorsement {
+    grid-column: span 1;
   }
 }

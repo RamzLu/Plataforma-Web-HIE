@@ -1,107 +1,123 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import logosGobierno from "../../assets/logosGobierno.png";
+import logoCompleto from "../../assets/logo-completo.png";
 import "../../styles/layout/Footer.css";
 
-import logoHospital from "../../assets/pngIcon.png";
-import logosGobierno from "../../assets/logosGobierno.png";
-
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="main-footer">
+    <footer className="hospital-footer" role="contentinfo" aria-label="Pie de página institucional">
+      {/* Línea decorativa superior institucional con degradado */}
+      <div className="footer-gradient-accent" aria-hidden="true"></div>
+
       <div className="footer-container">
-        <div className="footer-col brand-col">
-          <img
-            src={logoHospital}
-            alt="Logo Hospital Interdistrital Evita"
-            className="footer-logo"
-          />
-          <p className="footer-description">
-            Brindamos atención médica de excelencia, gratuita y accesible para
-            toda la comunidad. Salud pública conectada.
+        {/* Grilla Principal en 3 Columnas */}
+        <div className="footer-main-grid">
+          
+        <section className="footer-col-brand" aria-label="Identidad Hospitalaria">
+          <Link to="/" className="footer-logo-card" onClick={() => window.scrollTo(0, 0)}>
+            <img 
+              src={logoCompleto} 
+              alt="Hospital Interdistrital Evita" 
+              className="footer-main-logo-img" 
+            />
+          </Link>
+
+          <p className="footer-brand-mission">
+            Brindamos atención médica de excelencia, gratuita y accesible para toda la comunidad formoseña y la región. Centro de referencia en alta complejidad, docencia e investigación aplicada.
           </p>
-        </div>
+        </section>
 
-        <div className="footer-col contact-col">
-          <h3 className="footer-heading">INFORMACIÓN DE CONTACTO</h3>
-          <ul className="footer-contact-list">
-            <li>
-              <span className="footer-icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                </svg>
-              </span>
+          {/* COLUMNA 2: Canales Digitales Oficiales */}
+          <section className="footer-col-social" aria-labelledby="heading-canales-oficiales">
+            <h2 id="heading-canales-oficiales" className="footer-col-heading">CANALES OFICIALES</h2>
+            <div className="footer-col-divider"></div>
+            <p className="footer-col-description">
+              Siga nuestras novedades sobre campañas sanitarias y partes de salud en redes:
+            </p>
+
+            <div className="social-links-container">
+              {/* Facebook */}
               <a
-                href="tel:+5493704673728"
-                aria-label="Llamar al teléfono +54 9 3704673728"
+                href="https://facebook.com/redevitaformosa"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-card-btn facebook-card"
               >
-                +54 9 3704673728
-              </a>
-            </li>
-
-            <li>
-              <span className="footer-icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="4"></circle>
-                  <path d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0-5.5 8.28"></path>
+                <div className="social-card-left">
+                  <div className="social-icon-box" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </div>
+                  <div className="social-meta">
+                    <span className="social-title">Facebook Oficial</span>
+                    <span className="social-handle">@HospitalInterdistritalEvita</span>
+                  </div>
+                </div>
+                <svg className="social-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
                 </svg>
-              </span>
+              </a>
+
+              {/* Instagram */}
               <a
-                href="mailto:portalevita@gmail.com"
-                aria-label="Enviar correo a portalevita@gmail.com"
+                href="https://instagram.com/redevitaformosa"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-card-btn instagram-card"
               >
-                portalevita@gmail.com
-              </a>
-            </li>
-
-            <li>
-              <span className="footer-icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
+                <div className="social-card-left">
+                  <div className="social-icon-box" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                    </svg>
+                  </div>
+                  <div className="social-meta">
+                    <span className="social-title">Instagram Oficial</span>
+                    <span className="social-handle">@hospitalevitaformosa</span>
+                  </div>
+                </div>
+                <svg className="social-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
                 </svg>
-              </span>
-              <span aria-label="Dirección: Avenida 28 de Junio Número 250, Formosa">
-                Av. 28 de Junio N° 250, Formosa
-              </span>
-            </li>
-          </ul>
+              </a>
+            </div>
+          </section>
+
+          {/* COLUMNA 3: Respaldo Institucional Gubernamental */}
+          <aside className="footer-col-endorsement" aria-labelledby="heading-respaldo-institucional">
+            <h2 id="heading-respaldo-institucional" className="footer-col-heading">RESPALDO INSTITUCIONAL</h2>
+            <div className="footer-col-divider"></div>
+            <p className="footer-col-description">
+              Integrados al Sistema de Salud Provincial de Formosa:
+            </p>
+            
+            <div className="endorsement-panel">
+              <img 
+                src={logosGobierno} 
+                alt="Ministerio de Desarrollo Humano - Gobierno de Formosa" 
+                className="footer-gov-img"
+              />
+            </div>
+          </aside>
+
         </div>
 
-        <div className="footer-col gov-col">
-          <h3 className="footer-heading">RESPALDO INSTITUCIONAL</h3>
-          <img
-            src={logosGobierno}
-            alt="Ministerio de Desarrollo Humano y Gobierno de Formosa"
-            className="footer-gov-logo"
-          />
+        {/* Barra Inferior Centrada */}
+        <div className="footer-bottom-bar">
+          <div className="bottom-copyright">
+            © {currentYear} <strong>Hospital Interdistrital Evita - Formosa.</strong> Todos los derechos reservados.
+          </div>
+          <div className="bottom-subtext">
+            Red de Salud Pública Provincial • Ministerio de Desarrollo Humano • Gobierno de la Provincia de Formosa.
+          </div>
         </div>
-      </div>
 
-      <div className="footer-bottom">
-        <p>
-          © {new Date().getFullYear()} Hospital Interdistrital Evita - Formosa.
-          Todos los derechos reservados.
-        </p>
       </div>
     </footer>
   );
