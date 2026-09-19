@@ -1,0 +1,12 @@
+{
+  "name": "mi-proyecto-hospital",
+  "version": "1.0.0",
+  "scripts": {
+    "front": "npm run dev --prefix frontend",
+    "back": "npm run dev --prefix backend",
+    "dev": "concurrently \"npm run back\" \"npm run front\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}
