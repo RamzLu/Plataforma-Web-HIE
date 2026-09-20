@@ -55,40 +55,41 @@ const CmsPage = () => {
   const isKeycloakInitialized = useRef(false);
 
 const fetchNoticias = async () => {
-    try {
-      setLoading(true);
-      // Se agrega el parámetro ?admin=true
-      const response = await fetch("http://localhost:3000/api/cms/noticias?admin=true");
-      if (!response.ok)
-        throw new Error("Error al obtener noticias del servidor");
-      const data = await response.json();
+  try {
+    setLoading(true);
+    const response = await fetch("http://localhost:3000/api/cms/noticias?admin=true");
+    if (!response.ok) throw new Error("Error al obtener noticias del servidor");
+    const data = await response.json();
 
-      if (data && data.length > 0) {
-        const noticiasFormateadas = data.map((noticia) => ({
-          id: noticia.id,
-          title: noticia.titulo || noticia.title,
-          body: [noticia.contenido || noticia.body],
-          date: noticia.createdAt
-            ? new Date(noticia.createdAt).toLocaleDateString("es-AR")
-            : "Hoy",
-          createdAt: noticia.createdAt,
-          updatedAt: noticia.updatedAt,
-          category: "Noticias",
-          estado: noticia.estado || "PUBLICADO",
-          isDraft: noticia.isDraft || false,
-          images: noticia.images || [],
-          editor: noticia.editor || "Editor CMS", 
-          editedBy: noticia.editedBy || null
-        }));
-        
-        setNewsList(noticiasFormateadas);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    if (data && data.length > 0) {
+      const noticiasFormateadas = data.map((noticia) => ({
+        id: noticia.id,
+        title: noticia.titulo || noticia.title,
+        body: Array.isArray(noticia.body) ? noticia.body : [noticia.contenido || noticia.body],
+        date: noticia.createdAt
+          ? new Date(noticia.createdAt).toLocaleDateString("es-AR")
+          : "Hoy",
+        createdAt: noticia.createdAt,
+        updatedAt: noticia.updatedAt,
+        fechaPublicacion: noticia.fechaPublicacion || null,
+        category: noticia.category || "General",
+        estado: noticia.estado || "PUBLICADO",
+        isDraft: noticia.isDraft || false,
+        images: noticia.images || [],
+        editor: noticia.editor || "Editor CMS",
+        editedBy: noticia.editedBy || null
+      }));
+
+      setNewsList(noticiasFormateadas);
+    } else {
+      setNewsList([]);
     }
-  };
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchDocs = async () => {
     try {
@@ -186,20 +187,18 @@ const handleDeleteDoc = (id) => {
       });
   }, [newsList]);
 
-  const updateStats = (currentNews, currentDocs = docsList) => {
-    const publicadas = currentNews.filter((news) => !news.isDraft).length;
-    const borradoresPendientes = currentNews.filter(
-      (news) => news.isDraft,
-    ).length;
-    const totalDocumentos = currentDocs ? currentDocs.length : 0; 
+const updateStats = (currentNews, currentDocs = docsList) => {
+  const publicadas = currentNews.filter((n) => n.estado === "PUBLICADO").length;
+  const borradoresPendientes = currentNews.filter((n) => n.estado === "BORRADOR").length;
+  const totalDocumentos = currentDocs ? currentDocs.length : 0;
 
-    setDashboardStats({
-      contenidoPublicado: publicadas,
-      borradores: borradoresPendientes,
-      documentosActivos: totalDocumentos,
-      visitas: "0",
-    });
-  };
+  setDashboardStats({
+    contenidoPublicado: publicadas,
+    borradores: borradoresPendientes,
+    documentosActivos: totalDocumentos,
+    visitas: "0",
+  });
+};
 
   const handleAddNewNews = (nuevaNoticia) => {
     const updatedList = [nuevaNoticia, ...newsList];
