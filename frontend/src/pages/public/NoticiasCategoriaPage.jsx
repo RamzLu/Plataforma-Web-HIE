@@ -131,7 +131,7 @@ const NoticiasCategoriaPage = () => {
         </div>
       </div>
 
-      <div className="noticias-page-container" style={{ padding: "60px 20px", maxWidth: "1300px", margin: "0 auto" }}>
+      <div className="noticias-page-container" style={{ padding: "60px 20px", margin: "0 auto" }}>
         
         {loading ? (
           <div style={{ padding: "80px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
