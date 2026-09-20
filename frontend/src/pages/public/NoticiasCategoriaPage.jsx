@@ -88,9 +88,45 @@ const fetchNoticiasCategoria = async () => {
             currentPage={dbCategoryName?.toUpperCase()} 
             />
           <h1 className="news-main-title">NOTICIAS: {dbCategoryName?.toUpperCase()}</h1>
-          <div className="news-info-wrapper">
+<div className="news-info-wrapper">
             <div className="news-info-text">
               <p>Artículos médicos, novedades y campañas de concientización sobre {dbCategoryName}.</p>
+              
+              {/* NUEVO BOTÓN DE VOLVER */}
+              <button 
+                onClick={() => navigate('/noticias')}
+                style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  marginTop: '20px', 
+                  padding: '10px 20px', 
+                  backgroundColor: '#006eb3', 
+                  color: '#ffffff', 
+                  border: 'none', 
+                  borderRadius: '6px', 
+                  cursor: 'pointer', 
+                  fontWeight: '600', 
+                  fontSize: '0.9rem',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 6px rgba(0, 110, 179, 0.2)'
+                }}
+                onMouseOver={(e) => { 
+                  e.currentTarget.style.backgroundColor = '#004d80'; 
+                  e.currentTarget.style.transform = 'translateY(-2px)'; 
+                }}
+                onMouseOut={(e) => { 
+                  e.currentTarget.style.backgroundColor = '#006eb3'; 
+                  e.currentTarget.style.transform = 'translateY(0)'; 
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Volver a Noticias Generales
+              </button>
+
             </div>
           </div>
         </div>
