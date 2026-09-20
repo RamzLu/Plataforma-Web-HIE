@@ -266,8 +266,14 @@
     padding: 4px;
   }
 
+  .header-controls {
+    margin-left: auto; 
+  }
+
   .nav-actions-group {
     gap: 10px;
+    min-width: auto; 
+    justify-content: flex-end;
   }
 
   .action-text-wrapper {
@@ -287,7 +293,7 @@
     background: transparent;
   }
   
- .blueprint-icon {
+  .blueprint-icon {
     margin: 0 !important; 
     flex-shrink: 0;
   }
