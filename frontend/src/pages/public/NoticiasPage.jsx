@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
 import "../../styles/pages/NoticiasPage.css";
 import Breadcrumb from "../../components/Breadcrumb";
@@ -21,94 +21,47 @@ import imgAlta2 from "../../assets/fondoCARRUSELnoticias2.jpg";
 import imgAlta3 from "../../assets/fondoCARRUSELnoticias3.jpg";
 import imgAlta4 from "../../assets/fondoCARRUSELnoticias4.jpg";
 
-import folletoCD1 from "../../assets/folletoCD1.jpg";
-import folletoCD2 from "../../assets/folletoCD2.jpg";
-import folletoCD3 from "../../assets/folletoCD3.jpg";
-import folletoCD4 from "../../assets/folletoCD4.jpg";
-import folletoCD5 from "../../assets/folletoCD5.jpg";
-import folletoEjemplo from "../../assets/folletoCD5.jpg";
-
-const medicalArticles = [
+// Array de categorías que actuarán como botones de navegación
+const categoriasDestacadas = [
   {
     id: 1,
     title: "CÁNCER DE MAMA",
+    slug: "cancer-mama",
     color: "#005c89",
     icon: iconMamaStatic,
     iconAnimated: iconMama,
-    subtitle: "Prevenir es curar. Chequeos anuales.",
-    description: [
-      "La detección temprana del cáncer de mama salva vidas. Realizarte los controles anuales y conocer tu cuerpo es fundamental para cuidar tu salud.",
-    ],
-    campaignImages: [
-      folletoCD1,
-      folletoCD2,
-      folletoCD3,
-      folletoCD4,
-      folletoCD5,
-    ],
   },
   {
     id: 2,
     title: "TU CORAZÓN",
+    slug: "tu-corazon",
     color: "#005c89",
     icon: iconCorazonStatic,
     iconAnimated: iconCorazon,
-    subtitle: "Cuidá tu motor de vida",
-    description: [
-      "Mantener una dieta equilibrada, hacer ejercicio regularmente y controlar tu presión arterial son pasos clave para un corazón sano.",
-    ],
-    campaignImages: [
-      folletoEjemplo,
-      folletoEjemplo,
-      folletoEjemplo,
-      folletoCD2,
-    ],
   },
   {
     id: 3,
     title: "DONACIÓN",
+    slug: "donacion",
     color: "#005c89",
     icon: iconDonacionStatic,
     iconAnimated: iconDonacion,
-    subtitle: "Doná sangre. Salvá vidas",
-    description: [
-      "Hoy te compartimos todo lo que necesitás saber sobre la donación de sangre: quiénes pueden donar, cuáles son los requisitos básicos, algunos mitos y verdades, y por qué es tan importante que más personas se sumen a esta cadena de solidaridad.",
-      "Donar sangre es un acto voluntario, seguro y fundamental.",
-      "Una sola donación puede ayudar a varias personas.",
-      "La sangre no se fabrica: solo puede obtenerse gracias a la generosidad de los donantes.",
-    ],
-    campaignImages: [
-      folletoEjemplo,
-      folletoEjemplo,
-      folletoEjemplo,
-      folletoEjemplo,
-      folletoEjemplo,
-    ],
   },
   {
     id: 4,
     title: "DENGUE",
+    slug: "dengue",
     color: "#005c89",
     icon: iconDengueStatic,
     iconAnimated: iconDengue,
-    subtitle: "Sin mosquito no hay dengue",
-    description: [
-      "Eliminar los criaderos de mosquitos en nuestros hogares es la principal medida de prevención contra el dengue, zika y chikungunya.",
-    ],
-    campaignImages: [
-      folletoEjemplo,
-      folletoEjemplo,
-      folletoEjemplo,
-      folletoEjemplo,
-    ],
   },
 ];
 
 const miniCarouselData = [
-  { id: 1, img: imgAlta1 },
-  { id: 2, img: imgAlta2 },
-  { id: 3, img: imgAlta3 },
-  { id: 4, img: imgAlta4 },
+  { id: 1, img: imgAlta1, caption: "Campañas de prevención" },
+  { id: 2, img: imgAlta2, caption: "Infraestructura médica" },
+  { id: 3, img: imgAlta3, caption: "Atención especializada" },
+  { id: 4, img: imgAlta4, caption: "Tecnología de vanguardia" },
 ];
 
 const cleanHtmlText = (html) => {
@@ -177,10 +130,9 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
 
 const NoticiasPage = () => {
   const sliderRef = useRef(null);
-  const modalSliderRef = useRef(null);
   const { hash } = useLocation();
+  const navigate = useNavigate();
 
-  const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedNews, setSelectedNews] = useState(null);
   const [altaIndex, setAltaIndex] = useState(0);
   const [noticias, setNoticias] = useState([]);
@@ -198,16 +150,6 @@ const NoticiasPage = () => {
     if (sliderRef.current) {
       const scrollAmount = 360;
       sliderRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const scrollModal = (direction) => {
-    if (modalSliderRef.current) {
-      const scrollAmount = modalSliderRef.current.offsetWidth;
-      modalSliderRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
       });
@@ -238,23 +180,24 @@ const NoticiasPage = () => {
   }, [hash]);
 
   useEffect(() => {
-    const fetchNoticiasPublicas = async () => {
+const fetchNoticiasPublicas = async () => {
       setLoading(true);
       try {
-        // Usamos nuestra capa de API limpia
         const data = await getNoticias(false);
 
-        // Ya no necesitamos tanto formateo porque nuestro nuevo backend 
-        // devuelve los datos exactamente como los espera el frontend,
-        // pero mantenemos un mapeo de seguridad:
-        const noticiasFormateadas = data.map(noticia => ({
-          id: noticia.id,
-          title: noticia.title || noticia.titulo,
-          body: noticia.body || [noticia.contenido],
-          date: noticia.date || "Hoy",
-          category: "Noticias",
-          images: noticia.images || []
-        }));
+        const noticiasFormateadas = data
+          .filter(noticia => {
+            const catName = (noticia.category || "general").trim().toLowerCase();
+            return catName === "general" || catName === "noticias";
+          })
+          .map(noticia => ({
+            id: noticia.id,
+            title: noticia.title || noticia.titulo,
+            body: noticia.body || [noticia.contenido],
+            date: noticia.date || "Hoy",
+            category: "General",
+            images: noticia.images || []
+          }));
 
         setNoticias(noticiasFormateadas);
       } catch (error) {
@@ -341,7 +284,7 @@ const NoticiasPage = () => {
           </div>
         ) : (
           <div style={{ padding: "60px 0", textAlign: "center", color: "#64748b", width: "100%" }}>
-            No hay publicaciones recientes.
+            No hay publicaciones recientes en la categoría General.
           </div>
         )}
 
@@ -353,9 +296,9 @@ const NoticiasPage = () => {
               </h4>
               <div className="medical-divider"></div>
               <h2 className="medical-title">
-                ARTÍCULOS
+                NOTICIAS
                 <br />
-                MÉDICOS
+                ESPECIFICAS
               </h2>
             </div>
 
@@ -397,23 +340,23 @@ const NoticiasPage = () => {
           </div>
 
           <div className="articles-grid">
-            {medicalArticles.map((article) => (
+            {categoriasDestacadas.map((cat) => (
               <button
-                key={article.id}
+                key={cat.id}
                 className="article-card"
-                onClick={() => setSelectedArticle(article)}
+                onClick={() => navigate(`/noticias/${cat.slug}`)}
               >
-                <h3 style={{ color: article.color }}>{article.title}</h3>
+                <h3 style={{ color: cat.color }}>{cat.title}</h3>
 
                 <div className="article-icon-wrapper">
                   <img
-                    src={article.icon}
-                    alt={article.title}
+                    src={cat.icon}
+                    alt={cat.title}
                     className="icon-static"
                   />
                   <img
-                    src={article.iconAnimated}
-                    alt={`${article.title} animado`}
+                    src={cat.iconAnimated}
+                    alt={`${cat.title} animado`}
                     className="icon-animated"
                   />
                 </div>
@@ -439,117 +382,6 @@ const NoticiasPage = () => {
         </section>
       </div>
 
-      {selectedArticle && (
-        <div className="modal-overlay" onClick={() => setSelectedArticle(null)}>
-          <div
-            className="modal-content-esp"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header-esp">
-              <h2>{selectedArticle.title}</h2>
-              <button
-                className="btn-close-modal"
-                onClick={() => setSelectedArticle(null)}
-                title="Cerrar ventana"
-              >
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
-
-            <div className="modal-body-esp">
-              <div className="modal-author-row">
-                <div className="hospital-avatar">
-                  <img src={avatarHospital} alt="Avatar Hospital" />
-                </div>
-                <div className="author-meta">
-                  <h3>Hospital Interdistrital Evita Formosa</h3>
-                  <span>Espacio de Educación en Salud</span>
-                </div>
-              </div>
-
-              <div className="info-section">
-                <h4 className="info-title">
-                  <span className="info-icon">
-                    <svg viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="16" x2="12" y2="12"></line>
-                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                  </span>
-                  {selectedArticle.subtitle}
-                </h4>
-
-                <div className="article-paragraphs-box">
-                  {selectedArticle.description.map((paragraph, idx) => (
-                    <p key={idx} className="info-text">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              </div>
-
-              {selectedArticle.campaignImages &&
-                selectedArticle.campaignImages.length > 0 && (
-                  <div className="info-section">
-                    <h4 className="info-title">
-                      <span className="info-icon">
-                        <svg viewBox="0 0 24 24">
-                          <rect
-                            x="3"
-                            y="3"
-                            width="18"
-                            height="18"
-                            rx="2"
-                            ry="2"
-                          ></rect>
-                          <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                          <polyline points="21 15 16 10 5 21"></polyline>
-                        </svg>
-                      </span>
-                      MATERIAL INFORMATIVO Y FOLLETERÍA
-                    </h4>
-
-                    <div className="modal-slider-container">
-                      {selectedArticle.campaignImages.length > 3 && (
-                        <button
-                          className="modal-arrow modal-left"
-                          onClick={() => scrollModal("left")}
-                        >
-                          &#10094;
-                        </button>
-                      )}
-
-                      <div className="modal-slider" ref={modalSliderRef}>
-                        {selectedArticle.campaignImages.map((img, idx) => (
-                          <div
-                            className="modal-campaign-img"
-                            key={idx}
-                            onClick={() =>
-                              openLightbox(selectedArticle.campaignImages, idx)
-                            }
-                          >
-                            <img src={img} alt={`Folleto ${idx + 1}`} />
-                          </div>
-                        ))}
-                      </div>
-
-                      {selectedArticle.campaignImages.length > 3 && (
-                        <button
-                          className="modal-arrow modal-right"
-                          onClick={() => scrollModal("right")}
-                        >
-                          &#10095;
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-            </div>
-          </div>
-        </div>
-      )}
       {selectedNews && (
         <div className="modal-overlay" onClick={() => setSelectedNews(null)}>
           <div
@@ -571,7 +403,6 @@ const NoticiasPage = () => {
 
             <div className="modal-body-esp">
               
-              {/* COLUMNA IZQUIERDA: Textos y detalles */}
               <div className="modal-left-content">
                 <div className="modal-author-row">
                   <div className="hospital-avatar">
@@ -596,7 +427,6 @@ const NoticiasPage = () => {
                 </div>
               </div>
 
-              {/* COLUMNA DERECHA: Mosaico Dinámico (Estilo Facebook) */}
               {selectedNews.images && selectedNews.images.length > 0 && (
                 <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
                   {selectedNews.images.slice(0, 4).map((img, index) => {
@@ -623,13 +453,11 @@ const NoticiasPage = () => {
               )}
 
             </div>
-
- 
           </div>
         </div>
       )}
 
-{lightbox.isOpen && (
+      {lightbox.isOpen && (
         <div 
           className="lightbox-overlay" 
           style={{ zIndex: 999999 }} 

@@ -22,6 +22,7 @@ import AboutPage from "./pages/public/AboutPage";
 import CmsPage from "./pages/cms/CmsPage";
 import AdminPage from './pages/admin/AdminPage';
 import PlanoInstitucionalPage from "./pages/public/PlanoInstitucionalPage";
+import NoticiasCategoriaPage from "./pages/public/NoticiasCategoriaPage";
 
 const AppLayout = () => {
   const location = useLocation();
@@ -39,6 +40,7 @@ const AppLayout = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/especialidades" element={<EspecialidadesPage />} />
         <Route path="/noticias" element={<NoticiasPage />} />
+        <Route path="/noticias/:categoria" element={<NoticiasCategoriaPage />} />
         <Route path="/documentacion" element={<DocumentacionPage />} />
         <Route path="/profesionales" element={<ProfesionalesPage />} />
         <Route path="/capacitacion" element={<CapacitacionPage />} />
