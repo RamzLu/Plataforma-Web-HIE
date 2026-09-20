@@ -134,12 +134,9 @@
 /* =========================================
    VISTA 2: GRILLA DE ESPECIALIDADES
 ========================================= */
-/* =========================================
-   VISTA 2: CABECERA DE LA GRILLA (LAYOUT FLEXIBLE)
-========================================= */
 .esp-grid-header {
   display: flex;
-  flex-direction: column; /* Apila el botón arriba y el texto abajo */
+  flex-direction: column;
   align-items: flex-start;
   gap: 16px;
   width: 100%;
@@ -148,7 +145,7 @@
 }
 
 .btn-volver {
-  position: relative; /* ¡SIN position: absolute! */
+  position: relative;
   top: auto;
   left: auto;
   transform: none;
@@ -191,7 +188,7 @@
 
 .specialties-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columnas como en la imagen */
+  grid-template-columns: repeat(3, 1fr);
   gap: 25px;
   width: 100%;
 }
@@ -199,7 +196,7 @@
 .specialty-card {
   background-color: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 16px; /* Borde redondeado elegante */
+  border-radius: 16px;
   padding: 35px 20px;
   display: flex;
   justify-content: center;
@@ -218,7 +215,7 @@
 }
 
 .specialty-card h3 {
-  color: #006eb3; /* Azul vibrante */
+  color: #006eb3;
   font-size: 1.15rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -227,38 +224,41 @@
 }
 
 /* =========================================
-   ESTILOS DEL MODAL (POP-UP)
+   ESTILOS DEL MODAL
 ========================================= */
-.modal-overlay {
+.esp-aislado-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(15, 23, 42, 0.65); /* Fondo oscuro con blur */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(15, 23, 42, 0.45); /* Fondo oscuro suavizado */
+  backdrop-filter: blur(12px); /* Blur elegante y moderno */
+  -webkit-backdrop-filter: blur(12px);
   z-index: 2000;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
-  animation: fadeIn 0.2s ease-out;
+  animation: espFadeInOverlay 0.3s ease-out forwards;
 }
 
-.modal-content-esp {
-  background-color: #f8fafc; /* Un fondo apenitas gris muy claro para diferenciar del blanco */
+.esp-aislado-content {
+  background-color: #f8fafc;
   width: 100%;
   max-width: 650px;
   padding: 0;
   position: relative;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  border-radius: 15px; /* Bordes suaves minimalistas */
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.15); /* Sombra amplia, difuminada y elegante */
   display: flex;
-  flex-direction: column;
+  flex-direction: column !important;
   overflow: hidden;
+  opacity: 0; 
+  animation: espFadeInSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.modal-header-esp {
+.esp-aislado-header {
   background-color: #ffffff;
   padding: 30px 40px;
   border-bottom: 1px solid #e2e8f0;
@@ -267,30 +267,29 @@
   align-items: center;
 }
 
-.modal-header-esp h2 {
+.esp-aislado-header h2 {
   color: #006eb3;
   font-size: 1.6rem;
-  font-weight: 800;
+  font-weight: 200;
   text-transform: uppercase;
   margin: 0;
   letter-spacing: 0.5px;
 }
 
-.modal-body-esp {
+.esp-aislado-body {
   padding: 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
+  display: grid;
+  gap: 30px 40px; 
+  align-items: start; 
 }
 
-/* Estilos de las secciones del modal (adaptados a la imagen) */
-.info-section {
+.esp-aislado-info-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.info-title {
+.esp-aislado-info-title {
   font-size: 1.05rem;
   font-weight: 700;
   color: #1e293b;
@@ -300,58 +299,62 @@
   margin: 0;
 }
 
-.info-text {
+.esp-aislado-info-text {
   font-size: 1rem;
   color: #334155;
   margin: 0;
   line-height: 1.5;
 }
 
-.info-text.italic {
+.esp-aislado-info-text.italic {
   font-style: italic;
   color: #475569;
 }
 
-.info-row {
+.esp-aislado-info-row {
   display: flex;
   align-items: flex-start;
   gap: 10px;
 }
 
-.info-icon {
+.esp-aislado-info-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0c2340; /* Azul oscuro institucional */
-  margin-right: 5px; /* Pequeño margen para separarlo del texto */
+  color: #0c2340; 
+  margin-right: 5px; 
+  transition: all 0.3s ease; /* Transición para micro-interacción */
 }
 
-/* Estilo que aplicará automáticamente a todos los SVG dentro de .info-icon */
-.info-icon svg {
+/* Efecto hover sobre toda la sección para hacer saltar levemente el icono */
+.esp-aislado-info-section:hover .esp-aislado-info-icon {
+  transform: scale(1.1);
+  color: #006eb3;
+}
+
+.esp-aislado-info-icon svg {
   width: 22px;
   height: 22px;
   fill: none;
-  stroke: currentColor; /* Hereda el azul oscuro de arriba */
+  stroke: currentColor; 
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-/* Texto destacado en rojo (como el DNI en la imagen) */
-.text-danger {
+.esp-aislado-text-danger {
   color: #dc2626;
   font-weight: 700;
 }
 
-/* Footer del modal con el botón rojo */
-.modal-footer-esp {
+.esp-aislado-footer {
   padding: 0 40px 40px 40px;
   display: flex;
   justify-content: center;
 }
 
-.btn-cerrar-rojo {
-  background-color: #e11d48; /* Rojo elegante */
+.esp-aislado-btn-cerrar {
+  background-color: #e11d48; 
   color: #ffffff;
   border: none;
   border-radius: 50px;
@@ -361,28 +364,17 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(225, 29, 72, 0.25);
+  transition: all 0.3s ease; /* Transición fluida UX */
 }
 
-.btn-cerrar-rojo:hover {
+.esp-aislado-btn-cerrar:hover {
   background-color: #be123c;
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(225, 29, 72, 0.4);
+  box-shadow: 0 8px 20px rgba(225, 29, 72, 0.35); /* Sombra elegante al hacer hover */
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-/* Botón [X] de cerrar en la cabecera del modal */
-.btn-close-modal {
+.esp-aislado-btn-close {
   background: none;
   border: none;
   color: #94a3b8;
@@ -392,16 +384,16 @@
   justify-content: center;
   padding: 8px;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease; /* Transición fluida UX */
 }
 
-.btn-close-modal:hover {
+.esp-aislado-btn-close:hover {
   background-color: #fee2e2;
-  color: #e11d48; /* Se pone rojo al pasar el ratón */
-  transform: rotate(90deg);
+  color: #e11d48; 
+  transform: rotate(90deg); /* Animación lúdica al botón de cerrar */
 }
 
-.btn-close-modal svg {
+.esp-aislado-btn-close svg {
   width: 24px;
   height: 24px;
   stroke: currentColor;
@@ -410,8 +402,7 @@
   stroke-linejoin: round;
 }
 
-/* Ajuste para que la lista de requisitos se vea elegante */
-.requisitos-lista {
+.esp-aislado-requisitos-lista {
   margin: 5px 0 0 0;
   padding-left: 20px;
   display: flex;
@@ -419,16 +410,52 @@
   gap: 8px;
 }
 
-/* =========================================
-   RESPONSIVIDAD
-========================================= */
-@media (max-width: 992px) {
-  .specialties-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablet */
+/* Keyframes para la entrada fluida del Modal */
+@keyframes espFadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
+@keyframes espFadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================
+   RESPONSIVIDAD
+========================================= */
 @media (max-width: 768px) {
+  /* Ajustes del modal aislado para celulares */
+  .esp-aislado-body {
+    grid-template-columns: 1fr; /* Retorna a 1 sola columna */
+    padding: 25px;
+    gap: 25px;
+  }
+
+  .esp-aislado-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .esp-aislado-header {
+    padding: 20px 25px;
+  }
+
+  .esp-aislado-footer {
+    padding: 25px;
+  }
+  
+  /* Ajustes del layout general de la página */
   .esp-header-fluid {
     padding: 100px 20px 40px 20px;
   }
@@ -446,7 +473,6 @@
     grid-template-columns: 1fr;
   }
 
-  /* Ajustes del header en móviles sin solapamientos */
   .esp-grid-header {
     gap: 14px;
     margin-bottom: 25px;
@@ -456,24 +482,10 @@
     font-size: 1.05rem;
     width: 100%;
   }
-
-  .modal-content-esp {
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .modal-header-esp {
-    padding: 20px 25px;
-  }
-
-  .modal-body-esp,
-  .modal-footer-esp {
-    padding: 25px;
-  }
 }
 
 @media (max-width: 600px) {
   .specialties-grid {
-    grid-template-columns: 1fr; /* 1 columna en celulares */
+    grid-template-columns: 1fr; 
   }
 }

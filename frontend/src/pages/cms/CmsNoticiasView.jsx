@@ -1,8 +1,16 @@
 import React, { useState } from "react";
+import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
+
+// Importaciones del Calendario Moderno
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { isToday } from "date-fns";
+import es from "date-fns/locale/es";
+
 import {
   ClassicEditor,
   Essentials,
@@ -16,11 +24,34 @@ import {
   BlockQuote,
   Undo,
   Alignment,
-  SpecialCharacters,
-  SpecialCharactersEssentials
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import "../../styles/components/cms/CmsNoticiasView.css";
+
+registerLocale("es", es);
+
+// Componente visual para los botones del calendario/hora estilo píldora
+const CustomScheduleInput = React.forwardRef(({ value, onClick, icon, placeholder, isDate }, ref) => {
+  let displayValue = value || placeholder;
+  
+  if (isDate && value) {
+    const [dia, mes, anio] = value.split("/");
+    const dateObj = new Date(parseInt(anio), parseInt(mes) - 1, parseInt(dia));
+    if (!isNaN(dateObj) && isToday(dateObj)) {
+      displayValue = "Hoy";
+    }
+  }
+
+  return (
+    <button className="schedule-custom-btn" onClick={onClick} ref={ref} type="button">
+      <span className="schedule-icon">{icon}</span>
+      <span className="schedule-text">{displayValue}</span>
+      <svg className="schedule-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+  );
+});
 
 const CmsNoticiasView = ({
   newsList,
@@ -30,26 +61,50 @@ const CmsNoticiasView = ({
   onViewNews,
   loading,
 }) => {
+  // Lógica de Pestañas
+  const [viewTab, setViewTab] = useState("PUBLICADO");
+
+  // Estados de Modales
   const [showModal, setShowModal] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [showConfirmDraftModal, setShowConfirmDraftModal] = useState(false); 
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Estados del Formulario
   const [editingId, setEditingId] = useState(null);
   const [titulo, setTitulo] = useState("");
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("Noticias");
+  const [estado, setEstado] = useState("BORRADOR");
+  
+  // Cambiado a null para el DatePicker moderno
+  const [fechaProgramada, setFechaProgramada] = useState(null);
+  
   const [imagenesUrls, setImagenesUrls] = useState([]);
-  const [saving, setSaving] = useState(false);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
+  const [saving, setSaving] = useState(false);
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  // Estados de Eliminación
   const [noticiaAEliminar, setNoticiaAEliminar] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+
+  // Filtrar noticias según la pestaña activa
+  const filteredNews = newsList.filter((n) => {
+    const estadoItem = n.estado ? n.estado.toUpperCase() : (n.isDraft ? "BORRADOR" : "PUBLICADO");
+    return estadoItem === viewTab;
+  });
 
   const handleOpenCreate = () => {
     setEditingId(null);
     setTitulo("");
     setCuerpoHtml("");
     setCategoria("Noticias");
+    setEstado("BORRADOR");
+    setFechaProgramada(null);
     setImagenesUrls([]);
     setArchivosSeleccionados([]);
+    setHasUnsavedChanges(false);
     setShowModal(true);
   };
 
@@ -61,13 +116,35 @@ const CmsNoticiasView = ({
     setCuerpoHtml(
       typeof contenidoCrudo === "string"
         ? contenidoCrudo
-        : String(contenidoCrudo),
+        : String(contenidoCrudo)
     );
 
     setCategoria(news.category || "Noticias");
+    setEstado(news.estado ? news.estado.toUpperCase() : (news.isDraft ? "BORRADOR" : "PUBLICADO"));
     setImagenesUrls(news.images || []);
     setArchivosSeleccionados([]);
+    setHasUnsavedChanges(false);
     setShowModal(true);
+
+    if (news.fechaPublicacion) {
+      setFechaProgramada(new Date(news.fechaPublicacion));
+    } else {
+      setFechaProgramada(null);
+    }
+  };
+
+  const handleCloseAttempt = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedModal(true);
+    } else {
+      setShowModal(false);
+    }
+  };
+
+  const handleForceClose = () => {
+    setShowUnsavedModal(false);
+    setShowModal(false);
+    setHasUnsavedChanges(false);
   };
 
   const handleConfirmDeleteClick = (id) => {
@@ -75,7 +152,7 @@ const CmsNoticiasView = ({
     setShowDeleteModal(true);
   };
 
-const handleExecuteDelete = async () => {
+  const handleExecuteDelete = async () => {
     if (!noticiaAEliminar) return;
 
     const id = noticiaAEliminar;
@@ -83,19 +160,13 @@ const handleExecuteDelete = async () => {
 
     try {
       const token = keycloak.token;
-      const response = await fetch(
-        `http://localhost:3000/api/cms/noticias/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("No se pudo eliminar en el servidor");
+      if (!token) {
+        toast.error("Tu sesión ha expirado.");
+        keycloak.login();
+        return;
       }
+
+      await deleteNoticia(id, token);
 
       onDeleteNews(id);
       toast.success("Noticia eliminada correctamente.");
@@ -104,17 +175,20 @@ const handleExecuteDelete = async () => {
       setNoticiaAEliminar(null);
     } catch (error) {
       console.error("Error al eliminar:", error);
-      toast.error("Ocurrió un error al intentar eliminar la noticia.");
+      const backendError = error.response?.data?.error?.message || "Ocurrió un error al intentar eliminar la noticia.";
+      toast.error(backendError);
     } finally {
       setDeletingId(null);
     }
   };
+
   const handleMultipleImagesUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
+      setHasUnsavedChanges(true);
       const regexEspeciales = /[^a-zA-Z0-9.\-_]/;
       const tieneCaracteresEspeciaux = files.some((file) =>
-        regexEspeciales.test(file.name),
+        regexEspeciales.test(file.name)
       );
 
       if (tieneCaracteresEspeciaux) {
@@ -122,27 +196,14 @@ const handleExecuteDelete = async () => {
           "Advertencia: Algunos archivos seleccionados contienen tildes, espacios o caracteres especiales en su nombre y pueden romperse.",
           {
             icon: (
-              <svg
-                width="150"
-                height="150"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#f59e0b"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                 <line x1="12" y1="9" x2="12" y2="13"></line>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
               </svg>
             ),
-            style: {
-              background: "#fff",
-              color: "#b45309",
-              border: "1px solid #f59e0b",
-            },
-          },
+            style: { background: "#fff", color: "#b45309", border: "1px solid #f59e0b" },
+          }
         );
       }
 
@@ -153,14 +214,15 @@ const handleExecuteDelete = async () => {
   };
 
   const handleRemoveImage = (indexToRemove) => {
+    setHasUnsavedChanges(true);
     setImagenesUrls((prev) => prev.filter((_, idx) => idx !== indexToRemove));
     setArchivosSeleccionados((prev) =>
-      prev.filter((_, idx) => idx !== indexToRemove),
+      prev.filter((_, idx) => idx !== indexToRemove)
     );
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
+  const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
+    if (e) e.preventDefault();
 
     const textoContenido =
       typeof cuerpoHtml === "string"
@@ -168,10 +230,24 @@ const handleExecuteDelete = async () => {
         : Array.isArray(cuerpoHtml)
           ? cuerpoHtml[0] || ""
           : String(cuerpoHtml || "");
+          
+    const estadoFinal = forcedEstado || estado;
+
+    if (estadoFinal === "PROGRAMADO" && !fechaProgramada) {
+      toast.error("Por favor, selecciona una fecha y hora para programar la publicación.");
+      setShowUnsavedModal(false);
+      return;
+    }
 
     if (!titulo.trim() || !textoContenido.trim()) {
       toast.error("Por favor completa el título y el contenido.");
+      setShowUnsavedModal(false);
       return;
+    }
+
+    if (estadoFinal === "BORRADOR" && !bypassDraftWarning) {
+      setShowConfirmDraftModal(true);
+      return; 
     }
 
     setSaving(true);
@@ -187,51 +263,63 @@ const handleExecuteDelete = async () => {
       const formData = new FormData();
       formData.append("titulo", titulo);
       formData.append("contenido", textoContenido);
+      formData.append("estado", estadoFinal);
       formData.append("imagenesExistentes", JSON.stringify(imagenesUrls));
+
+      if (estadoFinal === "PROGRAMADO" && fechaProgramada) {
+        formData.append("fechaPublicacion", fechaProgramada.toISOString());
+      }
 
       archivosSeleccionados.forEach((file) => {
         formData.append("imagenes", file);
       });
 
-      const url = editingId
-        ? `http://localhost:3000/api/cms/noticias/${editingId}`
-        : "http://localhost:3000/api/cms/noticias";
+      let data;
+      
+      if (editingId) {
+        data = await updateNoticia(editingId, formData, token);
+        if (estadoFinal === "BORRADOR") {
+          toast.success("Borrador actualizado con éxito.");
+        } else {
+          toast.success("Noticia actualizada con éxito.");
+        }
+      } else {
+        data = await createNoticia(formData, token);
+        if (estadoFinal === "BORRADOR") {
+          toast.success("Borrador guardado con éxito.");
+        } else {
+          toast.success("Noticia creada con éxito.");
+        }
+      }
 
-      const method = editingId ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error al guardar");
-
-const noticiaFormateada = {
+      const noticiaFormateada = {
         id: data.noticia?.id || editingId,
         title: titulo,
         body: [textoContenido],
         date: new Date().toLocaleDateString("es-AR"),
         category: categoria || "Noticias",
-        isDraft: false,
+        estado: estadoFinal,
+        isDraft: estadoFinal === "BORRADOR",
         images: data.noticia?.images || imagenesUrls || [],
         editor: data.noticia?.editor || "Editor CMS", 
-        editedBy: data.noticia?.editedBy || null
+        editedBy: data.noticia?.editedBy || null,
+        fechaPublicacion: data.noticia?.fechaPublicacion || null
       };
 
       if (editingId) {
         if (onUpdateNews) onUpdateNews(noticiaFormateada);
-        toast.success("Noticia actualizada con éxito.");
       } else {
-        onAddNewNews(noticiaFormateada);
-        toast.success("Noticia creada con éxito.");
+        if (onAddNewNews) onAddNewNews(noticiaFormateada);
       }
 
+      setHasUnsavedChanges(false);
+      setShowUnsavedModal(false);
+      setShowConfirmDraftModal(false); 
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
-      toast.error(`Error: ${error.message}`);
+      const backendError = error.response?.data?.error?.message || error.message || "Error al guardar";
+      toast.error(`Error: ${backendError}`);
     } finally {
       setSaving(false);
     }
@@ -248,8 +336,32 @@ const noticiaFormateada = {
             Administre las publicaciones del portal.
           </p>
         </div>
-        <button className="btn-crear-noticia-header" onClick={handleOpenCreate}>
+        <button type="button" className="btn-crear-noticia-header" onClick={handleOpenCreate}>
           + CREAR NOTICIA
+        </button>
+      </div>
+
+      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+        <button
+          type="button"
+          onClick={() => setViewTab("PUBLICADO")}
+          style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: viewTab === "PUBLICADO" ? "#0c2340" : "#fff", color: viewTab === "PUBLICADO" ? "#fff" : "#334155", fontWeight: "600", cursor: "pointer" }}
+        >
+          Publicados
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewTab("BORRADOR")}
+          style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: viewTab === "BORRADOR" ? "#0c2340" : "#fff", color: viewTab === "BORRADOR" ? "#fff" : "#334155", fontWeight: "600", cursor: "pointer" }}
+        >
+          Borradores
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewTab("PROGRAMADO")}
+          style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: viewTab === "PROGRAMADO" ? "#0c2340" : "#fff", color: viewTab === "PROGRAMADO" ? "#fff" : "#334155", fontWeight: "600", cursor: "pointer" }}
+        >
+          Programados
         </button>
       </div>
 
@@ -282,14 +394,14 @@ const noticiaFormateada = {
                 Cargando listado de noticias...
               </span>
             </div>
-          ) : newsList.length === 0 ? (
+          ) : filteredNews.length === 0 ? (
             <div
               style={{ padding: "40px", textAlign: "center", color: "#64748b" }}
             >
-              No hay noticias registradas.
+              No hay noticias registradas en este apartado.
             </div>
           ) : (
-            newsList.map((news) => (
+            filteredNews.map((news) => (
               <div className="activity-row news-table-row" key={news.id}>
                 <div
                   className="col-content"
@@ -310,7 +422,7 @@ const noticiaFormateada = {
                       <div className="news-thumb-mock">HIE</div>
                     )}
                   </div>
-<div 
+                  <div 
                     className="news-title-interactive"
                     onClick={() => onViewNews && onViewNews(news)}
                     title="Ver comunicado completo"
@@ -348,14 +460,23 @@ const noticiaFormateada = {
                   {news.category || "Noticias"}
                 </div>
                 <div className="col-estado">
-                  <span
-                    className={`status-badge ${news.isDraft ? "pendiente" : "publicado"}`}
-                  >
-                    {news.isDraft ? "Pendiente" : "Publicado"}
-                  </span>
+                  <div className="status-wrapper">
+                    
+                    <span className={`status-badge ${news.estado?.toLowerCase() === "publicado" || (!news.isDraft && !news.estado) ? "publicado" : news.estado?.toLowerCase() === "programado" ? "programado" : "pendiente"}`}>
+                      {news.estado === "PROGRAMADO" ? "PROGRAMADO" : (news.estado || (news.isDraft ? "BORRADOR" : "PUBLICADO")).toUpperCase()}
+                    </span>
+                    
+                    {news.estado === "PROGRAMADO" && news.fechaPublicacion && (
+                      <span className="status-programmed-date">
+                        Para: {new Date(news.fechaPublicacion).toLocaleDateString('es-AR')} - {new Date(news.fechaPublicacion).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })} hs
+                      </span>
+                    )}
+                    
+                  </div>
                 </div>
                 <div className="news-actions-cell">
                   <button
+                    type="button"
                     title="Editar"
                     onClick={() => handleOpenEdit(news)}
                     className="news-action-btn-edit"
@@ -375,6 +496,7 @@ const noticiaFormateada = {
                     </svg>
                   </button>
                   <button
+                    type="button"
                     title="Eliminar"
                     onClick={() => handleConfirmDeleteClick(news.id)}
                     className="news-action-btn-delete"
@@ -407,7 +529,7 @@ const noticiaFormateada = {
         </div>
       </div>
 
-{showDeleteModal && (
+      {showDeleteModal && (
         <div
           className="modal-overlay"
           onClick={() => setShowDeleteModal(false)}
@@ -416,8 +538,8 @@ const noticiaFormateada = {
             className="modal-content-esp delete-modal-global"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Botón X flotante */}
             <button
+              type="button"
               className="btn-close-floating"
               onClick={() => setShowDeleteModal(false)}
             >
@@ -428,7 +550,6 @@ const noticiaFormateada = {
             </button>
 
             <div className="delete-modal-body">
-              {/* Ícono de Advertencia */}
               <div className="delete-icon-wrapper">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
@@ -438,8 +559,6 @@ const noticiaFormateada = {
               </div>
 
               <h2 className="delete-modal-title">Estás a punto de eliminar este elemento</h2>
-              
-              {/* Líneas decorativas (opcional, como en tu imagen) */}
               <div className="delete-modal-divider"></div>
 
               <p className="delete-modal-text">
@@ -449,6 +568,7 @@ const noticiaFormateada = {
 
             <div className="delete-modal-footer">
               <button
+                type="button"
                 className="btn-cancelar-gris"
                 onClick={() => setShowDeleteModal(false)}
                 disabled={deletingId === noticiaAEliminar}
@@ -456,6 +576,7 @@ const noticiaFormateada = {
                 Cancelar
               </button>
               <button 
+                type="button"
                 className="btn-cerrar-rojo" 
                 onClick={handleExecuteDelete}
                 disabled={deletingId === noticiaAEliminar}
@@ -475,7 +596,7 @@ const noticiaFormateada = {
       )}
 
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay" onClick={handleCloseAttempt}>
           <div
             className="modal-content-esp news-modal-content news-modal-content-wide"
             onClick={(e) => e.stopPropagation()}
@@ -483,8 +604,9 @@ const noticiaFormateada = {
             <div className="modal-header-esp">
               <h2>{editingId ? "Editar noticia" : "Crear noticia"}</h2>
               <button
+                type="button"
                 className="btn-close-modal"
-                onClick={() => setShowModal(false)}
+                onClick={handleCloseAttempt}
               >
                 <svg viewBox="0 0 24 24" fill="none">
                   <path d="M18 6L6 18M6 6l12 12"></path>
@@ -493,22 +615,85 @@ const noticiaFormateada = {
             </div>
 
             <form
-              onSubmit={handleSave}
+              onSubmit={(e) => handleSave(e)}
               style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
             >
               <div className="modal-split-layout">
-                {/* COLUMNA IZQUIERDA: FORMULARIO */}
                 <div className="news-form-left">
                   <div>
                     <label className="news-form-label">Título de la noticia</label>
                     <input
                       type="text"
                       value={titulo}
-                      onChange={(e) => setTitulo(e.target.value)}
+                      onChange={(e) => { setTitulo(e.target.value); setHasUnsavedChanges(true); }}
                       placeholder="Ingrese el título..."
                       className="news-form-input"
                       required
                     />
+                  </div>
+
+                  <div style={{ display: "flex", gap: "15px", marginTop: "15px", marginBottom: "15px" }}>
+                    <div style={{ flex: 1 }}>
+                      <label className="news-form-label">Estado</label>
+                      <select 
+                        value={estado} 
+                        onChange={(e) => { 
+                          setEstado(e.target.value); 
+                          setHasUnsavedChanges(true); 
+                          if (e.target.value !== "PROGRAMADO") setFechaProgramada(null);
+                        }} 
+                        className="news-form-input"
+                      >
+                        <option value="PUBLICADO">Publicado</option>
+                        <option value="BORRADOR">Borrador</option>
+                        <option value="PROGRAMADO">Programado</option>
+                      </select>
+                    </div>
+
+                    {estado === "PROGRAMADO" && (
+                      <div style={{ flex: 1 }}>
+                        <label className="news-form-label" style={{ display: 'block', marginBottom: '8px' }}>Publicar el:</label>
+                        <div className="schedule-picker-container">
+                          <DatePicker
+                            selected={fechaProgramada}
+                            onChange={(date) => { 
+                              if (fechaProgramada && date) {
+                                date.setHours(fechaProgramada.getHours());
+                                date.setMinutes(fechaProgramada.getMinutes());
+                              }
+                              setFechaProgramada(date); 
+                              setHasUnsavedChanges(true); 
+                            }}
+                            minDate={new Date()}
+                            locale="es"
+                            dateFormat="dd/MM/yyyy"
+                            customInput={
+                              <CustomScheduleInput 
+                                isDate={true}
+                                placeholder="Elegir fecha" 
+                                icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>}
+                              />
+                            }
+                          />
+
+                          <DatePicker
+                            selected={fechaProgramada}
+                            onChange={(date) => { setFechaProgramada(date); setHasUnsavedChanges(true); }}
+                            showTimeSelect
+                            showTimeSelectOnly
+                            timeIntervals={5}
+                            timeCaption="Hora"
+                            dateFormat="HH:mm"
+                            customInput={
+                              <CustomScheduleInput 
+                                placeholder="Elegir hora" 
+                                icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>}
+                              />
+                            }
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -564,17 +749,10 @@ const noticiaFormateada = {
                     >
                       Cuerpo de la noticia
                     </label>
-                    <div
-                      className="ckeditor-wrapper"
-                      style={{
-                        border: "1px solid #cbd5e1",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                      }}
-                    >
+                    <div className="custom-ckeditor-container">
                       <CKEditor
                         editor={ClassicEditor}
-                        data={cuerpoHtml}
+                        data={cuerpoHtml || ""}
                         config={{
                           licenseKey: "GPL",
                           plugins: [
@@ -589,8 +767,6 @@ const noticiaFormateada = {
                             BlockQuote,
                             Undo,
                             Alignment,
-                            SpecialCharacters,
-                            SpecialCharactersEssentials
                           ],
                           toolbar: [
                             "heading",
@@ -601,9 +777,13 @@ const noticiaFormateada = {
                             "link",
                             "bulletedList",
                             "numberedList",
-                            "alignment",
+                            "|",
+                            "alignment:left",
+                            "alignment:center",
+                            "alignment:right",
+                            "alignment:justify",
+                            "|",
                             "blockQuote",
-                            "specialCharacters",
                             "|",
                             "undo",
                             "redo",
@@ -612,24 +792,23 @@ const noticiaFormateada = {
                             options: ["left", "center", "right", "justify"],
                           },
                         }}
-                        onChange={(event, editor) =>
-                          setCuerpoHtml(editor.getData())
-                        }
+                        onChange={(event, editor) => {
+                          setCuerpoHtml(editor.getData());
+                          setHasUnsavedChanges(true);
+                        }}
                       />
                     </div>
                   </div>
                 </div>
+
                 <div className="news-form-right">
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b' }}>Vista previa de la publicación</span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#0ea5e9', backgroundColor: '#e0f2fe', padding: '3px 10px', borderRadius: '12px' }}>100%</span>
                   </div>
 
                   <div className="news-preview-paper" style={{ padding: 0 }}>
-                    {/* Contenedor idéntico al modal-body-esp público */}
                     <div className="preview-mock-modal-body">
                       
-                      {/* Lado Izquierdo de la Preview (Cabecera, Título y Texto) */}
                       <div className="preview-mock-left">
                         <div className="preview-mock-author-row">
                           <div className="preview-avatar-mock">
@@ -654,7 +833,6 @@ const noticiaFormateada = {
                         </div>
                       </div>
 
-                      {/* Lado Derecho de la Preview (Mosaico Dinámico de Imágenes) */}
                       {imagenesUrls.length > 0 ? (
                         <div className={`preview-mosaic-gallery layout-${imagenesUrls.length >= 4 ? 4 : imagenesUrls.length}`}>
                           {imagenesUrls.slice(0, 4).map((img, index) => {
@@ -680,7 +858,7 @@ const noticiaFormateada = {
                             <circle cx="8.5" cy="8.5" r="1.5"></circle>
                             <polyline points="21 15 16 10 5 21"></polyline>
                           </svg>
-                          [Área del mosaico de imágenes]
+                          [Imágenes]
                         </div>
                       )}
                       
@@ -693,7 +871,7 @@ const noticiaFormateada = {
                 <button
                   type="button"
                   className="btn-cancelar-gris"
-                  onClick={() => setShowModal(false)}
+                  onClick={handleCloseAttempt}
                   disabled={saving}
                 >
                   Cancelar
@@ -707,6 +885,124 @@ const noticiaFormateada = {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showConfirmDraftModal && (
+        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
+          <div 
+            style={{ 
+              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
+              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative", zIndex: 999999, display: "flex", flexDirection: "column"
+            }}
+          >
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
+                Guardar como borrador
+              </h2>
+              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
+                El estado de esta noticia es Borrador. No será visible en el portal público hasta que la publiques. ¿Deseas continuar?
+              </p>
+            </div>
+            
+            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <button 
+                type="button" 
+                onClick={(e) => handleSave(e, "BORRADOR", true)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
+                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Sí, guardar borrador
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setShowConfirmDraftModal(false)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
+                  border: "none", borderRadius: "12px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Revisar Estado
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUnsavedModal && (
+        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
+          <div 
+            style={{ 
+              width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", 
+              overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative", zIndex: 999999, display: "flex", flexDirection: "column"
+            }}
+          >
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>
+                Hay cambios sin guardar
+              </h2>
+              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>
+                ¿Qué deseas hacer con la noticia actual?
+              </p>
+            </div>
+            
+            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <button 
+                type="button" 
+                onClick={(e) => handleSave(e, "BORRADOR", true)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Guardar como borrador
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={handleForceClose}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Descartar cambios
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setShowUnsavedModal(false)}
+                style={{ 
+                  width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", 
+                  border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", 
+                  textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px",
+                  transition: "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif"
+                }}
+              >
+                Seguir editando
+              </button>
+            </div>
           </div>
         </div>
       )}

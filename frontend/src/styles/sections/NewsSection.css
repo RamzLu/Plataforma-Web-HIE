@@ -1,0 +1,411 @@
+:root {
+  --editorial-navy: #0d223f;
+  --editorial-cobalt: #5e8df2;
+  --editorial-sky: #0284c7;
+  --editorial-alert: #dc2626;
+  --editorial-border3: #cf3d03;
+  --editorial-border1: #bfc4ff;
+  --editorial-alert-bg: #fef2f2;
+  --editorial-text: #1e293b;
+  --editorial-muted: #64748b;
+  --editorial-line: #cbd5e1;
+  --editorial-card-bg: #f8fafc;
+  --editorial-card-border: #e2e8f0;
+}
+
+/* Contenedor General de la Sección */
+.news-section {
+  width: 100%;
+  background-color: #ffffff; 
+  padding: 80px 20px;
+  display: flex;
+  justify-content: center;
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  color: var(--editorial-text);
+  box-sizing: border-box;
+}
+
+.news-container {
+  max-width: 1100px; /* Alineado con el resto del portal */
+  width: 100%;
+  margin: 0 auto;
+}
+
+.news-header {
+  margin-bottom: 48px;
+}
+
+.news-subtitle {
+  color: var(--editorial-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.news-title {
+  color: #2b5b94;
+  font-size: 2.2rem;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   GRILLA DE 3 COLUMNAS EDITORIALES
+   ========================================================= */
+.editorial-columns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+  align-items: stretch;
+}
+
+/* Columna Editorial */
+.editorial-column {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-top: 20px;
+  height: 100%; /* Obliga a estirarse para alinear botones al fondo */
+}
+
+/* Barra superior de acento (línea fina) */
+.editorial-column::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.col-derivation::before { background-color: var(--editorial-border1); }
+.col-presential::before { background-color: var(--editorial-cobalt); }
+.col-protocol::before { background-color: var(--editorial-border3); }
+
+/* Metadatos superiores (Categoría y Paso) */
+.column-top-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.category-tag {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--editorial-cobalt);
+}
+
+.category-tag.alert-tag {
+  color: var(--editorial-alert);
+}
+
+.step-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--editorial-muted);
+}
+
+/* Títulos Editoriales Grandes en Mayúsculas */
+.editorial-title {
+  font-size: 28px;
+  line-height: 1.18;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--editorial-navy);
+  margin: 0 0 20px 0;
+  transition: transform 0.3s ease, color 0.3s ease;
+  cursor: default;  
+}
+
+.editorial-title:hover {
+  transform: translateX(6px);
+  color: var(--editorial-cobalt);
+}
+
+/* Modificadores para la segunda línea del título */
+.title-light-blue {
+  color: #2b5b94;
+  font-weight: 300; 
+  transition: color 0.3s ease;
+}
+
+.title-light-red {
+  color: var(--editorial-alert);
+  font-weight: 300;
+  transition: color 0.3s ease;
+}
+
+.editorial-title:hover .title-light-blue,
+.editorial-title:hover .title-light-red {
+  color: var(--editorial-navy);
+}
+
+/* Párrafo descriptivo */
+.editorial-lead-text {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #334155;
+  margin: 0 0 24px 0;
+}
+
+.editorial-lead-text strong {
+  color: var(--editorial-navy);
+  font-weight: 700;
+}
+
+/* =========================================================
+   GRILLA DE REQUISITOS (COLUMNA 2)
+   ========================================================= */
+.meta-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.meta-card {
+  background-color: var(--editorial-card-bg);
+  border: 1px solid var(--editorial-card-border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--editorial-muted);
+}
+
+.meta-value {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--editorial-navy);
+}
+
+/* =========================================================
+   BOX DE ALERTA (COLUMNA 3)
+   ========================================================= */
+.editorial-alert-box {
+  background-color: var(--editorial-alert-bg);
+  border-left: 3px solid var(--editorial-alert);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  border-radius: 0 6px 6px 0;
+}
+
+.alert-text {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.5;
+  color: var(--editorial-alert);
+}
+
+.alert-text strong {
+  font-weight: 800;
+}
+
+/* =========================================================
+   LISTA DE SUB-ENLACES CON FLECHA (→)
+   ========================================================= */
+.editorial-links-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+}
+
+.editorial-sublink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--editorial-card-border);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  color: #334155;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.editorial-sublink:first-child {
+  border-top: 1px solid var(--editorial-card-border);
+}
+
+.editorial-sublink:hover {
+  color: var(--editorial-cobalt);
+}
+
+.editorial-sublink .link-arrow {
+  font-size: 14px;
+  color: var(--editorial-muted);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.editorial-sublink:hover .link-arrow {
+  color: var(--editorial-cobalt);
+  transform: translateX(4px);
+}
+
+/* =========================================================
+   BANNER DE SEDE CENTRAL (ESTILO EDITORIAL PLANO)
+   ========================================================= */
+.location-banner {
+  background: #ffffff;
+  border: 1px solid var(--editorial-card-border);
+  border-radius: 6px;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 50px; /* Separación con las 3 columnas */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.location-left-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.location-icon-bubble {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  background-color: var(--editorial-card-bg);
+  border: 1px solid var(--editorial-card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--editorial-navy);
+  flex-shrink: 0;
+}
+
+.location-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.location-subtitle {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--editorial-sky);
+  margin-bottom: 4px;
+}
+
+.location-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--editorial-navy);
+  margin: 0 0 4px 0;
+}
+
+.location-address {
+  font-size: 14px;
+  color: var(--editorial-muted);
+  margin: 0;
+  font-weight: 500;
+}
+
+.location-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+/* Botones del Banner */
+.btn-building-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background-color: #ffffff;
+  border: 1.5px solid var(--editorial-card-border);
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--editorial-navy);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-building-info:hover {
+  background-color: var(--editorial-card-bg);
+  border-color: #94a3b8;
+}
+
+.btn-how-to-arrive {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background-color: var(--editorial-navy);
+  border: 1.5px solid var(--editorial-navy);
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-how-to-arrive:hover {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+/* =========================================================
+   RESPONSIVE DESIGN
+   ========================================================= */
+@media (max-width: 1024px) {
+  .editorial-columns-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .editorial-column {
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--editorial-card-border);
+  }
+
+  .editorial-column:last-child {
+    border-bottom: none;
+  }
+  
+  /* Banner Responsive */
+  .location-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .location-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .btn-building-info,
+  .btn-how-to-arrive {
+    width: 100%;
+    justify-content: center;
+  }
+}

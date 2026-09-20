@@ -1,0 +1,573 @@
+:root {
+  --hospital-navy-dark: #0d223f;
+  --hospital-navy: #102a4e;
+  --hospital-blue: #0066cc;
+  --hospital-cobalt: #1a56db;
+  --hospital-sky: #0284c7;
+  --hospital-sky-light: #e0f2fe;
+  --hospital-emergency: #dc2626;
+  --hospital-emergency-bg: #fef2f2;
+  --hospital-bg-overlay: rgba(13, 34, 63, 0.48);
+  --hospital-surface: #ffffff;
+  --hospital-surface-subtle: #f8fafc;
+  --hospital-surface-card: #ffffff;
+  --hospital-border-light: #e2e8f0;
+  --hospital-border-card: #edf2f7;
+  --hospital-text-main: #0d223f;
+  --hospital-text-body: #334155;
+  --hospital-text-muted: #64748b;
+  --hospital-radius-xl: 18px;
+  --hospital-radius-lg: 12px;
+  --hospital-radius-md: 8px;
+}
+
+/* Overlay general */
+.location-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--hospital-bg-overlay);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  z-index: 9999;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+/* Contenedor del Modal */
+.location-modal-container {
+  position: relative;
+  background-color: var(--hospital-surface);
+  border-radius: var(--hospital-radius-xl);
+  width: 100%;
+  max-width: 1080px;
+  max-height: 95vh;
+  box-shadow: 0 24px 50px -12px rgba(13, 34, 63, 0.28), 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  animation: modalSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Header del Modal */
+.location-modal-header {
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--hospital-border-light);
+}
+
+.modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hospital-symbol-box {
+  width: 44px;
+  height: 44px;
+  background-color: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hospital-navy-dark);
+  flex-shrink: 0;
+}
+
+.modal-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.institutional-kicker {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hospital-sky);
+  margin-bottom: 2px;
+}
+
+.modal-header-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--hospital-navy-dark);
+  letter-spacing: -0.01em;
+}
+
+.modal-header-address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16.5px;
+  color: var(--hospital-text-muted);
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+.modal-header-address svg {
+  color: var(--hospital-sky);
+  flex-shrink: 0;
+}
+
+.modal-close-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  border: none;
+  color: var(--hospital-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.modal-close-button:hover {
+  background-color: #e2e8f0;
+  color: var(--hospital-navy-dark);
+  transform: scale(1.05);
+}
+
+/* Contenido Principal en 2 Columnas */
+.location-modal-body {
+  padding: 28px 32px;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 28px;
+  background-color: #f8fafc;
+  overflow-y: auto;
+}
+
+/* Columna Izquierda: Mapa y Ubicación */
+.location-column-left {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.map-card-wrapper {
+  position: relative;
+  height: 270px;
+  border-radius: var(--hospital-radius-lg);
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 14px rgba(13, 34, 63, 0.06);
+}
+
+.google-map-embed {
+  width: 100%;
+  height: 100%;
+  border: none;
+  filter: saturate(1.05) contrast(1.02);
+}
+
+/* Controles flotantes en el mapa */
+.map-top-bar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.btn-copy-coords {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--hospital-navy-dark);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.15s ease;
+}
+
+.btn-copy-coords:hover {
+  background-color: #ffffff;
+  border-color: var(--hospital-sky);
+  color: var(--hospital-blue);
+}
+
+.map-bottom-bar {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  z-index: 10;
+}
+
+.btn-open-gmaps {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background-color: var(--hospital-navy-dark);
+  border: 1px solid var(--hospital-navy-dark);
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: 0 3px 8px rgba(13, 34, 63, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-open-gmaps:hover {
+  background-color: var(--hospital-navy);
+  transform: translateY(-1px);
+}
+
+/* Grilla inferior izquierda: Geolocalización & Diferenciación de entradas */
+.info-subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.info-tile {
+  background-color: var(--hospital-surface);
+  border: 1px solid var(--hospital-border-light);
+  border-radius: var(--hospital-radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 6px rgba(13, 34, 63, 0.02);
+}
+
+.tile-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tile-icon {
+  color: var(--hospital-sky);
+  display: flex;
+  align-items: center;
+}
+
+.tile-title {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hospital-text-muted);
+}
+
+.tile-bold-value {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--hospital-navy-dark);
+  margin-bottom: 4px;
+}
+
+.tile-sub-value {
+  font-size: 12.5px;
+  color: var(--hospital-text-muted);
+}
+
+/* Lista de accesos diferenciados */
+.access-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.access-item {
+  color: var(--hospital-text-body);
+  line-height: 1.4;
+}
+
+.access-item strong {
+  color: var(--hospital-navy-dark);
+  font-weight: 500;
+}
+
+.access-item.emergency {
+  color: var(--hospital-emergency);
+  font-weight: 500;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.emergency-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--hospital-emergency);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+/* Columna Derecha: Opciones de Movilidad y Transporte */
+.location-column-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.transit-card {
+  background-color: var(--hospital-surface);
+  border: 1px solid var(--hospital-border-light);
+  border-radius: var(--hospital-radius-lg);
+  padding: 18px 20px;
+  box-shadow: 0 2px 8px rgba(13, 34, 63, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.transit-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.transit-icon-bubble {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: var(--hospital-sky-light);
+  color: var(--hospital-navy-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.transit-title {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--hospital-navy-dark);
+  margin: 0;
+}
+
+.transit-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: #f1f5f9;
+  color: var(--hospital-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.transit-badge.badge-frequency {
+  background-color: #e2e8f0;
+  color: var(--hospital-navy-dark);
+}
+
+.transit-badge.badge-status {
+  background-color: #dbeafe;
+  color: var(--hospital-cobalt);
+  text-transform: uppercase;
+}
+
+.transit-badge.badge-capacity {
+  background-color: #e2e8f0;
+  color: var(--hospital-navy-dark);
+}
+
+/* =========================================
+   TRANSPORTE URBANO (LÍNEAS Y TRASBORDO)
+========================================= */
+
+.bus-direct-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--hospital-sky-light);
+  border: 1px solid #bae6fd;
+  padding: 12px;
+  border-radius: var(--hospital-radius-md);
+}
+
+.bus-pill-primary {
+  background-color: var(--hospital-sky);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
+  flex-shrink: 0;
+}
+
+.bus-transfer-info {
+  background-color: #f1f5f9;
+  border: 1px solid var(--hospital-border-light);
+  padding: 12px;
+  border-radius: var(--hospital-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.transfer-label {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--hospital-navy);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.bus-info-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--hospital-text-body);
+}
+
+.bus-info-text strong {
+  color: var(--hospital-navy-dark);
+  font-weight: 500;
+}
+
+/* Descripción de transporte */
+.transit-description {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--hospital-text-body);
+}
+
+/* Sub-detalles de Parking & Carril Sanitario */
+.parking-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.parking-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--hospital-text-body);
+}
+
+.feature-indicator {
+  font-weight: 500;
+  color: var(--hospital-navy-dark);
+  background-color: #e2e8f0;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.feature-indicator.ambulance {
+  background-color: var(--hospital-emergency-bg);
+  color: var(--hospital-emergency);
+}
+
+/* Footer de Accesibilidad del Modal */
+.location-modal-footer {
+  padding: 16px 32px;
+  background-color: #ffffff;
+  border-top: 1px solid var(--hospital-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--hospital-text-muted);
+}
+
+.accessibility-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+}
+
+.accessibility-notice svg {
+  color: var(--hospital-sky);
+  flex-shrink: 0;
+}
+
+/* Animaciones */
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Adaptación responsive */
+@media (max-width: 960px) {
+  .location-modal-body {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .location-modal-header,
+  .location-modal-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .map-card-wrapper {
+    height: 220px;
+  }
+}
+
+@media (max-width: 600px) {
+  .info-subgrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-header-left {
+    gap: 12px;
+  }
+
+  .hospital-symbol-box {
+    width: 36px;
+    height: 36px;
+  }
+
+  .modal-header-title {
+    font-size: 18px;
+  }
+}

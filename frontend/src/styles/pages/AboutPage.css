@@ -15,7 +15,7 @@
 .about-hero-banner {
   position: relative;
   width: 100%;
-  height: 380px;
+  height: 400px;
   overflow: hidden;
   background-color: #0c2340;
 }
@@ -176,6 +176,9 @@
   text-transform: uppercase;
   max-width: 200px;
   line-height: 1.35;
+}
+#sede-central {
+  scroll-margin-top: 170px;
 }
 
 @media (max-width: 992px) {
@@ -535,21 +538,18 @@
 }
 
 .valor-clean-card {
-  background-color: #d9eafa;
-  border: 1px solid #e1ebf8;
-  padding: 32px 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  box-shadow: 0 4px 15px rgba(59, 40, 231, 0.295);
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 6px rgba(13, 34, 63, 0.02);
+    transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .valor-clean-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+   transform: translateY(-2px);
+  border-color: #0066cc;
 }
 
 .valor-icon-box {

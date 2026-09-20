@@ -311,7 +311,7 @@ model usuario {
 enum EstadoEditorial {
   BORRADOR
   PUBLICADO
-  ARCHIVADO
+  PROGRAMADO
 }
 
 enum TipoContacto {

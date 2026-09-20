@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "../styles/components/Breadcrumb.css";
+import "../styles/ui/Breadcrumb.css";
 
 const Breadcrumb = ({ currentPage }) => {
   return (

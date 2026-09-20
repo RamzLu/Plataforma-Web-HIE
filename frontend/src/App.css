@@ -1,5 +1,7 @@
 .App {
   width: 100%;
+  max-width: 100%; /* Agregado */
+  overflow-x: hidden; /* Doble seguro para evitar scroll horizontal */
   display: flex;
   flex-direction: column;
   /* 
