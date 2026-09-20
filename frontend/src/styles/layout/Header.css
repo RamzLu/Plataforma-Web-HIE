@@ -114,6 +114,7 @@
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  min-width: 260px;
 }
 
 .btn-location-action,
@@ -147,9 +148,9 @@
 .btn-blueprint-action > svg {
   margin: 0 4px;
   transition: margin 0.4s ease;
-  flex-shrink: 0; /* CRÍTICO: Evita que el ícono colapse a un punto */
-  min-width: 18px; /* Fuerza el ancho original */
-  min-height: 18px; /* Fuerza el alto original */
+  flex-shrink: 0; 
+  min-width: 18px; 
+  min-height: 18px; 
 }
 
 .action-icon-bubble {
@@ -193,6 +194,7 @@
   line-height: 1.2;
 }
 
+
 .btn-location-action:hover,
 .btn-blueprint-action:hover {
   gap: 10px;
@@ -217,7 +219,7 @@
 
 .btn-location-action:hover .action-text-wrapper,
 .btn-blueprint-action:hover .action-text-wrapper {
-  max-width: 160px;
+  max-width: 160px; 
   opacity: 1;
 }
 .hospital-bottom-gradient-border {
@@ -323,6 +325,45 @@
     width: 100%;
     padding: 14px 12px;
     font-size: 14px;
+  }
+}
+
+@media (max-width: 1400px) {
+  .hospital-main-nav {
+    padding: 12px 30px; 
+  }
+
+  .nav-content-wrapper {
+    flex: 1;
+    justify-content: center; 
+    padding-left: 0; 
+  }
+
+  .nav-link-item {
+    font-size: 13px; 
+    padding: 8px 10px; 
+  }
+
+  .header-logo-img {
+    height: 45px; 
+  }
+
+  .nav-actions-group {
+    gap: 12px; 
+  }
+
+  .btn-location-action,
+  .btn-blueprint-action {
+    height: 42px;
+    padding: 8px;
+  }
+
+  .action-title {
+    font-size: 12px;
+  }
+
+  .action-eyebrow {
+    font-size: 9px;
   }
 }
 

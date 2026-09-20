@@ -1,6 +1,3 @@
-/* =========================================
-   ESTRUCTURA BASE DE LA PÁGINA
-========================================= */
 .noticias-page {
   width: 100%;
   background-color: #e9ebee;
@@ -18,16 +15,12 @@
   position: relative;
 }
 
-/* =========================================
-   BANNER FULL WIDTH: ÚLTIMAS PUBLICACIONES
-========================================= */
 .news-header-fluid {
     width: 100%;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    margin-bottom: 60px;
     justify-content: center;
     padding: 120px 20px 60px 20px;
 }
@@ -60,9 +53,6 @@
     margin: 0;
 }
 
-/* =========================================
-   SLIDER DE NOTICIAS FACEBOOK
-========================================= */
 .slider-wrapper {
   position: relative;
   display: flex;
@@ -117,25 +107,25 @@
   right: -25px;
 }
 
-/* --- TARJETAS DE NOTICIAS --- */
+
 .full-news-card {
   min-width: 320px;
   max-width: 320px;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1; /* Borde gris-celeste sutil */
-  border-radius: 16px; /* Mismo radio que las tarjetas médicas */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Sombra base definida */
+  border: 1px solid #cbd5e1; 
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); 
   overflow: hidden;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  transition: all 0.3s ease; /* Transición suave para el hover */
+  transition: all 0.3s ease; 
 }
 
 .full-news-card:hover {
   transform: translateY(-5px);
-  border-color: #2b5b94; /* Borde azul institucional */
-  box-shadow: 0 12px 25px rgba(43, 91, 148, 0.15); /* Sombra más fuerte y azulada */
+  border-color: #2b5b94; 
+  box-shadow: 0 12px 25px rgba(43, 91, 148, 0.15); 
 }
 .full-news-header {
   display: flex;
@@ -256,9 +246,7 @@
   object-fit: cover;
   display: block;
 }
-/* =========================================
-   ESTILOS DE LA NOTICIA DENTRO DEL MODAL
-========================================= */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -291,7 +279,7 @@
 .news-modal-headline h3 {
   word-break: break-word;
   overflow-wrap: break-word;
-  white-space: pre-wrap; /* Mantiene los saltos de línea pero fuerza el corte */
+  white-space: pre-wrap; 
   width: 100%;
 }
 
@@ -308,15 +296,14 @@
 .news-modal-images-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px; /* Espacio pequeño y controlado entre imágenes */
-  justify-content: flex-start; /* Alineadas a la izquierda */
+  gap: 10px; 
+  justify-content: flex-start; 
   margin-top: 15px;
 }
 
-/* Caja de cada miniatura en el modal */
 .modal-news-img-box {
-  width: 170px; /* Aumentamos el ancho de 100px a 170px (puedes ajustarlo a tu gusto) */
-  height: 110px; /* Mantenemos una altura proporcional y cómoda */
+  width: 170px; 
+  height: 110px; 
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid #cbd5e1;
@@ -335,15 +322,15 @@
 .modal-news-img-box img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Llena el cuadro rectangular perfectamente */
+  object-fit: cover; 
 }
 .modal-footer-esp {
-  padding: 20px 35px 25px 35px; /* Espaciado superior e inferior generoso */
+  padding: 20px 35px 25px 35px; 
   display: flex;
   justify-content: center;
-  background-color: #ffffff; /* Fondo blanco sólido */
-  border-top: 1px solid #e2e8f0; /* Línea divisoria elegante */
-  flex-shrink: 0; /* Evita que el footer se aplaste */
+  background-color: #ffffff; 
+  border-top: 1px solid #e2e8f0; 
+  flex-shrink: 0; 
   z-index: 10;
 }
 
@@ -352,24 +339,22 @@
   margin-bottom: 15px;
 }
 
-/* =========================================
-   ARTÍCULOS MÉDICOS Y CARRUSEL LATERAL
-========================================= */
+
 .medical-articles-section {
   margin-top: 80px;
   width: 100%;
   display: flex;
-  align-items: flex-start; /* Alinea los elementos arriba */
+  align-items: flex-start; 
   justify-content: space-between;
   gap: 50px;
 }
 
-/* --- COLUMNA IZQUIERDA (Título + Carrusel) --- */
+
 .medical-left-column {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  flex: 0.9; /* Proporción para la izquierda */
+  flex: 0.9; 
 }
 
 .medical-header {
@@ -405,7 +390,6 @@
   letter-spacing: -1px;
 }
 
-/* Tarjeta del Mini Carrusel */
 .mini-carousel-card {
   background-color: #ffffff;
   padding: 15px;
@@ -501,9 +485,9 @@
   background-color: #475569;
 }
 
-/* --- COLUMNA DERECHA (Grilla) --- */
+
 .articles-grid {
-  flex: 1.3; /* Proporción para la derecha */
+  flex: 1.3; 
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 25px;
@@ -512,24 +496,24 @@
 
 .article-card {
   background-color: #ffffff;
-  border: 4px solid #cbd5e1; /* Borde gris-celeste sutil para enmarcar la tarjeta */
+  border: 4px solid #cbd5e1; 
   border-radius: 15px;
   padding: 30px 20px;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Sombra base un poco más definida */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: all 0.3s ease; /* Transición para que el borde y sombra cambien suavemente */
+  transition: all 0.3s ease; 
   min-height: 250px;
   font-family: inherit;
 }
 
 .article-card:hover {
   transform: translateY(-5px);
-  border-color: #2b5b94; /* Al pasar el cursor, el borde se pinta de azul */
-  box-shadow: 0 12px 25px rgba(43, 91, 148, 0.15); /* Sombra más fuerte y con un leve tono azulado */
+  border-color: #2b5b94; 
+  box-shadow: 0 12px 25px rgba(43, 91, 148, 0.15); 
 }
 
 .article-card h3 {
@@ -554,8 +538,8 @@
   align-items: center;
   justify-content: center;
   margin: 20px 0;
-  height: 90px; /* Mantenemos la altura fija */
-  width: 100%; /* Le damos un ancho fijo al contenedor */
+  height: 90px; 
+  width: 100%; 
   position: relative;
 }
 
@@ -569,27 +553,18 @@
   transition: opacity 0.3s ease;
 }
 
-/* --- ESTADO 1: ÍCONO ESTÁTICO (PNG) --- */
+
 .icon-static {
   opacity: 1;
-  /* JUEGA CON ESTE NÚMERO: 
-     Si se ve muy grande, bájalo (ej: 0.8 o 0.7). 
-     Si se ve muy chico, súbelo (ej: 1.2 o 1.3). 
-     1 = tamaño original */
   transform: scale(0.85);
 }
 
-/* --- ESTADO 2: ÍCONO ANIMADO (GIF) --- */
+
 .icon-animated {
   opacity: 0;
-  /* JUEGA CON ESTE NÚMERO: 
-     Si se ve muy grande, bájalo (ej: 0.8 o 0.7). 
-     Si se ve muy chico, súbelo (ej: 1.2 o 1.3). 
-     1 = tamaño original */
   transform: scale(1.15);
 }
 
-/* EFECTO HOVER */
 .article-card:hover .icon-static {
   opacity: 0;
 }
@@ -611,7 +586,7 @@
   animation: fadeIn 0.25s ease-out;
 }
 
-/* CABECERA CON LÍNEA DE BORDE */
+
 .modal-header-esp {
   background-color: #ffffff;
   padding: 24px 35px;
@@ -630,7 +605,7 @@
   letter-spacing: 0.5px;
 }
 
-/* BOTÓN DE CERRAR [X] */
+
 .btn-close-modal {
   background: none;
   border: none;
@@ -644,19 +619,15 @@
   transition: all 0.2s ease;
 }
 
-/* =========================================
-   CONTENEDOR DEL SLIDER Y OCULTAMIENTO DE SCROLLBARS
-========================================= */
 .modal-slider-container {
   position: relative;
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 0 45px; /* Espacio lateral para que las flechas flotantes no pisen las imágenes */
+  padding: 0 45px; 
   box-sizing: border-box;
 }
 
-/* OCULTAR BARRAS DE DESPLAZAMIENTO EN EL SLIDER DE IMÁGENES */
 .modal-slider {
   display: flex;
   gap: 15px;
@@ -664,17 +635,16 @@
   scroll-behavior: smooth;
   width: 100%;
   padding: 10px 0;
-  /* Ocultar barra en Firefox, IE/Edge */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-/* Ocultar barra en Chrome, Safari y Opera */
+
 .modal-slider::-webkit-scrollbar {
   display: none;
 }
 
-/* FLECHAS CIRCULARES FLOTANTES */
+
 .modal-arrow {
   position: absolute;
   top: 50%;
@@ -717,7 +687,6 @@
   right: 0;
 }
 
-/* ESTILIZAR / SUAVIZAR BARRA VERTICAL DEL MODAL */
 .modal-body-esp::-webkit-scrollbar {
   width: 6px;
 }
@@ -736,7 +705,7 @@
   background: #2b5b94;
 }
 
-/* CUERPO DEL MODAL */
+
 .modal-body-esp {
   padding: 30px 40px;
   display: grid;
@@ -751,13 +720,11 @@
   gap: 20px;
 }
 
-/* =========================================
-   MODAL DE LECTURA: ESTRUCTURA FLUIDA
-========================================= */
+
 .modal-body-esp {
   padding: 30px 40px;
   display: grid;
-  grid-template-columns: 1.3fr 1fr; /* Escritorio: Texto izq, Mosaico der */
+  grid-template-columns: 1.3fr 1fr; 
   gap: 35px;
   overflow-y: auto;
   align-items: start;
@@ -769,9 +736,7 @@
   gap: 20px;
 }
 
-/* =========================================
-   MOSAICO DINÁMICO DE IMÁGENES
-========================================= */
+
 .mosaic-gallery {
   display: grid;
   gap: 4px;
@@ -832,12 +797,7 @@
   z-index: 10;
 }
 
-/* =========================================
-   ADAPTACIÓN PERFECTA PARA MÓVILES
-========================================= */
-/* =========================================
-   ADAPTACIÓN PERFECTA PARA MÓVILES
-========================================= */
+
 @media (max-width: 900px) {
   .modal-body-esp {
     display: flex;
@@ -846,41 +806,40 @@
     padding: 20px;
   }
 
-  /* 1. Autor y Fecha arriba */
+
   .modal-author-row {
     order: 1;
   }
 
-  /* 2. Título de la noticia */
+
   .news-modal-title {
     order: 2;
   }
 
-  /* 3. Galería de imágenes fluida y sin desbordes */
+
   .mosaic-gallery {
     order: 3;
     position: relative;
-    height: auto !important; /* Altura automática según el contenido */
+    height: auto !important; 
     max-height: none !important;
-    /* Creamos una grilla adaptable de 2 columnas automáticas de 140px de alto */
     grid-template-columns: repeat(2, 1fr) !important;
     grid-template-rows: repeat(2, 140px) !important;
     gap: 4px;
   }
 
-  /* Aseguramos que los elementos respeten la nueva grilla móvil */
+
   .mosaic-item {
     grid-column: auto !important;
     grid-row: auto !important;
     height: 140px;
   }
 
-  /* 4. Cuerpo de texto al final */
+
   .news-modal-body-text {
     order: 4;
   }
 }
-/* PERFIL DE LA INSTITUCIÓN */
+
 .modal-author-row {
   display: flex;
   align-items: center;
@@ -902,7 +861,7 @@
   font-weight: 500;
 }
 
-/* SECCIONES DE TEXTO */
+
 .article-paragraphs-box {
   display: flex;
   flex-direction: column;
@@ -910,7 +869,7 @@
   margin-top: 6px;
 }
 
-/* AJUSTES PARA LOS FOLLETOS EN EL CARRUSEL */
+
 .modal-slider {
   display: flex;
   gap: 15px;
@@ -923,7 +882,7 @@
 .modal-campaign-img {
   min-width: 220px;
   max-width: 220px;
-  height: 300px; /* Altura adecuada para ver folletos verticales sin distorsión */
+  height: 300px; 
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #cbd5e1;
@@ -948,7 +907,6 @@
   display: block;
 }
 
-/* ADAPTACIÓN EN DISPOSITIVOS MÓVILES */
 @media (max-width: 768px) {
   .modal-header-esp {
     padding: 18px 20px;
@@ -965,12 +923,7 @@
     height: 240px;
   }
 }
-/* =========================================
-   LIGHTBOX (VISOR ESTILO FACEBOOK)
-========================================= */
-/* =========================================
-   LIGHTBOX (VISOR ESTILO FACEBOOK)
-========================================= */
+
 .lightbox-overlay {
   position: fixed;
   top: 0;
@@ -1026,7 +979,7 @@ z-index: 100010 !important;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* Flechas en Escritorio (Flotando a los costados) */
+
 .lightbox-arrow {
   position: absolute;
   top: 50%;
@@ -1058,9 +1011,7 @@ z-index: 100010 !important;
   right: -70px;
 }
 
-/* =========================================
-   ADAPTACIÓN PARA MÓVILES (FLECHAS ABAJO)
-========================================= */
+
 @media (max-width: 768px) {
   .lightbox-overlay {
     padding: 10px;
@@ -1071,7 +1022,7 @@ z-index: 100010 !important;
     top: 15px;
     right: 20px;
     font-size: 2.2rem;
-    position: absolute; /* Mantenemos la cruz fija arriba a la derecha */
+    position: absolute; 
   }
 
   .lightbox-content {
@@ -1090,7 +1041,7 @@ z-index: 100010 !important;
     object-fit: contain;
   }
 
-  /* Ubicamos las flechas flotando a la izquierda y derecha de la foto de forma equilibrada */
+
   .lightbox-arrow {
     position: absolute;
     top: 50%;
@@ -1098,7 +1049,7 @@ z-index: 100010 !important;
     width: 42px;
     height: 42px;
     font-size: 1.3rem;
-    background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente para máxima visibilidad */
+    background-color: rgba(0, 0, 0, 0.6); 
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
@@ -1111,9 +1062,49 @@ z-index: 100010 !important;
   }
 }
 
-/* =========================================
-   RESPONSIVIDAD GENERAL
-========================================= */
+
+.news-modal-body-text blockquote,
+.clamped-text blockquote {
+  border-left: 4px solid #0c2340; 
+  background-color: #f8fafc;      
+  padding: 12px 16px;
+  margin: 15px 0;
+  font-style: italic;
+  color: #475569;
+  border-radius: 0 8px 8px 0;
+}
+
+
+.news-modal-body-text blockquote p,
+.clamped-text blockquote p {
+  margin: 0;
+}
+
+.ck-content ul {
+  list-style-type: disc !important;
+  margin-left: 25px !important;
+  margin-bottom: 10px !important;
+}
+
+.ck-content ol {
+  list-style-type: decimal !important;
+  margin-left: 25px !important;
+  margin-bottom: 10px !important;
+}
+
+
+.news-modal-body-text ul {
+  list-style-type: disc;
+  margin-left: 25px;
+  margin-bottom: 10px;
+}
+
+.news-modal-body-text ol {
+  list-style-type: decimal;
+  margin-left: 25px;
+  margin-bottom: 10px;
+}
+
 @media (max-width: 1024px) {
   .medical-articles-section {
     flex-direction: column;
@@ -1122,7 +1113,7 @@ z-index: 100010 !important;
   }
   .medical-left-column {
     width: 100%;
-    align-items: center; /* Centramos el título y el carrusel en tablets/celulares */
+    align-items: center;
   }
   .medical-header {
     align-items: center;
@@ -1215,45 +1206,26 @@ z-index: 100010 !important;
     max-width: 100%;
   }
 }
-/* Estilos para las citas (blockquotes) generadas por CKEditor */
-.news-modal-body-text blockquote,
-.clamped-text blockquote {
-  border-left: 4px solid #0c2340; /* Línea del color institucional a la izquierda */
-  background-color: #f8fafc;      /* Fondo sutilmente gris/azulado */
-  padding: 12px 16px;
-  margin: 15px 0;
-  font-style: italic;
-  color: #475569;
-  border-radius: 0 8px 8px 0;
-}
+@media (max-width: 1400px) {
+  .medical-articles-section {
+    grid-template-columns: 280px 1fr;
+    gap: 25px;
+  }
 
-/* Para quitar el margen extra del párrafo dentro de la cita */
-.news-modal-body-text blockquote p,
-.clamped-text blockquote p {
-  margin: 0;
-}
-/* Restaurar viñetas y números dentro de CKEditor */
-.ck-content ul {
-  list-style-type: disc !important;
-  margin-left: 25px !important;
-  margin-bottom: 10px !important;
-}
+  .articles-grid {
+    gap: 15px; 
+  }
 
-.ck-content ol {
-  list-style-type: decimal !important;
-  margin-left: 25px !important;
-  margin-bottom: 10px !important;
-}
+  .article-card {
+    padding: 20px 15px;
+    min-height: 180px; 
+  }
 
-/* Restaurar viñetas y números en los modales de lectura */
-.news-modal-body-text ul {
-  list-style-type: disc;
-  margin-left: 25px;
-  margin-bottom: 10px;
-}
+  .article-card h3 {
+    font-size: 1.2rem;
+  }
 
-.news-modal-body-text ol {
-  list-style-type: decimal;
-  margin-left: 25px;
-  margin-bottom: 10px;
+  .icon-static, .icon-animated {
+    width: 60px; 
+  }
 }
