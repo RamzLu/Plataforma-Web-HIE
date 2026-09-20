@@ -797,49 +797,6 @@
   z-index: 10;
 }
 
-
-@media (max-width: 900px) {
-  .modal-body-esp {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 20px;
-  }
-
-
-  .modal-author-row {
-    order: 1;
-  }
-
-
-  .news-modal-title {
-    order: 2;
-  }
-
-
-  .mosaic-gallery {
-    order: 3;
-    position: relative;
-    height: auto !important; 
-    max-height: none !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    grid-template-rows: repeat(2, 140px) !important;
-    gap: 4px;
-  }
-
-
-  .mosaic-item {
-    grid-column: auto !important;
-    grid-row: auto !important;
-    height: 140px;
-  }
-
-
-  .news-modal-body-text {
-    order: 4;
-  }
-}
-
 .modal-author-row {
   display: flex;
   align-items: center;
@@ -1156,21 +1113,6 @@ z-index: 100010 !important;
   }
 }
 
-@media (max-width: 900px) {
-  .lb-left {
-    left: 10px;
-  }
-  .lb-right {
-    right: 10px;
-  }
-  .lightbox-close {
-    top: 15px;
-    right: 20px;
-  }
-  .modal-body-esp {
-    grid-template-columns: 1fr;
-  }
-}
 
 @media (max-width: 768px) {
   .slider-arrow {
@@ -1251,5 +1193,48 @@ z-index: 100010 !important;
 
   .icon-static, .icon-animated {
     width: 60px; 
+  }
+}
+@media (max-width: 900px) {
+.modal-body-esp {
+    display: block !important; 
+    padding: 20px 20px 60px 20px !important; 
+  }
+
+  .modal-left-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px !important;
+  }
+
+  .mosaic-gallery {
+    position: relative;
+    height: auto !important;
+    max-height: none !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-rows: auto !important;
+    gap: 12px !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    margin-bottom: 20px !important; 
+  }
+
+  .mosaic-item {
+    grid-column: span 1 !important;
+    grid-row: auto !important;
+    height: 150px !important; 
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .mosaic-gallery.layout-1 .mosaic-item {
+    grid-column: span 2 !important;
+    height: 220px !important;
+  }
+
+  .mosaic-gallery.layout-3 .mosaic-item:nth-child(1) {
+    grid-column: span 2 !important;
+    height: 200px !important;
   }
 }
