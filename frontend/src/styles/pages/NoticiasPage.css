@@ -1105,6 +1105,30 @@ z-index: 100010 !important;
   margin-bottom: 10px;
 }
 
+/* --- ETIQUETA DE "NUEVO" PARA CATEGORÍAS --- */
+.badge-nuevo-articulo {
+  position: absolute;
+  top: -12px;
+  right: -10px;
+  background-color: #ef4444; /* Rojo vibrante */
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+  z-index: 10;
+  letter-spacing: 0.5px;
+  border: 2px solid #ffffff;
+  animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
 @media (max-width: 1024px) {
   .medical-articles-section {
     flex-direction: column;

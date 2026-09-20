@@ -6,7 +6,6 @@ import avatarHospital from "../../assets/logoHospitalEvita.png";
 import fondoBannerNoticias from "../../assets/banner_noticias.png";
 import "../../styles/pages/NoticiasPage.css";
 
-// Mapeo para convertir la URL (slug) al nombre exacto de la base de datos
 const CATEGORY_MAP = {
   "cancer-mama": "Cáncer de Mama",
   "tu-corazon": "Tu Corazón",
@@ -37,13 +36,15 @@ const NoticiasCategoriaPage = () => {
       return;
     }
 
-const fetchNoticiasCategoria = async () => {
+    // --- NUEVO: GUARDAMOS LA HORA EXACTA DE LA VISITA EN LA MEMORIA DEL NAVEGADOR ---
+    localStorage.setItem(`visited_${categoria}`, Date.now().toString());
+
+    const fetchNoticiasCategoria = async () => {
       setLoading(true);
       try {
         const data = await getNoticias(false);
         const targetCategory = (dbCategoryName || "").trim().toLowerCase();
 
-        // Compara ignorando mayúsculas y minúsculas
         const noticiasFiltradas = data
           .filter(n => {
             const currentCategory = (n.category || "").trim().toLowerCase();
@@ -86,13 +87,12 @@ const fetchNoticiasCategoria = async () => {
             parentLabel="NOTICIAS" 
             parentPath="/noticias" 
             currentPage={dbCategoryName?.toUpperCase()} 
-            />
+          />
           <h1 className="news-main-title">NOTICIAS: {dbCategoryName?.toUpperCase()}</h1>
-<div className="news-info-wrapper">
+          <div className="news-info-wrapper">
             <div className="news-info-text">
               <p>Artículos médicos, novedades y campañas de concientización sobre {dbCategoryName}.</p>
               
-              {/* NUEVO BOTÓN DE VOLVER */}
               <button 
                 onClick={() => navigate('/noticias')}
                 style={{ 
@@ -126,7 +126,6 @@ const fetchNoticiasCategoria = async () => {
                 </svg>
                 Volver a Noticias Generales
               </button>
-
             </div>
           </div>
         </div>
@@ -140,11 +139,11 @@ const fetchNoticiasCategoria = async () => {
             <p style={{ marginTop: "15px", color: "#64748b", fontWeight: "600" }}>Cargando artículos...</p>
           </div>
         ) : noticias.length > 0 ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "30px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
             {noticias.map((news) => {
               const plainText = cleanHtmlText(news.body[0]);
               return (
-                <article key={news.id} className="full-news-card" style={{ height: "100%" }}>
+                 <article key={news.id} className="full-news-card" style={{ height: "100%", width: "350px", flex: "0 0 auto" }}>
                   <div className="full-news-header">
                     <div className="hospital-avatar">
                       <img src={avatarHospital} alt="Avatar Hospital" />
