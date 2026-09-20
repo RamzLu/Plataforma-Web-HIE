@@ -10,8 +10,7 @@ const supabase = createClient(
 
 class CmsNoticiaService {
   async crearNoticia(data, archivosSubidos, user) {
-    // NUEVO: Extraemos fechaPublicacion
-    const { titulo, contenido, estado, fechaPublicacion } = data;
+    const { titulo, contenido, estado, fechaPublicacion, categoriaNombre } = data;
 
     if (!titulo || !contenido) {
       const error = new Error("Faltan campos obligatorios: titulo y contenido.");
@@ -20,17 +19,18 @@ class CmsNoticiaService {
     }
 
     const estadoFinal = estado ? estado.toUpperCase() : "BORRADOR";
+    const nombreCat = categoriaNombre || "General";
 
-    let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: "Noticias" } });
+    let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: nombreCat } });
+    
     if (!categoria) {
       categoria = await prisma.categoria_noticia.create({
-        data: { nombre: "Noticias", descripcion: "Por defecto" },
+        data: { nombre: nombreCat, descripcion: `Clasificación ${nombreCat}` },
       });
     }
 
     const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
 
-    // NUEVO: Agregamos fechaPublicacion si el estado es PROGRAMADO
     const nuevaNoticia = await prisma.noticia.create({
       data: {
         titulo, 
@@ -41,10 +41,14 @@ class CmsNoticiaService {
         updatedAt: new Date(),
         ...(estadoFinal === "PROGRAMADO" && fechaPublicacion ? { fechaPublicacion: new Date(fechaPublicacion) } : {})
       },
-      include: { usuario_noticia_createdByTousuario: true },
+      include: { 
+        usuario_noticia_createdByTousuario: true,
+        categoria_noticia: true
+      },
     });
 
     const imagenesUrlsGuardadas = [];
+    
     for (const file of archivosSubidos) {
       const { nombreUnico, extension } = generarNombreUnico(file.originalname, 'img');
 
@@ -76,11 +80,12 @@ class CmsNoticiaService {
       : "Editor CMS";
 
     return {
-      message: "¡Noticia y archivos subidos al Bucket y respaldados en la BD!",
+      message: "Exito",
       noticia: {
         ...nuevaNoticia,
         id: nuevaNoticia.id.toString(),
         categoriaId: nuevaNoticia.categoriaId.toString(),
+        category: nuevaNoticia.categoria_noticia.nombre,
         estado: nuevaNoticia.estado,
         isDraft: nuevaNoticia.estado === "BORRADOR",
         images: imagenesUrlsGuardadas,
@@ -100,6 +105,7 @@ class CmsNoticiaService {
         usuario_noticia_createdByTousuario: true,
         usuario_noticia_updatedByTousuario: true,
         noticia_archivo: { include: { archivo: true } },
+        categoria_noticia: true
       },
     });
 
@@ -122,10 +128,10 @@ class CmsNoticiaService {
         title: noticia.titulo,
         body: [noticia.contenido],
         date: new Date(noticia.createdAt).toLocaleDateString("es-AR"),
-        fechaPublicacion: noticia.fechaPublicacion, // Agregado para el frontend
+        fechaPublicacion: noticia.fechaPublicacion,
         createdAt: noticia.createdAt,
         updatedAt: noticia.updatedAt,
-        category: "Noticias",
+        category: noticia.categoria_noticia ? noticia.categoria_noticia.nombre : "General",
         estado: noticia.estado,
         isDraft: noticia.estado === "BORRADOR",
         images: imgs,
@@ -154,12 +160,11 @@ class CmsNoticiaService {
     }
 
     await prisma.noticia.delete({ where: { id: BigInt(id) } });
-    return { message: "¡Noticia eliminada con éxito!" };
+    return { message: "Exito" };
   }
 
   async actualizarNoticia(id, data, archivosSubidos, user) {
-    // NUEVO: Extraemos fechaPublicacion
-    const { titulo, contenido, imagenesExistentes, estado, fechaPublicacion } = data;
+    const { titulo, contenido, imagenesExistentes, estado, fechaPublicacion, categoriaNombre } = data;
     
     const usuarioEditor = await obtenerOCrearUsuarioLocal(user);
 
@@ -185,11 +190,20 @@ class CmsNoticiaService {
       dataUpdate.estado = estado.toUpperCase();
     }
     
-    // NUEVO: Guardar fechaPublicacion si se reprograma
     if (dataUpdate.estado === "PROGRAMADO" && fechaPublicacion) {
       dataUpdate.fechaPublicacion = new Date(fechaPublicacion);
     } else if (dataUpdate.estado !== "PROGRAMADO") {
-      dataUpdate.fechaPublicacion = null; // Limpiar si se pasa a publicado/borrador
+      dataUpdate.fechaPublicacion = null;
+    }
+
+    if (categoriaNombre) {
+      let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: categoriaNombre } });
+      if (!categoria) {
+        categoria = await prisma.categoria_noticia.create({
+          data: { nombre: categoriaNombre, descripcion: `Clasificación ${categoriaNombre}` },
+        });
+      }
+      dataUpdate.categoriaId = categoria.id;
     }
 
     const noticiaActualizada = await prisma.noticia.update({
@@ -198,6 +212,7 @@ class CmsNoticiaService {
     });
 
     const urlsConservadas = imagenesExistentes ? JSON.parse(imagenesExistentes) : [];
+    
     for (const na of noticiaExistente.noticia_archivo) {
       const archivo = na.archivo;
       const { data: urlData } = supabase.storage.from("noticias-imagenes").getPublicUrl(archivo.nombreArchivo);
@@ -231,7 +246,8 @@ class CmsNoticiaService {
       include: { 
         usuario_noticia_createdByTousuario: true,
         usuario_noticia_updatedByTousuario: true,
-        noticia_archivo: { include: { archivo: true } } 
+        noticia_archivo: { include: { archivo: true } },
+        categoria_noticia: true
       },
     });
 
@@ -241,11 +257,12 @@ class CmsNoticiaService {
     const editadoPorNombre = noticiaConArchivos.usuario_noticia_updatedByTousuario ? `${noticiaConArchivos.usuario_noticia_updatedByTousuario.nombre} ${noticiaConArchivos.usuario_noticia_updatedByTousuario.apellido || ""}`.trim() : null;
 
     return {
-      message: "¡Noticia y galería actualizadas correctamente!",
+      message: "Exito",
       noticia: {
         ...noticiaActualizada,
         id: noticiaActualizada.id.toString(),
         categoriaId: noticiaActualizada.categoriaId.toString(),
+        category: noticiaConArchivos.categoria_noticia ? noticiaConArchivos.categoria_noticia.nombre : "General",
         estado: noticiaActualizada.estado,
         isDraft: noticiaActualizada.estado === "BORRADOR",
         images: imgs,
@@ -265,12 +282,7 @@ class CmsNoticiaService {
         },
         data: { estado: "PUBLICADO" },
       });
-
-      if (result.count > 0) {
-        console.log(`⏰ [CRON] Se publicaron automáticamente ${result.count} noticias programadas.`);
-      }
     } catch (error) {
-      console.error("❌ [CRON] Error al ejecutar publicación programada:", error);
     }
   }
 }
