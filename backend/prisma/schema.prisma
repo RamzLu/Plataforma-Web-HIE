@@ -30,8 +30,11 @@ model area {
   descripcion      String?
   ubicacion        String?            @db.VarChar(255)
   activo           Boolean            @default(true)
+  servicioId       BigInt
   profesional_area profesional_area[]
-  servicio         servicio[]
+  servicio         servicio           @relation(fields: [servicioId], references: [id])
+
+  @@index([servicioId])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -275,11 +278,8 @@ model servicio {
   horarios               String?
   informacionDerivacion  String?
   ubicacion              String?
-  areaId                 BigInt
   activo                 Boolean @default(true)
-  area                   area    @relation(fields: [areaId], references: [id])
-
-  @@index([areaId])
+  area                   area[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
