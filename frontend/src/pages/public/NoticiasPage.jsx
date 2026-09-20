@@ -212,7 +212,7 @@ const NoticiasPage = () => {
             <div className="medical-header">
               <h4 className="medical-subtitle">ESPACIO DE EDUCACIÓN EN SALUD</h4>
               <div className="medical-divider"></div>
-              <h2 className="medical-title">CLASIFICACIONES<br />TEMÁTICAS</h2>
+              <h2 className="medical-title">NOTICIAS<br />CLASIFICADAS</h2>
             </div>
             <div className="mini-carousel-card">
               <div className="mini-carousel-img-wrapper">
