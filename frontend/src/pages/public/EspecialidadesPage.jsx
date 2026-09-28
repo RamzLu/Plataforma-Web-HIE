@@ -1,195 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../styles/pages/EspecialidadesPage.css";
 import Breadcrumb from "../../components/Breadcrumb";
 import fondoBannerEsp from "../../assets/banner_especialidades.png";
 import AnimatedContent from "../../components/ui/AnimatedContent";
-
-// =========================================
-// BASE DE DATOS: ESPECIALIDADES
-// =========================================
-const especialidadesData = [
-  {
-    id: 1,
-    tipo: "ESPECIALIDAD",
-    nombre: "CLÍNICA MÉDICA",
-    pregunta: "¿Qué atendemos aquí?",
-    descripcion:
-      "Atención integral de adultos, diagnóstico y control de patologías generales.",
-    ubicacion: "Sector de Consultorios - Pasillo A",
-    horarios: "Lunes, Miércoles y Jueves (8:00 a 12:00)",
-    requisitos: ["Traer DNI original.", "Derivación médica si corresponde."],
-    contacto: "3704-XXXXXX (Interno 101)",
-  },
-  {
-    id: 2,
-    tipo: "ESPECIALIDAD",
-    nombre: "PEDIATRÍA",
-    pregunta: "¿Qué atendemos aquí?",
-    descripcion: "Atención especializada para bebés, niños y adolescentes.",
-    ubicacion: "Sector de Pediatría - Planta Baja",
-    horarios: "Lunes a Viernes (7:30 a 13:00)",
-    requisitos: ["Traer DNI original.", "Libreta de Vacunación obligatoria."],
-    contacto: "3704-XXXXXX (Interno 102)",
-  },
-  {
-    id: 3,
-    tipo: "ESPECIALIDAD",
-    nombre: "GINECOLOGÍA",
-    pregunta: "¿Qué atendemos aquí?",
-    descripcion:
-      "Control anual, prevención, planificación familiar y patologías femeninas.",
-    ubicacion: "Sector Mujer - Pasillo C",
-    horarios: "Martes y Jueves (8:00 a 14:00)",
-    requisitos: [
-      "Traer DNI original.",
-      "Estudios previos (Papanicolau / Ecografías).",
-    ],
-    contacto: "3704-XXXXXX (Interno 103)",
-  },
-  {
-    id: 4,
-    tipo: "ESPECIALIDAD",
-    nombre: "TRAUMATOLOGÍA",
-    pregunta: "¿Qué atendemos aquí?",
-    descripcion:
-      "Dolores de huesos, articulaciones, esguinces y control de fracturas.",
-    ubicacion: "Sector de Consultorios - Pasillo B",
-    horarios: "Lunes, Miércoles y Viernes (8:00 a 14:00)",
-    requisitos: [
-      "Traer DNI original.",
-      "Si tiene radiografías previas, por favor tráigalas.",
-    ],
-    contacto: "3704-XXXXXX (Interno 123)",
-  },
-  {
-    id: 5,
-    tipo: "ESPECIALIDAD",
-    nombre: "OFTALMOLOGÍA",
-    pregunta: "¿Qué atendemos aquí?",
-    descripcion:
-      "Control de agudeza visual, fondo de ojo y tratamiento de afecciones oculares.",
-    ubicacion: "Sector Especialidades - Planta Alta",
-    horarios: "Lunes y Jueves (9:00 a 12:00)",
-    requisitos: [
-      "Traer DNI original.",
-      "Traer anteojos actuales si los utiliza.",
-    ],
-    contacto: "3704-XXXXXX (Interno 105)",
-  },
-  {
-    id: 6,
-    tipo: "ESPECIALIDAD",
-    nombre: "CIRUGÍA GENERAL",
-    pregunta: "¿Qué atendemos aquí?",
-    descripcion:
-      "Evaluación pre-quirúrgica, curaciones y control post-operatorio.",
-    ubicacion: "Sector Quirúrgico - Consultorio 4",
-    horarios: "Lunes a Viernes (10:00 a 14:00)",
-    requisitos: [
-      "Traer DNI original.",
-      "Estudios pre-quirúrgicos y derivación.",
-    ],
-    contacto: "3704-XXXXXX (Interno 106)",
-  },
-];
-
-// =========================================
-// BASE DE DATOS: SERVICIOS CLAVE
-// =========================================
-const serviciosData = [
-  {
-    id: 101,
-    tipo: "SERVICIO",
-    nombre: "LABORATORIO Y EXTRACCIONES",
-    pregunta: "¿Qué hacemos aquí?",
-    descripcion: "Para análisis de sangre, orina y otros fluidos corporales.",
-    ubicacion: "Sector Laboratorio - Planta Baja",
-    horarios: "Lunes a Viernes (6:30 a 9:00 hs para extracciones)",
-    requisitos: [
-      "Asistir con DNI y la Orden Médica.",
-      "Respetar las horas de ayuno indicadas por su profesional.",
-    ],
-    contacto: "3704-XXXXXX (Interno 201)",
-  },
-  {
-    id: 102,
-    tipo: "SERVICIO",
-    nombre: "DIAGNÓSTICO POR IMÁGENES",
-    pregunta: "¿Qué estudios realizamos?",
-    descripcion:
-      "Radiografías (Rayos X), Ecografías generales, Tomografías Computadas y Resonancias Magnéticas.",
-    ubicacion: "Sector de Imágenes - Planta Baja (Ala Sur)",
-    horarios: "Lunes a Viernes, 7:00 a 16:00 hs. (Programados)",
-    requisitos: [
-      "Asistir con DNI y la Orden Médica física.",
-      "En caso de ecografías abdominales, venir con 8 horas de ayuno.",
-    ],
-    contacto: "3704-XXXXXX (Interno 200)",
-  },
-  {
-    id: 103,
-    tipo: "SERVICIO",
-    nombre: "GUARDIA Y EMERGENCIAS",
-    pregunta: "¿Qué atendemos aquí?",
-    descripcion: "Atención inmediata de urgencias y emergencias médicas.",
-    ubicacion: "Ingreso por calle lateral - Guardia",
-    horarios: "Abierto las 24 horas, los 365 días del año.",
-    requisitos: [
-      "Presentarse con DNI.",
-      "La atención se prioriza según la gravedad del cuadro (Triage), no por orden de llegada.",
-    ],
-    contacto: "3704-XXXXXX (Interno 107) o llame al 107",
-  },
-  {
-    id: 104,
-    tipo: "SERVICIO",
-    nombre: "FARMACIA INSTITUCIONAL",
-    pregunta: "¿Qué hacemos aquí?",
-    descripcion:
-      "Retiro de medicamentos recetados exclusivamente por profesionales del hospital.",
-    ubicacion: "Sector Farmacia - Planta Baja",
-    horarios: "Lunes a Viernes (8:00 a 18:00 hs)",
-    requisitos: [
-      "Presentar DNI original del paciente.",
-      "Receta Médica actualizada del hospital.",
-    ],
-    contacto: "3704-XXXXXX (Interno 204)",
-  },
-  {
-    id: 105,
-    tipo: "SERVICIO",
-    nombre: "REHABILITACIÓN Y KINESIOLOGÍA",
-    pregunta: "¿Qué hacemos aquí?",
-    descripcion: "Sesiones de recuperación física, motriz y respiratoria.",
-    ubicacion: "Sector Kinesiología - 1er Piso",
-    horarios: "Lunes a Viernes (8:00 a 16:00 hs)",
-    requisitos: [
-      "Asistir con DNI.",
-      "Orden Médica con derivación explícita a kinesiología.",
-    ],
-    contacto: "3704-XXXXXX (Interno 205)",
-  },
-  {
-    id: 106,
-    tipo: "SERVICIO",
-    nombre: "HEMOTERAPIA (BANCO DE SANGRE)",
-    pregunta: "¿Qué hacemos aquí?",
-    descripcion:
-      "Para donación de sangre y atención de transfusiones hospitalarias.",
-    ubicacion: "Banco de Sangre - Planta Baja",
-    horarios: "Lunes a Viernes (7:00 a 11:00 hs para donantes)",
-    requisitos: [
-      "Presentar DNI original.",
-      "Desayunar líquidos (sin grasas ni lácteos) antes de donar.",
-    ],
-    contacto: "3704-XXXXXX (Interno 206)",
-  },
-];
+import { getEspecialidades } from "../../api/especialidades.api.js";
 
 const EspecialidadesPage = () => {
   const [currentView, setCurrentView] = useState("menu");
-
   const [selectedItem, setSelectedItem] = useState(null);
+  
+  const [especialidadesData, setEspecialidadesData] = useState([]);
+  const [serviciosData, setServiciosData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const fetchDatos = async () => {
+      try {
+        // false = Solo trae los elementos que están "Activos" para el público
+        const data = await getEspecialidades(false); 
+        setEspecialidadesData(data.filter(item => !item.esServicio));
+        setServiciosData(data.filter(item => item.esServicio));
+      } catch (error) {
+        console.error("Error cargando áreas de atención", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDatos();
+  }, []);
 
   const closeModal = () => setSelectedItem(null);
 
@@ -205,8 +44,7 @@ const EspecialidadesPage = () => {
           <Breadcrumb currentPage="Áreas de Atención" />
           <h1 className="esp-main-title">Áreas de Atención</h1>
           <p className="esp-subtitle">
-            Conozca los servicios y especialidades médicas de nuestra
-            institución
+            Conozca los servicios y especialidades médicas de nuestra institución
           </p>
         </div>
       </div>
@@ -242,6 +80,7 @@ const EspecialidadesPage = () => {
                 <h2>Especialidades</h2>
               </div>
             </AnimatedContent>
+            
             <AnimatedContent
               distance={40}
               direction="vertical"
@@ -291,32 +130,39 @@ const EspecialidadesPage = () => {
               </button>
               <h3 className="esp-instruction">
                 Seleccione{" "}
-                {currentView === "grilla-esp"
-                  ? "la especialidad"
-                  : "el servicio"}{" "}
+                {currentView === "grilla-esp" ? "la especialidad" : "el servicio"}{" "}
                 para ver horarios y requisitos:
               </h3>
             </div>
 
-            <div className="specialties-grid">
-              {(currentView === "grilla-esp"
-                ? especialidadesData
-                : serviciosData
-              ).map((item) => (
-                <div
-                  key={item.id}
-                  className="specialty-card"
-                  onClick={() => setSelectedItem(item)}
-                >
-                  <h3>{item.nombre}</h3>
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <div style={{ padding: "60px", textAlign: "center", color: "#64748b" }}>
+                Cargando áreas de atención...
+              </div>
+            ) : (
+              <div className="specialties-grid">
+                {(currentView === "grilla-esp" ? especialidadesData : serviciosData).map((item) => (
+                  <div
+                    key={item.id}
+                    className="specialty-card"
+                    onClick={() => setSelectedItem(item)}
+                  >
+                    <h3>{item.nombre}</h3>
+                  </div>
+                ))}
+                
+                {(currentView === "grilla-esp" ? especialidadesData : serviciosData).length === 0 && (
+                  <div style={{ padding: "40px", textAlign: "center", color: "#64748b", gridColumn: "1 / -1" }}>
+                    No hay {currentView === "grilla-esp" ? "especialidades" : "servicios"} registrados en este momento.
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
 
-      {/* MODAL CON CLASES AISLADAS (.esp-aislado-...) */}
+      {/* MODAL AISLADO */}
       {selectedItem && (
         <div className="esp-aislado-overlay" onClick={closeModal}>
           <div
@@ -325,9 +171,8 @@ const EspecialidadesPage = () => {
           >
             <div className="esp-aislado-header">
               <h2>
-                {selectedItem.tipo}: {selectedItem.nombre}
+                {selectedItem.esServicio ? "SERVICIO" : "ESPECIALIDAD"}: {selectedItem.nombre}
               </h2>
-              {/* Botón X de cerrar */}
               <button
                 className="esp-aislado-btn-close"
                 onClick={closeModal}
@@ -340,19 +185,21 @@ const EspecialidadesPage = () => {
             </div>
 
             <div className="esp-aislado-body">
-              <div className="esp-aislado-info-section">
-                <h4 className="esp-aislado-info-title">
-                  <span className="esp-aislado-info-icon">
-                    <svg viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="16" x2="12" y2="12"></line>
-                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                  </span>
-                  {selectedItem.pregunta}
-                </h4>
-                <p className="esp-aislado-info-text italic">{selectedItem.descripcion}</p>
-              </div>
+              {selectedItem.descripcion && (
+                <div className="esp-aislado-info-section">
+                  <h4 className="esp-aislado-info-title">
+                    <span className="esp-aislado-info-icon">
+                      <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                      </svg>
+                    </span>
+                    {selectedItem.pregunta || "¿Qué atendemos aquí?"}
+                  </h4>
+                  <p className="esp-aislado-info-text italic">{selectedItem.descripcion}</p>
+                </div>
+              )}
 
               <div className="esp-aislado-info-section">
                 <div className="esp-aislado-info-row">
@@ -363,7 +210,7 @@ const EspecialidadesPage = () => {
                     </svg>
                   </span>
                   <p className="esp-aislado-info-text">
-                    <strong>Ubicación:</strong> {selectedItem.ubicacion}
+                    <strong>Ubicación:</strong> {selectedItem.ubicacion || "Consultar en Admisión"}
                   </p>
                 </div>
                 <div className="esp-aislado-info-row">
@@ -374,73 +221,77 @@ const EspecialidadesPage = () => {
                     </svg>
                   </span>
                   <p className="esp-aislado-info-text">
-                    <strong>Horarios:</strong> {selectedItem.horarios}
+                    <strong>Horarios:</strong> {selectedItem.horarios || "Consultar horarios disponibles"}
                   </p>
                 </div>
               </div>
 
-              <div className="esp-aislado-info-section">
-                <h4 className="esp-aislado-info-title">
-                  <span className="esp-aislado-info-icon">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                      <line x1="12" y1="9" x2="12" y2="13"></line>
-                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                  </span>
-                  REQUISITOS IMPORTANTES:
-                </h4>
-                <ul className="esp-aislado-requisitos-lista">
-                  {selectedItem.requisitos.map((req, index) => (
-                    <li key={index} className="esp-aislado-info-text">
-                      {req.includes("DNI") ? (
-                        <>
-                          <span className="esp-aislado-text-danger">
-                            Traer DNI original.
-                          </span>{" "}
-                          {req
-                            .replace("Traer DNI original.", "")
-                            .replace("Asistir con DNI y", "Y")
-                            .replace("Asistir con DNI.", "")}
-                        </>
-                      ) : (
-                        req
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="esp-aislado-info-section">
-                <h4 className="esp-aislado-info-title">
-                  <span className="esp-aislado-info-icon">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                    </svg>
-                  </span>
-                  ¿CÓMO SOLICITAR TURNO?
-                </h4>
-                <p className="esp-aislado-info-text">
-                  Los turnos se otorgan de manera <strong>PRESENCIAL</strong> en
-                  la ventanilla del sector. Para consultas:
-                </p>
-                <div
-                  className="esp-aislado-info-row"
-                  style={{ marginTop: "10px", alignItems: "center" }}
-                >
-                  <span className="esp-aislado-info-icon">
-                    <svg
-                      viewBox="0 0 24 24"
-                      style={{ width: "18px", height: "18px" }}
-                    >
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                  </span>
-                  <p className="esp-aislado-info-text esp-aislado-text-danger">
-                    {selectedItem.contacto}
-                  </p>
+              {selectedItem.requisitos && selectedItem.requisitos.length > 0 && (
+                <div className="esp-aislado-info-section">
+                  <h4 className="esp-aislado-info-title">
+                    <span className="esp-aislado-info-icon">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                      </svg>
+                    </span>
+                    REQUISITOS IMPORTANTES:
+                  </h4>
+                  <ul className="esp-aislado-requisitos-lista">
+                    {selectedItem.requisitos.map((req, index) => (
+                      <li key={index} className="esp-aislado-info-text">
+                        {req && req.includes("DNI") ? (
+                          <>
+                            <span className="esp-aislado-text-danger">
+                              Traer DNI original.
+                            </span>{" "}
+                            {req
+                              .replace("Traer DNI original.", "")
+                              .replace("Asistir con DNI y", "Y")
+                              .replace("Asistir con DNI.", "")}
+                          </>
+                        ) : (
+                          req
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
+              )}
+
+              {selectedItem.contacto && (
+                <div className="esp-aislado-info-section">
+                  <h4 className="esp-aislado-info-title">
+                    <span className="esp-aislado-info-icon">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                    </span>
+                    ¿CÓMO SOLICITAR TURNO?
+                  </h4>
+                  <p className="esp-aislado-info-text">
+                    Los turnos se otorgan de manera <strong>PRESENCIAL</strong> en
+                    la ventanilla del sector. Para consultas:
+                  </p>
+                  <div
+                    className="esp-aislado-info-row"
+                    style={{ marginTop: "10px", alignItems: "center" }}
+                  >
+                    <span className="esp-aislado-info-icon">
+                      <svg
+                        viewBox="0 0 24 24"
+                        style={{ width: "18px", height: "18px" }}
+                      >
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </span>
+                    <p className="esp-aislado-info-text esp-aislado-text-danger">
+                      {selectedItem.contacto}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="esp-aislado-footer">
@@ -451,6 +302,7 @@ const EspecialidadesPage = () => {
           </div>
         </div>
       )}
+
     </main>
   );
 };
