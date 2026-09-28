@@ -327,6 +327,7 @@ enum EstadoEditorial {
   APROBADO
   PUBLICADO
   ARCHIVADO
+  PROGRAMADO
 }
 
 enum TipoContacto {

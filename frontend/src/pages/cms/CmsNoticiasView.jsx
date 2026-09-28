@@ -501,10 +501,41 @@ const CmsNoticiasView = ({
                   {estado === "PROGRAMADO" && (
                     <div style={{ marginBottom: "15px" }}>
                       <label className="news-form-label" style={{ display: 'block', marginBottom: '8px' }}>Publicar el:</label>
-                      <div className="schedule-picker-container">
-                        <DatePicker selected={fechaProgramada} onChange={(date) => { if (fechaProgramada && date) { date.setHours(fechaProgramada.getHours()); date.setMinutes(fechaProgramada.getMinutes()); } setFechaProgramada(date); setHasUnsavedChanges(true); }} minDate={new Date()} locale="es" dateFormat="dd/MM/yyyy" customInput={<CustomScheduleInput isDate={true} placeholder="Elegir fecha" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>} />} />
-                        <DatePicker selected={fechaProgramada} onChange={(date) => { setFechaProgramada(date); setHasUnsavedChanges(true); }} showTimeSelect showTimeSelectOnly timeIntervals={5} timeCaption="Hora" dateFormat="HH:mm" customInput={<CustomScheduleInput placeholder="Elegir hora" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>} />} />
-                      </div>
+<div className="schedule-picker-container">
+
+  <DatePicker 
+    selected={fechaProgramada} 
+    onChange={(date) => { 
+      if (fechaProgramada && date) { 
+        date.setHours(fechaProgramada.getHours()); 
+        date.setMinutes(fechaProgramada.getMinutes()); 
+      } 
+      setFechaProgramada(date); 
+      setHasUnsavedChanges(true); 
+    }} 
+    minDate={new Date()} 
+    locale="es" 
+    dateFormat="dd/MM/yyyy" 
+    portalId="root-portal"
+    customInput={<CustomScheduleInput isDate={true} placeholder="Elegir fecha" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>} />} 
+  />
+  
+
+  <DatePicker 
+    selected={fechaProgramada} 
+    onChange={(date) => { 
+      setFechaProgramada(date); 
+      setHasUnsavedChanges(true); 
+    }} 
+    showTimeSelect 
+    showTimeSelectOnly 
+    timeIntervals={5} 
+    timeCaption="Hora" 
+    dateFormat="HH:mm" 
+    portalId="root-portal" 
+    customInput={<CustomScheduleInput placeholder="Elegir hora" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>} />} 
+  />
+</div>
                     </div>
                   )}
 
