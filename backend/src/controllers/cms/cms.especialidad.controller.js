@@ -1,25 +1,37 @@
 import CmsEspecialidadService from "../../services/cms/cms.especialidad.service.js";
 
-export const crearEspecialidad = async (req, res, next) => {
-  try {
-    const result = await CmsEspecialidadService.crearEspecialidad(req.body);
-    res.status(201).json(result);
-  } catch (error) { next(error); }
-};
-
 export const obtenerEspecialidades = async (req, res, next) => {
   try {
     const { admin } = req.query;
     const result = await CmsEspecialidadService.obtenerEspecialidades(admin);
-    res.status(200).json(result);
+    return res.status(200).json(result);
+  } catch (error) { next(error); }
+};
+
+export const crearEspecialidad = async (req, res, next) => {
+  try {
+    const payload = { ...req.body, esServicio: req.body.esServicio === 'true' };
+    if (req.body.requisitos) {
+      try { payload.requisitos = JSON.parse(req.body.requisitos); } 
+      catch (e) { payload.requisitos = req.body.requisitos; }
+    }
+    // Pasamos req.file al servicio
+    const result = await CmsEspecialidadService.crearEspecialidad(payload, req.file);
+    return res.status(201).json(result);
   } catch (error) { next(error); }
 };
 
 export const actualizarEspecialidad = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await CmsEspecialidadService.actualizarEspecialidad(id, req.body);
-    res.status(200).json(result);
+    const payload = { ...req.body, esServicio: req.body.esServicio === 'true' };
+    if (req.body.requisitos) {
+      try { payload.requisitos = JSON.parse(req.body.requisitos); } 
+      catch (e) { payload.requisitos = req.body.requisitos; }
+    }
+    // Pasamos req.file al servicio
+    const result = await CmsEspecialidadService.actualizarEspecialidad(id, payload, req.file);
+    return res.status(200).json(result);
   } catch (error) { next(error); }
 };
 
@@ -28,8 +40,6 @@ export const eliminarEspecialidad = async (req, res, next) => {
     const { id } = req.params;
     const { isServicio } = req.query; 
     const result = await CmsEspecialidadService.eliminarEspecialidad(id, isServicio);
-    res.status(200).json(result);
-  } catch (error) { 
-    next(error); 
-  }
+    return res.status(200).json(result);
+  } catch (error) { next(error); }
 };

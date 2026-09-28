@@ -149,7 +149,8 @@ model especialidad {
   horarios               String?
   informacionDerivacion  String?
   ubicacion              String?
-  estado                 EstadoEditorial @default(PUBLICADO) // <-- NUEVO
+  imagenBanner           String?         @db.VarChar(500) 
+  estado                 EstadoEditorial @default(PUBLICADO)
   profesional            profesional[]
 }
 
@@ -280,6 +281,7 @@ model servicio {
   horarios               String?
   informacionDerivacion  String?
   ubicacion              String?
+  imagenBanner           String?         @db.Text
   estado                 EstadoEditorial @default(PUBLICADO)
   servicio_area          servicio_area[]
 }

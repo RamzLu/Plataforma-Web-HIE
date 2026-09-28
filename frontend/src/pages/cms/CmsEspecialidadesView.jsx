@@ -15,21 +15,9 @@ const CmsEspecialidadesView = () => {
   const [editingId, setEditingId] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [bannerFile, setBannerFile] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
 
-  // --- NUEVAS FUNCIONES ---
-  const handleCloseAttempt = () => {
-    if (hasUnsavedChanges) {
-      setShowUnsavedModal(true);
-    } else {
-      setShowModal(false);
-    }
-  };
-
-  const handleForceClose = () => {
-    setShowUnsavedModal(false);
-    setShowModal(false);
-    setHasUnsavedChanges(false);
-  };
   const [formData, setFormData] = useState({
     nombre: "", descripcion: "", ubicacion: "", horarios: "", 
     requisitos: "", documentacionNecesaria: "", informacionDerivacion: "", 
@@ -50,8 +38,25 @@ const CmsEspecialidadesView = () => {
     finally { setLoading(false); }
   };
 
+  // --- CONTROLES DE MODAL DE CAMBIOS SIN GUARDAR ---
+  const handleCloseAttempt = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedModal(true);
+    } else {
+      setShowModal(false);
+    }
+  };
+
+  const handleForceClose = () => {
+    setShowUnsavedModal(false);
+    setShowModal(false);
+    setHasUnsavedChanges(false);
+  };
+
   const handleOpenCreate = () => {
     setEditingId(null);
+    setBannerFile(null); 
+    setBannerPreview(null);
     setFormData({ 
       nombre: "", descripcion: "", ubicacion: "", horarios: "", 
       requisitos: "", documentacionNecesaria: "", informacionDerivacion: "", 
@@ -59,11 +64,12 @@ const CmsEspecialidadesView = () => {
     });
     setHasUnsavedChanges(false);
     setShowModal(true);
-    setShowModal(true);
   };
 
   const handleOpenEdit = (esp) => {
     setEditingId(esp.id);
+    setBannerFile(null); 
+    setBannerPreview(esp.imagenBanner || null); // Al ser Base64 o URL completa, se lee directo
     setFormData({
       nombre: esp.nombre || "", 
       descripcion: esp.descripcion || "",
@@ -77,38 +83,48 @@ const CmsEspecialidadesView = () => {
     });
     setHasUnsavedChanges(false);
     setShowModal(true);
-    setShowModal(true);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.nombre.trim()) return toast.error("El nombre es obligatorio.");
 
-    const payload = {
-      ...formData,
-      requisitos: formData.requisitos.split("\n").map(r => r.trim()).filter(r => r) 
-    };
-
     setIsSaving(true);
     try {
       const token = keycloak.token;
+      
+      const dataToSend = new FormData();
+      dataToSend.append("nombre", formData.nombre);
+      dataToSend.append("descripcion", formData.descripcion);
+      dataToSend.append("ubicacion", formData.ubicacion);
+      dataToSend.append("horarios", formData.horarios);
+      dataToSend.append("documentacionNecesaria", formData.documentacionNecesaria);
+      dataToSend.append("informacionDerivacion", formData.informacionDerivacion);
+      dataToSend.append("esServicio", formData.esServicio);
+      dataToSend.append("estado", formData.estado);
+      
+      const reqArray = formData.requisitos.split("\n").map(r => r.trim()).filter(r => r);
+      dataToSend.append("requisitos", JSON.stringify(reqArray));
+
+      if (bannerFile) dataToSend.append("banner", bannerFile);
+
       if (editingId) {
-        await updateEspecialidad(editingId, payload, token);
+        await updateEspecialidad(editingId, dataToSend, token); 
         toast.success("Actualizado con éxito.");
       } else {
-        await createEspecialidad(payload, token);
+        await createEspecialidad(dataToSend, token);
         toast.success("Creado con éxito.");
       }
       setShowModal(false);
-      cargarDatos();
       setHasUnsavedChanges(false);
+      cargarDatos();
     } catch (error) { toast.error("Error al guardar."); }
     finally { setIsSaving(false); }
   };
 
   const confirmDelete = (esp) => { setItemAEliminar(esp); setShowDeleteModal(true); };
 
-const executeDelete = async () => {
+  const executeDelete = async () => {
     setIsDeleting(true); 
     try {
       await deleteEspecialidad(itemAEliminar.id, keycloak.token, itemAEliminar.esServicio);
@@ -123,7 +139,6 @@ const executeDelete = async () => {
       setIsDeleting(false); 
     }
   };
-
 
   const datosFiltrados = especialidades.filter(esp => {
     if (activeTab === "PUBLICADOS") return esp.estado === "PUBLICADO";
@@ -141,13 +156,12 @@ const executeDelete = async () => {
         <button type="button" className="btn-crear-noticia-header" onClick={handleOpenCreate}>+ NUEVO ELEMENTO</button>
       </div>
 
-
       <div className="esp-tabs-container">
         <button 
           className={`esp-tab-btn ${activeTab === "PUBLICADOS" ? "active" : ""}`}
           onClick={() => setActiveTab("PUBLICADOS")}
         >
-        Publicados
+          Publicados
         </button>
         <button 
           className={`esp-tab-btn ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
@@ -157,7 +171,7 @@ const executeDelete = async () => {
         </button>
       </div>
 
-<div className="cms-news-table-container" style={{ marginTop: "20px" }}>
+      <div className="cms-news-table-container" style={{ marginTop: "20px" }}>
         <div className="activity-table-head">
           <div style={{ flex: 1.5 }}>NOMBRE</div>
           <div style={{ width: "140px" }}>CLASIFICACIÓN</div>
@@ -252,12 +266,52 @@ const executeDelete = async () => {
               <div className="esp-modal-body">
                 <div className="esp-form-grid">
                   
+                  {/* 1. CAMPO TÍTULO / NOMBRE */}
                   <div className="esp-full-width">
                     <label className="esp-form-label">Nombre de la Especialidad/Servicio <span className="esp-asterisk">*</span></label>
-                    <input type="text" value={formData.nombre} onChange={(e) => { setFormData({...formData, nombre: e.target.value}); setHasUnsavedChanges(true); }} className="esp-form-input" placeholder="Ej: Cardiología..." required />
+                    <input 
+                      type="text" 
+                      value={formData.nombre} 
+                      onChange={(e) => { setFormData({...formData, nombre: e.target.value}); setHasUnsavedChanges(true); }} 
+                      className="esp-form-input" 
+                      placeholder="Ej: Cardiología..." 
+                      required 
+                    />
+                  </div>
+
+                  {/* 2. CAMPO IMAGEN DE BANNER */}
+                  <div className="esp-full-width" style={{ border: "2px dashed #cbd5e1", padding: "15px", borderRadius: "8px", backgroundColor: "#f8fafc", marginBottom: "5px" }}>
+                    <label className="esp-form-label" style={{ color: "#0f172a" }}>Imagen de Banner (Opcional)</label>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setBannerFile(file);
+                          setBannerPreview(URL.createObjectURL(file));
+                          setHasUnsavedChanges(true);
+                        }
+                      }} 
+                      className="esp-form-input" 
+                      style={{ border: "none", padding: "0", marginTop: "8px" }}
+                    />
+                    {bannerPreview && (
+                      <div style={{ marginTop: "15px", width: "100%", height: "140px", borderRadius: "8px", overflow: "hidden", position: "relative", border: "1px solid #e2e8f0" }}>
+                        <img src={bannerPreview} alt="Preview Banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <button 
+                          type="button" 
+                          onClick={() => { setBannerFile(null); setBannerPreview(null); setHasUnsavedChanges(true); }}
+                          style={{ position: "absolute", top: "8px", right: "8px", background: "rgba(15, 23, 42, 0.75)", color: "#fff", border: "none", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", transition: "background 0.2s" }}
+                          title="Quitar imagen"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    )}
                   </div>
                   
-                  {/* SELECTORES DE CONFIGURACIÓN Y ESTADO */}
+                  {/* 3. SELECTORES DE CONFIGURACIÓN Y ESTADO */}
                   <div style={{ display: "flex", alignItems: "flex-end" }}>
                     <div style={{ flex: 1 }}>
                       <label className="esp-form-label">Tipo de Elemento</label>
@@ -283,6 +337,7 @@ const executeDelete = async () => {
                     </select>
                   </div>
 
+                  {/* 4. CAMPOS DE TEXTO RESTANTES */}
                   <div className="esp-full-width">
                     <label className="esp-form-label">Descripción general</label>
                     <textarea value={formData.descripcion} onChange={(e) => { setFormData({...formData, descripcion: e.target.value}); setHasUnsavedChanges(true); }} className="esp-form-input" rows="2" style={{ resize: "none" }} placeholder="Breve descripción del área..." />
@@ -322,7 +377,10 @@ const executeDelete = async () => {
                 </button>
                 <button type="submit" className="btn-cerrar-rojo" style={{ backgroundColor: "#2b5b94" }} disabled={isSaving}>
                   {isSaving ? (
-                    <div className="esp-saving-dots">GUARDANDO<span>.</span><span>.</span><span>.</span></div>
+                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px", borderTopColor: "white", borderColor: "rgba(255,255,255,0.3)" }}></div>
+                      GUARDANDO...
+                    </span>
                   ) : (
                     editingId ? "ACTUALIZAR" : "GUARDAR"
                   )}
@@ -342,8 +400,18 @@ const executeDelete = async () => {
               <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>¿Qué deseas hacer con el registro actual?</p>
             </div>
             <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <button type="button" onClick={handleForceClose} style={{ width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px", transition: "background-color 0.15s ease, transform 0.15s ease", fontFamily: "'Manrope', sans-serif" }}>Descartar cambios</button>
-              <button type="button" onClick={() => setShowUnsavedModal(false)} style={{ width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px", transition: "background-color 0.15s ease, transform 0.15s ease", fontFamily: "'Manrope', sans-serif" }}>Seguir editando</button>
+              <button 
+                type="button" 
+                onClick={(e) => {
+                   setFormData(prev => ({...prev, estado: "ARCHIVADO"}));
+                   setTimeout(() => handleSave(e), 50); 
+                }} 
+                style={{ width: "100%", padding: "16px 24px", backgroundColor: "#000b20", color: "#ffffff", border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px", transition: "background-color 0.15s ease", fontFamily: "'Manrope', sans-serif" }}
+              >
+                Guardar y archivar (Oculto)
+              </button>
+              <button type="button" onClick={handleForceClose} style={{ width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px", transition: "background-color 0.15s ease", fontFamily: "'Manrope', sans-serif" }}>Descartar cambios</button>
+              <button type="button" onClick={() => setShowUnsavedModal(false)} style={{ width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px", transition: "background-color 0.15s ease", fontFamily: "'Manrope', sans-serif" }}>Seguir editando</button>
             </div>
           </div>
         </div>
