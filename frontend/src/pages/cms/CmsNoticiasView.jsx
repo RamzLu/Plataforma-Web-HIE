@@ -25,7 +25,7 @@ import {
   Alignment,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
-import "../../styles/components/cms/CmsNoticiasView.css";
+import "../../styles/pages/cms/CmsNoticiasView.css";
 
 registerLocale("es", es);
 
@@ -474,13 +474,13 @@ const CmsNoticiasView = ({
               <div className="modal-split-layout">
                 <div className="news-form-left">
                   <div>
-                    <label className="news-form-label">Título de la publicación</label>
+                    <label className="news-form-label">TÍTULO DE LA PUBLICACION <span className="field-required-docs">*</span></label>
                     <input type="text" value={titulo} onChange={(e) => { setTitulo(e.target.value); setHasUnsavedChanges(true); }} placeholder="Ingrese el título..." className="news-form-input" required />
                   </div>
 
                   <div style={{ display: "flex", gap: "15px", marginTop: "15px", marginBottom: "15px" }}>
                     <div style={{ flex: 1 }}>
-                      <label className="news-form-label">Clasificación</label>
+                      <label className="news-form-label">CLASIFICACIÓN</label>
                       <select value={categoria} onChange={(e) => { setCategoria(e.target.value); setHasUnsavedChanges(true); }} className="news-form-input">
                         {CATEGORIAS.map((cat) => (
                           <option key={cat} value={cat}>{cat}</option>
@@ -489,7 +489,7 @@ const CmsNoticiasView = ({
                     </div>
 
                     <div style={{ flex: 1 }}>
-                      <label className="news-form-label">Estado</label>
+                      <label className="news-form-label">ESTADO</label>
                       <select value={estado} onChange={(e) => { setEstado(e.target.value); setHasUnsavedChanges(true); if (e.target.value !== "PROGRAMADO") setFechaProgramada(null); }} className="news-form-input">
                         <option value="PUBLICADO">Publicado</option>
                         <option value="BORRADOR">Borrador</option>
@@ -540,7 +540,7 @@ const CmsNoticiasView = ({
                   )}
 
                   <div>
-                    <label className="news-form-label">Imágenes adjuntas</label>
+                    <label className="news-form-label">IMÁGENES ADJUNTAS</label>
                     <div className="custom-file-upload-zone">
                       <input type="file" accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" multiple onChange={handleMultipleImagesUpload} className="custom-file-input-hidden" />
                       <div className="custom-file-upload-content">
@@ -562,7 +562,7 @@ const CmsNoticiasView = ({
                   </div>
 
                   <div>
-                    <label style={{ display: "block", fontWeight: "700", color: "#0c2340", marginBottom: "8px" }}>Cuerpo de la publicación</label>
+                    <label style={{ display: "block", fontWeight: "600", color: "rgb(100 116 139)", marginBottom: "8px" }}>CUERPO DE LA PUBLICACIÓN <span className="field-required-docs">*</span></label>
                     <div className="custom-ckeditor-container">
                       <CKEditor editor={ClassicEditor} data={cuerpoHtml || ""} config={{ licenseKey: "GPL", plugins: [Essentials, Paragraph, Heading, Bold, Italic, Underline, Link, List, BlockQuote, Undo, Alignment], toolbar: ["heading", "|", "bold", "italic", "underline", "link", "bulletedList", "numberedList", "|", "alignment:left", "alignment:center", "alignment:right", "alignment:justify", "|", "blockQuote", "|", "undo", "redo"], alignment: { options: ["left", "center", "right", "justify"] } }} onChange={(event, editor) => { setCuerpoHtml(editor.getData()); setHasUnsavedChanges(true); }} />
                     </div>
@@ -571,7 +571,7 @@ const CmsNoticiasView = ({
 
                 <div className="news-form-right">
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b' }}>Vista previa de la publicación</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b' }}>VISTA PREVIA DE LA PUBLICACIÓN</span>
                     <span style={{ backgroundColor: categoria === "General" ? "#f1f5f9" : "#e0f2fe", color: categoria === "General" ? "#475569" : "#0284c7", padding: "2px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "700" }}>{categoria}</span>
                   </div>
                   <div className="news-preview-paper" style={{ padding: 0 }}>

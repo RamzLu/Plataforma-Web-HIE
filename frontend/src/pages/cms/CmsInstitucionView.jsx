@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../../styles/components/cms/CmsInstitucionView.css";
+import "../../styles/pages/cms/CmsInstitucionView.css";
 
 // --- Datos hardcodeados (simulan lo que vendría del backend) ---
 const DATOS_INSTITUCIONALES = {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
-import "../../styles/components/cms/CmsProfesionalesView.css";
+import "../../styles/pages/cms/CmsProfesionalesView.css";
 
 const AREAS_ESPECIALIDAD = ["Clínica Médica", "Traumatología", "Pediatría", "Cardiología", "Cirugía General"];
 const AREAS_APOYO = ["Laboratorio", "Radiología", "Kinesiología", "Farmacia", "Nutrición"];

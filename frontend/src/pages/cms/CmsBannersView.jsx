@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
-import "../../styles/components/cms/CmsBannersView.css";
+import "../../styles/pages/cms/CmsBannersView.css";
 
 import imagen1 from "../../assets/fondoHospitalCarrusel1.jpg";
 import imagen2 from "../../assets/fondoHospitalCarrusel2.jpg";

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import { getEspecialidades, createEspecialidad, updateEspecialidad, deleteEspecialidad } from "../../api/especialidades.api.js";
-import "../../styles/components/cms/CmsDashboard.css"; 
+// import "../../styles/components/cms/CmsDashboard.css"; 
+import "../../styles/pages/cms/CmsEspecialidadesView.css";
 
 const CmsEspecialidadesView = () => {
   const [especialidades, setEspecialidades] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [isSaving, setIsSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -56,7 +57,7 @@ const CmsEspecialidadesView = () => {
     setShowModal(true);
   };
 
-  const handleSave = async (e) => {
+ const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.nombre.trim()) return toast.error("El nombre es obligatorio.");
 
@@ -64,6 +65,8 @@ const CmsEspecialidadesView = () => {
       ...formData,
       requisitos: formData.requisitos.split("\n").map(r => r.trim()).filter(r => r) 
     };
+
+    setIsSaving(true); // <-- Bloquea el botón e inicia la animación
 
     try {
       const token = keycloak.token;
@@ -76,7 +79,11 @@ const CmsEspecialidadesView = () => {
       }
       setShowModal(false);
       cargarDatos();
-    } catch (error) { toast.error("Error al guardar."); }
+    } catch (error) { 
+      toast.error("Error al guardar."); 
+    } finally {
+      setIsSaving(false); // <-- Desbloquea el botón al terminar
+    }
   };
 
   const confirmDelete = (esp) => { setItemAEliminar(esp); setShowDeleteModal(true); };
@@ -142,64 +149,104 @@ const CmsEspecialidadesView = () => {
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content-esp" style={{ maxWidth: "700px", padding: "30px" }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header-esp" style={{ padding: "0 0 20px 0", borderBottom: "1px solid #e2e8f0", marginBottom: "20px" }}>
-              <h2 style={{ fontSize: "1.4rem" }}>{editingId ? "Editar" : "Nuevo Registro"}</h2>
-              <button className="btn-close-modal" onClick={() => setShowModal(false)}><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+          <div className="modal-content-esp esp-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+            
+            <div className="modal-header-esp">
+              <h2>{editingId ? "Editar Registro" : "Nuevo Registro"}</h2>
+              <button type="button" className="btn-close-modal" onClick={() => setShowModal(false)}>
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+              </button>
             </div>
             
-            <form onSubmit={handleSave} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
-              <div style={{ gridColumn: "span 2" }}>
-                <label className="news-form-label">Nombre *</label>
-                <input type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="news-form-input" required />
-              </div>
-              
-              <div style={{ gridColumn: "span 2", display: "flex", gap: "20px", background: "#f8fafc", padding: "15px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: editingId ? "not-allowed" : "pointer", fontWeight: "600", opacity: editingId ? 0.6 : 1 }}>
-                  <input type="checkbox" checked={formData.esServicio} disabled={!!editingId} onChange={(e) => setFormData({...formData, esServicio: e.target.checked})} style={{ width: "18px", height: "18px" }} />
-                  Marcar como "Servicio Clave"
-                </label>
-                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontWeight: "600" }}>
-                  <input type="checkbox" checked={formData.activo} onChange={(e) => setFormData({...formData, activo: e.target.checked})} style={{ width: "18px", height: "18px" }} />
-                  Activo (Visible en la web)
-                </label>
+            <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <div className="esp-modal-body">
+                <div className="esp-form-grid">
+                  
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">Nombre de la Especialidad/Servicio <span className="esp-asterisk">*</span></label>
+                    <input type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="esp-form-input" placeholder="Ej: Cardiología..." required />
+                  </div>
+                  
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">Configuración del Registro</label>
+                    <div className="esp-toggles-container">
+                      {/* Toggle: Es Servicio Clave */}
+                      <label className={`esp-toggle-item ${editingId ? "disabled" : ""}`}>
+                        <div className="esp-switch">
+                          <input type="checkbox" checked={formData.esServicio} disabled={!!editingId} onChange={(e) => setFormData({...formData, esServicio: e.target.checked})} />
+                          <span className="esp-slider"></span>
+                        </div>
+                        <span className="esp-toggle-label-text">Marcar como "Servicio Clave"</span>
+                      </label>
+
+                      {/* Toggle: Activo */}
+                      <label className="esp-toggle-item">
+                        <div className="esp-switch">
+                          <input type="checkbox" checked={formData.activo} onChange={(e) => setFormData({...formData, activo: e.target.checked})} />
+                          <span className="esp-slider"></span>
+                        </div>
+                        <span className="esp-toggle-label-text">Activo (Visible en el portal público)</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">Descripción general</label>
+                    <textarea value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} className="esp-form-input" rows="2" style={{ resize: "none" }} placeholder="Breve descripción del área..." />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">Ubicación física</label>
+                    <input type="text" value={formData.ubicacion} onChange={(e) => setFormData({...formData, ubicacion: e.target.value})} className="esp-form-input" placeholder="Ej: Pasillo A, PB..." />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">Horarios</label>
+                    <input type="text" value={formData.horarios} onChange={(e) => setFormData({...formData, horarios: e.target.value})} className="esp-form-input" placeholder="Ej: Lun a Vie, 8 a 12hs" />
+                  </div>
+
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">Documentación Necesaria</label>
+                    <input type="text" value={formData.documentacionNecesaria} onChange={(e) => setFormData({...formData, documentacionNecesaria: e.target.value})} className="esp-form-input" placeholder="Ej: DNI, Derivación, Carnet..." />
+                  </div>
+
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">Información de Derivación</label>
+                    <textarea value={formData.informacionDerivacion} onChange={(e) => setFormData({...formData, informacionDerivacion: e.target.value})} className="esp-form-input" rows="2" placeholder="Información sobre cómo tramitar la derivación..." style={{ resize: "none" }} />
+                  </div>
+
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">Requisitos <span style={{ textTransform: "none", color: "#94a3b8", fontWeight: "normal" }}>(Separa cada uno con la tecla Enter)</span></label>
+                    <textarea value={formData.requisitos} onChange={(e) => setFormData({...formData, requisitos: e.target.value})} className="esp-form-input" rows="4" placeholder="Traer DNI original.&#10;Orden médica vigente..." style={{ resize: "none" }} />
+                  </div>
+
+                </div>
               </div>
 
-              <div style={{ gridColumn: "span 2" }}>
-                <label className="news-form-label">Descripción general</label>
-                <textarea value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} className="news-form-input" rows="2" style={{ resize: "none" }} />
-              </div>
-
-              <div>
-                <label className="news-form-label">Ubicación física</label>
-                <input type="text" value={formData.ubicacion} onChange={(e) => setFormData({...formData, ubicacion: e.target.value})} className="news-form-input" placeholder="Ej: Pasillo A, PB..." />
-              </div>
-
-              <div>
-                <label className="news-form-label">Horarios</label>
-                <input type="text" value={formData.horarios} onChange={(e) => setFormData({...formData, horarios: e.target.value})} className="news-form-input" placeholder="Ej: Lun a Vie, 8 a 12hs" />
-              </div>
-
-              <div style={{ gridColumn: "span 2" }}>
-                <label className="news-form-label">Documentación Necesaria</label>
-                <input type="text" value={formData.documentacionNecesaria} onChange={(e) => setFormData({...formData, documentacionNecesaria: e.target.value})} className="news-form-input" placeholder="Ej: DNI, Derivación, Carnet..." />
-              </div>
-
-              <div style={{ gridColumn: "span 2" }}>
-                <label className="news-form-label">Información de Derivación</label>
-                <textarea value={formData.informacionDerivacion} onChange={(e) => setFormData({...formData, informacionDerivacion: e.target.value})} className="news-form-input" rows="2" placeholder="Información sobre cómo tramitar la derivación..." style={{ resize: "none" }} />
-              </div>
-
-              <div style={{ gridColumn: "span 2" }}>
-                <label className="news-form-label">Requisitos (Uno por línea)</label>
-                <textarea value={formData.requisitos} onChange={(e) => setFormData({...formData, requisitos: e.target.value})} className="news-form-input" rows="3" placeholder="Traer DNI&#10;Orden médica..." style={{ resize: "none" }} />
-              </div>
-
-              <div style={{ gridColumn: "span 2", display: "flex", justifyContent: "flex-end", gap: "15px", marginTop: "10px" }}>
-                <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)}>Cancelar</button>
-                <button type="submit" className="btn-cerrar-rojo" style={{ backgroundColor: "#006eb3" }}>{editingId ? "Actualizar" : "Guardar"}</button>
+<div className="modal-footer-esp">
+                <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)} disabled={isSaving}>
+                  CANCELAR
+                </button>
+                
+                <button 
+                  type="submit" 
+                  className="btn-cerrar-rojo" 
+                  style={{ backgroundColor: "#2b5b94" }}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <div className="esp-saving-dots">
+                      GUARDANDO<span>.</span><span>.</span><span>.</span>
+                    </div>
+                  ) : (
+                    editingId ? "ACTUALIZAR" : "GUARDAR"
+                  )}
+                </button>
               </div>
             </form>
+            
           </div>
         </div>
       )}

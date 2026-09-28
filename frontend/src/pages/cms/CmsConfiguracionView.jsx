@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../styles/components/cms/CmsConfiguracionView.css";
+import "../../styles/pages/cms/CmsConfiguracionView.css";
 
 const CmsConfiguracionView = () => {
   // Estado Tarjeta 1: Datos de contacto

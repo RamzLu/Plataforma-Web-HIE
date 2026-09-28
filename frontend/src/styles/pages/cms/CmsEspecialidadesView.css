@@ -1,0 +1,198 @@
+/* =========================================================
+   MODAL DE ESPECIALIDADES Y SERVICIOS (ESTILO UNIFICADO)
+   ========================================================= */
+
+.esp-modal-wrapper {
+  max-width: 800px !important;
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  background-color: #f8fafc !important; /* Mismo fondo gris que Noticias */
+}
+
+/* --- CABECERA --- */
+.modal-header-esp {
+  padding: 25px 35px 20px 35px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header-esp h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #2b5b94; /* Color principal institucional */
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* --- CUERPO --- */
+.esp-modal-body {
+  padding: 30px 35px;
+  overflow-y: auto;
+  max-height: calc(90vh - 150px);
+  background-color: #f8fafc;
+}
+
+.esp-modal-body::-webkit-scrollbar { width: 6px; }
+.esp-modal-body::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+.esp-modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+/* --- GRILLA --- */
+.esp-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.esp-full-width { grid-column: span 2; }
+
+/* --- LABELS AL ESTILO NOTICIAS --- */
+.esp-form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.esp-asterisk {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+/* --- INPUTS AL ESTILO NOTICIAS --- */
+.esp-form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #334155;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.esp-form-input:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.esp-form-input::placeholder {
+  color: #94a3b8;
+}
+
+/* --- TOGGLES TIPO SWITCH (REEMPLAZA A LOS CHECKBOXES CUADRADOS) --- */
+.esp-toggles-container {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.esp-toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.esp-toggle-item.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.esp-toggle-label-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Diseño del Switch CSS puro */
+.esp-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.esp-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.esp-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 34px;
+}
+
+.esp-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .esp-slider {
+  background-color: #0284c7; /* Azul noticias */
+}
+
+input:checked + .esp-slider:before {
+  transform: translateX(20px);
+}
+
+/* --- PIE DE PÁGINA --- */
+.modal-footer-esp {
+  padding: 20px 35px;
+  background-color: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 12px 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+/* --- ANIMACIÓN PARA EL BOTÓN DE GUARDAR --- */
+.esp-saving-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.esp-saving-dots span {
+  animation: esp-blink 1.4s infinite both;
+  font-size: 1.1em;
+}
+
+.esp-saving-dots span:nth-child(2) { animation-delay: 0.2s; }
+.esp-saving-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes esp-blink {
+  0%, 80%, 100% { opacity: 0; }
+  40% { opacity: 1; }
+}
+
+.btn-cerrar-rojo:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
