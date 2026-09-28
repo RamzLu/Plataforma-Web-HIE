@@ -10,7 +10,7 @@ class CmsEspecialidadService {
       requisitos: data.requisitos ? JSON.stringify(data.requisitos) : "[]",
       documentacionNecesaria: data.documentacionNecesaria,
       informacionDerivacion: data.informacionDerivacion,
-      activo: data.activo
+      estado: data.estado || "PUBLICADO" // Usamos el estado
     };
 
     if (data.esServicio) {
@@ -23,7 +23,8 @@ class CmsEspecialidadService {
   }
 
   async obtenerEspecialidades(isAdmin) {
-    const whereClause = isAdmin === "true" ? {} : { activo: true };
+    // Si no es admin (portal público), solo trae los PUBLICADOS
+    const whereClause = isAdmin === "true" ? {} : { estado: "PUBLICADO" };
     
     const especialidades = await prisma.especialidad.findMany({ where: whereClause });
     const servicios = await prisma.servicio.findMany({ where: whereClause });
@@ -45,7 +46,7 @@ class CmsEspecialidadService {
       requisitos: data.requisitos ? JSON.stringify(data.requisitos) : "[]",
       documentacionNecesaria: data.documentacionNecesaria,
       informacionDerivacion: data.informacionDerivacion,
-      activo: data.activo
+      estado: data.estado
     };
 
     if (data.esServicio) {
@@ -78,28 +79,24 @@ class CmsEspecialidadService {
     return { message: "Eliminado con éxito" };
   }
 
-_format(registro, esServicio) {
+  _format(registro, esServicio) {
     let requisitosProcesados = [];
-
     if (registro.requisitos) {
       try {
-        // Intenta leerlo como JSON nuevo
         requisitosProcesados = JSON.parse(registro.requisitos);
       } catch (error) {
-        // Fallback: si es texto antiguo plano, lo separa por saltos de línea
         requisitosProcesados = typeof registro.requisitos === 'string' 
-          ? registro.requisitos.split('\n').map(r => r.trim()).filter(r => r !== '') 
-          : [];
+          ? registro.requisitos.split('\n').map(r => r.trim()).filter(r => r !== '') : [];
       }
     }
 
     return {
       ...registro,
       id: registro.id.toString(),
-      esServicio, // Bandera virtual (no se guarda en BD) para saber a qué tabla pertenece
+      esServicio,
       requisitos: requisitosProcesados
     };
   }
 }
 
-export default new CmsEspecialidadService();
+export default new CmsEspecialidadService();  

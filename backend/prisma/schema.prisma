@@ -149,7 +149,7 @@ model especialidad {
   horarios               String?
   informacionDerivacion  String?
   ubicacion              String?
-  activo                 Boolean       @default(true)
+  estado                 EstadoEditorial @default(PUBLICADO) // <-- NUEVO
   profesional            profesional[]
 }
 
@@ -280,7 +280,7 @@ model servicio {
   horarios               String?
   informacionDerivacion  String?
   ubicacion              String?
-  activo                 Boolean         @default(true)
+  estado                 EstadoEditorial @default(PUBLICADO)
   servicio_area          servicio_area[]
 }
 
