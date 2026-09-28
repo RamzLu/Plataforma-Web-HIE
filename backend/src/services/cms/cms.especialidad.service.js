@@ -2,58 +2,104 @@ import { prisma } from "../../config/prisma.js";
 
 class CmsEspecialidadService {
   async crearEspecialidad(data) {
-    const nueva = await prisma.especialidad.create({
-      data: {
-        ...data,
-        requisitos: data.requisitos ? JSON.stringify(data.requisitos) : "[]"
-      }
-    });
-    return { message: "Creada con éxito", data: this._format(nueva) };
+    const payload = {
+      nombre: data.nombre,
+      descripcion: data.descripcion,
+      ubicacion: data.ubicacion,
+      horarios: data.horarios,
+      requisitos: data.requisitos ? JSON.stringify(data.requisitos) : "[]",
+      documentacionNecesaria: data.documentacionNecesaria,
+      informacionDerivacion: data.informacionDerivacion,
+      activo: data.activo
+    };
+
+    if (data.esServicio) {
+      const nuevo = await prisma.servicio.create({ data: payload });
+      return { message: "Servicio creado", data: this._format(nuevo, true) };
+    } else {
+      const nueva = await prisma.especialidad.create({ data: payload });
+      return { message: "Especialidad creada", data: this._format(nueva, false) };
+    }
   }
 
   async obtenerEspecialidades(isAdmin) {
     const whereClause = isAdmin === "true" ? {} : { activo: true };
-    const registros = await prisma.especialidad.findMany({
-      where: whereClause,
-      orderBy: { nombre: 'asc' }
-    });
-    return registros.map(r => this._format(r));
+    
+    const especialidades = await prisma.especialidad.findMany({ where: whereClause });
+    const servicios = await prisma.servicio.findMany({ where: whereClause });
+
+    const combinados = [
+      ...especialidades.map(e => this._format(e, false)),
+      ...servicios.map(s => this._format(s, true))
+    ];
+
+    return combinados.sort((a, b) => a.nombre.localeCompare(b.nombre));
   }
 
   async actualizarEspecialidad(id, data) {
-    const updateData = { ...data };
-    if (data.requisitos) {
-      updateData.requisitos = JSON.stringify(data.requisitos);
+    const payload = {
+      nombre: data.nombre,
+      descripcion: data.descripcion,
+      ubicacion: data.ubicacion,
+      horarios: data.horarios,
+      requisitos: data.requisitos ? JSON.stringify(data.requisitos) : "[]",
+      documentacionNecesaria: data.documentacionNecesaria,
+      informacionDerivacion: data.informacionDerivacion,
+      activo: data.activo
+    };
+
+    if (data.esServicio) {
+      const actualizada = await prisma.servicio.update({
+        where: { id: BigInt(id) },
+        data: payload
+      });
+      return { message: "Servicio actualizado", data: this._format(actualizada, true) };
+    } else {
+      const actualizada = await prisma.especialidad.update({
+        where: { id: BigInt(id) },
+        data: payload
+      });
+      return { message: "Especialidad actualizada", data: this._format(actualizada, false) };
     }
-    const actualizada = await prisma.especialidad.update({
-      where: { id: BigInt(id) },
-      data: updateData
-    });
-    return { message: "Actualizada con éxito", data: this._format(actualizada) };
   }
 
-async eliminarEspecialidad(id) {
-    const profesionalesAsignados = await prisma.profesional.count({
-      where: { especialidadId: BigInt(id) }
-    });
-
-    if (profesionalesAsignados > 0) {
-      const error = new Error(`No se puede eliminar la especialidad porque tiene ${profesionalesAsignados} profesional(es) asignado(s). Por favor, cambie la especialidad de esos profesionales o elimínelos primero.`);
-      error.statusCode = 400;
-      throw error;
+  async eliminarEspecialidad(id, isServicio) {
+    if (isServicio === "true" || isServicio === true) {
+      await prisma.servicio.delete({ where: { id: BigInt(id) } });
+    } else {
+      const profAsignados = await prisma.profesional.count({ where: { especialidadId: BigInt(id) } });
+      if (profAsignados > 0) {
+        const error = new Error(`No se puede eliminar porque tiene ${profAsignados} profesional(es) asignado(s).`);
+        error.statusCode = 400;
+        throw error;
+      }
+      await prisma.especialidad.delete({ where: { id: BigInt(id) } });
     }
-
-    await prisma.especialidad.delete({ where: { id: BigInt(id) } });
-    
-    return { message: "Eliminada con éxito" };
+    return { message: "Eliminado con éxito" };
   }
 
-  _format(registro) {
+_format(registro, esServicio) {
+    let requisitosProcesados = [];
+
+    if (registro.requisitos) {
+      try {
+        // Intenta leerlo como JSON nuevo
+        requisitosProcesados = JSON.parse(registro.requisitos);
+      } catch (error) {
+        // Fallback: si es texto antiguo plano, lo separa por saltos de línea
+        requisitosProcesados = typeof registro.requisitos === 'string' 
+          ? registro.requisitos.split('\n').map(r => r.trim()).filter(r => r !== '') 
+          : [];
+      }
+    }
+
     return {
       ...registro,
       id: registro.id.toString(),
-      requisitos: registro.requisitos ? JSON.parse(registro.requisitos) : []
+      esServicio, // Bandera virtual (no se guarda en BD) para saber a qué tabla pertenece
+      requisitos: requisitosProcesados
     };
   }
 }
+
 export default new CmsEspecialidadService();

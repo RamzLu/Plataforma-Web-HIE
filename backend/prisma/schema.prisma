@@ -140,19 +140,17 @@ model documento {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-/// This model contains row level security and requires additional setup for migrations.
 model especialidad {
-  id          BigInt        @id @default(autoincrement())
-  nombre      String        @unique @db.VarChar(150)
-  descripcion String?
-  pregunta    String?       @db.VarChar(255) // Ej: "¿Qué atendemos aquí?"
-  ubicacion   String?       @db.VarChar(255) // Ej: "Sector de Pediatría - Planta Baja"
-  horarios    String?       @db.VarChar(255) // Ej: "Lunes a Viernes (7:30 a 13:00)"
-  requisitos  String?       @db.Text         // Guardaremos un JSON o texto largo
-  contacto    String?       @db.VarChar(255) // Ej: "3704-XXXXXX (Interno 102)"
-  esServicio  Boolean       @default(false)  // false = Especialidad, true = Servicio Clave
-  activo      Boolean       @default(true)
-  profesional profesional[]
+  id                     BigInt        @id @default(autoincrement())
+  nombre                 String        @unique @db.VarChar(150)
+  descripcion            String?
+  requisitos             String?
+  documentacionNecesaria String?
+  horarios               String?
+  informacionDerivacion  String?
+  ubicacion              String?
+  activo                 Boolean       @default(true)
+  profesional            profesional[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

@@ -11,42 +11,47 @@ const CmsEspecialidadesView = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
-    nombre: "", pregunta: "", descripcion: "", ubicacion: "",
-    horarios: "", requisitos: "", contacto: "", esServicio: false, activo: true
+    nombre: "", descripcion: "", ubicacion: "", horarios: "", 
+    requisitos: "", documentacionNecesaria: "", informacionDerivacion: "", 
+    esServicio: false, activo: true
   });
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState(null);
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
+  useEffect(() => { cargarDatos(); }, []);
 
   const cargarDatos = async () => {
     setLoading(true);
     try {
       const data = await getEspecialidades(true);
       setEspecialidades(data);
-    } catch (error) {
-      toast.error("Error al cargar los datos.");
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { toast.error("Error al cargar los datos."); } 
+    finally { setLoading(false); }
   };
 
   const handleOpenCreate = () => {
     setEditingId(null);
-    setFormData({ nombre: "", pregunta: "", descripcion: "", ubicacion: "", horarios: "", requisitos: "", contacto: "", esServicio: false, activo: true });
+    setFormData({ 
+      nombre: "", descripcion: "", ubicacion: "", horarios: "", 
+      requisitos: "", documentacionNecesaria: "", informacionDerivacion: "", 
+      esServicio: false, activo: true 
+    });
     setShowModal(true);
   };
 
   const handleOpenEdit = (esp) => {
     setEditingId(esp.id);
     setFormData({
-      nombre: esp.nombre || "", pregunta: esp.pregunta || "", descripcion: esp.descripcion || "",
-      ubicacion: esp.ubicacion || "", horarios: esp.horarios || "",
-      requisitos: esp.requisitos ? esp.requisitos.join("\n") : "", // Convertimos Array a saltos de línea
-      contacto: esp.contacto || "", esServicio: esp.esServicio, activo: esp.activo
+      nombre: esp.nombre || "", 
+      descripcion: esp.descripcion || "",
+      ubicacion: esp.ubicacion || "", 
+      horarios: esp.horarios || "",
+      requisitos: esp.requisitos ? esp.requisitos.join("\n") : "",
+      documentacionNecesaria: esp.documentacionNecesaria || "",
+      informacionDerivacion: esp.informacionDerivacion || "",
+      esServicio: esp.esServicio, 
+      activo: esp.activo
     });
     setShowModal(true);
   };
@@ -57,7 +62,7 @@ const CmsEspecialidadesView = () => {
 
     const payload = {
       ...formData,
-      requisitos: formData.requisitos.split("\n").map(r => r.trim()).filter(r => r) // Convertimos a Array
+      requisitos: formData.requisitos.split("\n").map(r => r.trim()).filter(r => r) 
     };
 
     try {
@@ -71,21 +76,20 @@ const CmsEspecialidadesView = () => {
       }
       setShowModal(false);
       cargarDatos();
-    } catch (error) {
-      toast.error("Error al guardar.");
-    }
+    } catch (error) { toast.error("Error al guardar."); }
   };
 
-  const confirmDelete = (id) => { setItemAEliminar(id); setShowDeleteModal(true); };
-const executeDelete = async () => {
+  const confirmDelete = (esp) => { setItemAEliminar(esp); setShowDeleteModal(true); };
+
+  const executeDelete = async () => {
     try {
-      await deleteEspecialidad(itemAEliminar, keycloak.token);
+      await deleteEspecialidad(itemAEliminar.id, keycloak.token, itemAEliminar.esServicio);
       toast.success("Eliminado con éxito.");
       setShowDeleteModal(false);
       cargarDatos();
     } catch (error) {
-      const mensajeBackend = error.response?.data?.message || error.response?.data?.error?.message || error.message || "Error al intentar eliminar.";
-      toast.error(mensajeBackend, { duration: 5000 }); 
+      const msg = error.response?.data?.error?.message || "Error al intentar eliminar.";
+      toast.error(msg, { duration: 5000 });
       setShowDeleteModal(false);
     }
   };
@@ -112,7 +116,7 @@ const executeDelete = async () => {
           {loading ? ( <div style={{ padding: "40px", textAlign: "center" }}>Cargando...</div> ) : 
            especialidades.length === 0 ? ( <div style={{ padding: "40px", textAlign: "center" }}>No hay registros.</div> ) : (
             especialidades.map((esp) => (
-              <div className="activity-row" key={esp.id}>
+              <div className="activity-row" key={esp.id + (esp.esServicio ? 'srv' : 'esp')}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: "700", color: "#0c2340" }}>{esp.nombre}</div>
                   <div style={{ fontSize: "0.75rem", color: esp.esServicio ? "#0284c7" : "#8b5cf6", fontWeight: "700", marginTop: "4px" }}>
@@ -128,7 +132,7 @@ const executeDelete = async () => {
                 </div>
                 <div style={{ width: "100px", display: "flex", justifyContent: "center", gap: "10px" }}>
                   <button type="button" onClick={() => handleOpenEdit(esp)} className="news-action-btn-edit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                  <button type="button" onClick={() => confirmDelete(esp.id)} className="news-action-btn-delete"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                  <button type="button" onClick={() => confirmDelete(esp)} className="news-action-btn-delete"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                 </div>
               </div>
             ))
@@ -150,9 +154,9 @@ const executeDelete = async () => {
                 <input type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="news-form-input" required />
               </div>
               
-              <div style={{ gridColumn: "span 2", display: "flex", gap: "20px" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontWeight: "600" }}>
-                  <input type="checkbox" checked={formData.esServicio} onChange={(e) => setFormData({...formData, esServicio: e.target.checked})} style={{ width: "18px", height: "18px" }} />
+              <div style={{ gridColumn: "span 2", display: "flex", gap: "20px", background: "#f8fafc", padding: "15px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: editingId ? "not-allowed" : "pointer", fontWeight: "600", opacity: editingId ? 0.6 : 1 }}>
+                  <input type="checkbox" checked={formData.esServicio} disabled={!!editingId} onChange={(e) => setFormData({...formData, esServicio: e.target.checked})} style={{ width: "18px", height: "18px" }} />
                   Marcar como "Servicio Clave"
                 </label>
                 <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontWeight: "600" }}>
@@ -162,12 +166,7 @@ const executeDelete = async () => {
               </div>
 
               <div style={{ gridColumn: "span 2" }}>
-                <label className="news-form-label">Subtítulo (Ej: ¿Qué atendemos aquí?)</label>
-                <input type="text" value={formData.pregunta} onChange={(e) => setFormData({...formData, pregunta: e.target.value})} className="news-form-input" />
-              </div>
-
-              <div style={{ gridColumn: "span 2" }}>
-                <label className="news-form-label">Descripción</label>
+                <label className="news-form-label">Descripción general</label>
                 <textarea value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} className="news-form-input" rows="2" style={{ resize: "none" }} />
               </div>
 
@@ -182,13 +181,18 @@ const executeDelete = async () => {
               </div>
 
               <div style={{ gridColumn: "span 2" }}>
-                <label className="news-form-label">Requisitos (Uno por línea)</label>
-                <textarea value={formData.requisitos} onChange={(e) => setFormData({...formData, requisitos: e.target.value})} className="news-form-input" rows="3" placeholder="Traer DNI&#10;Orden médica..." style={{ resize: "none" }} />
+                <label className="news-form-label">Documentación Necesaria</label>
+                <input type="text" value={formData.documentacionNecesaria} onChange={(e) => setFormData({...formData, documentacionNecesaria: e.target.value})} className="news-form-input" placeholder="Ej: DNI, Derivación, Carnet..." />
               </div>
 
               <div style={{ gridColumn: "span 2" }}>
-                <label className="news-form-label">Contacto (Teléfono o extensión)</label>
-                <input type="text" value={formData.contacto} onChange={(e) => setFormData({...formData, contacto: e.target.value})} className="news-form-input" />
+                <label className="news-form-label">Información de Derivación</label>
+                <textarea value={formData.informacionDerivacion} onChange={(e) => setFormData({...formData, informacionDerivacion: e.target.value})} className="news-form-input" rows="2" placeholder="Información sobre cómo tramitar la derivación..." style={{ resize: "none" }} />
+              </div>
+
+              <div style={{ gridColumn: "span 2" }}>
+                <label className="news-form-label">Requisitos (Uno por línea)</label>
+                <textarea value={formData.requisitos} onChange={(e) => setFormData({...formData, requisitos: e.target.value})} className="news-form-input" rows="3" placeholder="Traer DNI&#10;Orden médica..." style={{ resize: "none" }} />
               </div>
 
               <div style={{ gridColumn: "span 2", display: "flex", justifyContent: "flex-end", gap: "15px", marginTop: "10px" }}>
@@ -205,7 +209,7 @@ const executeDelete = async () => {
           <div className="modal-content-esp delete-modal-global" onClick={(e) => e.stopPropagation()}>
             <div className="delete-modal-body">
               <h2 className="delete-modal-title">¿Eliminar registro?</h2>
-              <p className="delete-modal-text">Esta acción no se puede deshacer.</p>
+              <p className="delete-modal-text">Si tiene profesionales asignados, no se podrá eliminar.</p>
             </div>
             <div className="delete-modal-footer">
               <button type="button" className="btn-cancelar-gris" onClick={() => setShowDeleteModal(false)}>Cancelar</button>

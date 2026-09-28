@@ -26,7 +26,10 @@ export const actualizarEspecialidad = async (req, res, next) => {
 export const eliminarEspecialidad = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await CmsEspecialidadService.eliminarEspecialidad(id);
+    const { isServicio } = req.query; 
+    const result = await CmsEspecialidadService.eliminarEspecialidad(id, isServicio);
     res.status(200).json(result);
-  } catch (error) { next(error); }
+  } catch (error) { 
+    next(error); 
+  }
 };

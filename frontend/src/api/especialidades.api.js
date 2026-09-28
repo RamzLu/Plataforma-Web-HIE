@@ -19,8 +19,8 @@ export const updateEspecialidad = async (id, data, token) => {
   return response.data;
 };
 
-export const deleteEspecialidad = async (id, token) => {
-  const response = await axios.delete(`/cms/especialidades/${id}`, {
+export const deleteEspecialidad = async (id, token, isServicio) => {
+  const response = await axios.delete(`/cms/especialidades/${id}?isServicio=${isServicio}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   return response.data;
