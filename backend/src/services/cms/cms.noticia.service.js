@@ -19,10 +19,13 @@ class CmsNoticiaService {
     }
 
     const estadoFinal = estado ? estado.toUpperCase() : "BORRADOR";
-    const nombreCat = categoriaNombre || "General";
+    
+    let nombreCat = categoriaNombre || "General";
+    if (nombreCat.toLowerCase() === "noticias" || nombreCat.toLowerCase() === "noticia") {
+      nombreCat = "General";
+    }
 
     let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: nombreCat } });
-    
     if (!categoria) {
       categoria = await prisma.categoria_noticia.create({
         data: { nombre: nombreCat, descripcion: `Clasificación ${nombreCat}` },
@@ -123,6 +126,11 @@ class CmsNoticiaService {
         ? `${noticia.usuario_noticia_updatedByTousuario.nombre} ${noticia.usuario_noticia_updatedByTousuario.apellido || ""}`.trim()
         : null;
 
+      let catName = noticia.categoria_noticia ? noticia.categoria_noticia.nombre : "General";
+      if (catName.toLowerCase() === "noticias" || catName.toLowerCase() === "noticia") {
+        catName = "General";
+      }
+
       return {
         id: noticia.id.toString(),
         title: noticia.titulo,
@@ -131,7 +139,7 @@ class CmsNoticiaService {
         fechaPublicacion: noticia.fechaPublicacion,
         createdAt: noticia.createdAt,
         updatedAt: noticia.updatedAt,
-        category: noticia.categoria_noticia ? noticia.categoria_noticia.nombre : "General",
+        category: catName, 
         estado: noticia.estado,
         isDraft: noticia.estado === "BORRADOR",
         images: imgs,
@@ -163,7 +171,7 @@ class CmsNoticiaService {
     return { message: "Exito" };
   }
 
-  async actualizarNoticia(id, data, archivosSubidos, user) {
+async actualizarNoticia(id, data, archivosSubidos, user) {
     const { titulo, contenido, imagenesExistentes, estado, fechaPublicacion, categoriaNombre } = data;
     
     const usuarioEditor = await obtenerOCrearUsuarioLocal(user);
@@ -196,11 +204,28 @@ class CmsNoticiaService {
       dataUpdate.fechaPublicacion = null;
     }
 
+
     if (categoriaNombre) {
-      let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: categoriaNombre } });
+      let nombreCatActualizar = categoriaNombre.trim();
+      
+
+      if (nombreCatActualizar.toLowerCase() === "noticias" || nombreCatActualizar.toLowerCase() === "noticia") {
+        nombreCatActualizar = "General";
+      }
+
+
+      let categoria = await prisma.categoria_noticia.findFirst({ 
+        where: { 
+          nombre: { 
+            equals: nombreCatActualizar, 
+            mode: 'insensitive' 
+          } 
+        } 
+      });
+      
       if (!categoria) {
         categoria = await prisma.categoria_noticia.create({
-          data: { nombre: categoriaNombre, descripcion: `Clasificación ${categoriaNombre}` },
+          data: { nombre: nombreCatActualizar, descripcion: `Clasificación ${nombreCatActualizar}` },
         });
       }
       dataUpdate.categoriaId = categoria.id;
@@ -256,13 +281,18 @@ class CmsNoticiaService {
     const editorOriginal = noticiaConArchivos.usuario_noticia_createdByTousuario ? `${noticiaConArchivos.usuario_noticia_createdByTousuario.nombre} ${noticiaConArchivos.usuario_noticia_createdByTousuario.apellido || ""}`.trim() : "Editor CMS";
     const editadoPorNombre = noticiaConArchivos.usuario_noticia_updatedByTousuario ? `${noticiaConArchivos.usuario_noticia_updatedByTousuario.nombre} ${noticiaConArchivos.usuario_noticia_updatedByTousuario.apellido || ""}`.trim() : null;
 
+    let catFinal = noticiaConArchivos.categoria_noticia ? noticiaConArchivos.categoria_noticia.nombre : "General";
+    if (catFinal.toLowerCase() === "noticias" || catFinal.toLowerCase() === "noticia") {
+      catFinal = "General";
+    }
+
     return {
       message: "Exito",
       noticia: {
         ...noticiaActualizada,
         id: noticiaActualizada.id.toString(),
         categoriaId: noticiaActualizada.categoriaId.toString(),
-        category: noticiaConArchivos.categoria_noticia ? noticiaConArchivos.categoria_noticia.nombre : "General",
+        category: catFinal,
         estado: noticiaActualizada.estado,
         isDraft: noticiaActualizada.estado === "BORRADOR",
         images: imgs,

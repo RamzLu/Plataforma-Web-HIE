@@ -31,7 +31,7 @@ model area {
   ubicacion        String?            @db.VarChar(255)
   activo           Boolean            @default(true)
   profesional_area profesional_area[]
-  servicio         servicio[]
+  servicio_area    servicio_area[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -267,19 +267,16 @@ model rol {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model servicio {
-  id                     BigInt  @id @default(autoincrement())
-  nombre                 String  @db.VarChar(150)
+  id                     BigInt          @id @default(autoincrement())
+  nombre                 String          @db.VarChar(150)
   descripcion            String?
   requisitos             String?
   documentacionNecesaria String?
   horarios               String?
   informacionDerivacion  String?
   ubicacion              String?
-  areaId                 BigInt
-  activo                 Boolean @default(true)
-  area                   area    @relation(fields: [areaId], references: [id])
-
-  @@index([areaId])
+  activo                 Boolean         @default(true)
+  servicio_area          servicio_area[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -308,10 +305,23 @@ model usuario {
   @@index([rolId])
 }
 
+model servicio_area {
+  servicioId BigInt
+  areaId     BigInt
+  area       area     @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  servicio   servicio @relation(fields: [servicioId], references: [id], onDelete: Cascade)
+
+  @@id([servicioId, areaId])
+  @@index([areaId])
+}
+
 enum EstadoEditorial {
   BORRADOR
+  PENDIENTE_APROBACION
+  RECHAZADO
+  APROBADO
   PUBLICADO
-  PROGRAMADO
+  ARCHIVADO
 }
 
 enum TipoContacto {
