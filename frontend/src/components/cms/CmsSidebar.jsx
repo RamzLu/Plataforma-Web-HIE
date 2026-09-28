@@ -6,6 +6,7 @@ import {
   Image as ImageIcon, 
   Building,
   Contact,
+  Activity, 
   Video,
   Settings,
   ChevronDown
@@ -15,7 +16,6 @@ import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 const CmsSidebar = ({ activeTab, setActiveTab }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
-  // Estado para manejar el acordeón (por defecto abierto en Edición de Contenidos)
   const [expandedSection, setExpandedSection] = useState("Edición de Contenidos");
 
   const menuSections = [
@@ -30,6 +30,7 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
       items: [
         { id: "noticias", label: "Noticias", icon: <FileText /> },
         { id: "documentacion", label: "Documentación", icon: <FolderOpen /> },
+        { id: "especialidades", label: "Especialidades", icon: <Activity /> },
         { id: "banners", label: "Banners", icon: <ImageIcon /> },
       ],
     },
@@ -44,18 +45,15 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
     },
   ];
 
-  // Función para manejar el clic en las categorías (Acordeón)
   const handleToggleSection = (title) => {
     if (isCollapsed) {
-      setIsCollapsed(false); // Expande el menú completo si estaba minimizado
+      setIsCollapsed(false); 
     }
-    // Si la categoría ya estaba abierta, la cierra; si no, la abre ocultando la anterior
     setExpandedSection((prev) => (prev === title ? null : title));
   };
 
   return (
     <aside className={`cms-sidebar ${isCollapsed ? "collapsed" : ""}`}>
-      {/* Área del Logo / Distintivo */}
       <div className="cms-sidebar-header">
         <div className="cms-logo-container-inner">
           <div className="cms-logo">
@@ -92,17 +90,14 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
         </button>
       </div>
 
-      {/* Navegación tipo Acordeón */}
       <nav className="cms-nav">
         {menuSections.map((section, idx) => {
-          // Lógica para excluir "General" de la mecánica del acordeón
           const isGeneral = section.title === "General";
           const isExpanded = expandedSection === section.title;
 
           return (
             <div className="cms-nav-group" key={idx}>
               
-              {/* Solo renderizamos el botón de abrir/cerrar si NO es la categoría General */}
               {!isGeneral && !isCollapsed && (
                 <div 
                   className={`cms-nav-group-header ${isExpanded ? "active" : ""}`}
@@ -113,7 +108,6 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
                 </div>
               )}
 
-              {/* Si ES general o si es la categoría abierta (expanded), la lista recibe la clase .expanded */}
               <ul className={`cms-nav-submenu ${isGeneral || isExpanded ? "expanded" : ""}`}>
                 {section.items.map((item) => (
                   <li

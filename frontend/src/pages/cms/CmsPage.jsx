@@ -15,8 +15,7 @@ import CmsDocsView from "../cms/CmsDocsView";
 import CmsProfesionalesView from "../cms/CmsProfesionalesView"; 
 import CmsInstitucionView from "../cms/CmsInstitucionView"; 
 import CmsConfiguracionView from "../cms/CmsConfiguracionView";
-
-import { documentosData } from "../../data/documentos";
+import CmsEspecialidadesView from "../cms/CmsEspecialidadesView";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 
 const CmsPage = () => {
@@ -305,7 +304,7 @@ const updateStats = (currentNews, currentDocs = docsList) => {
         <main className="cms-content">
           <div className="cms-page-title">
             <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
-            <h1>
+<h1>
               {activeTab === "noticias"
                 ? "Gestión de Noticias"
                 : activeTab === "documentacion"
@@ -316,8 +315,10 @@ const updateStats = (currentNews, currentDocs = docsList) => {
                 ? "Gestión de Banners"
                 : activeTab === "profesionales"
                 ? "Directorio de Profesionales" 
+                : activeTab === "especialidades"  
+                ? "Gestión de Especialidades"      
                 : activeTab === "configuracion"
-                ? "Gestión de Configuración" // <-- TÍTULO DINÁMICO AGREGADO
+                ? "Gestión de Configuración"
                 : "Panel de administración"}
             </h1>
             <p>
@@ -372,18 +373,21 @@ const updateStats = (currentNews, currentDocs = docsList) => {
             <CmsProfesionalesView />
           )}
 
-          {/* RENDERIZADO DEL NUEVO MÓDULO */}
+          {activeTab === "especialidades" && (
+            <CmsEspecialidadesView />
+          )}
+
           {activeTab === "configuracion" && (
             <CmsConfiguracionView />
           )}
 
-          {/* ACTUALIZADO PARA QUE NO MUESTRE "PRÓXIMAMENTE" SI ESTÁ EN CONFIGURACIÓN NI PROFESIONALES */}
           {activeTab !== "dashboard" && 
            activeTab !== "noticias" && 
            activeTab !== "documentacion" && 
            activeTab !== "banners" && 
            activeTab !== "institucional" && 
            activeTab !== "profesionales" && 
+           activeTab !== "especialidades" && 
            activeTab !== "configuracion" && (
             <div className="cms-dashboard-card">
               <h3 className="cms-card-title">
@@ -397,7 +401,6 @@ const updateStats = (currentNews, currentDocs = docsList) => {
         </main>
       </div>
 
-{/* MODAL DE CERRAR SESIÓN (LOGOUT) ACTUALIZADO */}
       {showLogoutModal && (
         <div className="modal-overlay-logout" onClick={() => setShowLogoutModal(false)} role="dialog" aria-modal="true" aria-labelledby="logout-title">
           <div className="modal-card-logout" onClick={(e) => e.stopPropagation()}>
@@ -483,22 +486,18 @@ const updateStats = (currentNews, currentDocs = docsList) => {
                   </div>
                   <div className="author-meta">
                     <h3>Hospital Interdistrital Evita Formosa</h3>
-                    {/* Propiedad corregida: date */}
                     <span>{selectedNews.date}</span>
                   </div>
                 </div>
 
-                {/* Propiedad corregida: title */}
                 <h3 className="news-modal-title">{selectedNews.title}</h3>
                 
-                {/* Propiedad corregida: body (tomamos el primer elemento si es un array) */}
                 <div 
                   className="info-text" 
                   dangerouslySetInnerHTML={{ __html: Array.isArray(selectedNews.body) ? selectedNews.body[0] : selectedNews.body }} 
                 />
               </div>
 
-              {/* Propiedad corregida: images */}
               {selectedNews.images && selectedNews.images.length > 0 && (
                 <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
                   
@@ -507,14 +506,12 @@ const updateStats = (currentNews, currentDocs = docsList) => {
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
                     const fotosRestantes = selectedNews.images.length - 4;
 
-                    // Mapeamos las imágenes para pasárselas al visor correctamente
                     const imageUrls = selectedNews.images.map(i => i.url || i);
 
                     return (
                       <div 
                         key={index} 
                         className="mosaic-item"
-                        // Función corregida: openLightbox requiere (imagenes, indice)
                         onClick={() => openLightbox(imageUrls, index)} 
                       >
                         <img src={img.url || img} alt={`Imagen ${index + 1}`} />
