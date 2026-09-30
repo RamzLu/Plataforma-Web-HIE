@@ -1,157 +1,203 @@
-import React, { useState } from "react";
-// Importamos los componentes de Swiper y sus módulos
+import React, { useState, useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation } from "swiper/modules"; 
+import { Autoplay, Navigation } from "swiper/modules";
 
-// Importamos los estilos necesarios de Swiper
 import "swiper/css";
 import "swiper/css/autoplay";
-import "swiper/css/navigation"; 
+import "swiper/css/navigation";
 import "../../styles/pages/ProfesionalesPage.css";
 
-import docEjemplo1 from "../../assets/foto-doctor-ejemplo.jpg";
-import docEjemplo2 from "../../assets/foto-doctora-ejemplo.jpg";
 import Breadcrumb from "../../components/Breadcrumb";
-
-// Base de datos con descripciones y M.P (Matrículas Profesionales) añadidas
-const equipoMedicoData = [
-  {
-    especialidad: "CLÍNICA MÉDICA",
-    profesionales: [
-      { id: 1, nombre: "Dr. Silvio Acosta", titulo: "Médico Clínico", matricula: "MP 1284", foto: docEjemplo1, descripcion: "Especialista con más de 10 años de experiencia en medicina interna, abocado al diagnóstico y tratamiento integral del paciente adulto." },
-      { id: 2, nombre: "Dra. Laura Gómez", titulo: "Médica Clínica", matricula: "MP 2309", foto: null, descripcion: "Dedicada a la medicina preventiva y control de enfermedades crónicas, acompañando al paciente en su bienestar diario." },
-      { id: 3, nombre: "Dr. Carlos Ruiz", titulo: "Médico Clínico", matricula: "MP 1985", foto: null, descripcion: "Especializado en valoración clínica integral y seguimiento de patologías prevalentes en internación." },
-      { id: 4, nombre: "Dra. Elena Torres", titulo: "Médica Clínica", matricula: "MP 4321", foto: null, descripcion: "Atención ambulatoria y resolución de cuadros clínicos complejos con un enfoque profundamente humano." },
-      { id: 5, nombre: "Dr. Martín Silva", titulo: "Médico Clínico", matricula: "MP 3210", foto: null, descripcion: "Experiencia en guardia e internación, con sólida formación diagnóstica y terapéutica general." },
-      { id: 6, nombre: "Dra. Valentina Rojas", titulo: "Médica Clínica", matricula: "MP 5092", foto: null, descripcion: "Fuerte perfil investigador y docente en el ámbito de la medicina interna y salud comunitaria." },
-      { id: 7, nombre: "Dr. Javier Morales", titulo: "Médico Clínico", matricula: "MP 2011", foto: null, descripcion: "Destacado en el abordaje del paciente polimedicado y manejo de urgencias hospitalarias." },
-    ],
-  },
-  {
-    especialidad: "PEDIATRÍA",
-    profesionales: [
-      { id: 8, nombre: "Lic. Ana Ramirez", titulo: "Lic. en Pediatría", matricula: "MP 4123", foto: docEjemplo2, descripcion: "Acompañamiento especializado en el crecimiento y desarrollo infantil, desde el nacimiento hasta la adolescencia." },
-      { id: 9, nombre: "Dr. Juan Medina", titulo: "Pediatra Especialista", matricula: "MP 3390", foto: null, descripcion: "Enfocado en infectología pediátrica y prevención de enfermedades de la infancia mediante planes de vacunación." },
-      { id: 10, nombre: "Dra. Sofía Castro", titulo: "Pediatra Neonatóloga", matricula: "MP 1092", foto: null, descripcion: "Cuidado intensivo e intermedio del recién nacido prematuro y de término con patologías complejas." },
-      { id: 11, nombre: "Dr. Luis Navarro", titulo: "Pediatra", matricula: "MP 5543", foto: null, descripcion: "Atención pediátrica general y asesoramiento continuo a familias sobre nutrición y crianza saludable." },
-      { id: 12, nombre: "Dra. Martina Páez", titulo: "Pediatra Especialista", matricula: "MP 3201", foto: null, descripcion: "Seguimiento de patologías respiratorias infantiles estacionales y crónicas." },
-      { id: 13, nombre: "Dra. Julia Rivas", titulo: "Pediatra Neonatóloga", matricula: "MP 2981", foto: null, descripcion: "Dedicada a la reanimación neonatal y seguimiento neurocognitivo del lactante de alto riesgo." },
-      { id: 14, nombre: "Dr. Mario Luna", titulo: "Pediatra", matricula: "MP 4001", foto: null, descripcion: "Médico de planta orientado a la guardia pediátrica y resolución rápida de emergencias infantiles." },
-    ],
-  },
-  {
-    especialidad: "GINECOLOGÍA",
-    profesionales: [
-      { id: 15, nombre: "Dra. María Blanco", titulo: "Ginecóloga y Obstetra", matricula: "MP 1009", foto: null, descripcion: "Atención integral de la mujer en todas sus etapas, seguimiento de embarazo y prevención ginecológica." },
-      { id: 16, nombre: "Dra. Patricia Luna", titulo: "Ginecóloga", matricula: "MP 2099", foto: null, descripcion: "Especialista en planificación familiar, endocrinología ginecológica y patología cervical." },
-      { id: 17, nombre: "Dr. Roberto Paz", titulo: "Ginecólogo", matricula: "MP 3102", foto: null, descripcion: "Cirujano ginecológico abocado a patologías uterinas complejas y procedimientos mínimamente invasivos." },
-      { id: 18, nombre: "Dra. Laura Blanco", titulo: "Ginecóloga y Obstetra", matricula: "MP 1199", foto: null, descripcion: "Alto nivel en manejo integral de la paciente embarazada y partos respetados humanizados." },
-      { id: 19, nombre: "Dra. Carmen Lima", titulo: "Ginecóloga", matricula: "MP 2811", foto: null, descripcion: "Focalizada en prevención del cáncer de mama y chequeos anuales de salud reproductiva." },
-      { id: 20, nombre: "Dr. Sergio Paz", titulo: "Ginecólogo", matricula: "MP 3502", foto: null, descripcion: "Dedicación a la atención ambulatoria, ecografías transvaginales y control de climaterio." },
-    ],
-  },
-];
+import AnimatedContent from "../../components/ui/AnimatedContent";
+const normalizeText = (text) => {
+  if (!text) return "";
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
 
 const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
+  const getIniciales = (nombre, apellido) => `${nombre?.charAt(0) || ""}${apellido?.charAt(0) || ""}`.toUpperCase();
+  
+const swiperRef = useRef(null);
+
+  const [prevEl, setPrevEl] = useState(null);
+  const [nextEl, setNextEl] = useState(null);
+
   return (
-    <div className="specialty-block">
-      <h2 className="specialty-title">{especialidad}</h2>
+    <div className="specialty-active-header" style={{ marginBottom: "60px" }}>
+      <div className="specialty-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+          <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4" />
+          <circle cx="20" cy="10" r="2" />
+        </svg>
+        <span>{profesionales[0]?.esServicioClave ? "SERVICIO CLAVE" : "ESPECIALIDAD MÉDICA"}</span>
+      </div>
+      <h1 className="active-specialty-title">{especialidad}</h1>
+      <p className="active-specialty-subtitle">Staff de Profesionales</p>
 
-      <div className="carousel-wrapper">
-        <Swiper
-          modules={[Autoplay, Navigation]}
-          spaceBetween={40} 
-          slidesPerView={3} /* Fijado estrictamente a 3 tarjetas visibles */
-          centeredSlides={true}
-          loop={true}
-          navigation={true} 
-          speed={600} /* Transición más ágil y suave */
-          autoplay={{
-            delay: 1500, /* Movimiento constante */
-            disableOnInteraction: false, /* NUNCA se detiene aunque el usuario interactúe */
-          }}
-          breakpoints={{
-            320: { slidesPerView: 1, spaceBetween: 20 },
-            768: { slidesPerView: 3, spaceBetween: 30 },
-            1200: { slidesPerView: 3, spaceBetween: 40 }, /* Fuerza a mantener 3 tarjetas en escritorio */
-          }}
-          className="mySwiper"
+      <div className="carousel-viewport-wrapper">
+        
+        <button
+          type="button"
+          className="carousel-nav-btn prev-btn"
+          onClick={() => swiperRef.current?.slidePrev()}
         >
-          {profesionales.map((prof) => (
-            <SwiperSlide key={prof.id} style={{ width: "280px" }}>
-              <div 
-                className="prof-card"
-                onClick={() => onSelectProf({ ...prof, especialidad })}
-              >
-                <div className="prof-card-bg">
-                  {prof.foto ? (
-                    <img src={prof.foto} alt={prof.nombre} />
-                  ) : (
-                    <svg width="60" height="60" fill="#cbd5e1" viewBox="0 0 24 24">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg>
-                  )}
-                </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
 
-                <div className="prof-info">
-                  <h4>{prof.nombre}</h4>
-                  <span>{prof.titulo}</span>
-                  <span className="prof-matricula">{prof.matricula}</span>
-                </div>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        <div className="doctors-cards-track">
+          <Swiper
+    modules={[Autoplay]}
+    onSwiper={(swiper) => (swiperRef.current = swiper)}
+    spaceBetween={30}
+    slidesPerView={1}
+    centeredSlides={profesionales.length > 1}
+    loop={profesionales.length >= 5}
+    rewind={profesionales.length < 5}
+    breakpoints={{
+      768: { slidesPerView: profesionales.length >= 2 ? 2 : 1 },
+      1024: { slidesPerView: profesionales.length >= 3 ? 3 : profesionales.length },
+    }}
+    className="mySwiper"
+  >
+            {profesionales.map((prof) => (
+              <SwiperSlide key={prof.id} style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
+                <article className="doctor-card" onClick={() => onSelectProf(prof)}>
+                  <div className="doctor-image-container">
+                    {prof.imagenUrl ? (
+                      <img src={prof.imagenUrl} alt={`${prof.nombre} ${prof.apellido}`} className="doctor-photo" loading="lazy" />
+                    ) : (
+                      <div className="doctor-photo-placeholder">
+                        <span style={{ fontSize: "3rem", fontWeight: "800", opacity: 0.5 }}>{getIniciales(prof.nombre, prof.apellido)}</span>
+                      </div>
+                    )}
+                    
+                    {prof.matricula && (
+                      <div className="license-pill">
+                        <span className="license-icon">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                          </svg>
+                        </span>
+                        <span>{prof.matricula}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="doctor-info-content">
+                    <h2 className="doctor-name">{prof.nombre} {prof.apellido}</h2>
+                    <p className="doctor-role">{prof.cargo || "Profesional de Planta"}</p>
+                  </div>
+                </article>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+
+
+        <button
+          type="button"
+          className="carousel-nav-btn next-btn"
+          onClick={() => swiperRef.current?.slideNext()}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
       </div>
     </div>
   );
 };
 
-const normalizeText = (text) => {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-};
-
 const ProfesionalesPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedArea, setSelectedArea] = useState("Todas las áreas");
+  const [profesionalesDb, setProfesionalesDb] = useState([]);
+  const [loading, setLoading] = useState(true);
   
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedService, setSelectedService] = useState("Todos los Servicios");
+  const [selectedSpecialty, setSelectedSpecialty] = useState("Especialidades (Todas)");
   const [selectedProf, setSelectedProf] = useState(null);
 
-  const areasList = [
-    "Todas las áreas",
-    ...equipoMedicoData.map((d) => d.especialidad),
-  ];
+  const searchInputRef = useRef(null);
 
-  const normalizedSearch = normalizeText(searchTerm);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const fetchProfesionales = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/cms/profesionales");
+        if (response.ok) {
+          const data = await response.json();
+          setProfesionalesDb(data.filter(p => p.publicado));
+        }
+      } catch (error) {
+        console.error("Error al cargar los profesionales:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfesionales();
+  }, []);
 
-  const filteredData = equipoMedicoData
+  const serviciosList = ["Todos los Servicios", ...new Set(profesionalesDb.filter(p => p.esServicioClave).map(p => p.especialidadNombre))].sort();
+  const especialidadesList = ["Especialidades (Todas)", ...new Set(profesionalesDb.filter(p => !p.esServicioClave).map(p => p.especialidadNombre))].sort();
+
+  const handleReset = () => {
+    setSearchQuery("");
+    setSelectedService("Todos los Servicios");
+    setSelectedSpecialty("Especialidades (Todas)");
+    searchInputRef.current?.focus();
+  };
+
+  const scrollToSearch = () => {
+    searchInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    searchInputRef.current?.focus();
+  };
+
+  const handleServiceChange = (e) => {
+    setSelectedService(e.target.value);
+    if (e.target.value !== "Todos los Servicios") setSelectedSpecialty("Especialidades (Todas)");
+  };
+  const handleSpecialtyChange = (e) => {
+    setSelectedSpecialty(e.target.value);
+    if (e.target.value !== "Especialidades (Todas)") setSelectedService("Todos los Servicios");
+  };
+
+  const normalizedSearch = normalizeText(searchQuery);
+
+  const groupedData = profesionalesDb.reduce((acc, prof) => {
+    const key = prof.especialidadNombre;
+    if (!acc[key]) acc[key] = { especialidad: key, isServicio: prof.esServicioClave, profesionales: [] };
+    acc[key].profesionales.push(prof);
+    return acc;
+  }, {});
+
+  const filteredData = Object.values(groupedData)
     .map((area) => {
-      const filteredProfs = area.profesionales.filter(
-        (p) =>
-          normalizeText(p.nombre).includes(normalizedSearch) ||
-          normalizeText(p.titulo).includes(normalizedSearch) ||
-          normalizeText(p.matricula).includes(normalizedSearch),
-      );
+      const filteredProfs = area.profesionales.filter((p) => {
+        const full = normalizeText(`${p.nombre} ${p.apellido} ${p.matricula} ${p.cargo}`);
+        return full.includes(normalizedSearch);
+      });
       return { ...area, profesionales: filteredProfs };
     })
     .filter((area) => {
-      const matchArea =
-        selectedArea === "Todas las áreas" ||
-        area.especialidad === selectedArea;
+      let matchArea = true;
+      if (selectedService !== "Todos los Servicios") matchArea = area.especialidad === selectedService;
+      else if (selectedSpecialty !== "Especialidades (Todas)") matchArea = area.especialidad === selectedSpecialty;
       return matchArea && area.profesionales.length > 0;
     });
 
+  const isDefaultView = !searchQuery && selectedService === "Todos los Servicios" && selectedSpecialty === "Especialidades (Todas)";
+  const dataToRender = isDefaultView ? filteredData.slice(0, 4) : filteredData;
+
   return (
-    <main className="profesionales-page">
-      <div
-        className="prof-header-fluid"
-        style={{
-          background: "linear-gradient(rgba(255, 255, 255, 0.85), #a4c2d6)",
-        }}
-      >
+    <main className="profesionales-page medical-directory-container">
+
+      <div className="prof-header-fluid" style={{ background: "linear-gradient(rgba(255, 255, 255, 0.85), #a4c2d6)" }}>
         <div className="prof-header-inner">
           <Breadcrumb currentPage="Profesionales" />
           <h1 className="prof-main-title">NUESTRO EQUIPO MÉDICO</h1>
@@ -161,78 +207,127 @@ const ProfesionalesPage = () => {
         </div>
       </div>
 
-      <div className="prof-search-container">
-        <div className="prof-search-bar">
-          <svg
-            className="search-icon"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            ></path>
-          </svg>
-          <input
-            type="text"
-            placeholder="Buscar por nombre, apellido o matrícula..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <select
-            className="prof-filter-select"
-            value={selectedArea}
-            onChange={(e) => setSelectedArea(e.target.value)}
-          >
-            {areasList.map((area, index) => (
-              <option key={index} value={area}>
-                {area}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="prof-container">
-        {filteredData.length > 0 ? (
-          filteredData.map((area, index) => (
-            <SpecialtyRow
-              key={index}
-              especialidad={area.especialidad}
-              profesionales={area.profesionales}
-              onSelectProf={setSelectedProf}
+      <AnimatedContent distance={30} direction="vertical" delay={0.1}>
+        <section className="search-filter-section" aria-label="Búsqueda de profesionales y especialidades">
+          <div className="search-input-wrapper">
+            <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="search-input-field"
+              placeholder="Buscar profesional por nombre, matrícula o cargo..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
+          </div>
+
+          <div className="filter-dropdowns-row">
+            <div className="custom-select-box">
+              <select className="select-element" value={selectedService} onChange={handleServiceChange}>
+                {serviciosList.map((srv, idx) => (
+                  <option key={idx} value={srv}>{srv}</option>
+                ))}
+              </select>
+              <svg className="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+
+            <div className="custom-select-box">
+              <select className="select-element" value={selectedSpecialty} onChange={handleSpecialtyChange}>
+                {especialidadesList.map((esp, idx) => (
+                  <option key={idx} value={esp}>{esp}</option>
+                ))}
+              </select>
+              <svg className="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+
+            <button type="button" className="btn-reset-filters" onClick={handleReset}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <polyline points="3 3 3 8 8 8" />
+              </svg>
+              <span>Restablecer</span>
+            </button>
+          </div>
+        </section>
+      </AnimatedContent>
+
+      <div style={{ width: "100%", maxWidth: "1200px" }}>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "60px 0" }}>
+            <div className="cms-spinner" style={{ borderWidth: "4px", width: "40px", height: "40px", borderTopColor: "#0d223f", margin: "0 auto" }}></div>
+            <p style={{ color: "#64748b", marginTop: "15px", fontWeight: "600" }}>Cargando directorio médico...</p>
+          </div>
+        ) : dataToRender.length > 0 ? (
+          dataToRender.map((area, index) => (
+            <AnimatedContent key={index} distance={40} direction="vertical" delay={index * 0.1}>
+              <SpecialtyRow
+                especialidad={area.especialidad}
+                profesionales={area.profesionales}
+                onSelectProf={setSelectedProf}
+              />
+            </AnimatedContent>
           ))
         ) : (
-          <div style={{ textAlign: "center", color: "#64748b", marginTop: "40px" }}>
+          <div style={{ textAlign: "center", padding: "60px 0", color: "#64748b" }}>
+            <svg width="50" height="50" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: "15px", opacity: 0.5 }}>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
             <h2>No se encontraron profesionales.</h2>
-            <p>Intente con otro nombre u otra especialidad.</p>
+            <p>Intente ajustando los filtros o el texto de búsqueda.</p>
           </div>
         )}
       </div>
 
-      {/* MODAL FULL-SCREEN INDEPENDIENTE */}
+      {!loading && filteredData.length > 0 && (
+        <div className="bottom-explore-action">
+          <button type="button" className="btn-explore-specialties" onClick={scrollToSearch}>
+            <svg className="explore-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <span>Explorar más especialidades y servicios</span>
+            <svg className="explore-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5" />
+              <polyline points="5 12 12 5 19 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {selectedProf && (
         <div className="prof-modal-overlay" onClick={() => setSelectedProf(null)}>
           <div className="prof-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="prof-modal-photo">
-              {selectedProf.foto ? (
-                <img src={selectedProf.foto} alt={selectedProf.nombre} />
+              {selectedProf.imagenUrl ? (
+                <img src={selectedProf.imagenUrl} alt={selectedProf.nombre} />
               ) : (
-                <svg width="60" height="60" fill="#cbd5e1" viewBox="0 0 24 24">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
+                <span style={{ fontSize: "3rem", fontWeight: "800", color: "#ffffff" }}>
+                  {`${selectedProf.nombre?.charAt(0) || ""}${selectedProf.apellido?.charAt(0) || ""}`.toUpperCase()}
+                </span>
               )}
             </div>
             
-            <h3 className="prof-modal-name">{selectedProf.nombre}</h3>
-            <h4 className="prof-modal-title">{selectedProf.titulo}</h4>
-            <span className="prof-modal-matricula-text">Matrícula: {selectedProf.matricula}</span>
-            <span className="prof-modal-specialty">{selectedProf.especialidad}</span>
-            <p className="prof-modal-desc">{selectedProf.descripcion}</p>
+            <h3 className="prof-modal-name">{selectedProf.nombre} {selectedProf.apellido}</h3>
+            <h4 className="prof-modal-title">{selectedProf.cargo || "Profesional Médico"}</h4>
+            
+            {selectedProf.matricula && (
+              <span className="prof-modal-matricula-text">Matrícula: {selectedProf.matricula}</span>
+            )}
+            
+            <span className="prof-modal-specialty">{selectedProf.especialidadNombre}</span>
+            
+            {selectedProf.descripcion && (
+              <p className="prof-modal-desc">{selectedProf.descripcion}</p>
+            )}
             
             <button className="btn-cerrar-modal" onClick={() => setSelectedProf(null)}>
               Cerrar y volver
