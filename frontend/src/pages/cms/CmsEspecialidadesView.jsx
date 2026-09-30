@@ -11,6 +11,8 @@ const CmsEspecialidadesView = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState("PUBLICADOS");
+  const [filtroTipo, setFiltroTipo] = useState("TODOS");
+
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -123,9 +125,15 @@ const CmsEspecialidadesView = () => {
   };
 
   const datosFiltrados = especialidades.filter(esp => {
-    if (activeTab === "PUBLICADOS") return esp.estado === "PUBLICADO";
-    if (activeTab === "ARCHIVADOS") return esp.estado === "ARCHIVADO" || esp.estado === "BORRADOR";
-    return true;
+    const matchEstado = activeTab === "PUBLICADOS" 
+      ? esp.estado === "PUBLICADO" 
+      : (esp.estado === "ARCHIVADO" || esp.estado === "BORRADOR");
+
+    let matchTipo = true;
+    if (filtroTipo === "ESPECIALIDADES") matchTipo = esp.esServicio === false;
+    if (filtroTipo === "SERVICIOS") matchTipo = esp.esServicio === true;
+
+    return matchEstado && matchTipo;
   });
 
   return (
@@ -138,22 +146,39 @@ const CmsEspecialidadesView = () => {
         <button type="button" className="btn-crear-noticia-header" onClick={handleOpenCreate}>+ NUEVO ELEMENTO</button>
       </div>
 
-      <div className="esp-tabs-container">
-        <button 
-          className={`esp-tab-btn ${activeTab === "PUBLICADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("PUBLICADOS")}
-        >
-          Publicados
-        </button>
-        <button 
-          className={`esp-tab-btn ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("ARCHIVADOS")}
-        >
-          Archivados
-        </button>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
+        
+        <div className="esp-tabs-container" style={{ margin: 0 }}>
+          <button 
+            className={`esp-tab-btn ${activeTab === "PUBLICADOS" ? "active" : ""}`}
+            onClick={() => setActiveTab("PUBLICADOS")}
+          >
+            Publicados
+          </button>
+          <button 
+            className={`esp-tab-btn ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
+            onClick={() => setActiveTab("ARCHIVADOS")}
+          >
+            Archivados
+          </button>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>Mostrar:</span>
+          <select 
+            value={filtroTipo} 
+            onChange={(e) => setFiltroTipo(e.target.value)}
+            style={{ padding: "8px 12px", borderRadius: "6px", border: "1px solid #cbd5e1", fontWeight: "600", color: "#0c2340", outline: "none", cursor: "pointer" }}
+          >
+            <option value="TODOS">Todos los registros</option>
+            <option value="ESPECIALIDADES">Solo Especialidades</option>
+            <option value="SERVICIOS">Solo Servicios Clave</option>
+          </select>
+        </div>
+
       </div>
 
-      <div className="cms-news-table-container" style={{ marginTop: "20px" }}>
+      <div className="cms-news-table-container">
         <div className="activity-table-head">
           <div style={{ flex: 1.5 }}>NOMBRE</div>
           <div style={{ width: "140px" }}>CLASIFICACIÓN</div>
@@ -171,7 +196,7 @@ const CmsEspecialidadesView = () => {
           ) : 
            datosFiltrados.length === 0 ? (
             <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
-              No hay registros en esta sección.
+              No se encontraron registros que coincidan con los filtros aplicados.
             </div> 
           ) : (
             datosFiltrados.map((esp) => (
