@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { obtenerBanners, crearBanner, actualizarBanner, eliminarBanner } from "../controllers/cms/cms.banners.controller.js";
 import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia } from "../controllers/cms/cms.noticia.controller.js";
 import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento } from "../controllers/cms/cms.doc.controller.js";
-import { obtenerProfesionales, crearProfesional, eliminarProfesional } from "../controllers/cms/cms.profesional.controller.js";
+import { obtenerProfesionales, crearProfesional, eliminarProfesional, actualizarProfesional } from "../controllers/cms/cms.profesional.controller.js";
 import * as especialidadCtrl from '../controllers/cms/cms.especialidad.controller.js';
 
 import { verifyToken } from '../middlewares/auth.middleware.js'; 
@@ -40,6 +40,7 @@ router.delete("/banners/:id", verifyToken, eliminarBanner);
 // ==========================================
 router.get("/profesionales", obtenerProfesionales);
 router.post("/profesionales", verifyToken, uploadMemory.single("archivo"), crearProfesional);
+router.put("/profesionales/:id", verifyToken, uploadMemory.single("archivo"), actualizarProfesional); // NUEVA LÍNEA
 router.delete("/profesionales/:id", verifyToken, eliminarProfesional);
 
 // ==========================================
@@ -49,5 +50,7 @@ router.get('/especialidades', especialidadCtrl.obtenerEspecialidades);
 router.post('/especialidades', verifyToken, especialidadCtrl.crearEspecialidad);
 router.put('/especialidades/:id', verifyToken, especialidadCtrl.actualizarEspecialidad);
 router.delete('/especialidades/:id', verifyToken, especialidadCtrl.eliminarEspecialidad);
+
+
 
 export default router;
