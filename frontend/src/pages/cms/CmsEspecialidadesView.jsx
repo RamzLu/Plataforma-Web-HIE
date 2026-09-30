@@ -10,7 +10,7 @@ const CmsEspecialidadesView = () => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [activeTab, setActiveTab] = useState("PUBLICADOS");
+  const [activeTab, setActiveTab] = useState("PUBLICADOS");  
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
 
   const [showModal, setShowModal] = useState(false);
@@ -20,7 +20,7 @@ const CmsEspecialidadesView = () => {
 
   const [formData, setFormData] = useState({
     nombre: "", descripcion: "", ubicacion: "", horarios: "", 
-    requisitos: "", documentacionNecesaria: "", informacionDerivacion: "", 
+    requisitos: "", informacionDerivacion: "", 
     esServicio: false, estado: "PUBLICADO"
   });
 
@@ -56,7 +56,7 @@ const CmsEspecialidadesView = () => {
     setEditingId(null);
     setFormData({ 
       nombre: "", descripcion: "", ubicacion: "", horarios: "", 
-      requisitos: "", documentacionNecesaria: "", informacionDerivacion: "", 
+      requisitos: "", informacionDerivacion: "", 
       esServicio: false, estado: "PUBLICADO" 
     });
     setHasUnsavedChanges(false);
@@ -71,7 +71,6 @@ const CmsEspecialidadesView = () => {
       ubicacion: esp.ubicacion || "", 
       horarios: esp.horarios || "",
       requisitos: esp.requisitos ? esp.requisitos.join("\n") : "",
-      documentacionNecesaria: esp.documentacionNecesaria || "",
       informacionDerivacion: esp.informacionDerivacion || "",
       esServicio: esp.esServicio, 
       estado: esp.estado || "PUBLICADO"
@@ -326,17 +325,12 @@ const CmsEspecialidadesView = () => {
                   </div>
 
                   <div className="esp-full-width">
-                    <label className="esp-form-label">Documentación Necesaria</label>
-                    <input type="text" value={formData.documentacionNecesaria} onChange={(e) => { setFormData({...formData, documentacionNecesaria: e.target.value}); setHasUnsavedChanges(true); }} className="esp-form-input" placeholder="Ej: DNI, Derivación, Carnet..." />
-                  </div>
-
-                  <div className="esp-full-width">
-                    <label className="esp-form-label">Información de Derivación</label>
+                    <label className="esp-form-label">Información de Derivación (Opcional)</label>
                     <textarea value={formData.informacionDerivacion} onChange={(e) => { setFormData({...formData, informacionDerivacion: e.target.value}); setHasUnsavedChanges(true); }} className="esp-form-input" rows="2" placeholder="Información sobre cómo tramitar la derivación..." style={{ resize: "none" }} />
                   </div>
 
                   <div className="esp-full-width">
-                    <label className="esp-form-label">Requisitos <span style={{ textTransform: "none", color: "#94a3b8", fontWeight: "normal" }}>(Separa cada uno con la tecla Enter)</span></label>
+                    <label className="esp-form-label">Requisitos y Documentación Necesaria <span style={{ textTransform: "none", color: "#94a3b8", fontWeight: "normal" }}>(Separa cada uno con la tecla Enter)</span></label>
                     <textarea value={formData.requisitos} onChange={(e) => { setFormData({...formData, requisitos: e.target.value}); setHasUnsavedChanges(true); }} className="esp-form-input" rows="4" placeholder="Traer DNI original.&#10;Orden médica vigente..." style={{ resize: "none" }} />
                   </div>
 
