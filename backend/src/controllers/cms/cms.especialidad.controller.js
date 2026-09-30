@@ -10,13 +10,8 @@ export const obtenerEspecialidades = async (req, res, next) => {
 
 export const crearEspecialidad = async (req, res, next) => {
   try {
-    const payload = { ...req.body, esServicio: req.body.esServicio === 'true' };
-    if (req.body.requisitos) {
-      try { payload.requisitos = JSON.parse(req.body.requisitos); } 
-      catch (e) { payload.requisitos = req.body.requisitos; }
-    }
-    // Pasamos req.file al servicio
-    const result = await CmsEspecialidadService.crearEspecialidad(payload, req.file);
+    const payload = { ...req.body };
+    const result = await CmsEspecialidadService.crearEspecialidad(payload);
     return res.status(201).json(result);
   } catch (error) { next(error); }
 };
@@ -24,13 +19,8 @@ export const crearEspecialidad = async (req, res, next) => {
 export const actualizarEspecialidad = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const payload = { ...req.body, esServicio: req.body.esServicio === 'true' };
-    if (req.body.requisitos) {
-      try { payload.requisitos = JSON.parse(req.body.requisitos); } 
-      catch (e) { payload.requisitos = req.body.requisitos; }
-    }
-    // Pasamos req.file al servicio
-    const result = await CmsEspecialidadService.actualizarEspecialidad(id, payload, req.file);
+    const payload = { ...req.body };
+    const result = await CmsEspecialidadService.actualizarEspecialidad(id, payload);
     return res.status(200).json(result);
   } catch (error) { next(error); }
 };

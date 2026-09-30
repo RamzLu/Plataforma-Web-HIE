@@ -7,7 +7,7 @@ import { obtenerProfesionales, crearProfesional, eliminarProfesional } from "../
 import * as especialidadCtrl from '../controllers/cms/cms.especialidad.controller.js';
 
 import { verifyToken } from '../middlewares/auth.middleware.js'; 
-import { uploadMemory, uploadLocalBanner } from '../middlewares/upload.middleware.js'; // <-- Importamos limpios
+import { uploadMemory } from '../middlewares/upload.middleware.js'; 
 
 const router = Router();
 
@@ -46,8 +46,8 @@ router.delete("/profesionales/:id", verifyToken, eliminarProfesional);
 // MÓDULO: ESPECIALIDADES
 // ==========================================
 router.get('/especialidades', especialidadCtrl.obtenerEspecialidades);
-router.post('/especialidades', verifyToken, uploadLocalBanner.single('banner'), especialidadCtrl.crearEspecialidad);
-router.put('/especialidades/:id', verifyToken, uploadLocalBanner.single('banner'), especialidadCtrl.actualizarEspecialidad);
+router.post('/especialidades', verifyToken, especialidadCtrl.crearEspecialidad);
+router.put('/especialidades/:id', verifyToken, especialidadCtrl.actualizarEspecialidad);
 router.delete('/especialidades/:id', verifyToken, especialidadCtrl.eliminarEspecialidad);
 
 export default router;

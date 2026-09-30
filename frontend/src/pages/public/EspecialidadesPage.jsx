@@ -17,7 +17,6 @@ const EspecialidadesPage = () => {
     window.scrollTo(0, 0);
     const fetchDatos = async () => {
       try {
-        // false = Solo trae los elementos que están "Activos" para el público
         const data = await getEspecialidades(false); 
         setEspecialidadesData(data.filter(item => !item.esServicio));
         setServiciosData(data.filter(item => item.esServicio));
@@ -141,46 +140,16 @@ const EspecialidadesPage = () => {
               </div>
             ) : (
               <div className="specialties-grid">
-                {(currentView === "grilla-esp" ? especialidadesData : serviciosData).map((item) => {
-                  
-                  // Verificamos si el string es Base64 o una ruta antigua
-                  const imgSrc = item.imagenBanner 
-                    ? (item.imagenBanner.includes('data:image') ? item.imagenBanner : `http://localhost:3000${item.imagenBanner}`) 
-                    : null;
-
-                  return (
-                    <div
-                      key={item.id}
-                      className="specialty-card"
-                      onClick={() => setSelectedItem(item)}
-                      style={{ overflow: "hidden", display: "flex", flexDirection: "column", padding: 0 }}
-                    >
-                      {/* BANNER SUPERIOR DE LA TARJETA */}
-                      {imgSrc ? (
-                        <img 
-                          src={imgSrc} 
-                          alt={`Banner de ${item.nombre}`} 
-                          style={{ width: "100%", height: "110px", objectFit: "cover", backgroundColor: "#f1f5f9" }}
-                          onError={(e) => { 
-                            // Si la imagen falla (ej. Base64 cortado), ocultamos el ícono roto y mostramos el fallback
-                            e.target.style.display = 'none'; 
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      
-                      {/* FALLBACK SI NO HAY IMAGEN O SI FALLA */}
-                      <div style={{ display: imgSrc ? "none" : "flex", width: "100%", height: "110px", backgroundColor: "#e2e8f0", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.8rem", fontWeight: "600" }}>
-                        HIE FORMOSA
-                      </div>
-
-                      {/* CONTENIDO DE LA TARJETA */}
-                      <div style={{ padding: "20px 15px", display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
-                        <h3 style={{ margin: 0, textAlign: "center" }}>{item.nombre}</h3>
-                      </div>
-                    </div>
-                  );
-                })}
+                {(currentView === "grilla-esp" ? especialidadesData : serviciosData).map((item) => (
+                  <div
+                    key={item.id}
+                    className="specialty-card"
+                    onClick={() => setSelectedItem(item)}
+                    style={{ overflow: "hidden", display: "flex", flexDirection: "column", padding: "30px 15px", alignItems: "center", justifyContent: "center" }}
+                  >
+                    <h3 style={{ margin: 0, textAlign: "center" }}>{item.nombre}</h3>
+                  </div>
+                ))}
                 
                 {(currentView === "grilla-esp" ? especialidadesData : serviciosData).length === 0 && (
                   <div style={{ padding: "40px", textAlign: "center", color: "#64748b", gridColumn: "1 / -1" }}>
@@ -272,19 +241,7 @@ const EspecialidadesPage = () => {
                   <ul className="esp-aislado-requisitos-lista">
                     {selectedItem.requisitos.map((req, index) => (
                       <li key={index} className="esp-aislado-info-text">
-                        {req && req.includes("DNI") ? (
-                          <>
-                            <span className="esp-aislado-text-danger">
-                              Traer DNI original.
-                            </span>{" "}
-                            {req
-                              .replace("Traer DNI original.", "")
-                              .replace("Asistir con DNI y", "Y")
-                              .replace("Asistir con DNI.", "")}
-                          </>
-                        ) : (
-                          req
-                        )}
+                        {req}
                       </li>
                     ))}
                   </ul>

@@ -1,6 +1,5 @@
 import express from 'express'
 import cors from 'cors'
-import path from 'path';
 import rolesRoutes from './routes/roles.routes.js'
 import adminRoutes from './routes/admin.routes.js';
 import cmsRoutes from './routes/cms.routes.js';
@@ -17,7 +16,6 @@ const PORT_frontend = process.env.PORT_FRONTEND || 5173
 // --- Middlewares ---
 app.use(cors())
 app.use(express.json())
-app.use('/banners-imagenes', express.static(path.join(process.cwd(), 'banners-imagenes')));
 
 // Conectamos las rutas
 app.use('/api/roles', rolesRoutes)

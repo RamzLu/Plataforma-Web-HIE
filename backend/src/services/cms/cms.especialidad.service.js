@@ -1,47 +1,20 @@
 import { prisma } from "../../config/prisma.js";
-import { createClient } from "@supabase/supabase-js";
-import { generarNombreUnico } from "../../utils/file.utils.js";
-
-// Configuración de Supabase (Misma clave que en Noticias)
-const supabase = createClient(
-  "https://ipwupwmbygtyiluezzle.supabase.co",
-  process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // Asegúrate de tener la key correcta
-);
 
 class CmsEspecialidadService {
   
-  async crearEspecialidad(data, file) {
-    let imagenBannerUrl = null;
-
-    // Si viene un archivo, lo subimos a Supabase
-    if (file) {
-      const { nombreUnico } = generarNombreUnico(file.originalname, 'banner');
-      const { error: storageError } = await supabase.storage
-        .from("banners-imagenes") // ⚠️ Asegúrate de crear este bucket en tu proyecto de Supabase y hacerlo Público
-        .upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
-
-      if (storageError) {
-        const err = new Error("Error al subir imagen a Supabase: " + storageError.message);
-        err.statusCode = 500; throw err;
-      }
-      // Obtenemos la URL pública
-      const { data: publicUrlData } = supabase.storage.from("banners-imagenes").getPublicUrl(nombreUnico);
-      imagenBannerUrl = publicUrlData.publicUrl;
-    }
-
+  async crearEspecialidad(data) {
     const payload = {
       nombre: data.nombre,
       descripcion: data.descripcion,
       ubicacion: data.ubicacion,
       horarios: data.horarios,
-      requisitos: data.requisitos ? JSON.stringify(data.requisitos) : "[]",
+      requisitos: data.requisitos ? (typeof data.requisitos === 'string' ? data.requisitos : JSON.stringify(data.requisitos)) : "[]",
       documentacionNecesaria: data.documentacionNecesaria,
       informacionDerivacion: data.informacionDerivacion,
-      estado: data.estado || "PUBLICADO",
-      imagenBanner: imagenBannerUrl
+      estado: data.estado || "PUBLICADO"
     };
 
-    if (data.esServicio) {
+    if (data.esServicio === true || data.esServicio === 'true') {
       const nuevo = await prisma.servicio.create({ data: payload });
       return { message: "Servicio creado", data: this._format(nuevo, true) };
     } else {
@@ -50,39 +23,19 @@ class CmsEspecialidadService {
     }
   }
 
-  async actualizarEspecialidad(id, data, file) {
-    let imagenBannerUrl = data.imagenBanner; // Mantiene la existente si no se sube nada nuevo
-
-    if (file) {
-      const { nombreUnico } = generarNombreUnico(file.originalname, 'banner');
-      const { error: storageError } = await supabase.storage
-        .from("banners-imagenes")
-        .upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
-
-      if (storageError) {
-        const err = new Error("Error al subir imagen a Supabase: " + storageError.message);
-        err.statusCode = 500; throw err;
-      }
-      const { data: publicUrlData } = supabase.storage.from("banners-imagenes").getPublicUrl(nombreUnico);
-      imagenBannerUrl = publicUrlData.publicUrl;
-    }
-
+  async actualizarEspecialidad(id, data) {
     const payload = {
       nombre: data.nombre,
       descripcion: data.descripcion,
       ubicacion: data.ubicacion,
       horarios: data.horarios,
-      requisitos: data.requisitos ? JSON.stringify(data.requisitos) : "[]",
+      requisitos: data.requisitos ? (typeof data.requisitos === 'string' ? data.requisitos : JSON.stringify(data.requisitos)) : "[]",
       documentacionNecesaria: data.documentacionNecesaria,
       informacionDerivacion: data.informacionDerivacion,
       estado: data.estado
     };
 
-    if (imagenBannerUrl !== undefined) {
-      payload.imagenBanner = imagenBannerUrl;
-    }
-
-    if (data.esServicio) {
+    if (data.esServicio === true || data.esServicio === 'true') {
       const actualizada = await prisma.servicio.update({ where: { id: BigInt(id) }, data: payload });
       return { message: "Servicio actualizado", data: this._format(actualizada, true) };
     } else {
@@ -128,8 +81,7 @@ class CmsEspecialidadService {
       ...registro,
       id: registro.id.toString(),
       esServicio,
-      requisitos: requisitosProcesados,
-      imagenBanner: registro.imagenBanner || null
+      requisitos: requisitosProcesados
     };
   }
 }

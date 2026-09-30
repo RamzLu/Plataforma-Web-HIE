@@ -15,8 +15,6 @@ const CmsEspecialidadesView = () => {
   const [editingId, setEditingId] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
-  const [bannerFile, setBannerFile] = useState(null);
-  const [bannerPreview, setBannerPreview] = useState(null);
 
   const [formData, setFormData] = useState({
     nombre: "", descripcion: "", ubicacion: "", horarios: "", 
@@ -38,7 +36,6 @@ const CmsEspecialidadesView = () => {
     finally { setLoading(false); }
   };
 
-  // --- CONTROLES DE MODAL DE CAMBIOS SIN GUARDAR ---
   const handleCloseAttempt = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedModal(true);
@@ -55,8 +52,6 @@ const CmsEspecialidadesView = () => {
 
   const handleOpenCreate = () => {
     setEditingId(null);
-    setBannerFile(null); 
-    setBannerPreview(null);
     setFormData({ 
       nombre: "", descripcion: "", ubicacion: "", horarios: "", 
       requisitos: "", documentacionNecesaria: "", informacionDerivacion: "", 
@@ -68,8 +63,6 @@ const CmsEspecialidadesView = () => {
 
   const handleOpenEdit = (esp) => {
     setEditingId(esp.id);
-    setBannerFile(null); 
-    setBannerPreview(esp.imagenBanner || null); // Al ser Base64 o URL completa, se lee directo
     setFormData({
       nombre: esp.nombre || "", 
       descripcion: esp.descripcion || "",
@@ -89,30 +82,19 @@ const CmsEspecialidadesView = () => {
     e.preventDefault();
     if (!formData.nombre.trim()) return toast.error("El nombre es obligatorio.");
 
+    const payload = {
+      ...formData,
+      requisitos: formData.requisitos.split("\n").map(r => r.trim()).filter(r => r)
+    };
+
     setIsSaving(true);
     try {
       const token = keycloak.token;
-      
-      const dataToSend = new FormData();
-      dataToSend.append("nombre", formData.nombre);
-      dataToSend.append("descripcion", formData.descripcion);
-      dataToSend.append("ubicacion", formData.ubicacion);
-      dataToSend.append("horarios", formData.horarios);
-      dataToSend.append("documentacionNecesaria", formData.documentacionNecesaria);
-      dataToSend.append("informacionDerivacion", formData.informacionDerivacion);
-      dataToSend.append("esServicio", formData.esServicio);
-      dataToSend.append("estado", formData.estado);
-      
-      const reqArray = formData.requisitos.split("\n").map(r => r.trim()).filter(r => r);
-      dataToSend.append("requisitos", JSON.stringify(reqArray));
-
-      if (bannerFile) dataToSend.append("banner", bannerFile);
-
       if (editingId) {
-        await updateEspecialidad(editingId, dataToSend, token); 
+        await updateEspecialidad(editingId, payload, token); 
         toast.success("Actualizado con éxito.");
       } else {
-        await createEspecialidad(dataToSend, token);
+        await createEspecialidad(payload, token);
         toast.success("Creado con éxito.");
       }
       setShowModal(false);
@@ -266,7 +248,6 @@ const CmsEspecialidadesView = () => {
               <div className="esp-modal-body">
                 <div className="esp-form-grid">
                   
-                  {/* 1. CAMPO TÍTULO / NOMBRE */}
                   <div className="esp-full-width">
                     <label className="esp-form-label">Nombre de la Especialidad/Servicio <span className="esp-asterisk">*</span></label>
                     <input 
@@ -279,39 +260,6 @@ const CmsEspecialidadesView = () => {
                     />
                   </div>
 
-                  {/* 2. CAMPO IMAGEN DE BANNER */}
-                  <div className="esp-full-width" style={{ border: "2px dashed #cbd5e1", padding: "15px", borderRadius: "8px", backgroundColor: "#f8fafc", marginBottom: "5px" }}>
-                    <label className="esp-form-label" style={{ color: "#0f172a" }}>Imagen de Banner (Opcional)</label>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          setBannerFile(file);
-                          setBannerPreview(URL.createObjectURL(file));
-                          setHasUnsavedChanges(true);
-                        }
-                      }} 
-                      className="esp-form-input" 
-                      style={{ border: "none", padding: "0", marginTop: "8px" }}
-                    />
-                    {bannerPreview && (
-                      <div style={{ marginTop: "15px", width: "100%", height: "140px", borderRadius: "8px", overflow: "hidden", position: "relative", border: "1px solid #e2e8f0" }}>
-                        <img src={bannerPreview} alt="Preview Banner" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        <button 
-                          type="button" 
-                          onClick={() => { setBannerFile(null); setBannerPreview(null); setHasUnsavedChanges(true); }}
-                          style={{ position: "absolute", top: "8px", right: "8px", background: "rgba(15, 23, 42, 0.75)", color: "#fff", border: "none", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", transition: "background 0.2s" }}
-                          title="Quitar imagen"
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* 3. SELECTORES DE CONFIGURACIÓN Y ESTADO */}
                   <div style={{ display: "flex", alignItems: "flex-end" }}>
                     <div style={{ flex: 1 }}>
                       <label className="esp-form-label">Tipo de Elemento</label>
@@ -337,7 +285,6 @@ const CmsEspecialidadesView = () => {
                     </select>
                   </div>
 
-                  {/* 4. CAMPOS DE TEXTO RESTANTES */}
                   <div className="esp-full-width">
                     <label className="esp-form-label">Descripción general</label>
                     <textarea value={formData.descripcion} onChange={(e) => { setFormData({...formData, descripcion: e.target.value}); setHasUnsavedChanges(true); }} className="esp-form-input" rows="2" style={{ resize: "none" }} placeholder="Breve descripción del área..." />
