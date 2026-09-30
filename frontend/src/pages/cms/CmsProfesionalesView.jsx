@@ -6,19 +6,21 @@ import "../../styles/pages/cms/CmsProfesionalesView.css";
 
 const CmsProfesionalesView = () => {
   const [profesionales, setProfesionales] = useState([]);
-  const [areasDisponibles, setAreasDisponibles] = useState([]); // Almacena Especialidades y Servicios de la DB
+  const [areasDisponibles, setAreasDisponibles] = useState([]); 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filtroTipo, setFiltroTipo] = useState("Todos"); // "Todos", "ESPECIALIDAD", "SERVICIO"
+  const [filtroTipo, setFiltroTipo] = useState("Todos"); 
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
     matricula: "",
-    tipoFiltroModal: "ESPECIALIDAD", // Para el primer select del modal (Filtra la lista de abajo)
-    especialidadId: "", // El ID real de la especialidad/servicio a guardar
+    tipoFiltroModal: "ESPECIALIDAD", 
+    especialidadId: "", 
     cargo: "",
     descripcion: ""
   });
@@ -27,14 +29,12 @@ const CmsProfesionalesView = () => {
   const fetchDatos = async () => {
     setLoading(true);
     try {
-      // 1. Traer Profesionales
       const resProf = await fetch("http://localhost:3000/api/cms/profesionales");
       if (resProf.ok) {
         const dataProf = await resProf.json();
         setProfesionales(dataProf);
       }
 
-      // 2. Traer Especialidades/Servicios (reutilizando tu API existente)
       const dataAreas = await getEspecialidades(true);
       setAreasDisponibles(dataAreas);
     } catch (error) {
@@ -49,7 +49,6 @@ const CmsProfesionalesView = () => {
     fetchDatos();
   }, []);
 
-  // Lógica de Filtrado de la Tabla Principal
   const profesionalesFiltrados = profesionales.filter(prof => {
     const coincideBusqueda = `${prof.nombre} ${prof.apellido}`.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -59,6 +58,21 @@ const CmsProfesionalesView = () => {
 
     return coincideBusqueda && coincideTipo;
   });
+
+  // --- LÓGICA DE CIERRE DE MODAL Y CAMBIOS SIN GUARDAR ---
+  const handleCloseAttempt = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedModal(true);
+    } else {
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleForceClose = () => {
+    setShowUnsavedModal(false);
+    setIsModalOpen(false);
+    setHasUnsavedChanges(false);
+  };
 
   const handleOpenCreate = () => {
     setFormData({ 
@@ -71,6 +85,7 @@ const CmsProfesionalesView = () => {
       descripcion: "" 
     });
     setArchivoFoto(null);
+    setHasUnsavedChanges(false);
     setIsModalOpen(true);
   };
 
@@ -120,6 +135,7 @@ const CmsProfesionalesView = () => {
       const resultado = await response.json();
       setProfesionales([resultado.profesional, ...profesionales]);
       toast.success("¡Profesional creado con éxito!");
+      setHasUnsavedChanges(false);
       setIsModalOpen(false);
     } catch (error) {
       toast.error("Ocurrió un error al guardar el profesional.");
@@ -130,7 +146,6 @@ const CmsProfesionalesView = () => {
     return `${nombre?.charAt(0) || ""}${apellido?.charAt(0) || ""}`.toUpperCase();
   };
 
-  // Filtramos las áreas del Modal según lo que el usuario eligió (Especialidad o Servicio)
   const areasParaElSelect = areasDisponibles.filter(area => 
     formData.tipoFiltroModal === "ESPECIALIDAD" ? area.esServicio === false : area.esServicio === true
   );
@@ -248,14 +263,14 @@ const CmsProfesionalesView = () => {
       </div>
 
       {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+        <div className="modal-overlay" onClick={handleCloseAttempt}>
           <div className="modal-container" onClick={e => e.stopPropagation()}>
             <header className="modal-header">
               <div className="header-content">
                 <h1 className="modal-title">AÑADIR PROFESIONAL</h1>
                 <p className="modal-subtitle">Completá los datos del profesional para registrarlo en el sistema.</p>
               </div>
-              <button type="button" className="close-button" onClick={() => setIsModalOpen(false)} aria-label="Cerrar">
+              <button type="button" className="close-button" onClick={handleCloseAttempt} aria-label="Cerrar">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -265,8 +280,6 @@ const CmsProfesionalesView = () => {
 
             <form onSubmit={handleSave}>
               <div className="modal-body">
-                
-                {/* Section A: Datos Personales */}
                 <section className="form-section">
                   <div className="section-header">
                     <h2 className="section-title">DATOS PERSONALES <span className="esp-asterisk">*</span></h2>
@@ -274,15 +287,15 @@ const CmsProfesionalesView = () => {
                   <div className="form-grid">
                     <div className="form-group">
                       <label htmlFor="nombre">Nombre</label>
-                      <input type="text" id="nombre" placeholder="Ej. Marcela" required value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
+                      <input type="text" id="nombre" placeholder="Ej. Marcela" required value={formData.nombre} onChange={e => {setFormData({...formData, nombre: e.target.value}); setHasUnsavedChanges(true);}} />
                     </div>
                     <div className="form-group">
                       <label htmlFor="apellido">Apellido</label>
-                      <input type="text" id="apellido" placeholder="Ej. Ferreyra" required value={formData.apellido} onChange={e => setFormData({...formData, apellido: e.target.value})} />
+                      <input type="text" id="apellido" placeholder="Ej. Ferreyra" required value={formData.apellido} onChange={e => {setFormData({...formData, apellido: e.target.value}); setHasUnsavedChanges(true);}} />
                     </div>
                     <div className="form-group">
                       <label htmlFor="matricula">Matrícula</label>
-                      <input type="text" id="matricula" placeholder="MP 00.000" value={formData.matricula} onChange={e => setFormData({...formData, matricula: e.target.value})} />
+                      <input type="text" id="matricula" placeholder="MP 00.000" value={formData.matricula} onChange={e => {setFormData({...formData, matricula: e.target.value}); setHasUnsavedChanges(true);}} />
                     </div>
                   </div>
                 </section>
@@ -292,13 +305,12 @@ const CmsProfesionalesView = () => {
                   <div className="file-upload-container">
                     <label className="file-upload-button">
                       Seleccionar archivo
-                      <input type="file" accept="image/*" className="hidden-input" onChange={e => setArchivoFoto(e.target.files[0])} />
+                      <input type="file" accept="image/*" className="hidden-input" onChange={e => {setArchivoFoto(e.target.files[0]); setHasUnsavedChanges(true);}} />
                     </label>
                     <span className="file-status">{archivoFoto ? archivoFoto.name : "Sin archivos seleccionados"}</span>
                   </div>
                 </section>
 
-                {/* Section B: Asignación de Área (Conexión real con Base de Datos) */}
                 <section className="form-section">
                   <div className="section-header">
                     <h2 className="section-title">ASIGNACIÓN DE ÁREA <span className="esp-asterisk">*</span> </h2>
@@ -311,7 +323,7 @@ const CmsProfesionalesView = () => {
                         <select 
                           id="tipo-area"
                           value={formData.tipoFiltroModal}
-                          onChange={e => setFormData({...formData, tipoFiltroModal: e.target.value, especialidadId: ''})}
+                          onChange={e => {setFormData({...formData, tipoFiltroModal: e.target.value, especialidadId: ''}); setHasUnsavedChanges(true);}}
                         >
                           <option value="ESPECIALIDAD">Especialidad médica</option>
                           <option value="SERVICIO">Servicio Clave</option>
@@ -326,7 +338,7 @@ const CmsProfesionalesView = () => {
                           id="area-especifica"
                           required
                           value={formData.especialidadId}
-                          onChange={e => setFormData({...formData, especialidadId: e.target.value})}
+                          onChange={e => {setFormData({...formData, especialidadId: e.target.value}); setHasUnsavedChanges(true);}}
                         >
                           <option value="" disabled>-- Seleccione de la lista --</option>
                           {areasParaElSelect.length === 0 ? (
@@ -348,24 +360,51 @@ const CmsProfesionalesView = () => {
                   </div>
                   <div className="form-group">
                     <label htmlFor="cargo">Cargo o función</label>
-                    <input type="text" id="cargo" placeholder="Ej. Jefa de Área" value={formData.cargo} onChange={e => setFormData({...formData, cargo: e.target.value})} />
+                    <input type="text" id="cargo" placeholder="Ej. Jefa de Área" value={formData.cargo} onChange={e => {setFormData({...formData, cargo: e.target.value}); setHasUnsavedChanges(true);}} />
                   </div>
                   <div className="form-group margin-top-md">
                     <label htmlFor="descripcion">Descripción</label>
-                    <textarea id="descripcion" placeholder="Breve reseña..." rows="4" value={formData.descripcion} onChange={e => setFormData({...formData, descripcion: e.target.value})}></textarea>
+                    <textarea id="descripcion" placeholder="Breve reseña..." rows="4" value={formData.descripcion} onChange={e => {setFormData({...formData, descripcion: e.target.value}); setHasUnsavedChanges(true);}}></textarea>
                   </div>
                 </section>
 
               </div>
 
               <footer className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                <button type="button" className="btn-secondary" onClick={handleCloseAttempt}>Cancelar</button>
                 <button type="submit" className="btn-primary">GUARDAR PROFESIONAL</button>
               </footer>
             </form>
           </div>
         </div>
       )}
+      {showUnsavedModal && (
+        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
+          <div style={{ width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)", boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif", position: "relative", zIndex: 999999, display: "flex", flexDirection: "column" }}>
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>Hay cambios sin guardar</h2>
+              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>¿Qué deseas hacer con el registro actual?</p>
+            </div>
+            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <button 
+                type="button" 
+                onClick={handleForceClose} 
+                style={{ width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px", transition: "background-color 0.15s ease", fontFamily: "'Manrope', sans-serif" }}
+              >
+                Descartar cambios
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setShowUnsavedModal(false)} 
+                style={{ width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px", transition: "background-color 0.15s ease", fontFamily: "'Manrope', sans-serif" }}
+              >
+                Seguir editando
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
