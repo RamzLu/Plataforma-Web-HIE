@@ -13,10 +13,7 @@ class CmsProfesionalService {
       orderBy: { createdAt: "desc" },
       include: {
         especialidad: true,
-        archivo: true,
-        profesional_area: {
-          include: { area: true }
-        }
+        archivo: true
       },
     });
 
@@ -36,8 +33,8 @@ class CmsProfesionalService {
         matricula: prof.matricula || "",
         cargo: prof.cargo || "",
         descripcion: prof.descripcion || "",
-        tipo: prof.especialidad?.nombre || "Especialidad médica",
-        area: prof.profesional_area[0]?.area?.nombre || "General",
+        especialidadNombre: prof.especialidad?.nombre || "Sin Asignar",
+        esServicioClave: prof.especialidad?.esServicio || false,
         especialidadId: prof.especialidadId.toString(),
         publicado: prof.activo,
         imagenUrl: pubUrl
@@ -46,29 +43,30 @@ class CmsProfesionalService {
   }
 
   async crearProfesional(data, file) {
-    const { nombre, apellido, matricula, cargo, descripcion, especialidadNombre, areaNombre } = data;
+    // Recibimos especialidadId desde el frontend
+    const { nombre, apellido, matricula, cargo, descripcion, especialidadId } = data;
 
-    if (!nombre || !apellido) {
-      const error = new Error("Nombre y apellido son obligatorios.");
+    if (!nombre || !apellido || !especialidadId) {
+      const error = new Error("Nombre, apellido y especialidad son obligatorios.");
       error.statusCode = 400;
       throw error;
     }
 
-    let especialidad = await prisma.especialidad.findFirst({
-      where: { nombre: especialidadNombre || "Especialidad médica" }
+    // Verificamos que la especialidad/servicio exista
+    const especialidad = await prisma.especialidad.findUnique({
+      where: { id: BigInt(especialidadId) }
     });
-    
+
     if (!especialidad) {
-      especialidad = await prisma.especialidad.create({
-        data: { nombre: especialidadNombre || "Especialidad médica", descripcion: "Creada automáticamente" }
-      });
+      const error = new Error("El área seleccionada no existe.");
+      error.statusCode = 404;
+      throw error;
     }
 
     let archivoId = null;
 
     if (file) {
       const { nombreUnico, extension } = generarNombreUnico(file.originalname, 'prof');
-
       const { error: storageError } = await supabase.storage
         .from("noticias-imagenes")
         .upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
@@ -89,7 +87,6 @@ class CmsProfesionalService {
           tamanioBytes: BigInt(file.size),
         },
       });
-      
       archivoId = archivoDb.id;
     }
 
@@ -108,19 +105,6 @@ class CmsProfesionalService {
       include: { especialidad: true, archivo: true }
     });
 
-    if (areaNombre) {
-      let areaDb = await prisma.area.findFirst({ where: { nombre: areaNombre } });
-      if (!areaDb) {
-        areaDb = await prisma.area.create({ data: { nombre: areaNombre } });
-      }
-      await prisma.profesional_area.create({
-        data: {
-          profesionalId: nuevoProfesional.id,
-          areaId: areaDb.id
-        }
-      });
-    }
-
     let pubUrl = "";
     if (nuevoProfesional.archivo) {
       const { data } = supabase.storage
@@ -138,8 +122,8 @@ class CmsProfesionalService {
         matricula: nuevoProfesional.matricula,
         cargo: nuevoProfesional.cargo,
         descripcion: nuevoProfesional.descripcion,
-        tipo: nuevoProfesional.especialidad.nombre,
-        area: areaNombre || "General",
+        especialidadNombre: nuevoProfesional.especialidad.nombre,
+        esServicioClave: nuevoProfesional.especialidad.esServicio,
         publicado: nuevoProfesional.activo,
         imagenUrl: pubUrl
       }

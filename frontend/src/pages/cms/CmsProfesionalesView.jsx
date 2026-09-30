@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
+import { getEspecialidades } from "../../api/especialidades.api.js";
 import "../../styles/pages/cms/CmsProfesionalesView.css";
-
-const AREAS_ESPECIALIDAD = ["Clínica Médica", "Traumatología", "Pediatría", "Cardiología", "Cirugía General"];
-const AREAS_APOYO = ["Laboratorio", "Radiología", "Kinesiología", "Farmacia", "Nutrición"];
 
 const CmsProfesionalesView = () => {
   const [profesionales, setProfesionales] = useState([]);
+  const [areasDisponibles, setAreasDisponibles] = useState([]); // Almacena Especialidades y Servicios de la DB
   const [searchTerm, setSearchTerm] = useState("");
-  const [filtroTipo, setFiltroTipo] = useState("Todos");
+  const [filtroTipo, setFiltroTipo] = useState("Todos"); // "Todos", "ESPECIALIDAD", "SERVICIO"
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,41 +17,59 @@ const CmsProfesionalesView = () => {
     nombre: "",
     apellido: "",
     matricula: "",
-    tipo: "Especialidad médica",
-    area: "",
+    tipoFiltroModal: "ESPECIALIDAD", // Para el primer select del modal (Filtra la lista de abajo)
+    especialidadId: "", // El ID real de la especialidad/servicio a guardar
     cargo: "",
     descripcion: ""
   });
   const [archivoFoto, setArchivoFoto] = useState(null);
 
-  const fetchProfesionales = async () => {
+  const fetchDatos = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/api/cms/profesionales");
-      if (response.ok) {
-        const data = await response.json();
-        setProfesionales(data);
+      // 1. Traer Profesionales
+      const resProf = await fetch("http://localhost:3000/api/cms/profesionales");
+      if (resProf.ok) {
+        const dataProf = await resProf.json();
+        setProfesionales(dataProf);
       }
+
+      // 2. Traer Especialidades/Servicios (reutilizando tu API existente)
+      const dataAreas = await getEspecialidades(true);
+      setAreasDisponibles(dataAreas);
     } catch (error) {
-      console.error("Error al obtener profesionales:", error);
-      toast.error("Error al cargar el directorio.");
+      console.error("Error al cargar datos:", error);
+      toast.error("Error al cargar los datos.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProfesionales();
+    fetchDatos();
   }, []);
 
+  // Lógica de Filtrado de la Tabla Principal
   const profesionalesFiltrados = profesionales.filter(prof => {
     const coincideBusqueda = `${prof.nombre} ${prof.apellido}`.toLowerCase().includes(searchTerm.toLowerCase());
-    const coincideTipo = filtroTipo === "Todos" || prof.tipo === filtroTipo;
+    
+    let coincideTipo = true;
+    if (filtroTipo === "ESPECIALIDAD") coincideTipo = prof.esServicioClave === false;
+    if (filtroTipo === "SERVICIO") coincideTipo = prof.esServicioClave === true;
+
     return coincideBusqueda && coincideTipo;
   });
 
   const handleOpenCreate = () => {
-    setFormData({ nombre: "", apellido: "", matricula: "", tipo: "Especialidad médica", area: "", cargo: "", descripcion: "" });
+    setFormData({ 
+      nombre: "", 
+      apellido: "", 
+      matricula: "", 
+      tipoFiltroModal: "ESPECIALIDAD", 
+      especialidadId: "", 
+      cargo: "", 
+      descripcion: "" 
+    });
     setArchivoFoto(null);
     setIsModalOpen(true);
   };
@@ -71,7 +88,6 @@ const CmsProfesionalesView = () => {
         setProfesionales(profesionales.filter(p => p.id !== id));
         toast.success("Profesional eliminado correctamente.");
       } catch (error) {
-        console.error("Error al eliminar:", error);
         toast.error("No se pudo eliminar el profesional.");
       }
     }
@@ -87,8 +103,8 @@ const CmsProfesionalesView = () => {
       dataForm.append("matricula", formData.matricula);
       dataForm.append("cargo", formData.cargo);
       dataForm.append("descripcion", formData.descripcion);
-      dataForm.append("especialidadNombre", formData.tipo);
-      dataForm.append("areaNombre", formData.area);
+      dataForm.append("especialidadId", formData.especialidadId);
+      
       if (archivoFoto) {
         dataForm.append("archivo", archivoFoto);
       }
@@ -106,7 +122,6 @@ const CmsProfesionalesView = () => {
       toast.success("¡Profesional creado con éxito!");
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Error al guardar:", error);
       toast.error("Ocurrió un error al guardar el profesional.");
     }
   };
@@ -114,6 +129,11 @@ const CmsProfesionalesView = () => {
   const getIniciales = (nombre, apellido) => {
     return `${nombre?.charAt(0) || ""}${apellido?.charAt(0) || ""}`.toUpperCase();
   };
+
+  // Filtramos las áreas del Modal según lo que el usuario eligió (Especialidad o Servicio)
+  const areasParaElSelect = areasDisponibles.filter(area => 
+    formData.tipoFiltroModal === "ESPECIALIDAD" ? area.esServicio === false : area.esServicio === true
+  );
 
   return (
     <div className="cms-dashboard-card">
@@ -151,8 +171,8 @@ const CmsProfesionalesView = () => {
           <label>Clasificar vista</label>
           <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
             <option value="Todos">Todos</option>
-            <option value="Especialidad médica">Especialidad médica</option>
-            <option value="Servicio de apoyo">Servicio de apoyo</option>
+            <option value="ESPECIALIDAD">Especialidades Médicas</option>
+            <option value="SERVICIO">Servicios Clave</option>
           </select>
         </div>
       </div>
@@ -161,7 +181,7 @@ const CmsProfesionalesView = () => {
         <div className="activity-table-head news-table-head">
           <div className="col-content">PROFESIONAL</div>
           <div className="col-cargo">CARGO O FUNCIÓN</div>
-          <div className="col-area">ÁREA</div>
+          <div className="col-area">ÁREA ASIGNADA</div>
           <div className="col-acciones" style={{ textAlign: "center" }}>ACCIONES</div>
         </div>
 
@@ -178,6 +198,7 @@ const CmsProfesionalesView = () => {
           ) : (
             profesionalesFiltrados.map((prof) => (
               <div className="activity-row news-table-row" key={prof.id}>
+                
                 <div className="col-content" style={{ flexDirection: "row", alignItems: "center", gap: "15px" }}>
                   <div className="news-thumb-box">
                     {prof.imagenUrl ? (
@@ -197,16 +218,16 @@ const CmsProfesionalesView = () => {
                 </div>
 
                 <div className="col-cargo" style={{ color: "#0f172a", fontWeight: "500" }}>
-                  {prof.cargo}
+                  {prof.cargo || "-"}
                 </div>
 
                 <div className="col-area">
                   <div className="badge-area badge-medica" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <span className="dot" style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#0284c7" }}></span> 
-                    {prof.area}
+                    <span className="dot" style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: prof.esServicioClave ? "#0284c7" : "#8b5cf6" }}></span> 
+                    {prof.especialidadNombre}
                   </div>
-                  <span className="tipo-area-texto" style={{ display: "block", fontSize: "0.75rem", color: "#64748b", marginTop: "3px" }}>
-                    {prof.tipo}
+                  <span className="tipo-area-texto" style={{ display: "block", fontSize: "0.75rem", color: "#64748b", marginTop: "3px", textTransform: "uppercase" }}>
+                    {prof.esServicioClave ? "SERVICIO CLAVE" : "ESPECIALIDAD"}
                   </span>
                 </div>
 
@@ -226,12 +247,9 @@ const CmsProfesionalesView = () => {
         </div>
       </div>
 
-      {/* MODAL CON ESTILO EXACTO DE REFERENCIA */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-container" onClick={e => e.stopPropagation()}>
-            
-            {/* Header del Modal de Referencia */}
             <header className="modal-header">
               <div className="header-content">
                 <h1 className="modal-title">AÑADIR PROFESIONAL</h1>
@@ -251,135 +269,95 @@ const CmsProfesionalesView = () => {
                 {/* Section A: Datos Personales */}
                 <section className="form-section">
                   <div className="section-header">
-                    <span className="section-badge">A</span>
-                    <h2 className="section-title">DATOS PERSONALES</h2>
+                    <h2 className="section-title">DATOS PERSONALES <span className="esp-asterisk">*</span></h2>
                   </div>
                   <div className="form-grid">
                     <div className="form-group">
                       <label htmlFor="nombre">Nombre</label>
-                      <input 
-                        type="text" 
-                        id="nombre" 
-                        placeholder="Ej. Marcela" 
-                        required 
-                        value={formData.nombre} 
-                        onChange={e => setFormData({...formData, nombre: e.target.value})} 
-                      />
+                      <input type="text" id="nombre" placeholder="Ej. Marcela" required value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
                     </div>
                     <div className="form-group">
                       <label htmlFor="apellido">Apellido</label>
-                      <input 
-                        type="text" 
-                        id="apellido" 
-                        placeholder="Ej. Ferreyra" 
-                        required 
-                        value={formData.apellido} 
-                        onChange={e => setFormData({...formData, apellido: e.target.value})} 
-                      />
+                      <input type="text" id="apellido" placeholder="Ej. Ferreyra" required value={formData.apellido} onChange={e => setFormData({...formData, apellido: e.target.value})} />
                     </div>
                     <div className="form-group">
                       <label htmlFor="matricula">Matrícula</label>
-                      <input 
-                        type="text" 
-                        id="matricula" 
-                        placeholder="MP 00.000" 
-                        value={formData.matricula} 
-                        onChange={e => setFormData({...formData, matricula: e.target.value})} 
-                      />
+                      <input type="text" id="matricula" placeholder="MP 00.000" value={formData.matricula} onChange={e => setFormData({...formData, matricula: e.target.value})} />
                     </div>
                   </div>
                 </section>
 
-                {/* Fotografía */}
                 <section className="form-section">
-                  <h2 className="section-title-simple">Fotografía</h2>
+                  <h2 className="section-title-simple">Fotografía <span className="esp-asterisk">*</span> </h2>
                   <div className="file-upload-container">
                     <label className="file-upload-button">
                       Seleccionar archivo
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden-input" 
-                        onChange={e => setArchivoFoto(e.target.files[0])} 
-                      />
+                      <input type="file" accept="image/*" className="hidden-input" onChange={e => setArchivoFoto(e.target.files[0])} />
                     </label>
-                    <span className="file-status">
-                      {archivoFoto ? archivoFoto.name : "Sin archivos seleccionados"}
-                    </span>
+                    <span className="file-status">{archivoFoto ? archivoFoto.name : "Sin archivos seleccionados"}</span>
                   </div>
                 </section>
 
-                {/* Section B: Asignación de Área */}
+                {/* Section B: Asignación de Área (Conexión real con Base de Datos) */}
                 <section className="form-section">
                   <div className="section-header">
-                    <span className="section-badge">B</span>
-                    <h2 className="section-title">ASIGNACIÓN DE ÁREA</h2>
+                    <h2 className="section-title">ASIGNACIÓN DE ÁREA <span className="esp-asterisk">*</span> </h2>
                   </div>
                   <div className="form-grid">
+                    
                     <div className="form-group">
-                      <label htmlFor="tipo-area">Tipo de Área</label>
+                      <label htmlFor="tipo-area">Clasificación General</label>
                       <div className="select-wrapper">
                         <select 
                           id="tipo-area"
-                          value={formData.tipo}
-                          onChange={e => setFormData({...formData, tipo: e.target.value, area: ''})}
+                          value={formData.tipoFiltroModal}
+                          onChange={e => setFormData({...formData, tipoFiltroModal: e.target.value, especialidadId: ''})}
                         >
-                          <option value="Especialidad médica">Especialidad médica</option>
-                          <option value="Servicio de apoyo">Servicio de apoyo</option>
+                          <option value="ESPECIALIDAD">Especialidad médica</option>
+                          <option value="SERVICIO">Servicio Clave</option>
                         </select>
                       </div>
                     </div>
+
                     <div className="form-group" style={{ gridColumn: "span 2" }}>
-                      <label htmlFor="area-especifica">Área específica</label>
+                      <label htmlFor="area-especifica">Seleccione el Área <span className="esp-asterisk">*</span></label>
                       <div className="select-wrapper">
                         <select 
                           id="area-especifica"
                           required
-                          value={formData.area}
-                          onChange={e => setFormData({...formData, area: e.target.value})}
+                          value={formData.especialidadId}
+                          onChange={e => setFormData({...formData, especialidadId: e.target.value})}
                         >
-                          <option value="" disabled>Seleccione el área específica</option>
-                          {(formData.tipo === 'Especialidad médica' ? AREAS_ESPECIALIDAD : AREAS_APOYO).map(a => (
-                            <option key={a} value={a}>{a}</option>
-                          ))}
+                          <option value="" disabled>-- Seleccione de la lista --</option>
+                          {areasParaElSelect.length === 0 ? (
+                            <option value="" disabled>No hay {formData.tipoFiltroModal === 'ESPECIALIDAD' ? 'Especialidades' : 'Servicios'} creados en el sistema.</option>
+                          ) : (
+                            areasParaElSelect.map(area => (
+                              <option key={area.id} value={area.id}>{area.nombre}</option>
+                            ))
+                          )}
                         </select>
                       </div>
                     </div>
                   </div>
                 </section>
 
-                {/* Section C: Rol y Perfil */}
                 <section className="form-section">
                   <div className="section-header">
-                    <span className="section-badge">C</span>
-                    <h2 className="section-title">ROL Y PERFIL</h2>
+                    <h2 className="section-title">ROL Y PERFIL <span className="esp-asterisk">*</span></h2>
                   </div>
                   <div className="form-group">
                     <label htmlFor="cargo">Cargo o función</label>
-                    <input 
-                      type="text" 
-                      id="cargo" 
-                      placeholder="Ej. Jefa de Área" 
-                      required 
-                      value={formData.cargo} 
-                      onChange={e => setFormData({...formData, cargo: e.target.value})} 
-                    />
+                    <input type="text" id="cargo" placeholder="Ej. Jefa de Área" value={formData.cargo} onChange={e => setFormData({...formData, cargo: e.target.value})} />
                   </div>
                   <div className="form-group margin-top-md">
                     <label htmlFor="descripcion">Descripción</label>
-                    <textarea 
-                      id="descripcion" 
-                      placeholder="Breve reseña..." 
-                      rows="4"
-                      value={formData.descripcion}
-                      onChange={e => setFormData({...formData, descripcion: e.target.value})}
-                    ></textarea>
+                    <textarea id="descripcion" placeholder="Breve reseña..." rows="4" value={formData.descripcion} onChange={e => setFormData({...formData, descripcion: e.target.value})}></textarea>
                   </div>
                 </section>
 
               </div>
 
-              {/* Footer Actions */}
               <footer className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>Cancelar</button>
                 <button type="submit" className="btn-primary">GUARDAR PROFESIONAL</button>
