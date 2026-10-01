@@ -222,7 +222,7 @@
 .carousel-viewport-wrapper {
   position: relative;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1600px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -265,13 +265,13 @@
 
 .doctors-cards-track {
   width: 100%;
-  padding: 20px 60px; /* Espacio para botones laterales */
+  padding: 20px 56px; /* Espacio para botones laterales */
 }
 
 /* Tarjeta del Profesional (Estilos Base / Inactiva) */
 .doctor-card {
   width: 100%;
-  max-width: 320px;
+  max-width: 400px;
   margin: 0 auto;
   background-color: #ffffff;
   border-radius: 20px;
@@ -288,7 +288,7 @@
 
 /* TARJETA ACTIVA (Centro del Carrusel) */
 .swiper-slide-active .doctor-card {
-  max-width: 380px;
+  max-width: 480px;
   border: 2px solid #0284c7;
   box-shadow: 0 16px 36px -6px rgba(2, 132, 199, 0.22);
   transform: scale(1) translateY(-6px);
@@ -300,14 +300,14 @@
 .doctor-image-container {
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 300px;
   background-color: #cbd5e1;
   overflow: hidden;
   transition: height 0.3s ease;
 }
 
 .swiper-slide-active .doctor-image-container {
-  height: 280px;
+  height: 360px;
 }
 
 .doctor-photo {
@@ -605,4 +605,17 @@
   .swiper-slide-active .doctor-card {
     max-width: 100%;
   }
+}
+
+/* =========================================================
+   CARRUSEL CON 1 O 2 PROFESIONALES (SIN LOOP, CENTRADOS)
+   ========================================================= */
+.few-slides .swiper-wrapper {
+  justify-content: center;
+}
+
+.few-slides .doctor-card {
+  opacity: 1;
+  transform: none;
+  max-width: 440px;
 }

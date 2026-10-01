@@ -31,14 +31,14 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
         { id: "noticias", label: "Noticias", icon: <FileText /> },
         { id: "documentacion", label: "Documentación", icon: <FolderOpen /> },
         { id: "especialidades", label: "Especialidades", icon: <Activity /> },
-        { id: "banners", label: "Banners", icon: <ImageIcon /> },
+        { id: "profesionales", label: "Profesionales", icon: <Contact /> },
       ],
     },
     {
       title: "Herramientas",
       items: [
+        { id: "banners", label: "Banners", icon: <ImageIcon /> },
         { id: "institucional", label: "Institucional", icon: <Building /> },
-        { id: "profesionales", label: "Profesionales", icon: <Contact /> },
         { id: "capsulas", label: "Cápsulas", icon: <Video /> },
         { id: "configuracion", label: "Configuración", icon: <Settings /> },
       ],

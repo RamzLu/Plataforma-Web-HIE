@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation } from "swiper/modules";
 
 import "swiper/css";
-import "swiper/css/autoplay";
-import "swiper/css/navigation";
 import "../../styles/pages/ProfesionalesPage.css";
 
 import Breadcrumb from "../../components/Breadcrumb";
@@ -17,10 +14,19 @@ const normalizeText = (text) => {
 const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
   const getIniciales = (nombre, apellido) => `${nombre?.charAt(0) || ""}${apellido?.charAt(0) || ""}`.toUpperCase();
   
-const swiperRef = useRef(null);
+  // Guardamos el carrusel para mover con las flechas
+  const swiperRef = useRef(null);
 
-  const [prevEl, setPrevEl] = useState(null);
-  const [nextEl, setNextEl] = useState(null);
+  // Con 3 o más profesionales: carrusel infinito con el del medio destacado.
+  // Con 1 o 2: se muestran todos juntos y centrados, sin loop.
+  const isCarousel = profesionales.length >= 3;
+
+  // Swiper necesita varios slides de sobra para hacer el loop.
+  // Si hay pocos, repetimos la lista hasta tener al menos 6.
+  let slides = profesionales;
+  if (isCarousel) {
+    while (slides.length < 6) slides = [...slides, ...profesionales];
+  }
 
   return (
     <div className="specialty-active-header" style={{ marginBottom: "60px" }}>
@@ -49,21 +55,18 @@ const swiperRef = useRef(null);
 
         <div className="doctors-cards-track">
           <Swiper
-    modules={[Autoplay]}
-    onSwiper={(swiper) => (swiperRef.current = swiper)}
-    spaceBetween={30}
-    slidesPerView={1}
-    centeredSlides={profesionales.length > 1}
-    loop={profesionales.length >= 5}
-    rewind={profesionales.length < 5}
-    breakpoints={{
-      768: { slidesPerView: profesionales.length >= 2 ? 2 : 1 },
-      1024: { slidesPerView: profesionales.length >= 3 ? 3 : profesionales.length },
-    }}
-    className="mySwiper"
-  >
-            {profesionales.map((prof) => (
-              <SwiperSlide key={prof.id} style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
+            onSwiper={(swiper) => (swiperRef.current = swiper)}
+            spaceBetween={30}
+            slidesPerView={1}
+            centeredSlides={isCarousel}
+            loop={isCarousel}
+            breakpoints={{
+              1024: { slidesPerView: isCarousel ? 3 : profesionales.length },
+            }}
+            className={isCarousel ? "mySwiper" : "mySwiper few-slides"}
+          >
+            {slides.map((prof, i) => (
+              <SwiperSlide key={`${prof.id}-${i}`} style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
                 <article className="doctor-card" onClick={() => onSelectProf(prof)}>
                   <div className="doctor-image-container">
                     {prof.imagenUrl ? (
@@ -258,7 +261,7 @@ const ProfesionalesPage = () => {
         </section>
       </AnimatedContent>
 
-      <div style={{ width: "100%", maxWidth: "1200px" }}>
+      <div style={{ width: "100%", maxWidth: "1600px", padding: "0 20px" }}>
         {loading ? (
           <div style={{ textAlign: "center", padding: "60px 0" }}>
             <div className="cms-spinner" style={{ borderWidth: "4px", width: "40px", height: "40px", borderTopColor: "#0d223f", margin: "0 auto" }}></div>
@@ -339,4 +342,4 @@ const ProfesionalesPage = () => {
   );
 };
 
-export default ProfesionalesPage;
+export default ProfesionalesPage; 

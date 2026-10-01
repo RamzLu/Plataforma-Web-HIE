@@ -412,7 +412,6 @@ const CmsProfesionalesView = () => {
                 
                 <section className="form-section">
                   <div className="section-header">
-                    <span className="section-badge">A</span>
                     <h2 className="section-title">DATOS PERSONALES <span className="esp-asterisk">*</span></h2>
                   </div>
                   <div className="form-grid">
@@ -457,7 +456,6 @@ const CmsProfesionalesView = () => {
 
                 <section className="form-section">
                   <div className="section-header">
-                    <span className="section-badge">B</span>
                     <h2 className="section-title">ASIGNACIÓN DE ÁREA <span className="esp-asterisk">*</span> </h2>
                   </div>
                   <div className="form-grid">
@@ -501,7 +499,6 @@ const CmsProfesionalesView = () => {
 
                 <section className="form-section">
                   <div className="section-header">
-                    <span className="section-badge">C</span>
                     <h2 className="section-title">ROL Y PERFIL <span className="esp-asterisk">*</span></h2>
                   </div>
                   <div className="form-group">
