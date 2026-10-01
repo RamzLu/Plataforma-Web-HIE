@@ -5,9 +5,6 @@ import { getEspecialidades } from "../../api/especialidades.api.js";
 import Cropper from "react-easy-crop";
 import "../../styles/pages/cms/CmsProfesionalesView.css";
 
-// ==========================================
-// FUNCIONES AUXILIARES PARA EL RECORTE
-// ==========================================
 const createImage = (url) =>
   new Promise((resolve, reject) => {
     const image = new Image();
@@ -60,6 +57,10 @@ const CmsProfesionalesView = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   
+  const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [profesionalToDelete, setProfesionalToDelete] = useState(null);
+  
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
@@ -70,10 +71,9 @@ const CmsProfesionalesView = () => {
     descripcion: ""
   });
   
-  // Estados para la imagen y el recorte
   const [archivoFoto, setArchivoFoto] = useState(null);
-  const [fotoPreview, setFotoPreview] = useState(null); // Previsualización en el form
-  const [imageSrc, setImageSrc] = useState(null);       // Imagen cruda para el Cropper
+  const [fotoPreview, setFotoPreview] = useState(null);
+  const [imageSrc, setImageSrc] = useState(null);       
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -151,24 +151,38 @@ const CmsProfesionalesView = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar a este profesional?")) {
-      try {
-        const token = keycloak?.token;
-        const response = await fetch(`http://localhost:3000/api/cms/profesionales/${id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error("Error al eliminar");
-        setProfesionales(profesionales.filter(p => p.id !== id));
-        toast.success("Profesional eliminado correctamente.");
-      } catch (error) {
-        toast.error("No se pudo eliminar el profesional.");
-      }
+  const confirmDelete = (prof) => {
+    setProfesionalToDelete(prof);
+    setShowDeleteModal(true);
+  };
+
+  const executeDelete = async () => {
+    if (!profesionalToDelete) return;
+    
+    setIsSaving(true);
+    const toastId = toast.loading("Eliminando profesional...");
+    
+    try {
+      const token = keycloak?.token;
+      const response = await fetch(`http://localhost:3000/api/cms/profesionales/${profesionalToDelete.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (!response.ok) throw new Error("Error al eliminar");
+      
+      setProfesionales(profesionales.filter(p => p.id !== profesionalToDelete.id));
+      toast.success("Profesional eliminado correctamente.", { id: toastId });
+      setShowDeleteModal(false);
+    } catch (error) {
+      toast.error("No se pudo eliminar el profesional.", { id: toastId });
+    } finally {
+      setIsSaving(false);
+      setProfesionalToDelete(null);
     }
   };
 
-  // --- LÓGICA DE SELECCIÓN Y RECORTE DE IMAGEN ---
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -177,7 +191,7 @@ const CmsProfesionalesView = () => {
     reader.readAsDataURL(file);
     reader.onload = () => {
       setImageSrc(reader.result);
-      setIsCropping(true); // Abrir el modal de recorte
+      setIsCropping(true); 
     };
   };
 
@@ -199,9 +213,12 @@ const CmsProfesionalesView = () => {
     }
   };
 
-  // --- GUARDAR PROFESIONAL ---
+
   const handleSave = async (e) => {
     e.preventDefault();
+    setIsSaving(true);
+    const toastId = toast.loading(editingId ? "Actualizando profesional..." : "Creando profesional...");
+
     try {
       const token = keycloak?.token;
       const dataForm = new FormData();
@@ -234,16 +251,18 @@ const CmsProfesionalesView = () => {
       
       if (editingId) {
         setProfesionales(profesionales.map(p => p.id === editingId ? resultado.profesional : p));
-        toast.success("¡Profesional actualizado con éxito!");
+        toast.success("¡Profesional actualizado con éxito!", { id: toastId });
       } else {
         setProfesionales([resultado.profesional, ...profesionales]);
-        toast.success("¡Profesional creado con éxito!");
+        toast.success("¡Profesional creado con éxito!", { id: toastId });
       }
       
       setHasUnsavedChanges(false);
       setIsModalOpen(false);
     } catch (error) {
-      toast.error("Ocurrió un error al guardar el profesional.");
+      toast.error("Ocurrió un error al guardar el profesional.", { id: toastId });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -375,7 +394,7 @@ const CmsProfesionalesView = () => {
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                   </button>
-                  <button type="button" title="Eliminar" onClick={() => handleDelete(prof.id)} className="news-action-btn-delete">
+                  <button type="button" title="Eliminar" onClick={() => confirmDelete(prof)} className="news-action-btn-delete">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="3 6 5 6 21 6"></polyline>
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -412,6 +431,7 @@ const CmsProfesionalesView = () => {
                 
                 <section className="form-section">
                   <div className="section-header">
+                    <span className="section-badge">A</span>
                     <h2 className="section-title">DATOS PERSONALES <span className="esp-asterisk">*</span></h2>
                   </div>
                   <div className="form-grid">
@@ -456,6 +476,7 @@ const CmsProfesionalesView = () => {
 
                 <section className="form-section">
                   <div className="section-header">
+                    <span className="section-badge">B</span>
                     <h2 className="section-title">ASIGNACIÓN DE ÁREA <span className="esp-asterisk">*</span> </h2>
                   </div>
                   <div className="form-grid">
@@ -499,6 +520,7 @@ const CmsProfesionalesView = () => {
 
                 <section className="form-section">
                   <div className="section-header">
+                    <span className="section-badge">C</span>
                     <h2 className="section-title">ROL Y PERFIL <span className="esp-asterisk">*</span></h2>
                   </div>
                   <div className="form-group">
@@ -514,8 +536,17 @@ const CmsProfesionalesView = () => {
               </div>
 
               <footer className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={handleCloseAttempt}>Cancelar</button>
-                <button type="submit" className="btn-primary">{editingId ? "ACTUALIZAR PROFESIONAL" : "GUARDAR PROFESIONAL"}</button>
+                <button type="button" className="btn-secondary" onClick={handleCloseAttempt} disabled={isSaving}>Cancelar</button>
+                <button type="submit" className="btn-primary" disabled={isSaving}>
+                  {isSaving ? (
+                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px", borderTopColor: "white", borderColor: "rgba(255,255,255,0.3)" }}></div>
+                      {editingId ? "ACTUALIZANDO..." : "GUARDANDO..."}
+                    </span>
+                  ) : (
+                    editingId ? "ACTUALIZAR PROFESIONAL" : "GUARDAR PROFESIONAL"
+                  )}
+                </button>
               </footer>
             </form>
           </div>
@@ -592,6 +623,66 @@ const CmsProfesionalesView = () => {
                 Seguir editando
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* MODAL GLOBAL DE ELIMINACIÓN */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => !isSaving && setShowDeleteModal(false)}>
+          <div className="modal-content-esp delete-modal-global" onClick={(e) => e.stopPropagation()}>
+            
+            <button type="button" className="btn-close-floating" onClick={() => setShowDeleteModal(false)} disabled={isSaving}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            <div className="delete-modal-body">
+              <div className="delete-icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </div>
+
+              <h2 className="delete-modal-title">Estás a punto de eliminar este profesional</h2>
+              <div className="delete-modal-divider"></div>
+
+              <p className="delete-modal-text">
+                Esta acción es <strong>permanente</strong> y eliminará la ficha de <br />
+                <span style={{ fontWeight: "700", color: "#0f172a" }}>{profesionalToDelete?.nombre} {profesionalToDelete?.apellido}</span>.
+              </p>
+            </div>
+
+            <div className="delete-modal-footer">
+              <button
+                type="button"
+                className="btn-cancelar-gris"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isSaving}
+              >
+                CANCELAR
+              </button>
+              <button 
+                type="button"
+                className="btn-cerrar-rojo" 
+                onClick={executeDelete}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px" }}></div>
+                    Eliminando...
+                  </span>
+                ) : (
+                  "ELIMINAR"
+                )}
+              </button>
+            </div>
+
           </div>
         </div>
       )}
