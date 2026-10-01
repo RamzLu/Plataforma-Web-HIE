@@ -258,27 +258,164 @@ const updateStats = (currentNews, currentDocs = docsList) => {
     }));
   };
 
-  if (!initialized) {
-    return <div className="cms-loading">Cargando plataforma...</div>;
+if (!initialized) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        backgroundColor: '#f8fafc',
+        fontFamily: "'Manrope', system-ui, sans-serif"
+      }}>
+        <div className="cms-spinner" style={{ 
+          width: '50px', 
+          height: '50px', 
+          borderWidth: '4px', 
+          borderTopColor: '#0c2340',
+          borderColor: 'rgba(12, 35, 64, 0.1)'
+        }}></div>
+        <h2 style={{ 
+          marginTop: '25px', 
+          color: '#0c2340', 
+          fontWeight: '700', 
+          fontSize: '1.2rem',
+          letterSpacing: '0.5px'
+        }}>
+          Iniciando Plataforma
+        </h2>
+        <p style={{ 
+          color: '#64748b', 
+          fontSize: '0.9rem', 
+          marginTop: '8px' 
+        }}>
+          Verificando credenciales de acceso...
+        </p>
+      </div>
+    );
   }
 
-  if (!authenticated) {
-    return <div className="cms-loading">No autenticado. Redirigiendo...</div>;
+if (!authenticated) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        backgroundColor: '#f8fafc',
+        fontFamily: "'Manrope', system-ui, sans-serif"
+      }}>
+        <div className="cms-spinner" style={{ 
+          width: '50px', 
+          height: '50px', 
+          borderWidth: '4px', 
+          borderTopColor: '#0284c7',
+          borderColor: 'rgba(2, 132, 199, 0.1)'
+        }}></div>
+        <h2 style={{ 
+          marginTop: '25px', 
+          color: '#0c2340', 
+          fontWeight: '700', 
+          fontSize: '1.2rem',
+          letterSpacing: '0.5px'
+        }}>
+          Redirigiendo a Seguridad
+        </h2>
+        <p style={{ 
+          color: '#64748b', 
+          fontSize: '0.9rem', 
+          marginTop: '8px' 
+        }}>
+          Por favor, ingrese sus credenciales en la siguiente pantalla...
+        </p>
+      </div>
+    );
   }
 
   if (!isCms) {
     return (
-      <div className="cms-unauthorized">
-        <h2>Acceso Denegado</h2>
-        <p>No tienes permisos de Redactor (CMS) para ver esta página.</p>
-        <button onClick={() => {
-          if (keycloak && typeof keycloak.logout === 'function') {
-            keycloak.logout();
-          } else {
-            localStorage.removeItem("cms_active_tab");
-            window.location.href = "/";
-          }
-        }}>Cerrar Sesión</button>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        backgroundColor: '#f8fafc',
+        fontFamily: "'Manrope', system-ui, sans-serif",
+        padding: '20px',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          width: '64px',
+          height: '64px',
+          backgroundColor: '#fee2e2',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '20px'
+        }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        
+        <h2 style={{ 
+          color: '#0c2340', 
+          fontWeight: '800', 
+          fontSize: '1.5rem',
+          letterSpacing: '0.5px',
+          margin: '0 0 10px 0'
+        }}>
+          Acceso Denegado
+        </h2>
+        <p style={{ 
+          color: '#64748b', 
+          fontSize: '1rem', 
+          margin: '0 0 30px 0',
+          maxWidth: '400px',
+          lineHeight: '1.5'
+        }}>
+          Tu cuenta no tiene los permisos de Redactor para ingresar al CMS.
+        </p>
+        
+        <button 
+          onClick={() => {
+            if (keycloak && typeof keycloak.logout === 'function') {
+              keycloak.logout();
+            } else {
+              localStorage.removeItem("cms_active_tab");
+              window.location.href = "/";
+            }
+          }}
+          style={{
+            backgroundColor: '#0c2340',
+            color: '#ffffff',
+            border: 'none',
+            padding: '12px 32px',
+            borderRadius: '8px',
+            fontWeight: '700',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            boxShadow: '0 4px 12px rgba(12, 35, 64, 0.15)'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.backgroundColor = '#1e3a5f';
+            e.target.style.transform = 'translateY(-2px)';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.backgroundColor = '#0c2340';
+            e.target.style.transform = 'translateY(0)';
+          }}
+        >
+          Cerrar Sesión
+        </button>
       </div>
     );
   }

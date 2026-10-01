@@ -73,7 +73,7 @@ const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
                       <img src={prof.imagenUrl} alt={`${prof.nombre} ${prof.apellido}`} className="doctor-photo" loading="lazy" />
                     ) : (
                       <div className="doctor-photo-placeholder">
-                        <span style={{ fontSize: "3rem", fontWeight: "800", opacity: 0.5 }}>{getIniciales(prof.nombre, prof.apellido)}</span>
+                        <span style={{ fontSize: "3rem", fontWeight: "600", opacity: 0.5 }}>{getIniciales(prof.nombre, prof.apellido)}</span>
                       </div>
                     )}
                     
