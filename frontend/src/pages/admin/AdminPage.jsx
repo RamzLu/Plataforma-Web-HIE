@@ -10,6 +10,7 @@ import AdminHeader from '../../components/admin/AdminHeader';
 // IMPORTAMOS TUS NUEVAS VISTAS MODULARES
 import AdminDashboardView from '../admin/AdminDashboardView';
 import AdminNoticiasView from '../admin/AdminNoticiasView';
+import AdminEspecialidadesServiciosView from '../admin/AdminEspecialidadesServiciosView';
 // import AdminUsuariosView from './admin/AdminUsuariosView';
 // import AdminRolesView from './admin/AdminRolesView';
 // import AdminAuditoriaView from './admin/AdminAuditoriaView';
@@ -127,6 +128,7 @@ const AdminPage = () => {
           {/* RENDERIZADO MODULAR DE TUS VISTAS */}
           {activeTab === "dashboard" && <AdminDashboardView />}
           {activeTab === "noticias" && <AdminNoticiasView />}
+          {activeTab === "servicios" && <AdminEspecialidadesServiciosView />}
           {activeTab === "usuarios" && <AdminUsuariosView />}
           {activeTab === "roles" && <AdminRolesView />}
           {activeTab === "auditoria" && <AdminAuditoriaView />}
