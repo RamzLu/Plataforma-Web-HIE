@@ -10,6 +10,7 @@ import "./App.css";
 
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
+import WhatsAppButton from "./components/ui/WhatsAppButton";
 import ScrollToTop from "./components/ui/ScrollToTop";
 
 import HomePage from "./pages/public/HomePage";
@@ -18,11 +19,11 @@ import NoticiasPage from "./pages/public/NoticiasPage";
 import DocumentacionPage from "./pages/public/DocumentacionPage";
 import ProfesionalesPage from "./pages/public/ProfesionalesPage";
 import CapacitacionPage from "./pages/public/CapacitacionPage";
+import ContactoPage from "./pages/public/ContactoPage";
 import AboutPage from "./pages/public/AboutPage";
 import CmsPage from "./pages/cms/CmsPage";
 import AdminPage from './pages/admin/AdminPage';
 import PlanoInstitucionalPage from "./pages/public/PlanoInstitucionalPage";
-import NoticiasCategoriaPage from "./pages/public/NoticiasCategoriaPage";
 
 const AppLayout = () => {
   const location = useLocation();
@@ -40,10 +41,10 @@ const AppLayout = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/especialidades" element={<EspecialidadesPage />} />
         <Route path="/noticias" element={<NoticiasPage />} />
-        <Route path="/noticias/:categoria" element={<NoticiasCategoriaPage />} />
         <Route path="/documentacion" element={<DocumentacionPage />} />
         <Route path="/profesionales" element={<ProfesionalesPage />} />
         <Route path="/capacitacion" element={<CapacitacionPage />} />
+        <Route path="/contacto" element={<ContactoPage />} />
         <Route path="/acerca-de" element={<AboutPage />} />
         <Route path="/plano" element={<PlanoInstitucionalPage />} />
         <Route path="/cms" element={<CmsPage />} />
@@ -72,6 +73,7 @@ const AppLayout = () => {
 
       {!isPrivatePanel && (
         <>
+          <WhatsAppButton />
           <Footer />
         </>
       )}

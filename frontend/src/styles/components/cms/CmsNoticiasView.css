@@ -91,7 +91,7 @@
 
 .news-title-clamped {
   display: -webkit-box;
-  line-clamp: 2;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -132,8 +132,8 @@
 
 .news-form-label {
   display: block;
-  font-weight: 600;
-  color: #4f5c6c;
+  font-weight: 700;
+  color: #0c2340;
   margin-bottom: 8px;
 }
 
@@ -633,28 +633,6 @@
 
 .react-datepicker-popper {
   z-index: 999999 !important;
-}
-
-.news-table-row .col-content {
-  padding-right: 30px; 
-}
-
-/* 2. Contenedor relativo para mantener la píldora en el centro de la fila */
-.status-wrapper {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-}
-
-/* 3. Posicionamiento absoluto para que la fecha quede "colgando" sin empujar la tabla */
-.status-programmed-date {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 6px;
-  font-size: 0.75rem;
-  color: #64748b;
-  white-space: nowrap;
 }
 
 @media (max-width: 1400px) {

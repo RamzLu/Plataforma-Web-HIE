@@ -261,17 +261,17 @@
 }
 
 .section-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #64748b;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary-dark);
   letter-spacing: 0.05em;
   margin: 0;
 }
 
 .section-title-simple {
-  font-size: 1.09rem;
-  font-weight: 600;
-  color: #64748b;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-dark);
   margin-bottom: 10px;
 }
 

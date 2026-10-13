@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { createDocumento, updateDocumento, deleteDocumento } from "../../api/documentos.api.js";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
-import "../../styles/pages/cms/CmsDocsView.css";
+import "../../styles/components/cms/CmsDocsView.css";
 
 const CATEGORIAS = [
   "Información institucional", 
