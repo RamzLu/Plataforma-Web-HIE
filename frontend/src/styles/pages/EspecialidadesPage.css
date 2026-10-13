@@ -3,23 +3,17 @@
 ========================================= */
 .especialidades-page {
   width: 100%;
-  background-color: #e9ebee; /* Mismo fondo gris/celeste que Noticias */
+  background-color: #e9ebee;
   padding: 0 0 80px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: calc(100vh - 80px);
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .especialidades-container {
-  max-width: 1200px; /* Un poco más contenido para centrar la atención */
+  max-width: 1200px;
   width: 100%;
   padding: 0 20px;
   position: relative;
@@ -38,6 +32,7 @@
   background-repeat: no-repeat;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   margin-bottom: 60px;
+  display: flex;
   justify-content: center;
   padding: 120px 20px 60px 20px;
 }
@@ -69,7 +64,7 @@
 }
 
 /* =========================================
-   VISTA 1: MENÚ PRINCIPAL (2 Tarjetas Grandes)
+   VISTA 1: MENÚ PRINCIPAL
 ========================================= */
 .esp-main-menu {
   display: grid;
@@ -109,6 +104,7 @@
   align-items: center;
   margin-bottom: 25px;
   color: #2b5b94;
+  transition: all 0.3s ease;
 }
 
 .menu-card-icon svg {
@@ -119,7 +115,6 @@
 .menu-card:hover .menu-card-icon {
   background-color: #2b5b94;
   color: #ffffff;
-  transition: all 0.3s ease;
 }
 
 .menu-card h2 {
@@ -141,14 +136,9 @@
   gap: 16px;
   width: 100%;
   margin-bottom: 35px;
-  position: relative;
 }
 
 .btn-volver {
-  position: relative;
-  top: auto;
-  left: auto;
-  transform: none;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -197,10 +187,10 @@
   background-color: #ffffff;
   border: 1px solid #cbd5e1;
   border-radius: 16px;
-  padding: 35px 20px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
   cursor: pointer;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
@@ -224,47 +214,45 @@
 }
 
 /* =========================================
-   ESTILOS DEL MODAL
+   ESTILOS DEL MODAL AISLADO (OVERLAY & CONTENEDOR)
 ========================================= */
 .esp-aislado-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(15, 23, 42, 0.45); /* Fondo oscuro suavizado */
-  backdrop-filter: blur(12px); /* Blur elegante y moderno */
-  -webkit-backdrop-filter: blur(12px);
+  inset: 0;
+  background-color: rgba(13, 34, 63, 0.55);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   z-index: 2000;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
-  animation: espFadeInOverlay 0.3s ease-out forwards;
+  padding: 24px 16px;
+  animation: espFadeInOverlay 0.2s ease-out forwards;
 }
 
 .esp-aislado-content {
-  background-color: #f8fafc;
+  background-color: #ffffff;
+  border-radius: 20px;
   width: 100%;
-  max-width: 650px;
-  padding: 0;
-  position: relative;
-  border-radius: 15px; /* Bordes suaves minimalistas */
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.15); /* Sombra amplia, difuminada y elegante */
+  max-width: 620px;
+  box-shadow: 0 25px 50px -12px rgba(13, 34, 63, 0.28), 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  overflow: hidden;
   display: flex;
   flex-direction: column !important;
-  overflow: hidden;
   opacity: 0; 
-  animation: espFadeInSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: espFadeInSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* =========================================
+   CABECERA DEL MODAL (INTACTA)
+========================================= */
 .esp-aislado-header {
-  background-color: #ffffff;
-  padding: 30px 40px;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 24px 32px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .esp-aislado-header h2 {
@@ -273,161 +261,241 @@
   font-weight: 200;
   text-transform: uppercase;
   margin: 0;
-  letter-spacing: 0.5px;
 }
 
-.esp-aislado-body {
-  padding: 40px;
-  display: grid;
-  gap: 30px 40px; 
-  align-items: start; 
-}
-
-.esp-aislado-info-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.esp-aislado-info-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-
-.esp-aislado-info-text {
-  font-size: 1rem;
-  color: #334155;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.esp-aislado-info-text.italic {
-  font-style: italic;
-  color: #475569;
-}
-
-.esp-aislado-info-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.esp-aislado-info-icon {
+.esp-aislado-btn-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #0c2340; 
-  margin-right: 5px; 
-  transition: all 0.3s ease; /* Transición para micro-interacción */
+  transition: all 0.2s ease;
 }
 
-/* Efecto hover sobre toda la sección para hacer saltar levemente el icono */
-.esp-aislado-info-section:hover .esp-aislado-info-icon {
-  transform: scale(1.1);
-  color: #006eb3;
+.esp-aislado-btn-close:hover {
+  background-color: #f1f5f9;
+  color: #0d223f;
+  transform: rotate(90deg);
 }
 
-.esp-aislado-info-icon svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor; 
+.esp-aislado-btn-close svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.esp-aislado-text-danger {
-  color: #dc2626;
-  font-weight: 700;
-}
-
-.esp-aislado-footer {
-  padding: 0 40px 40px 40px;
+/* =========================================
+   CUERPO DEL MODAL (NUEVOS ESTILOS)
+========================================= */
+.modal-body {
+  padding: 28px 32px 32px 32px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 22px;
 }
 
-.esp-aislado-btn-cerrar {
-  background-color: #e11d48; 
-  color: #ffffff;
-  border: none;
-  border-radius: 50px;
-  padding: 14px 40px;
-  font-size: 1rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(225, 29, 72, 0.25);
-  transition: all 0.3s ease; /* Transición fluida UX */
+/* Sección: ¿Qué atendemos aquí? */
+.section-scope {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.esp-aislado-btn-cerrar:hover {
-  background-color: #be123c;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(225, 29, 72, 0.35); /* Sombra elegante al hacer hover */
+.section-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.esp-aislado-btn-close {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
+.section-info-icon {
+  color: #006eb3;
+  flex-shrink: 0;
+}
+
+.section-heading-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 400;
+  color: #006eb3;
+  letter-spacing: -0.01em;
+}
+
+.scope-description-text {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.62;
+  color: #334155;
+  font-weight: 400;
+}
+
+/* Grilla de Tarjetas: Ubicación y Horarios */
+.info-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.info-box-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: border-color 0.2s ease;
+}
+
+.info-box-card:hover {
+  border-color: #cbd5e1;
+}
+
+.card-icon-bubble {
+  color: #0284c7;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  border-radius: 50%;
-  transition: all 0.3s ease; /* Transición fluida UX */
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
-.esp-aislado-btn-close:hover {
-  background-color: #fee2e2;
-  color: #e11d48; 
-  transform: rotate(90deg); /* Animación lúdica al botón de cerrar */
+.card-data {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.esp-aislado-btn-close svg {
-  width: 24px;
-  height: 24px;
-  stroke: currentColor;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.card-kicker {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
 }
 
-.esp-aislado-requisitos-lista {
-  margin: 5px 0 0 0;
-  padding-left: 20px;
+.card-main-val {
+  font-size: 15px;
+  font-weight: 500;
+  color: #0d223f;
+  line-height: 1.3;
+}
+
+/* Tarjeta de Requisitos Importantes (Ámbar) */
+.requirements-banner {
+  background-color: #fffbeb;
+  border: 1px solid #fef08a;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.req-header-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.req-icon {
+  color: #b45309;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.req-title {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b45309;
+}
+
+.req-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* Keyframes para la entrada fluida del Modal */
+.req-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: #78350f;
+}
+
+.req-bullet {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #b45309;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+/* Botón de Acción Inferior */
+.modal-action-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.btn-close-action {
+  padding: 14px 44px;
+  background-color: #e11d48;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.28);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-close-action:hover {
+  background-color: #be123c;
+  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.38);
+  transform: translateY(-1px);
+}
+
+.btn-close-action:active {
+  transform: translateY(0);
+}
+
+/* =========================================
+   ANIMACIONES
+========================================= */
 @keyframes espFadeInOverlay {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes espFadeInSlideUp {
   from {
     opacity: 0;
-    transform: translateY(25px) scale(0.98);
+    transform: scale(0.95) translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -435,51 +503,48 @@
    RESPONSIVIDAD
 ========================================= */
 @media (max-width: 768px) {
-  /* Ajustes del modal aislado para celulares */
-  .esp-aislado-body {
-    grid-template-columns: 1fr; /* Retorna a 1 sola columna */
-    padding: 25px;
-    gap: 25px;
-  }
-
-  .esp-aislado-content {
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .esp-aislado-header {
-    padding: 20px 25px;
-  }
-
-  .esp-aislado-footer {
-    padding: 25px;
-  }
-  
-  /* Ajustes del layout general de la página */
   .esp-header-fluid {
     padding: 100px 20px 40px 20px;
   }
-
   .esp-header-inner {
     border-left-width: 5px;
     padding-left: 20px;
   }
-
   .esp-main-title {
     font-size: 2.2rem;
   }
-
   .esp-main-menu {
     grid-template-columns: 1fr;
   }
-
   .esp-grid-header {
     gap: 14px;
     margin-bottom: 25px;
   }
-
   .esp-instruction {
     font-size: 1.05rem;
+    width: 100%;
+  }
+  
+  /* Ajustes del modal en móviles */
+  .esp-aislado-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .esp-aislado-header {
+    padding: 20px 24px;
+  }
+  .esp-aislado-header h2 {
+    font-size: 18px;
+  }
+  .modal-body {
+    padding: 20px 24px 28px 24px;
+    gap: 18px;
+  }
+  .info-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .btn-close-action {
     width: 100%;
   }
 }

@@ -15,8 +15,7 @@ import CmsDocsView from "../cms/CmsDocsView";
 import CmsProfesionalesView from "../cms/CmsProfesionalesView"; 
 import CmsInstitucionView from "../cms/CmsInstitucionView"; 
 import CmsConfiguracionView from "../cms/CmsConfiguracionView";
-
-import { documentosData } from "../../data/documentos";
+import CmsEspecialidadesView from "../cms/CmsEspecialidadesView";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 
 const CmsPage = () => {
@@ -55,40 +54,41 @@ const CmsPage = () => {
   const isKeycloakInitialized = useRef(false);
 
 const fetchNoticias = async () => {
-    try {
-      setLoading(true);
-      // Se agrega el parámetro ?admin=true
-      const response = await fetch("http://localhost:3000/api/cms/noticias?admin=true");
-      if (!response.ok)
-        throw new Error("Error al obtener noticias del servidor");
-      const data = await response.json();
+  try {
+    setLoading(true);
+    const response = await fetch("http://localhost:3000/api/cms/noticias?admin=true");
+    if (!response.ok) throw new Error("Error al obtener noticias del servidor");
+    const data = await response.json();
 
-      if (data && data.length > 0) {
-        const noticiasFormateadas = data.map((noticia) => ({
-          id: noticia.id,
-          title: noticia.titulo || noticia.title,
-          body: [noticia.contenido || noticia.body],
-          date: noticia.createdAt
-            ? new Date(noticia.createdAt).toLocaleDateString("es-AR")
-            : "Hoy",
-          createdAt: noticia.createdAt,
-          updatedAt: noticia.updatedAt,
-          category: "Noticias",
-          estado: noticia.estado || "PUBLICADO",
-          isDraft: noticia.isDraft || false,
-          images: noticia.images || [],
-          editor: noticia.editor || "Editor CMS", 
-          editedBy: noticia.editedBy || null
-        }));
-        
-        setNewsList(noticiasFormateadas);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    if (data && data.length > 0) {
+      const noticiasFormateadas = data.map((noticia) => ({
+        id: noticia.id,
+        title: noticia.titulo || noticia.title,
+        body: Array.isArray(noticia.body) ? noticia.body : [noticia.contenido || noticia.body],
+        date: noticia.createdAt
+          ? new Date(noticia.createdAt).toLocaleDateString("es-AR")
+          : "Hoy",
+        createdAt: noticia.createdAt,
+        updatedAt: noticia.updatedAt,
+        fechaPublicacion: noticia.fechaPublicacion || null,
+        category: noticia.category || "General",
+        estado: noticia.estado || "PUBLICADO",
+        isDraft: noticia.isDraft || false,
+        images: noticia.images || [],
+        editor: noticia.editor || "Editor CMS",
+        editedBy: noticia.editedBy || null
+      }));
+
+      setNewsList(noticiasFormateadas);
+    } else {
+      setNewsList([]);
     }
-  };
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchDocs = async () => {
     try {
@@ -186,20 +186,18 @@ const handleDeleteDoc = (id) => {
       });
   }, [newsList]);
 
-  const updateStats = (currentNews, currentDocs = docsList) => {
-    const publicadas = currentNews.filter((news) => !news.isDraft).length;
-    const borradoresPendientes = currentNews.filter(
-      (news) => news.isDraft,
-    ).length;
-    const totalDocumentos = currentDocs ? currentDocs.length : 0; 
+const updateStats = (currentNews, currentDocs = docsList) => {
+  const publicadas = currentNews.filter((n) => n.estado === "PUBLICADO").length;
+  const borradoresPendientes = currentNews.filter((n) => n.estado === "BORRADOR").length;
+  const totalDocumentos = currentDocs ? currentDocs.length : 0;
 
-    setDashboardStats({
-      contenidoPublicado: publicadas,
-      borradores: borradoresPendientes,
-      documentosActivos: totalDocumentos,
-      visitas: "0",
-    });
-  };
+  setDashboardStats({
+    contenidoPublicado: publicadas,
+    borradores: borradoresPendientes,
+    documentosActivos: totalDocumentos,
+    visitas: "0",
+  });
+};
 
   const handleAddNewNews = (nuevaNoticia) => {
     const updatedList = [nuevaNoticia, ...newsList];
@@ -260,27 +258,164 @@ const handleDeleteDoc = (id) => {
     }));
   };
 
-  if (!initialized) {
-    return <div className="cms-loading">Cargando plataforma...</div>;
+if (!initialized) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        backgroundColor: '#f8fafc',
+        fontFamily: "'Manrope', system-ui, sans-serif"
+      }}>
+        <div className="cms-spinner" style={{ 
+          width: '50px', 
+          height: '50px', 
+          borderWidth: '4px', 
+          borderTopColor: '#0c2340',
+          borderColor: 'rgba(12, 35, 64, 0.1)'
+        }}></div>
+        <h2 style={{ 
+          marginTop: '25px', 
+          color: '#0c2340', 
+          fontWeight: '700', 
+          fontSize: '1.2rem',
+          letterSpacing: '0.5px'
+        }}>
+          Iniciando Plataforma
+        </h2>
+        <p style={{ 
+          color: '#64748b', 
+          fontSize: '0.9rem', 
+          marginTop: '8px' 
+        }}>
+          Verificando credenciales de acceso...
+        </p>
+      </div>
+    );
   }
 
-  if (!authenticated) {
-    return <div className="cms-loading">No autenticado. Redirigiendo...</div>;
+if (!authenticated) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        backgroundColor: '#f8fafc',
+        fontFamily: "'Manrope', system-ui, sans-serif"
+      }}>
+        <div className="cms-spinner" style={{ 
+          width: '50px', 
+          height: '50px', 
+          borderWidth: '4px', 
+          borderTopColor: '#0284c7',
+          borderColor: 'rgba(2, 132, 199, 0.1)'
+        }}></div>
+        <h2 style={{ 
+          marginTop: '25px', 
+          color: '#0c2340', 
+          fontWeight: '700', 
+          fontSize: '1.2rem',
+          letterSpacing: '0.5px'
+        }}>
+          Redirigiendo a Seguridad
+        </h2>
+        <p style={{ 
+          color: '#64748b', 
+          fontSize: '0.9rem', 
+          marginTop: '8px' 
+        }}>
+          Por favor, ingrese sus credenciales en la siguiente pantalla...
+        </p>
+      </div>
+    );
   }
 
   if (!isCms) {
     return (
-      <div className="cms-unauthorized">
-        <h2>Acceso Denegado</h2>
-        <p>No tienes permisos de Redactor (CMS) para ver esta página.</p>
-        <button onClick={() => {
-          if (keycloak && typeof keycloak.logout === 'function') {
-            keycloak.logout();
-          } else {
-            localStorage.removeItem("cms_active_tab");
-            window.location.href = "/";
-          }
-        }}>Cerrar Sesión</button>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        backgroundColor: '#f8fafc',
+        fontFamily: "'Manrope', system-ui, sans-serif",
+        padding: '20px',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          width: '64px',
+          height: '64px',
+          backgroundColor: '#fee2e2',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '20px'
+        }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        
+        <h2 style={{ 
+          color: '#0c2340', 
+          fontWeight: '800', 
+          fontSize: '1.5rem',
+          letterSpacing: '0.5px',
+          margin: '0 0 10px 0'
+        }}>
+          Acceso Denegado
+        </h2>
+        <p style={{ 
+          color: '#64748b', 
+          fontSize: '1rem', 
+          margin: '0 0 30px 0',
+          maxWidth: '400px',
+          lineHeight: '1.5'
+        }}>
+          Tu cuenta no tiene los permisos de Redactor para ingresar al CMS.
+        </p>
+        
+        <button 
+          onClick={() => {
+            if (keycloak && typeof keycloak.logout === 'function') {
+              keycloak.logout();
+            } else {
+              localStorage.removeItem("cms_active_tab");
+              window.location.href = "/";
+            }
+          }}
+          style={{
+            backgroundColor: '#0c2340',
+            color: '#ffffff',
+            border: 'none',
+            padding: '12px 32px',
+            borderRadius: '8px',
+            fontWeight: '700',
+            fontSize: '0.95rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            boxShadow: '0 4px 12px rgba(12, 35, 64, 0.15)'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.backgroundColor = '#1e3a5f';
+            e.target.style.transform = 'translateY(-2px)';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.backgroundColor = '#0c2340';
+            e.target.style.transform = 'translateY(0)';
+          }}
+        >
+          Cerrar Sesión
+        </button>
       </div>
     );
   }
@@ -306,7 +441,7 @@ const handleDeleteDoc = (id) => {
         <main className="cms-content">
           <div className="cms-page-title">
             <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
-            <h1>
+<h1>
               {activeTab === "noticias"
                 ? "Gestión de Noticias"
                 : activeTab === "documentacion"
@@ -317,8 +452,10 @@ const handleDeleteDoc = (id) => {
                 ? "Gestión de Banners"
                 : activeTab === "profesionales"
                 ? "Directorio de Profesionales" 
+                : activeTab === "especialidades"  
+                ? "Gestión de Especialidades"      
                 : activeTab === "configuracion"
-                ? "Gestión de Configuración" // <-- TÍTULO DINÁMICO AGREGADO
+                ? "Gestión de Configuración"
                 : "Panel de administración"}
             </h1>
             <p>
@@ -373,18 +510,21 @@ const handleDeleteDoc = (id) => {
             <CmsProfesionalesView />
           )}
 
-          {/* RENDERIZADO DEL NUEVO MÓDULO */}
+          {activeTab === "especialidades" && (
+            <CmsEspecialidadesView />
+          )}
+
           {activeTab === "configuracion" && (
             <CmsConfiguracionView />
           )}
 
-          {/* ACTUALIZADO PARA QUE NO MUESTRE "PRÓXIMAMENTE" SI ESTÁ EN CONFIGURACIÓN NI PROFESIONALES */}
           {activeTab !== "dashboard" && 
            activeTab !== "noticias" && 
            activeTab !== "documentacion" && 
            activeTab !== "banners" && 
            activeTab !== "institucional" && 
            activeTab !== "profesionales" && 
+           activeTab !== "especialidades" && 
            activeTab !== "configuracion" && (
             <div className="cms-dashboard-card">
               <h3 className="cms-card-title">
@@ -398,7 +538,6 @@ const handleDeleteDoc = (id) => {
         </main>
       </div>
 
-{/* MODAL DE CERRAR SESIÓN (LOGOUT) ACTUALIZADO */}
       {showLogoutModal && (
         <div className="modal-overlay-logout" onClick={() => setShowLogoutModal(false)} role="dialog" aria-modal="true" aria-labelledby="logout-title">
           <div className="modal-card-logout" onClick={(e) => e.stopPropagation()}>
@@ -484,22 +623,18 @@ const handleDeleteDoc = (id) => {
                   </div>
                   <div className="author-meta">
                     <h3>Hospital Interdistrital Evita Formosa</h3>
-                    {/* Propiedad corregida: date */}
                     <span>{selectedNews.date}</span>
                   </div>
                 </div>
 
-                {/* Propiedad corregida: title */}
                 <h3 className="news-modal-title">{selectedNews.title}</h3>
                 
-                {/* Propiedad corregida: body (tomamos el primer elemento si es un array) */}
                 <div 
                   className="info-text" 
                   dangerouslySetInnerHTML={{ __html: Array.isArray(selectedNews.body) ? selectedNews.body[0] : selectedNews.body }} 
                 />
               </div>
 
-              {/* Propiedad corregida: images */}
               {selectedNews.images && selectedNews.images.length > 0 && (
                 <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
                   
@@ -508,14 +643,12 @@ const handleDeleteDoc = (id) => {
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
                     const fotosRestantes = selectedNews.images.length - 4;
 
-                    // Mapeamos las imágenes para pasárselas al visor correctamente
                     const imageUrls = selectedNews.images.map(i => i.url || i);
 
                     return (
                       <div 
                         key={index} 
                         className="mosaic-item"
-                        // Función corregida: openLightbox requiere (imagenes, indice)
                         onClick={() => openLightbox(imageUrls, index)} 
                       >
                         <img src={img.url || img} alt={`Imagen ${index + 1}`} />

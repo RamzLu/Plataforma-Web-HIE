@@ -1,5 +1,4 @@
 import React from "react";
-// Importamos Link solo para las rutas puras (sin hash) para evitar recargas innecesarias
 import { Link } from "react-router-dom"; 
 import "../styles/sections/NewsSection.css";
 import AnimatedContent from "../components/ui/AnimatedContent";
@@ -138,7 +137,6 @@ const NewsSection = () => {
           </AnimatedContent>
         </main>
 
-        {/* BANNER DE SEDE CENTRAL */}
         <AnimatedContent distance={50} direction="vertical" delay={0.45}>
           <section className="location-banner" aria-label="Información de la sede">
             <div className="location-left-group">
@@ -155,15 +153,25 @@ const NewsSection = () => {
             </div>
 
             <div className="location-actions">
-              <a href="/acerca-de#sede-central" className="btn-building-info" style={{ textDecoration: 'none' }}>
+              <Link 
+                to="/acerca-de#sede-central" 
+                className="btn-building-info" 
+                style={{ textDecoration: 'none' }}
+              >
                 <FiInfo size={16} strokeWidth={2.2} />
                 Información del Edificio
-              </a>
+              </Link>
 
-              <a href="/contacto#transporte-mapa" className="btn-how-to-arrive" style={{ textDecoration: 'none' }}>
+              {/* Botón 2: Dispara el evento que abre el Modal de Ubicación */}
+              <button 
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("openLocationModal"))}
+                className="btn-how-to-arrive" 
+                style={{ cursor: 'pointer' }}
+              >
                 <FiNavigation size={16} strokeWidth={2.2} />
                 Cómo llegar
-              </a>
+              </button>
             </div>
           </section>
         </AnimatedContent>

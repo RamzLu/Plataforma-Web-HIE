@@ -18,6 +18,14 @@ export const crearProfesional = async (req, res, next) => {
   }
 };
 
+export const actualizarProfesional = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await CmsProfesionalService.actualizarProfesional(id, req.body, req.file);
+    return res.status(200).json(result);
+  } catch (error) { next(error); }
+};
+
 export const eliminarProfesional = async (req, res, next) => {
   try {
     const { id } = req.params;

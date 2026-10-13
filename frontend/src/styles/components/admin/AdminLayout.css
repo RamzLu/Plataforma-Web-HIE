@@ -1,6 +1,4 @@
-/* =========================================
-   LAYOUT GENERAL ADMIN
-========================================= */
+
 .admin-layout {
   display: flex;
   height: 100vh; 
@@ -10,9 +8,6 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 } 
 
-/* =========================================
-   SIDEBAR ADMIN (TIPO SHOPALL - OSCURO)
-========================================= */
 .admin-sidebar {
   background-color: #0a162e;
   color: #8a99af;
@@ -122,8 +117,6 @@
   width: 18px;
   height: 18px;
 }
-
-/* --- NAVEGACIÓN Y ACORDEÓN --- */
 .admin-nav {
   padding: 10px 0;
   display: flex;
@@ -153,7 +146,11 @@
   font-size: 0.75rem;
   color: #64748b;
   font-weight: 600;
+<<<<<<< HEAD
   margin: 0; 
+=======
+  margin: 0;
+>>>>>>> dev-luana-vivi
   text-transform: uppercase;
   transition: color 0.2s ease;
 }
@@ -195,7 +192,11 @@
 }
 
 .admin-nav-submenu.expanded {
+<<<<<<< HEAD
   max-height: 450px; 
+=======
+  max-height: 450px
+>>>>>>> dev-luana-vivi
 }
 
 .admin-sidebar.collapsed .admin-nav-submenu {
@@ -204,10 +205,16 @@
 }
 
 .admin-sidebar.collapsed .admin-nav-group-header {
+<<<<<<< HEAD
   display: none; 
 }
 
 /* --- DISEÑO DE LOS ITEMS DE LA LISTA --- */
+=======
+  display: none;
+}
+
+>>>>>>> dev-luana-vivi
 .admin-nav li {
   display: flex;
   align-items: center;
@@ -293,9 +300,6 @@ margin-left: revert;
   margin-right: 12px;
 }
 
-/* =========================================
-   CONTENEDOR PRINCIPAL Y HEADER ADMIN
-========================================= */
 .admin-main-wrapper {
   flex: 1;
   display: flex;
@@ -332,7 +336,10 @@ margin-left: revert;
   height: 22px;
   stroke: #64748b;
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev-luana-vivi
 .admin-header-breadcrumb {
   display: flex;
   align-items: center;
@@ -345,10 +352,6 @@ margin-left: revert;
   color: #0284c7; 
 }
 
-.breadcrumb-separator {
-  color: #94a3b8; 
-}
-
 .breadcrumb-current {
   color: #0f172a; 
 }
@@ -359,6 +362,10 @@ margin-left: revert;
   gap: 20px;
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev-luana-vivi
 .admin-notification-btn,
 .admin-dropdown-btn {
   background: none;
@@ -386,6 +393,10 @@ margin-left: revert;
   color: #ef4444; 
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev-luana-vivi
 .admin-user-profile {
   display: flex;
   align-items: center;
