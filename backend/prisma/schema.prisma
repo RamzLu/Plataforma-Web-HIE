@@ -328,7 +328,7 @@ enum TipoContacto {
   TELEFONO
   EMAIL
   RED_SOCIAL
-  OTRO
+  OTRO 
 }
 
 enum TipoPublicacionAcademica {
