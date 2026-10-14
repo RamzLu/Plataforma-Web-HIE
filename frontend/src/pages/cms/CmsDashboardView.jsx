@@ -83,35 +83,48 @@ const DeltaBadge = ({ diff, customText }) => {
 };
 
 const specialtiesData = [
-  { name: 'Clínica Médica', value: 12, color: '#6d28d9' }, // Violeta (Color base)
-  { name: 'Pediatría', value: 8, color: '#0ea5e9' },       // Azul cielo
-  { name: 'Ginecología', value: 6, color: '#10b981' },     // Verde esmeralda
-  { name: 'Traumatología', value: 7, color: '#f59e0b' },   // Ámbar / Naranja
-  { name: 'Oftalmología', value: 4, color: '#f43f5e' },    // Rojo / Rosa fuerte
-  { name: 'Cirugía General', value: 5, color: '#8b5cf6' }, // Lila claro
+  { name: 'Clínica Médica', value: 12, color: '#6d28d9' },
+  { name: 'Pediatría', value: 8, color: '#0ea5e9' },      
+  { name: 'Ginecología', value: 6, color: '#10b981' },    
+  { name: 'Traumatología', value: 7, color: '#f59e0b' },  
+  { name: 'Oftalmología', value: 4, color: '#f43f5e' },   
+  { name: 'Cirugía General', value: 5, color: '#8b5cf6' }, 
 ];
 
-// Paleta de colores para las categorías dinámicas de documentos
+// Paleta de colores para gráficos dinámicos
 const CHART_COLORS = [
   '#6d28d9', // Violeta
   '#0ea5e9', // Azul
   '#10b981', // Verde
   '#f59e0b', // Naranja
   '#f43f5e', // Rojo
-  '#14b8a6', // Teal / Turquesa
+  '#14b8a6', // Turquesa
   '#ec4899', // Fucsia
 ];
-
 
 const processDocsData = (docs) => {
   if (!docs || docs.length === 0) return [];
   const counts = {};
   
   docs.forEach(doc => {
-    // Leemos directamente 'category', que es como lo envía el backend en docsFormateados
     let cat = doc.category || doc.categoria || "Sin categorizar";
-    
-    // Agrupamos contando cuántos hay de cada uno
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+
+  return Object.keys(counts).map((key, index) => ({
+    name: key,
+    value: counts[key],
+    color: CHART_COLORS[index % CHART_COLORS.length]
+  }));
+};
+
+// NUEVA FUNCIÓN: Agrupa las noticias según su categoría o clasificación temática
+const processNewsCategoriesData = (newsList) => {
+  if (!newsList || newsList.length === 0) return [];
+  const counts = {};
+  
+  newsList.forEach(news => {
+    let cat = news.category || "General";
     counts[cat] = (counts[cat] || 0) + 1;
   });
 
@@ -131,7 +144,7 @@ const CmsDashboardView = ({
   handleQuickAction,
   loading,
 }) => {
-  // Estado para controlar qué muestra el gráfico
+  // Estado para controlar qué muestra el gráfico ("profesionales", "documentacion" o "noticias")
   const [chartType, setChartType] = useState("profesionales");
 
   const noticias = dashboardStats?.contenidoPublicado || 0;
@@ -143,14 +156,25 @@ const CmsDashboardView = ({
   const noticiasDelta = calculateWeeklyDelta(newsList);
   const docsDelta = calculateWeeklyDelta(docsList);
 
-  // Determinamos los datos del gráfico según el Select
-  const currentChartData = chartType === "profesionales" 
-    ? specialtiesData 
-    : processDocsData(docsList);
+  // Determinamos los datos del gráfico según la selección del usuario
+  let currentChartData = specialtiesData;
+  if (chartType === "documentacion") {
+    currentChartData = processDocsData(docsList);
+  } else if (chartType === "noticias") {
+    currentChartData = processNewsCategoriesData(newsList);
+  }
 
   const chartTotal = currentChartData.reduce((acc, curr) => acc + curr.value, 0);
-  const chartTitle = chartType === "profesionales" ? "Total Profesionales" : "Total Documentos";
-  const chartCenterLabel = chartType === "profesionales" ? "Total Prof." : "Total Docs.";
+  
+  let chartTitle = "Total Profesionales";
+  let chartCenterLabel = "Total Prof.";
+  if (chartType === "documentacion") {
+    chartTitle = "Total Documentos";
+    chartCenterLabel = "Total Docs.";
+  } else if (chartType === "noticias") {
+    chartTitle = "Noticias por Clasificación";
+    chartCenterLabel = "Total Not.";
+  }
 
   return (
     <div className="cms-dashboard-wrapper">
@@ -191,7 +215,6 @@ const CmsDashboardView = ({
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </div>
             </div>
-            {/* El total de profesionales sí viene de la data simulada temporalmente */}
             <h3 className="stat-value">{specialtiesData.reduce((acc, curr) => acc + curr.value, 0)}</h3>
             <p className="stat-label">Profesionales listados</p>
             <div style={{ marginTop: "16px" }}>
@@ -217,7 +240,7 @@ const CmsDashboardView = ({
         <div className="stat-card-chart">
           <div className="chart-header">
             <h3 className="chart-title">{chartTitle}</h3>
-            {/* Selector de categoría */}
+            {/* Selector de tipo de gráfico con la nueva opción de Noticias */}
             <select 
               className="chart-btn"
               value={chartType}
@@ -225,15 +248,16 @@ const CmsDashboardView = ({
             >
               <option value="profesionales">Profesionales</option>
               <option value="documentacion">Documentos</option>
+              <option value="noticias">Noticias</option>
             </select>
           </div>
           
           <div className="chart-body">
             {currentChartData.length > 0 ? (
-<ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
-<Tooltip 
-                    wrapperStyle={{ zIndex: 100 }} /* <-- ESTA LÍNEA LO PONE AL FRENTE */
+                  <Tooltip 
+                    wrapperStyle={{ zIndex: 100 }}
                     contentStyle={{ 
                       backgroundColor: '#ffffff', 
                       borderRadius: '8px', 
