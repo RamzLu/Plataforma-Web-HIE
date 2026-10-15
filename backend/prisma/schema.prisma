@@ -16,6 +16,7 @@ model archivo {
   mimeType             String                 @db.VarChar(100)
   tamanioBytes         BigInt
   createdAt            DateTime               @default(now())
+  autoridad            autoridad[]
   capacitacion         capacitacion[]
   contenido_grafico    contenido_grafico[]
   documento            documento[]
@@ -406,6 +407,20 @@ model ubicacion_contenido_grafico {
   descripcion       String?
   activo            Boolean             @default(true)
   contenido_grafico contenido_grafico[]
+}
+
+model autoridad {
+  id          BigInt   @id @default(autoincrement())
+  nombre      String   @db.VarChar(150)
+  descripcion String?
+  cargo       String   @db.VarChar(150)
+  imagenId    BigInt?
+  orden       Int      @default(0)
+  activo      Boolean  @default(true)
+  archivo     archivo? @relation(fields: [imagenId], references: [id])
+
+  @@index([activo, orden])
+  @@index([imagenId])
 }
 
 enum EstadoEditorial {
