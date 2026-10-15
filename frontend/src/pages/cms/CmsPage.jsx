@@ -14,7 +14,7 @@ import CmsBannersView from "../cms/CmsBannersView";
 import CmsDocsView from "../cms/CmsDocsView";
 import CmsProfesionalesView from "../cms/CmsProfesionalesView"; 
 import CmsInstitucionView from "../cms/CmsInstitucionView"; 
-import CmsConfiguracionView from "../cms/CmsConfiguracionView";
+
 import CmsEspecialidadesView from "../cms/CmsEspecialidadesView";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 
@@ -447,15 +447,13 @@ if (!authenticated) {
                 : activeTab === "documentacion"
                 ? "Gestión de Documentación"
                 : activeTab === "institucional"
-                ? "Gestión de Institucional"
+                ? "Gestión Institucional"
                 : activeTab === "banners"
                 ? "Gestión de Banners"
                 : activeTab === "profesionales"
                 ? "Directorio de Profesionales" 
                 : activeTab === "especialidades"  
                 ? "Gestión de Especialidades"      
-                : activeTab === "configuracion"
-                ? "Gestión de Configuración"
                 : "Panel de administración"}
             </h1>
             <p>
@@ -514,9 +512,7 @@ if (!authenticated) {
             <CmsEspecialidadesView />
           )}
 
-          {activeTab === "configuracion" && (
-            <CmsConfiguracionView />
-          )}
+
 
           {activeTab !== "dashboard" && 
            activeTab !== "noticias" && 
@@ -524,8 +520,7 @@ if (!authenticated) {
            activeTab !== "banners" && 
            activeTab !== "institucional" && 
            activeTab !== "profesionales" && 
-           activeTab !== "especialidades" && 
-           activeTab !== "configuracion" && (
+           activeTab !== "especialidades" && (
             <div className="cms-dashboard-card">
               <h3 className="cms-card-title">
                 Módulo de {activeTab.toUpperCase()}

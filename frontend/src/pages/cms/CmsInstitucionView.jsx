@@ -1,33 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { Plus, Trash2, Save, X, Edit3, Users } from "lucide-react";
 import "../../styles/pages/cms/CmsInstitucionView.css";
 
 // --- Datos hardcodeados (simulan lo que vendría del backend) ---
 const DATOS_INSTITUCIONALES = {
-  historia: {
-    titulo: "ACERCA DEL HIE",
-    cuerpo:
-      "Acá va toda la historia actual que se muestra en el portal, con un color clarito para que simule que está bloqueado hasta que se toca Editar.",
-    estado: "Publicado",
-    ultimaEdicion: "22 de agosto de 2026 · 10:42 hs",
-  },
-  principios: {
-    titulo: "NUESTROS VALORES",
-    valores: [
-      { nombre: "EXCELENCIA Y CALIDEZ", descripcion: "" },
-      { nombre: "EQUIDAD E INCLUSIÓN", descripcion: "" },
-      { nombre: "INNOVACIÓN Y COMPROMISO", descripcion: "" },
-    ],
-  },
   autoridades: [
     { id: 1, nombre: "Dr. Jorge Alberto Gómez", cargo: "Director Ejecutivo", imagen: "archivon133621" },
-    { id: 2, nombre: "Dr. Jorge Alberto Gómez", cargo: "Directora Administrativa", imagen: "archivon133621" },
-    { id: 3, nombre: "Dr. Jorge Alberto Gómez", cargo: "Directora Administrativa", imagen: "archivon133621" },
+    { id: 2, nombre: "Dra. María Fernández", cargo: "Directora Administrativa", imagen: "archivon133622" },
+    { id: 3, nombre: "Dr. Carlos Pérez", cargo: "Director Médico", imagen: "archivon133623" },
   ],
-  datosGenerales: {
-    direccion: "Av. 25 de Mayo 1234, Formosa Capital",
-    horario: "Lunes a viernes, de 7:00 a 19:00 hs",
-    telefono: "(370) 442-0000",
-    correo: "contacto@redevitformosa.gob.ar",
+  redesSociales: {
+    facebook: "https://facebook.com/redevitaformosa",
+    instagram: "https://instagram.com/redevitaformosa",
   },
 };
 
@@ -35,14 +19,72 @@ const CmsInstitucionView = () => {
   const [loading, setLoading] = useState(true);
   const [datos, setDatos] = useState(null);
 
-  // Simula la carga de datos con una demora (como la latencia de un backend real).
+  // --- Estado de Autoridades ---
+  const [autoridades, setAutoridades] = useState([]);
+  const [editingAutoridadId, setEditingAutoridadId] = useState(null);
+  const [tempAutoridad, setTempAutoridad] = useState({ nombre: "", cargo: "", imagen: "" });
+  const [showAddAutoridad, setShowAddAutoridad] = useState(false);
+  const [newAutoridad, setNewAutoridad] = useState({ nombre: "", cargo: "", imagen: "" });
+
+  // --- Estado de Redes Sociales ---
+  const [socialData, setSocialData] = useState({ facebook: "", instagram: "" });
+  const [isEditingSocial, setIsEditingSocial] = useState(false);
+  const [tempSocial, setTempSocial] = useState({ facebook: "", instagram: "" });
+
+  // Simula la carga de datos
   useEffect(() => {
     const timer = setTimeout(() => {
       setDatos(DATOS_INSTITUCIONALES);
+      setAutoridades(DATOS_INSTITUCIONALES.autoridades);
+      setSocialData(DATOS_INSTITUCIONALES.redesSociales);
+      setTempSocial(DATOS_INSTITUCIONALES.redesSociales);
       setLoading(false);
     }, 1200);
     return () => clearTimeout(timer);
   }, []);
+
+  // --- Handlers de Autoridades ---
+  const handleEditAutoridad = (autoridad) => {
+    setEditingAutoridadId(autoridad.id);
+    setTempAutoridad({ nombre: autoridad.nombre, cargo: autoridad.cargo, imagen: autoridad.imagen });
+  };
+
+  const handleSaveAutoridad = (id) => {
+    setAutoridades(prev =>
+      prev.map(a => a.id === id ? { ...a, ...tempAutoridad } : a)
+    );
+    setEditingAutoridadId(null);
+    setTempAutoridad({ nombre: "", cargo: "", imagen: "" });
+  };
+
+  const handleCancelEditAutoridad = () => {
+    setEditingAutoridadId(null);
+    setTempAutoridad({ nombre: "", cargo: "", imagen: "" });
+  };
+
+  const handleDeleteAutoridad = (id) => {
+    if (window.confirm("¿Está seguro de eliminar esta autoridad?")) {
+      setAutoridades(prev => prev.filter(a => a.id !== id));
+    }
+  };
+
+  const handleAddAutoridad = () => {
+    if (!newAutoridad.nombre.trim() || !newAutoridad.cargo.trim()) {
+      alert("Complete al menos el nombre y cargo de la autoridad.");
+      return;
+    }
+    const nuevoId = autoridades.length > 0 ? Math.max(...autoridades.map(a => a.id)) + 1 : 1;
+    setAutoridades(prev => [...prev, { id: nuevoId, ...newAutoridad }]);
+    setNewAutoridad({ nombre: "", cargo: "", imagen: "" });
+    setShowAddAutoridad(false);
+  };
+
+  // --- Handlers de Redes Sociales ---
+  const handleSaveSocial = () => {
+    setSocialData({ ...tempSocial });
+    setIsEditingSocial(false);
+    alert("¡Redes sociales actualizadas correctamente!");
+  };
 
   if (loading) {
     return (
@@ -55,131 +97,222 @@ const CmsInstitucionView = () => {
     );
   }
 
-  const { historia, principios, autoridades, datosGenerales } = datos;
-
   return (
     <div className="inst-container">
-      {/* ===== 1. HISTORIA INSTITUCIONAL ===== */}
+
+      {/* ===== 1. AUTORIDADES ===== */}
       <section className="cms-dashboard-card inst-card">
         <div className="inst-card-header">
-          <div>
-            <h3 className="inst-card-title">Historia Institucional</h3>
-            <p className="inst-card-subtitle">Reseña y trayectoria de la institución</p>
+          <div className="inst-header-left">
+            <div className="inst-header-icon-wrap">
+              <Users size={22} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="inst-card-title">Autoridades</h3>
+              <p className="inst-card-subtitle">Equipo directivo vigente del Hospital Interdistrital Evita</p>
+            </div>
           </div>
-          <span className="status-badge publicado">{historia.estado}</span>
-        </div>
-
-        <div className="inst-field">
-          <label className="inst-label">Título</label>
-          <input className="inst-input" type="text" value={historia.titulo} readOnly />
-        </div>
-
-        <div className="inst-field">
-          <textarea className="inst-textarea inst-bloqueado" value={historia.cuerpo} readOnly />
-        </div>
-
-        <div className="inst-card-footer">
-          <span className="inst-ultima-edicion">Última edición: {historia.ultimaEdicion}</span>
-          <button className="btn-inst-oscuro">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-            Editar historia
+          <button
+            className="btn-inst-primary"
+            onClick={() => setShowAddAutoridad(!showAddAutoridad)}
+          >
+            {showAddAutoridad ? (
+              <><X size={16} strokeWidth={2.5} /> Cancelar</>
+            ) : (
+              <><Plus size={16} strokeWidth={2.5} /> Añadir autoridad</>
+            )}
           </button>
         </div>
-      </section>
 
-      {/* ===== 2. PRINCIPIOS INSTITUCIONALES ===== */}
-      <section className="cms-dashboard-card inst-card">
-        <div className="inst-card-header">
-          <div>
-            <h3 className="inst-card-title">Principios Institucionales</h3>
-            <p className="inst-card-subtitle">Propósito y horizonte institucional</p>
+        {/* Formulario para agregar nueva autoridad */}
+        {showAddAutoridad && (
+          <div className="inst-add-form">
+            <div className="inst-add-form-grid">
+              <div className="inst-form-group">
+                <label>Nombre completo</label>
+                <input
+                  type="text"
+                  placeholder="Ej: Dr. Juan Pérez"
+                  value={newAutoridad.nombre}
+                  onChange={(e) => setNewAutoridad({ ...newAutoridad, nombre: e.target.value })}
+                />
+              </div>
+              <div className="inst-form-group">
+                <label>Cargo</label>
+                <input
+                  type="text"
+                  placeholder="Ej: Director Ejecutivo"
+                  value={newAutoridad.cargo}
+                  onChange={(e) => setNewAutoridad({ ...newAutoridad, cargo: e.target.value })}
+                />
+              </div>
+              <div className="inst-form-group">
+                <label>Referencia de imagen</label>
+                <input
+                  type="text"
+                  placeholder="Ej: archivon123456"
+                  value={newAutoridad.imagen}
+                  onChange={(e) => setNewAutoridad({ ...newAutoridad, imagen: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="inst-add-form-actions">
+              <button className="btn-inst-cancel" onClick={() => { setShowAddAutoridad(false); setNewAutoridad({ nombre: "", cargo: "", imagen: "" }); }}>
+                Cancelar
+              </button>
+              <button className="btn-inst-save" onClick={handleAddAutoridad}>
+                <Save size={15} strokeWidth={2.5} /> Guardar autoridad
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="inst-field">
-          <label className="inst-label">Título</label>
-          <input className="inst-input" type="text" value={principios.titulo} readOnly />
-        </div>
-
-        <div className="inst-valores-pills">
-          {principios.valores.map((v, i) => (
-            <div key={i} className="inst-valor-pill">{v.nombre}</div>
-          ))}
-        </div>
-
-        <div className="inst-valores-cajas">
-          {principios.valores.map((v, i) => (
-            <div key={i} className="inst-valor-caja">{v.descripcion}</div>
-          ))}
-        </div>
-
-        <div className="inst-card-footer center">
-          <button className="btn-inst-oscuro">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-            Editar
-          </button>
-        </div>
-      </section>
-
-      {/* ===== 3. AUTORIDADES ===== */}
-      <section className="cms-dashboard-card inst-card">
-        <div className="inst-card-header">
-          <div>
-            <h3 className="inst-card-title">Autoridades</h3>
-            <p className="inst-card-subtitle">Equipo directivo vigente</p>
-          </div>
-          <button className="btn-inst-oscuro">+ Añadir autoridad</button>
-        </div>
-
+        {/* Tabla de autoridades */}
         <div className="inst-autoridades-tabla">
           <div className="inst-autoridades-head">
             <div>NOMBRE</div>
             <div>CARGO</div>
             <div>IMAGEN</div>
+            <div>ACCIONES</div>
           </div>
-          {autoridades.map((a) => (
-            <div key={a.id} className="inst-autoridades-row">
-              <div className="inst-aut-nombre">{a.nombre}</div>
-              <div className="inst-aut-cargo">{a.cargo}</div>
-              <div className="inst-aut-imagen">{a.imagen}</div>
+          {autoridades.length === 0 ? (
+            <div className="inst-empty-state">
+              <Users size={40} strokeWidth={1.5} />
+              <p>No hay autoridades registradas</p>
+              <span>Haga clic en "Añadir autoridad" para agregar la primera.</span>
             </div>
-          ))}
+          ) : (
+            autoridades.map((a) => (
+              <div key={a.id} className="inst-autoridades-row">
+                {editingAutoridadId === a.id ? (
+                  <>
+                    <div>
+                      <input
+                        className="inst-inline-input"
+                        type="text"
+                        value={tempAutoridad.nombre}
+                        onChange={(e) => setTempAutoridad({ ...tempAutoridad, nombre: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <input
+                        className="inst-inline-input"
+                        type="text"
+                        value={tempAutoridad.cargo}
+                        onChange={(e) => setTempAutoridad({ ...tempAutoridad, cargo: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <input
+                        className="inst-inline-input"
+                        type="text"
+                        value={tempAutoridad.imagen}
+                        onChange={(e) => setTempAutoridad({ ...tempAutoridad, imagen: e.target.value })}
+                      />
+                    </div>
+                    <div className="inst-row-actions">
+                      <button className="btn-inst-icon save" onClick={() => handleSaveAutoridad(a.id)} title="Guardar">
+                        <Save size={16} />
+                      </button>
+                      <button className="btn-inst-icon cancel" onClick={handleCancelEditAutoridad} title="Cancelar">
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="inst-aut-nombre">{a.nombre}</div>
+                    <div className="inst-aut-cargo">{a.cargo}</div>
+                    <div className="inst-aut-imagen">{a.imagen}</div>
+                    <div className="inst-row-actions">
+                      <button className="btn-inst-icon edit" onClick={() => handleEditAutoridad(a)} title="Editar">
+                        <Edit3 size={16} />
+                      </button>
+                      <button className="btn-inst-icon delete" onClick={() => handleDeleteAutoridad(a.id)} title="Eliminar">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="inst-card-footer-info">
+          <span className="inst-count-badge">{autoridades.length} autoridades registradas</span>
         </div>
       </section>
 
-      {/* ===== 4. DATOS GENERALES ===== */}
+      {/* ===== 2. REDES SOCIALES (Facebook + Instagram) ===== */}
       <section className="cms-dashboard-card inst-card">
         <div className="inst-card-header">
-          <div>
-            <h3 className="inst-card-title">Datos generales</h3>
-            <p className="inst-card-subtitle">Información de contacto y atención</p>
+          <div className="inst-header-left">
+            <div className="inst-header-icon-wrap social">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 className="inst-card-title">Redes Sociales</h3>
+              <p className="inst-card-subtitle">Enlaces visibles en el portal público del hospital</p>
+            </div>
           </div>
-          <button className="btn-inst-oscuro">Editar</button>
+
+          <div className="inst-social-actions">
+            {!isEditingSocial ? (
+              <button className="btn-inst-primary" onClick={() => { setTempSocial({...socialData}); setIsEditingSocial(true); }}>
+                <Edit3 size={15} strokeWidth={2.5} /> Editar
+              </button>
+            ) : (
+              <div className="inst-btn-group">
+                <button className="btn-inst-cancel" onClick={() => setIsEditingSocial(false)}>
+                  Cancelar
+                </button>
+                <button className="btn-inst-save" onClick={handleSaveSocial}>
+                  <Save size={15} strokeWidth={2.5} /> Guardar
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="inst-field">
-          <label className="inst-label">Dirección breve</label>
-          <input className="inst-input" type="text" value={datosGenerales.direccion} readOnly />
-        </div>
-        <div className="inst-field">
-          <label className="inst-label">Horario general</label>
-          <input className="inst-input" type="text" value={datosGenerales.horario} readOnly />
-        </div>
-        <div className="inst-field">
-          <label className="inst-label">Teléfono de contacto</label>
-          <input className="inst-input" type="text" value={datosGenerales.telefono} readOnly />
-        </div>
-        <div className="inst-field">
-          <label className="inst-label">Correo institucional</label>
-          <input className="inst-input" type="text" value={datosGenerales.correo} readOnly />
+        <div className="inst-social-grid">
+          {/* Facebook */}
+          <div className="inst-social-field">
+            <div className="inst-social-label-row">
+              <div className="inst-social-icon facebook">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              </div>
+              <label>Facebook</label>
+            </div>
+            <input
+              type="text"
+              className={`inst-social-input ${!isEditingSocial ? "readonly" : ""}`}
+              value={isEditingSocial ? tempSocial.facebook : socialData.facebook}
+              onChange={(e) => setTempSocial({...tempSocial, facebook: e.target.value})}
+              disabled={!isEditingSocial}
+              placeholder="https://facebook.com/..."
+            />
+          </div>
+
+          {/* Instagram */}
+          <div className="inst-social-field">
+            <div className="inst-social-label-row">
+              <div className="inst-social-icon instagram">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              </div>
+              <label>Instagram</label>
+            </div>
+            <input
+              type="text"
+              className={`inst-social-input ${!isEditingSocial ? "readonly" : ""}`}
+              value={isEditingSocial ? tempSocial.instagram : socialData.instagram}
+              onChange={(e) => setTempSocial({...tempSocial, instagram: e.target.value})}
+              disabled={!isEditingSocial}
+              placeholder="https://instagram.com/..."
+            />
+          </div>
         </div>
       </section>
     </div>

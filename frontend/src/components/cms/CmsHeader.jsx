@@ -25,8 +25,7 @@ const CmsHeader = ({ userName, isAdmin, onLogoutClick, activeTab }) => {
       banners: "BANNERS",
       institucional: "INSTITUCIONAL",
       profesionales: "PROFESIONALES",
-      capsulas: "CÁPSULAS",
-      configuracion: "CONFIGURACIÓN"
+      capsulas: "CÁPSULAS"
     };
     return names[tabId] || tabId.toUpperCase();
   };
