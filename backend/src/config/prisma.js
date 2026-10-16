@@ -15,8 +15,9 @@ const globalForPrisma = globalThis;
 const pool = globalForPrisma.pgPool || new pg.Pool({
   connectionString,
   max: process.env.NODE_ENV === "production" ? 10 : 5, 
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000, 
+  idleTimeoutMillis: 60000,
+  connectionTimeoutMillis: 10000,
+  keepAlive: true,
 });
 
 if (process.env.NODE_ENV !== "production") {

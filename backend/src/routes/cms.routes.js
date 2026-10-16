@@ -5,6 +5,14 @@ import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia } fro
 import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento } from "../controllers/cms/cms.doc.controller.js";
 import { obtenerProfesionales, crearProfesional, eliminarProfesional, actualizarProfesional } from "../controllers/cms/cms.profesional.controller.js";
 import * as especialidadCtrl from '../controllers/cms/cms.especialidad.controller.js';
+import { 
+  obtenerInstitucional, 
+  crearAutoridad, 
+  actualizarAutoridad, 
+  eliminarAutoridad, 
+  actualizarRedesSociales 
+} from "../controllers/cms/cms.institucional.controller.js";
+
 
 import { verifyToken } from '../middlewares/auth.middleware.js'; 
 import { uploadMemory } from '../middlewares/upload.middleware.js'; 
@@ -40,7 +48,7 @@ router.delete("/banners/:id", verifyToken, eliminarBanner);
 // ==========================================
 router.get("/profesionales", obtenerProfesionales);
 router.post("/profesionales", verifyToken, uploadMemory.single("archivo"), crearProfesional);
-router.put("/profesionales/:id", verifyToken, uploadMemory.single("archivo"), actualizarProfesional); // NUEVA LÍNEA
+router.put("/profesionales/:id", verifyToken, uploadMemory.single("archivo"), actualizarProfesional);
 router.delete("/profesionales/:id", verifyToken, eliminarProfesional);
 
 // ==========================================
@@ -51,6 +59,13 @@ router.post('/especialidades', verifyToken, especialidadCtrl.crearEspecialidad);
 router.put('/especialidades/:id', verifyToken, especialidadCtrl.actualizarEspecialidad);
 router.delete('/especialidades/:id', verifyToken, especialidadCtrl.eliminarEspecialidad);
 
-
+// ==========================================
+// MÓDULO: INSTITUCIONAL (AUTORIDADES Y REDES)
+// ==========================================
+router.get('/institucional', obtenerInstitucional);
+router.post('/institucional/autoridades', verifyToken, uploadMemory.single('archivo'), crearAutoridad);
+router.put('/institucional/autoridades/:id', verifyToken, uploadMemory.single('archivo'), actualizarAutoridad);
+router.delete('/institucional/autoridades/:id', verifyToken, eliminarAutoridad);
+router.put('/institucional/redes', verifyToken, actualizarRedesSociales);
 
 export default router;

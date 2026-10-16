@@ -5,6 +5,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 import ReactCountUp from "react-countup";
 const CountUp = ReactCountUp.default || ReactCountUp;
 import AnimatedContent from "../../components/ui/AnimatedContent";
+import { getInstitucional } from "../../api/autoridades.api.js";
 
 // IMÁGENES INSTITUCIONALES
 import fotoHeroHeader from "../../assets/foto-sede.jpg";
@@ -16,29 +17,9 @@ import videoInstitucional from "../../assets/video-hospital-evita.mp4";
 // COMPONENTES
 import InteractiveTimelineSection from "../../components/InteractiveTimelineSection";
 
-// Fotos de autoridades
+// Imagen de fallback cuando la autoridad no tiene foto cargada
 import fotoDirector from "../../assets/imagen-temporal-autoridades.jpg";
 
-const AUTORIDADES = [
-  {
-    cargo: "DIRECTORA GENERAL",
-    nombre: "Dra. Paula Ramírez",
-    especialidad: "Gestión médica, formación de residentes y telemedicina provincial.",
-    foto: fotoDirector,
-  },
-  {
-    cargo: "SUBDIRECTORA DE GESTIÓN ADMINISTRATIVA",
-    nombre: "Dra. Silvia Aquino",
-    especialidad: "Contadora Pública",
-    foto: fotoDirector,
-  },
-  {
-    cargo: "SUBDIRECTOR DE MANTENIMIENTO Y SERVICIOS GENERALES",
-    nombre: "Ing. Santiago Jojot",
-    especialidad: "Ingeniería clínica y gestión de infraestructura hospitalaria.",
-    foto: fotoDirector,
-  },
-];
 
 const VALORES_INSTITUCIONALES = [
   {
@@ -82,6 +63,17 @@ const AboutPage = () => {
   const sedeCentralRef = useRef(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // ── Estado de autoridades desde la API ──────────────────────────────────
+  const [autoridades, setAutoridades] = useState([]);
+  const [loadingAutoridades, setLoadingAutoridades] = useState(true);
+
+  useEffect(() => {
+    getInstitucional()
+      .then((data) => setAutoridades(data.autoridades || []))
+      .catch(() => setAutoridades([]))
+      .finally(() => setLoadingAutoridades(false));
+  }, []);
 
   // EFECTO PARA HACER SCROLL AUTOMÁTICO GENERALIZADO
   useEffect(() => {
@@ -356,25 +348,52 @@ const AboutPage = () => {
           </div>
 
           <div className="authorities-grid">
-            {AUTORIDADES.map((item, idx) => (
-              <AnimatedContent
-                key={idx}
-                distance={50}
-                delay={idx * 0.15}
-                scale={0.96}
-              >
-                <div key={idx} className="authority-card">
-                  <div className="authority-img-box">
-                    <img src={item.foto} alt={item.nombre} />
-                  </div>
+            {loadingAutoridades ? (
+              // Skeleton de carga
+              [1, 2, 3].map((n) => (
+                <div key={n} className="authority-card" style={{ opacity: 0.5 }}>
+                  <div
+                    className="authority-img-box"
+                    style={{ background: "#e2e8f0", borderRadius: "50%" }}
+                  />
                   <div className="authority-info">
-                    <span className="authority-role">{item.cargo}</span>
-                    <h3 className="authority-name">{item.nombre}</h3>
-                    <p className="authority-spec">{item.especialidad}</p>
+                    <span className="authority-role" style={{ background: "#e2e8f0", borderRadius: 4, display: "block", height: 14, width: "60%" }} />
+                    <h3 className="authority-name" style={{ background: "#e2e8f0", borderRadius: 4, height: 18, width: "80%", marginTop: 8 }} />
+                    <p className="authority-spec" style={{ background: "#e2e8f0", borderRadius: 4, height: 12, width: "70%", marginTop: 8 }} />
                   </div>
                 </div>
-              </AnimatedContent>
-            ))}
+              ))
+            ) : autoridades.length === 0 ? (
+              <p style={{ color: "#64748b", gridColumn: "1/-1", textAlign: "center" }}>
+                No hay autoridades registradas en este momento.
+              </p>
+            ) : (
+              autoridades.map((item, idx) => (
+                <AnimatedContent
+                  key={item.id}
+                  distance={50}
+                  delay={idx * 0.15}
+                  scale={0.96}
+                >
+                  <div className="authority-card">
+                    <div className="authority-img-box">
+                      <img
+                        src={item.imagenUrl || fotoDirector}
+                        alt={item.nombre}
+                        onError={(e) => { e.target.src = fotoDirector; }}
+                      />
+                    </div>
+                    <div className="authority-info">
+                      <span className="authority-role">{item.cargo}</span>
+                      <h3 className="authority-name">{item.nombre}</h3>
+                      {item.descripcion && (
+                        <p className="authority-spec">{item.descripcion}</p>
+                      )}
+                    </div>
+                  </div>
+                </AnimatedContent>
+              ))
+            )}
           </div>
         </section>
       </div>
