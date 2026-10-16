@@ -10,6 +10,7 @@ import {
   crearAutoridad, 
   actualizarAutoridad, 
   eliminarAutoridad, 
+  reordenarAutoridades,
   actualizarRedesSociales 
 } from "../controllers/cms/cms.institucional.controller.js";
 
@@ -63,6 +64,7 @@ router.delete('/especialidades/:id', verifyToken, especialidadCtrl.eliminarEspec
 // MÓDULO: INSTITUCIONAL (AUTORIDADES Y REDES)
 // ==========================================
 router.get('/institucional', obtenerInstitucional);
+router.put('/institucional/autoridades/reordenar', verifyToken, reordenarAutoridades);
 router.post('/institucional/autoridades', verifyToken, uploadMemory.single('archivo'), crearAutoridad);
 router.put('/institucional/autoridades/:id', verifyToken, uploadMemory.single('archivo'), actualizarAutoridad);
 router.delete('/institucional/autoridades/:id', verifyToken, eliminarAutoridad);

@@ -34,6 +34,20 @@ export const deleteAutoridad = async (id, token) => {
   return response.data;
 };
 
+export const reordenarAutoridades = async (ordenIds, token) => {
+  const response = await api.put(
+    "/cms/institucional/autoridades/reordenar",
+    { ordenIds },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};
+
 export const updateRedesSociales = async (data, token) => {
   const response = await api.put("/cms/institucional/redes", data, {
     headers: {

@@ -42,6 +42,16 @@ export const eliminarAutoridad = async (req, res, next) => {
   }
 };
 
+export const reordenarAutoridades = async (req, res, next) => {
+  try {
+    const { ordenIds } = req.body;
+    const result = await CmsAutoridadesService.reordenarAutoridades(ordenIds);
+    return res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ─── REDES SOCIALES ───────────────────────────────────────────────────────────
 
 export const actualizarRedesSociales = async (req, res, next) => {

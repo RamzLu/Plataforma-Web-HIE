@@ -167,29 +167,106 @@
   gap: 10px;
 }
 
-/* ===== Autoridades: tabla de 4 columnas ===== */
+/* ===== Banner informativo de arrastre ===== */
+.inst-drag-tip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  color: #0369a1;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.inst-drag-tip svg {
+  color: #0284c7;
+  flex-shrink: 0;
+}
+
+/* ===== Autoridades: tabla con columna de arrastre ===== */
 .inst-autoridades-tabla { display: flex; flex-direction: column; }
 .inst-autoridades-head,
 .inst-autoridades-row {
   display: grid;
-  grid-template-columns: 1.4fr 1.2fr 1fr 0.6fr;
+  grid-template-columns: 80px 1.4fr 1.2fr 1fr 90px;
   align-items: center;
   gap: 12px;
-  padding: 14px 8px;
+  padding: 12px 10px;
 }
 .inst-autoridades-head {
   font-size: 0.75rem;
   font-weight: 700;
   color: #64748b;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 2px solid #e2e8f0;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 .inst-autoridades-row {
   border-bottom: 1px solid #f1f5f9;
-  transition: background 0.15s;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
 }
 .inst-autoridades-row:hover { background: #f8fafc; }
+
+.inst-autoridades-row.draggable-row {
+  cursor: grab;
+}
+
+.inst-autoridades-row.dragging {
+  opacity: 0.4;
+  background-color: #e0f2fe;
+  border: 2px dashed #0284c7;
+  cursor: grabbing;
+}
+
+.inst-autoridades-row.drag-over {
+  border-top: 3px solid #0284c7;
+  background-color: #f0f9ff;
+  transform: translateY(-2px);
+}
+
+.inst-drag-col {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inst-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: grab;
+  transition: all 0.15s ease;
+}
+
+.inst-drag-handle:hover {
+  background-color: #e2e8f0;
+  color: #0c2340;
+}
+
+.inst-drag-handle:active {
+  cursor: grabbing;
+}
+
+.inst-order-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0284c7;
+  background-color: #e0f2fe;
+  padding: 2px 7px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
+}
+
 .inst-aut-nombre { font-weight: 700; color: #0c2340; font-size: 0.95rem; }
 .inst-aut-cargo { color: #b45309; font-weight: 500; font-size: 0.9rem; }
 .inst-aut-imagen { color: #64748b; font-size: 0.85rem; }

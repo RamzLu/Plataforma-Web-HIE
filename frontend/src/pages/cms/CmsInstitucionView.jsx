@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Save, X, Edit3, Users, Upload } from "lucide-react";
+import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical } from "lucide-react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import "../../styles/pages/cms/CmsInstitucionView.css";
@@ -8,6 +8,7 @@ import {
   createAutoridad,
   updateAutoridad,
   deleteAutoridad,
+  reordenarAutoridades,
   updateRedesSociales,
 } from "../../api/autoridades.api.js";
 
@@ -23,10 +24,13 @@ const CmsInstitucionView = () => {
     nombre: "",
     cargo: "",
     descripcion: "",
-    orden: 0,
     archivo: null,
     previewUrl: null,
   });
+
+  // --- Estado de Arrastre (Drag and Drop) ---
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
 
   // --- Modal de Eliminación ---
   const [autoridadToDelete, setAutoridadToDelete] = useState(null);
@@ -61,7 +65,6 @@ const CmsInstitucionView = () => {
       nombre: "",
       cargo: "",
       descripcion: "",
-      orden: autoridades.length + 1,
       archivo: null,
       previewUrl: null,
     });
@@ -75,7 +78,6 @@ const CmsInstitucionView = () => {
       nombre: autoridad.nombre || "",
       cargo: autoridad.cargo || "",
       descripcion: autoridad.descripcion || "",
-      orden: autoridad.orden ?? 0,
       archivo: null,
       previewUrl: autoridad.imagenUrl || null,
     });
@@ -100,7 +102,13 @@ const CmsInstitucionView = () => {
       formData.append("nombre", autoridadForm.nombre.trim());
       formData.append("cargo", autoridadForm.cargo.trim());
       formData.append("descripcion", autoridadForm.descripcion.trim());
-      formData.append("orden", Number(autoridadForm.orden) || 0);
+
+      // Si es nueva, se coloca al final de la lista automáticamente
+      const ordenFinal = editingAutoridad
+        ? (editingAutoridad.orden ?? 0)
+        : (autoridades.length + 1);
+      formData.append("orden", ordenFinal);
+
       if (autoridadForm.archivo) {
         formData.append("archivo", autoridadForm.archivo);
       }
@@ -126,6 +134,60 @@ const CmsInstitucionView = () => {
       toast.error("No se pudo guardar la autoridad.", { id: toastId });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // --- MANEJADORES DE DRAG AND DROP (REORDENAMIENTO) ---
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    try {
+      e.dataTransfer.setData("text/plain", `${index}`);
+    } catch (err) {}
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = async (e, targetIndex) => {
+    e.preventDefault();
+    const sourceIndex = draggedIndex;
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+
+    if (sourceIndex === null || sourceIndex === targetIndex) {
+      return;
+    }
+
+    const reordered = [...autoridades];
+    const [movedItem] = reordered.splice(sourceIndex, 1);
+    reordered.splice(targetIndex, 0, movedItem);
+
+    // Actualización optimista inmediata
+    const updatedList = reordered.map((item, idx) => ({
+      ...item,
+      orden: idx + 1,
+    }));
+    setAutoridades(updatedList);
+
+    const toastId = toast.loading("Guardando nuevo orden...");
+    try {
+      const ordenIds = updatedList.map((a) => a.id);
+      await reordenarAutoridades(ordenIds, keycloak?.token);
+      toast.success("¡Orden actualizado con éxito!", { id: toastId });
+    } catch (error) {
+      toast.error("Error al actualizar el orden.", { id: toastId });
+      fetchInstitucional(); // Restaurar orden en caso de fallo
     }
   };
 
@@ -204,9 +266,20 @@ const CmsInstitucionView = () => {
           </button>
         </div>
 
+        {/* Banner o tip explicativo del arrastre */}
+        {autoridades.length > 1 && (
+          <div className="inst-drag-tip">
+            <GripVertical size={16} />
+            <span>
+              Podés arrastrar y soltar las filas para cambiar el orden de aparición de las autoridades en el portal público.
+            </span>
+          </div>
+        )}
+
         {/* Tabla de autoridades */}
         <div className="inst-autoridades-tabla">
           <div className="inst-autoridades-head">
+            <div style={{ textAlign: "center" }}>ORDEN</div>
             <div>NOMBRE Y DESCRIPCIÓN</div>
             <div>CARGO</div>
             <div>IMAGEN</div>
@@ -219,8 +292,25 @@ const CmsInstitucionView = () => {
               <span>Haga clic en "Añadir autoridad" para agregar la primera.</span>
             </div>
           ) : (
-            autoridades.map((a) => (
-              <div key={a.id} className="inst-autoridades-row">
+            autoridades.map((a, index) => (
+              <div
+                key={a.id}
+                className={`inst-autoridades-row draggable-row ${
+                  draggedIndex === index ? "dragging" : ""
+                } ${dragOverIndex === index ? "drag-over" : ""}`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnter={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                onDrop={(e) => handleDrop(e, index)}
+              >
+                <div className="inst-drag-col">
+                  <div className="inst-drag-handle" title="Arrastrar para reordenar">
+                    <GripVertical size={18} />
+                  </div>
+                  <span className="inst-order-badge">#{index + 1}</span>
+                </div>
                 <div>
                   <div className="inst-aut-nombre">{a.nombre}</div>
                   {a.descripcion && (
@@ -247,7 +337,7 @@ const CmsInstitucionView = () => {
                     <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Sin imagen</span>
                   )}
                 </div>
-                <div className="inst-row-actions">
+                <div className="inst-row-actions" onDragStart={(e) => e.stopPropagation()} draggable={false}>
                   <button className="btn-inst-icon edit" onClick={() => handleOpenEditAutoridad(a)} title="Editar">
                     <Edit3 size={16} />
                   </button>
@@ -396,28 +486,16 @@ const CmsInstitucionView = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="esp-form-label">Orden de aparición</label>
-                    <input
-                      type="number"
-                      min="0"
-                      className="esp-form-input"
-                      placeholder="Ej: 1"
-                      value={autoridadForm.orden}
-                      onChange={(e) => setAutoridadForm({ ...autoridadForm, orden: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
+                  <div className="esp-full-width">
                     <label className="esp-form-label">Fotografía</label>
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "#ffffff", padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "#ffffff", padding: "12px 16px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
                       {autoridadForm.previewUrl ? (
                         <img
                           src={autoridadForm.previewUrl}
                           alt="Foto"
                           style={{
-                            width: "48px",
-                            height: "48px",
+                            width: "52px",
+                            height: "52px",
                             borderRadius: "50%",
                             objectFit: "cover",
                             border: "2px solid #0284c7",
@@ -427,8 +505,8 @@ const CmsInstitucionView = () => {
                       ) : (
                         <div
                           style={{
-                            width: "48px",
-                            height: "48px",
+                            width: "52px",
+                            height: "52px",
                             borderRadius: "50%",
                             background: "#e0f2fe",
                             color: "#0284c7",
@@ -438,7 +516,7 @@ const CmsInstitucionView = () => {
                             flexShrink: 0
                           }}
                         >
-                          <Users size={22} />
+                          <Users size={24} />
                         </div>
                       )}
                       <div style={{ flex: 1, minWidth: 0 }}>

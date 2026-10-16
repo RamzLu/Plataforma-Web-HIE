@@ -229,6 +229,27 @@ class CmsAutoridadesService {
     return { message: "¡Autoridad eliminada correctamente!" };
   }
 
+  // ─── REORDENAR AUTORIDADES ─────────────────────────────────────────────────
+
+  async reordenarAutoridades(ordenIds) {
+    if (!Array.isArray(ordenIds) || ordenIds.length === 0) {
+      const err = new Error("Se requiere un arreglo de IDs para reordenar.");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const updates = ordenIds.map((id, index) =>
+      prisma.autoridad.update({
+        where: { id: BigInt(id) },
+        data: { orden: index + 1 },
+      })
+    );
+
+    await prisma.$transaction(updates);
+
+    return { message: "¡Orden de autoridades actualizado correctamente!" };
+  }
+
   // ─── REDES SOCIALES ───────────────────────────────────────────────────────
 
   async actualizarRedesSociales({ facebook, instagram }) {
