@@ -15,24 +15,17 @@ const CmsInstitucionView = () => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  // --- Estado de Autoridades ---
+  // --- Estado de Autoridades y Modal ---
   const [autoridades, setAutoridades] = useState([]);
-  const [editingAutoridadId, setEditingAutoridadId] = useState(null);
-  const [tempAutoridad, setTempAutoridad] = useState({
+  const [showAutoridadModal, setShowAutoridadModal] = useState(false);
+  const [editingAutoridad, setEditingAutoridad] = useState(null);
+  const [autoridadForm, setAutoridadForm] = useState({
     nombre: "",
     cargo: "",
     descripcion: "",
     orden: 0,
     archivo: null,
-  });
-
-  const [showAddAutoridad, setShowAddAutoridad] = useState(false);
-  const [newAutoridad, setNewAutoridad] = useState({
-    nombre: "",
-    cargo: "",
-    descripcion: "",
-    orden: 0,
-    archivo: null,
+    previewUrl: null,
   });
 
   // --- Modal de Eliminación ---
@@ -61,81 +54,76 @@ const CmsInstitucionView = () => {
     fetchInstitucional();
   }, []);
 
-  // --- CREAR AUTORIDAD ---
-  const handleAddAutoridad = async () => {
-    if (!newAutoridad.nombre.trim() || !newAutoridad.cargo.trim()) {
-      toast.error("Complete al menos el nombre y el cargo de la autoridad.");
-      return;
-    }
-
-    setIsSaving(true);
-    const toastId = toast.loading("Guardando autoridad...");
-
-    try {
-      const formData = new FormData();
-      formData.append("nombre", newAutoridad.nombre);
-      formData.append("cargo", newAutoridad.cargo);
-      formData.append("descripcion", newAutoridad.descripcion || "");
-      formData.append("orden", newAutoridad.orden || autoridades.length + 1);
-      if (newAutoridad.archivo) {
-        formData.append("archivo", newAutoridad.archivo);
-      }
-
-      const data = await createAutoridad(formData, keycloak?.token);
-
-      setAutoridades((prev) =>
-        [...prev, data.autoridad].sort((a, b) => a.orden - b.orden)
-      );
-      setNewAutoridad({ nombre: "", cargo: "", descripcion: "", orden: 0, archivo: null });
-      setShowAddAutoridad(false);
-      toast.success("¡Autoridad añadida correctamente!", { id: toastId });
-    } catch (error) {
-      toast.error("No se pudo guardar la autoridad.", { id: toastId });
-    } finally {
-      setIsSaving(false);
-    }
+  // --- ABRIR MODAL CREAR ---
+  const handleOpenCreateAutoridad = () => {
+    setEditingAutoridad(null);
+    setAutoridadForm({
+      nombre: "",
+      cargo: "",
+      descripcion: "",
+      orden: autoridades.length + 1,
+      archivo: null,
+      previewUrl: null,
+    });
+    setShowAutoridadModal(true);
   };
 
-  // --- EDITAR AUTORIDAD ---
-  const handleEditAutoridad = (autoridad) => {
-    setEditingAutoridadId(autoridad.id);
-    setTempAutoridad({
+  // --- ABRIR MODAL EDITAR ---
+  const handleOpenEditAutoridad = (autoridad) => {
+    setEditingAutoridad(autoridad);
+    setAutoridadForm({
       nombre: autoridad.nombre || "",
       cargo: autoridad.cargo || "",
       descripcion: autoridad.descripcion || "",
       orden: autoridad.orden ?? 0,
       archivo: null,
+      previewUrl: autoridad.imagenUrl || null,
     });
+    setShowAutoridadModal(true);
   };
 
-  const handleSaveAutoridad = async (id) => {
-    if (!tempAutoridad.nombre.trim() || !tempAutoridad.cargo.trim()) {
-      toast.error("El nombre y el cargo no pueden estar vacíos.");
+  // --- GUARDAR AUTORIDAD (CREAR O ACTUALIZAR) ---
+  const handleSaveAutoridadModal = async (e) => {
+    e.preventDefault();
+    if (!autoridadForm.nombre.trim() || !autoridadForm.cargo.trim()) {
+      toast.error("Complete al menos el nombre y el cargo de la autoridad.");
       return;
     }
 
     setIsSaving(true);
-    const toastId = toast.loading("Actualizando autoridad...");
+    const toastId = toast.loading(
+      editingAutoridad ? "Actualizando autoridad..." : "Guardando autoridad..."
+    );
 
     try {
       const formData = new FormData();
-      formData.append("nombre", tempAutoridad.nombre);
-      formData.append("cargo", tempAutoridad.cargo);
-      formData.append("descripcion", tempAutoridad.descripcion || "");
-      formData.append("orden", tempAutoridad.orden ?? 0);
-      if (tempAutoridad.archivo) {
-        formData.append("archivo", tempAutoridad.archivo);
+      formData.append("nombre", autoridadForm.nombre.trim());
+      formData.append("cargo", autoridadForm.cargo.trim());
+      formData.append("descripcion", autoridadForm.descripcion.trim());
+      formData.append("orden", Number(autoridadForm.orden) || 0);
+      if (autoridadForm.archivo) {
+        formData.append("archivo", autoridadForm.archivo);
       }
 
-      const data = await updateAutoridad(id, formData, keycloak?.token);
+      if (editingAutoridad) {
+        const data = await updateAutoridad(editingAutoridad.id, formData, keycloak?.token);
+        setAutoridades((prev) =>
+          prev
+            .map((a) => (a.id === editingAutoridad.id ? data.autoridad : a))
+            .sort((a, b) => a.orden - b.orden)
+        );
+        toast.success("¡Autoridad actualizada con éxito!", { id: toastId });
+      } else {
+        const data = await createAutoridad(formData, keycloak?.token);
+        setAutoridades((prev) =>
+          [...prev, data.autoridad].sort((a, b) => a.orden - b.orden)
+        );
+        toast.success("¡Autoridad añadida correctamente!", { id: toastId });
+      }
 
-      setAutoridades((prev) =>
-        prev.map((a) => (a.id === id ? data.autoridad : a)).sort((a, b) => a.orden - b.orden)
-      );
-      setEditingAutoridadId(null);
-      toast.success("¡Autoridad actualizada con éxito!", { id: toastId });
+      setShowAutoridadModal(false);
     } catch (error) {
-      toast.error("No se pudo actualizar la autoridad.", { id: toastId });
+      toast.error("No se pudo guardar la autoridad.", { id: toastId });
     } finally {
       setIsSaving(false);
     }
@@ -207,100 +195,14 @@ const CmsInstitucionView = () => {
             </div>
           </div>
           <button
+            type="button"
             className="btn-inst-primary"
-            onClick={() => setShowAddAutoridad(!showAddAutoridad)}
+            onClick={handleOpenCreateAutoridad}
             disabled={isSaving}
           >
-            {showAddAutoridad ? (
-              <><X size={16} strokeWidth={2.5} /> Cancelar</>
-            ) : (
-              <><Plus size={16} strokeWidth={2.5} /> Añadir autoridad</>
-            )}
+            <Plus size={16} strokeWidth={2.5} /> Añadir autoridad
           </button>
         </div>
-
-        {/* Formulario para agregar nueva autoridad */}
-        {showAddAutoridad && (
-          <div className="inst-add-form">
-            <div className="inst-add-form-grid">
-              <div className="inst-form-group">
-                <label>Nombre completo *</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Dr. Jorge Alberto Gómez"
-                  value={newAutoridad.nombre}
-                  onChange={(e) => setNewAutoridad({ ...newAutoridad, nombre: e.target.value })}
-                />
-              </div>
-              <div className="inst-form-group">
-                <label>Cargo *</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Director Ejecutivo"
-                  value={newAutoridad.cargo}
-                  onChange={(e) => setNewAutoridad({ ...newAutoridad, cargo: e.target.value })}
-                />
-              </div>
-              <div className="inst-form-group">
-                <label>Fotografía</label>
-                <label className="btn-inst-cancel" style={{ cursor: "pointer", justifyContent: "center" }}>
-                  <Upload size={15} />
-                  <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {newAutoridad.archivo ? newAutoridad.archivo.name : "Seleccionar imagen..."}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) setNewAutoridad({ ...newAutoridad, archivo: file });
-                    }}
-                  />
-                </label>
-              </div>
-            </div>
-
-            <div className="inst-add-form-grid" style={{ gridTemplateColumns: "2fr 1fr" }}>
-              <div className="inst-form-group">
-                <label>Descripción / Reseña (Opcional)</label>
-                <input
-                  type="text"
-                  placeholder="Breve descripción o especialidad..."
-                  value={newAutoridad.descripcion}
-                  onChange={(e) => setNewAutoridad({ ...newAutoridad, descripcion: e.target.value })}
-                />
-              </div>
-              <div className="inst-form-group">
-                <label>Orden de aparición</label>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="Ej: 1"
-                  value={newAutoridad.orden}
-                  onChange={(e) => setNewAutoridad({ ...newAutoridad, orden: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="inst-add-form-actions">
-              <button
-                className="btn-inst-cancel"
-                disabled={isSaving}
-                onClick={() => {
-                  setShowAddAutoridad(false);
-                  setNewAutoridad({ nombre: "", cargo: "", descripcion: "", orden: 0, archivo: null });
-                }}
-              >
-                Cancelar
-              </button>
-              <button className="btn-inst-save" onClick={handleAddAutoridad} disabled={isSaving}>
-                <Save size={15} strokeWidth={2.5} />
-                {isSaving ? "..." : "Guardar autoridad"}
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Tabla de autoridades */}
         <div className="inst-autoridades-tabla">
@@ -319,112 +221,40 @@ const CmsInstitucionView = () => {
           ) : (
             autoridades.map((a) => (
               <div key={a.id} className="inst-autoridades-row">
-                {editingAutoridadId === a.id ? (
-                  <>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                      <input
-                        className="inst-inline-input"
-                        type="text"
-                        placeholder="Nombre completo"
-                        value={tempAutoridad.nombre}
-                        onChange={(e) => setTempAutoridad({ ...tempAutoridad, nombre: e.target.value })}
-                      />
-                      <input
-                        className="inst-inline-input"
-                        type="text"
-                        placeholder="Descripción (opcional)"
-                        value={tempAutoridad.descripcion}
-                        onChange={(e) => setTempAutoridad({ ...tempAutoridad, descripcion: e.target.value })}
-                      />
+                <div>
+                  <div className="inst-aut-nombre">{a.nombre}</div>
+                  {a.descripcion && (
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "2px" }}>
+                      {a.descripcion}
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                      <input
-                        className="inst-inline-input"
-                        type="text"
-                        placeholder="Cargo"
-                        value={tempAutoridad.cargo}
-                        onChange={(e) => setTempAutoridad({ ...tempAutoridad, cargo: e.target.value })}
-                      />
-                      <input
-                        className="inst-inline-input"
-                        type="number"
-                        placeholder="Orden"
-                        value={tempAutoridad.orden}
-                        onChange={(e) => setTempAutoridad({ ...tempAutoridad, orden: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="btn-inst-cancel" style={{ padding: "8px 12px", fontSize: "0.8rem", cursor: "pointer" }}>
-                        <Upload size={14} />
-                        <span>{tempAutoridad.archivo ? tempAutoridad.archivo.name : "Cambiar foto"}</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          style={{ display: "none" }}
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) setTempAutoridad({ ...tempAutoridad, archivo: file });
-                          }}
-                        />
-                      </label>
-                    </div>
-                    <div className="inst-row-actions">
-                      <button
-                        className="btn-inst-icon save"
-                        onClick={() => handleSaveAutoridad(a.id)}
-                        disabled={isSaving}
-                        title="Guardar"
-                      >
-                        {isSaving ? "..." : <Save size={16} />}
-                      </button>
-                      <button
-                        className="btn-inst-icon cancel"
-                        onClick={() => setEditingAutoridadId(null)}
-                        disabled={isSaving}
-                        title="Cancelar"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <div className="inst-aut-nombre">{a.nombre}</div>
-                      {a.descripcion && (
-                        <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "2px" }}>
-                          {a.descripcion}
-                        </div>
-                      )}
-                    </div>
-                    <div className="inst-aut-cargo">{a.cargo}</div>
-                    <div className="inst-aut-imagen" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      {a.imagenUrl ? (
-                        <img
-                          src={a.imagenUrl}
-                          alt={a.nombre}
-                          style={{
-                            width: "44px",
-                            height: "44px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            border: "2px solid #e2e8f0",
-                          }}
-                        />
-                      ) : (
-                        <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Sin imagen</span>
-                      )}
-                    </div>
-                    <div className="inst-row-actions">
-                      <button className="btn-inst-icon edit" onClick={() => handleEditAutoridad(a)} title="Editar">
-                        <Edit3 size={16} />
-                      </button>
-                      <button className="btn-inst-icon delete" onClick={() => setAutoridadToDelete(a)} title="Eliminar">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </>
-                )}
+                  )}
+                </div>
+                <div className="inst-aut-cargo">{a.cargo}</div>
+                <div className="inst-aut-imagen" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {a.imagenUrl ? (
+                    <img
+                      src={a.imagenUrl}
+                      alt={a.nombre}
+                      style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: "2px solid #e2e8f0",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>Sin imagen</span>
+                  )}
+                </div>
+                <div className="inst-row-actions">
+                  <button className="btn-inst-icon edit" onClick={() => handleOpenEditAutoridad(a)} title="Editar">
+                    <Edit3 size={16} />
+                  </button>
+                  <button className="btn-inst-icon delete" onClick={() => setAutoridadToDelete(a)} title="Eliminar">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             ))
           )}
@@ -516,6 +346,189 @@ const CmsInstitucionView = () => {
           </div>
         </div>
       </section>
+
+      {/* MODAL DE CREACIÓN / EDICIÓN DE AUTORIDAD */}
+      {showAutoridadModal && (
+        <div className="modal-overlay" onClick={() => !isSaving && setShowAutoridadModal(false)}>
+          <div className="modal-content-esp esp-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-esp">
+              <h2>{editingAutoridad ? "Editar Autoridad" : "Añadir Autoridad"}</h2>
+              <button
+                type="button"
+                className="btn-close-modal"
+                onClick={() => !isSaving && setShowAutoridadModal(false)}
+                aria-label="Cerrar modal"
+              >
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAutoridadModal} style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <div className="esp-modal-body">
+                <div className="esp-form-grid">
+                  <div>
+                    <label className="esp-form-label">
+                      Nombre completo <span className="esp-asterisk">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="esp-form-input"
+                      placeholder="Ej: Dr. Jorge Alberto Gómez"
+                      required
+                      value={autoridadForm.nombre}
+                      onChange={(e) => setAutoridadForm({ ...autoridadForm, nombre: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">
+                      Cargo <span className="esp-asterisk">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="esp-form-input"
+                      placeholder="Ej: Director Ejecutivo"
+                      required
+                      value={autoridadForm.cargo}
+                      onChange={(e) => setAutoridadForm({ ...autoridadForm, cargo: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">Orden de aparición</label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="esp-form-input"
+                      placeholder="Ej: 1"
+                      value={autoridadForm.orden}
+                      onChange={(e) => setAutoridadForm({ ...autoridadForm, orden: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">Fotografía</label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "#ffffff", padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
+                      {autoridadForm.previewUrl ? (
+                        <img
+                          src={autoridadForm.previewUrl}
+                          alt="Foto"
+                          style={{
+                            width: "48px",
+                            height: "48px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "2px solid #0284c7",
+                            flexShrink: 0
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: "48px",
+                            height: "48px",
+                            borderRadius: "50%",
+                            background: "#e0f2fe",
+                            color: "#0284c7",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0
+                          }}
+                        >
+                          <Users size={22} />
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <label
+                          htmlFor="aut-modal-file"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "6px 14px",
+                            background: "#e2e8f0",
+                            color: "#0c2340",
+                            borderRadius: "6px",
+                            fontWeight: "600",
+                            fontSize: "0.82rem",
+                            cursor: "pointer",
+                            transition: "background 0.2s"
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = "#cbd5e1"}
+                          onMouseLeave={(e) => e.currentTarget.style.background = "#e2e8f0"}
+                        >
+                          <Upload size={14} />
+                          {autoridadForm.previewUrl ? "Cambiar foto" : "Seleccionar foto"}
+                        </label>
+                        <input
+                          id="aut-modal-file"
+                          type="file"
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              setAutoridadForm({
+                                ...autoridadForm,
+                                archivo: file,
+                                previewUrl: URL.createObjectURL(file)
+                              });
+                            }
+                          }}
+                        />
+                        <span style={{ display: "block", marginTop: "4px", fontSize: "0.75rem", color: "#64748b", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                          {autoridadForm.archivo ? autoridadForm.archivo.name : "Formato JPG o PNG"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">Descripción / Reseña (Opcional)</label>
+                    <textarea
+                      className="esp-form-input"
+                      placeholder="Breve reseña sobre la trayectoria o especialidad de la autoridad..."
+                      rows="3"
+                      value={autoridadForm.descripcion}
+                      onChange={(e) => setAutoridadForm({ ...autoridadForm, descripcion: e.target.value })}
+                      style={{ resize: "none" }}
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer-esp">
+                <button
+                  type="button"
+                  className="btn-cancelar-gris"
+                  onClick={() => setShowAutoridadModal(false)}
+                  disabled={isSaving}
+                >
+                  CANCELAR
+                </button>
+                <button
+                  type="submit"
+                  className="btn-cerrar-rojo"
+                  style={{ backgroundColor: "#2b5b94" }}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px", borderTopColor: "white", borderColor: "rgba(255,255,255,0.3)" }}></div>
+                      {editingAutoridad ? "ACTUALIZANDO..." : "GUARDANDO..."}
+                    </span>
+                  ) : (
+                    editingAutoridad ? "ACTUALIZAR" : "GUARDAR"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* MODAL DE ELIMINACIÓN */}
       {autoridadToDelete && (

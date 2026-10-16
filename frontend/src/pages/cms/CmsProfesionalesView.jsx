@@ -412,142 +412,179 @@ const CmsProfesionalesView = () => {
       {/* MODAL DE CREACIÓN / EDICIÓN */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={handleCloseAttempt}>
-          <div className="modal-container" onClick={e => e.stopPropagation()}>
-            <header className="modal-header">
-              <div className="header-content">
-                <h1 className="modal-title">{editingId ? "EDITAR PROFESIONAL" : "AÑADIR PROFESIONAL"}</h1>
-                <p className="modal-subtitle">Completá los datos del profesional para registrarlo en el sistema.</p>
-              </div>
-              <button type="button" className="close-button" onClick={handleCloseAttempt} aria-label="Cerrar">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+          <div className="modal-content-esp esp-modal-wrapper" onClick={e => e.stopPropagation()}>
+            <div className="modal-header-esp">
+              <h2>{editingId ? "Editar Profesional" : "Añadir Profesional"}</h2>
+              <button type="button" className="btn-close-modal" onClick={handleCloseAttempt} aria-label="Cerrar modal">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
                 </svg>
               </button>
-            </header>
+            </div>
 
-            <form onSubmit={handleSave}>
-              <div className="modal-body">
-                
-                <section className="form-section">
-                  <div className="section-header">
-                    <span className="section-badge">A</span>
-                    <h2 className="section-title">DATOS PERSONALES <span className="esp-asterisk">*</span></h2>
-                  </div>
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="nombre">Nombre</label>
-                      <input type="text" id="nombre" placeholder="Ej. Marcela" required value={formData.nombre} onChange={e => {setFormData({...formData, nombre: e.target.value}); setHasUnsavedChanges(true);}} />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="apellido">Apellido</label>
-                      <input type="text" id="apellido" placeholder="Ej. Ferreyra" required value={formData.apellido} onChange={e => {setFormData({...formData, apellido: e.target.value}); setHasUnsavedChanges(true);}} />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="matricula">Matrícula</label>
-                      <input type="text" id="matricula" placeholder="MP 00.000" value={formData.matricula} onChange={e => {setFormData({...formData, matricula: e.target.value}); setHasUnsavedChanges(true);}} />
-                    </div>
-                  </div>
-                </section>
-
-                <section className="form-section">
-                  <h2 className="section-title-simple">Fotografía {editingId ? "(Opcional si ya tiene una)" : <span className="esp-asterisk">*</span>} </h2>
-                  <div className="file-upload-container">
-                    <label className="file-upload-button">
-                      Seleccionar archivo
-                      <input type="file" accept="image/*" className="hidden-input" onChange={handleFileChange} />
-                    </label>
-                    <span className="file-status">{archivoFoto ? archivoFoto.name : "Seleccione una imagen para encuadrar"}</span>
-                  </div>
+            <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <div className="esp-modal-body">
+                <div className="esp-form-grid">
                   
-                  {/* PREVISUALIZACIÓN DE LA FOTO RECORTADA / EXISTENTE */}
-                  {fotoPreview && (
-                    <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'center' }}>
-                      <div style={{ padding: "4px", backgroundColor: "#fff", borderRadius: "50%", border: "2px dashed #cbd5e1" }}>
-                        <img 
-                          src={fotoPreview} 
-                          alt="Preview" 
-                          style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '50%', border: '4px solid #f1f5f9', boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }} 
-                        />
-                      </div>
-                    </div>
-                  )}
-                </section>
-
-                <section className="form-section">
-                  <div className="section-header">
-                    <span className="section-badge">B</span>
-                    <h2 className="section-title">ASIGNACIÓN DE ÁREA <span className="esp-asterisk">*</span> </h2>
+                  <div>
+                    <label className="esp-form-label">Nombre <span className="esp-asterisk">*</span></label>
+                    <input 
+                      type="text" 
+                      className="esp-form-input"
+                      placeholder="Ej. Marcela" 
+                      required 
+                      value={formData.nombre} 
+                      onChange={e => {setFormData({...formData, nombre: e.target.value}); setHasUnsavedChanges(true);}} 
+                    />
                   </div>
-                  <div className="form-grid">
-                    
-                    <div className="form-group">
-                      <label htmlFor="tipo-area">Clasificación General</label>
-                      <div className="select-wrapper">
-                        <select 
-                          id="tipo-area"
-                          value={formData.tipoFiltroModal}
-                          onChange={e => {setFormData({...formData, tipoFiltroModal: e.target.value, especialidadId: ''}); setHasUnsavedChanges(true);}}
+
+                  <div>
+                    <label className="esp-form-label">Apellido <span className="esp-asterisk">*</span></label>
+                    <input 
+                      type="text" 
+                      className="esp-form-input"
+                      placeholder="Ej. Ferreyra" 
+                      required 
+                      value={formData.apellido} 
+                      onChange={e => {setFormData({...formData, apellido: e.target.value}); setHasUnsavedChanges(true);}} 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">Matrícula</label>
+                    <input 
+                      type="text" 
+                      className="esp-form-input"
+                      placeholder="Ej. MP 00.000" 
+                      value={formData.matricula} 
+                      onChange={e => {setFormData({...formData, matricula: e.target.value}); setHasUnsavedChanges(true);}} 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">Cargo o Función</label>
+                    <input 
+                      type="text" 
+                      className="esp-form-input"
+                      placeholder="Ej. Jefa de Área / Especialista de Planta" 
+                      value={formData.cargo} 
+                      onChange={e => {setFormData({...formData, cargo: e.target.value}); setHasUnsavedChanges(true);}} 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">Clasificación General</label>
+                    <select 
+                      className="esp-form-input"
+                      value={formData.tipoFiltroModal}
+                      onChange={e => {setFormData({...formData, tipoFiltroModal: e.target.value, especialidadId: ''}); setHasUnsavedChanges(true);}}
+                    >
+                      <option value="ESPECIALIDAD">Especialidad médica</option>
+                      <option value="SERVICIO">Servicio Clave</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">Área Asignada <span className="esp-asterisk">*</span></label>
+                    <select 
+                      className="esp-form-input"
+                      required
+                      value={formData.especialidadId}
+                      onChange={e => {setFormData({...formData, especialidadId: e.target.value}); setHasUnsavedChanges(true);}}
+                    >
+                      <option value="" disabled>-- Seleccione de la lista --</option>
+                      {areasParaElSelect.length === 0 ? (
+                        <option value="" disabled>No hay {formData.tipoFiltroModal === 'ESPECIALIDAD' ? 'Especialidades' : 'Servicios'} creados</option>
+                      ) : (
+                        areasParaElSelect.map(area => (
+                          <option key={area.id} value={area.id}>{area.nombre}</option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Fotografía {editingId ? "(Opcional si ya posee una)" : <span className="esp-asterisk">*</span>}
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "20px", background: "#ffffff", padding: "16px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
+                      {fotoPreview ? (
+                        <div style={{ width: "64px", height: "64px", borderRadius: "50%", overflow: "hidden", border: "2px solid #0284c7", flexShrink: 0 }}>
+                          <img 
+                            src={fotoPreview} 
+                            alt="Preview" 
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                          />
+                        </div>
+                      ) : (
+                        <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "#e0f2fe", color: "#0284c7", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "1.1rem", flexShrink: 0 }}>
+                          {formData.nombre || formData.apellido ? getIniciales(formData.nombre, formData.apellido) : "?"}
+                        </div>
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <label 
+                          htmlFor="prof-file-input" 
+                          style={{ 
+                            display: "inline-flex", 
+                            alignItems: "center", 
+                            gap: "8px", 
+                            padding: "9px 18px", 
+                            background: "#e2e8f0", 
+                            color: "#0c2340", 
+                            borderRadius: "6px", 
+                            fontWeight: "600", 
+                            fontSize: "0.85rem", 
+                            cursor: "pointer", 
+                            transition: "background 0.2s" 
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = "#cbd5e1"}
+                          onMouseLeave={(e) => e.currentTarget.style.background = "#e2e8f0"}
                         >
-                          <option value="ESPECIALIDAD">Especialidad médica</option>
-                          <option value="SERVICIO">Servicio Clave</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="form-group" style={{ gridColumn: "span 2" }}>
-                      <label htmlFor="area-especifica">Seleccione el Área <span className="esp-asterisk">*</span></label>
-                      <div className="select-wrapper">
-                        <select 
-                          id="area-especifica"
-                          required
-                          value={formData.especialidadId}
-                          onChange={e => {setFormData({...formData, especialidadId: e.target.value}); setHasUnsavedChanges(true);}}
-                        >
-                          <option value="" disabled>-- Seleccione de la lista --</option>
-                          {areasParaElSelect.length === 0 ? (
-                            <option value="" disabled>No hay {formData.tipoFiltroModal === 'ESPECIALIDAD' ? 'Especialidades' : 'Servicios'} creados en el sistema.</option>
-                          ) : (
-                            areasParaElSelect.map(area => (
-                              <option key={area.id} value={area.id}>{area.nombre}</option>
-                            ))
-                          )}
-                        </select>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                          </svg>
+                          {fotoPreview ? "Cambiar imagen..." : "Seleccionar imagen..."}
+                        </label>
+                        <input id="prof-file-input" type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileChange} />
+                        <span style={{ display: "block", marginTop: "6px", fontSize: "0.8rem", color: "#64748b" }}>
+                          {archivoFoto ? archivoFoto.name : "Formato JPG o PNG. Podrás recortar y encuadrar la imagen."}
+                        </span>
                       </div>
                     </div>
                   </div>
-                </section>
 
-                <section className="form-section">
-                  <div className="section-header">
-                    <span className="section-badge">C</span>
-                    <h2 className="section-title">ROL Y PERFIL <span className="esp-asterisk">*</span></h2>
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">Descripción o Perfil Profesional</label>
+                    <textarea 
+                      className="esp-form-input" 
+                      placeholder="Breve reseña o trayectoria del profesional..." 
+                      rows="3" 
+                      value={formData.descripcion} 
+                      onChange={e => {setFormData({...formData, descripcion: e.target.value}); setHasUnsavedChanges(true);}}
+                      style={{ resize: "none" }}
+                    ></textarea>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="cargo">Cargo o función</label>
-                    <input type="text" id="cargo" placeholder="Ej. Jefa de Área" value={formData.cargo} onChange={e => {setFormData({...formData, cargo: e.target.value}); setHasUnsavedChanges(true);}} />
-                  </div>
-                  <div className="form-group margin-top-md">
-                    <label htmlFor="descripcion">Descripción</label>
-                    <textarea id="descripcion" placeholder="Breve reseña..." rows="4" value={formData.descripcion} onChange={e => {setFormData({...formData, descripcion: e.target.value}); setHasUnsavedChanges(true);}}></textarea>
-                  </div>
-                </section>
 
+                </div>
               </div>
 
-              <footer className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={handleCloseAttempt} disabled={isSaving}>Cancelar</button>
-                <button type="submit" className="btn-primary" disabled={isSaving}>
+              <div className="modal-footer-esp">
+                <button type="button" className="btn-cancelar-gris" onClick={handleCloseAttempt} disabled={isSaving}>
+                  CANCELAR
+                </button>
+                <button type="submit" className="btn-cerrar-rojo" style={{ backgroundColor: "#2b5b94" }} disabled={isSaving}>
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px", borderTopColor: "white", borderColor: "rgba(255,255,255,0.3)" }}></div>
                       {editingId ? "ACTUALIZANDO..." : "GUARDANDO..."}
                     </span>
                   ) : (
-                    editingId ? "ACTUALIZAR PROFESIONAL" : "GUARDAR PROFESIONAL"
+                    editingId ? "ACTUALIZAR" : "GUARDAR"
                   )}
                 </button>
-              </footer>
+              </div>
             </form>
           </div>
         </div>
