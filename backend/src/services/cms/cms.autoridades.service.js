@@ -238,14 +238,15 @@ class CmsAutoridadesService {
       throw err;
     }
 
-    const updates = ordenIds.map((id, index) =>
-      prisma.autoridad.update({
-        where: { id: BigInt(id) },
-        data: { orden: index + 1 },
-      })
+    // Se utiliza Promise.all para compatibilidad con el pooler de Supabase
+    await Promise.all(
+      ordenIds.map((id, index) =>
+        prisma.autoridad.update({
+          where: { id: BigInt(id) },
+          data: { orden: index + 1 },
+        })
+      )
     );
-
-    await prisma.$transaction(updates);
 
     return { message: "¡Orden de autoridades actualizado correctamente!" };
   }
@@ -255,7 +256,7 @@ class CmsAutoridadesService {
   async actualizarRedesSociales({ facebook, instagram }) {
     const now = new Date();
 
-    await prisma.$transaction([
+    await Promise.all([
       prisma.configuracion.upsert({
         where: { clave: "SOCIAL_FACEBOOK" },
         update: { valor: facebook || "", updatedAt: now },

@@ -41,16 +41,18 @@ const gracefulShutdown = async (signal) => {
   if (process.env.NODE_ENV === "development") {
     console.log(`\n[Prisma] Recibida señal ${signal}. Liberando recursos...`);
   }
-  await prisma.$disconnect();
-  await pool.end();
+  delete globalForPrisma.pgPool;
+  delete globalForPrisma.prisma;
+  try {
+    await Promise.race([
+      Promise.allSettled([prisma.$disconnect(), pool.end()]),
+      new Promise((resolve) => setTimeout(resolve, 800)),
+    ]);
+  } catch (e) {
+    // Ignorar errores durante el cierre
+  }
   process.exit(0);
 };
 
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-
-process.once("SIGUSR2", async () => {
-  await prisma.$disconnect();
-  await pool.end();
-  process.kill(process.pid, "SIGUSR2");
-});
