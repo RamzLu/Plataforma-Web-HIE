@@ -1,11 +1,50 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import logosGobierno from "../../assets/logosGobierno.png";
 import logoCompleto from "../../assets/logo-completo.png";
+import { getInstitucional } from "../../api/autoridades.api.js";
 import "../../styles/layout/Footer.css";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+
+  const [socialData, setSocialData] = useState({
+    facebook: "https://facebook.com/redevitaformosa",
+    instagram: "https://instagram.com/redevitaformosa",
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    getInstitucional()
+      .then((data) => {
+        if (isMounted && data?.redesSociales) {
+          setSocialData({
+            facebook: data.redesSociales.facebook || "https://facebook.com/redevitaformosa",
+            instagram: data.redesSociales.instagram || "https://instagram.com/redevitaformosa",
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const getHandle = (url, defaultHandle) => {
+    if (!url) return defaultHandle;
+    try {
+      const cleaned = url.trim().replace(/\/+$/, "");
+      const parts = cleaned.split("/");
+      const last = parts[parts.length - 1];
+      if (last && !last.includes("?") && !last.includes("&") && last.length > 1) {
+        return `@${last}`;
+      }
+      return defaultHandle;
+    } catch {
+      return defaultHandle;
+    }
+  };
 
   return (
     <footer className="hospital-footer" role="contentinfo" aria-label="Pie de página institucional">
@@ -41,7 +80,7 @@ const Footer = () => {
             <div className="social-links-container">
               {/* Facebook */}
               <a
-                href="https://facebook.com/redevitaformosa"
+                href={socialData.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="social-card-btn facebook-card"
@@ -54,7 +93,6 @@ const Footer = () => {
                   </div>
                   <div className="social-meta">
                     <span className="social-title">Facebook Oficial</span>
-                    <span className="social-handle">@HospitalInterdistritalEvita</span>
                   </div>
                 </div>
                 <svg className="social-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -64,7 +102,7 @@ const Footer = () => {
 
               {/* Instagram */}
               <a
-                href="https://instagram.com/redevitaformosa"
+                href={socialData.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="social-card-btn instagram-card"
@@ -79,7 +117,6 @@ const Footer = () => {
                   </div>
                   <div className="social-meta">
                     <span className="social-title">Instagram Oficial</span>
-                    <span className="social-handle">@hospitalevitaformosa</span>
                   </div>
                 </div>
                 <svg className="social-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

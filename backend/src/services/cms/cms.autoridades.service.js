@@ -92,25 +92,39 @@ class CmsAutoridadesService {
   // ─── OBTENER DATOS INSTITUCIONALES (autoridades + redes) ──────────────────
 
   async obtenerInstitucional() {
-    const [autoridades, configs] = await Promise.all([
-      prisma.autoridad.findMany({
-        where: { activo: true },
-        orderBy: [{ orden: "asc" }, { id: "asc" }],
-        include: { archivo: true },
-      }),
-      prisma.configuracion.findMany({
-        where: { clave: { in: ["SOCIAL_FACEBOOK", "SOCIAL_INSTAGRAM"] } },
-      }),
-    ]);
+    let institucion = await prisma.informacion_institucional.findFirst({
+      include: { contacto_institucional: true },
+    });
 
-    const redesSociales = {
-      facebook: configs.find((c) => c.clave === "SOCIAL_FACEBOOK")?.valor || "",
-      instagram: configs.find((c) => c.clave === "SOCIAL_INSTAGRAM")?.valor || "",
-    };
+    if (!institucion) {
+      institucion = await prisma.informacion_institucional.create({
+        data: {
+          nombre: "Hospital Interdistrital Evita",
+          direccion: "Av. Principal 1234",
+          localidad: "Formosa",
+          provincia: "Formosa",
+          updatedAt: new Date(),
+        },
+        include: { contacto_institucional: true },
+      });
+    }
+
+    const contactos = institucion.contacto_institucional || [];
+    const facebookContacto = contactos.find((c) => c.redSocial.toLowerCase() === "facebook");
+    const instagramContacto = contactos.find((c) => c.redSocial.toLowerCase() === "instagram");
+
+    const autoridades = await prisma.autoridad.findMany({
+      where: { activo: true },
+      orderBy: [{ orden: "asc" }, { id: "asc" }],
+      include: { archivo: true },
+    });
 
     return {
       autoridades: autoridades.map(serializarAutoridad),
-      redesSociales,
+      redesSociales: {
+        facebook: facebookContacto?.enlace || "",
+        instagram: instagramContacto?.enlace || "",
+      },
     };
   }
 
@@ -254,32 +268,55 @@ class CmsAutoridadesService {
   // ─── REDES SOCIALES ───────────────────────────────────────────────────────
 
   async actualizarRedesSociales({ facebook, instagram }) {
-    const now = new Date();
+    let institucion = await prisma.informacion_institucional.findFirst();
+    if (!institucion) {
+      institucion = await prisma.informacion_institucional.create({
+        data: {
+          nombre: "Hospital Interdistrital Evita",
+          direccion: "Av. Principal 1234",
+          localidad: "Formosa",
+          provincia: "Formosa",
+          updatedAt: new Date(),
+        },
+      });
+    }
+
+    const institucionId = institucion.id;
+    const fbEnlace = (facebook || "").trim();
+    const igEnlace = (instagram || "").trim();
 
     await Promise.all([
-      prisma.configuracion.upsert({
-        where: { clave: "SOCIAL_FACEBOOK" },
-        update: { valor: facebook || "", updatedAt: now },
+      prisma.contacto_institucional.upsert({
+        where: {
+          institucionId_redSocial: {
+            institucionId,
+            redSocial: "facebook",
+          },
+        },
+        update: { enlace: fbEnlace },
         create: {
-          clave: "SOCIAL_FACEBOOK",
-          valor: facebook || "",
-          descripcion: "Enlace oficial de Facebook",
-          updatedAt: now,
+          institucionId,
+          redSocial: "facebook",
+          enlace: fbEnlace,
         },
       }),
-      prisma.configuracion.upsert({
-        where: { clave: "SOCIAL_INSTAGRAM" },
-        update: { valor: instagram || "", updatedAt: now },
+      prisma.contacto_institucional.upsert({
+        where: {
+          institucionId_redSocial: {
+            institucionId,
+            redSocial: "instagram",
+          },
+        },
+        update: { enlace: igEnlace },
         create: {
-          clave: "SOCIAL_INSTAGRAM",
-          valor: instagram || "",
-          descripcion: "Enlace oficial de Instagram",
-          updatedAt: now,
+          institucionId,
+          redSocial: "instagram",
+          enlace: igEnlace,
         },
       }),
     ]);
 
-    return { facebook: facebook || "", instagram: instagram || "" };
+    return { facebook: fbEnlace, instagram: igEnlace };
   }
 }
 

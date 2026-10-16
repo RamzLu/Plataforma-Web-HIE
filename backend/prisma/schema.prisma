@@ -85,15 +85,11 @@ model configuracion {
 model contacto_institucional {
   id                        BigInt                    @id @default(autoincrement())
   institucionId             BigInt
-  tipo                      TipoContacto
-  valor                     String                    @db.VarChar(255)
-  descripcion               String?                   @db.VarChar(255)
-  orden                     Int                       @default(0)
-  activo                    Boolean                   @default(true)
-  createdAt                 DateTime                  @default(now())
-  updatedAt                 DateTime
+  redSocial                 String                    @db.VarChar(50)
+  enlace                    String                    @db.VarChar(255)
   informacion_institucional informacion_institucional @relation(fields: [institucionId], references: [id], onDelete: Cascade)
 
+  @@unique([institucionId, redSocial])
   @@index([institucionId])
 }
 
@@ -433,17 +429,17 @@ enum EstadoEditorial {
   PROGRAMADO
 }
 
-enum TipoContacto {
-  TELEFONO
-  EMAIL
-  RED_SOCIAL
-  OTRO
-}
-
 enum TipoPublicacionAcademica {
   CURSO
   JORNADA
   CONGRESO
   PROYECTO_INVESTIGACION
   CONVOCATORIA
+}
+
+enum TipoContacto {
+  TELEFONO
+  EMAIL
+  RED_SOCIAL
+  OTRO
 }
