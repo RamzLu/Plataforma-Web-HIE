@@ -55,10 +55,31 @@
   gap: 16px; 
 }
 
+.cms-logo-container-inner {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
 .cms-logo {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+.cms-logo-completo {
+  height: 67px;
+  max-width: 185px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.2s ease;
+}
+
+.cms-logo:hover .cms-logo-completo {
+  opacity: 0.92;
 }
 
 .cms-logo-img {
@@ -67,6 +88,7 @@
   object-fit: contain;
   border-radius: 50%;
   padding: 2px;
+  display: block;
 }
 
 .cms-logo-text-box {

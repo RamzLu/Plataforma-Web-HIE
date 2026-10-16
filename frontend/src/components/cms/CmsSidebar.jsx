@@ -12,6 +12,7 @@ import {
   GraduationCap
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
+import logoCompletoBlanco from "../../assets/logo-completo-blanco.png";
 
 const CmsSidebar = ({ activeTab, setActiveTab }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -56,17 +57,24 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
     <aside className={`cms-sidebar ${isCollapsed ? "collapsed" : ""}`}>
       <div className="cms-sidebar-header">
         <div className="cms-logo-container-inner">
-          <div className="cms-logo">
-            <img
-              src={avatarHospital}
-              alt="Logo Hospital Evita"
-              className="cms-logo-img"
-            />
-            {!isCollapsed && (
-              <div className="cms-logo-text-box">
-                <span className="logo-title">HOSPITAL INTERDISTRITAL</span>
-                <span className="logo-subtitle">EVITA FORMOSA</span>
-              </div>
+          <div 
+            className="cms-logo"
+            onClick={() => setActiveTab && setActiveTab("dashboard")}
+            style={{ cursor: "pointer" }}
+            title="Hospital Interdistrital Evita Formosa"
+          >
+            {isCollapsed ? (
+              <img
+                src={avatarHospital}
+                alt="Logo Hospital Evita"
+                className="cms-logo-img"
+              />
+            ) : (
+              <img
+                src={logoCompletoBlanco}
+                alt="Hospital Interdistrital Evita Formosa"
+                className="cms-logo-completo"
+              />
             )}
           </div>
         </div>
