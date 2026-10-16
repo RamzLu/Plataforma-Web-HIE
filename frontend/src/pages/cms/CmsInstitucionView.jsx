@@ -83,6 +83,10 @@ const CmsInstitucionView = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
 
+  // --- Estado de Cambios Sin Guardar ---
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+
   // --- Estado de Arrastre (Drag and Drop) ---
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -113,6 +117,44 @@ const CmsInstitucionView = () => {
     fetchInstitucional();
   }, []);
 
+  // --- COMPROBAR CAMBIOS PENDIENTES ---
+  const checkHasChanges = () => {
+    if (!editingAutoridad) {
+      return !!(
+        autoridadForm.nombre.trim() ||
+        autoridadForm.cargo.trim() ||
+        autoridadForm.descripcion.trim() ||
+        autoridadForm.archivo
+      );
+    }
+    return (
+      autoridadForm.nombre !== (editingAutoridad.nombre || "") ||
+      autoridadForm.cargo !== (editingAutoridad.cargo || "") ||
+      autoridadForm.descripcion !== (editingAutoridad.descripcion || "") ||
+      autoridadForm.archivo !== null
+    );
+  };
+
+  const handleCloseAttempt = () => {
+    if (isSaving) return;
+    if (hasUnsavedChanges || checkHasChanges()) {
+      setShowUnsavedModal(true);
+    } else {
+      setShowAutoridadModal(false);
+      setHasUnsavedChanges(false);
+      setImageSrc(null);
+      setIsCropping(false);
+    }
+  };
+
+  const handleForceClose = () => {
+    setShowUnsavedModal(false);
+    setShowAutoridadModal(false);
+    setHasUnsavedChanges(false);
+    setImageSrc(null);
+    setIsCropping(false);
+  };
+
   // --- ABRIR MODAL CREAR ---
   const handleOpenCreateAutoridad = () => {
     setEditingAutoridad(null);
@@ -125,6 +167,7 @@ const CmsInstitucionView = () => {
     });
     setImageSrc(null);
     setIsCropping(false);
+    setHasUnsavedChanges(false);
     setShowAutoridadModal(true);
   };
 
@@ -140,6 +183,7 @@ const CmsInstitucionView = () => {
     });
     setImageSrc(null);
     setIsCropping(false);
+    setHasUnsavedChanges(false);
     setShowAutoridadModal(true);
   };
 
@@ -182,6 +226,7 @@ const CmsInstitucionView = () => {
         archivo: file,
         previewUrl: url,
       }));
+      setHasUnsavedChanges(true);
       setIsCropping(false);
       toast.success("Foto encuadrada correctamente para el portal público.");
     } catch (e) {
@@ -235,6 +280,7 @@ const CmsInstitucionView = () => {
         toast.success("¡Autoridad añadida correctamente!", { id: toastId });
       }
 
+      setHasUnsavedChanges(false);
       setShowAutoridadModal(false);
     } catch (error) {
       toast.error("No se pudo guardar la autoridad.", { id: toastId });
@@ -546,14 +592,14 @@ const CmsInstitucionView = () => {
 
       {/* MODAL DE CREACIÓN / EDICIÓN DE AUTORIDAD */}
       {showAutoridadModal && (
-        <div className="modal-overlay" onClick={() => !isSaving && setShowAutoridadModal(false)}>
+        <div className="modal-overlay" onClick={handleCloseAttempt}>
           <div className="modal-content-esp esp-modal-wrapper" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-esp">
               <h2>{editingAutoridad ? "Editar Autoridad" : "Añadir Autoridad"}</h2>
               <button
                 type="button"
                 className="btn-close-modal"
-                onClick={() => !isSaving && setShowAutoridadModal(false)}
+                onClick={handleCloseAttempt}
                 aria-label="Cerrar modal"
               >
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -575,7 +621,10 @@ const CmsInstitucionView = () => {
                       placeholder="Ej: Dr. Jorge Alberto Gómez"
                       required
                       value={autoridadForm.nombre}
-                      onChange={(e) => setAutoridadForm({ ...autoridadForm, nombre: e.target.value })}
+                      onChange={(e) => {
+                        setAutoridadForm({ ...autoridadForm, nombre: e.target.value });
+                        setHasUnsavedChanges(true);
+                      }}
                     />
                   </div>
 
@@ -589,7 +638,10 @@ const CmsInstitucionView = () => {
                       placeholder="Ej: Director Ejecutivo"
                       required
                       value={autoridadForm.cargo}
-                      onChange={(e) => setAutoridadForm({ ...autoridadForm, cargo: e.target.value })}
+                      onChange={(e) => {
+                        setAutoridadForm({ ...autoridadForm, cargo: e.target.value });
+                        setHasUnsavedChanges(true);
+                      }}
                     />
                   </div>
 
@@ -693,7 +745,10 @@ const CmsInstitucionView = () => {
                       placeholder="Breve reseña sobre la trayectoria o especialidad de la autoridad..."
                       rows="3"
                       value={autoridadForm.descripcion}
-                      onChange={(e) => setAutoridadForm({ ...autoridadForm, descripcion: e.target.value })}
+                      onChange={(e) => {
+                        setAutoridadForm({ ...autoridadForm, descripcion: e.target.value });
+                        setHasUnsavedChanges(true);
+                      }}
                       style={{ resize: "none" }}
                     ></textarea>
                   </div>
@@ -704,7 +759,7 @@ const CmsInstitucionView = () => {
                 <button
                   type="button"
                   className="btn-cancelar-gris"
-                  onClick={() => setShowAutoridadModal(false)}
+                  onClick={handleCloseAttempt}
                   disabled={isSaving}
                 >
                   CANCELAR
@@ -770,7 +825,123 @@ const CmsInstitucionView = () => {
         </div>
       )}
 
-      {/* ===== 4. MODAL DE RECORTE / ENCUADRE DE FOTOGRAFÍA (332 x 260) ===== */}
+      {/* ===== 4. MODAL DE ADVERTENCIA DE CAMBIOS SIN GUARDAR ===== */}
+      {showUnsavedModal && (
+        <div
+          className="modal-overlay"
+          style={{
+            zIndex: 99999,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 11, 32, 0.4)",
+            backdropFilter: "blur(2px)",
+          }}
+          onClick={() => setShowUnsavedModal(false)}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "384px",
+              margin: "16px",
+              borderRadius: "12px",
+              overflow: "hidden",
+              backgroundColor: "#ffffff",
+              border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)",
+              fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative",
+              zIndex: 999999,
+              display: "flex",
+              flexDirection: "column",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <h2
+                style={{
+                  margin: 0,
+                  color: "#000b20",
+                  fontSize: "20px",
+                  fontWeight: "600",
+                  lineHeight: "28px",
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                Hay cambios sin guardar
+              </h2>
+              <p
+                style={{
+                  color: "#44474d",
+                  margin: 0,
+                  fontSize: "16px",
+                  fontWeight: "400",
+                  lineHeight: "24px",
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                ¿Qué deseas hacer con el registro actual?
+              </p>
+            </div>
+            <div
+              style={{
+                padding: "16px 24px 24px 24px",
+                backgroundColor: "#f7f9fb",
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleForceClose}
+                style={{
+                  width: "100%",
+                  padding: "16px 24px",
+                  backgroundColor: "#ba1a1a",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "5px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  letterSpacing: "0.08em",
+                  lineHeight: "16px",
+                  transition: "background-color 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                Descartar cambios
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowUnsavedModal(false)}
+                style={{
+                  width: "100%",
+                  padding: "16px 24px",
+                  backgroundColor: "#d8e0ed",
+                  color: "#000b20",
+                  border: "none",
+                  borderRadius: "5px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  letterSpacing: "0.08em",
+                  lineHeight: "16px",
+                  transition: "background-color 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                Seguir editando
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== 5. MODAL DE RECORTE / ENCUADRE DE FOTOGRAFÍA (332 x 260) ===== */}
       {isCropping && imageSrc && (
         <div className="crop-modal-overlay">
           <div className="crop-modal-card">
