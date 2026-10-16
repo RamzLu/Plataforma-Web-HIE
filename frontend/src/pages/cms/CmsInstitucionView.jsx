@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical } from "lucide-react";
+import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn, ZoomOut, Check } from "lucide-react";
+import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import "../../styles/pages/cms/CmsInstitucionView.css";
@@ -11,6 +12,53 @@ import {
   reordenarAutoridades,
   updateRedesSociales,
 } from "../../api/autoridades.api.js";
+
+// Proporción exacta de la tarjeta en el portal público (331.73 x 260)
+const ASPECT_RATIO_AUTORIDAD = 332 / 260;
+
+const createImage = (url) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve(image));
+    image.addEventListener("error", (error) => reject(error));
+    image.setAttribute("crossOrigin", "anonymous");
+    image.src = url;
+  });
+
+async function getCroppedImg(imageSrc, pixelCrop, fileName = "autoridad.jpg") {
+  const image = await createImage(imageSrc);
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) return null;
+
+  canvas.width = Math.round(pixelCrop.width);
+  canvas.height = Math.round(pixelCrop.height);
+
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  return new Promise((resolve) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const file = new File([blob], fileName, { type: "image/jpeg" });
+        resolve({ file, url: URL.createObjectURL(blob) });
+      },
+      "image/jpeg",
+      0.95
+    );
+  });
+}
 
 const CmsInstitucionView = () => {
   const [loading, setLoading] = useState(true);
@@ -27,6 +75,13 @@ const CmsInstitucionView = () => {
     archivo: null,
     previewUrl: null,
   });
+
+  // --- Estado del Recortador (Cropper) ---
+  const [imageSrc, setImageSrc] = useState(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   // --- Estado de Arrastre (Drag and Drop) ---
   const [draggedIndex, setDraggedIndex] = useState(null);
@@ -68,6 +123,8 @@ const CmsInstitucionView = () => {
       archivo: null,
       previewUrl: null,
     });
+    setImageSrc(null);
+    setIsCropping(false);
     setShowAutoridadModal(true);
   };
 
@@ -81,7 +138,56 @@ const CmsInstitucionView = () => {
       archivo: null,
       previewUrl: autoridad.imagenUrl || null,
     });
+    setImageSrc(null);
+    setIsCropping(false);
     setShowAutoridadModal(true);
+  };
+
+  // --- MANEJADORES DE RECORTE DE IMAGEN ---
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor seleccione un archivo de imagen (JPG, PNG o WEBP).");
+      return;
+    }
+
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setImageSrc(reader.result);
+      setIsCropping(true);
+    };
+    e.target.value = "";
+  };
+
+  const onCropComplete = (croppedArea, croppedAreaPx) => {
+    setCroppedAreaPixels(croppedAreaPx);
+  };
+
+  const handleSaveCrop = async () => {
+    if (!imageSrc || !croppedAreaPixels) return;
+    try {
+      const { file, url } = await getCroppedImg(
+        imageSrc,
+        croppedAreaPixels,
+        `autoridad-${Date.now()}.jpg`
+      );
+      setAutoridadForm((prev) => ({
+        ...prev,
+        archivo: file,
+        previewUrl: url,
+      }));
+      setIsCropping(false);
+      toast.success("Foto encuadrada correctamente para el portal público.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al recortar la imagen.");
+    }
   };
 
   // --- GUARDAR AUTORIDAD (CREAR O ACTUALIZAR) ---
@@ -326,11 +432,12 @@ const CmsInstitucionView = () => {
                       src={a.imagenUrl}
                       alt={a.nombre}
                       style={{
-                        width: "44px",
-                        height: "44px",
-                        borderRadius: "50%",
+                        width: "51px",
+                        height: "40px",
+                        borderRadius: "6px",
                         objectFit: "cover",
-                        border: "2px solid #e2e8f0",
+                        border: "1px solid #cbd5e1",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
                       }}
                     />
                   ) : (
@@ -487,79 +594,94 @@ const CmsInstitucionView = () => {
                   </div>
 
                   <div className="esp-full-width">
-                    <label className="esp-form-label">Fotografía</label>
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "#ffffff", padding: "12px 16px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
+                    <label className="esp-form-label">
+                      Fotografía <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "normal" }}>(Proporción tarjeta 332 × 260)</span>
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", background: "#ffffff", padding: "14px 16px", borderRadius: "10px", border: "1px solid #cbd5e1" }}>
                       {autoridadForm.previewUrl ? (
-                        <img
-                          src={autoridadForm.previewUrl}
-                          alt="Foto"
-                          style={{
-                            width: "52px",
-                            height: "52px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            border: "2px solid #0284c7",
-                            flexShrink: 0
-                          }}
-                        />
+                        <div style={{ position: "relative" }}>
+                          <img
+                            src={autoridadForm.previewUrl}
+                            alt="Foto"
+                            style={{
+                              width: "74px",
+                              height: "58px",
+                              borderRadius: "6px",
+                              objectFit: "cover",
+                              border: "2px solid #0284c7",
+                              display: "block",
+                              flexShrink: 0,
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                            }}
+                          />
+                        </div>
                       ) : (
                         <div
                           style={{
-                            width: "52px",
-                            height: "52px",
-                            borderRadius: "50%",
+                            width: "74px",
+                            height: "58px",
+                            borderRadius: "6px",
                             background: "#e0f2fe",
                             color: "#0284c7",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            flexShrink: 0
+                            flexShrink: 0,
+                            border: "1px dashed #7dd3fc",
                           }}
                         >
-                          <Users size={24} />
+                          <Users size={26} />
                         </div>
                       )}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <label
-                          htmlFor="aut-modal-file"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            padding: "6px 14px",
-                            background: "#e2e8f0",
-                            color: "#0c2340",
-                            borderRadius: "6px",
-                            fontWeight: "600",
-                            fontSize: "0.82rem",
-                            cursor: "pointer",
-                            transition: "background 0.2s"
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.background = "#cbd5e1"}
-                          onMouseLeave={(e) => e.currentTarget.style.background = "#e2e8f0"}
-                        >
-                          <Upload size={14} />
-                          {autoridadForm.previewUrl ? "Cambiar foto" : "Seleccionar foto"}
-                        </label>
+                        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px" }}>
+                          <label
+                            htmlFor="aut-modal-file"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              padding: "7px 14px",
+                              background: "#0c2340",
+                              color: "#ffffff",
+                              borderRadius: "6px",
+                              fontWeight: "600",
+                              fontSize: "0.82rem",
+                              cursor: "pointer",
+                              transition: "background 0.2s"
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = "#1a365d"}
+                            onMouseLeave={(e) => e.currentTarget.style.background = "#0c2340"}
+                          >
+                            <Upload size={14} />
+                            {autoridadForm.previewUrl ? "Cambiar foto" : "Seleccionar foto"}
+                          </label>
+
+                          {imageSrc && (
+                            <button
+                              type="button"
+                              onClick={() => setIsCropping(true)}
+                              className="btn-inst-recrop"
+                            >
+                              <Crop size={14} /> Reajustar encuadre
+                            </button>
+                          )}
+                        </div>
                         <input
                           id="aut-modal-file"
                           type="file"
                           accept="image/*"
                           style={{ display: "none" }}
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) {
-                              setAutoridadForm({
-                                ...autoridadForm,
-                                archivo: file,
-                                previewUrl: URL.createObjectURL(file)
-                              });
-                            }
-                          }}
+                          onChange={handleFileChange}
                         />
-                        <span style={{ display: "block", marginTop: "4px", fontSize: "0.75rem", color: "#64748b", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
-                          {autoridadForm.archivo ? autoridadForm.archivo.name : "Formato JPG o PNG"}
-                        </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" }}>
+                          <span className="inst-crop-badge">
+                            Medida portal: 332 × 260
+                          </span>
+                          <span style={{ fontSize: "0.75rem", color: "#64748b", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                            {autoridadForm.archivo ? autoridadForm.archivo.name : "JPG, PNG o WEBP"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -642,6 +764,91 @@ const CmsInstitucionView = () => {
                 disabled={isSaving}
               >
                 {isSaving ? "..." : "ELIMINAR"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== 4. MODAL DE RECORTE / ENCUADRE DE FOTOGRAFÍA (332 x 260) ===== */}
+      {isCropping && imageSrc && (
+        <div className="crop-modal-overlay">
+          <div className="crop-modal-card">
+            <div className="crop-modal-header">
+              <div className="crop-header-left">
+                <div className="crop-header-icon">
+                  <Crop size={20} />
+                </div>
+                <div>
+                  <h3 className="crop-modal-title">Encuadrar Fotografía</h3>
+                  <p className="crop-modal-subtitle">
+                    Ajustá el centrado y zoom para la tarjeta del portal público (332 × 260 px)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="crop-modal-close"
+                onClick={() => setIsCropping(false)}
+                title="Cerrar recorte"
+                aria-label="Cerrar ventana de recorte"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="crop-area-wrapper">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={ASPECT_RATIO_AUTORIDAD}
+                cropShape="rect"
+                showGrid={true}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+
+            {/* Controles de Zoom */}
+            <div className="crop-controls-panel">
+              <div className="crop-zoom-row">
+                <ZoomOut size={16} className="crop-zoom-icon" />
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.05}
+                  aria-label="Zoom de recorte"
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="crop-zoom-slider"
+                />
+                <ZoomIn size={16} className="crop-zoom-icon" />
+                <span className="crop-zoom-label">
+                  {Math.round(zoom * 100)}%
+                </span>
+              </div>
+              <span className="crop-hint">
+                Arrastrá la foto para centrar la cara y usá el deslizador para regular el acercamiento.
+              </span>
+            </div>
+
+            <div className="crop-modal-footer">
+              <button
+                type="button"
+                className="btn-cancelar-gris"
+                onClick={() => setIsCropping(false)}
+              >
+                CANCELAR
+              </button>
+              <button
+                type="button"
+                className="btn-crop-confirm"
+                onClick={handleSaveCrop}
+              >
+                <Check size={16} strokeWidth={2.5} /> APLICAR RECORTE
               </button>
             </div>
           </div>
