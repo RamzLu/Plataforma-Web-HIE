@@ -8,7 +8,8 @@ import {
   Contact,
   Activity, 
   Video,
-  ChevronDown
+  ChevronDown,
+  GraduationCap
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 
@@ -31,6 +32,7 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
         { id: "documentacion", label: "Documentación", icon: <FolderOpen /> },
         { id: "especialidades", label: "Especialidades", icon: <Activity /> },
         { id: "profesionales", label: "Profesionales", icon: <Contact /> },
+        { id: "residencias", label: "Residencias", icon: <GraduationCap /> },
       ],
     },
     {

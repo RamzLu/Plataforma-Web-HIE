@@ -3,7 +3,9 @@ import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import { getEspecialidades, createEspecialidad, updateEspecialidad, deleteEspecialidad } from "../../api/especialidades.api.js";
 import "../../styles/components/cms/CmsDashboard.css"; 
+import "../../styles/pages/cms/CmsNoticiasView.css";
 import "../../styles/pages/cms/CmsEspecialidadesView.css"; 
+import "../../styles/pages/cms/CmsResidenciasView.css";
 
 const CmsEspecialidadesView = () => {
   const [especialidades, setEspecialidades] = useState([]);
@@ -12,6 +14,7 @@ const CmsEspecialidadesView = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState("PUBLICADOS");  
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -132,65 +135,102 @@ const CmsEspecialidadesView = () => {
     if (filtroTipo === "ESPECIALIDADES") matchTipo = esp.esServicio === false;
     if (filtroTipo === "SERVICIOS") matchTipo = esp.esServicio === true;
 
-    return matchEstado && matchTipo;
+    const query = searchTerm.toLowerCase();
+    const matchSearch = !searchTerm ||
+      (esp.nombre && esp.nombre.toLowerCase().includes(query)) ||
+      (esp.ubicacion && esp.ubicacion.toLowerCase().includes(query)) ||
+      (esp.descripcion && esp.descripcion.toLowerCase().includes(query));
+
+    return matchEstado && matchTipo && matchSearch;
   });
 
   return (
     <div className="cms-dashboard-card">
+      {/* Cabecera idéntica a Noticias y Profesionales */}
       <div className="news-view-header">
         <div>
-          <h3 className="cms-card-title news-view-title">Listado de Especialidades y Servicios</h3>
-          <p className="news-view-subtitle">Administre los servicios médicos de la institución.</p>
+          <h3 className="cms-card-title news-view-title">
+            Listado de especialidades y servicios
+          </h3>
+          <p className="news-view-subtitle">
+            Administre las especialidades médicas y servicios clave de la institución.
+          </p>
         </div>
-        <button type="button" className="btn-crear-noticia-header" onClick={handleOpenCreate}>+ NUEVO ELEMENTO</button>
+        <button type="button" className="btn-crear-noticia-header" onClick={handleOpenCreate}>
+          + AÑADIR ESPECIALIDAD
+        </button>
       </div>
 
+      {/* Barra de herramientas: Pestañas a la izquierda, buscador y filtros a la derecha */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
         
-        <div className="esp-tabs-container" style={{ margin: 0 }}>
+        {/* Pestañas de estado idénticas a Noticias */}
+        <div style={{ display: "flex", gap: "10px" }}>
           <button 
-            className={`esp-tab-btn ${activeTab === "PUBLICADOS" ? "active" : ""}`}
+            type="button"
+            className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
             onClick={() => setActiveTab("PUBLICADOS")}
           >
             Publicados
           </button>
           <button 
-            className={`esp-tab-btn ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
+            type="button"
+            className={`res-tab-btn-unificado ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
             onClick={() => setActiveTab("ARCHIVADOS")}
           >
             Archivados
           </button>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>Mostrar:</span>
-          <select 
-            value={filtroTipo} 
-            onChange={(e) => setFiltroTipo(e.target.value)}
-            style={{ padding: "8px 12px", borderRadius: "6px", border: "1px solid #cbd5e1", fontWeight: "600", color: "#0c2340", outline: "none", cursor: "pointer" }}
-          >
-            <option value="TODOS">Todos los registros</option>
-            <option value="ESPECIALIDADES">Solo Especialidades</option>
-            <option value="SERVICIOS">Solo Servicios Clave</option>
-          </select>
-        </div>
+        {/* Buscador y Selector alineados */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          <div className="res-search-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Buscar por nombre o ubicación..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="res-search-input-field"
+            />
+          </div>
 
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
+              FILTRAR POR:
+            </span>
+            <select 
+              value={filtroTipo} 
+              onChange={(e) => setFiltroTipo(e.target.value)}
+              className="res-select-field"
+            >
+              <option value="TODOS">Todas las clasificaciones</option>
+              <option value="ESPECIALIDADES">Solo Especialidades</option>
+              <option value="SERVICIOS">Solo Servicios Clave</option>
+            </select>
+          </div>
+        </div>
       </div>
 
+      {/* Contenedor de la tabla idéntico al estilo de Noticias y Profesionales */}
       <div className="cms-news-table-container">
-        <div className="activity-table-head">
-          <div style={{ flex: 1.5 }}>NOMBRE</div>
-          <div style={{ width: "140px" }}>CLASIFICACIÓN</div>
-          <div style={{ flex: 2 }}>CONTENIDO</div>
+        <div className="activity-table-head news-table-head" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <div style={{ flex: 1.8 }}>CONTENIDO</div>
+          <div style={{ flex: 1.2 }}>UBICACIÓN</div>
+          <div style={{ flex: 1 }}>HORARIOS</div>
+          <div style={{ flex: 1 }}>CLASIFICACIÓN</div>
           <div style={{ width: "120px", textAlign: "center" }}>ESTADO</div>
           <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
         <div className="activity-table-body">
           {loading ? ( 
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 0", gap: "15px", width: "100%" }}>
-              <div className="cms-spinner" style={{ width: "40px", height: "40px", borderWidth: "4px", borderTopColor: "#0c2340", borderRightColor: "#e2e8f0", borderBottomColor: "#e2e8f0", borderLeftColor: "#e2e8f0" }}></div>
-              <span style={{ color: "#64748b", fontSize: "0.95rem", fontWeight: "500" }}>Cargando listado...</span>
+            <div style={{ padding: "40px", textAlign: "center", gridColumn: "1 / -1" }}>
+              <div className="cms-spinner" style={{ margin: "0 auto 10px auto" }}></div>
+              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>Cargando listado...</span>
             </div>
           ) : 
            datosFiltrados.length === 0 ? (
@@ -199,52 +239,72 @@ const CmsEspecialidadesView = () => {
             </div> 
           ) : (
             datosFiltrados.map((esp) => (
-              <div className="activity-row" key={esp.id + (esp.esServicio ? 'srv' : 'esp')}>
+              <div className="activity-row news-table-row" key={esp.id + (esp.esServicio ? 'srv' : 'esp')} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                 
-                <div style={{ flex: 1.5 }}>
-                  <div style={{ fontWeight: "700", color: "#0c2340", fontSize: "0.95rem" }}>{esp.nombre}</div>
+                {/* Columna CONTENIDO con miniatura e información */}
+                <div className="col-content" style={{ flex: 1.8, display: "flex", flexDirection: "row", alignItems: "center", gap: "15px" }}>
+                  <div className="news-thumb-box" style={{ display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f1f5f9" }}>
+                    <div className="news-thumb-mock" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                      <span style={{ fontSize: "0.75rem", fontWeight: "800", color: "#0c2340" }}>HIE</span>
+                    </div>
+                  </div>
+                  <div className="news-title-interactive">
+                    <span className="activity-title" style={{ fontWeight: "600", color: "#0c2340", fontSize: "0.95rem", display: "block" }}>
+                      {esp.nombre}
+                    </span>
+                    <span style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "4px", display: "block" }}>
+                      {esp.descripcion && esp.descripcion.length > 55 
+                        ? `${esp.descripcion.substring(0, 55)}...` 
+                        : esp.descripcion || "Área asistencial del hospital"}
+                    </span>
+                  </div>
                 </div>
 
-                <div style={{ width: "140px" }}>
+                {/* Columna UBICACIÓN */}
+                <div style={{ flex: 1.2, color: "#475569", fontSize: "0.9rem", fontWeight: "500" }}>
+                  {esp.ubicacion || "Sin ubicación asignada"}
+                </div>
+
+                {/* Columna HORARIOS */}
+                <div style={{ flex: 1, color: "#475569", fontSize: "0.9rem", fontWeight: "500" }}>
+                  {esp.horarios || "Consultar horarios"}
+                </div>
+
+                {/* Columna CLASIFICACIÓN (estilo idéntico a Noticias y Profesionales) */}
+                <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
                   <span style={{ 
-                    fontSize: "0.7rem", 
-                    fontWeight: "700", 
-                    color: esp.esServicio ? "#0284c7" : "#8b5cf6",
-                    backgroundColor: esp.esServicio ? "#e0f2fe" : "#ede9fe",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    letterSpacing: "0.5px"
+                    backgroundColor: esp.esServicio ? "#e0f2fe" : "#ede9fe", 
+                    color: esp.esServicio ? "#0284c7" : "#6d28d9", 
+                    padding: "6px 14px", 
+                    borderRadius: "8px", 
+                    fontSize: "0.85rem", 
+                    fontWeight: "700" 
                   }}>
                     {esp.esServicio ? "SERVICIO CLAVE" : "ESPECIALIDAD"}
                   </span>
                 </div>
 
-                <div style={{ flex: 2, color: "#64748b", fontSize: "0.85rem" }}>
-                  <div style={{ fontWeight: "600", marginBottom: "4px", color: "#475569" }}>
-                    {esp.ubicacion || "Sin ubicación asignada"}
-                  </div>
-                  {esp.descripcion && esp.descripcion.length > 50 
-                    ? `${esp.descripcion.substring(0, 50)}...` 
-                    : esp.descripcion}
-                </div>
-
+                {/* Columna ESTADO */}
                 <div style={{ width: "120px", textAlign: "center" }}>
                   <span className={`status-badge ${esp.estado === "PUBLICADO" ? "publicado" : "archivado"}`}>
                     {esp.estado}
                   </span>
                 </div>
 
+                {/* Columna ACCIONES */}
                 <div style={{ width: "100px", display: "flex", justifyContent: "center", gap: "10px" }}>
-                  <button type="button" onClick={() => handleOpenEdit(esp)} className="news-action-btn-edit">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <button type="button" onClick={() => handleOpenEdit(esp)} className="news-action-btn-edit" title="Editar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                   </button>
-                  <button type="button" onClick={() => confirmDelete(esp)} className="news-action-btn-delete">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <button type="button" onClick={() => confirmDelete(esp)} className="news-action-btn-delete" title="Eliminar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="3 6 5 6 21 6"></polyline>
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
                     </svg>
                   </button>
                 </div>
