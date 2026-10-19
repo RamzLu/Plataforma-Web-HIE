@@ -18,11 +18,16 @@ const capacitacionesData = [
     fecha: "20 de Mayo de 2026",
     horario: "10:00 hs.",
     modalidadCompleta: "Presencial (SUM Hospital Evita)",
+    modalidadTag: "VIRTUAL",
     descripcion:
       "Capacitación intensiva sobre el diagnóstico precoz, protocolo de trombolisis y manejo inicial del paciente con ACV isquémico agudo en el servicio de urgencias.",
     pdfUrl: "/docs/temario-acv.pdf",
     whatsappMsg:
       "Hola! Quisiera más información sobre la capacitación: ABORDAJE INICIAL DEL ACV ISQUÉMICO EN GUARDIA",
+    tipo: "video",
+    badgeIcon: "🎥",
+    badgeLabel: "Video On-Demand",
+    btnText: "REPRODUCIR VIDEO",
   },
   {
     id: 2,
@@ -32,11 +37,16 @@ const capacitacionesData = [
     fecha: "22 de Mayo de 2026",
     horario: "11:30 hs.",
     modalidadCompleta: "Virtual - Plataforma Telesalud HIE",
+    modalidadTag: "VIRTUAL",
     descripcion:
       "Taller práctico para el manejo del sistema institucional de teleconsultas, carga de historias clínicas virtuales y atención remota de pacientes.",
     pdfUrl: "/docs/temario-telesalud.pdf",
     whatsappMsg:
       "Hola! Quisiera más información sobre la capacitación: USO DE LA PLATAFORMA DE TELESALUD Y TELECONSULTAS",
+    tipo: "pdf",
+    badgeIcon: "📄",
+    badgeLabel: "Guía PDF",
+    btnText: "ABRIR PDF",
   },
   {
     id: 3,
@@ -46,11 +56,16 @@ const capacitacionesData = [
     fecha: "20 de Mayo de 2026",
     horario: "10:00 hs.",
     modalidadCompleta: "Presencial (SUM Hospital Evita)",
+    modalidadTag: "PRESENCIAL",
     descripcion:
       "Capacitación para jefes de enfermería en la transformación de registros administrativos en datos clínicos útiles para la toma de decisiones.",
     pdfUrl: "/docs/temario-gestion-enfermeria.pdf",
     whatsappMsg:
       "Hola! Quisiera más información sobre la capacitación: GESTIÓN BASADA EN DATOS CLÍNICOS PARA ENFERMERÍA",
+    tipo: "presencial",
+    badgeIcon: "👥",
+    badgeLabel: "Presencial",
+    btnText: "VER MÁS",
   },
   {
     id: 4,
@@ -60,11 +75,16 @@ const capacitacionesData = [
     fecha: "05 de Junio de 2026",
     horario: "08:30 hs.",
     modalidadCompleta: "Presencial (Gimnasio de Rehabilitación)",
+    modalidadTag: "PRESENCIAL",
     descripcion:
       "Actualización en maniobras de RCP avanzada, uso de desfibrilador externo automático (DEA) y manejo de vía aérea en emergencias médicas.",
     pdfUrl: "/docs/temario-rcp.pdf",
     whatsappMsg:
       "Hola! Quisiera más información sobre la capacitación: REANIMACIÓN CARDIOPULMONAR (RCP) AVANZADA",
+    tipo: "presencial",
+    badgeIcon: "👥",
+    badgeLabel: "Presencial",
+    btnText: "VER MÁS",
   },
   {
     id: 5,
@@ -74,11 +94,16 @@ const capacitacionesData = [
     fecha: "12 de Junio de 2026",
     horario: "09:00 hs.",
     modalidadCompleta: "Híbrida - Aula Magna y Zoom",
+    modalidadTag: "HÍBRIDA",
     descripcion:
       "Estrategias y medidas de bioseguridad para la prevención de infecciones asociadas al cuidado de la salud (IACS) en servicios críticos.",
     pdfUrl: "/docs/temario-infecciones.pdf",
     whatsappMsg:
       "Hola! Quisiera más información sobre la capacitación: CONTROL Y PREVENCIÓN DE INFECCIONES INTRAHOSPITALARIAS",
+    tipo: "presencial",
+    badgeIcon: "👥",
+    badgeLabel: "Presencial",
+    btnText: "VER MÁS",
   },
   {
     id: 6,
@@ -88,16 +113,30 @@ const capacitacionesData = [
     fecha: "18 de Junio de 2026",
     horario: "11:00 hs.",
     modalidadCompleta: "Presencial (Auditorio Principal HIE)",
+    modalidadTag: "PRESENCIAL",
     descripcion:
       "Análisis de casos dilemáticos en la práctica médica diaria, consentimiento informado y marco legal de la atención en el hospital público.",
     pdfUrl: "/docs/temario-bioetica.pdf",
     whatsappMsg:
       "Hola! Quisiera más información sobre la capacitación: BIOÉTICA Y DERECHOS DEL PACIENTE EN EL ÁMBITO PÚBLICO",
+    tipo: "presencial",
+    badgeIcon: "👥",
+    badgeLabel: "Presencial",
+    btnText: "VER MÁS",
   },
 ];
 
 const CapacitacionPage = () => {
   const [selectedCurso, setSelectedCurso] = useState(null);
+
+  const handleOpenWhatsappCurso = (curso) => {
+    if (!curso) return;
+    const mensaje = encodeURIComponent(
+      curso.whatsappMsg ||
+        `Hola! Quisiera más información sobre la capacitación: ${curso.titulo}`
+    );
+    window.open(`https://wa.me/?text=${mensaje}`, "_blank");
+  };
 
   return (
     <main className="capacitacion-page">
@@ -143,40 +182,114 @@ const CapacitacionPage = () => {
           {capacitacionesData.map((item, index) => (
             <AnimatedContent
               key={item.id}
+              className="cap-grid-item"
               distance={40}
               direction="vertical"
               delay={index * 0.08} // Efecto cascada entre tarjetas
               threshold={0.1}
             >
-              <div className="cap-card">
-                {item.imagen ? (
-                  <div
-                    className="cap-card-bg"
-                    style={{ backgroundImage: `url(${item.imagen})` }}
-                  >
-                    <div className="cap-card-overlay">
-                      <h3>{item.titulo}</h3>
-                      <p>{item.modalidadCorta}</p>
-                      <button
-                        className="cap-btn-vermas"
-                        onClick={() => setSelectedCurso(item)}
+              <div className="cap-card-unified">
+                {/* Contenedor de Imagen o Placeholder con Badge Flotante */}
+                <div className="cap-card-media">
+                  {item.imagen ? (
+                    <img
+                      src={item.imagen}
+                      alt={item.titulo}
+                      className="cap-card-img"
+                    />
+                  ) : (
+                    <div className="cap-card-placeholder">
+                      <div className="cap-placeholder-icon-wrap">
+                        <svg
+                          className="cap-placeholder-icon"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                          <path d="M12 8v8" />
+                          <path d="M8 12h8" />
+                        </svg>
+                      </div>
+                      <span className="cap-placeholder-brand">
+                        HOSPITAL INTERDISTRITAL EVITA
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Badge del material flotando en la esquina superior derecha */}
+                  <div className={`material-badge badge-${item.tipo}`}>
+                    <span className="material-badge-icon">{item.badgeIcon}</span>
+                    <span className="material-badge-label">{item.badgeLabel}</span>
+                  </div>
+                </div>
+
+                {/* Contenido / Cuerpo de la tarjeta */}
+                <div className="cap-card-body">
+                  <span className="cap-card-date-modality">
+                    {item.fecha.toUpperCase()} • {item.modalidadTag || "PRESENCIAL"}
+                  </span>
+
+                  <h3 className="cap-card-title">{item.titulo}</h3>
+
+                  <p className="cap-card-desc">{item.descripcion}</p>
+
+                  <div className="cap-card-meta">
+                    <div className="cap-card-meta-item">
+                      <svg
+                        className="cap-meta-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
-                        VER MÁS
-                      </button>
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                      <span>{item.horario}</span>
+                    </div>
+                    <div className="cap-card-meta-item">
+                      <svg
+                        className="cap-meta-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                      </svg>
+                      <span>{item.modalidadCorta}</span>
                     </div>
                   </div>
-                ) : (
-                  <div className="cap-card-empty">
-                    <h3>{item.titulo}</h3>
-                    <p>{item.modalidadCorta}</p>
-                    <button
-                      className="cap-btn-vermas outline"
-                      onClick={() => setSelectedCurso(item)}
-                    >
-                      VER MÁS
-                    </button>
-                  </div>
-                )}
+                </div>
+
+                {/* Botón inferior institucional de ancho completo */}
+                <div className="cap-card-footer">
+                  <button
+                    className="cap-btn-vermas-unified"
+                    onClick={() => setSelectedCurso(item)}
+                  >
+                    <span>
+                      {item.btnText ||
+                        (item.tipo === "video"
+                          ? "REPRODUCIR VIDEO"
+                          : item.tipo === "pdf"
+                          ? "ABRIR PDF"
+                          : "VER MÁS")}
+                    </span>
+                    <span className="cap-btn-arrow">➔</span>
+                  </button>
+                </div>
               </div>
             </AnimatedContent>
           ))}

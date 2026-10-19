@@ -109,6 +109,7 @@
 .cap-banner-logo {
   height: 144px;
 }
+/* GRILLA Y TARJETAS UNIFICADAS (STYLE B) */
 .cap-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -117,80 +118,274 @@
   margin-bottom: 40px;
 }
 
+.cap-grid-item {
+  height: 100%;
+  display: flex;
+}
+
+.cap-card-unified,
 .cap-card {
-  height: 240px;
+  width: 100%;
+  background-color: #ffffff;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.cap-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
-}
-
-.cap-card-bg {
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-}
-
-.cap-card-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(12, 35, 64, 0.9) 0%,
-    rgba(12, 35, 64, 0.35) 100%
-  );
-  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease;
+}
+
+.cap-card-unified:hover,
+.cap-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 30px rgba(12, 35, 64, 0.12);
+  border-color: #cbd5e1;
+}
+
+/* MEDIA: IMAGEN O PLACEHOLDER ILUSTRADO */
+.cap-card-media {
+  position: relative;
+  width: 100%;
+  height: 190px;
+  background-color: #f1f5f9;
+  overflow: hidden;
+}
+
+.cap-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.cap-card-unified:hover .cap-card-img {
+  transform: scale(1.05);
+}
+
+/* PLACEHOLDER ILUSTRADO INSTITUCIONAL */
+.cap-card-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #eef5fc 0%, #d8e8f8 60%, #c8ddf3 100%);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cap-card-placeholder::before {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 70%);
+  top: -60px;
+  right: -60px;
+  pointer-events: none;
+}
+
+.cap-placeholder-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(43, 91, 148, 0.16);
+  color: #2b5b94;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+.cap-card-unified:hover .cap-placeholder-icon-wrap {
+  transform: scale(1.08);
+}
+
+.cap-placeholder-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.cap-placeholder-brand {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #2b5b94;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* BADGES FLOTANTES DEL MATERIAL */
+.material-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+  z-index: 2;
+  text-transform: uppercase;
+}
+
+.material-badge .material-badge-icon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.material-badge.badge-video {
+  background-color: #dc2626;
   color: #ffffff;
 }
 
-.cap-card-overlay h3,
-.cap-card-empty h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  line-height: 1.25;
+.material-badge.badge-pdf {
+  background-color: #d97706;
+  color: #ffffff;
+}
+
+.material-badge.badge-presencial {
+  background-color: #2b5b94;
+  color: #ffffff;
+}
+
+/* CUERPO DE LA TARJETA BLANCA */
+.cap-card-body {
+  padding: 22px 22px 16px 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.cap-card-date-modality {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #2b5b94;
+  letter-spacing: 0.6px;
   margin-bottom: 8px;
   text-transform: uppercase;
 }
 
-.cap-card-overlay p,
-.cap-card-empty p {
-  font-size: 0.85rem;
-  font-weight: 300;
-  font-style: italic;
-  margin-bottom: 15px;
-  opacity: 0.9;
+.cap-card-title {
+  color: #0c2340;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.7em;
 }
 
-.cap-card-empty {
-  width: 100%;
-  height: 100%;
-  padding: 25px 20px;
+.cap-card-desc {
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* META-INFORMACIÓN: HORARIO Y MODALIDAD CON ICONOS */
+.cap-card-meta {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  background-color: #ffffff;
-  color: #1c1e21;
+  gap: 7px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
 }
 
+.cap-card-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.8rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.cap-meta-icon {
+  width: 15px;
+  height: 15px;
+  color: #2b5b94;
+  flex-shrink: 0;
+}
+
+/* FOOTER Y BOTÓN INTEGRADO DE ANCHO COMPLETO */
+.cap-card-footer {
+  padding: 0 22px 22px 22px;
+  width: 100%;
+}
+
+.cap-btn-vermas-unified {
+  width: 100%;
+  background-color: #2b5b94;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+  font-family: inherit;
+  text-transform: uppercase;
+  box-shadow: 0 3px 8px rgba(43, 91, 148, 0.2);
+}
+
+.cap-btn-vermas-unified:hover {
+  background-color: #1c4373;
+  box-shadow: 0 6px 14px rgba(43, 91, 148, 0.3);
+}
+
+.cap-btn-vermas-unified:active {
+  transform: translateY(1px);
+}
+
+.cap-btn-arrow {
+  transition: transform 0.2s ease;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.cap-btn-vermas-unified:hover .cap-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* Mantenemos soporte de compatibilidad */
 .cap-btn-vermas {
   background-color: #2b5b94;
   color: #ffffff;
@@ -207,11 +402,6 @@
 
 .cap-btn-vermas:hover {
   background-color: #1c4373;
-}
-
-.cap-btn-vermas.outline {
-  background-color: #2b5b94;
-  color: #ffffff;
 }
 
 .cap-disclaimer {
