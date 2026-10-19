@@ -11,7 +11,8 @@ export const obtenerResidencias = async (req, res, next) => {
 
 export const crearResidencia = async (req, res, next) => {
   try {
-    const result = await CmsResidenciaService.crearResidencia(req.body, req.file);
+    const files = req.files || req.file;
+    const result = await CmsResidenciaService.crearResidencia(req.body, files);
     return res.status(201).json(result);
   } catch (error) {
     next(error);
@@ -21,7 +22,8 @@ export const crearResidencia = async (req, res, next) => {
 export const actualizarResidencia = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await CmsResidenciaService.actualizarResidencia(id, req.body, req.file);
+    const files = req.files || req.file;
+    const result = await CmsResidenciaService.actualizarResidencia(id, req.body, files);
     return res.status(200).json(result);
   } catch (error) {
     next(error);

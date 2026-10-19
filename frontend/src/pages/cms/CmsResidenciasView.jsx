@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
-import { FileText, Upload, X, File, Video, ExternalLink } from "lucide-react";
+import {
+  FileText,
+  Upload,
+  X,
+  File,
+  Image as ImageIcon,
+  ExternalLink,
+} from "lucide-react";
 import keycloak from "../../config/keycloak";
 import {
   getResidencias,
@@ -11,56 +18,70 @@ import {
 } from "../../api/residencias.api";
 
 import "../../styles/components/cms/CmsDashboard.css";
+import "../../styles/components/cms/CmsModals.css";
 import "../../styles/pages/cms/CmsNoticiasView.css";
 import "../../styles/pages/cms/CmsEspecialidadesView.css";
 import "../../styles/pages/cms/CmsResidenciasView.css";
 
 const CmsResidenciasView = () => {
-  // Lista de residencias proveniente de la Base de Datos
+  // Lista de residencias de la BD
   const [residencias, setResidencias] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("PUBLICADOS"); // PUBLICADOS, BORRADORES, ARCHIVADOS
+  const [activeTab, setActiveTab] = useState("PUBLICADOS"); 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filtroTipo, setFiltroTipo] = useState("TODOS");
+  const [filtroCategoria, setFiltroCategoria] = useState("TODOS");
 
-  // Modales y estados de acción
+  // Modales
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [showConfirmDraftModal, setShowConfirmDraftModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Manejo de archivo adjunto (PDF, DOC, DOCX o imagen)
-  const fileInputRef = useRef(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [archivoSeleccionado, setArchivoSeleccionado] = useState(null);
-  const [eliminarArchivoFlag, setEliminarArchivoFlag] = useState(false);
+  // Referencias para carga de archivos
+  const bannerInputRef = useRef(null);
+  const docInputRef = useRef(null);
+  const [isDraggingBanner, setIsDraggingBanner] = useState(false);
+  const [isDraggingDoc, setIsDraggingDoc] = useState(false);
 
-  // Formulario inicial basado en schema.prisma
+  // Estados de archivos seleccionados
+  const [bannerSeleccionado, setBannerSeleccionado] = useState(null);
+  const [eliminarBannerFlag, setEliminarBannerFlag] = useState(false);
+  const [documentoSeleccionado, setDocumentoSeleccionado] = useState(null);
+  const [eliminarDocumentoFlag, setEliminarDocumentoFlag] = useState(false);
+
+  // Formulario según los campos solicitados para la vista del portal
   const initialForm = {
-    nombre: "",
-    tipo: "Básica",
-    especialidad: "",
-    duracion: "3 años",
-    cupos: "2",
-    convocatoria: "Convocatoria 2026",
-    fechaConvocatoria: "",
-    estado: "PUBLICADO",
-    videoUrl: "",
-    descripcion: "",
-    requisitos: "",
-    contenidoDetallado: "",
-    archivoNombre: "",
-    archivoTamano: "",
-    archivoUrl: "",
+    nombre: "", // Nombre de la residencia
+    categoria: "Formación Médica de Posgrado", // Categoría
+    fechaConvocatoria: "", // Fecha Límite / Fecha de Examen
+    convocatoria: "Abierta",
+    descripcion: "", // Resumen breve / copete
+    descripcionPrograma: "", // Descripción del Programa Académico
+    cupos: "",
+    duracion: "", // Duración Oficial
+    requisitos: "", // Requisitos para la Postulación Provincial
+    reglamentoRotacion: "Descargue el cronograma de actividades, régimen de guardias docentes y plan de evaluación de Residencia.", // Reglamento y Programa de Rotación
+    estado: "BORRADOR",
+
+    // Banner
+    bannerNombre: "",
+    bannerUrl: "",
+
+    // Documento
+    documentoNombre: "",
+    documentoTamano: "",
+    documentoTipo: "PDF",
+    documentoUrl: "",
   };
 
   const [formData, setFormData] = useState(initialForm);
 
-  // Cargar residencias desde la Base de Datos
+  // Cargar residencias desde la BD
   const cargarResidencias = async () => {
     setLoading(true);
     try {
@@ -68,7 +89,7 @@ const CmsResidenciasView = () => {
       setResidencias(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error al cargar residencias:", error);
-      toast.error("No se pudieron cargar las residencias desde la base de datos.");
+      toast.error("No se pudieron cargar las residencias.");
     } finally {
       setLoading(false);
     }
@@ -78,14 +99,49 @@ const CmsResidenciasView = () => {
     cargarResidencias();
   }, []);
 
-  // Procesamiento de archivo PDF / Word / Imagen
-  const procesarArchivo = (file) => {
+  // Procesamiento de Imagen de Banner
+  const procesarBanner = (file) => {
     if (!file) return;
     const extension = file.name.split(".").pop().toLowerCase();
-    if (!["pdf", "doc", "docx", "jpg", "jpeg", "png"].includes(extension)) {
-      return toast.error(
-        "Solo se admiten documentos en formato PDF, DOC, DOCX o imágenes JPG/PNG.",
-      );
+    if (!["jpg", "jpeg", "png", "webp"].includes(extension)) {
+      return toast.error("La imagen de banner debe ser JPG, PNG o WEBP.");
+    }
+
+    setBannerSeleccionado(file);
+    setEliminarBannerFlag(false);
+    setFormData((prev) => ({
+      ...prev,
+      bannerNombre: file.name,
+      bannerUrl: URL.createObjectURL(file),
+    }));
+    setHasUnsavedChanges(true);
+    toast.success("Imagen de banner seleccionada.");
+  };
+
+  const handleBannerChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) procesarBanner(file);
+  };
+
+  const handleRemoveBanner = (e) => {
+    if (e) e.stopPropagation();
+    setBannerSeleccionado(null);
+    setEliminarBannerFlag(true);
+    setFormData((prev) => ({
+      ...prev,
+      bannerNombre: "",
+      bannerUrl: "",
+    }));
+    setHasUnsavedChanges(true);
+    if (bannerInputRef.current) bannerInputRef.current.value = "";
+  };
+
+  // Procesamiento de Documento (PDF / DOC)
+  const procesarDocumento = (file) => {
+    if (!file) return;
+    const extension = file.name.split(".").pop().toLowerCase();
+    if (!["pdf", "doc", "docx"].includes(extension)) {
+      return toast.error("El documento debe ser formato PDF, DOC o DOCX.");
     }
 
     const sizeFormatted =
@@ -93,63 +149,49 @@ const CmsResidenciasView = () => {
         ? `${(file.size / (1024 * 1024)).toFixed(2)} MB`
         : `${(file.size / 1024).toFixed(0)} KB`;
 
-    setArchivoSeleccionado(file);
-    setEliminarArchivoFlag(false);
+    setDocumentoSeleccionado(file);
+    setEliminarDocumentoFlag(false);
     setFormData((prev) => ({
       ...prev,
-      archivoNombre: file.name,
-      archivoTamano: sizeFormatted,
-      archivoUrl: URL.createObjectURL(file),
+      documentoNombre: file.name,
+      documentoTamano: sizeFormatted,
+      documentoTipo: extension.toUpperCase(),
+      documentoUrl: URL.createObjectURL(file),
     }));
     setHasUnsavedChanges(true);
-    toast.success("Documento seleccionado para subir.");
+    toast.success("Documento cargado correctamente.");
   };
 
-  const handleFileChange = (e) => {
+  const handleDocChange = (e) => {
     const file = e.target.files?.[0];
-    if (file) procesarArchivo(file);
+    if (file) procesarDocumento(file);
   };
 
-  const handleRemoveFile = (e) => {
+  const handleRemoveDoc = (e) => {
     if (e) e.stopPropagation();
-    setArchivoSeleccionado(null);
-    setEliminarArchivoFlag(true);
+    setDocumentoSeleccionado(null);
+    setEliminarDocumentoFlag(true);
     setFormData((prev) => ({
       ...prev,
-      archivoNombre: "",
-      archivoTamano: "",
-      archivoUrl: "",
+      documentoNombre: "",
+      documentoTamano: "",
+      documentoTipo: "PDF",
+      documentoUrl: "",
     }));
     setHasUnsavedChanges(true);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) procesarArchivo(file);
+    if (docInputRef.current) docInputRef.current.value = "";
   };
 
   // Apertura modal alta
   const handleOpenCreate = () => {
     setEditingId(null);
-    setArchivoSeleccionado(null);
-    setEliminarArchivoFlag(false);
+    setBannerSeleccionado(null);
+    setEliminarBannerFlag(false);
+    setDocumentoSeleccionado(null);
+    setEliminarDocumentoFlag(false);
     setFormData(initialForm);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (bannerInputRef.current) bannerInputRef.current.value = "";
+    if (docInputRef.current) docInputRef.current.value = "";
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
@@ -157,30 +199,50 @@ const CmsResidenciasView = () => {
   // Apertura modal edición
   const handleOpenEdit = (res) => {
     setEditingId(res.id);
-    setArchivoSeleccionado(null);
-    setEliminarArchivoFlag(false);
+    setBannerSeleccionado(null);
+    setEliminarBannerFlag(false);
+    setDocumentoSeleccionado(null);
+    setEliminarDocumentoFlag(false);
+
+    let convVal = "Abierta";
+    if (res.convocatoria) {
+      const norm = res.convocatoria.toLowerCase().trim();
+      if (norm.includes("cerrad")) convVal = "Cerrada";
+      else if (norm.includes("proxim") || norm.includes("próxim")) convVal = "Proximamente";
+      else if (norm.includes("abiert")) convVal = "Abierta";
+      else convVal = res.convocatoria;
+    }
+
     setFormData({
       nombre: res.nombre || "",
-      tipo: res.tipo || "Básica",
-      especialidad: res.especialidad || "",
-      duracion: res.duracion || "3 años",
-      cupos: res.cupos || "",
-      convocatoria: res.convocatoria || "",
+      categoria:
+        res.categoria ||
+        "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
       fechaConvocatoria: res.fechaConvocatoria || "",
-      estado: res.estado || "PUBLICADO",
-      videoUrl: res.videoUrl || "",
+      convocatoria: convVal,
       descripcion: res.descripcion || "",
+      descripcionPrograma: res.descripcionPrograma || "",
+      cupos: res.cupos || "",
+      duracion: res.duracion || "4 Años • Sede Hospital Interdistrital Evita",
       requisitos: res.requisitos || "",
-      contenidoDetallado: res.contenidoDetallado || "",
-      archivoNombre: res.archivoNombre || "",
-      archivoTamano: res.archivoTamano || "",
-      archivoUrl: res.archivoUrl || "",
+      reglamentoRotacion:
+        res.reglamentoRotacion ||
+        "Descargue el cronograma de actividades, régimen de guardias docentes y plan de evaluación de Residencia.",
+      estado: res.estado || "BORRADOR",
+
+      bannerNombre: res.bannerNombre || "",
+      bannerUrl: res.bannerUrl || "",
+
+      documentoNombre: res.documentoNombre || "",
+      documentoTamano: res.documentoTamano || "",
+      documentoTipo: res.documentoTipo || "PDF",
+      documentoUrl: res.documentoUrl || "",
     });
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
 
-  // Cierre de modal
+  // Control de cierre modal
   const handleCloseAttempt = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedModal(true);
@@ -195,56 +257,77 @@ const CmsResidenciasView = () => {
     setHasUnsavedChanges(false);
   };
 
-  // Guardar datos en la Base de Datos (Create / Update)
-  const handleSave = async (e) => {
+  // Guardar en la BD (Crear o Actualizar)
+  const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
     if (!formData.nombre.trim()) {
       return toast.error("El nombre de la residencia es obligatorio.");
     }
 
+    const estadoFinal = forcedEstado || formData.estado || "BORRADOR";
+
+    if (estadoFinal === "BORRADOR" && !bypassDraftWarning) {
+      setShowConfirmDraftModal(true);
+      return;
+    }
+
     setIsSaving(true);
     const toastId = toast.loading(
       editingId
-        ? "Actualizando residencia en la base de datos..."
-        : "Guardando residencia en la base de datos...",
+        ? "Actualizando residencia..."
+        : "Guardando residencia...",
     );
 
     try {
       const token = keycloak?.token;
       const dataForm = new FormData();
       dataForm.append("nombre", formData.nombre.trim());
-      dataForm.append("tipo", formData.tipo);
-      dataForm.append("especialidad", formData.especialidad);
-      dataForm.append("duracion", formData.duracion);
-      dataForm.append("cupos", formData.cupos);
-      dataForm.append("convocatoria", formData.convocatoria);
+      dataForm.append("categoria", formData.categoria.trim());
       dataForm.append("fechaConvocatoria", formData.fechaConvocatoria);
-      dataForm.append("estado", formData.estado);
-      dataForm.append("videoUrl", formData.videoUrl);
-      dataForm.append("descripcion", formData.descripcion);
-      dataForm.append("requisitos", formData.requisitos);
-      dataForm.append("contenidoDetallado", formData.contenidoDetallado);
+      dataForm.append("convocatoria", formData.convocatoria.trim());
+      dataForm.append("descripcion", formData.descripcion.trim());
+      dataForm.append("descripcionPrograma", formData.descripcionPrograma.trim());
+      dataForm.append("cupos", (formData.cupos || "").trim());
+      dataForm.append("duracion", formData.duracion.trim());
+      dataForm.append("requisitos", formData.requisitos.trim());
+      dataForm.append("reglamentoRotacion", formData.reglamentoRotacion.trim());
+      dataForm.append("estado", estadoFinal);
 
-      if (archivoSeleccionado) {
-        dataForm.append("archivo", archivoSeleccionado);
-      } else if (eliminarArchivoFlag) {
-        dataForm.append("eliminarArchivo", "true");
+      // Archivo de Banner (imagen)
+      if (bannerSeleccionado) {
+        dataForm.append("banner", bannerSeleccionado);
+      } else if (eliminarBannerFlag) {
+        dataForm.append("eliminarBanner", "true");
+      }
+
+      // Archivo de Documento (PDF / DOC)
+      if (documentoSeleccionado) {
+        dataForm.append("documento", documentoSeleccionado);
+      } else if (eliminarDocumentoFlag) {
+        dataForm.append("eliminarDocumento", "true");
       }
 
       if (editingId) {
         await updateResidencia(editingId, dataForm, token);
-        toast.success("Residencia actualizada con éxito en la base de datos.", {
-          id: toastId,
-        });
+        toast.success(
+          estadoFinal === "BORRADOR"
+            ? "Borrador actualizado con éxito."
+            : "Residencia actualizada con éxito.",
+          { id: toastId },
+        );
       } else {
         await createResidencia(dataForm, token);
-        toast.success("Residencia publicada con éxito en la base de datos.", {
-          id: toastId,
-        });
+        toast.success(
+          estadoFinal === "BORRADOR"
+            ? "Borrador guardado con éxito."
+            : "Residencia publicada con éxito.",
+          { id: toastId },
+        );
       }
 
       await cargarResidencias();
       setShowModal(false);
+      setShowConfirmDraftModal(false);
       setShowUnsavedModal(false);
       setHasUnsavedChanges(false);
     } catch (error) {
@@ -252,45 +335,14 @@ const CmsResidenciasView = () => {
       const msg =
         error.response?.data?.error ||
         error.message ||
-        "Error al guardar la residencia en la base de datos.";
+        "Error al guardar la residencia.";
       toast.error(msg, { id: toastId });
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Eliminar residencia
-  const confirmDelete = (item) => {
-    setItemAEliminar(item);
-    setShowDeleteModal(true);
-  };
-
-  const executeDelete = async () => {
-    if (!itemAEliminar) return;
-    setIsDeleting(true);
-    const toastId = toast.loading("Eliminando residencia de la base de datos...");
-
-    try {
-      const token = keycloak?.token;
-      await deleteResidencia(itemAEliminar.id, token);
-      toast.success("Residencia eliminada con éxito de la base de datos.", {
-        id: toastId,
-      });
-      setShowDeleteModal(false);
-      setItemAEliminar(null);
-      await cargarResidencias();
-    } catch (error) {
-      console.error("Error al eliminar residencia:", error);
-      const msg =
-        error.response?.data?.error ||
-        "Error al eliminar la residencia de la base de datos.";
-      toast.error(msg, { id: toastId });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  // Cambiar estado rápido directamente desde la grilla
+  // Cambiar estado interactivo (Publicado, Borrador, Archivado)
   const handleCambiarEstado = async (id, nuevoEstado) => {
     const estadoLegible =
       nuevoEstado === "PUBLICADO"
@@ -316,8 +368,40 @@ const CmsResidenciasView = () => {
     }
   };
 
+  // Eliminar residencia
+  const confirmDelete = (item) => {
+    setItemAEliminar(item);
+    setShowDeleteModal(true);
+  };
+
+  const executeDelete = async () => {
+    if (!itemAEliminar) return;
+    setIsDeleting(true);
+    const toastId = toast.loading("Eliminando residencia...");
+
+    try {
+      const token = keycloak?.token;
+      await deleteResidencia(itemAEliminar.id, token);
+      toast.success("Residencia eliminada con éxito.", {
+        id: toastId,
+      });
+      setShowDeleteModal(false);
+      setItemAEliminar(null);
+      await cargarResidencias();
+    } catch (error) {
+      console.error("Error al eliminar residencia:", error);
+      const msg =
+        error.response?.data?.error ||
+        "Error al eliminar la residencia.";
+      toast.error(msg, { id: toastId });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Filtrado de datos
-  const datosFiltrados = residencias.filter((res) => {
+  const datosFiltrados = (Array.isArray(residencias) ? residencias : []).filter((res) => {
+    if (!res) return false;
     const matchEstado =
       activeTab === "PUBLICADOS"
         ? res.estado === "PUBLICADO"
@@ -325,29 +409,30 @@ const CmsResidenciasView = () => {
           ? res.estado === "BORRADOR"
           : res.estado === "ARCHIVADO";
 
-    const matchTipo = filtroTipo === "TODOS" ? true : res.tipo === filtroTipo;
+    const matchCategoria =
+      filtroCategoria === "TODOS" ? true : res.categoria === filtroCategoria;
 
-    const query = searchTerm.toLowerCase();
+    const query = (searchTerm || "").toLowerCase().trim();
     const matchSearch =
-      !searchTerm ||
-      res.nombre.toLowerCase().includes(query) ||
-      (res.especialidad && res.especialidad.toLowerCase().includes(query)) ||
-      (res.convocatoria && res.convocatoria.toLowerCase().includes(query));
+      !query ||
+      (res.nombre && res.nombre.toLowerCase().includes(query)) ||
+      (res.categoria && res.categoria.toLowerCase().includes(query)) ||
+      (res.convocatoria && res.convocatoria.toLowerCase().includes(query)) ||
+      (res.descripcion && res.descripcion.toLowerCase().includes(query));
 
-    return matchEstado && matchTipo && matchSearch;
+    return matchEstado && matchCategoria && matchSearch;
   });
 
   return (
     <div className="cms-dashboard-card">
-      {/* Cabecera idéntica a Noticias y Profesionales */}
+      {/* Cabecera */}
       <div className="news-view-header">
         <div>
           <h3 className="cms-card-title news-view-title">
             Listado de residencias
           </h3>
           <p className="news-view-subtitle">
-            Administre las convocatorias y programas de residencia formativa de la
-            institución en la base de datos.
+            Administre los programas formativos, convocatorias, banner y reglamentos que se visualizan en el portal de residencias.
           </p>
         </div>
         <button
@@ -359,7 +444,7 @@ const CmsResidenciasView = () => {
         </button>
       </div>
 
-      {/* Barra de herramientas: Pestañas a la izquierda, buscador y filtros a la derecha */}
+      {/* Barra de herramientas: Pestañas a la izquierda, buscador a la derecha */}
       <div
         style={{
           display: "flex",
@@ -370,7 +455,7 @@ const CmsResidenciasView = () => {
           gap: "15px",
         }}
       >
-        {/* Pestañas de estado idénticas a Noticias */}
+        {/* Pestañas de estado */}
         <div style={{ display: "flex", gap: "10px" }}>
           <button
             type="button"
@@ -395,7 +480,7 @@ const CmsResidenciasView = () => {
           </button>
         </div>
 
-        {/* Buscador y Selector alineados */}
+        {/* Buscador */}
         <div
           style={{
             display: "flex",
@@ -418,34 +503,11 @@ const CmsResidenciasView = () => {
             </svg>
             <input
               type="text"
-              placeholder="Buscar por programa o especialidad..."
+              placeholder="Buscar por programa o categoría..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="res-search-input-field"
             />
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: "700",
-                color: "#64748b",
-                textTransform: "uppercase",
-              }}
-            >
-              TIPO:
-            </span>
-            <select
-              value={filtroTipo}
-              onChange={(e) => setFiltroTipo(e.target.value)}
-              className="res-select-field"
-            >
-              <option value="TODOS">Todos los tipos</option>
-              <option value="Básica">Residencias Básicas</option>
-              <option value="Posbásica">Residencias Posbásicas</option>
-              <option value="Multidisciplinaria">Multidisciplinarias</option>
-            </select>
           </div>
         </div>
       </div>
@@ -467,11 +529,10 @@ const CmsResidenciasView = () => {
             letterSpacing: "0.5px",
           }}
         >
-          <div style={{ flex: 2.2 }}>PROGRAMA Y ESPECIALIDAD</div>
-          <div style={{ flex: 1 }}>DURACIÓN Y CUPOS</div>
-          <div style={{ flex: 1.2 }}>CONVOCATORIA</div>
-          <div style={{ flex: 1 }}>TIPO</div>
-          <div style={{ width: "120px", textAlign: "center" }}>ESTADO</div>
+          <div style={{ flex: 2.2 }}>PROGRAMA Y CATEGORÍA</div>
+          <div style={{ flex: 1.2 }}>DURACIÓN</div>
+          <div style={{ flex: 1.1 }}>FECHA / CONVOCATORIA</div>
+          <div style={{ width: "135px", textAlign: "center" }}>ESTADO</div>
           <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
@@ -496,7 +557,7 @@ const CmsResidenciasView = () => {
                 }}
               ></div>
               <p style={{ margin: 0, fontWeight: "600" }}>
-                Cargando residencias desde la base de datos...
+                Cargando residencias...
               </p>
             </div>
           ) : datosFiltrados.length === 0 ? (
@@ -507,9 +568,22 @@ const CmsResidenciasView = () => {
                 color: "#64748b",
               }}
             >
-              <FileText size={40} style={{ margin: "0 auto 12px", color: "#94a3b8", display: "block" }} />
-              <p style={{ margin: "0 0 12px 0", fontWeight: "600", fontSize: "1rem" }}>
-                No se encontraron registros de residencias en la base de datos.
+              <FileText
+                size={40}
+                style={{
+                  margin: "0 auto 12px",
+                  color: "#94a3b8",
+                  display: "block",
+                }}
+              />
+              <p
+                style={{
+                  margin: "0 0 12px 0",
+                  fontWeight: "600",
+                  fontSize: "1rem",
+                }}
+              >
+                No se encontraron registros de residencias.
               </p>
               <button
                 type="button"
@@ -533,7 +607,7 @@ const CmsResidenciasView = () => {
                   transition: "background-color 0.2s",
                 }}
               >
-                {/* Columna PROGRAMA Y ESPECIALIDAD */}
+                {/* Columna PROGRAMA Y CATEGORÍA */}
                 <div
                   style={{
                     flex: 2.2,
@@ -543,28 +617,42 @@ const CmsResidenciasView = () => {
                   }}
                 >
                   <div className="news-img-thumbnail">
-                    <div
-                      style={{
-                        width: "48px",
-                        height: "48px",
-                        borderRadius: "8px",
-                        backgroundColor: "#f0fdf4",
-                        border: "1px solid #bbf7d0",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <span
+                    {res.bannerUrl ? (
+                      <img
+                        src={res.bannerUrl}
+                        alt={res.nombre}
                         style={{
-                          fontSize: "0.75rem",
-                          fontWeight: "800",
-                          color: "#166534",
+                          width: "50px",
+                          height: "50px",
+                          borderRadius: "8px",
+                          objectFit: "cover",
+                          border: "1px solid #e2e8f0",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          borderRadius: "8px",
+                          backgroundColor: "#f0fdf4",
+                          border: "1px solid #bbf7d0",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
-                        HIE
-                      </span>
-                    </div>
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            fontWeight: "800",
+                            color: "#166534",
+                          }}
+                        >
+                          HIE
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="news-title-interactive">
                     <span
@@ -589,10 +677,10 @@ const CmsResidenciasView = () => {
                         flexWrap: "wrap",
                       }}
                     >
-                      <span>{res.especialidad || "Área formativa médica"}</span>
-                      {res.archivoNombre && (
+                      <span>{res.categoria}</span>
+                      {res.documentoNombre && (
                         <a
-                          href={res.archivoUrl || "#"}
+                          href={res.documentoUrl || "#"}
                           target="_blank"
                           rel="noreferrer"
                           style={{
@@ -604,77 +692,81 @@ const CmsResidenciasView = () => {
                             gap: "3px",
                           }}
                           onClick={(e) => {
-                            if (!res.archivoUrl) e.preventDefault();
+                            if (!res.documentoUrl) e.preventDefault();
                           }}
                         >
-                          • {res.archivoTipo || "DOC"}{" "}
+                          • {res.documentoTipo || "PDF"}{" "}
                           <ExternalLink size={11} />
                         </a>
                       )}
-                      {res.videoUrl && (
+                      {res.bannerUrl && (
                         <span
                           style={{
-                            color: "#dc2626",
+                            color: "#10b981",
                             fontWeight: "600",
                             display: "inline-flex",
                             alignItems: "center",
                             gap: "3px",
                           }}
                         >
-                          • Video <Video size={11} />
+                          • Banner <ImageIcon size={11} />
                         </span>
                       )}
                     </span>
                   </div>
                 </div>
 
-                {/* Columna DURACIÓN Y CUPOS */}
-                <div
-                  style={{
-                    flex: 1,
-                    color: "#475569",
-                    fontSize: "0.9rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  {res.duracion} • {res.cupos ? `${res.cupos} vacantes` : "Vacantes s/d"}
-                </div>
-
-                {/* Columna CONVOCATORIA */}
+                {/* Columna DURACIÓN */}
                 <div
                   style={{
                     flex: 1.2,
                     color: "#475569",
-                    fontSize: "0.9rem",
+                    fontSize: "0.88rem",
                     fontWeight: "500",
                   }}
                 >
-                  <div>{res.convocatoria || "Abierta"}</div>
-                  {res.fechaConvocatoria && (
-                    <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "2px" }}>
-                      Límite: {res.fechaConvocatoria}
-                    </div>
-                  )}
+                  <div style={{ fontWeight: "600", color: "#1e293b" }}>
+                    {res.duracion || "Duración no definida"}
+                  </div>
                 </div>
 
-                {/* Columna CLASIFICACIÓN */}
-                <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-                  <span
+                {/* Columna FECHA LÍMITE Y CONVOCATORIA */}
+                <div
+                  style={{
+                    flex: 1.1,
+                    color: "#475569",
+                    fontSize: "0.88rem",
+                    fontWeight: "500",
+                  }}
+                >
+                  <div>{res.fechaConvocatoria || "Sin fecha fija"}</div>
+                  <div
                     style={{
-                      backgroundColor: "#e0f2fe",
-                      color: "#0284c7",
-                      padding: "6px 14px",
-                      borderRadius: "8px",
-                      fontSize: "0.85rem",
-                      fontWeight: "700",
+                      fontSize: "0.75rem",
+                      color:
+                        (res.convocatoria || "").toLowerCase().includes("cerrad")
+                          ? "#ef4444"
+                          : (res.convocatoria || "").toLowerCase().includes("proxim")
+                          ? "#d97706"
+                          : "#0284c7",
+                      fontWeight: "600",
+                      marginTop: "2px",
                     }}
                   >
-                    {res.tipo}
-                  </span>
+                    {res.convocatoria === "Proximamente"
+                      ? "Próximamente"
+                      : res.convocatoria || "Abierta"}
+                  </div>
                 </div>
 
-                {/* Columna ESTADO (Selector interactivo: Publicado / Borrador / Archivado) */}
-                <div style={{ width: "135px", display: "flex", justifyContent: "center" }}>
+                {/* Columna ESTADO */}
+                <div
+                  style={{
+                    width: "135px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
                   <select
                     value={res.estado}
                     onChange={(e) => handleCambiarEstado(res.id, e.target.value)}
@@ -743,12 +835,12 @@ const CmsResidenciasView = () => {
         </div>
       </div>
 
-      {/* MODAL DE ALTA / EDICIÓN BASADO EN SCHEMA.PRISMA */}
+      {/* MODAL REHECHO CON LOS CAMPOS DE LA VISTA DEL PORTAL */}
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseAttempt}>
           <div
             className="modal-content-esp esp-modal-wrapper"
-            style={{ maxWidth: "800px" }}
+            style={{ maxWidth: "860px" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header del Modal */}
@@ -784,10 +876,10 @@ const CmsResidenciasView = () => {
             >
               <div className="esp-modal-body">
                 <div className="esp-form-grid">
-                  {/* Nombre de la Residencia (Prisma: nombre String @db.VarChar(200)) */}
+                  {/* 1. Nombre de la residencia */}
                   <div className="esp-full-width">
                     <label className="esp-form-label">
-                      Nombre del Programa / Residencia{" "}
+                      Nombre de la Residencia{" "}
                       <span className="esp-asterisk">*</span>
                     </label>
                     <input
@@ -798,103 +890,27 @@ const CmsResidenciasView = () => {
                         setHasUnsavedChanges(true);
                       }}
                       className="esp-form-input"
-                      placeholder="Ej: Residencia Médica en Terapia Intensiva..."
+                      placeholder="Ej: Residencia en Clínica Médica"
                       required
                     />
                   </div>
 
-                  {/* Tipo de Residencia */}
+                  {/* 2. Categoría */}
                   <div>
-                    <label className="esp-form-label">Tipo de Residencia</label>
-                    <select
-                      value={formData.tipo}
-                      onChange={(e) => {
-                        setFormData({ ...formData, tipo: e.target.value });
-                        setHasUnsavedChanges(true);
-                      }}
-                      className="esp-form-input"
-                    >
-                      <option value="Básica">Residencia Básica</option>
-                      <option value="Posbásica">Residencia Posbásica</option>
-                      <option value="Multidisciplinaria">
-                        Multidisciplinaria
-                      </option>
-                    </select>
-                  </div>
-
-                  {/* Especialidad o Área Vinculada */}
-                  <div>
-                    <label className="esp-form-label">
-                      Especialidad / Área Vinculada
-                    </label>
+                    <label className="esp-form-label">Categoría Institucional</label>
                     <input
                       type="text"
-                      value={formData.especialidad}
+                      value={formData.categoria}
                       onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          especialidad: e.target.value,
-                        });
+                        setFormData({ ...formData, categoria: e.target.value });
                         setHasUnsavedChanges(true);
                       }}
                       className="esp-form-input"
-                      placeholder="Ej: Cardiología, Cuidados Críticos..."
+                      placeholder="Ej: Formación Médica de Posgrado - Ministerio de Desarrollo Humano"
                     />
                   </div>
 
-                  {/* Duración */}
-                  <div>
-                    <label className="esp-form-label">
-                      Duración del Programa
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.duracion}
-                      onChange={(e) => {
-                        setFormData({ ...formData, duracion: e.target.value });
-                        setHasUnsavedChanges(true);
-                      }}
-                      className="esp-form-input"
-                      placeholder="Ej: 3 años, 4 años..."
-                    />
-                  </div>
-
-                  {/* Cupos / Vacantes */}
-                  <div>
-                    <label className="esp-form-label">Cupos / Vacantes</label>
-                    <input
-                      type="text"
-                      value={formData.cupos}
-                      onChange={(e) => {
-                        setFormData({ ...formData, cupos: e.target.value });
-                        setHasUnsavedChanges(true);
-                      }}
-                      className="esp-form-input"
-                      placeholder="Ej: 4 vacantes por año"
-                    />
-                  </div>
-
-                  {/* Convocatoria / Ciclo (Prisma: convocatoria String?) */}
-                  <div>
-                    <label className="esp-form-label">
-                      Convocatoria / Ciclo Formativo
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.convocatoria}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          convocatoria: e.target.value,
-                        });
-                        setHasUnsavedChanges(true);
-                      }}
-                      className="esp-form-input"
-                      placeholder="Ej: Convocatoria Unificada 2026"
-                    />
-                  </div>
-
-                  {/* Fecha de Convocatoria / Examen (Prisma: fechaConvocatoria DateTime?) */}
+                  {/* 3. Fecha Límite / Fecha de Examen */}
                   <div>
                     <label className="esp-form-label">
                       Fecha Límite / Fecha de Examen
@@ -913,10 +929,38 @@ const CmsResidenciasView = () => {
                     />
                   </div>
 
-                  {/* Estado de Publicación (Prisma: estado EstadoEditorial) */}
-                  <div className="esp-full-width">
+                  {/* Estado de Convocatoria */}
+                  <div>
                     <label className="esp-form-label">
-                      Estado de Publicación
+                      Estado de la Convocatoria
+                    </label>
+                    <select
+                      value={formData.convocatoria}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          convocatoria: e.target.value,
+                        });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
+                    >
+                      <option value="Abierta">Abierta</option>
+                      <option value="Cerrada">Cerrada</option>
+                      <option value="Proximamente">Próximamente</option>
+                      {formData.convocatoria &&
+                        !["Abierta", "Cerrada", "Proximamente", "Próximamente"].includes(formData.convocatoria) && (
+                          <option value={formData.convocatoria}>
+                            {formData.convocatoria}
+                          </option>
+                        )}
+                    </select>
+                  </div>
+
+                  {/* Estado de Publicación */}
+                  <div>
+                    <label className="esp-form-label">
+                      Estado de Publicación en Portal
                     </label>
                     <select
                       value={formData.estado}
@@ -926,50 +970,16 @@ const CmsResidenciasView = () => {
                       }}
                       className="esp-form-input"
                     >
-                      <option value="PUBLICADO">Publicado (Visible en portal)</option>
-                      <option value="BORRADOR">Borrador (En edición)</option>
-                      <option value="ARCHIVADO">Archivado (Histórico / Cerrado)</option>
+                      <option value="PUBLICADO">Publicado</option>
+                      <option value="BORRADOR">Borrador</option>
+                      <option value="ARCHIVADO">Archivado</option>
                     </select>
                   </div>
 
-                  {/* Video URL (Prisma: videoUrl String?) */}
-                  <div className="esp-full-width">
-                    <label
-                      className="esp-form-label"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span>Video Informativo / Presentación</span>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "#94a3b8",
-                          textTransform: "none",
-                          fontWeight: "normal",
-                        }}
-                      >
-                        Opcional (Enlace YouTube / Vimeo)
-                      </span>
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.videoUrl}
-                      onChange={(e) => {
-                        setFormData({ ...formData, videoUrl: e.target.value });
-                        setHasUnsavedChanges(true);
-                      }}
-                      className="esp-form-input"
-                      placeholder="Ej: https://www.youtube.com/watch?v=..."
-                    />
-                  </div>
-
-                  {/* Descripción / Objetivos (Prisma: descripcion String?) */}
+                  {/* Resumen breve introductorio */}
                   <div className="esp-full-width">
                     <label className="esp-form-label">
-                      Descripción y Objetivos Formativos
+                      Resumen Breve del Encabezado
                     </label>
                     <textarea
                       value={formData.descripcion}
@@ -981,16 +991,54 @@ const CmsResidenciasView = () => {
                         setHasUnsavedChanges(true);
                       }}
                       className="esp-form-input"
+                      rows="2"
+                      placeholder="Ej: Entrenamiento clínico intensivo en salas de internación general, cuidados intermedios y consultorios de orientación diagnóstica..."
+                      style={{ resize: "vertical" }}
+                    />
+                    <span className="res-helper-text">
+                      Texto que acompaña la categoría y fecha en el encabezado superior de la tarjeta.
+                    </span>
+                  </div>
+                  {/* 4. Descripción del Programa Académico */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Descripción del Programa Académico
+                    </label>
+                    <textarea
+                      value={formData.descripcionPrograma}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          descripcionPrograma: e.target.value,
+                        });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
                       rows="3"
-                      placeholder="Resumen del programa de formación médica, perfil del egresado y rotaciones..."
+                      placeholder="Ej: El programa formativo del Servicio de Clínica Médica del Hospital Interdistrital Evita prepara a los médicos para abordar patologías clínicas complejas de alta prevalencia y cuadros atípicos, con enfoque en medicina humanizada y soporte multidisciplinario..."
                       style={{ resize: "vertical" }}
                     />
                   </div>
 
-                  {/* Requisitos de Admisión / Inscripción */}
+                  {/* Duración Oficial */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">Duración Oficial</label>
+                    <input
+                      type="text"
+                      value={formData.duracion}
+                      onChange={(e) => {
+                        setFormData({ ...formData, duracion: e.target.value });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
+                      placeholder="Ej: 4 Años"
+                    />
+                  </div>
+
+                  {/* 7. Requisitos para la Postulación Provincial */}
                   <div className="esp-full-width">
                     <label className="esp-form-label">
-                      Requisitos de Admisión e Inscripción
+                      Requisitos para la Postulación Provincial
                     </label>
                     <textarea
                       value={formData.requisitos}
@@ -1002,13 +1050,15 @@ const CmsResidenciasView = () => {
                         setHasUnsavedChanges(true);
                       }}
                       className="esp-form-input"
-                      rows="3"
-                      placeholder="Título habilitante, matrícula provincial o nacional, promedio universitario sin aplazos..."
+                      rows="4"
+                      placeholder={"Título de Médico habilitado nacional o convalidado.\nInscripción formal en el Sistema Único de Residencias de Formosa.\nMatrícula profesional de la provincia de Formosa (o en trámite oficial).\nAprobación de la entrevista con el Comité Docente e Investigación."}
                       style={{ resize: "vertical" }}
                     />
+                    <span className="res-helper-text">
+                      Escriba un requisito por línea. En la vista del portal se representarán automáticamente como una lista con tilde (✓).
+                    </span>
                   </div>
-
-                  {/* Plan de Formación y Rotaciones (Prisma: contenido String?) */}
+                  {/* 10. Imagen de banner */}
                   <div className="esp-full-width">
                     <label
                       className="esp-form-label"
@@ -1018,7 +1068,7 @@ const CmsResidenciasView = () => {
                         alignItems: "center",
                       }}
                     >
-                      <span>Plan de Formación / Rotaciones y Servicios</span>
+                      <span>Imagen de Banner / Portada</span>
                       <span
                         style={{
                           fontSize: "0.75rem",
@@ -1027,92 +1077,178 @@ const CmsResidenciasView = () => {
                           fontWeight: "normal",
                         }}
                       >
-                        Opcional
-                      </span>
-                    </label>
-                    <textarea
-                      value={formData.contenidoDetallado}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          contenidoDetallado: e.target.value,
-                        });
-                        setHasUnsavedChanges(true);
-                      }}
-                      className="esp-form-input"
-                      rows="3"
-                      placeholder="Detalles sobre régimen de guardias, rotaciones externas por hospitales de alta complejidad, materias teóricas..."
-                      style={{ resize: "vertical" }}
-                    />
-                  </div>
-
-                  {/* Documento / Bases en PDF o Word (Prisma: archivo / imagenId) */}
-                  <div className="esp-full-width">
-                    <label
-                      className="esp-form-label"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span>Programa / Reglamento en PDF o Word</span>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "#94a3b8",
-                          textTransform: "none",
-                          fontWeight: "normal",
-                        }}
-                      >
-                        Opcional
+                        Fotografía representativa (JPG, PNG, WEBP)
                       </span>
                     </label>
 
                     <input
-                      ref={fileInputRef}
+                      ref={bannerInputRef}
                       type="file"
-                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                      onChange={handleFileChange}
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      onChange={handleBannerChange}
                       style={{ display: "none" }}
                     />
 
-                    {formData.archivoNombre ? (
+                    {formData.bannerUrl ? (
+                      <div className="res-banner-card">
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                          <img
+                            src={formData.bannerUrl}
+                            alt="Preview banner"
+                            className="res-banner-thumb"
+                          />
+                          <div>
+                            <div className="res-file-name" title={formData.bannerNombre || "Banner de la residencia"}>
+                              {formData.bannerNombre || "Banner de la residencia"}
+                            </div>
+                            <span className="res-file-size">
+                              Imagen cargada para el lateral derecho del portal
+                            </span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          <button
+                            type="button"
+                            className="res-file-remove-btn"
+                            onClick={() => window.open(formData.bannerUrl, "_blank")}
+                            title="Ver imagen en tamaño completo"
+                            style={{ color: "#0284c7" }}
+                          >
+                            <ExternalLink size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="res-file-remove-btn"
+                            onClick={() => bannerInputRef.current?.click()}
+                            title="Cambiar imagen"
+                          >
+                            <Upload size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="res-file-remove-btn"
+                            onClick={handleRemoveBanner}
+                            title="Quitar banner"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        className={`res-file-upload-zone ${isDraggingBanner ? "drag-active" : ""}`}
+                        onClick={() => bannerInputRef.current?.click()}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDraggingBanner(true);
+                        }}
+                        onDragLeave={(e) => {
+                          e.preventDefault();
+                          setIsDraggingBanner(false);
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDraggingBanner(false);
+                          const f = e.dataTransfer.files?.[0];
+                          if (f) procesarBanner(f);
+                        }}
+                      >
+                        <div className="res-file-icon-wrap">
+                          <ImageIcon size={22} color="#2b5b94" />
+                        </div>
+                        <p className="res-file-upload-title">
+                          Cargar imagen de banner para la tarjeta
+                        </p>
+                        <p className="res-file-upload-sub">
+                          Arrastrá una foto aquí o <strong>hacé clic para examinar</strong> (JPG o PNG recomendado 800x500px)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 8. Reglamento y Programa de Rotación */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Leyenda de Reglamento y Programa de Rotación
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.reglamentoRotacion}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          reglamentoRotacion: e.target.value,
+                        });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
+                      placeholder="Ej: Descargue el cronograma de actividades, régimen de guardias docentes y plan de evaluación de Residencia..."
+                    />
+                    <span className="res-helper-text">
+                      Descripción breve que se ubica justo encima del botón de descarga del documento.
+                    </span>
+                  </div>
+
+                  {/* 9. Carga de documentos */}
+                  <div className="esp-full-width">
+                    <label
+                      className="esp-form-label"
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span>Carga de Documentos (PDF o Word)</span>
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "#94a3b8",
+                          textTransform: "none",
+                          fontWeight: "normal",
+                        }}
+                      >
+                        Programa formativo, cronograma o bases
+                      </span>
+                    </label>
+
+                    <input
+                      ref={docInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      onChange={handleDocChange}
+                      style={{ display: "none" }}
+                    />
+
+                    {formData.documentoNombre ? (
                       <div className="res-file-selected-card">
                         <div className="res-file-selected-left">
                           <div
-                            className={`res-file-type-icon ${formData.archivoNombre.toLowerCase().endsWith(".pdf") ? "pdf" : "doc"}`}
+                            className={`res-file-type-icon ${formData.documentoNombre.toLowerCase().endsWith(".pdf") ? "pdf" : "doc"}`}
                           >
                             <FileText size={18} />
                           </div>
                           <div className="res-file-meta">
                             <span
                               className="res-file-name"
-                              title={formData.archivoNombre}
+                              title={formData.documentoNombre}
                             >
-                              {formData.archivoNombre}
+                              {formData.documentoNombre}
                             </span>
                             <span className="res-file-size">
-                              {formData.archivoTamano || "Documento cargado"} • Formato{" "}
-                              {formData.archivoNombre.split(".").pop().toUpperCase()}
+                              {formData.documentoTamano || "Documento disponible"} • Formato{" "}
+                              {formData.documentoTipo || "PDF"}
                             </span>
                           </div>
                         </div>
 
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          {formData.archivoUrl && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          {formData.documentoUrl && (
                             <button
                               type="button"
                               className="res-file-remove-btn"
-                              onClick={() =>
-                                window.open(formData.archivoUrl, "_blank")
-                              }
+                              onClick={() => window.open(formData.documentoUrl, "_blank")}
                               title="Visualizar documento"
                               style={{ color: "#0284c7" }}
                             >
@@ -1122,7 +1258,7 @@ const CmsResidenciasView = () => {
                           <button
                             type="button"
                             className="res-file-remove-btn"
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={() => docInputRef.current?.click()}
                             title="Reemplazar archivo"
                           >
                             <Upload size={16} />
@@ -1130,7 +1266,7 @@ const CmsResidenciasView = () => {
                           <button
                             type="button"
                             className="res-file-remove-btn"
-                            onClick={handleRemoveFile}
+                            onClick={handleRemoveDoc}
                             title="Quitar archivo"
                           >
                             <X size={16} />
@@ -1139,22 +1275,31 @@ const CmsResidenciasView = () => {
                       </div>
                     ) : (
                       <div
-                        className={`res-file-upload-zone ${isDragging ? "drag-active" : ""}`}
-                        onClick={() => fileInputRef.current?.click()}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
+                        className={`res-file-upload-zone ${isDraggingDoc ? "drag-active" : ""}`}
+                        onClick={() => docInputRef.current?.click()}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDraggingDoc(true);
+                        }}
+                        onDragLeave={(e) => {
+                          e.preventDefault();
+                          setIsDraggingDoc(false);
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDraggingDoc(false);
+                          const f = e.dataTransfer.files?.[0];
+                          if (f) procesarDocumento(f);
+                        }}
                       >
                         <div className="res-file-icon-wrap">
                           <Upload size={20} />
                         </div>
                         <p className="res-file-upload-title">
-                          Cargar programa formativo o bases
+                          Cargar documento del programa (PDF, DOC o DOCX)
                         </p>
                         <p className="res-file-upload-sub">
-                          Arrastrá tu archivo aquí o{" "}
-                          <strong>hacé clic para examinar</strong> (PDF, DOC o
-                          DOCX hasta 15 MB)
+                          Arrastrá el archivo aquí o <strong>hacé clic para examinar</strong> (hasta 15 MB)
                         </p>
                       </div>
                     )}
@@ -1334,6 +1479,130 @@ const CmsResidenciasView = () => {
         </div>
       )}
 
+      {/* MODAL DE CONFIRMACIÓN: GUARDAR COMO BORRADOR */}
+      {showConfirmDraftModal && (
+        <div
+          className="modal-overlay"
+          style={{
+            zIndex: 99999,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0, 11, 32, 0.4)",
+            backdropFilter: "blur(2px)",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "384px",
+              margin: "16px",
+              borderRadius: "12px",
+              overflow: "hidden",
+              backgroundColor: "#ffffff",
+              border: "1px solid rgba(196, 198, 206, 0.3)",
+              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)",
+              fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
+              position: "relative",
+              zIndex: 999999,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <div
+              style={{
+                padding: "24px 24px 16px 24px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+              }}
+            >
+              <h2
+                style={{
+                  margin: 0,
+                  color: "#000b20",
+                  fontSize: "20px",
+                  fontWeight: "600",
+                  lineHeight: "28px",
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                Guardar como borrador
+              </h2>
+              <p
+                style={{
+                  color: "#44474d",
+                  margin: 0,
+                  fontSize: "16px",
+                  fontWeight: "400",
+                  lineHeight: "24px",
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                El estado de esta residencia es Borrador. No será visible en el
+                portal público hasta que la publiques. ¿Deseas continuar?
+              </p>
+            </div>
+            <div
+              style={{
+                padding: "16px 24px 24px 24px",
+                backgroundColor: "#f7f9fb",
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={(e) => handleSave(e, "BORRADOR", true)}
+                style={{
+                  width: "100%",
+                  padding: "16px 24px",
+                  backgroundColor: "#000b20",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  letterSpacing: "0.08em",
+                  lineHeight: "16px",
+                  transition:
+                    "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                Sí, guardar borrador
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowConfirmDraftModal(false)}
+                style={{
+                  width: "100%",
+                  padding: "16px 24px",
+                  backgroundColor: "#d8e0ed",
+                  color: "#000b20",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  letterSpacing: "0.08em",
+                  lineHeight: "16px",
+                  transition:
+                    "background-color 0.15s ease, transform 0.15s ease",
+                  fontFamily: "'Manrope', sans-serif",
+                }}
+              >
+                Revisar Estado
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
       {showDeleteModal && itemAEliminar && (
         <div
@@ -1341,22 +1610,22 @@ const CmsResidenciasView = () => {
           onClick={() => !isDeleting && setShowDeleteModal(false)}
         >
           <div
-            className="modal-content delete-modal-content"
+            className="modal-content-esp delete-modal-global"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
-              className="delete-modal-close"
+              className="btn-close-floating"
               onClick={() => !isDeleting && setShowDeleteModal(false)}
               disabled={isDeleting}
             >
               <svg
                 viewBox="0 0 24 24"
-                width="20"
-                height="20"
+                fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1386,7 +1655,7 @@ const CmsResidenciasView = () => {
 
               <p className="delete-modal-text">
                 Esta acción es <strong>permanente</strong> y quitará la
-                residencia <strong>"{itemAEliminar.nombre}"</strong> de la base de datos.
+                residencia <strong>"{itemAEliminar.nombre}"</strong> junto con sus archivos.
               </p>
             </div>
 

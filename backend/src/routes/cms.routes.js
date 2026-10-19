@@ -81,8 +81,8 @@ router.put('/institucional/redes', verifyToken, actualizarRedesSociales);
 // MÓDULO: RESIDENCIAS
 // ==========================================
 router.get('/residencias', obtenerResidencias);
-router.post('/residencias', verifyToken, uploadMemory.single('archivo'), crearResidencia);
-router.put('/residencias/:id', verifyToken, uploadMemory.single('archivo'), actualizarResidencia);
+router.post('/residencias', verifyToken, uploadMemory.any(), crearResidencia);
+router.put('/residencias/:id', verifyToken, uploadMemory.any(), actualizarResidencia);
 router.patch('/residencias/:id/estado', verifyToken, cambiarEstadoResidencia);
 router.delete('/residencias/:id', verifyToken, eliminarResidencia);
 

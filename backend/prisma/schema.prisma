@@ -356,7 +356,6 @@ model residencia {
   descripcion          String?
   contenido            String?
   imagenId             BigInt?
-  videoUrl             String?
   convocatoria         String?
   fechaConvocatoria    DateTime?
   estado               EstadoEditorial

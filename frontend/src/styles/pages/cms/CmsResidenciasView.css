@@ -256,3 +256,74 @@
   box-shadow: 0 0 0 2px rgba(43, 91, 148, 0.25);
 }
 
+/* =========================================================
+   TARJETAS DE BANNER Y SECCIONES DEL MODAL
+   ========================================================= */
+
+.res-banner-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  gap: 12px;
+}
+
+.res-banner-thumb {
+  width: 70px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+}
+
+.res-helper-text {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 4px;
+  display: block;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   MODAL DE CONFIRMACIÓN DE ELIMINACIÓN UNIFICADO
+   ========================================================= */
+.delete-modal-global {
+  background-color: #ffffff !important;
+  max-width: 400px !important;
+  padding: 35px 25px 25px 25px !important;
+  position: relative;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35) !important;
+  box-sizing: border-box;
+}
+
+.btn-close-floating {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-close-floating:hover {
+  color: #0f172a !important;
+  background-color: #f1f5f9 !important;
+}
+
+.btn-close-floating svg {
+  width: 20px;
+  height: 20px;
+}
+
+

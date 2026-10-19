@@ -7,6 +7,13 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlwd3Vwd21ieWd0eWlsdWV6emxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNDM2MDUsImV4cCI6MjEwMjcxOTYwNX0.ytya9DiAojD-DbQ0kDmr_nojF4GUp7XaFLsUIRH2sWE"
 );
 
+const formatBytes = (bytes) => {
+  const n = Number(bytes || 0);
+  if (n > 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  if (n > 0) return `${(n / 1024).toFixed(0)} KB`;
+  return "";
+};
+
 class CmsResidenciaService {
   /**
    * Obtener todas las residencias con su archivo y datos formateados
@@ -23,57 +30,102 @@ class CmsResidenciaService {
   }
 
   /**
-   * Crear una nueva residencia
+   * Crear una nueva residencia (soporta Banner y Documento adjunto)
    */
-  async crearResidencia(data, file) {
+  async crearResidencia(data, files) {
     if (!data.nombre || !data.nombre.trim()) {
       const error = new Error("El nombre de la residencia es obligatorio.");
       error.statusCode = 400;
       throw error;
     }
 
+    const filesArray = Array.isArray(files) ? files : (files ? [files] : []);
+    const bannerFile = filesArray.find((f) => f.fieldname === "banner" || f.fieldname === "imagen");
+    const docFile = filesArray.find((f) => f.fieldname === "archivo" || f.fieldname === "documento");
+
     let imagenId = null;
 
-    // Si se subió un archivo (PDF, DOC, DOCX, imagen)
-    if (file) {
-      const { nombreUnico, extension } = generarNombreUnico(file.originalname, "residencia");
-
+    // 1. Procesar Imagen de Banner si existe
+    if (bannerFile) {
+      const { nombreUnico, extension } = generarNombreUnico(bannerFile.originalname, "residencia_banner");
       const { error: storageError } = await supabase.storage
-        .from("documentos")
-        .upload(nombreUnico, file.buffer, {
-          contentType: file.mimetype,
+        .from("noticias-imagenes")
+        .upload(nombreUnico, bannerFile.buffer, {
+          contentType: bannerFile.mimetype,
           upsert: true,
         });
 
       if (storageError) {
-        console.error("Error subiendo archivo a Supabase:", storageError);
-        const error = new Error("Error al subir archivo adjunto: " + storageError.message);
+        console.error("Error subiendo imagen de banner a Supabase:", storageError);
+        const error = new Error("Error al subir imagen de banner: " + storageError.message);
         error.statusCode = 500;
         throw error;
       }
 
-      const archivoDb = await prisma.archivo.create({
+      const archivoBannerDb = await prisma.archivo.create({
         data: {
-          nombreOriginal: file.originalname,
+          nombreOriginal: bannerFile.originalname,
           nombreArchivo: nombreUnico,
-          ruta: `documentos/${nombreUnico}`,
-          extension: extension || "bin",
-          mimeType: file.mimetype,
-          tamanioBytes: BigInt(file.size || 0),
+          ruta: `noticias-imagenes/${nombreUnico}`,
+          extension: extension || "jpg",
+          mimeType: bannerFile.mimetype,
+          tamanioBytes: BigInt(bannerFile.size || 0),
         },
       });
 
-      imagenId = archivoDb.id;
+      imagenId = archivoBannerDb.id;
     }
 
-    // Estructurar el contenido en JSON para persistir los campos complementarios
+    // 2. Procesar Documento adjunto (PDF / Word) si existe
+    let documentoMeta = null;
+    if (docFile) {
+      const { nombreUnico, extension } = generarNombreUnico(docFile.originalname, "residencia_doc");
+      const { error: storageError } = await supabase.storage
+        .from("documentos")
+        .upload(nombreUnico, docFile.buffer, {
+          contentType: docFile.mimetype,
+          upsert: true,
+        });
+
+      if (storageError) {
+        console.error("Error subiendo documento a Supabase:", storageError);
+        const error = new Error("Error al subir documento adjunto: " + storageError.message);
+        error.statusCode = 500;
+        throw error;
+      }
+
+      const archivoDocDb = await prisma.archivo.create({
+        data: {
+          nombreOriginal: docFile.originalname,
+          nombreArchivo: nombreUnico,
+          ruta: `documentos/${nombreUnico}`,
+          extension: extension || "pdf",
+          mimeType: docFile.mimetype,
+          tamanioBytes: BigInt(docFile.size || 0),
+        },
+      });
+
+      const { data: pubUrlData } = supabase.storage.from("documentos").getPublicUrl(nombreUnico);
+
+      documentoMeta = {
+        documentoId: archivoDocDb.id.toString(),
+        documentoNombre: docFile.originalname,
+        documentoTamano: formatBytes(docFile.size),
+        documentoTipo: (extension || "pdf").toUpperCase(),
+        documentoUrl: pubUrlData?.publicUrl || "",
+        documentoArchivoNombre: nombreUnico,
+      };
+    }
+
+    // 3. Estructurar el contenido en JSON
     const contenidoPayload = {
-      tipo: data.tipo || "Básica",
-      especialidad: data.especialidad || "",
-      duracion: data.duracion || "3 años",
+      categoria: data.categoria || "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
+      descripcionPrograma: data.descripcionPrograma || "",
       cupos: data.cupos || "",
+      duracion: data.duracion || "",
       requisitos: data.requisitos || "",
-      contenidoDetallado: data.contenidoDetallado || data.contenido || "",
+      reglamentoRotacion: data.reglamentoRotacion || "",
+      documento: documentoMeta,
     };
 
     let fechaConvocatoriaDate = null;
@@ -84,7 +136,6 @@ class CmsResidenciaService {
       }
     }
 
-    // Normalizar estado editorial
     let estadoNormalizado = "PUBLICADO";
     if (data.estado) {
       const estadoUpper = data.estado.toUpperCase();
@@ -96,11 +147,10 @@ class CmsResidenciaService {
     const nueva = await prisma.residencia.create({
       data: {
         nombre: data.nombre.trim(),
-        descripcion: data.descripcion || null,
+        descripcion: data.descripcion ? data.descripcion.trim() : null,
         contenido: JSON.stringify(contenidoPayload),
         imagenId: imagenId,
-        videoUrl: data.videoUrl ? data.videoUrl.trim() : null,
-        convocatoria: data.convocatoria ? data.convocatoria.trim() : null,
+        convocatoria: data.convocatoria ? data.convocatoria.trim() : "Convocatoria Abierta",
         fechaConvocatoria: fechaConvocatoriaDate,
         estado: estadoNormalizado,
         activo: data.activo !== undefined ? (data.activo === true || data.activo === "true") : true,
@@ -120,7 +170,7 @@ class CmsResidenciaService {
   /**
    * Actualizar una residencia existente
    */
-  async actualizarResidencia(id, data, file) {
+  async actualizarResidencia(id, data, files) {
     const idBigInt = BigInt(id);
 
     const residenciaExistente = await prisma.residencia.findUnique({
@@ -134,82 +184,157 @@ class CmsResidenciaService {
       throw error;
     }
 
+    const filesArray = Array.isArray(files) ? files : (files ? [files] : []);
+    const bannerFile = filesArray.find((f) => f.fieldname === "banner" || f.fieldname === "imagen");
+    const docFile = filesArray.find((f) => f.fieldname === "archivo" || f.fieldname === "documento");
+
     let finalImagenId = residenciaExistente.imagenId;
 
-    // Si se envía eliminarArchivo = 'true'
-    if (data.eliminarArchivo === "true" || data.eliminarArchivo === true) {
+    // Manejo de eliminación explícita de Banner
+    if (data.eliminarBanner === "true" || data.eliminarBanner === true) {
       if (residenciaExistente.archivo) {
         try {
           await supabase.storage
-            .from("documentos")
+            .from("noticias-imagenes")
             .remove([residenciaExistente.archivo.nombreArchivo]);
+          await prisma.archivo.delete({ where: { id: residenciaExistente.archivo.id } });
         } catch (e) {
-          console.warn("No se pudo eliminar el archivo anterior en storage:", e.message);
+          console.warn("No se pudo remover el banner anterior:", e.message);
         }
       }
       finalImagenId = null;
     }
 
-    // Si se subió un nuevo archivo para reemplazar
-    if (file) {
+    // Si se subió un nuevo Banner
+    if (bannerFile) {
       if (residenciaExistente.archivo) {
         try {
           await supabase.storage
-            .from("documentos")
+            .from("noticias-imagenes")
             .remove([residenciaExistente.archivo.nombreArchivo]);
+          await prisma.archivo.delete({ where: { id: residenciaExistente.archivo.id } });
         } catch (e) {
-          console.warn("No se pudo remover el archivo previo:", e.message);
+          console.warn("No se pudo remover banner previo:", e.message);
         }
       }
 
-      const { nombreUnico, extension } = generarNombreUnico(file.originalname, "residencia");
-
+      const { nombreUnico, extension } = generarNombreUnico(bannerFile.originalname, "residencia_banner");
       const { error: storageError } = await supabase.storage
-        .from("documentos")
-        .upload(nombreUnico, file.buffer, {
-          contentType: file.mimetype,
+        .from("noticias-imagenes")
+        .upload(nombreUnico, bannerFile.buffer, {
+          contentType: bannerFile.mimetype,
           upsert: true,
         });
 
       if (storageError) {
-        const error = new Error("Error al subir archivo a Supabase: " + storageError.message);
+        const error = new Error("Error al subir banner a Supabase: " + storageError.message);
         error.statusCode = 500;
         throw error;
       }
 
-      const nuevoArchivoDb = await prisma.archivo.create({
+      const nuevoArchivoBanner = await prisma.archivo.create({
         data: {
-          nombreOriginal: file.originalname,
+          nombreOriginal: bannerFile.originalname,
           nombreArchivo: nombreUnico,
-          ruta: `documentos/${nombreUnico}`,
-          extension: extension || "bin",
-          mimeType: file.mimetype,
-          tamanioBytes: BigInt(file.size || 0),
+          ruta: `noticias-imagenes/${nombreUnico}`,
+          extension: extension || "jpg",
+          mimeType: bannerFile.mimetype,
+          tamanioBytes: BigInt(bannerFile.size || 0),
         },
       });
 
-      finalImagenId = nuevoArchivoDb.id;
+      finalImagenId = nuevoArchivoBanner.id;
     }
 
-    // Estructurar el contenido en JSON
+    // Parsear contenido previo
     let contenidoPrevio = {};
     if (residenciaExistente.contenido) {
       try {
         contenidoPrevio = JSON.parse(residenciaExistente.contenido);
       } catch (err) {
-        contenidoPrevio = { contenidoDetallado: residenciaExistente.contenido };
+        contenidoPrevio = {};
       }
     }
 
+    let documentoMeta = contenidoPrevio.documento || null;
+
+    // Manejo de eliminación explícita de Documento
+    if (data.eliminarDocumento === "true" || data.eliminarDocumento === true) {
+      if (documentoMeta?.documentoId) {
+        try {
+          if (documentoMeta.documentoArchivoNombre) {
+            await supabase.storage
+              .from("documentos")
+              .remove([documentoMeta.documentoArchivoNombre]);
+          }
+          await prisma.archivo.delete({ where: { id: BigInt(documentoMeta.documentoId) } });
+        } catch (e) {
+          console.warn("No se pudo remover documento previo:", e.message);
+        }
+      }
+      documentoMeta = null;
+    }
+
+    // Si se subió un nuevo Documento
+    if (docFile) {
+      if (documentoMeta?.documentoId) {
+        try {
+          if (documentoMeta.documentoArchivoNombre) {
+            await supabase.storage
+              .from("documentos")
+              .remove([documentoMeta.documentoArchivoNombre]);
+          }
+          await prisma.archivo.delete({ where: { id: BigInt(documentoMeta.documentoId) } });
+        } catch (e) {
+          console.warn("No se pudo remover documento previo:", e.message);
+        }
+      }
+
+      const { nombreUnico, extension } = generarNombreUnico(docFile.originalname, "residencia_doc");
+      const { error: storageError } = await supabase.storage
+        .from("documentos")
+        .upload(nombreUnico, docFile.buffer, {
+          contentType: docFile.mimetype,
+          upsert: true,
+        });
+
+      if (storageError) {
+        const error = new Error("Error al subir documento a Supabase: " + storageError.message);
+        error.statusCode = 500;
+        throw error;
+      }
+
+      const nuevoArchivoDoc = await prisma.archivo.create({
+        data: {
+          nombreOriginal: docFile.originalname,
+          nombreArchivo: nombreUnico,
+          ruta: `documentos/${nombreUnico}`,
+          extension: extension || "pdf",
+          mimeType: docFile.mimetype,
+          tamanioBytes: BigInt(docFile.size || 0),
+        },
+      });
+
+      const { data: pubUrlData } = supabase.storage.from("documentos").getPublicUrl(nombreUnico);
+
+      documentoMeta = {
+        documentoId: nuevoArchivoDoc.id.toString(),
+        documentoNombre: docFile.originalname,
+        documentoTamano: formatBytes(docFile.size),
+        documentoTipo: (extension || "pdf").toUpperCase(),
+        documentoUrl: pubUrlData?.publicUrl || "",
+        documentoArchivoNombre: nombreUnico,
+      };
+    }
+
     const contenidoPayload = {
-      tipo: data.tipo !== undefined ? data.tipo : (contenidoPrevio.tipo || "Básica"),
-      especialidad: data.especialidad !== undefined ? data.especialidad : (contenidoPrevio.especialidad || ""),
-      duracion: data.duracion !== undefined ? data.duracion : (contenidoPrevio.duracion || "3 años"),
+      categoria: data.categoria !== undefined ? data.categoria : (contenidoPrevio.categoria || ""),
+      descripcionPrograma: data.descripcionPrograma !== undefined ? data.descripcionPrograma : (contenidoPrevio.descripcionPrograma || ""),
       cupos: data.cupos !== undefined ? data.cupos : (contenidoPrevio.cupos || ""),
+      duracion: data.duracion !== undefined ? data.duracion : (contenidoPrevio.duracion || ""),
       requisitos: data.requisitos !== undefined ? data.requisitos : (contenidoPrevio.requisitos || ""),
-      contenidoDetallado: data.contenidoDetallado !== undefined 
-        ? data.contenidoDetallado 
-        : (data.contenido !== undefined ? data.contenido : (contenidoPrevio.contenidoDetallado || "")),
+      reglamentoRotacion: data.reglamentoRotacion !== undefined ? data.reglamentoRotacion : (contenidoPrevio.reglamentoRotacion || ""),
+      documento: documentoMeta,
     };
 
     let fechaConvocatoriaDate = residenciaExistente.fechaConvocatoria;
@@ -237,7 +362,6 @@ class CmsResidenciaService {
         descripcion: data.descripcion !== undefined ? data.descripcion : residenciaExistente.descripcion,
         contenido: JSON.stringify(contenidoPayload),
         imagenId: finalImagenId,
-        videoUrl: data.videoUrl !== undefined ? (data.videoUrl ? data.videoUrl.trim() : null) : residenciaExistente.videoUrl,
         convocatoria: data.convocatoria !== undefined ? (data.convocatoria ? data.convocatoria.trim() : null) : residenciaExistente.convocatoria,
         fechaConvocatoria: fechaConvocatoriaDate,
         estado: estadoNormalizado,
@@ -252,53 +376,6 @@ class CmsResidenciaService {
     return {
       message: "Residencia actualizada con éxito.",
       residencia: this._formatResidencia(actualizada),
-    };
-  }
-
-  /**
-   * Eliminar una residencia y su archivo si existe
-   */
-  async eliminarResidencia(id) {
-    const idBigInt = BigInt(id);
-
-    const residencia = await prisma.residencia.findUnique({
-      where: { id: idBigInt },
-      include: { archivo: true },
-    });
-
-    if (!residencia) {
-      const error = new Error("La residencia no existe.");
-      error.statusCode = 404;
-      throw error;
-    }
-
-    if (residencia.archivo) {
-      try {
-        await supabase.storage
-          .from("documentos")
-          .remove([residencia.archivo.nombreArchivo]);
-      } catch (e) {
-        console.warn("No se pudo eliminar el archivo de storage:", e.message);
-      }
-    }
-
-    await prisma.residencia.delete({
-      where: { id: idBigInt },
-    });
-
-    if (residencia.imagenId) {
-      try {
-        await prisma.archivo.delete({
-          where: { id: residencia.imagenId },
-        });
-      } catch (e) {
-        console.warn("No se pudo eliminar el registro de archivo:", e.message);
-      }
-    }
-
-    return {
-      message: "Residencia eliminada correctamente.",
-      id: id.toString(),
     };
   }
 
@@ -353,16 +430,82 @@ class CmsResidenciaService {
   }
 
   /**
+   * Eliminar una residencia y sus archivos (banner y documento)
+   */
+  async eliminarResidencia(id) {
+    const idBigInt = BigInt(id);
+
+    const residencia = await prisma.residencia.findUnique({
+      where: { id: idBigInt },
+      include: { archivo: true },
+    });
+
+    if (!residencia) {
+      const error = new Error("La residencia no existe.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // 1. Eliminar banner
+    if (residencia.archivo) {
+      try {
+        await supabase.storage
+          .from("noticias-imagenes")
+          .remove([residencia.archivo.nombreArchivo]);
+      } catch (e) {
+        console.warn("No se pudo eliminar banner de storage:", e.message);
+      }
+    }
+
+    // 2. Eliminar documento si existe en contenido
+    if (residencia.contenido) {
+      try {
+        const parsed = JSON.parse(residencia.contenido);
+        if (parsed.documento?.documentoArchivoNombre) {
+          await supabase.storage
+            .from("documentos")
+            .remove([parsed.documento.documentoArchivoNombre]);
+        }
+        if (parsed.documento?.documentoId) {
+          await prisma.archivo.delete({
+            where: { id: BigInt(parsed.documento.documentoId) },
+          }).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    await prisma.residencia.delete({
+      where: { id: idBigInt },
+    });
+
+    if (residencia.imagenId) {
+      try {
+        await prisma.archivo.delete({
+          where: { id: residencia.imagenId },
+        });
+      } catch (e) {
+        console.warn("No se pudo eliminar el registro de archivo del banner:", e.message);
+      }
+    }
+
+    return {
+      message: "Residencia eliminada correctamente.",
+      id: id.toString(),
+    };
+  }
+
+  /**
    * Formatear el registro de residencia para el cliente
    */
   _formatResidencia(res) {
     let extra = {
-      tipo: "Básica",
-      especialidad: "",
-      duracion: "3 años",
+      categoria: "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
+      descripcionPrograma: "",
       cupos: "",
+      duracion: "",
       requisitos: "",
-      contenidoDetallado: "",
+      reglamentoRotacion: "",
+      documento: null,
     };
 
     if (res.contenido) {
@@ -370,42 +513,33 @@ class CmsResidenciaService {
         const parsed = JSON.parse(res.contenido);
         if (typeof parsed === "object" && parsed !== null) {
           extra = { ...extra, ...parsed };
-        } else {
-          extra.contenidoDetallado = String(res.contenido);
         }
-      } catch (e) {
-        extra.contenidoDetallado = String(res.contenido);
-      }
+      } catch (e) {}
     }
 
-    let archivoUrl = "";
-    let archivoNombre = "";
-    let archivoTamano = "";
-    let archivoTipo = "";
-
+    // Banner URL e Info
+    let bannerUrl = "";
+    let bannerNombre = "";
     if (res.archivo) {
-      archivoNombre = res.archivo.nombreOriginal || "";
-      archivoTipo = res.archivo.extension ? res.archivo.extension.toUpperCase() : "PDF";
-
-      const bytes = Number(res.archivo.tamanioBytes || 0);
-      if (bytes > 1024 * 1024) {
-        archivoTamano = `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-      } else if (bytes > 0) {
-        archivoTamano = `${(bytes / 1024).toFixed(0)} KB`;
-      }
-
+      bannerNombre = res.archivo.nombreOriginal || "";
       const { data } = supabase.storage
-        .from("documentos")
+        .from("noticias-imagenes")
         .getPublicUrl(res.archivo.nombreArchivo);
-      archivoUrl = data?.publicUrl || "";
+      bannerUrl = data?.publicUrl || "";
     }
+
+    // Documento adjunto (PDF / Word)
+    const doc = extra.documento || {};
+    const documentoUrl = doc.documentoUrl || "";
+    const documentoNombre = doc.documentoNombre || "";
+    const documentoTamano = doc.documentoTamano || "";
+    const documentoTipo = doc.documentoTipo || (documentoNombre ? documentoNombre.split(".").pop().toUpperCase() : "PDF");
 
     return {
       id: res.id.toString(),
       nombre: res.nombre,
       descripcion: res.descripcion || "",
-      videoUrl: res.videoUrl || "",
-      convocatoria: res.convocatoria || "",
+      convocatoria: res.convocatoria || "Convocatoria Abierta",
       fechaConvocatoria: res.fechaConvocatoria
         ? res.fechaConvocatoria.toISOString().split("T")[0]
         : "",
@@ -413,19 +547,32 @@ class CmsResidenciaService {
       activo: res.activo,
       createdAt: res.createdAt ? res.createdAt.toISOString() : "",
       updatedAt: res.updatedAt ? res.updatedAt.toISOString() : "",
-      // Campos complementarios del contenido
-      tipo: extra.tipo || "Básica",
-      especialidad: extra.especialidad || "",
-      duracion: extra.duracion || "3 años",
+
+      // Campos específicos solicitados por el usuario
+      categoria: extra.categoria || "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
+      descripcionPrograma: extra.descripcionPrograma || "",
       cupos: extra.cupos || "",
+      duracion: extra.duracion || "",
       requisitos: extra.requisitos || "",
-      contenidoDetallado: extra.contenidoDetallado || "",
-      // Archivo adjunto
-      archivoId: res.imagenId ? res.imagenId.toString() : null,
-      archivoNombre,
-      archivoTamano,
-      archivoTipo,
-      archivoUrl,
+      reglamentoRotacion: extra.reglamentoRotacion || "",
+
+      // Imagen de Banner
+      bannerId: res.imagenId ? res.imagenId.toString() : null,
+      bannerNombre,
+      bannerUrl,
+
+      // Carga de Documentos
+      documentoId: doc.documentoId || null,
+      documentoNombre,
+      documentoTamano,
+      documentoTipo,
+      documentoUrl,
+
+      // Compatibilidad con tabla
+      archivoNombre: documentoNombre,
+      archivoUrl: documentoUrl,
+      archivoTamano: documentoTamano,
+      archivoTipo: documentoTipo,
     };
   }
 }
