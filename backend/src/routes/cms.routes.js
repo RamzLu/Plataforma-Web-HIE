@@ -13,6 +13,13 @@ import {
   reordenarAutoridades,
   actualizarRedesSociales 
 } from "../controllers/cms/cms.institucional.controller.js";
+import {
+  obtenerResidencias,
+  crearResidencia,
+  actualizarResidencia,
+  eliminarResidencia,
+  cambiarEstadoResidencia
+} from "../controllers/cms/cms.residencia.controller.js";
 
 
 import { verifyToken } from '../middlewares/auth.middleware.js'; 
@@ -69,5 +76,14 @@ router.post('/institucional/autoridades', verifyToken, uploadMemory.single('arch
 router.put('/institucional/autoridades/:id', verifyToken, uploadMemory.single('archivo'), actualizarAutoridad);
 router.delete('/institucional/autoridades/:id', verifyToken, eliminarAutoridad);
 router.put('/institucional/redes', verifyToken, actualizarRedesSociales);
+
+// ==========================================
+// MÓDULO: RESIDENCIAS
+// ==========================================
+router.get('/residencias', obtenerResidencias);
+router.post('/residencias', verifyToken, uploadMemory.single('archivo'), crearResidencia);
+router.put('/residencias/:id', verifyToken, uploadMemory.single('archivo'), actualizarResidencia);
+router.patch('/residencias/:id/estado', verifyToken, cambiarEstadoResidencia);
+router.delete('/residencias/:id', verifyToken, eliminarResidencia);
 
 export default router;
