@@ -18,6 +18,7 @@ import NoticiasPage from "./pages/public/NoticiasPage";
 import DocumentacionPage from "./pages/public/DocumentacionPage";
 import ProfesionalesPage from "./pages/public/ProfesionalesPage";
 import CapacitacionPage from "./pages/public/CapacitacionPage";
+import ResidenciasPage from "./pages/public/ResidenciasPage";
 import AboutPage from "./pages/public/AboutPage";
 import CmsPage from "./pages/cms/CmsPage";
 import AdminPage from './pages/admin/AdminPage';
@@ -44,6 +45,7 @@ const AppLayout = () => {
         <Route path="/documentacion" element={<DocumentacionPage />} />
         <Route path="/profesionales" element={<ProfesionalesPage />} />
         <Route path="/capacitacion" element={<CapacitacionPage />} />
+        <Route path="/residencias" element={<ResidenciasPage />} />
         <Route path="/acerca-de" element={<AboutPage />} />
         <Route path="/plano" element={<PlanoInstitucionalPage />} />
         <Route path="/cms" element={<CmsPage />} />
