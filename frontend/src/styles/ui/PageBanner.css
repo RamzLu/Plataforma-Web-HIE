@@ -1,0 +1,109 @@
+/* =========================================================
+   COMPONENTE MODULAR: BANNER PÚBLICO INSTITUCIONAL (PageBanner)
+   Unifica medidas, márgenes, padding y tipografía en todos los módulos
+   ========================================================= */
+
+.public-page-banner {
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  padding: 120px 20px 60px 20px;
+  margin-bottom: 50px;
+  box-sizing: border-box;
+}
+
+.public-page-banner-inner {
+  width: 100%;
+  max-width: 1200px;
+  border-left: 8px solid #2b5b94;
+  padding-left: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+.public-page-banner-title {
+  color: #2b5b94;
+  font-size: 3.2rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  margin: 0 0 15px 0;
+  letter-spacing: 1px;
+  line-height: 1.15;
+}
+
+.public-page-banner-subtitle {
+  color: #64748b;
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 900px;
+}
+
+/* Acciones o elementos extra dentro del banner (ej: botones) */
+.public-page-banner-extra {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* =========================================================
+   RESPONSIVIDAD Y AJUSTE EN DISPOSITIVOS MÓVILES
+   ========================================================= */
+@media (max-width: 992px) {
+  .public-page-banner {
+    padding: 110px 20px 50px 20px;
+  }
+  .public-page-banner-inner {
+    border-left-width: 6px;
+    padding-left: 28px;
+  }
+  .public-page-banner-title {
+    font-size: 2.6rem;
+  }
+  .public-page-banner-subtitle {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .public-page-banner {
+    padding: 100px 16px 40px 16px;
+    margin-bottom: 35px;
+  }
+  .public-page-banner-inner {
+    border-left-width: 5px;
+    padding-left: 20px;
+  }
+  .public-page-banner-title {
+    font-size: 2.1rem;
+    margin-bottom: 12px;
+  }
+  .public-page-banner-subtitle {
+    font-size: 0.98rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .public-page-banner {
+    padding: 95px 12px 35px 12px;
+  }
+  .public-page-banner-inner {
+    border-left-width: 4px;
+    padding-left: 14px;
+  }
+  .public-page-banner-title {
+    font-size: 1.7rem;
+    letter-spacing: 0.5px;
+  }
+  .public-page-banner-subtitle {
+    font-size: 0.9rem;
+  }
+}

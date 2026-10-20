@@ -4,7 +4,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "../../styles/pages/ProfesionalesPage.css";
 
-import Breadcrumb from "../../components/Breadcrumb";
+import PageBanner from "../../components/PageBanner";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 
 // Dirección base de la API (ya incluye /api).
@@ -204,15 +204,11 @@ const ProfesionalesPage = () => {
   return (
     <main className="profesionales-page medical-directory-container">
 
-      <div className="prof-header-fluid" style={{ background: "linear-gradient(rgba(255, 255, 255, 0.85), #a4c2d6)" }}>
-        <div className="prof-header-inner">
-          <Breadcrumb currentPage="Profesionales" />
-          <h1 className="prof-main-title">NUESTRO EQUIPO MÉDICO</h1>
-          <p className="prof-subtitle">
-            Conozca a los profesionales que forman parte de nuestra institución.
-          </p>
-        </div>
-      </div>
+      <PageBanner
+        currentPage="Profesionales"
+        title="NUESTRO EQUIPO MÉDICO"
+        subtitle="Conozca a los profesionales que forman parte de nuestra institución."
+      />
 
       <AnimatedContent distance={30} direction="vertical" delay={0.1}>
         <section className="search-filter-section" aria-label="Búsqueda de profesionales y especialidades">

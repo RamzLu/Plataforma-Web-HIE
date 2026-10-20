@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import "../../styles/pages/CapacitacionPage.css";
 import AnimatedContent from "../../components/ui/AnimatedContent";
-
-import Breadcrumb from "../../components/Breadcrumb";
+import PageBanner from "../../components/PageBanner";
 
 import logoHospital from "../../assets/logoHospitalEvita.png";
 import fondoBanner from "../../assets/banner_capacitaciones.png";
@@ -101,22 +100,12 @@ const CapacitacionPage = () => {
 
   return (
     <main className="capacitacion-page">
-      <div
-        className="cap-header-fluid"
-        style={{
-          backgroundImage: `linear-gradient(#4283d0, #eaf6fc), url(${fondoBanner})`,
-        }}
-      >
-        <div className="cap-header-inner">
-          <Breadcrumb currentPage="capacitación" />
-          <h1 className="cap-title">CAPACITACIÓN</h1>
-          <div className="cap-info-wrapper">
-            <div className="cap-info-text">
-              <p>Formación continua para profesionales y el equipo de salud institucional.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageBanner
+        currentPage="capacitación"
+        title="CAPACITACIÓN"
+        subtitle="Formación continua para profesionales y el equipo de salud institucional."
+        image={fondoBanner}
+      />
 
       <div className="capacitacion-container">
         <div className="cap-banner-box">

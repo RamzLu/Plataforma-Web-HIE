@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../../styles/pages/EspecialidadesPage.css";
-import Breadcrumb from "../../components/Breadcrumb";
+import PageBanner from "../../components/PageBanner";
 import fondoBannerEsp from "../../assets/banner_especialidades.png";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import { getEspecialidades } from "../../api/especialidades.api.js";
@@ -33,20 +33,12 @@ const EspecialidadesPage = () => {
 
   return (
     <main className="especialidades-page">
-      <div
-        className="esp-header-fluid"
-        style={{
-          backgroundImage: `linear-gradient(rgba(46, 111, 196, 0.85), rgba(233, 235, 238, 0.85)), url(${fondoBannerEsp})`,
-        }}
-      >
-        <div className="esp-header-inner">
-          <Breadcrumb currentPage="Áreas de Atención" />
-          <h1 className="esp-main-title">Áreas de Atención</h1>
-          <p className="esp-subtitle">
-            Conozca los servicios y especialidades médicas de nuestra institución
-          </p>
-        </div>
-      </div>
+      <PageBanner
+        currentPage="Áreas de Atención"
+        title="Áreas de Atención"
+        subtitle="Conozca los servicios y especialidades médicas de nuestra institución"
+        image={fondoBannerEsp}
+      />
 
       <div className="especialidades-container">
         {currentView === "menu" && (

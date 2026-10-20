@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
 import "../../styles/pages/NoticiasPage.css";
-import Breadcrumb from "../../components/Breadcrumb";
+import PageBanner from "../../components/PageBanner";
 import iconMama from "../../assets/icon-mama.png";
 import iconCorazon from "../../assets/icon-corazon.png";
 import iconDonacion from "../../assets/icon-donacion-de-sangre.png";
@@ -173,17 +173,12 @@ const NoticiasPage = () => {
 
   return (
     <main className="noticias-page">
-      <div className="news-header-fluid" style={{ backgroundImage: `linear-gradient(rgba(46, 111, 196, 0.85), rgba(233, 235, 238, 0.85)), url(${fondoBannerNoticias})` }}>
-        <div className="news-header-inner">
-          <Breadcrumb currentPage="Noticias" />
-          <h1 className="news-main-title">ÚLTIMAS PUBLICACIONES</h1>
-          <div className="news-info-wrapper">
-            <div className="news-info-text">
-              <p>Manténgase informado con la actualidad y comunicados oficiales de la institución.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageBanner
+        currentPage="Noticias"
+        title="ÚLTIMAS PUBLICACIONES"
+        subtitle="Manténgase informado con la actualidad y comunicados oficiales de la institución."
+        image={fondoBannerNoticias}
+      />
 
       <div className="noticias-page-container">
         {loading ? (

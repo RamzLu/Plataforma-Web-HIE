@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { getDocumentos } from "../../api/documentos.api.js";
 import "../../styles/pages/DocumentacionPage.css";
-import AnimatedContent from "../../components/ui/AnimatedContent";
-import Breadcrumb from "../../components/Breadcrumb";
+import PageBanner from "../../components/PageBanner";
 import fondoBanner from "../../assets/banner_documentacion.png";
+import AnimatedContent from "../../components/ui/AnimatedContent";
+
 
 const DocumentacionPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -117,22 +118,13 @@ const DocumentacionPage = () => {
 
   return (
     <main className="documentacion-page">
-      <div
-        className="doc-header-fluid"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), #a4c2d6), url(${fondoBanner})`,
-        }}
-      >
-        <div className="doc-header-inner">
-          <Breadcrumb currentPage="documentación" />
-          <h1 className="doc-title-page">REPOSITORIO DE DOCUMENTOS</h1>
-          <div className="doc-info-wrapper">
-            <div className="doc-info-text">
-              <p>Acceda a manuales, guías e información oficial disponible para toda la comunidad.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageBanner
+        currentPage="documentación"
+        title="REPOSITORIO DE DOCUMENTOS"
+        subtitle="Acceda a manuales, guías e información oficial disponible para toda la comunidad."
+        image={fondoBanner}
+        marginBottom={0}
+      />
 
       <div className="documentacion-container">
         

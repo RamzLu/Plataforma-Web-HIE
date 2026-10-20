@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../../styles/pages/ResidenciasPage.css";
-import Breadcrumb from "../../components/Breadcrumb";
+import PageBanner from "../../components/PageBanner";
 import fondoBanner from "../../assets/banner_residencias.png";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import { getResidencias } from "../../api/residencias.api";
@@ -31,21 +31,12 @@ const ResidenciasPage = () => {
 
   return (
     <main className="residencias-page">
-      {/* Banner Superior con Breadcrumb institucional */}
-      <div
-        className="residencias-header-fluid"
-        style={{
-          backgroundImage: `linear-gradient(rgba(46, 111, 196, 0.85), rgba(233, 235, 238, 0.85)), url(${fondoBanner})`,
-        }}
-      >
-        <div className="residencias-header-inner">
-          <Breadcrumb currentPage="Residencias" />
-          <h1 className="residencias-main-title">RESIDENCIAS MÉDICAS</h1>
-          <p className="residencias-subtitle">
-            Conozca las convocatorias y programas formativos de posgrado de nuestra institución
-          </p>
-        </div>
-      </div>
+      <PageBanner
+        currentPage="Residencias"
+        title="RESIDENCIAS MÉDICAS"
+        subtitle="Conozca las convocatorias y programas formativos de posgrado de nuestra institución"
+        image={fondoBanner}
+      />
 
       <div className="residencias-container">
         {loading ? (
