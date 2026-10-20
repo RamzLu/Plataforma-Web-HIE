@@ -1,6 +1,6 @@
-/* =========================================
+/* =========================================================
    ESTRUCTURA BASE DE LA PÁGINA PÚBLICA RESIDENCIAS
-========================================= */
+   ========================================================= */
 .residencias-page {
   width: 100%;
   background-color: #e9ebee;
@@ -13,18 +13,18 @@
 }
 
 .residencias-container {
-  max-width: 1200px;
   width: 100%;
-  padding: 0 20px;
+  padding: 0 90px;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-sizing: border-box;
 }
 
-/* =========================================
+/* =========================================================
    HERO / BANNER INFORMATIVO RESIDENCIAS
-========================================= */
+   ========================================================= */
 .res-hero-animation-wrapper {
   width: 100%;
 }
@@ -39,7 +39,7 @@
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   align-items: stretch;
-  margin-bottom: 50px;
+  margin-bottom: 55px;
   transition: box-shadow 0.3s ease;
 }
 
@@ -130,9 +130,425 @@
   transform: scale(1.02);
 }
 
-/* =========================================
+/* =========================================================
+   SECCIÓN DE ESPECIALIDADES MÉDICAS ACREDITADAS (LISTADO)
+   ========================================================= */
+.res-programs-section {
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 40px;
+}
+
+.res-section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.res-section-eyebrow {
+  color: #0088b7;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.res-section-title {
+  color: #1b3b6f;
+  font-size: 2.2rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
+  line-height: 1.2;
+}
+
+.res-section-subtitle {
+  color: #64748b;
+  font-size: 1.05rem;
+  font-weight: 400;
+  margin: 0;
+  max-width: 860px;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   TARJETA ACORDEÓN DE RESIDENCIA (res-card)
+   ========================================================= */
+.res-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(12, 35, 64, 0.05);
+  margin-bottom: 24px;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  box-sizing: border-box;
+}
+
+.res-card:hover {
+  box-shadow: 0 8px 24px rgba(12, 35, 64, 0.08);
+  border-color: #cbd5e1;
+}
+
+/* Encabezado Azul Océano / Turquesa de la Tarjeta */
+.res-card-header {
+  background: #0088b7;
+  padding: 16px 26px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  user-select: none;
+}
+
+.res-card-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.res-card-resolucion {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.res-card-title {
+  color: #ffffff;
+  font-size: 1.90rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.25;
+}
+
+/* Botón 'Ver programa / Ocultar detalles' en la cabecera */
+.res-header-toggle-btn {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.res-header-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: #ffffff;
+}
+
+/* Cuerpo de la Tarjeta */
+.res-card-body {
+  padding: 24px 26px;
+  box-sizing: border-box;
+}
+
+/* Línea de Metadatos */
+.res-meta-line {
+  font-size: 0.92rem;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.res-meta-category-label {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.res-meta-dot {
+  margin: 0 6px;
+  color: #94a3b8;
+}
+
+.res-meta-date {
+  color: #0088b7;
+  font-weight: 600;
+}
+
+.res-meta-status {
+  color: #0088b7;
+  font-weight: 700;
+}
+
+/* Copete / Resumen breve */
+.res-copete {
+  color: #334155;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+
+/* Barra de Acciones */
+.res-actions-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Botón Rosa / Carmín 'Descargar' */
+.res-btn-download {
+  background: #d91a5b;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(217, 26, 91, 0.25);
+}
+
+.res-btn-download:hover {
+  background: #b8144b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(217, 26, 91, 0.35);
+}
+
+/* Botón Celeste 'Ver requisitos y rotación' */
+.res-btn-toggle-req {
+  background: #f0f9ff;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.res-btn-toggle-req:hover {
+  background: #e0f2fe;
+  border-color: #7dd3fc;
+  color: #0369a1;
+}
+
+/* Badge de Duración / Sede */
+.res-badge-duration {
+  background: #f8fafc;
+  color: #0284c7;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Ícono de flecha rotatoria */
+.res-chevron-icon {
+  transition: transform 0.25s ease;
+}
+
+.res-chevron-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* =========================================================
+   CONTENIDO EXPANDIDO (ACORDEÓN ABIERTO)
+   ========================================================= */
+.res-expanded-content {
+  border-top: 1px dashed #cbd5e1;
+  margin-top: 24px;
+  padding-top: 24px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 36px;
+  align-items: start;
+  animation: resFadeIn 0.3s ease;
+}
+
+@keyframes resFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Títulos con íconos de subsección */
+.res-subheading {
+  color: #0c2340;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.res-program-description {
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  margin: 0 0 20px 0;
+}
+
+/* Cajas de Estadísticas (Cupos y Duración) */
+.res-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.res-stat-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.res-stat-label {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.res-stat-value {
+  color: #0c2340;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* Lista de Requisitos */
+.res-requisitos-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.res-requisito-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.92rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.res-check-icon {
+  color: #0088b7;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* Columna Derecha del Acordeón */
+.res-right-media {
+  width: 100%;
+  height: 190px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f1f5f9;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.res-right-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.res-rotation-title {
+  color: #0c2340;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+.res-rotation-desc {
+  color: #64748b;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin: 0 0 18px 0;
+}
+
+/* Botón Descargar Programa (PDF) */
+.res-btn-program-pdf {
+  background: #e0f2fe;
+  color: #006eb3 !important;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.res-btn-program-pdf:hover {
+  background: #bae6fd;
+  color: #004d80 !important;
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   ESTADO VACÍO Y CARGA
+   ========================================================= */
+.res-loading-state,
+.res-empty-state {
+  width: 100%;
+  padding: 60px 20px;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 1rem;
+  box-shadow: 0 4px 14px rgba(12, 35, 64, 0.04);
+}
+
+/* =========================================================
    RESPONSIVIDAD
-========================================= */
+   ========================================================= */
 @media (max-width: 992px) {
   .res-hero-card {
     grid-template-columns: 1fr;
@@ -157,9 +573,18 @@
     font-size: 1rem;
     margin-bottom: 26px;
   }
+
+  .res-expanded-content {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .res-right-media {
+    max-height: 240px;
+  }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 640px) {
   .res-hero-card {
     border-radius: 16px;
   }
@@ -187,5 +612,41 @@
     width: 100%;
     justify-content: center;
     padding: 12px 20px;
+  }
+
+  .res-section-title {
+    font-size: 1.7rem;
+  }
+
+  .res-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px 20px;
+  }
+
+  .res-header-toggle-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .res-card-body {
+    padding: 20px;
+  }
+
+  .res-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .res-actions-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .res-btn-download,
+  .res-btn-toggle-req,
+  .res-badge-duration {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
   }
 }
