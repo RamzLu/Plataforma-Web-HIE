@@ -4,6 +4,10 @@ import toast from "react-hot-toast";
 import { getEspecialidades } from "../../api/especialidades.api.js";
 import Cropper from "react-easy-crop";
 import "../../styles/pages/cms/CmsProfesionalesView.css";
+import {
+  CmsDeleteModal,
+  CmsUnsavedChangesModal,
+} from "../../components/cms/CmsModals";
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -637,92 +641,29 @@ const CmsProfesionalesView = () => {
       )}
 
       {/* MODAL DE ADVERTENCIA DE CAMBIOS SIN GUARDAR */}
-      {showUnsavedModal && (
-        <div className="modal-overlay" style={{ zIndex: 99999, display: "flex", justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 11, 32, 0.4)", backdropFilter: "blur(2px)" }}>
-          <div style={{ width: "100%", maxWidth: "384px", margin: "16px", borderRadius: "12px", overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid rgba(196, 198, 206, 0.3)", boxShadow: "0px 10px 30px rgba(13,34,63,0.08)", fontFamily: "'Manrope', system-ui, -apple-system, sans-serif", position: "relative", zIndex: 999999, display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
-              <h2 style={{ margin: 0, color: "#000b20", fontSize: "20px", fontWeight: "600", lineHeight: "28px", fontFamily: "'Manrope', sans-serif" }}>Hay cambios sin guardar</h2>
-              <p style={{ color: "#44474d", margin: 0, fontSize: "16px", fontWeight: "400", lineHeight: "24px", fontFamily: "'Manrope', sans-serif" }}>¿Qué deseas hacer con el registro actual?</p>
-            </div>
-            <div style={{ padding: "16px 24px 24px 24px", backgroundColor: "#f7f9fb", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <button 
-                type="button" 
-                onClick={handleForceClose} 
-                style={{ width: "100%", padding: "16px 24px", backgroundColor: "#ba1a1a", color: "#ffffff", border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px", transition: "background-color 0.15s ease", fontFamily: "'Manrope', sans-serif" }}
-              >
-                Descartar cambios
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setShowUnsavedModal(false)} 
-                style={{ width: "100%", padding: "16px 24px", backgroundColor: "#d8e0ed", color: "#000b20", border: "none", borderRadius: "5px", fontWeight: "800", fontSize: "12px", textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", lineHeight: "16px", transition: "background-color 0.15s ease", fontFamily: "'Manrope', sans-serif" }}
-              >
-                Seguir editando
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
+      <CmsUnsavedChangesModal
+        isOpen={showUnsavedModal}
+        onKeepEditing={() => setShowUnsavedModal(false)}
+        onDiscard={handleForceClose}
+        message="¿Qué deseas hacer con el registro actual?"
+      />
+
       {/* MODAL GLOBAL DE ELIMINACIÓN */}
-      {showDeleteModal && (
-        <div className="modal-overlay" onClick={() => !isSaving && setShowDeleteModal(false)}>
-          <div className="modal-content-esp delete-modal-global" onClick={(e) => e.stopPropagation()}>
-            
-            <button type="button" className="btn-close-floating" onClick={() => setShowDeleteModal(false)} disabled={isSaving}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-
-            <div className="delete-modal-body">
-              <div className="delete-icon-wrapper">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-              </div>
-
-              <h2 className="delete-modal-title">Estás a punto de eliminar este profesional</h2>
-              <div className="delete-modal-divider"></div>
-
-              <p className="delete-modal-text">
-                Esta acción es <strong>permanente</strong> y eliminará la ficha de <br />
-                <span style={{ fontWeight: "700", color: "#0f172a" }}>{profesionalToDelete?.nombre} {profesionalToDelete?.apellido}</span>.
-              </p>
-            </div>
-
-            <div className="delete-modal-footer">
-              <button
-                type="button"
-                className="btn-cancelar-gris"
-                onClick={() => setShowDeleteModal(false)}
-                disabled={isSaving}
-              >
-                CANCELAR
-              </button>
-              <button 
-                type="button"
-                className="btn-cerrar-rojo" 
-                onClick={executeDelete}
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px" }}></div>
-                    Eliminando...
-                  </span>
-                ) : (
-                  "ELIMINAR"
-                )}
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
+      <CmsDeleteModal
+        isOpen={showDeleteModal && !!profesionalToDelete}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={executeDelete}
+        title="Estás a punto de eliminar este profesional"
+        message={
+          <>
+            Esta acción es <strong>permanente</strong> y eliminará la ficha de <br />
+            <span style={{ fontWeight: "700", color: "#0f172a" }}>
+              {profesionalToDelete?.nombre} {profesionalToDelete?.apellido}
+            </span>.
+          </>
+        }
+        isDeleting={isSaving}
+      />
 
     </div>
   );

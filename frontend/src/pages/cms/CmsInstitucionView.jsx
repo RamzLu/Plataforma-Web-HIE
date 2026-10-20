@@ -5,6 +5,10 @@ import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import "../../styles/pages/cms/CmsInstitucionView.css";
 import {
+  CmsDeleteModal,
+  CmsUnsavedChangesModal,
+} from "../../components/cms/CmsModals";
+import {
   getInstitucional,
   createAutoridad,
   updateAutoridad,
@@ -791,160 +795,28 @@ const CmsInstitucionView = () => {
       )}
 
       {/* MODAL DE ELIMINACIÓN */}
-      {autoridadToDelete && (
-        <div className="modal-overlay" onClick={() => !isSaving && setAutoridadToDelete(null)}>
-          <div className="modal-content-esp delete-modal-global" onClick={(e) => e.stopPropagation()}>
-            <div className="delete-modal-body">
-              <div className="delete-icon-wrapper">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-              </div>
-              <h2 className="delete-modal-title">Estás a punto de eliminar esta autoridad</h2>
-              <div className="delete-modal-divider"></div>
-              <p className="delete-modal-text">
-                Se eliminará el registro de <strong>{autoridadToDelete.nombre}</strong> ({autoridadToDelete.cargo}).
-              </p>
-            </div>
-            <div className="delete-modal-footer">
-              <button
-                type="button"
-                className="btn-cancelar-gris"
-                onClick={() => setAutoridadToDelete(null)}
-                disabled={isSaving}
-              >
-                CANCELAR
-              </button>
-              <button
-                type="button"
-                className="btn-cerrar-rojo"
-                onClick={executeDeleteAutoridad}
-                disabled={isSaving}
-              >
-                {isSaving ? "..." : "ELIMINAR"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CmsDeleteModal
+        isOpen={!!autoridadToDelete}
+        onClose={() => setAutoridadToDelete(null)}
+        onConfirm={executeDeleteAutoridad}
+        title="Estás a punto de eliminar esta autoridad"
+        message={
+          <>
+            Se eliminará el registro de{" "}
+            <strong>{autoridadToDelete?.nombre}</strong> (
+            {autoridadToDelete?.cargo}).
+          </>
+        }
+        isDeleting={isSaving}
+      />
 
       {/* ===== 4. MODAL DE ADVERTENCIA DE CAMBIOS SIN GUARDAR ===== */}
-      {showUnsavedModal && (
-        <div
-          className="modal-overlay"
-          style={{
-            zIndex: 99999,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(0, 11, 32, 0.4)",
-            backdropFilter: "blur(2px)",
-          }}
-          onClick={() => setShowUnsavedModal(false)}
-        >
-          <div
-            style={{
-              width: "100%",
-              maxWidth: "384px",
-              margin: "16px",
-              borderRadius: "12px",
-              overflow: "hidden",
-              backgroundColor: "#ffffff",
-              border: "1px solid rgba(196, 198, 206, 0.3)",
-              boxShadow: "0px 10px 30px rgba(13,34,63,0.08)",
-              fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
-              position: "relative",
-              zIndex: 999999,
-              display: "flex",
-              flexDirection: "column",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ padding: "24px 24px 16px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
-              <h2
-                style={{
-                  margin: 0,
-                  color: "#000b20",
-                  fontSize: "20px",
-                  fontWeight: "600",
-                  lineHeight: "28px",
-                  fontFamily: "'Manrope', sans-serif",
-                }}
-              >
-                Hay cambios sin guardar
-              </h2>
-              <p
-                style={{
-                  color: "#44474d",
-                  margin: 0,
-                  fontSize: "16px",
-                  fontWeight: "400",
-                  lineHeight: "24px",
-                  fontFamily: "'Manrope', sans-serif",
-                }}
-              >
-                ¿Qué deseas hacer con el registro actual?
-              </p>
-            </div>
-            <div
-              style={{
-                padding: "16px 24px 24px 24px",
-                backgroundColor: "#f7f9fb",
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={handleForceClose}
-                style={{
-                  width: "100%",
-                  padding: "16px 24px",
-                  backgroundColor: "#ba1a1a",
-                  color: "#ffffff",
-                  border: "none",
-                  borderRadius: "5px",
-                  fontWeight: "800",
-                  fontSize: "12px",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  letterSpacing: "0.08em",
-                  lineHeight: "16px",
-                  transition: "background-color 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif",
-                }}
-              >
-                Descartar cambios
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowUnsavedModal(false)}
-                style={{
-                  width: "100%",
-                  padding: "16px 24px",
-                  backgroundColor: "#d8e0ed",
-                  color: "#000b20",
-                  border: "none",
-                  borderRadius: "5px",
-                  fontWeight: "800",
-                  fontSize: "12px",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  letterSpacing: "0.08em",
-                  lineHeight: "16px",
-                  transition: "background-color 0.15s ease",
-                  fontFamily: "'Manrope', sans-serif",
-                }}
-              >
-                Seguir editando
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CmsUnsavedChangesModal
+        isOpen={showUnsavedModal}
+        onKeepEditing={() => setShowUnsavedModal(false)}
+        onDiscard={handleForceClose}
+        message="¿Qué deseas hacer con el registro actual?"
+      />
 
       {/* ===== 5. MODAL DE RECORTE / ENCUADRE DE FOTOGRAFÍA (332 x 260) ===== */}
       {isCropping && imageSrc && (
