@@ -9,7 +9,8 @@ import {
   Activity, 
   Video,
   ChevronDown,
-  GraduationCap
+  GraduationCap,
+  BookOpen
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 import logoCompletoBlanco from "../../assets/logo-completo-blanco.png";
@@ -34,6 +35,7 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
         { id: "especialidades", label: "Especialidades", icon: <Activity /> },
         { id: "profesionales", label: "Profesionales", icon: <Contact /> },
         { id: "residencias", label: "Residencias", icon: <GraduationCap /> },
+        { id: "capacitaciones", label: "Capacitaciones", icon: <BookOpen /> },
       ],
     },
     {

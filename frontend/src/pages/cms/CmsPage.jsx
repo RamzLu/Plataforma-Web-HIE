@@ -17,6 +17,7 @@ import CmsInstitucionView from "../cms/CmsInstitucionView";
 
 import CmsEspecialidadesView from "../cms/CmsEspecialidadesView";
 import CmsResidenciasView from "../cms/CmsResidenciasView";
+import CmsCapacitacionesView from "../cms/CmsCapacitacionesView";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 
 const CmsPage = () => {
@@ -457,6 +458,8 @@ if (!authenticated) {
                 ? "Gestión de Especialidades"      
                 : activeTab === "residencias"
                 ? "Gestión de Residencias"
+                : activeTab === "capacitaciones"
+                ? "Gestión de Capacitaciones"
                 : "Panel de administración"}
             </h1>
             <p>
@@ -519,6 +522,10 @@ if (!authenticated) {
             <CmsResidenciasView />
           )}
 
+          {activeTab === "capacitaciones" && (
+            <CmsCapacitacionesView />
+          )}
+
           {activeTab !== "dashboard" && 
            activeTab !== "noticias" && 
            activeTab !== "documentacion" && 
@@ -526,7 +533,8 @@ if (!authenticated) {
            activeTab !== "institucional" && 
            activeTab !== "profesionales" && 
            activeTab !== "especialidades" && 
-           activeTab !== "residencias" && (
+           activeTab !== "residencias" && 
+           activeTab !== "capacitaciones" && (
             <div className="cms-dashboard-card">
               <h3 className="cms-card-title">
                 Módulo de {activeTab.toUpperCase()}
