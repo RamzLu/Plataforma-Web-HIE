@@ -428,6 +428,15 @@ const CmsResidenciasView = () => {
     return matchEstado && matchCategoria && matchSearch;
   });
 
+  const getInicialesResidencia = (nombre) => {
+    if (!nombre) return "RC";
+    const palabras = nombre.trim().split(/\s+/).filter(Boolean);
+    if (palabras.length >= 2) {
+      return `${palabras[0].charAt(0)}${palabras[1].charAt(0)}`.toUpperCase();
+    }
+    return nombre.slice(0, 2).toUpperCase();
+  };
+
   return (
     <div className="cms-dashboard-card">
       {/* Cabecera */}
@@ -517,145 +526,60 @@ const CmsResidenciasView = () => {
         </div>
       </div>
 
-      {/* Tabla Unificada */}
-      <div className="cms-table-container">
+      {/* Tabla Unificada con diseño armonizado idéntico a Profesionales */}
+      <div className="cms-news-table-container">
         <div
-          className="cms-table-header"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "12px 20px",
-            backgroundColor: "#f8fafc",
-            borderBottom: "1px solid #e2e8f0",
-            fontWeight: "700",
-            fontSize: "0.75rem",
-            color: "#64748b",
-            textTransform: "uppercase",
-            letterSpacing: "0.5px",
-          }}
+          className="activity-table-head news-table-head"
+          style={{ display: "flex", gap: "10px", alignItems: "center" }}
         >
-          <div style={{ flex: 2.2 }}>PROGRAMA Y CATEGORÍA</div>
-          <div style={{ flex: 1.2 }}>DURACIÓN</div>
-          <div style={{ flex: 1.1 }}>FECHA / CONVOCATORIA</div>
+          <div style={{ flex: 1.8 }}>PROGRAMA Y CATEGORÍA</div>
+          <div style={{ flex: 1 }}>DURACIÓN</div>
+          <div style={{ flex: 1.2 }}>FECHA / CONVOCATORIA</div>
           <div style={{ width: "135px", textAlign: "center" }}>ESTADO</div>
           <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
-        <div className="cms-table-body">
+        <div className="activity-table-body">
           {loading ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "50px 20px",
-                color: "#64748b",
-              }}
-            >
-              <div
-                className="cms-spinner"
-                style={{
-                  margin: "0 auto 12px",
-                  width: "28px",
-                  height: "28px",
-                  borderWidth: "3px",
-                  borderTopColor: "#2b5b94",
-                  borderColor: "rgba(43, 91, 148, 0.2)",
-                }}
-              ></div>
-              <p style={{ margin: 0, fontWeight: "600" }}>
+            <div style={{ padding: "40px", textAlign: "center", gridColumn: "1 / -1" }}>
+              <div className="cms-spinner" style={{ margin: "0 auto 10px auto" }}></div>
+              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
                 Cargando residencias...
-              </p>
+              </span>
             </div>
           ) : datosFiltrados.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "50px 20px",
-                color: "#64748b",
-              }}
-            >
-              <FileText
-                size={40}
-                style={{
-                  margin: "0 auto 12px",
-                  color: "#94a3b8",
-                  display: "block",
-                }}
-              />
-              <p
-                style={{
-                  margin: "0 0 12px 0",
-                  fontWeight: "600",
-                  fontSize: "1rem",
-                }}
-              >
-                No se encontraron registros de residencias.
-              </p>
-              <button
-                type="button"
-                className="btn-crear-noticia-header"
-                onClick={handleOpenCreate}
-                style={{ margin: "0 auto" }}
-              >
-                + PUBLICAR NUEVA RESIDENCIA
-              </button>
+            <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
+              No se encontraron residencias registradas.
             </div>
           ) : (
             datosFiltrados.map((res) => (
               <div
+                className="activity-row news-table-row"
                 key={res.id}
-                className="news-row"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "16px 20px",
-                  borderBottom: "1px solid #f1f5f9",
-                  transition: "background-color 0.2s",
-                }}
+                style={{ display: "flex", gap: "10px", alignItems: "center" }}
               >
                 {/* Columna PROGRAMA Y CATEGORÍA */}
                 <div
+                  className="col-content"
                   style={{
-                    flex: 2.2,
+                    flex: 1.8,
                     display: "flex",
+                    flexDirection: "row",
                     alignItems: "center",
                     gap: "15px",
                   }}
                 >
-                  <div className="news-img-thumbnail">
+                  <div className="news-thumb-box">
                     {res.bannerUrl ? (
                       <img
                         src={res.bannerUrl}
                         alt={res.nombre}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          borderRadius: "8px",
-                          objectFit: "cover",
-                          border: "1px solid #e2e8f0",
-                        }}
+                        className="news-thumb-img"
+                        style={{ objectFit: "cover" }}
                       />
                     ) : (
-                      <div
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          borderRadius: "8px",
-                          backgroundColor: "#f0fdf4",
-                          border: "1px solid #bbf7d0",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            fontWeight: "800",
-                            color: "#166534",
-                          }}
-                        >
-                          HIE
-                        </span>
+                      <div className="news-thumb-mock">
+                        {getInicialesResidencia(res.nombre)}
                       </div>
                     )}
                   </div>
@@ -723,29 +647,33 @@ const CmsResidenciasView = () => {
 
                 {/* Columna DURACIÓN */}
                 <div
+                  className="col-cargo"
                   style={{
-                    flex: 1.2,
-                    color: "#475569",
-                    fontSize: "0.88rem",
+                    flex: 1,
+                    color: "#0f172a",
                     fontWeight: "500",
+                    display: "flex",
+                    alignItems: "center",
                   }}
                 >
-                  <div style={{ fontWeight: "600", color: "#1e293b" }}>
-                    {res.duracion || "Duración no definida"}
-                  </div>
+                  {res.duracion || "-"}
                 </div>
 
                 {/* Columna FECHA LÍMITE Y CONVOCATORIA */}
                 <div
+                  className="col-area"
                   style={{
-                    flex: 1.1,
-                    color: "#475569",
-                    fontSize: "0.88rem",
-                    fontWeight: "500",
+                    flex: 1.2,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "flex-start",
                   }}
                 >
-                  <div>{res.fechaConvocatoria || "Sin fecha fija"}</div>
-                  <div
+                  <span style={{ color: "#0c2340", fontWeight: "600", fontSize: "0.88rem" }}>
+                    {res.fechaConvocatoria || "Sin fecha fija"}
+                  </span>
+                  <span
                     style={{
                       fontSize: "0.75rem",
                       color:
@@ -754,14 +682,15 @@ const CmsResidenciasView = () => {
                           : (res.convocatoria || "").toLowerCase().includes("proxim")
                           ? "#d97706"
                           : "#0284c7",
-                      fontWeight: "600",
+                      fontWeight: "700",
                       marginTop: "2px",
+                      display: "inline-block",
                     }}
                   >
                     {res.convocatoria === "Proximamente"
                       ? "Próximamente"
                       : res.convocatoria || "Abierta"}
-                  </div>
+                  </span>
                 </div>
 
                 {/* Columna ESTADO */}
@@ -770,6 +699,7 @@ const CmsResidenciasView = () => {
                     width: "135px",
                     display: "flex",
                     justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
                   <select
@@ -786,18 +716,36 @@ const CmsResidenciasView = () => {
 
                 {/* Columna ACCIONES */}
                 <div
+                  className="news-actions-cell"
                   style={{
                     width: "100px",
-                    display: "flex",
                     justifyContent: "center",
-                    gap: "10px",
+                    gap: "8px",
                   }}
                 >
                   <button
                     type="button"
                     onClick={() => handleOpenEdit(res)}
                     className="news-action-btn-edit"
-                    title="Editar residencia"
+                    title="Editar"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => confirmDelete(res)}
+                    className="news-action-btn-delete"
+                    title="Eliminar"
                   >
                     <svg
                       width="18"
@@ -809,17 +757,6 @@ const CmsResidenciasView = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => confirmDelete(res)}
-                    className="news-action-btn-delete"
-                    title="Eliminar residencia"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="3 6 5 6 21 6"></polyline>
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                       <line x1="10" y1="11" x2="10" y2="17"></line>
