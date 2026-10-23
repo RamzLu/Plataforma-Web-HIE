@@ -44,6 +44,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-05-20",
     horario: "10:00",
     ubicacion: "Plataforma Telesalud HIE (Video On-Demand)",
+    disertantes: "Dr. Marcelo Morales, Dra. Elena Vega",
     videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     archivoTipo: "video",
     archivoNombre: "Protocolo_ACV_VideoClase.mp4",
@@ -67,6 +68,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-05-22",
     horario: "11:30",
     ubicacion: "Virtual - Plataforma Telesalud HIE",
+    disertantes: "Lic. Carlos Benítez, Lic. Romina Soto",
     videoUrl: "",
     archivoTipo: "documento",
     archivoNombre: "Guia_Operativa_Teleconsultas_HIE.pdf",
@@ -90,6 +92,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-05-20",
     horario: "10:00",
     ubicacion: "SUM Hospital Interdistrital Evita",
+    disertantes: "Lic. Patricia Romero, Enf. Esp. Claudio Ruiz",
     videoUrl: "",
     archivoTipo: "documento",
     archivoNombre: "Programa_Gestion_Enfermeria.pdf",
@@ -113,6 +116,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-06-05",
     horario: "08:30",
     ubicacion: "Gimnasio de Rehabilitación HIE",
+    disertantes: "Dr. Martín Almada, Dra. Sofía Albornoz",
     videoUrl: "",
     archivoTipo: "imagen",
     archivoNombre: "Afiche_Convocatoria_RCP_2026.png",
@@ -136,6 +140,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-06-12",
     horario: "09:00",
     ubicacion: "Híbrida - Aula Magna y Zoom",
+    disertantes: "Dra. María Laura Giménez, Dr. Roberto Méndez",
     videoUrl: "",
     archivoTipo: "documento",
     archivoNombre: "Protocolo_IACS_Hospital_Evita.pdf",
@@ -159,6 +164,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-06-18",
     horario: "11:00",
     ubicacion: "Auditorio Principal HIE",
+    disertantes: "Dra. Valeria Fontana, Dr. Hernán Castro",
     videoUrl: "",
     archivoTipo: "documento",
     archivoNombre: "Temario_Bioetica_Hospitalaria.pdf",
@@ -202,6 +208,7 @@ const CmsCapacitacionesView = () => {
     fechaFin: "",
     horario: "10:00",
     ubicacion: "Hospital Interdistrital Evita",
+    disertantes: "",
     videoUrl: "",
     archivoTipo: "", // "video" | "documento" | "imagen"
     archivoNombre: "",
@@ -306,6 +313,7 @@ const CmsCapacitacionesView = () => {
       fechaFin: item.fechaFin || "",
       horario: horaExtraida,
       ubicacion: item.ubicacion || "",
+      disertantes: item.disertantes || "",
       videoUrl: item.videoUrl || "",
       archivoTipo: tipoArch,
       archivoNombre: item.archivoNombre || "",
@@ -435,6 +443,7 @@ const CmsCapacitacionesView = () => {
     const matchSearch =
       !query ||
       item.titulo.toLowerCase().includes(query) ||
+      (item.disertantes && item.disertantes.toLowerCase().includes(query)) ||
       (item.descripcion && item.descripcion.toLowerCase().includes(query)) ||
       (item.ubicacion && item.ubicacion.toLowerCase().includes(query));
 
@@ -616,6 +625,19 @@ const CmsCapacitacionesView = () => {
                     >
                       {item.titulo}
                     </span>
+                    {item.disertantes && (
+                      <span
+                        style={{
+                          fontSize: "0.78rem",
+                          color: "#0284c7",
+                          fontWeight: "500",
+                          marginTop: "2px",
+                          display: "block",
+                        }}
+                      >
+                        Dictado por: {item.disertantes}
+                      </span>
+                    )}
                     <span
                       style={{
                         fontSize: "0.75rem",
@@ -920,6 +942,23 @@ const CmsCapacitacionesView = () => {
                       }}
                       className="esp-form-input"
                       placeholder="Ej: SUM Hospital Evita o Zoom / Telesalud"
+                    />
+                  </div>
+
+                  {/* Nombres de quienes dictan la capacitación (Opcional) */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Disertantes / Docentes a cargo (Opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.disertantes}
+                      onChange={(e) => {
+                        setFormData({ ...formData, disertantes: e.target.value });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
+                      placeholder="Ej: Dr. Marcelo Morales, Dra. Elena Vega (Nombres de quienes dictan la capacitación)"
                     />
                   </div>
 
