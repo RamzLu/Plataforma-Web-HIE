@@ -20,6 +20,14 @@ import {
   eliminarResidencia,
   cambiarEstadoResidencia
 } from "../controllers/cms/cms.residencia.controller.js";
+import {
+  obtenerCapacitaciones,
+  obtenerCapacitacionesPublicas,
+  crearCapacitacion,
+  actualizarCapacitacion,
+  cambiarEstadoCapacitacion,
+  eliminarCapacitacion
+} from "../controllers/cms/cms.capacitacion.controller.js";
 
 
 import { verifyToken } from '../middlewares/auth.middleware.js'; 
@@ -85,5 +93,15 @@ router.post('/residencias', verifyToken, uploadMemory.any(), crearResidencia);
 router.put('/residencias/:id', verifyToken, uploadMemory.any(), actualizarResidencia);
 router.patch('/residencias/:id/estado', verifyToken, cambiarEstadoResidencia);
 router.delete('/residencias/:id', verifyToken, eliminarResidencia);
+
+// ==========================================
+// MÓDULO: CAPACITACIONES
+// ==========================================
+router.get('/capacitaciones', obtenerCapacitaciones);
+router.get('/capacitaciones/publicas', obtenerCapacitacionesPublicas);
+router.post('/capacitaciones', verifyToken, uploadMemory.single('archivo'), crearCapacitacion);
+router.put('/capacitaciones/:id', verifyToken, uploadMemory.single('archivo'), actualizarCapacitacion);
+router.patch('/capacitaciones/:id/estado', verifyToken, cambiarEstadoCapacitacion);
+router.delete('/capacitaciones/:id', verifyToken, eliminarCapacitacion);
 
 export default router;

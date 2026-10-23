@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../styles/pages/CapacitacionPage.css";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import PageBanner from "../../components/PageBanner";
 
-import logoHospital from "../../assets/logoHospitalEvita.png";
 import fondoBanner from "../../assets/banner_capacitaciones.png";
 import imgCapacitacion1 from "../../assets/fondoCARRUSELnoticias2.jpg";
 import imgCapacitacion2 from "../../assets/fondoCARRUSELnoticias3.jpg";
+import { getCapacitacionesPublicas } from "../../api/capacitaciones.api";
 
 const capacitacionesData = [
   {
@@ -125,8 +125,156 @@ const capacitacionesData = [
   },
 ];
 
+const formatFechaEspanol = (fechaStr) => {
+  if (!fechaStr) return "";
+  try {
+    const parts = fechaStr.split("-");
+    if (parts.length === 3) {
+      const year = parts[0];
+      const month = parts[1];
+      const day = parts[2].split("T")[0];
+      const meses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      ];
+      const mesIndex = parseInt(month, 10) - 1;
+      const mesNombre = meses[mesIndex] || month;
+      return `${parseInt(day, 10)} de ${mesNombre} de ${year}`;
+    }
+    const d = new Date(fechaStr);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString("es-AR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+    }
+  } catch {}
+  return fechaStr;
+};
+
+const formatItemData = (item) => {
+  const modalidadTag = (item.modalidad || item.modalidadTag || "PRESENCIAL").toUpperCase();
+
+  let tipo = "presencial";
+  if (item.tipoRecurso === "video" || item.archivoTipo === "video" || item.videoUrl) {
+    tipo = "video";
+  } else if (item.tipoRecurso === "pdf" || item.archivoTipo === "documento" || item.pdfUrl || (item.archivoUrl && item.archivoUrl.endsWith(".pdf"))) {
+    tipo = "pdf";
+  } else if (item.tipo) {
+    tipo = item.tipo;
+  }
+
+  let badgeIcon = "👥";
+  let badgeLabel = "Presencial";
+  let btnText = "VER MÁS";
+
+  if (tipo === "video") {
+    badgeIcon = "🎥";
+    badgeLabel = "Video On-Demand";
+    btnText = "REPRODUCIR VIDEO";
+  } else if (tipo === "pdf") {
+    badgeIcon = "📄";
+    badgeLabel = "Guía PDF";
+    btnText = "ABRIR PDF";
+  }
+
+  const imagen = item.imagenUrl || item.imagen || null;
+
+  let fechaTexto = item.fecha || "";
+  if (!fechaTexto && item.fechaInicio) {
+    fechaTexto = formatFechaEspanol(item.fechaInicio);
+  }
+
+  let horarioTexto = item.horario || "";
+  if (horarioTexto && !horarioTexto.includes("hs")) {
+    horarioTexto = `${horarioTexto} hs.`;
+  }
+
+  const modalidadCorta = item.modalidadCorta || (item.modalidad ? `Modalidad: ${item.modalidad}` : "Modalidad: Presencial");
+  const modalidadCompleta = item.modalidadCompleta || item.ubicacion || (item.modalidad ? `${item.modalidad} - Hospital Evita` : "Presencial (SUM Hospital Evita)");
+
+  return {
+    ...item,
+    tipo,
+    badgeIcon: item.badgeIcon || badgeIcon,
+    badgeLabel: item.badgeLabel || badgeLabel,
+    btnText: item.btnText || btnText,
+    imagen,
+    fechaTexto,
+    horarioTexto,
+    modalidadTag,
+    modalidadCorta,
+    modalidadCompleta,
+  };
+};
+
+const parseVideoUrl = (url) => {
+  if (!url || typeof url !== "string") return { isEmbed: false, src: "" };
+  const clean = url.trim();
+
+  // YouTube match: watch?v=ID or youtu.be/ID or embed/ID
+  const ytMatch = clean.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
+  if (ytMatch && ytMatch[1]) {
+    return {
+      isEmbed: true,
+      src: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0&modestbranding=1`,
+    };
+  }
+
+  // Vimeo match
+  const vimeoMatch = clean.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+  if (vimeoMatch && vimeoMatch[1]) {
+    return {
+      isEmbed: true,
+      src: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`,
+    };
+  }
+
+  // Direct video file (e.g. Supabase storage URL .mp4, .webm, etc.)
+  return {
+    isEmbed: false,
+    src: clean,
+  };
+};
+
 const CapacitacionPage = () => {
+  const [capacitaciones, setCapacitaciones] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCurso, setSelectedCurso] = useState(null);
+  const [activeVideo, setActiveVideo] = useState(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const fetchCapacitaciones = async () => {
+      try {
+        const data = await getCapacitacionesPublicas();
+        if (Array.isArray(data) && data.length > 0) {
+          setCapacitaciones(data);
+        } else {
+          setCapacitaciones(capacitacionesData);
+        }
+      } catch (err) {
+        console.warn("No se pudieron cargar capacitaciones públicas desde el backend:", err);
+        setCapacitaciones(capacitacionesData);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCapacitaciones();
+  }, []);
+
+  // Cerrar modales con tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        if (activeVideo) setActiveVideo(null);
+        else if (selectedCurso) setSelectedCurso(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeVideo, selectedCurso]);
 
   const handleOpenWhatsappCurso = (curso) => {
     if (!curso) return;
@@ -135,6 +283,20 @@ const CapacitacionPage = () => {
         `Hola! Quisiera más información sobre la capacitación: ${curso.titulo}`
     );
     window.open(`https://wa.me/?text=${mensaje}`, "_blank");
+  };
+
+  const handleAbrirVideo = (item) => {
+    if (!item) return;
+    const url = item.videoUrl || (item.archivoTipo === "video" ? item.archivoUrl : "");
+    if (!url || url.startsWith("blob:")) {
+      setSelectedCurso(item);
+      return;
+    }
+    const parsed = parseVideoUrl(url);
+    setActiveVideo({
+      titulo: item.titulo,
+      ...parsed,
+    });
   };
 
   return (
@@ -147,142 +309,138 @@ const CapacitacionPage = () => {
       />
 
       <div className="capacitacion-container">
-        <div className="cap-banner-box">
-          <div className="cap-banner-left">
-            <h2 className="cap-banner-headline">
-              ¿Eres profesional del HIE y quieres seguir capacitándote?
-            </h2>
-            <p className="cap-banner-subtext">
-              Para inscripciones, consultas o proponer nuevas jornadas:
-            </p>
+        {loading ? (
+          <div style={{ padding: "60px 0", textAlign: "center", color: "#64748b" }}>
+            <p>Cargando capacitaciones institucionales...</p>
           </div>
+        ) : (
+          <div className="cap-grid">
+            {capacitaciones.map((rawItem, index) => {
+              const item = formatItemData(rawItem);
+              return (
+                <AnimatedContent
+                  key={item.id || index}
+                  className="cap-grid-item"
+                  distance={40}
+                  direction="vertical"
+                  delay={index * 0.08} // Efecto cascada entre tarjetas
+                  threshold={0.1}
+                >
+                  <div className="cap-card-unified">
+                    {/* Contenedor de Imagen o Placeholder con Badge Flotante */}
+                    <div className="cap-card-media">
+                      {item.imagen ? (
+                        <img
+                          src={item.imagen}
+                          alt={item.titulo}
+                          className="cap-card-img"
+                        />
+                      ) : (
+                        <div className="cap-card-placeholder">
+                          <div className="cap-placeholder-icon-wrap">
+                            <svg
+                              className="cap-placeholder-icon"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                              <path d="M12 8v8" />
+                              <path d="M8 12h8" />
+                            </svg>
+                          </div>
+                          <span className="cap-placeholder-brand">
+                            HOSPITAL INTERDISTRITAL EVITA
+                          </span>
+                        </div>
+                      )}
 
-          <div className="cap-banner-divider"></div>
-
-          <div className="cap-banner-right">
-            <img
-              src={logoHospital}
-              alt="Hospital Interdistrital Evita"
-              className="cap-banner-logo"
-            />
-          </div>
-        </div>
-        <div className="cap-grid">
-          {capacitacionesData.map((item, index) => (
-            <AnimatedContent
-              key={item.id}
-              className="cap-grid-item"
-              distance={40}
-              direction="vertical"
-              delay={index * 0.08} // Efecto cascada entre tarjetas
-              threshold={0.1}
-            >
-              <div className="cap-card-unified">
-                {/* Contenedor de Imagen o Placeholder con Badge Flotante */}
-                <div className="cap-card-media">
-                  {item.imagen ? (
-                    <img
-                      src={item.imagen}
-                      alt={item.titulo}
-                      className="cap-card-img"
-                    />
-                  ) : (
-                    <div className="cap-card-placeholder">
-                      <div className="cap-placeholder-icon-wrap">
-                        <svg
-                          className="cap-placeholder-icon"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                          <path d="M12 8v8" />
-                          <path d="M8 12h8" />
-                        </svg>
+                      {/* Badge del material flotando en la esquina superior derecha */}
+                      <div className={`material-badge badge-${item.tipo}`}>
+                        <span className="material-badge-icon">{item.badgeIcon}</span>
+                        <span className="material-badge-label">{item.badgeLabel}</span>
                       </div>
-                      <span className="cap-placeholder-brand">
-                        HOSPITAL INTERDISTRITAL EVITA
+                    </div>
+
+                    {/* Contenido / Cuerpo de la tarjeta */}
+                    <div className="cap-card-body">
+                      <span className="cap-card-date-modality">
+                        {(item.fechaTexto || "").toUpperCase()} • {item.modalidadTag || "PRESENCIAL"}
                       </span>
+
+                      <h3 className="cap-card-title">{item.titulo}</h3>
+
+                      <p className="cap-card-desc">{item.descripcion}</p>
+
+                      <div className="cap-card-meta">
+                        <div className="cap-card-meta-item">
+                          <svg
+                            className="cap-meta-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                          </svg>
+                          <span>{item.horarioTexto || "A confirmar"}</span>
+                        </div>
+                        <div className="cap-card-meta-item">
+                          <svg
+                            className="cap-meta-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                          </svg>
+                          <span>{item.modalidadCorta}</span>
+                        </div>
+                      </div>
                     </div>
-                  )}
 
-                  {/* Badge del material flotando en la esquina superior derecha */}
-                  <div className={`material-badge badge-${item.tipo}`}>
-                    <span className="material-badge-icon">{item.badgeIcon}</span>
-                    <span className="material-badge-label">{item.badgeLabel}</span>
-                  </div>
-                </div>
-
-                {/* Contenido / Cuerpo de la tarjeta */}
-                <div className="cap-card-body">
-                  <span className="cap-card-date-modality">
-                    {item.fecha.toUpperCase()} • {item.modalidadTag || "PRESENCIAL"}
-                  </span>
-
-                  <h3 className="cap-card-title">{item.titulo}</h3>
-
-                  <p className="cap-card-desc">{item.descripcion}</p>
-
-                  <div className="cap-card-meta">
-                    <div className="cap-card-meta-item">
-                      <svg
-                        className="cap-meta-icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    {/* Botón inferior institucional de ancho completo */}
+                    <div className="cap-card-footer">
+                      <button
+                        className="cap-btn-vermas-unified"
+                        onClick={() => {
+                          const hasVideo = item.videoUrl || (item.archivoTipo === "video" && item.archivoUrl);
+                          if (item.tipo === "video" && hasVideo && !String(hasVideo).startsWith("blob:")) {
+                            handleAbrirVideo(item);
+                          } else {
+                            setSelectedCurso(item);
+                          }
+                        }}
                       >
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                      </svg>
-                      <span>{item.horario}</span>
-                    </div>
-                    <div className="cap-card-meta-item">
-                      <svg
-                        className="cap-meta-icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                      </svg>
-                      <span>{item.modalidadCorta}</span>
+                        <span>
+                          {item.btnText ||
+                            (item.tipo === "video"
+                              ? "REPRODUCIR VIDEO"
+                              : item.tipo === "pdf"
+                              ? "ABRIR PDF"
+                              : "VER MÁS")}
+                        </span>
+                        <span className="cap-btn-arrow">➔</span>
+                      </button>
                     </div>
                   </div>
-                </div>
-
-                {/* Botón inferior institucional de ancho completo */}
-                <div className="cap-card-footer">
-                  <button
-                    className="cap-btn-vermas-unified"
-                    onClick={() => setSelectedCurso(item)}
-                  >
-                    <span>
-                      {item.btnText ||
-                        (item.tipo === "video"
-                          ? "REPRODUCIR VIDEO"
-                          : item.tipo === "pdf"
-                          ? "ABRIR PDF"
-                          : "VER MÁS")}
-                    </span>
-                    <span className="cap-btn-arrow">➔</span>
-                  </button>
-                </div>
-              </div>
-            </AnimatedContent>
-          ))}
-        </div>
+                </AnimatedContent>
+              );
+            })}
+          </div>
+        )}
 
         {/* AVISO INSTITUCIONAL */}
         <p className="cap-disclaimer">
@@ -333,7 +491,7 @@ const CapacitacionPage = () => {
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                   </svg>
                 </span>
-                <strong>Fecha:</strong> {selectedCurso.fecha}
+                <strong>Fecha:</strong> {selectedCurso.fechaTexto || selectedCurso.fecha || "A coordinar"}
               </p>
 
               {/* ÍCONO HORARIO */}
@@ -349,7 +507,7 @@ const CapacitacionPage = () => {
                     <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
                 </span>
-                <strong>Horario:</strong> {selectedCurso.horario}
+                <strong>Horario:</strong> {selectedCurso.horarioTexto || selectedCurso.horario || "A coordinar"}
               </p>
 
               {/* ÍCONO MODALIDAD */}
@@ -365,7 +523,7 @@ const CapacitacionPage = () => {
                     <circle cx="12" cy="10" r="3"></circle>
                   </svg>
                 </span>
-                <strong>Modalidad:</strong> {selectedCurso.modalidadCompleta}
+                <strong>Modalidad:</strong> {selectedCurso.modalidadCompleta || selectedCurso.modalidad}
               </p>
 
               {/* ÍCONO DISERTANTES (OPCIONAL) */}
@@ -410,21 +568,77 @@ const CapacitacionPage = () => {
                   </span>
                 </p>
               </div>
+
+              {/* TEMARIO / CONTENIDO ACADÉMICO (OPCIONAL) */}
+              {(selectedCurso.temario || (selectedCurso.contenido && selectedCurso.contenido !== selectedCurso.descripcion)) && (
+                <div className="cap-modal-desc-box" style={{ marginTop: "12px" }}>
+                  <p className="cap-modal-desc">
+                    <span className="cap-info-icon">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                      </svg>
+                    </span>
+                    <span>
+                      <strong>Temario / Programa:</strong>
+                      <span style={{ display: "block", marginTop: "6px", whiteSpace: "pre-line", lineHeight: "1.5" }}>
+                        {selectedCurso.temario || selectedCurso.contenido}
+                      </span>
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="cap-modal-actions">
-              <a
-                href={selectedCurso.pdfUrl}
-                download
-                className="cap-modal-btn download"
-              >
-                <div className="cap-modal-btn-icon">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                  </svg>
-                </div>
-                <span>DESCARGAR TEMARIO</span>
-              </a>
+              {/* BOTÓN VER VIDEO (SE SOBREPONE A LA PANTALLA) */}
+              {(selectedCurso.videoUrl || (selectedCurso.archivoTipo === "video" && selectedCurso.archivoUrl)) && (
+                <button
+                  type="button"
+                  onClick={() => handleAbrirVideo(selectedCurso)}
+                  className="cap-modal-btn"
+                  style={{
+                    backgroundColor: "#e11d48",
+                    color: "#ffffff",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div className="cap-modal-btn-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  </div>
+                  <span>VER CLASE / VIDEO</span>
+                </button>
+              )}
+
+              {/* BOTÓN DESCARGAR / VER DOCUMENTO O TEMARIO */}
+              {(selectedCurso.archivoUrl || selectedCurso.pdfUrl) && selectedCurso.archivoTipo !== "video" && (
+                <a
+                  href={selectedCurso.archivoUrl || selectedCurso.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  className="cap-modal-btn download"
+                >
+                  <div className="cap-modal-btn-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                    </svg>
+                  </div>
+                  <span>
+                    {selectedCurso.archivoTipo === "imagen"
+                      ? "VER IMAGEN"
+                      : "DESCARGAR TEMARIO"}
+                  </span>
+                </a>
+              )}
 
               <button
                 className="cap-modal-btn whatsapp"
@@ -442,6 +656,64 @@ const CapacitacionPage = () => {
             <p className="cap-modal-tagline">
               🔒 <em>Exclusivo: Todo el equipo de salud HIE</em>
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL REPRODUCTOR DE VIDEO SOBREPUESTO A LA PANTALLA */}
+      {activeVideo && (
+        <div
+          className="cap-video-modal-overlay"
+          onClick={() => setActiveVideo(null)}
+        >
+          <div
+            className="cap-video-modal-box"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="cap-video-modal-header">
+              <div className="cap-video-modal-title-wrap">
+                <span className="cap-video-pill">CLASE VIRTUAL</span>
+                <h3 className="cap-video-modal-title" title={activeVideo.titulo}>
+                  {activeVideo.titulo}
+                </h3>
+              </div>
+              <button
+                type="button"
+                className="cap-video-modal-close"
+                onClick={() => setActiveVideo(null)}
+                aria-label="Cerrar video"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="cap-video-frame-container">
+              {activeVideo.isEmbed ? (
+                <iframe
+                  src={activeVideo.src}
+                  title={activeVideo.titulo}
+                  className="cap-video-iframe"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  src={activeVideo.src}
+                  controls
+                  autoPlay
+                  className="cap-video-native-player"
+                >
+                  Tu navegador no soporta la reproducción de video HTML5.
+                </video>
+              )}
+            </div>
+
+            <div className="cap-video-modal-footer">
+              <p className="cap-video-modal-disclaimer">
+                🔒 <em>Hospital Interdistrital Evita • Formación continua institucional</em>
+              </p>
+            </div>
           </div>
         </div>
       )}

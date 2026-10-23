@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import {
   BookOpen,
@@ -28,6 +28,14 @@ import {
   CmsDeleteModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import keycloak from "../../config/keycloak";
+import {
+  getCapacitaciones,
+  createCapacitacion,
+  updateCapacitacion,
+  deleteCapacitacion,
+  cambiarEstadoCapacitacion,
+} from "../../api/capacitaciones.api";
 
 // Datos iniciales armonizados con el portal público (CapacitacionPage) y schema.prisma
 const INITIAL_CAPACITACIONES = [
@@ -178,9 +186,9 @@ const INITIAL_CAPACITACIONES = [
 ];
 
 const CmsCapacitacionesView = () => {
-  // Lista de capacitaciones en estado local (sin backend según instrucción)
-  const [capacitaciones, setCapacitaciones] = useState(INITIAL_CAPACITACIONES);
-  const [loading, setLoading] = useState(false);
+  // Lista de capacitaciones obtenidas desde la base de datos
+  const [capacitaciones, setCapacitaciones] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("PUBLICADOS"); // PUBLICADOS, BORRADORES, ARCHIVADOS
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroModalidad, setFiltroModalidad] = useState("TODAS");
@@ -197,6 +205,7 @@ const CmsCapacitacionesView = () => {
   // Referencia para archivo unificado (video, documento o imagen)
   const fileInputRef = useRef(null);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [archivoSeleccionado, setArchivoSeleccionado] = useState(null);
 
   // Formulario según los campos de schema.prisma y el portal público
   const initialForm = {
@@ -221,6 +230,24 @@ const CmsCapacitacionesView = () => {
   };
 
   const [formData, setFormData] = useState(initialForm);
+
+  // Cargar capacitaciones desde el backend
+  const cargarCapacitaciones = async () => {
+    setLoading(true);
+    try {
+      const data = await getCapacitaciones();
+      setCapacitaciones(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error al cargar capacitaciones:", error);
+      toast.error("No se pudieron cargar las capacitaciones desde el servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarCapacitaciones();
+  }, []);
 
   // Helper para generar iniciales
   const getInicialesCapacitacion = (nombre) => {
@@ -261,6 +288,7 @@ const CmsCapacitacionesView = () => {
     if (isImage) tipo = "imagen";
     if (isVideo) tipo = "video";
 
+    setArchivoSeleccionado(file);
     setFormData((prev) => ({
       ...prev,
       archivoTipo: tipo,
@@ -268,21 +296,21 @@ const CmsCapacitacionesView = () => {
       archivoTamano: sizeFormatted,
       archivoUrl: blobUrl,
       imagenUrl: isImage ? blobUrl : prev.imagenUrl,
-      videoUrl: isVideo ? blobUrl : prev.videoUrl,
       tipoRecurso: isVideo ? "video" : isDoc ? "pdf" : isImage ? "imagen" : prev.tipoRecurso,
     }));
     setHasUnsavedChanges(true);
     toast.success(
       tipo === "video"
-        ? "Video cargado con éxito."
+        ? "Video seleccionado para carga."
         : tipo === "imagen"
-        ? "Imagen cargada con éxito."
-        : "Documento cargado con éxito."
+        ? "Imagen seleccionada para carga."
+        : "Documento seleccionado para carga."
     );
   };
 
   const handleOpenCreate = () => {
     setEditingId(null);
+    setArchivoSeleccionado(null);
     setFormData(initialForm);
     if (fileInputRef.current) fileInputRef.current.value = "";
     setHasUnsavedChanges(false);
@@ -291,6 +319,7 @@ const CmsCapacitacionesView = () => {
 
   const handleOpenEdit = (item) => {
     setEditingId(item.id);
+    setArchivoSeleccionado(null);
     let horaExtraida = "10:00";
     if (item.horario) {
       const match = item.horario.match(/(\d{1,2}:\d{2})/);
@@ -342,44 +371,54 @@ const CmsCapacitacionesView = () => {
     setHasUnsavedChanges(false);
   };
 
-  // Guardar datos en el estado local
-  const handleSave = (e, forcedEstado) => {
+  // Guardar datos en la base de datos a través de la API
+  const handleSave = async (e, forcedEstado) => {
     if (e) e.preventDefault();
     if (!formData.titulo.trim()) {
       return toast.error("El título de la capacitación es obligatorio.");
     }
 
     const estadoFinal = forcedEstado || formData.estado || "PUBLICADO";
-
     setIsSaving(true);
-    setTimeout(() => {
+
+    try {
+      const token = keycloak?.token || localStorage.getItem("token") || "";
+      const dataToSend = new FormData();
+      dataToSend.append("titulo", formData.titulo.trim());
+      dataToSend.append("estado", estadoFinal);
+      dataToSend.append("modalidad", formData.modalidad || "Presencial");
+      dataToSend.append("tipoRecurso", formData.tipoRecurso || "presencial");
+      dataToSend.append("fechaInicio", formData.fechaInicio || "");
+      dataToSend.append("fechaFin", formData.fechaFin || "");
+      dataToSend.append("horario", formData.horario || "10:00");
+      dataToSend.append("ubicacion", formData.ubicacion || "");
+      dataToSend.append("disertantes", formData.disertantes || "");
+      dataToSend.append("descripcion", formData.descripcion || "");
+      dataToSend.append("contenido", formData.contenido || "");
+      const cleanVideoUrl = formData.videoUrl && !formData.videoUrl.startsWith("blob:") ? formData.videoUrl.trim() : "";
+      const cleanArchivoUrl = formData.archivoUrl && !formData.archivoUrl.startsWith("blob:") ? formData.archivoUrl.trim() : "";
+      const cleanImagenUrl = formData.imagenUrl && !formData.imagenUrl.startsWith("blob:") ? formData.imagenUrl.trim() : "";
+
+      dataToSend.append("videoUrl", cleanVideoUrl);
+      dataToSend.append("archivoTipo", formData.archivoTipo || "");
+      dataToSend.append("archivoNombre", formData.archivoNombre || "");
+      dataToSend.append("archivoTamano", formData.archivoTamano || "");
+      dataToSend.append("archivoUrl", cleanArchivoUrl);
+      dataToSend.append("imagenUrl", cleanImagenUrl);
+
+      if (archivoSeleccionado) {
+        dataToSend.append("archivo", archivoSeleccionado);
+      }
+
       if (editingId) {
-        setCapacitaciones((prev) =>
-          prev.map((item) =>
-            item.id === editingId
-              ? {
-                  ...item,
-                  ...formData,
-                  estado: estadoFinal,
-                  updatedAt: new Date().toISOString(),
-                }
-              : item
-          )
-        );
+        await updateCapacitacion(editingId, dataToSend, token);
         toast.success(
           estadoFinal === "BORRADOR"
             ? "Borrador actualizado con éxito."
             : "Capacitación actualizada con éxito."
         );
       } else {
-        const nuevoRegistro = {
-          id: Date.now(),
-          ...formData,
-          estado: estadoFinal,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        setCapacitaciones((prev) => [nuevoRegistro, ...prev]);
+        await createCapacitacion(dataToSend, token);
         toast.success(
           estadoFinal === "BORRADOR"
             ? "Borrador guardado con éxito."
@@ -387,30 +426,36 @@ const CmsCapacitacionesView = () => {
         );
       }
 
-      setIsSaving(false);
+      await cargarCapacitaciones();
       setShowModal(false);
       setShowUnsavedModal(false);
       setHasUnsavedChanges(false);
-    }, 200);
+      setArchivoSeleccionado(null);
+    } catch (error) {
+      console.error("Error al guardar capacitación:", error);
+      toast.error(error.response?.data?.message || error.message || "Error al guardar la capacitación.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Cambio de estado interactivo (Publicado, Borrador, Archivado)
-  const handleCambiarEstado = (id, nuevoEstado) => {
-    const estadoLegible =
-      nuevoEstado === "PUBLICADO"
-        ? "Publicado"
-        : nuevoEstado === "BORRADOR"
-        ? "Borrador"
-        : "Archivado";
-
-    setCapacitaciones((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, estado: nuevoEstado, updatedAt: new Date().toISOString() }
-          : item
-      )
-    );
-    toast.success(`Estado actualizado a ${estadoLegible}.`);
+  const handleCambiarEstado = async (id, nuevoEstado) => {
+    try {
+      const token = keycloak?.token || localStorage.getItem("token") || "";
+      await cambiarEstadoCapacitacion(id, nuevoEstado, token);
+      const estadoLegible =
+        nuevoEstado === "PUBLICADO"
+          ? "Publicado"
+          : nuevoEstado === "BORRADOR"
+          ? "Borrador"
+          : "Archivado";
+      toast.success(`Estado actualizado a ${estadoLegible}.`);
+      await cargarCapacitaciones();
+    } catch (error) {
+      console.error("Error al cambiar estado:", error);
+      toast.error("No se pudo actualizar el estado de la capacitación.");
+    }
   };
 
   // Eliminación de registro
@@ -419,12 +464,20 @@ const CmsCapacitacionesView = () => {
     setShowDeleteModal(true);
   };
 
-  const executeDelete = () => {
+  const executeDelete = async () => {
     if (!itemAEliminar) return;
-    setCapacitaciones((prev) => prev.filter((c) => c.id !== itemAEliminar.id));
-    toast.success("Capacitación eliminada correctamente.");
-    setShowDeleteModal(false);
-    setItemAEliminar(null);
+    try {
+      const token = keycloak?.token || localStorage.getItem("token") || "";
+      await deleteCapacitacion(itemAEliminar.id, token);
+      toast.success("Capacitación eliminada correctamente.");
+      await cargarCapacitaciones();
+    } catch (error) {
+      console.error("Error al eliminar capacitación:", error);
+      toast.error("No se pudo eliminar la capacitación.");
+    } finally {
+      setShowDeleteModal(false);
+      setItemAEliminar(null);
+    }
   };
 
   // Filtrado de datos
@@ -962,6 +1015,23 @@ const CmsCapacitacionesView = () => {
                     />
                   </div>
 
+                  {/* Enlace de Video Online (Opcional) */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Enlace a Video / Clase Virtual (YouTube, Vimeo o URL directa)
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.videoUrl && !formData.videoUrl.startsWith("blob:") ? formData.videoUrl : ""}
+                      onChange={(e) => {
+                        setFormData({ ...formData, videoUrl: e.target.value });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
+                      placeholder="Ej: https://www.youtube.com/watch?v=... o https://vimeo.com/..."
+                    />
+                  </div>
+
                   {/* Descripción breve (Copete) */}
                   <div className="esp-full-width">
                     <label className="esp-form-label">Descripción Breve (Resumen para la tarjeta)</label>
@@ -1073,6 +1143,7 @@ const CmsCapacitacionesView = () => {
                             type="button"
                             className="res-file-remove-btn"
                             onClick={() => {
+                              setArchivoSeleccionado(null);
                               setFormData({
                                 ...formData,
                                 archivoTipo: "",
