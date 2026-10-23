@@ -1122,51 +1122,48 @@ const CmsCapacitacionesView = () => {
                 </div>
               </div>
 
-              {/* Footer del Modal con botones corregidos */}
-              <div className="cap-modal-footer">
+              {/* Footer del Modal */}
+              <div className="modal-footer-esp">
                 <button
                   type="button"
-                  className="cap-btn-cancelar"
+                  className="btn-cancelar-gris"
                   onClick={handleCloseAttempt}
                   disabled={isSaving}
                 >
-                  Cancelar
+                  CANCELAR
                 </button>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <button
-                    type="button"
-                    className="cap-btn-draft"
-                    onClick={(e) => handleSave(e, "BORRADOR")}
-                    disabled={isSaving}
-                  >
-                    Guardar como Borrador
-                  </button>
-                  <button
-                    type="submit"
-                    className="cap-btn-primary"
-                    disabled={isSaving}
-                  >
-                    {isSaving ? (
-                      <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div
-                          className="cms-spinner"
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                            borderWidth: "2px",
-                            borderTopColor: "white",
-                            borderColor: "rgba(255,255,255,0.3)",
-                          }}
-                        ></div>
-                        Guardando...
-                      </span>
-                    ) : editingId ? (
-                      "Actualizar Capacitación"
-                    ) : (
-                      "Guardar Capacitación"
-                    )}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  className="btn-cerrar-rojo"
+                  style={{ backgroundColor: "#2b5b94" }}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <div
+                        className="cms-spinner"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          borderWidth: "2px",
+                          borderTopColor: "white",
+                          borderColor: "rgba(255,255,255,0.3)",
+                        }}
+                      ></div>
+                      GUARDANDO...
+                    </span>
+                  ) : editingId ? (
+                    "ACTUALIZAR"
+                  ) : (
+                    "GUARDAR"
+                  )}
+                </button>
               </div>
             </form>
           </div>

@@ -496,10 +496,47 @@ const CmsBannersView = () => {
                 )}
               </div>
 
-              <div className="modal-footer-esp" style={{ padding: 0, justifyContent: "flex-end" }}>
-                <button type="button" className="btn-cancelar-gris" onClick={() => setShowModal(false)} disabled={saving}>Cancelar</button>
-                <button type="submit" className="btn-cerrar-rojo" disabled={saving} style={{ backgroundColor: "#0c2340" }}>
-                  {saving ? "Procesando..." : (editingId ? "Actualizar Imagen" : "Guardar Imagen")}
+              {/* Footer del Modal */}
+              <div className="modal-footer-esp">
+                <button
+                  type="button"
+                  className="btn-cancelar-gris"
+                  onClick={() => setShowModal(false)}
+                  disabled={saving}
+                >
+                  CANCELAR
+                </button>
+                <button
+                  type="submit"
+                  className="btn-cerrar-rojo"
+                  style={{ backgroundColor: "#2b5b94" }}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <div
+                        className="cms-spinner"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          borderWidth: "2px",
+                          borderTopColor: "white",
+                          borderColor: "rgba(255,255,255,0.3)",
+                        }}
+                      ></div>
+                      GUARDANDO...
+                    </span>
+                  ) : editingId ? (
+                    "ACTUALIZAR"
+                  ) : (
+                    "GUARDAR"
+                  )}
                 </button>
               </div>
             </form>
