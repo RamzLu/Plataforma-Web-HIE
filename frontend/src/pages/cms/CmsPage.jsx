@@ -11,6 +11,7 @@ import CmsHeader from "../../components/cms/CmsHeader";
 import CmsDashboardView from "../cms/CmsDashboardView";
 import CmsNoticiasView from "../cms/CmsNoticiasView";
 import CmsBannersView from "../cms/CmsBannersView";
+import CmsContenidoGraficoView from "../cms/CmsContenidoGraficoView";
 import CmsDocsView from "../cms/CmsDocsView";
 import CmsProfesionalesView from "../cms/CmsProfesionalesView"; 
 import CmsInstitucionView from "../cms/CmsInstitucionView"; 
@@ -441,32 +442,32 @@ if (!authenticated) {
         />
 
         <main className="cms-content">
-          <div className="cms-page-title">
-            <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
-<h1>
-              {activeTab === "noticias"
-                ? "Gestión de Noticias"
-                : activeTab === "documentacion"
-                ? "Gestión de Documentación"
-                : activeTab === "institucional"
-                ? "Gestión Institucional"
-                : activeTab === "banners"
-                ? "Gestión de Banners"
-                : activeTab === "profesionales"
-                ? "Directorio de Profesionales" 
-                : activeTab === "especialidades"  
-                ? "Gestión de Especialidades"      
-                : activeTab === "residencias"
-                ? "Gestión de Residencias"
-                : activeTab === "capacitaciones"
-                ? "Gestión de Capacitaciones"
-                : "Panel de administración"}
-            </h1>
-            <p>
-              Administre de forma segura la información pública del Portal Red
-              Evita Formosa.
-            </p>
-          </div>
+          {activeTab !== "contenido-grafico" && activeTab !== "banners" && (
+            <div className="cms-page-title">
+              <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
+              <h1>
+                {activeTab === "noticias"
+                  ? "Gestión de Noticias"
+                  : activeTab === "documentacion"
+                  ? "Gestión de Documentación"
+                  : activeTab === "institucional"
+                  ? "Gestión Institucional"
+                  : activeTab === "profesionales"
+                  ? "Directorio de Profesionales" 
+                  : activeTab === "especialidades"  
+                  ? "Gestión de Especialidades"      
+                  : activeTab === "residencias"
+                  ? "Gestión de Residencias"
+                  : activeTab === "capacitaciones"
+                  ? "Gestión de Capacitaciones"
+                  : "Panel de administración"}
+              </h1>
+              <p>
+                Administre de forma segura la información pública del Portal Red
+                Evita Formosa.
+              </p>
+            </div>
+          )}
 
           {activeTab === "dashboard" && (
             <CmsDashboardView
@@ -491,8 +492,8 @@ if (!authenticated) {
             />
           )}
 
-          {activeTab === "banners" && (
-            <CmsBannersView />
+          {(activeTab === "banners" || activeTab === "contenido-grafico") && (
+            <CmsContenidoGraficoView />
           )}
 
           {activeTab === "documentacion" && (
@@ -530,6 +531,7 @@ if (!authenticated) {
            activeTab !== "noticias" && 
            activeTab !== "documentacion" && 
            activeTab !== "banners" && 
+           activeTab !== "contenido-grafico" &&
            activeTab !== "institucional" && 
            activeTab !== "profesionales" && 
            activeTab !== "especialidades" && 
