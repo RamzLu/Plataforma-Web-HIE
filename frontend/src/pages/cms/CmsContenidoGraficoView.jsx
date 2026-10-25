@@ -611,6 +611,10 @@ const CmsContenidoGraficoView = () => {
               descripcion: correctionData.descripcion,
               altText: correctionData.altText,
               enlaceUrl: correctionData.enlaceUrl,
+              page: correctionData.page || r.page,
+              ubicacion: correctionData.ubicacion || r.ubicacion,
+              orden: parseInt(correctionData.orden) || r.orden,
+              activo: correctionData.activo !== undefined ? correctionData.activo : r.activo,
               imageUrl: correctionData.imageUrl || r.imageUrl,
               estado: "BORRADOR",
               updatedAt: new Date().toISOString(),
@@ -624,7 +628,7 @@ const CmsContenidoGraficoView = () => {
 
   const handleCorrectionResubmit = () => {
     if (!selectedRecurso) return;
-    if (!correctionData.altText.trim()) {
+    if (!correctionData.altText || !correctionData.altText.trim()) {
       toast.error("El texto alternativo accesible es obligatorio para reenviar.");
       return;
     }
@@ -637,6 +641,10 @@ const CmsContenidoGraficoView = () => {
               descripcion: correctionData.descripcion,
               altText: correctionData.altText,
               enlaceUrl: correctionData.enlaceUrl,
+              page: correctionData.page || r.page,
+              ubicacion: correctionData.ubicacion || r.ubicacion,
+              orden: parseInt(correctionData.orden) || r.orden,
+              activo: correctionData.activo !== undefined ? correctionData.activo : r.activo,
               imageUrl: correctionData.imageUrl || r.imageUrl,
               estado: "PENDIENTE_APROBACION",
               rejectionReason: null,
@@ -645,7 +653,7 @@ const CmsContenidoGraficoView = () => {
           : r
       )
     );
-    toast.success("Recurso corregido y reenviado a aprobación editorial.");
+    toast.success("¡Recurso corregido con éxito! Se reenvió a revisión editorial.");
     setShowCorrectionModal(false);
   };
 

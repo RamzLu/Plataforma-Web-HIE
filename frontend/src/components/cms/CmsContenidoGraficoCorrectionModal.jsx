@@ -308,15 +308,25 @@ export const CmsContenidoGraficoCorrectionModal = ({
                 <select
                   id="select-pagina-portal"
                   className="cg-select"
-                  value={correctionData.page}
+                  value={
+                    correctionData.page?.includes("Inicio")
+                      ? "Inicio"
+                      : correctionData.page?.includes("Especialidades")
+                      ? "Especialidades"
+                      : correctionData.page?.includes("Capacitación")
+                      ? "Capacitación"
+                      : correctionData.page?.includes("Institucional")
+                      ? "Institucional"
+                      : correctionData.page || "Inicio"
+                  }
                   onChange={(e) =>
                     setCorrectionData((prev) => ({ ...prev, page: e.target.value }))
                   }
                 >
-                  <option value="Página de Inicio">Página de Inicio</option>
-                  <option value="Especialidades y Servicios">Especialidades y Servicios</option>
-                  <option value="Capacitación y Docencia">Capacitación y Docencia</option>
-                  <option value="Institucional / Autoridades">Institucional / Autoridades</option>
+                  <option value="Inicio">Inicio (Página Principal)</option>
+                  <option value="Especialidades">Especialidades y Servicios</option>
+                  <option value="Capacitación">Capacitación y Docencia</option>
+                  <option value="Institucional">Institucional / Autoridades</option>
                 </select>
               </div>
 
@@ -329,15 +339,25 @@ export const CmsContenidoGraficoCorrectionModal = ({
                 <select
                   id="select-ubicacion-seccion"
                   className="cg-select"
-                  value={correctionData.ubicacion}
+                  value={
+                    correctionData.ubicacion?.includes("Cabecera")
+                      ? "Cabecera Principal"
+                      : correctionData.ubicacion?.includes("Media")
+                      ? "Sección Media"
+                      : correctionData.ubicacion?.includes("Lateral")
+                      ? "Columna Lateral"
+                      : correctionData.ubicacion?.includes("Pie")
+                      ? "Pie"
+                      : correctionData.ubicacion || "Cabecera Principal"
+                  }
                   onChange={(e) =>
                     setCorrectionData((prev) => ({ ...prev, ubicacion: e.target.value }))
                   }
                 >
                   <option value="Cabecera Principal">Cabecera Principal</option>
-                  <option value="Sección Media Transversal">Sección Media Transversal</option>
-                  <option value="Columna Lateral Institucional">Columna Lateral Institucional</option>
-                  <option value="Pie / Accesos Rápidos">Pie / Accesos Rápidos</option>
+                  <option value="Sección Media">Sección Media Informativa</option>
+                  <option value="Columna Lateral">Columna Lateral Institucional</option>
+                  <option value="Pie">Pie Institucional</option>
                 </select>
               </div>
 
