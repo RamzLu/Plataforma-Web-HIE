@@ -13,21 +13,20 @@ import {
   CmsContenidoGraficoCorrectionModal,
 } from "../../components/cms/CmsModals";
 
-
 // Imágenes de respaldo locales
 import defaultImg1 from "../../assets/fondoHospitalCarrusel1.jpg";
 import defaultImg2 from "../../assets/fondoHospitalCarrusel2.jpg";
 import defaultImg3 from "../../assets/fondoHospitalCarrusel3.jpg";
 import defaultImg4 from "../../assets/fondoHospitalCarrusel4.jpg";
 
-// Lista inicial de datos armonizados con Stitch y requerimientos editoriales sanitarios (24 recursos)
+// Lista inicial de recursos armonizada con los lineamientos estéticos del CMS y Portal HIE
 const INITIAL_RECURSOS = [
   {
     id: "cg-1",
     titulo: "Campaña Prevención Dengue 2026",
-    descripcion: "Pautas y medidas vectoriales comunitarias para el distrito",
+    descripcion: "Recurso vectorial y flyer informativo para portal",
     altText: "Taller comunitario de prevención del dengue en aula hospitalaria con médico mostrando infografía y lavado de manos",
-    imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuB6iNQdW1e1ZOLr56k4xAArCU0V3BuFZYt8qM2XrIsKP8uRYexPVmEdT1Nzkd2p5FL2cgej9tznVc_E443IFrSvUp7pK1A6ROprzyxk1kj3pbgTaQx_nwwq_HJ2AVcg0zzsouVrOC_9SF3T1y1rG-ZkaAqJqmoy74swq02z88FfxbJz-81Qyp58MoPACwgMCCIUesWDG7eCIozBB4cWCwFOpToGSEMzFVMCzjacTEQI",
+    imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCvu7PZE0_bCUNR4Hy2V7bSPnVUh_V4Ga8FGvyaML8GEUSKHqL09rrJ6w7BCIqrvxWSArG9UHQ1YuPyxn3fMN53UHuzwbbMckU1jzPdraqo3wNO1lZuof-8fGiNU__b2p8b1fuTFEarR823nOp_cwvQ602U4xVFB5bMwFBz3g1KDdLl_IRX2ni1Gj5QjmCva0Ri1hiUWMPj4VMT8PhIySf_Er3nZjnkceMBlmGERKHo__u6c_ZiGVxZfg",
     page: "Inicio",
     ubicacion: "Cabecera Principal",
     orden: 1,
@@ -39,10 +38,10 @@ const INITIAL_RECURSOS = [
   },
   {
     id: "cg-2",
-    titulo: "Taller de Maternidad y Parto Respetado",
-    descripcion: "Inscripciones abiertas para gestantes y acompañantes",
+    titulo: "Taller de Maternidad",
+    descripcion: "Fotografía sesión informativa obstetricia",
     altText: "Educadora sanitaria dialogando con mujeres gestantes en sala de obstetricia con láminas anatómicas explicativas",
-    imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuBXywqfXTBjeMPY5VF6vq0Thwp3hCqzikGl4lVARPzlszssjVrELL2rRZ0d9RwRHdxD6ImJ6KOq07REoOx5ZtSudIwuWlNA5FOgj0LO7zCRT_eOYRcmW0PstXGYc5gIKOR5H7SOopO6gBAGFa_VRbhdhRCanv97kfEHo8Oo-CEqKLa7X33TExSAdf15OAjODc0KwI2-rdWzroMYNAVcdge5WsHD7AWAUNkXj4Eo8DGc",
+    imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCN_DU_dFNhIWoCY9kOV_1tUwRNi7yCCPbsds6ppuyQiNfPh0Lb1LOF3gaRBwASVm-nPhVcDCcgGGEtai4SofyUH6vrwtfIKDA8ZiIz6yrW7yciVPHtkEfptefZthhC4j_QfDKTQlESJ4AIdc4S2mSLp3W3OEsWw-N63Wx1rNgkm0JKcu7U1ic9ebUAHXFA56b8KdjyLsd-Vj-C7jIOQ2LALX5Rs9NY1LUijMzXqYagMp1BtI7pweDHbw",
     page: "Especialidades",
     ubicacion: "Sección Media",
     orden: 2,
@@ -54,10 +53,10 @@ const INITIAL_RECURSOS = [
   },
   {
     id: "cg-3",
-    titulo: "Nutrición y Soporte Clínico en Oncología",
-    descripcion: "Guías alimentarias para pacientes ambulatorios e internados",
+    titulo: "Nutrición y Cuidados Oncológicos",
+    descripcion: "Taller grupal multidisciplinario de soporte clínico",
     altText: "Mesa redonda multidisciplinaria con nutricionistas y pacientes evaluando alimentos frescos y dietoterapia oncológica",
-    imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCtH1OBzrxPnOxN-zzXE-jTuUqniriIq6nP5HDVhcxubPGbyZRD29BnZfKn_RglPWoLtAVE0RxuckWeGSTKi1CzG_ZzJzrqD_qYDHNHSsNgY80A2dxxbbM-biuxKjYeSMeSajOfrl4XUOFAoeuW1DpCUP7MvlgIAnlyuoZy6w_rvR_L5PdFdF-CLHhie_3UGwhDa_n33qsBn5G6t_yF4s0F4JZ7ICk8PaiIAUjUYZXZ",
+    imageUrl: "https://lh3.googleusercontent.com/aida/AEtjO1VbTUazlMB30nH5PEPaFhgKuBNLO-D0u7Pwp7H0ukr5dUo-NEvPWslJB3S0R6gJ8GdWgc6urAnC21ilKT18-K6mrcH8eOrV1CfTo506wL9l1whiPsxApHbZtzNloG_D0Z0UmZQGfJXmcLJ12vDy3IlaqKnqcRH4oFwKeUVNvsGfIO1GRNYC3opKK_Gz9u9_7THYsxBKX-gKzBzS4Pf9pqjz7iF90XGpL1aRUY7CaqCrT_-gP1HXLJ_yv_u8",
     page: "Capacitación",
     ubicacion: "Sección Media",
     orden: 3,
@@ -72,7 +71,7 @@ const INITIAL_RECURSOS = [
     titulo: "Residencias de Cirugía de Alta Complejidad",
     descripcion: "Entrenamiento continuo en centro de destrezas quirúrgicas",
     altText: "Equipo quirúrgico con barbijos y cofias realizando entrenamiento en simulador de laparoscopía bajo iluminación quirúrgica",
-    imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCUFMs9uljQyYjgM6I7oJl6DZcT_5_jnEh2rum0JTk8jUP8n42KHcpox5IHDHc4S7Q0Mwu-RnR05sz3j5Fi1Tgph7jDz8jpkQLGmmnevVw0avc5ECjCRMyOXiBzPXMaIKAmsGeW3HE9GRkozG8iNp0c9qGGOQW3MrU1lDmC67ONYeeDPlMZIx0PqHXXlJE1y-DHqJaiHLh58oGW9KEfT6LYcEa5YP1S39j6l4b0VBov",
+    imageUrl: defaultImg2,
     page: "Capacitación",
     ubicacion: "Cabecera Principal",
     orden: 4,
@@ -86,8 +85,8 @@ const INITIAL_RECURSOS = [
     id: "cg-5",
     titulo: "Protocolo de Triage Pediátrico y Guardias",
     descripcion: "Actualización visual de tiempos y categorías de atención",
-    altText: "",
-    imageUrl: null,
+    altText: "Cartilla informativa de clasificación de riesgo triage en pediatría",
+    imageUrl: defaultImg3,
     page: "Institucional",
     ubicacion: "Columna Lateral",
     orden: 5,
@@ -251,8 +250,8 @@ const INITIAL_RECURSOS = [
     id: "cg-16",
     titulo: "Actualización en Farmacovigilancia y Seguridad del Paciente",
     descripcion: "Módulos de capacitación interna para el cuerpo médico y farmacéutico",
-    altText: "",
-    imageUrl: null,
+    altText: "Farmacéutica hospitalaria realizando control de dosis unitaria",
+    imageUrl: defaultImg3,
     page: "Capacitación",
     ubicacion: "Columna Lateral",
     orden: 16,
@@ -267,7 +266,7 @@ const INITIAL_RECURSOS = [
     titulo: "Prevención de Infecciones Asociadas al Cuidado de la Salud",
     descripcion: "Manual de bioseguridad y normas de aislamiento hospitalario",
     altText: "Dispensadores de alcohol en gel y señalética de lavado de manos en pasillo clínico",
-    imageUrl: defaultImg3,
+    imageUrl: defaultImg4,
     page: "Institucional",
     ubicacion: "Cabecera Principal",
     orden: 17,
@@ -279,103 +278,13 @@ const INITIAL_RECURSOS = [
   },
   {
     id: "cg-18",
-    titulo: "Centro Integral de Rehabilitación y Kinesiología",
-    descripcion: "Terapia física y readaptación funcional motora para pacientes postraumáticos",
-    altText: "Kinesiólogo asistiendo en barras paralelas a paciente en rehabilitación motriz",
-    imageUrl: defaultImg4,
-    page: "Especialidades",
-    ubicacion: "Columna Lateral",
-    orden: 18,
-    enlaceUrl: "/servicios/kinesiologia",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    createdAt: "2026-04-20T14:00:00Z",
-  },
-  {
-    id: "cg-19",
-    titulo: "Programa de Detección Precoz del Cáncer de Mama",
-    descripcion: "Mamografías digitales sin orden médica durante octubre rosa",
-    altText: "Listón rosa y mamógrafo digital de última generación en centro mamario",
-    imageUrl: defaultImg1,
-    page: "Inicio",
-    ubicacion: "Pie",
-    orden: 19,
-    enlaceUrl: "/campanas/cancer-mama",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    createdAt: "2026-04-21T15:30:00Z",
-  },
-  {
-    id: "cg-20",
-    titulo: "Laboratorio Central de Análisis Clínicos y Microbiología",
-    descripcion: "Procesamiento automatizado de muestras con resultados en línea",
-    altText: "Bioquímica analizando cultivos celulares bajo microscopio binocular",
-    imageUrl: defaultImg2,
-    page: "Especialidades",
-    ubicacion: "Sección Media",
-    orden: 20,
-    enlaceUrl: "/servicios/laboratorio",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    createdAt: "2026-04-22T09:10:00Z",
-  },
-  {
-    id: "cg-21",
-    titulo: "Campaña de Salud Visual Infantil y Detección de Ambliopía",
-    descripcion: "Controles oftalmológicos gratuitos para niños en edad escolar",
-    altText: "Oftalmólogo examinando agudeza visual con optotipo infantil",
-    imageUrl: defaultImg3,
-    page: "Inicio",
-    ubicacion: "Columna Lateral",
-    orden: 21,
-    enlaceUrl: "/campanas/salud-visual-ninos",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    createdAt: "2026-04-22T16:00:00Z",
-  },
-  {
-    id: "cg-22",
-    titulo: "Protocolo de Derivaciones y Red Provincial de Salud",
-    descripcion: "Criterios de traslado sanitario y coordinación con hospitales distritales",
-    altText: "Ambulancia de alta complejidad arribando al helipuerto del Hospital Evita",
-    imageUrl: defaultImg4,
-    page: "Institucional",
-    ubicacion: "Columna Lateral",
-    orden: 22,
-    enlaceUrl: "/red-salud/derivaciones",
-    estado: "PENDIENTE_APROBACION",
-    activo: false,
-    rejectionReason: null,
-    createdAt: "2026-04-23T11:40:00Z",
-  },
-  {
-    id: "cg-23",
-    titulo: "Semana del Donante de Médula Ósea",
-    descripcion: "Inscripción en el registro nacional de donantes CPH",
-    altText: "Voluntarios brindando folletos informativos sobre donación de células madre",
-    imageUrl: defaultImg1,
-    page: "Inicio",
-    ubicacion: "Sección Media",
-    orden: 23,
-    enlaceUrl: "/campanas/medula-osea",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    createdAt: "2026-04-23T14:20:00Z",
-  },
-  {
-    id: "cg-24",
     titulo: "Borrador de Guía de Atención en Salud Mental Comunitaria",
     descripcion: "Lineamientos de urgencias psiquiátricas y contención psicológica",
-    altText: "",
-    imageUrl: null,
+    altText: "Guía gráfica informativa de soporte psicosocial",
+    imageUrl: defaultImg1,
     page: "Especialidades",
     ubicacion: "Pie",
-    orden: 24,
+    orden: 18,
     enlaceUrl: "",
     estado: "BORRADOR",
     activo: false,
@@ -401,15 +310,15 @@ const CmsContenidoGraficoView = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // Filtros
-  const [searchTerm, setSearchTerm] = useState("");
+  // Tabs de Estado: 'publicados' | 'borradores' | 'pendientes' | 'rechazados'
+  const [viewTab, setViewTab] = useState("publicados");
+
+  // Filtro de Página
   const [filtroPagina, setFiltroPagina] = useState("");
-  const [filtroUbicacion, setFiltroUbicacion] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState("");
 
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
 
   // Modales
   const [showCreateEditModal, setShowCreateEditModal] = useState(false);
@@ -425,7 +334,7 @@ const CmsContenidoGraficoView = () => {
   const [reviewAction, setReviewAction] = useState("approve"); // "approve" | "reject"
   const [reviewRejectionText, setReviewRejectionText] = useState("");
 
-  // Estado específico para el Modal de Corrección (Stitch Specification)
+  // Estado específico para el Modal de Corrección
   const [correctionData, setCorrectionData] = useState({
     id: "",
     expediente: "3418/25",
@@ -434,13 +343,13 @@ const CmsContenidoGraficoView = () => {
     descripcion: "",
     altText: "",
     enlaceUrl: "",
-    page: "Página de Inicio",
+    page: "Inicio",
     ubicacion: "Cabecera Principal",
     orden: 1,
     activo: false,
     imageUrl: "",
     fileName: "recurso_hospital_evita.jpg",
-    fileMeta: "1.8 MB • 1920×1080 px • WEBP/JPG progresivo",
+    fileMeta: "1.8 MB • 1920×1080 px • WEBP/JPG",
     fileObj: null,
   });
   const correctionFileInputRef = useRef(null);
@@ -470,34 +379,17 @@ const CmsContenidoGraficoView = () => {
     localStorage.setItem("hie_contenido_grafico", JSON.stringify(recursos));
   }, [recursos]);
 
-  // Cargar desde el backend si está disponible
+  // Carga inicial opcional desde Backend si está activo
   useEffect(() => {
     const fetchFromBackend = async () => {
       try {
         setLoading(true);
         const data = await getContenidosGraficos();
-        if (Array.isArray(data) && data.length > 0) {
-          // Unificar con los datos locales
-          const formateados = data.map((item, idx) => ({
-            id: item.id ? item.id.toString() : `api-${idx}`,
-            titulo: item.titulo || item.title || "Sin título",
-            descripcion: item.descripcion || item.content || "",
-            altText: item.altText || item.alt || "Recurso institucional HIE",
-            imageUrl: item.imageUrl || item.url || defaultImg1,
-            page: item.page || "Inicio",
-            ubicacion: item.ubicacion || "Cabecera Principal",
-            orden: item.orden || idx + 1,
-            enlaceUrl: item.enlace || item.enlaceUrl || "",
-            estado: item.estado || (item.activo ? "APROBADO" : "BORRADOR"),
-            activo: typeof item.activo === "boolean" ? item.activo : true,
-            rejectionReason: item.rejectionReason || null,
-            createdAt: item.createdAt || new Date().toISOString(),
-          }));
-          setRecursos(formateados);
+        if (data && Array.isArray(data) && data.length > 0) {
+          setRecursos(data);
         }
       } catch (err) {
-        // En caso de que el backend no esté activo, mantenemos la lista inicial/local
-        console.log("Modo autónomo de CMS Contenido Gráfico (Backend no conectado o sin cambios)");
+        // Modo autónomo con datos locales
       } finally {
         setLoading(false);
       }
@@ -506,115 +398,35 @@ const CmsContenidoGraficoView = () => {
     fetchFromBackend();
   }, []);
 
-  // Cálculo dinámico de Métricas / KPIs
-  const stats = useMemo(() => {
-    const total = recursos.length;
-    const borradores = recursos.filter((r) => r.estado === "BORRADOR").length;
-    const pendientes = recursos.filter((r) => r.estado === "PENDIENTE_APROBACION").length;
-    const rechazados = recursos.filter((r) => r.estado === "RECHAZADO").length;
-    const publicados = recursos.filter((r) => r.estado === "APROBADO" || r.estado === "PUBLICADO").length;
-    const tasaAprobacion = total > 0 ? Math.round((publicados / total) * 100) : 0;
-
-    return { total, borradores, pendientes, rechazados, publicados, tasaAprobacion };
-  }, [recursos]);
-
-  // Filtrado de recursos
+  // Filtrado de recursos conforme a la pestaña y filtro por página
   const recursosFiltrados = useMemo(() => {
     return recursos.filter((item) => {
-      // Búsqueda por texto (título, descripción, enlace)
-      if (searchTerm.trim()) {
-        const query = searchTerm.toLowerCase().trim();
-        const matchTitulo = item.titulo?.toLowerCase().includes(query);
-        const matchDesc = item.descripcion?.toLowerCase().includes(query);
-        const matchLink = item.enlaceUrl?.toLowerCase().includes(query);
-        if (!matchTitulo && !matchDesc && !matchLink) return false;
+      // 1. Filtro por pestaña de estado
+      const est = (item.estado || "BORRADOR").toUpperCase();
+      if (viewTab === "publicados") {
+        if (est !== "APROBADO" && est !== "PUBLICADO") return false;
+      } else if (viewTab === "borradores") {
+        if (est !== "BORRADOR") return false;
+      } else if (viewTab === "pendientes") {
+        if (est !== "PENDIENTE_APROBACION" && est !== "PENDIENTE") return false;
+      } else if (viewTab === "rechazados") {
+        if (est !== "RECHAZADO") return false;
       }
 
-      // Filtro de Página
-      if (filtroPagina) {
-        const matchPage = item.page?.toLowerCase() === filtroPagina.toLowerCase();
-        if (!matchPage) return false;
-      }
-
-      // Filtro de Ubicación
-      if (filtroUbicacion) {
-        const matchUbicacion = item.ubicacion?.toLowerCase().includes(filtroUbicacion.toLowerCase());
-        if (!matchUbicacion) return false;
-      }
-
-      // Filtro de Estado
-      if (filtroEstado) {
-        if (filtroEstado.toLowerCase() === "aprobado") {
-          if (item.estado !== "APROBADO" && item.estado !== "PUBLICADO") return false;
-        } else if (item.estado?.toLowerCase() !== filtroEstado.toLowerCase()) {
-          return false;
-        }
+      // 2. Filtro por página
+      if (filtroPagina && filtroPagina !== "" && filtroPagina !== "Todas las páginas") {
+        if (item.page?.toLowerCase() !== filtroPagina.toLowerCase()) return false;
       }
 
       return true;
     });
-  }, [recursos, searchTerm, filtroPagina, filtroUbicacion, filtroEstado]);
+  }, [recursos, viewTab, filtroPagina]);
 
   // Paginación
   const totalPages = Math.max(1, Math.ceil(recursosFiltrados.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, recursosFiltrados.length);
   const currentRecursos = recursosFiltrados.slice(startIndex, endIndex);
-
-  const handleResetFilters = () => {
-    setSearchTerm("");
-    setFiltroPagina("");
-    setFiltroUbicacion("");
-    setFiltroEstado("");
-    setCurrentPage(1);
-    toast.success("Filtros restablecidos");
-  };
-
-  // Reordenar elementos interactivos (Up / Down)
-  const handleMoveOrder = (item, direction) => {
-    const currentIndexInList = recursos.findIndex((r) => r.id === item.id);
-    if (currentIndexInList === -1) return;
-
-    const targetIndex = direction === "up" ? currentIndexInList - 1 : currentIndexInList + 1;
-    if (targetIndex < 0 || targetIndex >= recursos.length) return;
-
-    const newRecursos = [...recursos];
-    const temp = newRecursos[currentIndexInList];
-    newRecursos[currentIndexInList] = newRecursos[targetIndex];
-    newRecursos[targetIndex] = temp;
-
-    // Actualizar números de orden correlativos
-    const reordered = newRecursos.map((r, index) => ({
-      ...r,
-      orden: index + 1,
-    }));
-
-    setRecursos(reordered);
-    toast.success(`Orden actualizado: "${item.titulo}" ahora es posición ${targetIndex + 1}°`);
-  };
-
-  // Alternar Disponibilidad (Switch Activo / Inactivo)
-  const handleToggleActivo = (item) => {
-    if (item.estado === "RECHAZADO") {
-      toast.error("No se puede activar un recurso rechazado sin corregir las observaciones.");
-      return;
-    }
-    if (item.estado === "BORRADOR") {
-      toast.error("Los borradores deben ser aprobados antes de poder activarse en el portal público.");
-      return;
-    }
-
-    const nuevoActivo = !item.activo;
-    setRecursos((prev) =>
-      prev.map((r) => (r.id === item.id ? { ...r, activo: nuevoActivo } : r))
-    );
-
-    toast.success(
-      nuevoActivo
-        ? `Recurso "${item.titulo}" activado en el portal.`
-        : `Recurso "${item.titulo}" desactivado.`
-    );
-  };
 
   // Apertura de Modales
   const handleOpenCreate = () => {
@@ -638,9 +450,9 @@ const CmsContenidoGraficoView = () => {
       titulo: item.titulo,
       descripcion: item.descripcion || "",
       altText: item.altText || "",
-      page: item.page,
-      ubicacion: item.ubicacion,
-      orden: item.orden,
+      page: item.page || "Inicio",
+      ubicacion: item.ubicacion || "Cabecera Principal",
+      orden: item.orden || 1,
       enlaceUrl: item.enlaceUrl || "",
       estado: item.estado,
       activo: item.activo,
@@ -654,160 +466,24 @@ const CmsContenidoGraficoView = () => {
 
   const handleOpenCorrection = (item) => {
     setSelectedRecurso(item);
-
-    let pageValue = "Página de Inicio";
-    if (item.page?.toLowerCase().includes("inicio")) pageValue = "Página de Inicio";
-    else if (item.page?.toLowerCase().includes("especialidad")) pageValue = "Especialidades y Servicios";
-    else if (item.page?.toLowerCase().includes("capacita") || item.page?.toLowerCase().includes("docencia")) pageValue = "Capacitación y Docencia";
-    else if (item.page?.toLowerCase().includes("institucion") || item.page?.toLowerCase().includes("autoridad")) pageValue = "Institucional / Autoridades";
-
-    let ubicacionValue = "Cabecera Principal";
-    if (item.ubicacion?.toLowerCase().includes("cabecera")) ubicacionValue = "Cabecera Principal";
-    else if (item.ubicacion?.toLowerCase().includes("media") || item.ubicacion?.toLowerCase().includes("transversal")) ubicacionValue = "Sección Media Transversal";
-    else if (item.ubicacion?.toLowerCase().includes("lateral") || item.ubicacion?.toLowerCase().includes("columna")) ubicacionValue = "Columna Lateral Institucional";
-    else if (item.ubicacion?.toLowerCase().includes("pie")) ubicacionValue = "Pie / Accesos Rápidos";
-
-    let filename = "recurso_hospital_evita.jpg";
-    if (item.titulo) {
-      filename = item.titulo.toLowerCase().replace(/[^a-z0-9]/g, "_").slice(0, 32) + ".jpg";
-    }
-
     setCorrectionData({
       id: item.id,
-      expediente: "3418/25",
-      rejectionReason: item.rejectionReason || "La imagen adjunta no cuenta con resolución adecuada para la cabecera y el texto alternativo es insuficiente para accesibilidad WCAG. Por favor, actualizar el recurso y detallar el atributo ALT antes de reenviar.",
-      titulo: item.titulo || "",
+      expediente: `3418/25`,
+      rejectionReason: item.rejectionReason || "Observaciones de diseño pendientes",
+      titulo: item.titulo,
       descripcion: item.descripcion || "",
       altText: item.altText || "",
       enlaceUrl: item.enlaceUrl || "",
-      page: pageValue,
-      ubicacion: ubicacionValue,
-      orden: item.orden || 1,
-      activo: item.activo || false,
-      imageUrl: item.imageUrl || defaultImg1,
-      fileName: filename,
-      fileMeta: "1.8 MB • 1920×1080 px • WEBP/JPG progresivo",
+      page: item.page,
+      ubicacion: item.ubicacion,
+      orden: item.orden,
+      activo: item.activo,
+      imageUrl: item.imageUrl || "",
+      fileName: item.fileName || "recurso_hospital_evita.jpg",
+      fileMeta: "1.8 MB • 1920×1080 px • WEBP/JPG",
       fileObj: null,
     });
     setShowCorrectionModal(true);
-  };
-
-  const handleCorrectionFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Por favor seleccione un archivo de imagen válido (JPG, PNG o WEBP).");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("El archivo supera el tamaño máximo permitido de 5MB.");
-      return;
-    }
-
-    const previewUrl = URL.createObjectURL(file);
-    const sizeInMB = (file.size / (1024 * 1024)).toFixed(1);
-
-    setCorrectionData((prev) => ({
-      ...prev,
-      fileObj: file,
-      imageUrl: previewUrl,
-      fileName: file.name,
-      fileMeta: `${sizeInMB} MB • 1920×1080 px • ${file.type.split("/")[1]?.toUpperCase() || "JPG"} progresivo`,
-    }));
-    toast.success("Nueva imagen cargada para la corrección.");
-  };
-
-  const handleSaveCorrectionAsDraft = () => {
-    if (!selectedRecurso) return;
-
-    let pageShort = "Inicio";
-    if (correctionData.page.includes("Especialidades")) pageShort = "Especialidades";
-    else if (correctionData.page.includes("Capacitación")) pageShort = "Capacitación";
-    else if (correctionData.page.includes("Institucional")) pageShort = "Institucional";
-
-    let ubicacionShort = "Cabecera Principal";
-    if (correctionData.ubicacion.includes("Media")) ubicacionShort = "Sección Media";
-    else if (correctionData.ubicacion.includes("Lateral")) ubicacionShort = "Columna Lateral";
-    else if (correctionData.ubicacion.includes("Pie")) ubicacionShort = "Pie";
-
-    setRecursos((prev) =>
-      prev.map((r) =>
-        r.id === selectedRecurso.id
-          ? {
-              ...r,
-              titulo: correctionData.titulo,
-              descripcion: correctionData.descripcion,
-              altText: correctionData.altText,
-              enlaceUrl: correctionData.enlaceUrl,
-              page: pageShort,
-              ubicacion: ubicacionShort,
-              orden: parseInt(correctionData.orden, 10) || r.orden,
-              activo: false,
-              imageUrl: correctionData.imageUrl,
-              estado: "BORRADOR",
-              updatedAt: new Date().toISOString(),
-            }
-          : r
-      )
-    );
-
-    toast.success("Recurso guardado como Borrador. Podrá continuar editándolo más tarde.");
-    setShowCorrectionModal(false);
-  };
-
-  const handleResubmitCorrectionForApproval = () => {
-    if (!selectedRecurso) return;
-
-    if (!correctionData.titulo.trim()) {
-      toast.error("El título del contenido gráfico es obligatorio.");
-      return;
-    }
-
-    if (!correctionData.altText.trim()) {
-      toast.error("El texto alternativo (ALT) es obligatorio según el estándar WCAG 2.1 AA antes de reenviar.");
-      return;
-    }
-
-    let pageShort = "Inicio";
-    if (correctionData.page.includes("Especialidades")) pageShort = "Especialidades";
-    else if (correctionData.page.includes("Capacitación")) pageShort = "Capacitación";
-    else if (correctionData.page.includes("Institucional")) pageShort = "Institucional";
-
-    let ubicacionShort = "Cabecera Principal";
-    if (correctionData.ubicacion.includes("Media")) ubicacionShort = "Sección Media";
-    else if (correctionData.ubicacion.includes("Lateral")) ubicacionShort = "Columna Lateral";
-    else if (correctionData.ubicacion.includes("Pie")) ubicacionShort = "Pie";
-
-    setRecursos((prev) =>
-      prev.map((r) =>
-        r.id === selectedRecurso.id
-          ? {
-              ...r,
-              titulo: correctionData.titulo,
-              descripcion: correctionData.descripcion,
-              altText: correctionData.altText,
-              enlaceUrl: correctionData.enlaceUrl,
-              page: pageShort,
-              ubicacion: ubicacionShort,
-              orden: parseInt(correctionData.orden, 10) || r.orden,
-              activo: correctionData.activo,
-              imageUrl: correctionData.imageUrl,
-              estado: "PENDIENTE_APROBACION",
-              rejectionReason: null,
-              updatedAt: new Date().toISOString(),
-            }
-          : r
-      )
-    );
-
-    const resourceCode = selectedRecurso.id.startsWith("cg-")
-      ? `#CG-0${selectedRecurso.id.replace("cg-", "")}`
-      : `#CG-${selectedRecurso.id}`;
-
-    toast.success(`¡Corrección enviada! El recurso ${resourceCode} ha sido reenviado para Aprobación Editorial.`);
-    setShowCorrectionModal(false);
   };
 
   const handleOpenPreview = (item) => {
@@ -827,7 +503,7 @@ const CmsContenidoGraficoView = () => {
     setShowDeleteModal(true);
   };
 
-  // Manejo de carga de imagen
+  // Manejo de carga de imagen en Modal Crear / Editar
   const handleImageFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -841,7 +517,7 @@ const CmsContenidoGraficoView = () => {
     }
   };
 
-  // Guardar recurso (Crear / Actualizar / Corregir)
+  // Guardar recurso (Crear / Actualizar)
   const handleSaveForm = (e) => {
     e.preventDefault();
 
@@ -863,7 +539,6 @@ const CmsContenidoGraficoView = () => {
     let finalImageUrl = imagePreview || defaultImg1;
     let nuevoEstado = formData.estado;
 
-    // Si estábamos corrigiendo un rechazo, pasa a Pendiente de Aprobación
     if (isFixingRejection) {
       nuevoEstado = "PENDIENTE_APROBACION";
     }
@@ -909,13 +584,78 @@ const CmsContenidoGraficoView = () => {
     setShowCreateEditModal(false);
   };
 
-  // Procesar Revisión Editorial (Aprobar / Rechazar con motivo - RF-CMS-035)
+  // Subsanación desde el Modal de Corrección
+  const handleCorrectionFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const preview = URL.createObjectURL(file);
+      setCorrectionData((prev) => ({
+        ...prev,
+        fileObj: file,
+        fileName: file.name,
+        fileMeta: `${(file.size / (1024 * 1024)).toFixed(1)} MB • Imagen reemplazada`,
+        imageUrl: preview,
+      }));
+      toast.success("Archivo adjunto reemplazado.");
+    }
+  };
+
+  const handleCorrectionSaveDraft = () => {
+    if (!selectedRecurso) return;
+    setRecursos((prev) =>
+      prev.map((r) =>
+        r.id === selectedRecurso.id
+          ? {
+              ...r,
+              titulo: correctionData.titulo,
+              descripcion: correctionData.descripcion,
+              altText: correctionData.altText,
+              enlaceUrl: correctionData.enlaceUrl,
+              imageUrl: correctionData.imageUrl || r.imageUrl,
+              estado: "BORRADOR",
+              updatedAt: new Date().toISOString(),
+            }
+          : r
+      )
+    );
+    toast.success("Borrador de subsanación guardado.");
+    setShowCorrectionModal(false);
+  };
+
+  const handleCorrectionResubmit = () => {
+    if (!selectedRecurso) return;
+    if (!correctionData.altText.trim()) {
+      toast.error("El texto alternativo accesible es obligatorio para reenviar.");
+      return;
+    }
+    setRecursos((prev) =>
+      prev.map((r) =>
+        r.id === selectedRecurso.id
+          ? {
+              ...r,
+              titulo: correctionData.titulo,
+              descripcion: correctionData.descripcion,
+              altText: correctionData.altText,
+              enlaceUrl: correctionData.enlaceUrl,
+              imageUrl: correctionData.imageUrl || r.imageUrl,
+              estado: "PENDIENTE_APROBACION",
+              rejectionReason: null,
+              updatedAt: new Date().toISOString(),
+            }
+          : r
+      )
+    );
+    toast.success("Recurso corregido y reenviado a aprobación editorial.");
+    setShowCorrectionModal(false);
+  };
+
+  // Procesar Revisión Editorial (Aprobar / Rechazar)
   const handleProcessReview = () => {
     if (!selectedRecurso) return;
 
     if (reviewAction === "reject") {
       if (!reviewRejectionText.trim()) {
-        toast.error("Debe especificar obligatoriamente el motivo de rechazo (RF-CMS-035).");
+        toast.error("Debe especificar obligatoriamente el motivo del rechazo.");
         return;
       }
 
@@ -934,7 +674,6 @@ const CmsContenidoGraficoView = () => {
       );
       toast.error(`Recurso "${selectedRecurso.titulo}" rechazado con observaciones.`);
     } else {
-      // Aprobar
       setRecursos((prev) =>
         prev.map((r) =>
           r.id === selectedRecurso.id
@@ -948,33 +687,15 @@ const CmsContenidoGraficoView = () => {
             : r
         )
       );
-      toast.success(`Recurso "${selectedRecurso.titulo}" aprobado y habilitado en el portal.`);
+      toast.success(`Recurso "${selectedRecurso.titulo}" aprobado y habilitado.`);
     }
 
     setShowReviewModal(false);
   };
 
-  // Enviar a aprobación rápida desde la tabla
-  const handleSendToApproval = (item) => {
-    setRecursos((prev) =>
-      prev.map((r) =>
-        r.id === item.id
-          ? {
-              ...r,
-              estado: "PENDIENTE_APROBACION",
-              rejectionReason: null,
-              updatedAt: new Date().toISOString(),
-            }
-          : r
-      )
-    );
-    toast.success(`"${item.titulo}" fue enviado al circuito de aprobación editorial.`);
-  };
-
   // Eliminar Recurso
   const handleConfirmDelete = () => {
     if (!selectedRecurso) return;
-
     setRecursos((prev) => prev.filter((r) => r.id !== selectedRecurso.id));
     toast.success("Recurso eliminado correctamente.");
     setShowDeleteModal(false);
@@ -982,806 +703,366 @@ const CmsContenidoGraficoView = () => {
   };
 
   return (
-    <div className="cg-view-wrapper">
-      {/* Encabezado Institucional y Migas de Pan */}
-      <div className="cg-header">
+    <div className="cms-dashboard-card cg-main-card">
+      {/* Encabezado Interno idéntico a las otras vistas */}
+      <div className="cg-inner-header">
         <div>
-          <nav aria-label="Migas de pan" className="cg-breadcrumbs">
-            <span className="cg-breadcrumbs-item">CMS Administrativo</span>
-            <span className="cg-breadcrumbs-sep">/</span>
-            <span className="cg-breadcrumbs-item">Módulo 5</span>
-            <span className="cg-breadcrumbs-sep">/</span>
-            <span className="cg-breadcrumbs-current">Gestión de Contenido Gráfico</span>
-          </nav>
-
-          <div className="cg-header-main">
-            <div className="cg-header-icon-box">
-              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
-                collections
-              </span>
-            </div>
-            <div>
-              <h1 className="cg-header-title">Gestión de Contenido Gráfico</h1>
-              <p className="cg-header-subtitle">
-                Administración de recursos visuales por página y sección del Portal Público
-              </p>
-            </div>
-          </div>
+          <h2 className="cg-title">Listado de contenidos</h2>
+          <p className="cg-subtitle">Administre los recursos visuales del portal.</p>
         </div>
+        <button
+          type="button"
+          className="cg-btn-nuevo"
+          id="btn-nuevo-contenido"
+          onClick={handleOpenCreate}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+            add
+          </span>
+          <span>+ NUEVO CONTENIDO</span>
+        </button>
+      </div>
 
-        {/* Botón de Acción Principal (RF-CMS-028) */}
-        <div>
-          <button className="cg-btn-primary" type="button" onClick={handleOpenCreate}>
-            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
-              add_circle
-            </span>
-            <span>Nuevo Contenido Gráfico</span>
+      {/* Fila de Controles: Tabs & Filtro */}
+      <div className="cg-controls-row">
+        {/* Toggle Tabs */}
+        <div className="cg-tabs-container" id="tab-group">
+          <button
+            type="button"
+            className={`filter-tab ${viewTab === "publicados" ? "active" : ""}`}
+            onClick={() => {
+              setViewTab("publicados");
+              setCurrentPage(1);
+            }}
+            data-status="publicados"
+          >
+            Publicados
+          </button>
+          <button
+            type="button"
+            className={`filter-tab ${viewTab === "borradores" ? "active" : ""}`}
+            onClick={() => {
+              setViewTab("borradores");
+              setCurrentPage(1);
+            }}
+            data-status="borradores"
+          >
+            Borradores
+          </button>
+          <button
+            type="button"
+            className={`filter-tab ${viewTab === "pendientes" ? "active" : ""}`}
+            onClick={() => {
+              setViewTab("pendientes");
+              setCurrentPage(1);
+            }}
+            data-status="pendientes"
+          >
+            Pendientes
+          </button>
+          <button
+            type="button"
+            className={`filter-tab ${viewTab === "rechazados" ? "active" : ""}`}
+            onClick={() => {
+              setViewTab("rechazados");
+              setCurrentPage(1);
+            }}
+            data-status="rechazados"
+          >
+            Rechazados
           </button>
         </div>
-      </div>
 
-      {/* Fila de KPIs / Indicadores de Control Editorial (5 Métricas Clave) */}
-      <div className="cg-kpis-grid">
-        {/* KPI 1: Total Recursos */}
-        <div
-          className={`cg-kpi-card ${filtroEstado === "" ? "active-kpi" : ""}`}
-          onClick={() => {
-            setFiltroEstado("");
-            setCurrentPage(1);
-          }}
-          title="Ver todos los recursos visuales"
-        >
-          <div className="cg-kpi-header">
-            <span className="cg-kpi-label">Total Recursos</span>
-            <span className="cg-kpi-icon">
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                photo_library
-              </span>
-            </span>
-          </div>
-          <div className="cg-kpi-body">
-            <span className="cg-kpi-value">{stats.total}</span>
-            <span className="cg-kpi-subtitle">activos en sistema</span>
-          </div>
-        </div>
-
-        {/* KPI 2: Borradores */}
-        <div
-          className={`cg-kpi-card ${filtroEstado === "BORRADOR" ? "active-kpi" : ""}`}
-          onClick={() => {
-            setFiltroEstado(filtroEstado === "BORRADOR" ? "" : "BORRADOR");
-            setCurrentPage(1);
-          }}
-          title="Filtrar borradores"
-        >
-          <div className="cg-kpi-header">
-            <span className="cg-kpi-label">Borradores</span>
-            <span className="cg-kpi-icon">
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                edit_note
-              </span>
-            </span>
-          </div>
-          <div className="cg-kpi-body">
-            <span className="cg-kpi-value">{stats.borradores}</span>
-            <span className="cg-kpi-subtitle">en redacción</span>
-          </div>
-        </div>
-
-        {/* KPI 3: Pendientes */}
-        <div
-          className={`cg-kpi-card ${filtroEstado === "PENDIENTE_APROBACION" ? "active-kpi" : ""}`}
-          onClick={() => {
-            setFiltroEstado(filtroEstado === "PENDIENTE_APROBACION" ? "" : "PENDIENTE_APROBACION");
-            setCurrentPage(1);
-          }}
-          title="Filtrar recursos pendientes de aprobación"
-        >
-          <div className="cg-kpi-header">
-            <span className="cg-kpi-label" style={{ color: "var(--cg-secondary)" }}>
-              Pendientes
-            </span>
-            <span className="cg-kpi-icon pending">
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                pending_actions
-              </span>
-            </span>
-          </div>
-          <div className="cg-kpi-body">
-            <span className="cg-kpi-value">{stats.pendientes}</span>
-            <span className="cg-kpi-badge pending">
-              <span className="cg-kpi-dot" style={{ backgroundColor: "var(--cg-primary)" }}></span>
-              En revisión
-            </span>
-          </div>
-        </div>
-
-        {/* KPI 4: Requieren Ajuste (Rechazados / RF-CMS-035) */}
-        <div
-          className={`cg-kpi-card ${filtroEstado === "RECHAZADO" ? "active-kpi" : ""}`}
-          onClick={() => {
-            setFiltroEstado(filtroEstado === "RECHAZADO" ? "" : "RECHAZADO");
-            setCurrentPage(1);
-          }}
-          title="Filtrar recursos con observaciones de rechazo"
-        >
-          <div className="cg-kpi-header">
-            <span className="cg-kpi-label" style={{ color: "var(--cg-error)" }}>
-              Requieren Ajuste
-            </span>
-            <span className="cg-kpi-icon error">
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                error
-              </span>
-            </span>
-          </div>
-          <div className="cg-kpi-body">
-            <span className="cg-kpi-value error">{stats.rechazados}</span>
-            <span className="cg-kpi-badge error">Con observaciones</span>
-          </div>
-        </div>
-
-        {/* KPI 5: Publicados */}
-        <div
-          className={`cg-kpi-card ${filtroEstado === "APROBADO" ? "active-kpi" : ""}`}
-          onClick={() => {
-            setFiltroEstado(filtroEstado === "APROBADO" ? "" : "APROBADO");
-            setCurrentPage(1);
-          }}
-          title="Filtrar recursos publicados en el portal"
-        >
-          <div className="cg-kpi-header">
-            <span className="cg-kpi-label" style={{ color: "var(--cg-tertiary)" }}>
-              Publicados
-            </span>
-            <span className="cg-kpi-icon tertiary">
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                cloud_done
-              </span>
-            </span>
-          </div>
-          <div className="cg-kpi-body">
-            <span className="cg-kpi-value">{stats.publicados}</span>
-            <span className="cg-kpi-badge tertiary">
-              <span className="cg-kpi-dot pulse" style={{ backgroundColor: "var(--cg-tertiary)" }}></span>
-              En portal
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Barra de Herramientas y Filtros Combinables */}
-      <div className="cg-filters-card">
-        <div className="cg-filters-grid">
-          {/* Buscador principal */}
-          <div className="cg-search-box">
-            <span className="material-symbols-outlined cg-search-icon">search</span>
-            <input
-              type="text"
-              className="cg-search-input"
-              placeholder="Buscar contenido gráfico por título..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-            />
-          </div>
-
-          {/* Filtro Página del Portal */}
-          <div className="cg-select-wrapper">
+        {/* Filtro por Página */}
+        <div className="cg-filter-dropdown-wrapper">
+          <div className="cg-filter-dropdown-box">
+            <span className="cg-filter-prefix">FILTRAR POR:</span>
             <select
-              className="cg-select"
+              className="cg-filter-select"
               value={filtroPagina}
               onChange={(e) => {
                 setFiltroPagina(e.target.value);
                 setCurrentPage(1);
               }}
             >
-              <option value="">Página: Todas las páginas</option>
-              <option value="inicio">Inicio (Home)</option>
-              <option value="especialidades">Especialidades y Servicios</option>
-              <option value="capacitación">Capacitación y Residencias</option>
-              <option value="institucional">Información Institucional</option>
+              <option value="">Todas las páginas</option>
+              <option value="Inicio">Inicio</option>
+              <option value="Especialidades">Especialidades</option>
+              <option value="Capacitación">Capacitación</option>
+              <option value="Institucional">Institucional</option>
             </select>
-            <span className="material-symbols-outlined cg-select-chevron">expand_more</span>
+            <span className="material-symbols-outlined cg-filter-chevron">expand_more</span>
           </div>
+        </div>
+      </div>
 
-          {/* Filtro Ubicación */}
-          <div className="cg-select-wrapper">
-            <select
-              className="cg-select"
-              value={filtroUbicacion}
-              onChange={(e) => {
-                setFiltroUbicacion(e.target.value);
-                setCurrentPage(1);
-              }}
-            >
-              <option value="">Ubicación: Todas</option>
-              <option value="cabecera">Cabecera Principal</option>
-              <option value="media">Sección Media Informativa</option>
-              <option value="lateral">Columna Lateral Destacada</option>
-              <option value="pie">Pie Institucional</option>
-            </select>
-            <span className="material-symbols-outlined cg-select-chevron">expand_more</span>
-          </div>
+      {/* Tabla de Contenidos */}
+      <div className="cg-table-wrapper">
+        <table className="cg-table">
+          <thead>
+            <tr className="cg-table-head-row">
+              <th className="cg-th-orden" scope="col">
+                ORDEN
+              </th>
+              <th className="cg-th-recurso" scope="col">
+                VISTA PREVIA Y RECURSO
+              </th>
+              <th className="cg-th-ubicacion" scope="col">
+                PÁGINA Y UBICACIÓN
+              </th>
+              <th className="cg-th-estado" scope="col">
+                ESTADO
+              </th>
+              <th className="cg-th-acciones" scope="col">
+                ACCIONES
+              </th>
+            </tr>
+          </thead>
+          <tbody className="cg-table-body">
+            {currentRecursos.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="cg-empty-cell">
+                  <div className="cg-empty-content">
+                    <span className="material-symbols-outlined cg-empty-icon">
+                      photo_library
+                    </span>
+                    <p className="cg-empty-title">No hay contenidos registrados en esta pestaña</p>
+                    <p className="cg-empty-desc">
+                      Pruebe cambiando de pestaña o limpiando el filtro de páginas.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              currentRecursos.map((item, index) => {
+                const isApproved = item.estado === "APROBADO" || item.estado === "PUBLICADO";
+                const isRejected = item.estado === "RECHAZADO";
+                const isPending =
+                  item.estado === "PENDIENTE_APROBACION" || item.estado === "PENDIENTE";
+                const isDraft = item.estado === "BORRADOR";
 
-          {/* Filtro Estado Editorial */}
-          <div className="cg-select-wrapper">
-            <select
-              className="cg-select"
-              value={filtroEstado}
-              onChange={(e) => {
-                setFiltroEstado(e.target.value);
-                setCurrentPage(1);
-              }}
-            >
-              <option value="">Estado: Todos</option>
-              <option value="aprobado">Aprobado</option>
-              <option value="pendiente_aprobacion">Pendiente de Aprobación</option>
-              <option value="rechazado">Rechazado</option>
-              <option value="borrador">Borrador</option>
-            </select>
-            <span className="material-symbols-outlined cg-select-chevron">expand_more</span>
-          </div>
+                return (
+                  <tr key={item.id} className="cg-table-row">
+                    {/* ORDEN */}
+                    <td className="cg-td-orden">
+                      {item.orden || startIndex + index + 1}
+                    </td>
 
-          {/* Botón Limpiar Filtros */}
+                    {/* VISTA PREVIA Y RECURSO */}
+                    <td className="cg-td-recurso">
+                      <div className="cg-recurso-box">
+                        <div
+                          className="cg-thumb-container"
+                          onClick={() => handleOpenPreview(item)}
+                          title="Clic para previsualizar"
+                        >
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt={item.altText || item.titulo}
+                              className="cg-thumb-img"
+                            />
+                          ) : (
+                            <div className="cg-thumb-empty">
+                              <span className="material-symbols-outlined">broken_image</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="cg-info-col">
+                          <span
+                            className="cg-info-title"
+                            title={item.titulo}
+                            onClick={() => handleOpenPreview(item)}
+                          >
+                            {item.titulo}
+                          </span>
+                          <span className="cg-info-desc" title={item.descripcion}>
+                            {item.descripcion || "Recurso visual para el portal"}
+                          </span>
+                          {isRejected && item.rejectionReason && (
+                            <div
+                              className="cg-rejection-warning-pill"
+                              onClick={() => handleOpenCorrection(item)}
+                              title="Hacer clic para ver motivo y corregir"
+                            >
+                              <span className="material-symbols-outlined text-[13px]">
+                                report
+                              </span>
+                              <span className="cg-rejection-warning-text truncate">
+                                {item.rejectionReason}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* PÁGINA Y UBICACIÓN */}
+                    <td className="cg-td-ubicacion">
+                      <span className="cg-location-text">
+                        {item.page || "Inicio"} - {item.ubicacion || "Cabecera Principal"}
+                      </span>
+                    </td>
+
+                    {/* ESTADO */}
+                    <td className="cg-td-estado">
+                      {isApproved && (
+                        <span className="cg-status-badge status-aprobado">
+                          <span className="cg-status-dot dot-aprobado"></span>
+                          APROBADO
+                        </span>
+                      )}
+                      {isRejected && (
+                        <button
+                          type="button"
+                          className="cg-status-badge status-rechazado clickable"
+                          onClick={() => handleOpenCorrection(item)}
+                          title="Hacer clic para ver motivo de rechazo y corregir"
+                        >
+                          <span className="cg-status-dot dot-rechazado"></span>
+                          RECHAZADO
+                        </button>
+                      )}
+                      {isPending && (
+                        <span className="cg-status-badge status-pendiente">
+                          <span className="cg-status-dot dot-pendiente"></span>
+                          PENDIENTE
+                        </span>
+                      )}
+                      {isDraft && (
+                        <span className="cg-status-badge status-borrador">
+                          <span className="cg-status-dot dot-borrador"></span>
+                          BORRADOR
+                        </span>
+                      )}
+                    </td>
+
+                    {/* ACCIONES */}
+                    <td className="cg-td-acciones">
+                      <div className="cg-actions-group">
+                        {/* Previsualizar */}
+                        <button
+                          type="button"
+                          className="cg-action-btn"
+                          title="Previsualizar"
+                          onClick={() => handleOpenPreview(item)}
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            visibility
+                          </span>
+                        </button>
+
+                        {/* Editar o Corregir */}
+                        <button
+                          type="button"
+                          className={`cg-action-btn ${isRejected ? "action-fix" : ""}`}
+                          title={isRejected ? "Ver motivo y corregir" : "Editar"}
+                          onClick={() => {
+                            if (isRejected) {
+                              handleOpenCorrection(item);
+                            } else {
+                              handleOpenEdit(item);
+                            }
+                          }}
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            {isRejected ? "build" : "edit"}
+                          </span>
+                        </button>
+
+                        {/* Si está pendiente: botón de revisión editorial */}
+                        {isPending && (
+                          <button
+                            type="button"
+                            className="cg-action-btn action-review"
+                            title="Revisar / Acreditar"
+                            onClick={() => handleOpenReview(item)}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">
+                              fact_check
+                            </span>
+                          </button>
+                        )}
+
+                        {/* Eliminar */}
+                        <button
+                          type="button"
+                          className="cg-action-btn action-delete"
+                          title="Eliminar"
+                          onClick={() => handleOpenDelete(item)}
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            delete
+                          </span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Paginación / Footer Info */}
+      <div className="cg-footer-row">
+        <span className="cg-footer-info">
+          Mostrando {recursosFiltrados.length === 0 ? 0 : startIndex + 1} de{" "}
+          {recursosFiltrados.length} recursos registrados
+        </span>
+        <div className="cg-pagination-nav">
           <button
             type="button"
-            className="cg-btn-reset"
-            onClick={handleResetFilters}
-            title="Restablecer todos los filtros"
+            className="cg-page-arrow"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            aria-label="Página anterior"
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              restart_alt
-            </span>
-            <span>Limpiar</span>
+            <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+            <button
+              key={num}
+              type="button"
+              className={`cg-page-number ${currentPage === num ? "active" : ""}`}
+              onClick={() => setCurrentPage(num)}
+            >
+              {num}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="cg-page-arrow"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            aria-label="Página siguiente"
+          >
+            <span className="material-symbols-outlined text-[18px]">chevron_right</span>
           </button>
         </div>
       </div>
 
-      {/* Contenedor Principal de la Tabla de Control Editorial */}
-      <div className="cg-table-card">
-        <div className="cg-table-responsive">
-          <table className="cg-table">
-            <thead>
-              <tr>
-                <th style={{ width: "320px" }}>Vista Previa y Recurso</th>
-                <th style={{ width: "220px" }}>Página y Ubicación</th>
-                <th style={{ width: "110px", textAlign: "center" }}>Orden</th>
-                <th style={{ width: "200px" }}>Enlace Asociado</th>
-                <th style={{ width: "220px" }}>Estado Editorial</th>
-                <th style={{ width: "120px", textAlign: "center" }}>Disponibilidad</th>
-                <th style={{ width: "150px", textAlign: "right" }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentRecursos.length === 0 ? (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--cg-outline)" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "36px", opacity: 0.5 }}>
-                        search_off
-                      </span>
-                      <p style={{ margin: 0, fontWeight: 500 }}>
-                        No se encontraron contenidos gráficos con los criterios seleccionados.
-                      </p>
-                      <button
-                        type="button"
-                        className="cg-btn-secondary"
-                        style={{ marginTop: "0.5rem", fontSize: "0.75rem", padding: "0.4rem 0.8rem" }}
-                        onClick={handleResetFilters}
-                      >
-                        Restablecer filtros
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                currentRecursos.map((item, index) => {
-                  const isRejected = item.estado === "RECHAZADO";
-                  const isApproved = item.estado === "APROBADO" || item.estado === "PUBLICADO";
-                  const isPending = item.estado === "PENDIENTE_APROBACION";
-                  const isDraft = item.estado === "BORRADOR";
-
-                  return (
-                    <tr
-                      key={item.id}
-                      className={isRejected ? "row-rejected" : ""}
-                    >
-                      {/* Columna 1: Vista Previa y Recurso */}
-                      <td style={{ verticalAlign: isRejected ? "top" : "middle" }}>
-                        <div className="cg-preview-wrapper">
-                          <div className="cg-thumbnail-box">
-                            {item.imageUrl ? (
-                              <img
-                                src={item.imageUrl}
-                                alt={item.altText || item.titulo}
-                                className="cg-thumbnail-img"
-                              />
-                            ) : (
-                              <span className="material-symbols-outlined" style={{ color: "var(--cg-outline)", fontSize: "28px" }}>
-                                broken_image
-                              </span>
-                            )}
-                            <span className="cg-ratio-badge">16:9</span>
-                          </div>
-
-                          <div className="cg-resource-info">
-                            <span className={`cg-resource-title ${isRejected || isDraft ? "text-normal" : ""}`} title={item.titulo}>
-                              {item.titulo}
-                            </span>
-                            <span className="cg-resource-subtitle" title={item.descripcion}>
-                              {item.descripcion || "Sin descripción adicional"}
-                            </span>
-
-                            {/* Badge ALT */}
-                            {item.altText && item.altText.trim() ? (
-                              <span
-                                className="cg-alt-badge success"
-                                title={`Texto alternativo accesible: "${item.altText}"`}
-                              >
-                                <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
-                                  check_circle
-                                </span>
-                                <span>ALT ✓</span>
-                              </span>
-                            ) : (
-                              <span className="cg-alt-badge pending" title="Falta cargar el texto alternativo accesible">
-                                <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>
-                                  pending
-                                </span>
-                                <span>Pendiente ALT</span>
-                              </span>
-                            )}
-
-                            {/* Mensaje Inline de Rechazo Mandatorio (RF-CMS-035 Destacada) */}
-                            {isRejected && item.rejectionReason && (
-                              <div className="cg-inline-rejection">
-                                <span className="material-symbols-outlined cg-inline-rejection-icon">
-                                  report_problem
-                                </span>
-                                <p className="cg-inline-rejection-text">
-                                  <strong>Motivo de rechazo:</strong> {item.rejectionReason}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Columna 2: Página y Ubicación */}
-                      <td style={{ verticalAlign: isRejected ? "top" : "middle", paddingTop: isRejected ? "1.25rem" : undefined }}>
-                        <div className="cg-location-tags">
-                          <span className="cg-tag-page">Página: {item.page}</span>
-                          <span
-                            className={`cg-tag-location ${
-                              item.ubicacion?.toLowerCase().includes("cabecera")
-                                ? "primary-fixed"
-                                : item.ubicacion?.toLowerCase().includes("media")
-                                ? "secondary-fixed"
-                                : "neutral"
-                            }`}
-                          >
-                            Ubicación: {item.ubicacion}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Columna 3: Orden */}
-                      <td
-                        style={{
-                          verticalAlign: isRejected ? "top" : "middle",
-                          paddingTop: isRejected ? "1.25rem" : undefined,
-                          textAlign: "center",
-                        }}
-                      >
-                        <div className="cg-order-box">
-                          <span className="cg-order-number">{item.orden}°</span>
-                          <div className="cg-order-arrows">
-                            <button
-                              type="button"
-                              className="cg-order-btn"
-                              title="Subir posición"
-                              aria-label="Subir orden"
-                              disabled={item.orden <= 1}
-                              onClick={() => handleMoveOrder(item, "up")}
-                            >
-                              <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
-                                expand_less
-                              </span>
-                            </button>
-                            <button
-                              type="button"
-                              className="cg-order-btn"
-                              title="Bajar posición"
-                              aria-label="Bajar orden"
-                              disabled={item.orden >= recursos.length}
-                              onClick={() => handleMoveOrder(item, "down")}
-                            >
-                              <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
-                                expand_more
-                              </span>
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Columna 4: Enlace Asociado */}
-                      <td style={{ verticalAlign: isRejected ? "top" : "middle", paddingTop: isRejected ? "1.25rem" : undefined }}>
-                        {item.enlaceUrl ? (
-                          <a
-                            href={item.enlaceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="cg-link-cell"
-                            title={item.enlaceUrl}
-                          >
-                            <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--cg-outline)" }}>
-                              link
-                            </span>
-                            <span>{item.enlaceUrl}</span>
-                          </a>
-                        ) : (
-                          <span className="cg-link-cell disabled">
-                            <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                              link_off
-                            </span>
-                            <span>Sin definir</span>
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Columna 5: Estado Editorial */}
-                      <td style={{ verticalAlign: isRejected ? "top" : "middle", paddingTop: isRejected ? "1.25rem" : undefined }}>
-                        <div className="cg-status-stack">
-                          {isApproved && (
-                            <span className="cg-status-pill aprobado">
-                              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                                check_circle
-                              </span>
-                              <span>Aprobado</span>
-                            </span>
-                          )}
-
-                          {isPending && (
-                            <span className="cg-status-pill pendiente">
-                              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                                schedule
-                              </span>
-                              <span>Pendiente de Aprobación</span>
-                            </span>
-                          )}
-
-                          {isDraft && (
-                            <span className="cg-status-pill borrador">
-                              <span
-                                style={{
-                                  width: "6px",
-                                  height: "6px",
-                                  borderRadius: "50%",
-                                  backgroundColor: "var(--cg-outline)",
-                                  display: "inline-block",
-                                }}
-                              ></span>
-                              <span>Borrador</span>
-                            </span>
-                          )}
-
-                          {isRejected && (
-                            <>
-                              <span className="cg-status-pill rechazado">
-                                <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
-                                  cancel
-                                </span>
-                                <span>Rechazado</span>
-                              </span>
-
-                              {/* Botón de Acción Directa Solicitado en Stitch */}
-                              <button
-                                type="button"
-                                className="cg-btn-fix-rejection"
-                                onClick={() => handleOpenCorrection(item)}
-                              >
-                                <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>
-                                  build
-                                </span>
-                                <span>Ver motivo y corregir</span>
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Columna 6: Disponibilidad */}
-                      <td
-                        style={{
-                          verticalAlign: isRejected ? "top" : "middle",
-                          paddingTop: isRejected ? "1.25rem" : undefined,
-                          textAlign: "center",
-                        }}
-                      >
-                        <label
-                          className={`cg-switch-label ${isRejected || isDraft ? "disabled" : ""}`}
-                          title={
-                            isRejected
-                              ? "Recurso observado: No puede activarse hasta ser corregido y aprobado."
-                              : isDraft
-                              ? "Borrador: Debe enviarse a aprobación antes de activarse."
-                              : item.activo
-                              ? "Visible en portal público"
-                              : "Inactivo en portal público"
-                          }
-                        >
-                          <input
-                            type="checkbox"
-                            className="cg-switch-input"
-                            checked={item.activo}
-                            disabled={isRejected || isDraft}
-                            onChange={() => handleToggleActivo(item)}
-                          />
-                          <div className="cg-switch-slider"></div>
-                          <span className={`cg-switch-text ${item.activo ? "active" : "inactive"}`}>
-                            {item.activo ? "Activo" : "Inactivo"}
-                          </span>
-                        </label>
-                      </td>
-
-                      {/* Columna 7: Acciones */}
-                      <td
-                        style={{
-                          verticalAlign: isRejected ? "top" : "middle",
-                          paddingTop: isRejected ? "1.25rem" : undefined,
-                          textAlign: "right",
-                        }}
-                      >
-                        <div className="cg-actions-row">
-                          {/* Previsualizar */}
-                          <button
-                            type="button"
-                            className="cg-action-icon-btn"
-                            title="Previsualizar recurso"
-                            onClick={() => handleOpenPreview(item)}
-                          >
-                            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                              visibility
-                            </span>
-                          </button>
-
-                          {/* Editar */}
-                          <button
-                            type="button"
-                            className="cg-action-icon-btn"
-                            title={isRejected ? "Editar y corregir" : "Editar contenido"}
-                            onClick={() => {
-                              if (item.estado === "RECHAZADO") {
-                                handleOpenCorrection(item);
-                              } else {
-                                handleOpenEdit(item);
-                              }
-                            }}
-                          >
-                            <span
-                              className="material-symbols-outlined"
-                              style={{
-                                fontSize: "18px",
-                                color: isRejected ? "var(--cg-primary)" : undefined,
-                              }}
-                            >
-                              edit
-                            </span>
-                          </button>
-
-                          {/* Acción contextual según estado */}
-                          {isPending && (
-                            <button
-                              type="button"
-                              className="cg-action-icon-btn btn-approve"
-                              title="Revisar y aprobar / rechazar"
-                              onClick={() => handleOpenReview(item)}
-                            >
-                              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                                done_all
-                              </span>
-                            </button>
-                          )}
-
-                          {isDraft && (
-                            <button
-                              type="button"
-                              className="cg-action-icon-btn"
-                              title="Enviar a aprobación"
-                              onClick={() => handleSendToApproval(item)}
-                            >
-                              <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "var(--cg-primary)" }}>
-                                publish
-                              </span>
-                            </button>
-                          )}
-
-                          {isRejected && (
-                            <button
-                              type="button"
-                              className="cg-action-icon-btn"
-                              title="Reenviar a revisión"
-                              onClick={() => handleSendToApproval(item)}
-                            >
-                              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                                send
-                              </span>
-                            </button>
-                          )}
-
-                          {isApproved && (
-                            <button
-                              type="button"
-                              className="cg-action-icon-btn"
-                              title="Historial editorial"
-                              onClick={() => toast("Historial: recurso auditado y publicado con trazabilidad sanitaria.")}
-                            >
-                              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                                history
-                              </span>
-                            </button>
-                          )}
-
-                          {/* Eliminar */}
-                          <button
-                            type="button"
-                            className="cg-action-icon-btn btn-delete"
-                            title="Eliminar recurso"
-                            onClick={() => handleOpenDelete(item)}
-                          >
-                            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                              delete_outline
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Paginación y Resumen Inferior */}
-        <div className="cg-pagination-bar">
-          <div className="cg-pagination-info">
-            <span>
-              Mostrando <strong>{recursosFiltrados.length === 0 ? 0 : startIndex + 1}-{endIndex}</strong> de{" "}
-              <strong>{recursosFiltrados.length}</strong> contenidos gráficos
-            </span>
-            <div className="cg-pagination-divider"></div>
-            <span className="cg-pagination-rate">
-              Tasa de aprobación editorial: <strong>{stats.tasaAprobacion}%</strong>
-            </span>
-          </div>
-
-          <div className="cg-pagination-controls">
-            <button
-              type="button"
-              className="cg-page-btn"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              aria-label="Página anterior"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                chevron_left
-              </span>
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => {
-              if (
-                totalPages > 6 &&
-                num !== 1 &&
-                num !== totalPages &&
-                Math.abs(num - currentPage) > 1
-              ) {
-                if (num === 2 || num === totalPages - 1) {
-                  return (
-                    <span key={num} className="cg-page-ellipsis">
-                      ...
-                    </span>
-                  );
-                }
-                return null;
-              }
-
-              return (
-                <button
-                  key={num}
-                  type="button"
-                  className={`cg-page-btn ${currentPage === num ? "active" : ""}`}
-                  onClick={() => setCurrentPage(num)}
-                >
-                  {num}
-                </button>
-              );
-            })}
-
-            <button
-              type="button"
-              className="cg-page-btn"
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              aria-label="Página siguiente"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                chevron_right
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Panel Resumen de Lineamientos Sanitarios y Accesibilidad (WCAG 2.2 AA) */}
-      <div className="cg-guidelines-grid">
-        <div className="cg-guideline-card">
-          <span className="material-symbols-outlined cg-guideline-icon primary">
-            verified_user
-          </span>
-          <div className="cg-guideline-content">
-            <span className="cg-guideline-title">Trazabilidad Sanitaria y Legal</span>
-            <p className="cg-guideline-desc">
-              Cada recurso visual publicado en el portal público cuenta con registro de aprobación médica y comunicación comunitaria auditada.
-            </p>
-          </div>
-        </div>
-
-        <div className="cg-guideline-card">
-          <span className="material-symbols-outlined cg-guideline-icon tertiary">
-            accessibility_new
-          </span>
-          <div className="cg-guideline-content">
-            <span className="cg-guideline-title">Estándar de Accesibilidad WCAG 2.2</span>
-            <p className="cg-guideline-desc">
-              Obligatoriedad de texto alternativo conciso y contraste mínimo 4.5:1 en tipografías integradas sobre imágenes médicas.
-            </p>
-          </div>
-        </div>
-
-        <div className="cg-guideline-card">
-          <span className="material-symbols-outlined cg-guideline-icon secondary">
-            aspect_ratio
-          </span>
-          <div className="cg-guideline-content">
-            <span className="cg-guideline-title">Formato y Optimización</span>
-            <p className="cg-guideline-desc">
-              Resolución estándar 1920x1080 (16:9) en WebP/JPG progresivo comprimido a &lt; 450 KB para garantizar carga inmediata en redes periféricas.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* ==========================================================================
-          MODALES
+          MODALES OPERATIVOS
           ========================================================================== */}
 
       {/* MODAL 1: Crear / Editar Contenido Gráfico */}
       {showCreateEditModal && (
         <div className="cg-modal-overlay" onClick={() => setShowCreateEditModal(false)}>
-          <div className="cg-modal-container large" onClick={(e) => e.stopPropagation()}>
+          <div className="cg-modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="cg-modal-header">
               <div className="cg-modal-header-left">
-                <div className={`cg-modal-header-icon ${isFixingRejection ? "error" : ""}`}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
-                    {isFixingRejection ? "build" : isEditing ? "edit" : "add_photo_alternate"}
-                  </span>
-                </div>
+                <span className="material-symbols-outlined cg-modal-header-icon">
+                  {isEditing ? "edit" : "add_photo_alternate"}
+                </span>
                 <div>
                   <h2 className="cg-modal-title">
-                    {isFixingRejection
-                      ? "Corregir Contenido Observado"
-                      : isEditing
-                      ? "Editar Recurso Gráfico"
-                      : "Nuevo Contenido Gráfico"}
+                    {isEditing ? "Editar Recurso Gráfico" : "Nuevo Contenido Gráfico"}
                   </h2>
                   <p className="cg-modal-subtitle">
-                    {isFixingRejection
-                      ? "Subsanación de requerimientos de diseño y accesibilidad sanitaria"
-                      : "Complete los datos del recurso según el estándar editorial del Hospital Evita"}
+                    Complete los datos visuales conforme a los requerimientos del Portal
                   </p>
                 </div>
               </div>
@@ -1791,239 +1072,168 @@ const CmsContenidoGraficoView = () => {
                 onClick={() => setShowCreateEditModal(false)}
                 aria-label="Cerrar modal"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
             <form onSubmit={handleSaveForm}>
               <div className="cg-modal-body">
-                {/* Banner de Observación si viene de Rechazado */}
-                {isFixingRejection && selectedRecurso?.rejectionReason && (
-                  <div
-                    style={{
-                      padding: "0.85rem 1rem",
-                      borderRadius: "10px",
-                      backgroundColor: "var(--cg-error-container)",
-                      borderLeft: "4px solid var(--cg-error)",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: "0.75rem",
-                    }}
-                  >
-                    <span className="material-symbols-outlined" style={{ color: "var(--cg-error)", fontSize: "20px", marginTop: "2px" }}>
-                      report_problem
-                    </span>
-                    <div>
-                      <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--cg-on-error-container)" }}>
-                        Observación a corregir (RF-CMS-035):
-                      </span>
-                      <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.78125rem", color: "var(--cg-on-error-container)", lineHeight: 1.4 }}>
-                        {selectedRecurso.rejectionReason}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Título */}
                 <div className="cg-form-group">
                   <label className="cg-form-label">
-                    Título del Recurso <span className="required">*</span>
+                    Título del Recurso Visual <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     className="cg-form-input"
-                    placeholder="Ej. Campaña Prevención Dengue 2026"
+                    placeholder="Ej. Campaña Prevención Dengue 2026..."
                     value={formData.titulo}
                     onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
                     required
                   />
                 </div>
 
-                {/* Copete / Descripción */}
                 <div className="cg-form-group">
-                  <label className="cg-form-label">Descripción o Copete Informativo</label>
-                  <textarea
-                    className="cg-form-textarea"
-                    placeholder="Resumen del contenido que acompaña al banner en el portal público..."
+                  <label className="cg-form-label">Descripción Informativa</label>
+                  <input
+                    type="text"
+                    className="cg-form-input"
+                    placeholder="Ej. Recurso vectorial y flyer informativo para portal..."
                     value={formData.descripcion}
                     onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                   />
                 </div>
 
-                {/* Subida de Imagen 16:9 */}
-                <div className="cg-form-group">
-                  <label className="cg-form-label">
-                    Recurso Visual (Proporción 16:9) <span className="required">*</span>
-                  </label>
-
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/jpeg,image/png,image/webp"
-                    style={{ display: "none" }}
-                    onChange={handleImageFileChange}
-                  />
-
-                  {imagePreview ? (
-                    <div className="cg-image-preview-box">
-                      <img src={imagePreview} alt="Vista previa del recurso" />
-                      <span className="cg-image-preview-badge">16:9 • 1920x1080</span>
-                      <button
-                        type="button"
-                        className="cg-image-preview-remove"
-                        title="Cambiar imagen"
-                        onClick={() => {
-                          setImageFile(null);
-                          setImagePreview("");
-                        }}
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>close</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="cg-dropzone" onClick={() => fileInputRef.current?.click()}>
-                      <div className="cg-dropzone-icon">
-                        <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
-                          cloud_upload
-                        </span>
-                      </div>
-                      <span className="cg-dropzone-text">Haga clic o arrastre una imagen aquí</span>
-                      <span className="cg-dropzone-sub">
-                        Formatos soportados: WEBP, JPG o PNG progresivo. Resolución ideal 1920x1080 (16:9). Peso &lt; 450 KB.
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Texto Alternativo Accesible (WCAG 2.2 AA) */}
-                <div className="cg-form-group">
-                  <label className="cg-form-label">
-                    Texto Alternativo Accesible (ALT) <span className="required">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="cg-form-input"
-                    placeholder="Describa la imagen para personas con discapacidad visual y lectores de pantalla..."
-                    value={formData.altText}
-                    onChange={(e) => setFormData({ ...formData, altText: e.target.value })}
-                  />
-                  <span className="cg-form-hint">
-                    Obligatorio para la aprobación institucional. No incluya frases como "imagen de" o "foto de".
-                  </span>
-                </div>
-
-                {/* Fila de Página y Ubicación */}
                 <div className="cg-form-row">
-                  <div className="cg-form-group">
+                  <div className="cg-form-group flex-1">
                     <label className="cg-form-label">Página de Destino</label>
                     <select
                       className="cg-form-select"
                       value={formData.page}
                       onChange={(e) => setFormData({ ...formData, page: e.target.value })}
                     >
-                      <option value="Inicio">Inicio (Home)</option>
-                      <option value="Especialidades">Especialidades y Servicios</option>
-                      <option value="Capacitación">Capacitación y Residencias</option>
-                      <option value="Institucional">Información Institucional</option>
+                      <option value="Inicio">Inicio</option>
+                      <option value="Especialidades">Especialidades</option>
+                      <option value="Capacitación">Capacitación</option>
+                      <option value="Institucional">Institucional</option>
                     </select>
                   </div>
 
-                  <div className="cg-form-group">
-                    <label className="cg-form-label">Ubicación en Pantalla</label>
+                  <div className="cg-form-group flex-1">
+                    <label className="cg-form-label">Ubicación</label>
                     <select
                       className="cg-form-select"
                       value={formData.ubicacion}
                       onChange={(e) => setFormData({ ...formData, ubicacion: e.target.value })}
                     >
                       <option value="Cabecera Principal">Cabecera Principal</option>
-                      <option value="Sección Media">Sección Media Informativa</option>
-                      <option value="Columna Lateral">Columna Lateral Destacada</option>
+                      <option value="Sección Media">Sección Media</option>
+                      <option value="Columna Lateral">Columna Lateral</option>
                       <option value="Pie">Pie Institucional</option>
                     </select>
                   </div>
-                </div>
 
-                {/* Enlace y Orden */}
-                <div className="cg-form-row">
-                  <div className="cg-form-group">
-                    <label className="cg-form-label">Enlace o Destino Asociado (URL)</label>
-                    <input
-                      type="text"
-                      className="cg-form-input"
-                      placeholder="Ej. /campanas/dengue-2026"
-                      value={formData.enlaceUrl}
-                      onChange={(e) => setFormData({ ...formData, enlaceUrl: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="cg-form-group">
-                    <label className="cg-form-label">Orden de Visualización</label>
+                  <div className="cg-form-group w-24">
+                    <label className="cg-form-label">Orden</label>
                     <input
                       type="number"
-                      min={1}
-                      max={99}
-                      className="cg-form-input"
+                      min="1"
+                      className="cg-form-input text-center"
                       value={formData.orden}
-                      onChange={(e) => setFormData({ ...formData, orden: parseInt(e.target.value, 10) || 1 })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, orden: parseInt(e.target.value) || 1 })
+                      }
                     />
                   </div>
                 </div>
 
-                {/* Estado y Disponibilidad Inicial */}
-                <div className="cg-form-row">
-                  <div className="cg-form-group">
-                    <label className="cg-form-label">Estado Inicial</label>
-                    <select
-                      className="cg-form-select"
-                      value={formData.estado}
-                      disabled={isFixingRejection}
-                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                    >
-                      <option value="BORRADOR">Borrador (en preparación)</option>
-                      <option value="PENDIENTE_APROBACION">Pendiente de Aprobación</option>
-                      <option value="APROBADO">Aprobado / Listo para publicar</option>
-                    </select>
-                  </div>
+                <div className="cg-form-group">
+                  <label className="cg-form-label">Enlace URL Asociado (Opcional)</label>
+                  <input
+                    type="text"
+                    className="cg-form-input"
+                    placeholder="Ej. /campanas/dengue-2026"
+                    value={formData.enlaceUrl}
+                    onChange={(e) => setFormData({ ...formData, enlaceUrl: e.target.value })}
+                  />
+                </div>
 
-                  <div className="cg-form-group" style={{ justifyContent: "center" }}>
-                    <label className="cg-form-label" style={{ marginBottom: "0.5rem" }}>
-                      Disponibilidad Inmediata
-                    </label>
-                    <label className="cg-switch-label">
-                      <input
-                        type="checkbox"
-                        className="cg-switch-input"
-                        checked={formData.activo}
-                        onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                      />
-                      <div className="cg-switch-slider"></div>
-                      <span className={`cg-switch-text ${formData.activo ? "active" : "inactive"}`}>
-                        {formData.activo ? "Activo al guardar" : "Inactivo"}
-                      </span>
-                    </label>
+                <div className="cg-form-group">
+                  <label className="cg-form-label">
+                    Texto Alternativo Accesible (WCAG 2.2) <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    className="cg-form-textarea"
+                    rows="2"
+                    placeholder="Describa de forma precisa el contenido de la imagen para lectores de pantalla..."
+                    value={formData.altText}
+                    onChange={(e) => setFormData({ ...formData, altText: e.target.value })}
+                  />
+                </div>
+
+                {/* Carga de Imagen */}
+                <div className="cg-form-group">
+                  <label className="cg-form-label">
+                    Imagen del Recurso (16:9 - 1920×1080 px){" "}
+                    {!isEditing && <span className="text-red-500">*</span>}
+                  </label>
+
+                  <div
+                    className="cg-upload-box"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      style={{ display: "none" }}
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                    />
+
+                    {imagePreview ? (
+                      <div className="cg-upload-preview-box">
+                        <img src={imagePreview} alt="Vista previa" className="cg-upload-img" />
+                        <span className="cg-upload-badge">Cambiar imagen</span>
+                      </div>
+                    ) : (
+                      <div className="cg-upload-prompt">
+                        <span className="material-symbols-outlined text-[32px] text-slate-400">
+                          cloud_upload
+                        </span>
+                        <p className="cg-upload-text">
+                          Haga clic o arrastre un archivo de imagen aquí
+                        </p>
+                        <span className="cg-upload-subtext">JPG, PNG o WEBP (máx. 5MB)</span>
+                      </div>
+                    )}
                   </div>
+                </div>
+
+                {/* Estado */}
+                <div className="cg-form-group">
+                  <label className="cg-form-label">Estado Inicial</label>
+                  <select
+                    className="cg-form-select"
+                    value={formData.estado}
+                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                  >
+                    <option value="BORRADOR">Borrador</option>
+                    <option value="PENDIENTE_APROBACION">Pendiente de Aprobación</option>
+                    <option value="APROBADO">Publicado / Aprobado</option>
+                  </select>
                 </div>
               </div>
 
               <div className="cg-modal-footer">
                 <button
                   type="button"
-                  className="cg-btn-secondary"
+                  className="cg-btn-cancel"
                   onClick={() => setShowCreateEditModal(false)}
                 >
                   Cancelar
                 </button>
-                <button type="submit" className="cg-btn-primary">
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                    save
-                  </span>
-                  <span>
-                    {isFixingRejection
-                      ? "Guardar y Reenviar a Revisión"
-                      : isEditing
-                      ? "Guardar Cambios"
-                      : "Crear Contenido Gráfico"}
-                  </span>
+                <button type="submit" className="cg-btn-submit">
+                  <span className="material-symbols-outlined text-[18px]">check</span>
+                  <span>{isEditing ? "Guardar Cambios" : "Crear Recurso"}</span>
                 </button>
               </div>
             </form>
@@ -2031,7 +1241,7 @@ const CmsContenidoGraficoView = () => {
         </div>
       )}
 
-      {/* MODAL 2: Corregir Contenido Gráfico Rechazado (Modular) */}
+      {/* MODAL 2: Modal de Subsanación / Corrección de Rechazo */}
       <CmsContenidoGraficoCorrectionModal
         isOpen={showCorrectionModal}
         onClose={() => setShowCorrectionModal(false)}
@@ -2040,25 +1250,21 @@ const CmsContenidoGraficoView = () => {
         setCorrectionData={setCorrectionData}
         fileInputRef={correctionFileInputRef}
         onFileChange={handleCorrectionFileChange}
-        onSaveDraft={handleSaveCorrectionAsDraft}
-        onResubmitApproval={handleResubmitCorrectionForApproval}
+        onSaveDraft={handleCorrectionSaveDraft}
+        onResubmitApproval={handleCorrectionResubmit}
       />
 
-      {/* MODAL 3: Vista Previa Completa del Recurso */}
+      {/* MODAL 3: Vista Previa 16:9 del Recurso */}
       {showPreviewModal && selectedRecurso && (
         <div className="cg-modal-overlay" onClick={() => setShowPreviewModal(false)}>
-          <div className="cg-modal-container large" onClick={(e) => e.stopPropagation()}>
+          <div className="cg-modal-container preview-modal" onClick={(e) => e.stopPropagation()}>
             <div className="cg-modal-header">
               <div className="cg-modal-header-left">
-                <div className="cg-modal-header-icon">
-                  <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
-                    visibility
-                  </span>
-                </div>
+                <span className="material-symbols-outlined cg-modal-header-icon">visibility</span>
                 <div>
-                  <h2 className="cg-modal-title">Vista Previa del Contenido Gráfico</h2>
+                  <h2 className="cg-modal-title">Vista Previa del Recurso</h2>
                   <p className="cg-modal-subtitle">
-                    Simulación de visualización en el Portal Institucional Hospital Evita
+                    {selectedRecurso.page} • {selectedRecurso.ubicacion}
                   </p>
                 </div>
               </div>
@@ -2067,102 +1273,51 @@ const CmsContenidoGraficoView = () => {
                 className="cg-modal-close"
                 onClick={() => setShowPreviewModal(false)}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
             <div className="cg-modal-body">
-              {/* Visor 16:9 Principal */}
-              <div
-                style={{
-                  width: "100%",
-                  aspectRatio: "16 / 9",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  backgroundColor: "#0b1c30",
-                  position: "relative",
-                  boxShadow: "0 10px 25px -5px rgba(0,0,0,0.25)",
-                }}
-              >
+              <div className="cg-preview-banner-box">
                 {selectedRecurso.imageUrl ? (
                   <img
                     src={selectedRecurso.imageUrl}
                     alt={selectedRecurso.altText || selectedRecurso.titulo}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    className="cg-preview-banner-img"
                   />
                 ) : (
-                  <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ffffff" }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "48px", opacity: 0.5 }}>
+                  <div className="cg-preview-banner-empty">
+                    <span className="material-symbols-outlined text-[48px] text-slate-400">
                       broken_image
                     </span>
                   </div>
                 )}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    padding: "1.5rem",
-                    background: "linear-gradient(to top, rgba(11,28,48,0.92) 0%, rgba(11,28,48,0.4) 70%, transparent 100%)",
-                    color: "#ffffff",
-                  }}
-                >
-                  <span
-                    style={{
-                      padding: "2px 8px",
-                      borderRadius: "6px",
-                      backgroundColor: "var(--cg-primary)",
-                      fontSize: "0.75rem",
-                      fontWeight: 600,
-                      marginBottom: "0.5rem",
-                      display: "inline-block",
-                    }}
-                  >
+                <div className="cg-preview-overlay">
+                  <span className="cg-preview-tag">
                     {selectedRecurso.page} • {selectedRecurso.ubicacion}
                   </span>
-                  <h3 style={{ margin: "0.25rem 0", fontSize: "1.35rem", fontWeight: 700, letterSpacing: "-0.01em" }}>
-                    {selectedRecurso.titulo}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: "0.875rem", opacity: 0.9 }}>
-                    {selectedRecurso.descripcion}
-                  </p>
+                  <h3 className="cg-preview-title">{selectedRecurso.titulo}</h3>
+                  <p className="cg-preview-desc">{selectedRecurso.descripcion}</p>
                 </div>
               </div>
 
-              {/* Ficha Técnica y Metadatos Sanitarios */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                  gap: "0.85rem",
-                  marginTop: "0.5rem",
-                }}
-              >
-                <div style={{ padding: "0.75rem", backgroundColor: "var(--cg-surface-low)", borderRadius: "8px" }}>
-                  <span style={{ fontSize: "0.71875rem", color: "var(--cg-outline)", textTransform: "uppercase" }}>
-                    Texto Alternativo (ALT)
-                  </span>
-                  <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.8125rem", fontWeight: 500, color: "var(--cg-on-surface)" }}>
+              <div className="cg-preview-details-grid">
+                <div className="cg-detail-card">
+                  <span className="cg-detail-label">Texto Alternativo (ALT)</span>
+                  <p className="cg-detail-value">
                     {selectedRecurso.altText || "Sin texto alternativo definido"}
                   </p>
                 </div>
-
-                <div style={{ padding: "0.75rem", backgroundColor: "var(--cg-surface-low)", borderRadius: "8px" }}>
-                  <span style={{ fontSize: "0.71875rem", color: "var(--cg-outline)", textTransform: "uppercase" }}>
-                    Enlace de Destino
-                  </span>
-                  <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.8125rem", fontWeight: 600, color: "var(--cg-primary)", fontFamily: "monospace" }}>
+                <div className="cg-detail-card">
+                  <span className="cg-detail-label">Enlace de Destino</span>
+                  <p className="cg-detail-value font-mono">
                     {selectedRecurso.enlaceUrl || "Sin enlace configurado"}
                   </p>
                 </div>
-
-                <div style={{ padding: "0.75rem", backgroundColor: "var(--cg-surface-low)", borderRadius: "8px" }}>
-                  <span style={{ fontSize: "0.71875rem", color: "var(--cg-outline)", textTransform: "uppercase" }}>
-                    Estado y Disponibilidad
-                  </span>
-                  <p style={{ margin: "0.25rem 0 0 0", fontSize: "0.8125rem", fontWeight: 600, color: "var(--cg-on-surface)" }}>
-                    {selectedRecurso.estado} • {selectedRecurso.activo ? "Activo (En línea)" : "Inactivo"}
+                <div className="cg-detail-card">
+                  <span className="cg-detail-label">Estado</span>
+                  <p className="cg-detail-value font-semibold">
+                    {selectedRecurso.estado} • {selectedRecurso.activo ? "Activo" : "Inactivo"}
                   </p>
                 </div>
               </div>
@@ -2171,22 +1326,20 @@ const CmsContenidoGraficoView = () => {
             <div className="cg-modal-footer">
               <button
                 type="button"
-                className="cg-btn-secondary"
+                className="cg-btn-cancel"
                 onClick={() => setShowPreviewModal(false)}
               >
                 Cerrar
               </button>
               <button
                 type="button"
-                className="cg-btn-primary"
+                className="cg-btn-submit"
                 onClick={() => {
                   setShowPreviewModal(false);
                   handleOpenEdit(selectedRecurso);
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                  edit
-                </span>
+                <span className="material-symbols-outlined text-[18px]">edit</span>
                 <span>Editar Recurso</span>
               </button>
             </div>
@@ -2194,21 +1347,17 @@ const CmsContenidoGraficoView = () => {
         </div>
       )}
 
-      {/* MODAL 4: Revisión Editorial (Aprobación / Rechazo con Motivo Obligatorio) */}
+      {/* MODAL 4: Revisión Editorial (Aprobar o Rechazar con Motivo) */}
       {showReviewModal && selectedRecurso && (
         <div className="cg-modal-overlay" onClick={() => setShowReviewModal(false)}>
           <div className="cg-modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="cg-modal-header">
               <div className="cg-modal-header-left">
-                <div className="cg-modal-header-icon">
-                  <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
-                    fact_check
-                  </span>
-                </div>
+                <span className="material-symbols-outlined cg-modal-header-icon">fact_check</span>
                 <div>
-                  <h2 className="cg-modal-title">Dictamen Editorial</h2>
+                  <h2 className="cg-modal-title">Revisión Editorial</h2>
                   <p className="cg-modal-subtitle">
-                    Aprobación médica o rechazo con observación requerida (RF-CMS-035)
+                    Dictamen editorial para "{selectedRecurso.titulo}"
                   </p>
                 </div>
               </div>
@@ -2217,108 +1366,58 @@ const CmsContenidoGraficoView = () => {
                 className="cg-modal-close"
                 onClick={() => setShowReviewModal(false)}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
             <div className="cg-modal-body">
-              <div style={{ display: "flex", gap: "0.85rem", alignItems: "center" }}>
-                <div className="cg-thumbnail-box" style={{ width: "90px", height: "52px" }}>
-                  {selectedRecurso.imageUrl ? (
-                    <img src={selectedRecurso.imageUrl} alt={selectedRecurso.titulo} className="cg-thumbnail-img" />
-                  ) : (
-                    <span className="material-symbols-outlined">broken_image</span>
-                  )}
-                  <span className="cg-ratio-badge">16:9</span>
-                </div>
-                <div>
-                  <span style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--cg-on-surface)" }}>
-                    {selectedRecurso.titulo}
-                  </span>
-                  <p style={{ margin: "0.15rem 0 0 0", fontSize: "0.78125rem", color: "var(--cg-on-surface-variant)" }}>
-                    {selectedRecurso.page} • {selectedRecurso.ubicacion}
-                  </p>
-                </div>
-              </div>
+              <div className="cg-review-options">
+                <label
+                  className={`cg-review-option ${reviewAction === "approve" ? "selected-approve" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="reviewAction"
+                    value="approve"
+                    checked={reviewAction === "approve"}
+                    onChange={() => setReviewAction("approve")}
+                  />
+                  <div>
+                    <span className="cg-review-title text-green-700">Aprobar y Publicar</span>
+                    <p className="cg-review-desc">El contenido visual se habilitará en el portal.</p>
+                  </div>
+                </label>
 
-              <div className="cg-form-group">
-                <label className="cg-form-label">Seleccione la Resolución Editorial:</label>
-                <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem" }}>
-                  <label
-                    style={{
-                      flex: 1,
-                      padding: "0.85rem",
-                      borderRadius: "10px",
-                      border: `2px solid ${reviewAction === "approve" ? "var(--cg-tertiary)" : "var(--cg-outline-variant)"}`,
-                      backgroundColor: reviewAction === "approve" ? "rgba(0, 135, 58, 0.08)" : "transparent",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="reviewAction"
-                      checked={reviewAction === "approve"}
-                      onChange={() => setReviewAction("approve")}
-                    />
-                    <div>
-                      <strong style={{ display: "block", fontSize: "0.8125rem", color: "var(--cg-tertiary)" }}>
-                        Aprobar y Publicar
-                      </strong>
-                      <span style={{ fontSize: "0.71875rem", color: "var(--cg-outline)" }}>
-                        Cumple estándares sanitarios y WCAG 2.2
-                      </span>
-                    </div>
-                  </label>
-
-                  <label
-                    style={{
-                      flex: 1,
-                      padding: "0.85rem",
-                      borderRadius: "10px",
-                      border: `2px solid ${reviewAction === "reject" ? "var(--cg-error)" : "var(--cg-outline-variant)"}`,
-                      backgroundColor: reviewAction === "reject" ? "rgba(186, 26, 26, 0.08)" : "transparent",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="reviewAction"
-                      checked={reviewAction === "reject"}
-                      onChange={() => setReviewAction("reject")}
-                    />
-                    <div>
-                      <strong style={{ display: "block", fontSize: "0.8125rem", color: "var(--cg-error)" }}>
-                        Rechazar con Observaciones
-                      </strong>
-                      <span style={{ fontSize: "0.71875rem", color: "var(--cg-outline)" }}>
-                        Requiere ajustes obligatorios
-                      </span>
-                    </div>
-                  </label>
-                </div>
+                <label
+                  className={`cg-review-option ${reviewAction === "reject" ? "selected-reject" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="reviewAction"
+                    value="reject"
+                    checked={reviewAction === "reject"}
+                    onChange={() => setReviewAction("reject")}
+                  />
+                  <div>
+                    <span className="cg-review-title text-red-700">Rechazar con Observaciones</span>
+                    <p className="cg-review-desc">Requiere ajustes obligatorios por parte del redactor.</p>
+                  </div>
+                </label>
               </div>
 
               {reviewAction === "reject" && (
-                <div className="cg-form-group">
+                <div className="cg-form-group mt-4">
                   <label className="cg-form-label">
-                    Motivo Obligatorio de Rechazo (RF-CMS-035) <span className="required">*</span>
+                    Motivo Obligatorio del Rechazo <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     className="cg-form-textarea"
-                    placeholder="Detalle de forma precisa qué debe corregir el redactor (ej. Falta incorporar isologo institucional y ajustar contraste)..."
+                    rows="3"
+                    placeholder="Detalle los ajustes obligatorios (ej. Falta incorporar isologo institucional y ajustar contraste)..."
                     value={reviewRejectionText}
                     onChange={(e) => setReviewRejectionText(e.target.value)}
                     required
                   />
-                  <span className="cg-form-hint">
-                    Este texto se mostrará directamente en el panel del redactor con la etiqueta de requerimiento de corrección.
-                  </span>
                 </div>
               )}
             </div>
@@ -2326,17 +1425,17 @@ const CmsContenidoGraficoView = () => {
             <div className="cg-modal-footer">
               <button
                 type="button"
-                className="cg-btn-secondary"
+                className="cg-btn-cancel"
                 onClick={() => setShowReviewModal(false)}
               >
                 Cancelar
               </button>
               <button
                 type="button"
-                className={reviewAction === "reject" ? "cg-btn-danger" : "cg-btn-primary"}
+                className={reviewAction === "reject" ? "cg-btn-danger" : "cg-btn-submit"}
                 onClick={handleProcessReview}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                <span className="material-symbols-outlined text-[18px]">
                   {reviewAction === "reject" ? "cancel" : "check_circle"}
                 </span>
                 <span>{reviewAction === "reject" ? "Confirmar Rechazo" : "Aprobar Recurso"}</span>
@@ -2346,7 +1445,7 @@ const CmsContenidoGraficoView = () => {
         </div>
       )}
 
-      {/* MODAL 5: Confirmar Eliminación (Modular con CmsDeleteModal) */}
+      {/* MODAL 5: Eliminar Recurso */}
       <CmsDeleteModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}

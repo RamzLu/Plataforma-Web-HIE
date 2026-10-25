@@ -442,32 +442,32 @@ if (!authenticated) {
         />
 
         <main className="cms-content">
-          {activeTab !== "contenido-grafico" && activeTab !== "banners" && (
-            <div className="cms-page-title">
-              <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
-              <h1>
-                {activeTab === "noticias"
-                  ? "Gestión de Noticias"
-                  : activeTab === "documentacion"
-                  ? "Gestión de Documentación"
-                  : activeTab === "institucional"
-                  ? "Gestión Institucional"
-                  : activeTab === "profesionales"
-                  ? "Directorio de Profesionales" 
-                  : activeTab === "especialidades"  
-                  ? "Gestión de Especialidades"      
-                  : activeTab === "residencias"
-                  ? "Gestión de Residencias"
-                  : activeTab === "capacitaciones"
-                  ? "Gestión de Capacitaciones"
-                  : "Panel de administración"}
-              </h1>
-              <p>
-                Administre de forma segura la información pública del Portal Red
-                Evita Formosa.
-              </p>
-            </div>
-          )}
+          <div className="cms-page-title">
+            <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
+            <h1>
+              {activeTab === "noticias"
+                ? "Gestión de Noticias"
+                : activeTab === "documentacion"
+                ? "Gestión de Documentación"
+                : activeTab === "institucional"
+                ? "Gestión Institucional"
+                : activeTab === "profesionales"
+                ? "Directorio de Profesionales" 
+                : activeTab === "especialidades"  
+                ? "Gestión de Especialidades"      
+                : activeTab === "residencias"
+                ? "Gestión de Residencias"
+                : activeTab === "capacitaciones"
+                ? "Gestión de Capacitaciones"
+                : activeTab === "contenido-grafico" || activeTab === "banners"
+                ? "Gestión de Contenido Gráfico"
+                : "Panel de administración"}
+            </h1>
+            <p>
+              Administre de forma segura la información pública del Portal Red
+              Evita Formosa.
+            </p>
+          </div>
 
           {activeTab === "dashboard" && (
             <CmsDashboardView
