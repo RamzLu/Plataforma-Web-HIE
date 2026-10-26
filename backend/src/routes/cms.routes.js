@@ -52,12 +52,17 @@ router.put('/documentacion/:id', verifyToken, uploadMemory.single('archivo'), ac
 router.delete('/documentacion/:id', verifyToken, eliminarDocumento);
 
 // ==========================================
-// MÓDULO: BANNERS
+// MÓDULO: BANNERS Y CONTENIDO GRÁFICO
 // ==========================================
 router.get("/banners", obtenerBanners);
 router.post("/banners", verifyToken, uploadMemory.single("imagen"), crearBanner);
 router.put("/banners/:id", verifyToken, uploadMemory.single("imagen"), actualizarBanner); 
 router.delete("/banners/:id", verifyToken, eliminarBanner); 
+
+router.get("/contenido-grafico", obtenerBanners);
+router.post("/contenido-grafico", verifyToken, uploadMemory.single("imagen"), crearBanner);
+router.put("/contenido-grafico/:id", verifyToken, uploadMemory.single("imagen"), actualizarBanner); 
+router.delete("/contenido-grafico/:id", verifyToken, eliminarBanner); 
 
 // ==========================================
 // MÓDULO: PROFESIONALES

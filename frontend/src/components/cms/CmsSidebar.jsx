@@ -41,7 +41,7 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
     {
       title: "Herramientas",
       items: [
-        { id: "banners", label: "Banners", icon: <ImageIcon /> },
+        { id: "contenido-grafico", label: "Contenido Gráfico", icon: <ImageIcon /> },
         { id: "institucional", label: "Institucional", icon: <Building /> },
         { id: "capsulas", label: "Cápsulas", icon: <Video /> },
       ],
@@ -122,7 +122,7 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
                 {section.items.map((item) => (
                   <li
                     key={item.id}
-                    className={activeTab === item.id ? "active" : ""}
+                    className={(activeTab === item.id || (item.id === "contenido-grafico" && activeTab === "banners")) ? "active" : ""}
                     onClick={() => setActiveTab(item.id)}
                     title={isCollapsed ? item.label : ""}
                   >

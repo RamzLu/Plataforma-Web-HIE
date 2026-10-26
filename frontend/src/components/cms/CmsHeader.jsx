@@ -22,9 +22,13 @@ const CmsHeader = ({ userName, isAdmin, onLogoutClick, activeTab }) => {
       dashboard: "DASHBOARD",
       noticias: "NOTICIAS",
       documentacion: "DOCUMENTACIÓN",
-      banners: "BANNERS",
+      banners: "CONTENIDO GRÁFICO",
+      "contenido-grafico": "CONTENIDO GRÁFICO",
       institucional: "INSTITUCIONAL",
       profesionales: "PROFESIONALES",
+      especialidades: "ESPECIALIDADES",
+      residencias: "RESIDENCIAS",
+      capacitaciones: "CAPACITACIONES",
       capsulas: "CÁPSULAS"
     };
     return names[tabId] || tabId.toUpperCase();
