@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import "../../styles/pages/CapacitacionPage.css";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import PageBanner from "../../components/PageBanner";
@@ -16,7 +16,7 @@ const capacitacionesData = [
     imagen: imgCapacitacion1,
     fecha: "20 de Mayo de 2026",
     horario: "10:00 hs.",
-    modalidadCompleta: "Presencial (SUM Hospital Evita)",
+    modalidadCompleta: "Virtual (Plataforma Telesalud HIE)",
     modalidadTag: "VIRTUAL",
     descripcion:
       "Capacitación intensiva sobre el diagnóstico precoz, protocolo de trombolisis y manejo inicial del paciente con ACV isquémico agudo en el servicio de urgencias.",
@@ -53,8 +53,6 @@ const capacitacionesData = [
     descripcion:
       "Capacitación para jefes de enfermería en la transformación de registros administrativos en datos clínicos útiles para la toma de decisiones.",
     pdfUrl: "/docs/temario-gestion-enfermeria.pdf",
-    whatsappMsg:
-      "Hola! Quisiera más información sobre la capacitación: GESTIÓN BASADA EN DATOS CLÍNICOS PARA ENFERMERÍA",
     tipo: "presencial",
     badgeLabel: "Presencial",
     btnText: "VER MÁS",
@@ -71,8 +69,6 @@ const capacitacionesData = [
     descripcion:
       "Actualización en maniobras de RCP avanzada, uso de desfibrilador externo automático (DEA) y manejo de vía aérea en emergencias médicas.",
     pdfUrl: "/docs/temario-rcp.pdf",
-    whatsappMsg:
-      "Hola! Quisiera más información sobre la capacitación: REANIMACIÓN CARDIOPULMONAR (RCP) AVANZADA",
     tipo: "presencial",
     badgeLabel: "Presencial",
     btnText: "VER MÁS",
@@ -89,8 +85,6 @@ const capacitacionesData = [
     descripcion:
       "Estrategias y medidas de bioseguridad para la prevención de infecciones asociadas al cuidado de la salud (IACS) en servicios críticos.",
     pdfUrl: "/docs/temario-infecciones.pdf",
-    whatsappMsg:
-      "Hola! Quisiera más información sobre la capacitación: CONTROL Y PREVENCIÓN DE INFECCIONES INTRAHOSPITALARIAS",
     tipo: "presencial",
     badgeLabel: "Presencial",
     btnText: "VER MÁS",
@@ -107,13 +101,41 @@ const capacitacionesData = [
     descripcion:
       "Análisis de casos dilemáticos en la práctica médica diaria, consentimiento informado y marco legal de la atención en el hospital público.",
     pdfUrl: "/docs/temario-bioetica.pdf",
-    whatsappMsg:
-      "Hola! Quisiera más información sobre la capacitación: BIOÉTICA Y DERECHOS DEL PACIENTE EN EL ÁMBITO PÚBLICO",
     tipo: "presencial",
     badgeLabel: "Presencial",
     btnText: "VER MÁS",
   },
 ];
+
+// Opciones de filtrado por Formato de Contenido
+const FILTROS_FORMATO = [
+  { id: "all", label: "TODOS", icon: "grid_view" },
+  { id: "video", label: "VIDEO", icon: "play_circle" },
+  { id: "imagen", label: "IMAGEN", icon: "image" },
+  { id: "pdf", label: "PDF", icon: "picture_as_pdf" },
+];
+
+// Opciones de filtrado por Modalidad
+const FILTROS_MODALIDAD = [
+  { id: "all", label: "TODAS", icon: "dashboard" },
+  { id: "presencial", label: "PRESENCIAL", icon: "apartment" },
+  { id: "virtual", label: "VIRTUAL", icon: "laptop_chromebook" },
+  { id: "hibrido", label: "HÍBRIDO", icon: "hub" },
+];
+
+const getModalidadNormalizada = (item) => {
+  const directTag = (item.modalidadTag || item.modalidad || "").toLowerCase();
+  if (directTag.includes("híbrid") || directTag.includes("hibrid")) return "hibrido";
+  if (directTag.includes("virtual")) return "virtual";
+  if (directTag.includes("presencial")) return "presencial";
+
+  const allText = `${item.modalidadCompleta || ""} ${item.ubicacion || ""} ${item.modalidadCorta || ""}`.toLowerCase();
+  if (allText.includes("híbrid") || allText.includes("hibrid")) return "hibrido";
+  if (allText.includes("virtual") || allText.includes("zoom") || allText.includes("campus") || allText.includes("telesalud") || allText.includes("on-demand")) return "virtual";
+  if (allText.includes("presencial")) return "presencial";
+
+  return "presencial";
+};
 
 const formatFechaEspanol = (fechaStr) => {
   if (!fechaStr) return "";
@@ -147,7 +169,7 @@ const formatItemData = (item) => {
   const modalidadTag = (item.modalidad || item.modalidadTag || "PRESENCIAL").toUpperCase();
 
   let tipo = "presencial";
-  // archivoTipo tiene prioridad máxima: refleja exactamente qué material fue cargado
+  // archivoTipo tiene prioridad máxima: refleja exactamente qué material fue cargado en el CMS
   if (item.archivoTipo === "documento") {
     tipo = "pdf";
   } else if (item.archivoTipo === "video") {
@@ -155,7 +177,6 @@ const formatItemData = (item) => {
   } else if (item.archivoTipo === "imagen") {
     tipo = "imagen";
   } else if (item.tipoRecurso === "video") {
-    // Solo usar tipoRecurso=video si no hay archivoTipo que lo contradiga
     tipo = "video";
   } else if (item.tipoRecurso === "pdf") {
     tipo = "pdf";
@@ -168,7 +189,6 @@ const formatItemData = (item) => {
   } else if (item.archivoNombre && item.archivoNombre.match(/\.(png|jpg|jpeg|webp)$/i)) {
     tipo = "imagen";
   } else if (item.videoUrl && !item.archivoTipo) {
-    // videoUrl solo aplica si no hay archivoTipo que indique otra cosa
     tipo = "video";
   } else if (item.tipo) {
     const t = String(item.tipo).toLowerCase();
@@ -230,7 +250,7 @@ const parseVideoUrl = (url) => {
   if (!url || typeof url !== "string") return { isEmbed: false, isVertical: false, src: "" };
   const clean = url.trim();
 
-  // YouTube Shorts match: youtube.com/shorts/ID
+  // YouTube Shorts: youtube.com/shorts/ID
   const ytShortMatch = clean.match(/(?:youtube\.com\/shorts\/)([\w-]{11})/i);
   if (ytShortMatch && ytShortMatch[1]) {
     return {
@@ -240,7 +260,7 @@ const parseVideoUrl = (url) => {
     };
   }
 
-  // YouTube match: watch?v=ID or youtu.be/ID or embed/ID
+  // YouTube general: watch?v=ID or youtu.be/ID or embed/ID
   const ytMatch = clean.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
   if (ytMatch && ytMatch[1]) {
     return {
@@ -250,7 +270,7 @@ const parseVideoUrl = (url) => {
     };
   }
 
-  // Vimeo match
+  // Vimeo
   const vimeoMatch = clean.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
   if (vimeoMatch && vimeoMatch[1]) {
     return {
@@ -271,10 +291,15 @@ const parseVideoUrl = (url) => {
 const CapacitacionPage = () => {
   const [capacitaciones, setCapacitaciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [formatoFilter, setFormatoFilter] = useState("all");
+  const [modalidadFilter, setModalidadFilter] = useState("all");
   const [selectedCurso, setSelectedCurso] = useState(null);
   const [activeVideo, setActiveVideo] = useState(null);
   const [isVerticalVideo, setIsVerticalVideo] = useState(false);
   const [activeImage, setActiveImage] = useState(null);
+
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -299,6 +324,12 @@ const CapacitacionPage = () => {
   const handleCerrarVideo = () => {
     setActiveVideo(null);
     setIsVerticalVideo(false);
+  };
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setFormatoFilter("all");
+    setModalidadFilter("all");
   };
 
   // Bloquear el scroll de la página cuando cualquier modal esté abierto
@@ -334,15 +365,6 @@ const CapacitacionPage = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [activeImage, activeVideo, selectedCurso]);
 
-  const handleOpenWhatsappCurso = (curso) => {
-    if (!curso) return;
-    const mensaje = encodeURIComponent(
-      curso.whatsappMsg ||
-        `Hola! Quisiera más información sobre la capacitación: ${curso.titulo}`
-    );
-    window.open(`https://wa.me/?text=${mensaje}`, "_blank");
-  };
-
   const handleAbrirVideo = (item) => {
     if (!item) return;
     const url = item.videoUrl || (item.archivoTipo === "video" ? item.archivoUrl : "");
@@ -358,165 +380,395 @@ const CapacitacionPage = () => {
     });
   };
 
+  // Filtrado reactivo por formato de contenido (video, imagen, pdf), modalidad (presencial, virtual, hibrido) y búsqueda
+  const itemsFiltrados = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return capacitaciones.map(formatItemData).filter((item) => {
+      // 1. Filtrado por Formato de contenido
+      let matchFormato = false;
+      if (formatoFilter === "all") {
+        matchFormato = true;
+      } else if (formatoFilter === "video") {
+        matchFormato = item.tipo === "video";
+      } else if (formatoFilter === "imagen") {
+        matchFormato = item.tipo === "imagen" || item.tipo === "infografia";
+      } else if (formatoFilter === "pdf") {
+        matchFormato = item.tipo === "pdf";
+      }
+
+      // 2. Filtrado por Modalidad
+      let matchModalidad = false;
+      const modNorm = getModalidadNormalizada(item);
+      if (modalidadFilter === "all") {
+        matchModalidad = true;
+      } else if (modalidadFilter === "presencial") {
+        matchModalidad = modNorm === "presencial";
+      } else if (modalidadFilter === "virtual") {
+        matchModalidad = modNorm === "virtual";
+      } else if (modalidadFilter === "hibrido") {
+        matchModalidad = modNorm === "hibrido";
+      }
+
+      // 3. Filtrado por término de búsqueda
+      const matchSearch =
+        !term ||
+        (item.titulo && item.titulo.toLowerCase().includes(term)) ||
+        (item.descripcion && item.descripcion.toLowerCase().includes(term)) ||
+        (item.modalidad && item.modalidad.toLowerCase().includes(term)) ||
+        (item.modalidadCorta && item.modalidadCorta.toLowerCase().includes(term)) ||
+        (item.modalidadTag && item.modalidadTag.toLowerCase().includes(term)) ||
+        (item.disertantes && item.disertantes.toLowerCase().includes(term));
+
+      return matchFormato && matchModalidad && matchSearch;
+    });
+  }, [capacitaciones, formatoFilter, modalidadFilter, searchTerm]);
+
   return (
-    <main className="capacitacion-page">
+    <main className="documentacion-page capacitacion-page-root">
+      {/* ==========================================================================
+          1. BANNER INSTITUCIONAL UNIFICADO
+          ========================================================================== */}
       <PageBanner
-        currentPage="capacitación"
-        title="CAPACITACIÓN"
-        subtitle="Formación continua para profesionales y el equipo de salud institucional."
+        currentPage="capacitaciones"
+        title="CAPACITACIONES Y CHARLAS"
+        subtitle="Capacitaciones, talleres formativos y charlas abiertas para toda la comunidad y el equipo de salud."
         image={fondoBanner}
+        marginBottom={0}
       />
 
-      <div className="capacitacion-container">
-        {loading ? (
-          <div style={{ padding: "60px 0", textAlign: "center", color: "#64748b" }}>
-            <p>Cargando capacitaciones institucionales...</p>
+      <div className="documentacion-container capacitacion-container">
+        {/* ==========================================================================
+            2. BUSCADOR INSTITUCIONAL EN PÍLDORA (Estilo Stella)
+            ========================================================================== */}
+        <div className="doc-search-wrapper">
+          <div className="doc-search-bar">
+            <svg
+              className="doc-search-icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="doc-search-input"
+              placeholder="Buscar capacitación, taller, charla o ateneo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="doc-search-spacer" />
           </div>
-        ) : (
-          <div className="cap-grid">
-            {capacitaciones.map((rawItem, index) => {
-              const item = formatItemData(rawItem);
-              return (
-                <AnimatedContent
-                  key={item.id || index}
-                  className="cap-grid-item"
-                  distance={40}
-                  direction="vertical"
-                  delay={index * 0.08} // Efecto cascada entre tarjetas
-                  threshold={0.1}
+        </div>
+
+        {/* ==========================================================================
+            3. FILTROS AVANZADOS: FORMATO DE CONTENIDO Y MODALIDAD
+            ========================================================================== */}
+        <div className="cap-filters-container">
+          {/* Fila 1: Formato de Contenido (video, imagen, pdf) */}
+          <div className="cap-filter-row">
+            <div className="cap-filter-header">
+              <span className="material-symbols-outlined cap-filter-icon">folder_open</span>
+              <span>Formato de Contenido:</span>
+            </div>
+            <div className="cap-filters-group">
+              {FILTROS_FORMATO.map((fmt) => (
+                <button
+                  key={fmt.id}
+                  type="button"
+                  className={`filter-chip ${formatoFilter === fmt.id ? "active" : ""}`}
+                  onClick={() => setFormatoFilter(fmt.id)}
                 >
-                  <div className="cap-card-unified">
-                    {/* Contenedor de Imagen o Placeholder con Badge Flotante */}
-                    <div className="cap-card-media">
-                      {item.imagen ? (
-                        <img
-                          src={item.imagen}
-                          alt={item.titulo}
-                          className="cap-card-img"
-                        />
-                      ) : (
-                        <div className="cap-card-placeholder">
-                          <div className="cap-placeholder-icon-wrap">
-                            <svg
-                              className="cap-placeholder-icon"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                              <path d="M12 8v8" />
-                              <path d="M8 12h8" />
-                            </svg>
-                          </div>
-                          <span className="cap-placeholder-brand">
-                            HOSPITAL INTERDISTRITAL EVITA
-                          </span>
-                        </div>
-                      )}
+                  <span className="material-symbols-outlined filter-chip-icon">{fmt.icon}</span>
+                  <span>{fmt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-                      {/* Badge del material flotando en la esquina superior derecha */}
-                      <div className={`material-badge badge-${item.tipo}`}>
-                        <span className="material-badge-icon">
-                          {item.tipo === "video" ? (
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                              <polygon points="5 3 19 12 5 21 5 3" />
-                            </svg>
-                          ) : item.tipo === "pdf" ? (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="12" height="12">
-                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                              <polyline points="14 2 14 8 20 8" />
-                            </svg>
-                          ) : item.tipo === "imagen" || item.tipo === "infografia" ? (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="12" height="12">
-                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                              <circle cx="8.5" cy="8.5" r="1.5" />
-                              <polyline points="21 15 16 10 5 21" />
-                            </svg>
-                          ) : (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="12" height="12">
-                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                              <circle cx="9" cy="7" r="4" />
-                            </svg>
-                          )}
-                        </span>
-                        <span className="material-badge-label">{item.badgeLabel}</span>
-                      </div>
-                    </div>
+          {/* Fila 2: Modalidad (virtual, presencial o hibrido) */}
+          <div className="cap-filter-row">
+            <div className="cap-filter-header">
+              <span className="material-symbols-outlined cap-filter-icon">tune</span>
+              <span>Modalidad:</span>
+            </div>
+            <div className="cap-filters-group">
+              {FILTROS_MODALIDAD.map((mod) => (
+                <button
+                  key={mod.id}
+                  type="button"
+                  className={`filter-chip ${modalidadFilter === mod.id ? "active" : ""}`}
+                  onClick={() => setModalidadFilter(mod.id)}
+                >
+                  <span className="material-symbols-outlined filter-chip-icon">{mod.icon}</span>
+                  <span>{mod.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-                    {/* Contenido / Cuerpo de la tarjeta */}
-                    <div className="cap-card-body">
-                      <span className="cap-card-date-modality">
-                        {(item.fechaTexto || "").toUpperCase()} • {item.modalidadTag || "PRESENCIAL"}
-                      </span>
+          {/* Botón flotante para limpiar filtros si hay alguno aplicado */}
+          {(formatoFilter !== "all" || modalidadFilter !== "all" || searchTerm) && (
+            <div className="cap-filter-reset-wrap">
+              <button
+                type="button"
+                className="cap-filter-reset-btn"
+                onClick={handleResetFilters}
+                title="Restablecer todos los filtros y búsqueda"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>restart_alt</span>
+                <span>Limpiar filtros</span>
+              </button>
+            </div>
+          )}
+        </div>
 
-                      <h3 className="cap-card-title">{item.titulo}</h3>
+        {/* ==========================================================================
+            4. CONTENIDO PRINCIPAL: CABECERA EDITORIAL Y GRILLA DE TARJETAS
+            ========================================================================== */}
+        <div className="w-full-anim-wrapper">
+          <AnimatedContent distance={30} direction="vertical" delay={0.08}>
+            <div className="cap-grid-section">
+              <div className="cap-section-header">
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <span className="cap-section-overline">
+                    Ciclo de Formación 2026
+                  </span>
+                  <h2 className="cap-section-title">
+                    Capacitaciones y Charlas Comunitarias y Profesionales
+                  </h2>
+                </div>
 
-                      {Boolean(item.descripcion && item.descripcion.trim()) && (
-                        <p className="cap-card-desc">{item.descripcion}</p>
-                      )}
+                <div
+                  className="cap-counter-box"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span className="material-symbols-outlined">auto_stories</span>
+                  <span id="training-counter">
+                    Mostrando {itemsFiltrados.length} capacitaci
+                    {itemsFiltrados.length === 1 ? "ón disponible" : "ones disponibles"}
+                  </span>
+                </div>
+              </div>
 
-                      <div className="cap-card-meta">
-                        <div className="cap-card-meta-item">
-                          <svg
-                            className="cap-meta-icon"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                          </svg>
-                          <span>{item.horarioTexto || "A confirmar"}</span>
-                        </div>
-                        <div className="cap-card-meta-item">
-                          <svg
-                            className="cap-meta-icon"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                          </svg>
-                          <span>{item.modalidadCorta}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Botón inferior institucional de ancho completo */}
-                    <div className="cap-card-footer">
-                      <button
-                        className="cap-btn-vermas-unified"
+              {loading ? (
+                <div style={{ padding: "60px 0", textAlign: "center", color: "#64748b" }}>
+                  <p>Cargando capacitaciones institucionales...</p>
+                </div>
+              ) : itemsFiltrados.length === 0 ? (
+                <div className="cap-no-results">
+                  <span className="material-symbols-outlined" style={{ fontSize: "48px" }}>
+                    sentiment_dissatisfied
+                  </span>
+                  <h3>No se encontraron capacitaciones</h3>
+                  <p>Intenta con otro término de búsqueda o selecciona otra categoría.</p>
+                  <button
+                    type="button"
+                    className="filter-chip active"
+                    onClick={handleResetFilters}
+                  >
+                    Restablecer Filtros
+                  </button>
+                </div>
+              ) : (
+                <div className="cap-cards-grid" id="training-grid">
+                  {itemsFiltrados.map((item, index) => (
+                    <AnimatedContent
+                      key={item.id || index}
+                      distance={25}
+                      direction="vertical"
+                      delay={index * 0.05}
+                      threshold={0.1}
+                      style={{ height: "100%" }}
+                    >
+                      <article
+                        className="training-card group"
+                        data-category={item.tipo}
                         onClick={() => setSelectedCurso(item)}
                       >
-                        <span>{item.btnText || "VER MÁS"}</span>
-                        <span className="cap-btn-arrow">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="13" height="13">
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                            <polyline points="12 5 19 12 12 19" />
-                          </svg>
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </AnimatedContent>
-              );
-            })}
+                        <div className="training-card-top">
+                          {/* Cabecera Gráfica con Proporción 16:9 y Badge Temático */}
+                          <div className="training-media-container">
+                            {item.imagen ? (
+                              <img
+                                className="training-media-img"
+                                src={item.imagen}
+                                alt={item.titulo}
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="cap-card-placeholder">
+                                <div className="cap-placeholder-icon-wrap">
+                                  <svg
+                                    className="cap-placeholder-icon"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.8"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                    <path d="M12 8v8" />
+                                    <path d="M8 12h8" />
+                                  </svg>
+                                </div>
+                                <span className="cap-placeholder-brand">
+                                  HOSPITAL INTERDISTRITAL EVITA
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Badge Temático Flotante con Icono y Etiqueta Normalizada */}
+                            <span className={`training-floating-badge badge-${item.tipo}`}>
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: "14px", marginRight: "3px" }}
+                              >
+                                {item.tipo === "video"
+                                  ? "play_circle"
+                                  : item.tipo === "pdf"
+                                  ? "picture_as_pdf"
+                                  : item.tipo === "imagen" || item.tipo === "infografia"
+                                  ? "view_quilt"
+                                  : "groups"}
+                              </span>
+                              <span>{item.badgeLabel}</span>
+                            </span>
+                          </div>
+
+                          {/* Cuerpo Editorial de la Tarjeta */}
+                          <div className="training-card-body">
+                            <div className="training-date-tag">
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: "15px" }}
+                              >
+                                event
+                              </span>
+                              <span>
+                                {(item.fechaTexto || "A CONFIRMAR").toUpperCase()} • {item.modalidadTag || "PRESENCIAL"}
+                              </span>
+                            </div>
+
+                            <h3 className="training-card-title">{item.titulo}</h3>
+
+                            {Boolean(item.descripcion && item.descripcion.trim()) && (
+                              <p className="training-card-desc">{item.descripcion}</p>
+                            )}
+
+                            <div className="training-card-divider" />
+
+                            <div className="training-card-meta">
+                              <div className="training-meta-item">
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "16px" }}
+                                >
+                                  schedule
+                                </span>
+                                <span>{item.horarioTexto || "A confirmar"}</span>
+                              </div>
+                              <div className="training-meta-item">
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "16px" }}
+                                >
+                                  {item.tipo === "video"
+                                    ? "smart_display"
+                                    : item.tipo === "pdf"
+                                    ? "description"
+                                    : item.tipo === "imagen"
+                                    ? "image"
+                                    : "location_on"}
+                                </span>
+                                <span>{item.modalidadCorta}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Botón de Acción Anclado */}
+                        <div className="training-card-action">
+                          <button
+                            type="button"
+                            className="training-action-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCurso(item);
+                            }}
+                            aria-label={`${item.btnText || "VER MÁS"}: ${item.titulo}`}
+                          >
+                            <span>{item.btnText || "VER MÁS"}</span>
+                            <span
+                              className="material-symbols-outlined"
+                              style={{ fontSize: "18px" }}
+                            >
+                              arrow_forward
+                            </span>
+                          </button>
+                        </div>
+                      </article>
+                    </AnimatedContent>
+                  ))}
+                </div>
+              )}
+            </div>
+          </AnimatedContent>
+        </div>
+
+        {/* ==========================================================================
+            5. BANNER INFORMATIVO: ACCESO A LA REVISTA CIENTÍFICA (Stella)
+            ========================================================================== */}
+        <section className="cap-docencia-section">
+          <div className="cap-docencia-card">
+            <div className="cap-docencia-left">
+              <div className="cap-docencia-icon-box">
+                <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+                  menu_book
+                </span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <h4 className="cap-docencia-title">
+                  Revista Científica y Publicaciones Médicas
+                </h4>
+                <p className="cap-docencia-desc">
+                  ¿Querés conocer más? ¿Sos especialista y querés investigar o ver material clínico específico?
+                  Ingresá a nuestra revista científica para acceder a artículos, protocolos e investigaciones especializadas del hospital.
+                </p>
+              </div>
+            </div>
+
+            <div className="cap-docencia-right">
+              <a
+                className="cap-docencia-btn"
+                href="https://revista.hospitalinterdistrital.gob.ar"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>Ingresar a la Revista Científica</span>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ verticalAlign: "middle", marginLeft: "6px", fontSize: "16px" }}
+                >
+                  open_in_new
+                </span>
+              </a>
+            </div>
           </div>
-        )}
+        </section>
       </div>
 
+      {/* ==========================================================================
+          MODAL DETALLADO DE CAPACITACIÓN / CHARLAS
+          ========================================================================== */}
       {selectedCurso && (
         <div
           className="cap-modal-overlay"
@@ -633,7 +885,7 @@ const CapacitacionPage = () => {
               )}
             </div>
 
-            {/* Caja de Descripción */}
+            {/* Caja de Descripción (oculta automáticamente si está vacía) */}
             {Boolean(selectedCurso.descripcion && selectedCurso.descripcion.trim()) && (
               <div className="cap-modal-desc-box">
                 <div className="cap-modal-desc-box-title">
@@ -649,7 +901,7 @@ const CapacitacionPage = () => {
               </div>
             )}
 
-            {/* Caja de Temario / Programa Académico */}
+            {/* Caja de Temario / Programa Académico (oculta si está vacía) */}
             {Boolean(
               (selectedCurso.temario && selectedCurso.temario.trim()) ||
               (selectedCurso.contenido &&
@@ -789,7 +1041,9 @@ const CapacitacionPage = () => {
         </div>
       )}
 
-      {/* MODAL REPRODUCTOR DE VIDEO SOBREPUESTO A LA PANTALLA */}
+      {/* ==========================================================================
+          MODAL REPRODUCTOR DE VIDEO SOBREPUESTO A LA PANTALLA
+          ========================================================================== */}
       {activeVideo && (
         <div
           className="cap-video-modal-overlay"
@@ -818,10 +1072,8 @@ const CapacitacionPage = () => {
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                     {isVerticalVideo ? (
-                      /* Icono de pantalla horizontal */
                       <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
                     ) : (
-                      /* Icono de pantalla vertical (móvil) */
                       <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
                     )}
                   </svg>
@@ -875,7 +1127,9 @@ const CapacitacionPage = () => {
         </div>
       )}
 
-      {/* VISOR DE INFOGRAFÍA PANTALLA COMPLETA (SIN MARCOS INVASIVOS) */}
+      {/* ==========================================================================
+          VISOR DE INFOGRAFÍA PANTALLA COMPLETA (SIN MARCOS INVASIVOS)
+          ========================================================================== */}
       {activeImage && (
         <div
           className="cap-image-lightbox-overlay"

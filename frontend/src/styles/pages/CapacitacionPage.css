@@ -1,169 +1,414 @@
-.capacitacion-page {
+/* ==========================================================================
+   PORTAL PÚBLICO - VISTA CAPACITACIÓN & CHARLAS FORMATIVAS
+   Hospital Interdistrital Evita Formosa
+   Diseño Armonizado con Estilos Institucionales (Stella + Luana)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+:root {
+  --cap-primary: #006194;
+  --cap-primary-container: #007bb9;
+  --cap-secondary: #4a5f7f;
+  --cap-surface: #f8f9ff;
+  --cap-surface-lowest: #ffffff;
+  --cap-surface-low: #eff4ff;
+  --cap-surface-container: #e5eeff;
+  --cap-surface-high: #dce9ff;
+  --cap-surface-variant: #d3e4fe;
+  --cap-on-surface: #0b1c30;
+  --cap-error: #ba1a1a;
+  --cap-tertiary: #006b2c;
+  --cap-border-subtle: rgba(220, 233, 255, 0.8);
+}
+
+.capacitacion-page,
+.capacitacion-page-root {
   width: 100%;
-  background-color: #e9ebee;
+  background-color: #e9ebee; /* Fondo institucional unificado */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--cap-on-surface);
+  min-height: calc(100vh - 80px);
   padding: 0 0 80px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: calc(100vh - 80px);
 }
 
 .capacitacion-container {
-  max-width: 1200px;
+  max-width: 1500px;
   width: 100%;
   padding: 0 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-sizing: border-box;
 }
 
-/* SECCION DE BANNER */
-.cap-header-fluid {
-    width: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    margin-bottom: 60px;
-    justify-content: center;
-    padding: 120px 20px 60px 20px;
-}
-
-.cap-header-inner {
+/* ==========================================================================
+   BUSCADOR INSTITUCIONAL (Estilo píldora idéntico a Documentos y Profesionales)
+   ========================================================================== */
+.doc-search-wrapper {
   width: 100%;
-  max-width: 1100px;
-  border-left: 8px solid #2b5b94;
-  padding-left: 40px;
+  max-width: 1200px;
+  padding: 0 20px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: center;
+  margin-top: 35px;
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
 }
 
-.cap-title {
-  color: #2b5b94;
-  font-size: 3.2rem;
-  font-weight: 300;
-  text-transform: uppercase;
-  margin-bottom: 15px;
-  letter-spacing: 1px;
-}
-
-.cap-info-text p {
-    color: #64748b;
-    font-size: 1.15rem;
-    font-weight: 400;
-    margin: 0;
-}
-
-/* //seccion del banner */
-.cap-banner-box {
-  width: 100%;
-  background: linear-gradient(135deg, #d3e5f8 0%, #2b5b94 100%);
-  border-radius: 0px;
-  padding: 30px 45px;
+.doc-search-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  margin-bottom: 30px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  padding: 13px 10px 12px 20px;
+  width: 100%;
+  max-width: 650px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
-.cap-banner-left {
+.doc-search-bar:focus-within {
+  box-shadow: 0 6px 15px rgba(0, 97, 148, 0.12);
+  border-color: #94a3b8;
+}
+
+.doc-search-icon {
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.doc-search-input {
   flex: 1;
-  text-align: right;
-  padding-right: 35px;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  color: #334155;
+  background: transparent;
+  font-family: inherit;
+  width: 100%;
 }
 
-.cap-banner-headline {
-  color: #0c2340;
-  font-size: 1.8rem;
-  font-weight: 300;
-  letter-spacing: 1px;
-  line-height: 1.25;
-  margin: 0 0 12px 0;
+.doc-search-input::placeholder {
+  color: #94a3b8;
+  font-style: normal;
+  font-weight: 400;
 }
 
-.cap-banner-subtext {
-  color: #0c2340;
-  font-size: 1.15rem;
-  font-weight: 300;
-  letter-spacing: 0.5px;
+.doc-search-spacer {
+  width: 40px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   FILTROS POR FORMATO Y MODALIDAD (DUAL SECTION)
+   ========================================================================== */
+.cap-filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 32px;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 10px;
+}
+
+.cap-filter-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+@media (min-width: 860px) {
+  .cap-filter-row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+.cap-filter-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cap-secondary);
+  white-space: nowrap;
+}
+
+@media (min-width: 860px) {
+  .cap-filter-header {
+    min-width: 195px;
+    justify-content: flex-end;
+  }
+}
+
+.cap-filter-icon {
+  font-size: 17px !important;
+  color: var(--cap-primary);
+}
+
+.cap-filters-group,
+.doc-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 8px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.filter-chip-icon {
+  font-size: 16px !important;
+  line-height: 1;
+}
+
+.filter-chip:hover {
+  background-color: #f1f5f9;
+  color: var(--cap-primary);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.filter-chip.active {
+  background-color: var(--cap-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--cap-primary) !important;
+  box-shadow: 0 4px 10px rgba(0, 97, 148, 0.25);
+}
+
+.filter-chip.active .filter-chip-icon {
+  color: #ffffff !important;
+}
+
+.cap-filter-reset-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.cap-filter-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  padding: 6px 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  transition: all 0.2s ease;
+}
+
+.cap-filter-reset-btn:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+  transform: translateY(-1px);
+}
+
+.w-full-anim-wrapper {
+  width: 100%;
+}
+
+.w-full-anim-wrapper > div {
+  width: 100% !important;
+}
+
+/* ==========================================================================
+   SECCIÓN DE CONTENIDO EDITORIAL Y CABECERA
+   ========================================================================== */
+.cap-grid-section {
+  width: 100%;
+  max-width: 80rem; /* 1280px */
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3.5rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.cap-section-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .cap-section-header {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+.cap-section-overline {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  color: var(--cap-primary-container);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.cap-section-title {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--cap-on-surface);
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
-.cap-banner-divider {
-  width: 2px;
-  height: 144px;
-  background-color: #183a65;
-  flex-shrink: 0;
-}
-
-.cap-banner-right {
-  display: flex;
+.cap-counter-box {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding-left: 35px;
-  flex-shrink: 0;
-}
-
-.cap-banner-logo {
-  height: 144px;
-}
-/* GRILLA Y TARJETAS UNIFICADAS (STYLE B) */
-.cap-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  width: 100%;
-  margin-bottom: 40px;
-}
-
-.cap-grid-item {
-  height: 100%;
-  display: flex;
-}
-
-.cap-card-unified,
-.cap-card {
-  width: 100%;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cap-secondary);
   background-color: #ffffff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--cap-border-subtle);
+  white-space: nowrap;
+}
+
+.cap-counter-box span.material-symbols-outlined {
+  color: var(--cap-primary);
+  font-size: 18px;
+}
+
+/* Estado sin resultados */
+.cap-no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
   display: flex;
   flex-direction: column;
-  transition:
-    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.3s ease;
+  align-items: center;
+  gap: 12px;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid var(--cap-border-subtle);
 }
 
-.cap-card-unified:hover,
-.cap-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 30px rgba(12, 35, 64, 0.12);
-  border-color: #cbd5e1;
+.cap-no-results h3 {
+  font-size: 1.25rem;
+  color: #1e293b;
+  margin: 0;
 }
 
-/* MEDIA: IMAGEN O PLACEHOLDER ILUSTRADO */
-.cap-card-media {
+.cap-no-results p {
+  font-size: 0.95rem;
+  margin: 0 0 10px 0;
+}
+
+/* Grilla de Tarjetas 3 Columnas */
+.cap-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .cap-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cap-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ==========================================================================
+   CÁPSULAS / TARJETAS DE CAPACITACIONES (DISEÑO ARMONIZADO)
+   ========================================================================== */
+.training-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #ffffff !important;
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--cap-border-subtle);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  height: 100%;
+}
+
+.training-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -6px rgba(11, 28, 48, 0.12), 0 4px 8px -2px rgba(11, 28, 48, 0.04);
+}
+
+.training-card-top {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabecera Gráfica con Proporción 16:9 */
+.training-media-container {
   position: relative;
   width: 100%;
-  height: 190px;
-  background-color: #f1f5f9;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
+  background-color: var(--cap-surface-container);
 }
 
-.cap-card-img {
+.training-media-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.4s ease;
+  transition: transform 0.5s ease;
 }
 
-.cap-card-unified:hover .cap-card-img {
+.training-card:hover .training-media-img {
   transform: scale(1.05);
 }
 
@@ -208,7 +453,7 @@
   transition: transform 0.3s ease;
 }
 
-.cap-card-unified:hover .cap-placeholder-icon-wrap {
+.training-card:hover .cap-placeholder-icon-wrap {
   transform: scale(1.08);
 }
 
@@ -228,11 +473,55 @@
   opacity: 0.9;
 }
 
-/* BADGES FLOTANTES DEL MATERIAL */
-.material-badge {
+/* Badges Flotantes Temáticos */
+.training-floating-badge {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  line-height: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  text-transform: uppercase;
+  color: #ffffff;
+  z-index: 2;
+}
+
+.training-floating-badge.static {
+  position: static;
+}
+
+/* Clases unificadas de colores para badges */
+.badge-video {
+  background-color: var(--cap-error, #dc2626) !important;
+  color: #ffffff !important;
+}
+
+.badge-pdf {
+  background-color: var(--cap-tertiary, #006b2c) !important;
+  color: #ffffff !important;
+}
+
+.badge-infografia,
+.badge-imagen {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+}
+
+.badge-ateneo,
+.badge-presencial {
+  background-color: #2b5b94 !important;
+  color: #ffffff !important;
+}
+
+/* Compatibilidad con badges del modal */
+.material-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -242,9 +531,7 @@
   font-weight: 700;
   letter-spacing: 0.4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  z-index: 2;
   text-transform: uppercase;
-  background-color: #2b5b94;
   color: #ffffff;
 }
 
@@ -255,183 +542,219 @@
   line-height: 1;
 }
 
-.material-badge .material-badge-icon svg {
-  display: block;
-}
-
-.material-badge.badge-video {
-  background-color: #dc2626;
-  color: #ffffff;
-}
-
-.material-badge.badge-pdf {
-  background-color: #d97706;
-  color: #ffffff;
-}
-
-.material-badge.badge-imagen,
-.material-badge.badge-infografia {
-  background-color: #059669;
-  color: #ffffff;
-}
-
-.material-badge.badge-presencial {
-  background-color: #2b5b94;
-  color: #ffffff;
-}
-
-/* CUERPO DE LA TARJETA BLANCA */
-.cap-card-body {
-  padding: 22px 22px 16px 22px;
+/* Cuerpo Editorial de la Tarjeta */
+.training-card-body {
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  flex: 1;
 }
 
-.cap-card-date-modality {
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #2b5b94;
-  letter-spacing: 0.6px;
-  margin-bottom: 8px;
+.training-date-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  color: var(--cap-primary-container);
   text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.5rem;
 }
 
-.cap-card-title {
-  color: #0c2340;
-  font-size: 1.05rem;
-  font-weight: 700;
+.training-card-title {
+  font-size: 1.15rem;
   line-height: 1.35;
-  margin: 0 0 10px 0;
-  letter-spacing: 0.2px;
-  text-transform: uppercase;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 2.7em;
+  font-weight: 700;
+  color: var(--cap-on-surface);
+  margin: 0 0 0.5rem 0;
+  transition: color 0.2s ease;
 }
 
-.cap-card-desc {
-  color: #64748b;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  margin: 0 0 16px 0;
+.training-card:hover .training-card-title {
+  color: var(--cap-primary);
+}
+
+.training-card-desc {
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--cap-secondary);
+  margin: 0 0 1rem 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
 }
 
-/* META-INFORMACIÓN: HORARIO Y MODALIDAD CON ICONOS */
-.cap-card-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding-top: 14px;
-  border-top: 1px solid #f1f5f9;
-  margin-top: auto;
+.training-card-divider {
+  width: 100%;
+  height: 1px;
+  background-color: var(--cap-surface-high);
+  margin-bottom: 1rem;
 }
 
-.cap-card-meta-item {
+.training-card-meta {
   display: flex;
   align-items: center;
-  gap: 9px;
-  font-size: 0.8rem;
-  color: #475569;
-  font-weight: 500;
+  justify-content: space-between;
+  font-size: 0.725rem;
+  color: var(--cap-secondary);
+  gap: 0.5rem;
 }
 
-.cap-meta-icon {
-  width: 15px;
-  height: 15px;
-  color: #2b5b94;
-  flex-shrink: 0;
-}
-
-/* FOOTER Y BOTÓN INTEGRADO DE ANCHO COMPLETO */
-.cap-card-footer {
-  padding: 0 22px 22px 22px;
-  width: 100%;
-}
-
-.cap-btn-vermas-unified {
-  width: 100%;
-  background-color: #2b5b94;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 18px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  cursor: pointer;
+.training-meta-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition:
-    background-color 0.2s ease,
-    transform 0.15s ease,
-    box-shadow 0.2s ease;
-  font-family: inherit;
-  text-transform: uppercase;
-  box-shadow: 0 3px 8px rgba(43, 91, 148, 0.2);
+  gap: 0.375rem;
 }
 
-.cap-btn-vermas-unified:hover {
-  background-color: #1c4373;
-  box-shadow: 0 6px 14px rgba(43, 91, 148, 0.3);
+.training-meta-item span.material-symbols-outlined {
+  color: var(--cap-primary);
+  font-size: 16px;
 }
 
-.cap-btn-vermas-unified:active {
-  transform: translateY(1px);
+/* Botón de Acción Anclado */
+.training-card-action {
+  padding: 0 1.5rem 1.5rem 1.5rem;
 }
 
-.cap-btn-arrow {
+.training-action-btn {
+  width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s ease;
-  line-height: 1;
-}
-
-.cap-btn-arrow svg {
-  display: block;
-}
-
-.cap-btn-vermas-unified:hover .cap-btn-arrow {
-  transform: translateX(4px);
-}
-
-/* Mantenemos soporte de compatibilidad */
-.cap-btn-vermas {
-  background-color: #2b5b94;
-  color: #ffffff;
-  border: none;
-  border-radius: 30px;
-  padding: 8px 25px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: inherit;
+  gap: 0.375rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--cap-primary-container) !important;
+  color: #ffffff !important;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 123, 185, 0.2);
 }
 
-.cap-btn-vermas:hover {
-  background-color: #1c4373;
+.training-action-btn:hover {
+  background-color: var(--cap-primary) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 97, 148, 0.3);
 }
 
-.cap-disclaimer {
+/* ==========================================================================
+   BANNER DE CONTACTO: COMITÉ DE DOCENCIA E INVESTIGACIÓN / REVISTA CIENTÍFICA
+   ========================================================================== */
+.cap-docencia-section {
+  width: 100%;
+  max-width: 80rem; /* 1280px */
+  margin: 0 auto;
+  padding: 0 1.5rem 3.5rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.cap-docencia-card {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border: 1px solid var(--cap-border-subtle);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 768px) {
+  .cap-docencia-card {
+    flex-direction: row;
+  }
+}
+
+.cap-docencia-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.cap-docencia-icon-box {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  background-color: var(--cap-primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 97, 148, 0.25);
+}
+
+.cap-docencia-title {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  font-weight: 700;
+  color: var(--cap-on-surface);
+  margin: 0;
+}
+
+.cap-docencia-desc {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--cap-secondary);
+  max-width: 38rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.cap-docencia-right {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .cap-docencia-right {
+    width: auto;
+  }
+}
+
+.cap-docencia-btn {
+  display: inline-block;
   text-align: center;
-  color: #ff0d00;
-  font-size: 1.1rem;
-  font-weight: 400;
-  margin-top: 10px;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--cap-surface-low);
+  color: var(--cap-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--cap-border-subtle);
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
+@media (min-width: 768px) {
+  .cap-docencia-btn {
+    width: auto;
+  }
+}
+
+.cap-docencia-btn:hover {
+  background-color: var(--cap-primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   MODAL DETALLADO DE CAPACITACIÓN / CHARLAS
+   ========================================================================== */
 .cap-modal-overlay {
   position: fixed;
   inset: 0;
@@ -572,6 +895,12 @@
   margin-bottom: 20px;
 }
 
+@media (max-width: 640px) {
+  .cap-modal-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .cap-modal-meta-row {
   display: flex;
   align-items: center;
@@ -585,7 +914,6 @@
   font-weight: 600;
 }
 
-/* CONTENEDOR E ÍCONO DE INFORMACIÓN */
 .cap-info-icon {
   width: 22px;
   height: 22px;
@@ -697,71 +1025,6 @@
   fill: currentColor;
 }
 
-.cap-modal-tagline {
-  color: #64748b;
-  font-size: 0.78rem;
-  font-weight: 500;
-  margin-top: 14px;
-  text-align: center;
-}
-
-/* --- RESPONSIVIDAD --- */
-@media (max-width: 992px) {
-  .cap-banner-box {
-    flex-direction: column;
-    padding: 25px 20px;
-    gap: 20px;
-  }
-
-  .cap-banner-left {
-    text-align: center;
-    padding-right: 0;
-  }
-
-  .cap-banner-divider {
-    width: 80%;
-    height: 6px;
-  }
-
-  .cap-banner-right {
-    padding-left: 0;
-  }
-
-  .cap-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Responsividad de la cabecera */
-@media (max-width: 768px) {
-.cap-header-inner {
-    border-left-width: 5px;
-    padding-left: 20px;
-}
-
-.cap-title {
-    font-size: 2rem;
-
-}
-  .doc-info-wrapper {
-    align-items: flex-start;
-  }
-
-.cap-info-text p {
-    font-size: 0.95rem;
-}
-}
-
-@media (max-width: 600px) {
-  .cap-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .cap-modal-actions {
-    flex-direction: column;
-  }
-}
-
 /* ==========================================================================
    REPRODUCTOR DE VIDEO INSTITUCIONAL SOBREPUESTO (LIGHTBOX / MODAL)
    ========================================================================== */
@@ -801,7 +1064,6 @@
   transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s ease;
 }
 
-/* Formato vertical inteligente (para videos de celular / 9:16 / Shorts) */
 .cap-video-modal-box.is-vertical {
   width: fit-content;
   max-width: min(440px, 92vw);
@@ -920,14 +1182,12 @@
   min-height: 0;
 }
 
-/* Modo horizontal: 16:9 restringido por la altura de la pantalla */
 .cap-video-frame-container:not(.is-vertical) {
   aspect-ratio: 16 / 9;
   max-height: calc(100vh - 140px);
   max-height: calc(100dvh - 140px);
 }
 
-/* Modo vertical: 9:16 adaptado a la altura de la pantalla */
 .cap-video-frame-container.is-vertical {
   aspect-ratio: 9 / 16;
   max-height: calc(100vh - 140px);
@@ -977,25 +1237,6 @@
 @keyframes capVideoZoomIn {
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
-}
-
-@media (max-width: 768px) {
-  .cap-video-modal-overlay {
-    padding: 10px;
-  }
-  .cap-video-modal-box {
-    max-width: 100%;
-    border-radius: 12px;
-  }
-  .cap-video-modal-box.is-vertical {
-    max-width: 95vw;
-  }
-  .cap-video-modal-header {
-    padding: 10px 14px;
-  }
-  .cap-video-modal-title {
-    font-size: 0.88rem;
-  }
 }
 
 /* ==========================================================================
@@ -1145,5 +1386,11 @@
     max-height: 90vh;
     max-height: 90dvh;
   }
+  .cap-modal-content {
+    padding: 24px 20px;
+  }
+  .cap-modal-banner-wrap {
+    width: calc(100% + 40px);
+    margin: -24px -20px 20px -20px;
+  }
 }
-
