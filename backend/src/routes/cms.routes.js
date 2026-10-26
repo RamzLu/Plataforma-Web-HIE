@@ -99,8 +99,8 @@ router.delete('/residencias/:id', verifyToken, eliminarResidencia);
 // ==========================================
 router.get('/capacitaciones', obtenerCapacitaciones);
 router.get('/capacitaciones/publicas', obtenerCapacitacionesPublicas);
-router.post('/capacitaciones', verifyToken, uploadMemory.single('archivo'), crearCapacitacion);
-router.put('/capacitaciones/:id', verifyToken, uploadMemory.single('archivo'), actualizarCapacitacion);
+router.post('/capacitaciones', verifyToken, uploadMemory.any(), crearCapacitacion);
+router.put('/capacitaciones/:id', verifyToken, uploadMemory.any(), actualizarCapacitacion);
 router.patch('/capacitaciones/:id/estado', verifyToken, cambiarEstadoCapacitacion);
 router.delete('/capacitaciones/:id', verifyToken, eliminarCapacitacion);
 

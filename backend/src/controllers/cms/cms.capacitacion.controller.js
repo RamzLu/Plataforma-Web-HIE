@@ -20,8 +20,8 @@ export const obtenerCapacitacionesPublicas = async (req, res, next) => {
 
 export const crearCapacitacion = async (req, res, next) => {
   try {
-    const file = req.file || (req.files && req.files[0]) || null;
-    const result = await CmsCapacitacionService.crearCapacitacion(req.body, file);
+    const files = req.files || req.file;
+    const result = await CmsCapacitacionService.crearCapacitacion(req.body, files);
     return res.status(201).json(result);
   } catch (error) {
     next(error);
@@ -31,8 +31,8 @@ export const crearCapacitacion = async (req, res, next) => {
 export const actualizarCapacitacion = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const file = req.file || (req.files && req.files[0]) || null;
-    const result = await CmsCapacitacionService.actualizarCapacitacion(id, req.body, file);
+    const files = req.files || req.file;
+    const result = await CmsCapacitacionService.actualizarCapacitacion(id, req.body, files);
     return res.status(200).json(result);
   } catch (error) {
     next(error);
