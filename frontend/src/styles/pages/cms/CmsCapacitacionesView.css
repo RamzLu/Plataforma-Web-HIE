@@ -169,3 +169,109 @@
   transform: none;
 }
 
+/* =========================================================
+   ESTILOS PARA BANNER / PORTADA Y MATERIAL DIDÁCTICO SEPARADOS
+   ========================================================= */
+.cap-banner-preview-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.cap-banner-preview-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.cap-banner-preview-thumb {
+  width: 96px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #cbd5e1;
+  flex-shrink: 0;
+  background-color: #f8fafc;
+}
+
+.cap-banner-preview-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.cap-banner-preview-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0c2340;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cap-banner-preview-sub {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cap-banner-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  background-color: #e0f2fe;
+  color: #0284c7;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.cap-banner-upload-zone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 20px 24px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f8fafc;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cap-banner-upload-zone:hover,
+.cap-banner-upload-zone.drag-active {
+  border-color: #0284c7;
+  background-color: #f0f9ff;
+}
+
+.cap-banner-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #e0f2fe;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: transform 0.2s ease;
+}
+
+.cap-banner-upload-zone:hover .cap-banner-icon-wrap {
+  transform: scale(1.08);
+}
+

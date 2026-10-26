@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import {
   BookOpen,
@@ -28,6 +28,14 @@ import {
   CmsDeleteModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import keycloak from "../../config/keycloak";
+import {
+  getCapacitaciones,
+  createCapacitacion,
+  updateCapacitacion,
+  deleteCapacitacion,
+  cambiarEstadoCapacitacion,
+} from "../../api/capacitaciones.api";
 
 // Datos iniciales armonizados con el portal público (CapacitacionPage) y schema.prisma
 const INITIAL_CAPACITACIONES = [
@@ -44,6 +52,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-05-20",
     horario: "10:00",
     ubicacion: "Plataforma Telesalud HIE (Video On-Demand)",
+    disertantes: "Dr. Marcelo Morales, Dra. Elena Vega",
     videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     archivoTipo: "video",
     archivoNombre: "Protocolo_ACV_VideoClase.mp4",
@@ -67,6 +76,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-05-22",
     horario: "11:30",
     ubicacion: "Virtual - Plataforma Telesalud HIE",
+    disertantes: "Lic. Carlos Benítez, Lic. Romina Soto",
     videoUrl: "",
     archivoTipo: "documento",
     archivoNombre: "Guia_Operativa_Teleconsultas_HIE.pdf",
@@ -90,6 +100,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-05-20",
     horario: "10:00",
     ubicacion: "SUM Hospital Interdistrital Evita",
+    disertantes: "Lic. Patricia Romero, Enf. Esp. Claudio Ruiz",
     videoUrl: "",
     archivoTipo: "documento",
     archivoNombre: "Programa_Gestion_Enfermeria.pdf",
@@ -113,6 +124,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-06-05",
     horario: "08:30",
     ubicacion: "Gimnasio de Rehabilitación HIE",
+    disertantes: "Dr. Martín Almada, Dra. Sofía Albornoz",
     videoUrl: "",
     archivoTipo: "imagen",
     archivoNombre: "Afiche_Convocatoria_RCP_2026.png",
@@ -136,6 +148,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-06-12",
     horario: "09:00",
     ubicacion: "Híbrida - Aula Magna y Zoom",
+    disertantes: "Dra. María Laura Giménez, Dr. Roberto Méndez",
     videoUrl: "",
     archivoTipo: "documento",
     archivoNombre: "Protocolo_IACS_Hospital_Evita.pdf",
@@ -159,6 +172,7 @@ const INITIAL_CAPACITACIONES = [
     fechaFin: "2026-06-18",
     horario: "11:00",
     ubicacion: "Auditorio Principal HIE",
+    disertantes: "Dra. Valeria Fontana, Dr. Hernán Castro",
     videoUrl: "",
     archivoTipo: "documento",
     archivoNombre: "Temario_Bioetica_Hospitalaria.pdf",
@@ -172,9 +186,9 @@ const INITIAL_CAPACITACIONES = [
 ];
 
 const CmsCapacitacionesView = () => {
-  // Lista de capacitaciones en estado local (sin backend según instrucción)
-  const [capacitaciones, setCapacitaciones] = useState(INITIAL_CAPACITACIONES);
-  const [loading, setLoading] = useState(false);
+  // Lista de capacitaciones obtenidas desde la base de datos
+  const [capacitaciones, setCapacitaciones] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("PUBLICADOS"); // PUBLICADOS, BORRADORES, ARCHIVADOS
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroModalidad, setFiltroModalidad] = useState("TODAS");
@@ -188,9 +202,18 @@ const CmsCapacitacionesView = () => {
   const [itemAEliminar, setItemAEliminar] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Referencia para archivo unificado (video, documento o imagen)
+  // Referencia y estados para BANNER / PORTADA (Tarjeta y cabecera)
+  const bannerInputRef = useRef(null);
+  const [isDraggingBanner, setIsDraggingBanner] = useState(false);
+  const [bannerSeleccionado, setBannerSeleccionado] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState("");
+  const [eliminarBannerFlag, setEliminarBannerFlag] = useState(false);
+
+  // Referencia y estados para ARCHIVO DE CONTENIDO / MATERIAL DIDÁCTICO (Video, Documento o Imagen)
   const fileInputRef = useRef(null);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [archivoSeleccionado, setArchivoSeleccionado] = useState(null);
+  const [eliminarArchivoFlag, setEliminarArchivoFlag] = useState(false);
 
   // Formulario según los campos de schema.prisma y el portal público
   const initialForm = {
@@ -202,18 +225,39 @@ const CmsCapacitacionesView = () => {
     fechaFin: "",
     horario: "10:00",
     ubicacion: "Hospital Interdistrital Evita",
+    disertantes: "",
     videoUrl: "",
     archivoTipo: "", // "video" | "documento" | "imagen"
     archivoNombre: "",
     archivoTamano: "",
     archivoUrl: "",
     imagenUrl: "",
+    bannerUrl: "",
+    bannerNombre: "",
     descripcion: "",
     contenido: "",
     activo: true,
   };
 
   const [formData, setFormData] = useState(initialForm);
+
+  // Cargar capacitaciones desde el backend
+  const cargarCapacitaciones = async () => {
+    setLoading(true);
+    try {
+      const data = await getCapacitaciones();
+      setCapacitaciones(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error al cargar capacitaciones:", error);
+      toast.error("No se pudieron cargar las capacitaciones desde el servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarCapacitaciones();
+  }, []);
 
   // Helper para generar iniciales
   const getInicialesCapacitacion = (nombre) => {
@@ -225,7 +269,48 @@ const CmsCapacitacionesView = () => {
     return nombre.slice(0, 2).toUpperCase();
   };
 
-  // Procesamiento unificado de archivo: Video / Documento / Imagen
+  // Procesamiento de BANNER / PORTADA (Imagen de tarjeta y cabecera)
+  const procesarBanner = (file) => {
+    if (!file) return;
+
+    const extension = file.name.split(".").pop().toLowerCase();
+    const mime = file.type || "";
+    const isImage =
+      mime.startsWith("image/") || ["jpg", "jpeg", "png", "webp", "gif"].includes(extension);
+
+    if (!isImage) {
+      return toast.error("Solo se admiten imágenes para el Banner / Portada (JPG, PNG, WEBP).");
+    }
+
+    const blobUrl = URL.createObjectURL(file);
+    setBannerSeleccionado(file);
+    setBannerPreview(blobUrl);
+    setEliminarBannerFlag(false);
+    setFormData((prev) => ({
+      ...prev,
+      bannerUrl: blobUrl,
+      bannerNombre: file.name,
+      imagenUrl: blobUrl,
+    }));
+    setHasUnsavedChanges(true);
+    toast.success("Imagen de portada / banner seleccionada.");
+  };
+
+  const handleQuitarBanner = () => {
+    setBannerSeleccionado(null);
+    setBannerPreview("");
+    setEliminarBannerFlag(true);
+    setFormData((prev) => ({
+      ...prev,
+      bannerUrl: "",
+      bannerNombre: "",
+      imagenUrl: "",
+    }));
+    if (bannerInputRef.current) bannerInputRef.current.value = "";
+    setHasUnsavedChanges(true);
+  };
+
+  // Procesamiento de ARCHIVO DE CONTENIDO / MATERIAL DIDÁCTICO (Video, Documento o Imagen)
   const procesarArchivoUnificado = (file) => {
     if (!file) return;
 
@@ -241,7 +326,7 @@ const CmsCapacitacionesView = () => {
       ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(extension);
 
     if (!isImage && !isVideo && !isDoc) {
-      return toast.error("Solo se admiten videos (MP4/WEBM), documentos (PDF/DOC) o imágenes (JPG/PNG/WEBP).");
+      return toast.error("Solo se admiten videos (MP4/WEBM), documentos (PDF/DOC) o infografías (JPG/PNG/WEBP).");
     }
 
     const sizeFormatted =
@@ -254,29 +339,49 @@ const CmsCapacitacionesView = () => {
     if (isImage) tipo = "imagen";
     if (isVideo) tipo = "video";
 
+    setArchivoSeleccionado(file);
+    setEliminarArchivoFlag(false);
     setFormData((prev) => ({
       ...prev,
       archivoTipo: tipo,
       archivoNombre: file.name,
       archivoTamano: sizeFormatted,
       archivoUrl: blobUrl,
-      imagenUrl: isImage ? blobUrl : prev.imagenUrl,
-      videoUrl: isVideo ? blobUrl : prev.videoUrl,
       tipoRecurso: isVideo ? "video" : isDoc ? "pdf" : isImage ? "imagen" : prev.tipoRecurso,
     }));
     setHasUnsavedChanges(true);
     toast.success(
       tipo === "video"
-        ? "Video cargado con éxito."
+        ? "Video seleccionado para carga."
         : tipo === "imagen"
-        ? "Imagen cargada con éxito."
-        : "Documento cargado con éxito."
+        ? "Infografía / Imagen de contenido seleccionada."
+        : "Documento seleccionado para carga."
     );
+  };
+
+  const handleQuitarArchivo = () => {
+    setArchivoSeleccionado(null);
+    setEliminarArchivoFlag(true);
+    setFormData((prev) => ({
+      ...prev,
+      archivoTipo: "",
+      archivoNombre: "",
+      archivoTamano: "",
+      archivoUrl: "",
+    }));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setHasUnsavedChanges(true);
   };
 
   const handleOpenCreate = () => {
     setEditingId(null);
+    setBannerSeleccionado(null);
+    setBannerPreview("");
+    setEliminarBannerFlag(false);
+    setArchivoSeleccionado(null);
+    setEliminarArchivoFlag(false);
     setFormData(initialForm);
+    if (bannerInputRef.current) bannerInputRef.current.value = "";
     if (fileInputRef.current) fileInputRef.current.value = "";
     setHasUnsavedChanges(false);
     setShowModal(true);
@@ -284,6 +389,15 @@ const CmsCapacitacionesView = () => {
 
   const handleOpenEdit = (item) => {
     setEditingId(item.id);
+    setBannerSeleccionado(null);
+    const existingBanner = item.bannerUrl || item.imagenUrl || "";
+    setBannerPreview(existingBanner);
+    setEliminarBannerFlag(false);
+    setArchivoSeleccionado(null);
+    setEliminarArchivoFlag(false);
+    if (bannerInputRef.current) bannerInputRef.current.value = "";
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
     let horaExtraida = "10:00";
     if (item.horario) {
       const match = item.horario.match(/(\d{1,2}:\d{2})/);
@@ -293,25 +407,33 @@ const CmsCapacitacionesView = () => {
     let tipoArch = item.archivoTipo || "";
     if (!tipoArch) {
       if (item.videoUrl && item.videoUrl.match(/\.(mp4|webm|mov)$/i)) tipoArch = "video";
-      else if (item.archivoNombre) tipoArch = "documento";
-      else if (item.imagenUrl) tipoArch = "imagen";
+      else if ((item.archivoNombre && item.archivoNombre.match(/\.(png|jpg|jpeg|webp|gif|svg)$/i)) || (item.archivoUrl && item.archivoUrl.match(/\.(png|jpg|jpeg|webp|gif|svg)$/i))) tipoArch = "imagen";
+      else if (item.archivoNombre || (item.archivoUrl && item.archivoUrl.match(/\.(pdf|doc|docx)$/i))) tipoArch = "documento";
     }
 
     setFormData({
       titulo: item.titulo || "",
       estado: item.estado || "PUBLICADO",
       modalidad: item.modalidad || "Presencial",
-      tipoRecurso: item.tipoRecurso || "presencial",
+      tipoRecurso: (() => {
+        if (tipoArch === "documento") return "pdf";
+        if (tipoArch === "video") return "video";
+        if (tipoArch === "imagen") return "imagen";
+        return item.tipoRecurso || "presencial";
+      })(),
       fechaInicio: item.fechaInicio || "",
       fechaFin: item.fechaFin || "",
       horario: horaExtraida,
       ubicacion: item.ubicacion || "",
+      disertantes: item.disertantes || "",
       videoUrl: item.videoUrl || "",
       archivoTipo: tipoArch,
       archivoNombre: item.archivoNombre || "",
       archivoTamano: item.archivoTamano || "",
       archivoUrl: item.archivoUrl || "",
-      imagenUrl: item.imagenUrl || "",
+      imagenUrl: existingBanner,
+      bannerUrl: existingBanner,
+      bannerNombre: item.bannerNombre || (existingBanner ? "banner_portada.jpg" : ""),
       descripcion: item.descripcion || "",
       contenido: item.contenido || "",
       activo: item.activo !== false,
@@ -334,44 +456,69 @@ const CmsCapacitacionesView = () => {
     setHasUnsavedChanges(false);
   };
 
-  // Guardar datos en el estado local
-  const handleSave = (e, forcedEstado) => {
+  // Guardar datos en la base de datos a través de la API
+  const handleSave = async (e, forcedEstado) => {
     if (e) e.preventDefault();
     if (!formData.titulo.trim()) {
       return toast.error("El título de la capacitación es obligatorio.");
     }
 
     const estadoFinal = forcedEstado || formData.estado || "PUBLICADO";
-
     setIsSaving(true);
-    setTimeout(() => {
+
+    try {
+      const token = keycloak?.token || localStorage.getItem("token") || "";
+      const dataToSend = new FormData();
+      dataToSend.append("titulo", formData.titulo.trim());
+      dataToSend.append("estado", estadoFinal);
+      dataToSend.append("modalidad", formData.modalidad || "Presencial");
+      dataToSend.append("tipoRecurso", formData.tipoRecurso || "presencial");
+      dataToSend.append("fechaInicio", formData.fechaInicio || "");
+      dataToSend.append("fechaFin", formData.fechaFin || "");
+      dataToSend.append("horario", formData.horario || "10:00");
+      dataToSend.append("ubicacion", formData.ubicacion || "");
+      dataToSend.append("disertantes", formData.disertantes || "");
+      dataToSend.append("descripcion", formData.descripcion || "");
+      dataToSend.append("contenido", formData.contenido || "");
+
+      const cleanVideoUrl = formData.videoUrl && !formData.videoUrl.startsWith("blob:") ? formData.videoUrl.trim() : "";
+      const cleanArchivoUrl = formData.archivoUrl && !formData.archivoUrl.startsWith("blob:") ? formData.archivoUrl.trim() : "";
+      const cleanBannerUrl = formData.bannerUrl && !formData.bannerUrl.startsWith("blob:") ? formData.bannerUrl.trim() : "";
+
+      dataToSend.append("videoUrl", cleanVideoUrl);
+      dataToSend.append("archivoTipo", formData.archivoTipo || "");
+      dataToSend.append("archivoNombre", formData.archivoNombre || "");
+      dataToSend.append("archivoTamano", formData.archivoTamano || "");
+      dataToSend.append("archivoUrl", cleanArchivoUrl);
+      dataToSend.append("bannerUrl", cleanBannerUrl);
+      dataToSend.append("imagenUrl", cleanBannerUrl);
+      dataToSend.append("bannerNombre", formData.bannerNombre || "");
+
+      // 1. Banner / Portada
+      if (bannerSeleccionado) {
+        dataToSend.append("banner", bannerSeleccionado);
+      }
+      if (eliminarBannerFlag) {
+        dataToSend.append("eliminarBanner", "true");
+      }
+
+      // 2. Archivo de contenido / Material Didáctico
+      if (archivoSeleccionado) {
+        dataToSend.append("archivo", archivoSeleccionado);
+      }
+      if (eliminarArchivoFlag) {
+        dataToSend.append("eliminarArchivo", "true");
+      }
+
       if (editingId) {
-        setCapacitaciones((prev) =>
-          prev.map((item) =>
-            item.id === editingId
-              ? {
-                  ...item,
-                  ...formData,
-                  estado: estadoFinal,
-                  updatedAt: new Date().toISOString(),
-                }
-              : item
-          )
-        );
+        await updateCapacitacion(editingId, dataToSend, token);
         toast.success(
           estadoFinal === "BORRADOR"
             ? "Borrador actualizado con éxito."
             : "Capacitación actualizada con éxito."
         );
       } else {
-        const nuevoRegistro = {
-          id: Date.now(),
-          ...formData,
-          estado: estadoFinal,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        setCapacitaciones((prev) => [nuevoRegistro, ...prev]);
+        await createCapacitacion(dataToSend, token);
         toast.success(
           estadoFinal === "BORRADOR"
             ? "Borrador guardado con éxito."
@@ -379,30 +526,37 @@ const CmsCapacitacionesView = () => {
         );
       }
 
-      setIsSaving(false);
+      await cargarCapacitaciones();
       setShowModal(false);
       setShowUnsavedModal(false);
       setHasUnsavedChanges(false);
-    }, 200);
+      setBannerSeleccionado(null);
+      setArchivoSeleccionado(null);
+    } catch (error) {
+      console.error("Error al guardar capacitación:", error);
+      toast.error(error.response?.data?.message || error.message || "Error al guardar la capacitación.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Cambio de estado interactivo (Publicado, Borrador, Archivado)
-  const handleCambiarEstado = (id, nuevoEstado) => {
-    const estadoLegible =
-      nuevoEstado === "PUBLICADO"
-        ? "Publicado"
-        : nuevoEstado === "BORRADOR"
-        ? "Borrador"
-        : "Archivado";
-
-    setCapacitaciones((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, estado: nuevoEstado, updatedAt: new Date().toISOString() }
-          : item
-      )
-    );
-    toast.success(`Estado actualizado a ${estadoLegible}.`);
+  const handleCambiarEstado = async (id, nuevoEstado) => {
+    try {
+      const token = keycloak?.token || localStorage.getItem("token") || "";
+      await cambiarEstadoCapacitacion(id, nuevoEstado, token);
+      const estadoLegible =
+        nuevoEstado === "PUBLICADO"
+          ? "Publicado"
+          : nuevoEstado === "BORRADOR"
+          ? "Borrador"
+          : "Archivado";
+      toast.success(`Estado actualizado a ${estadoLegible}.`);
+      await cargarCapacitaciones();
+    } catch (error) {
+      console.error("Error al cambiar estado:", error);
+      toast.error("No se pudo actualizar el estado de la capacitación.");
+    }
   };
 
   // Eliminación de registro
@@ -411,12 +565,20 @@ const CmsCapacitacionesView = () => {
     setShowDeleteModal(true);
   };
 
-  const executeDelete = () => {
+  const executeDelete = async () => {
     if (!itemAEliminar) return;
-    setCapacitaciones((prev) => prev.filter((c) => c.id !== itemAEliminar.id));
-    toast.success("Capacitación eliminada correctamente.");
-    setShowDeleteModal(false);
-    setItemAEliminar(null);
+    try {
+      const token = keycloak?.token || localStorage.getItem("token") || "";
+      await deleteCapacitacion(itemAEliminar.id, token);
+      toast.success("Capacitación eliminada correctamente.");
+      await cargarCapacitaciones();
+    } catch (error) {
+      console.error("Error al eliminar capacitación:", error);
+      toast.error("No se pudo eliminar la capacitación.");
+    } finally {
+      setShowDeleteModal(false);
+      setItemAEliminar(null);
+    }
   };
 
   // Filtrado de datos
@@ -435,6 +597,7 @@ const CmsCapacitacionesView = () => {
     const matchSearch =
       !query ||
       item.titulo.toLowerCase().includes(query) ||
+      (item.disertantes && item.disertantes.toLowerCase().includes(query)) ||
       (item.descripcion && item.descripcion.toLowerCase().includes(query)) ||
       (item.ubicacion && item.ubicacion.toLowerCase().includes(query));
 
@@ -616,6 +779,19 @@ const CmsCapacitacionesView = () => {
                     >
                       {item.titulo}
                     </span>
+                    {item.disertantes && (
+                      <span
+                        style={{
+                          fontSize: "0.78rem",
+                          color: "#0284c7",
+                          fontWeight: "500",
+                          marginTop: "2px",
+                          display: "block",
+                        }}
+                      >
+                        Dictado por: {item.disertantes}
+                      </span>
+                    )}
                     <span
                       style={{
                         fontSize: "0.75rem",
@@ -642,9 +818,9 @@ const CmsCapacitacionesView = () => {
                           <FileText size={11} /> PDF/DOC
                         </span>
                       )}
-                      {(item.archivoTipo === "imagen" || item.imagenUrl || (item.archivoNombre && item.archivoNombre.match(/\.(png|jpg|jpeg|webp)$/i))) && (
+                      {(item.archivoTipo === "imagen" || (item.archivoNombre && item.archivoNombre.match(/\.(png|jpg|jpeg|webp)$/i))) && (
                         <span className="cap-resource-pill link">
-                          <ImageIcon size={11} /> Imagen
+                          <ImageIcon size={11} /> Infografía
                         </span>
                       )}
                     </span>
@@ -923,6 +1099,40 @@ const CmsCapacitacionesView = () => {
                     />
                   </div>
 
+                  {/* Nombres de quienes dictan la capacitación (Opcional) */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Disertantes / Docentes a cargo (Opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.disertantes}
+                      onChange={(e) => {
+                        setFormData({ ...formData, disertantes: e.target.value });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
+                      placeholder="Ej: Dr. Marcelo Morales, Dra. Elena Vega (Nombres de quienes dictan la capacitación)"
+                    />
+                  </div>
+
+                  {/* Enlace de Video Online (Opcional) */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Enlace a Video / Clase Virtual (YouTube, Vimeo o URL directa)
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.videoUrl && !formData.videoUrl.startsWith("blob:") ? formData.videoUrl : ""}
+                      onChange={(e) => {
+                        setFormData({ ...formData, videoUrl: e.target.value });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
+                      placeholder="Ej: https://www.youtube.com/watch?v=... o https://vimeo.com/..."
+                    />
+                  </div>
+
                   {/* Descripción breve (Copete) */}
                   <div className="esp-full-width">
                     <label className="esp-form-label">Descripción Breve (Resumen para la tarjeta)</label>
@@ -955,15 +1165,114 @@ const CmsCapacitacionesView = () => {
                     />
                   </div>
 
-                  {/* Archivo multimedia o documento unificado (Video, Documento o Imagen) */}
+                  {/* CAMPO 1: BANNER / PORTADA DE LA TARJETA */}
                   <div className="esp-full-width">
                     <label
                       className="esp-form-label"
                       style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
                     >
-                      <span>Archivo Adjunto / Multimedia (Video, Documento o Imagen)</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <ImageIcon size={16} color="#0c2340" />
+                        <strong>Banner / Portada de la Tarjeta</strong>
+                      </span>
                       <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "normal" }}>
-                        Opcional • MP4, PDF, DOCX, JPG, PNG
+                        Opcional • JPG, PNG, WEBP (Recomendado 1200x600 px)
+                      </span>
+                    </label>
+
+                    <input
+                      ref={bannerInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) procesarBanner(file);
+                      }}
+                      style={{ display: "none" }}
+                    />
+
+                    {bannerPreview || formData.bannerUrl ? (
+                      <div className="cap-banner-preview-card">
+                        <div className="cap-banner-preview-left">
+                          <img
+                            src={bannerPreview || formData.bannerUrl}
+                            alt="Banner previa"
+                            className="cap-banner-preview-thumb"
+                          />
+                          <div className="cap-banner-preview-info">
+                            <span className="cap-banner-preview-title" title={formData.bannerNombre || "Banner de portada"}>
+                              {formData.bannerNombre || "Banner_Portada_Capacitacion.jpg"}
+                            </span>
+                            <span className="cap-banner-preview-sub">
+                              <span className="cap-banner-badge">PORTADA ACTIVA</span>
+                              <span>• Portada visible en la tarjeta y cabecera</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <button
+                            type="button"
+                            className="res-file-remove-btn"
+                            onClick={() => bannerInputRef.current?.click()}
+                            title="Cambiar imagen de portada"
+                          >
+                            <Upload size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="res-file-remove-btn"
+                            onClick={handleQuitarBanner}
+                            title="Quitar portada"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        className={`cap-banner-upload-zone ${isDraggingBanner ? "drag-active" : ""}`}
+                        onClick={() => bannerInputRef.current?.click()}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDraggingBanner(true);
+                        }}
+                        onDragLeave={(e) => {
+                          e.preventDefault();
+                          setIsDraggingBanner(false);
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setIsDraggingBanner(false);
+                          const f = e.dataTransfer.files?.[0];
+                          if (f) procesarBanner(f);
+                        }}
+                      >
+                        <div className="cap-banner-icon-wrap">
+                          <ImageIcon size={22} />
+                        </div>
+                        <p className="res-file-upload-title" style={{ color: "#0c2340", fontWeight: "700" }}>
+                          Cargar Imagen de Portada / Banner
+                        </p>
+                        <p className="res-file-upload-sub">
+                          Arrastrá la imagen aquí o <strong>hacé clic para examinar</strong> (Imagen que viste la tarjeta y la cabecera del modal público)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* CAMPO 2: ARCHIVO DE CONTENIDO / MATERIAL DIDÁCTICO */}
+                  <div className="esp-full-width">
+                    <label
+                      className="esp-form-label"
+                      style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                    >
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <FileText size={16} color="#0c2340" />
+                        <strong>Material Didáctico Adjunto (Contenido)</strong>
+                      </span>
+                      <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "normal" }}>
+                        Opcional • Video MP4, Documento PDF/DOC o Infografía complementaria
                       </span>
                     </label>
 
@@ -1013,9 +1322,9 @@ const CmsCapacitacionesView = () => {
                             <span className="res-file-size">
                               {formData.archivoTamano || "Archivo adjunto"} •{" "}
                               {formData.archivoTipo === "video"
-                                ? "Video Multimedia"
+                                ? "Video Multimedia de la Clase"
                                 : formData.archivoTipo === "imagen"
-                                ? "Imagen Adjunta"
+                                ? "Infografía / Imagen de Contenido"
                                 : "Documento Descargable"}
                             </span>
                           </div>
@@ -1033,16 +1342,7 @@ const CmsCapacitacionesView = () => {
                           <button
                             type="button"
                             className="res-file-remove-btn"
-                            onClick={() => {
-                              setFormData({
-                                ...formData,
-                                archivoTipo: "",
-                                archivoNombre: "",
-                                archivoTamano: "",
-                                archivoUrl: "",
-                              });
-                              setHasUnsavedChanges(true);
-                            }}
+                            onClick={handleQuitarArchivo}
                             title="Quitar archivo"
                           >
                             <X size={16} />
@@ -1072,10 +1372,10 @@ const CmsCapacitacionesView = () => {
                           <Upload size={20} />
                         </div>
                         <p className="res-file-upload-title">
-                          Cargar Video, Documento o Imagen
+                          Cargar Video, Documento o Infografía Didáctica
                         </p>
                         <p className="res-file-upload-sub">
-                          Arrastrá el archivo aquí o <strong>hacé clic para examinar</strong> (Video MP4/WEBM, Documento PDF/DOC o Imagen JPG/PNG hasta 50 MB)
+                          Arrastrá el archivo aquí o <strong>hacé clic para examinar</strong> (Video MP4/WEBM, Documento PDF/DOC o Imagen de contenido didáctico)
                         </p>
                       </div>
                     )}
@@ -1083,51 +1383,48 @@ const CmsCapacitacionesView = () => {
                 </div>
               </div>
 
-              {/* Footer del Modal con botones corregidos */}
-              <div className="cap-modal-footer">
+              {/* Footer del Modal */}
+              <div className="modal-footer-esp">
                 <button
                   type="button"
-                  className="cap-btn-cancelar"
+                  className="btn-cancelar-gris"
                   onClick={handleCloseAttempt}
                   disabled={isSaving}
                 >
-                  Cancelar
+                  CANCELAR
                 </button>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <button
-                    type="button"
-                    className="cap-btn-draft"
-                    onClick={(e) => handleSave(e, "BORRADOR")}
-                    disabled={isSaving}
-                  >
-                    Guardar como Borrador
-                  </button>
-                  <button
-                    type="submit"
-                    className="cap-btn-primary"
-                    disabled={isSaving}
-                  >
-                    {isSaving ? (
-                      <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <div
-                          className="cms-spinner"
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                            borderWidth: "2px",
-                            borderTopColor: "white",
-                            borderColor: "rgba(255,255,255,0.3)",
-                          }}
-                        ></div>
-                        Guardando...
-                      </span>
-                    ) : editingId ? (
-                      "Actualizar Capacitación"
-                    ) : (
-                      "Guardar Capacitación"
-                    )}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  className="btn-cerrar-rojo"
+                  style={{ backgroundColor: "#2b5b94" }}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      <div
+                        className="cms-spinner"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          borderWidth: "2px",
+                          borderTopColor: "white",
+                          borderColor: "rgba(255,255,255,0.3)",
+                        }}
+                      ></div>
+                      GUARDANDO...
+                    </span>
+                  ) : editingId ? (
+                    "ACTUALIZAR"
+                  ) : (
+                    "GUARDAR"
+                  )}
+                </button>
               </div>
             </form>
           </div>

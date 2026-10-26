@@ -644,7 +644,9 @@
 .modal-footer-esp {
   padding: 20px 35px 25px 35px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
   background-color: #ffffff;
   border-top: 1px solid #e2e8f0;
   flex-shrink: 0;

@@ -564,19 +564,50 @@ const CmsDocsView = ({
               </div>
             </form>
 
-            <footer className="modal-footer-docs">
-              <button type="button" className="btn-secondary-docs" onClick={handleCloseAttempt} disabled={saving}>CANCELAR</button>
-              <button 
-                  type="submit" 
-                  className="btn-primary-docs" 
-                  onClick={handleSave} 
-                  disabled={saving}
-                >
-                  {saving 
-                    ? (editingId ? "ACTUALIZANDO..." : "GUARDANDO...") 
-                    : (editingId ? "ACTUALIZAR DOCUMENTO" : "GUARDAR DOCUMENTO")}
-                </button>
-            </footer>
+            {/* Footer del Modal */}
+            <div className="modal-footer-esp">
+              <button
+                type="button"
+                className="btn-cancelar-gris"
+                onClick={handleCloseAttempt}
+                disabled={saving}
+              >
+                CANCELAR
+              </button>
+              <button
+                type="submit"
+                className="btn-cerrar-rojo"
+                style={{ backgroundColor: "#2b5b94" }}
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? (
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <div
+                      className="cms-spinner"
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        borderWidth: "2px",
+                        borderTopColor: "white",
+                        borderColor: "rgba(255,255,255,0.3)",
+                      }}
+                    ></div>
+                    GUARDANDO...
+                  </span>
+                ) : editingId ? (
+                  "ACTUALIZAR"
+                ) : (
+                  "GUARDAR"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,8 +1,10 @@
 /* ==========================================================================
    PORTAL PÚBLICO - VISTA CAPACITACIÓN & CHARLAS FORMATIVAS
    Hospital Interdistrital Evita Formosa
-   Diseño Armonizado con el Estilo de las Compañeras
+   Diseño Armonizado con Estilos Institucionales (Stella + Luana)
    ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 :root {
   --cap-primary: #006194;
@@ -20,9 +22,11 @@
   --cap-border-subtle: rgba(220, 233, 255, 0.8);
 }
 
+.capacitacion-page,
 .capacitacion-page-root {
   width: 100%;
-  background-color: #e9ebee; /* Fondo institucional unificado */
+  background-color: #e9ebee;
+  /* Fondo institucional unificado */
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--cap-on-surface);
   min-height: calc(100vh - 80px);
@@ -108,53 +112,146 @@
 }
 
 /* ==========================================================================
-   FILTROS EN CHIPS (Estilo idéntico a Documentos)
+   FILTROS POR FORMATO Y MODALIDAD (DUAL SECTION)
    ========================================================================== */
+.cap-filters-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 32px;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 10px;
+}
+
+.cap-filter-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+@media (min-width: 860px) {
+  .cap-filter-row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+.cap-filter-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cap-secondary);
+  white-space: nowrap;
+}
+
+@media (min-width: 860px) {
+  .cap-filter-header {
+    min-width: 195px;
+    justify-content: flex-end;
+  }
+}
+
+.cap-filter-icon {
+  font-size: 17px !important;
+  color: var(--cap-primary);
+}
+
+.cap-filters-group,
 .doc-filters {
   display: flex;
-  gap: 12px;
-  margin-bottom: 35px;
+  gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
-  width: 100%;
-  max-width: 1000px;
 }
 
 .filter-chip {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   background-color: #ffffff;
-  border: none;
-  padding: 10px 22px;
+  border: 1px solid #e2e8f0;
+  padding: 8px 18px;
   border-radius: 50px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.filter-chip-icon {
+  font-size: 16px !important;
+  line-height: 1;
 }
 
 .filter-chip:hover {
   background-color: #f1f5f9;
   color: var(--cap-primary);
+  border-color: #cbd5e1;
   transform: translateY(-1px);
 }
 
 .filter-chip.active {
   background-color: var(--cap-primary) !important;
   color: #ffffff !important;
+  border-color: var(--cap-primary) !important;
   box-shadow: 0 4px 10px rgba(0, 97, 148, 0.25);
+}
+
+.filter-chip.active .filter-chip-icon {
+  color: #ffffff !important;
+}
+
+.cap-filter-reset-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.cap-filter-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  padding: 6px 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  transition: all 0.2s ease;
+}
+
+.cap-filter-reset-btn:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+  transform: translateY(-1px);
 }
 
 .w-full-anim-wrapper {
   width: 100%;
 }
 
-.w-full-anim-wrapper > div {
+.w-full-anim-wrapper>div {
   width: 100% !important;
 }
 
@@ -163,7 +260,8 @@
    ========================================================================== */
 .cap-grid-section {
   width: 100%;
-  max-width: 80rem; /* 1280px */
+  max-width: 80rem;
+  /* 1280px */
   margin: 0 auto;
   padding: 1rem 1.5rem 3.5rem 1.5rem;
   box-sizing: border-box;
@@ -269,14 +367,15 @@
 }
 
 /* ==========================================================================
-   CÁPSULAS / TARJETAS DE CAPACITACIONES (DISEÑO ORIGINAL DE LAS COMPAÑERAS)
+   CÁPSULAS / TARJETAS DE CAPACITACIONES (DISEÑO ARMONIZADO)
    ========================================================================== */
 .training-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: #ffffff !important; /* Fondo Blanco Original */
-  border-radius: 0.75rem; /* 12px */
+  background-color: #ffffff !important;
+  border-radius: 0.75rem;
+  /* 12px */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
   border: 1px solid var(--cap-border-subtle);
   overflow: hidden;
@@ -319,6 +418,53 @@
 /* Badges Flotantes Temáticos (Colores Originales del Prototipo) */
 .training-floating-badge {
   position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 70%);
+  top: -60px;
+  right: -60px;
+  pointer-events: none;
+}
+
+.cap-placeholder-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(43, 91, 148, 0.16);
+  color: #2b5b94;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+.training-card:hover .cap-placeholder-icon-wrap {
+  transform: scale(1.08);
+}
+
+.cap-placeholder-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.cap-placeholder-brand {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #2b5b94;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* Badges Flotantes Temáticos */
+.training-floating-badge {
+  position: absolute;
   top: 0.75rem;
   right: 0.75rem;
   display: inline-flex;
@@ -333,30 +479,56 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
   text-transform: uppercase;
   color: #ffffff;
+  z-index: 2;
 }
 
 .training-floating-badge.static {
   position: static;
 }
 
+/* Clases unificadas de colores para badges */
 .badge-video {
-  background-color: var(--cap-error) !important;
+  background-color: var(--cap-error, #dc2626) !important;
   color: #ffffff !important;
 }
 
 .badge-pdf {
-  background-color: var(--cap-tertiary) !important;
+  background-color: var(--cap-tertiary, #006b2c) !important;
   color: #ffffff !important;
 }
 
-.badge-infografia {
-  background-color: var(--cap-secondary) !important;
+.badge-infografia,
+.badge-imagen {
+  background-color: #059669 !important;
   color: #ffffff !important;
 }
 
-.badge-ateneo {
-  background-color: var(--cap-primary) !important;
+.badge-ateneo,
+.badge-presencial {
+  background-color: #2b5b94 !important;
   color: #ffffff !important;
+}
+
+/* Compatibilidad con badges del modal */
+.material-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.material-badge .material-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 /* Cuerpo Editorial de la Tarjeta */
@@ -463,11 +635,12 @@
 }
 
 /* ==========================================================================
-   BANNER DE CONTACTO: COMITÉ DE DOCENCIA E INVESTIGACIÓN
+   BANNER DE CONTACTO: COMITÉ DE DOCENCIA E INVESTIGACIÓN / REVISTA CIENTÍFICA
    ========================================================================== */
 .cap-docencia-section {
   width: 100%;
-  max-width: 80rem; /* 1280px */
+  max-width: 80rem;
+  /* 1280px */
   margin: 0 auto;
   padding: 0 1.5rem 3.5rem 1.5rem;
   box-sizing: border-box;
@@ -570,60 +743,174 @@
 }
 
 /* ==========================================================================
-   MODAL DETALLADO DE CAPACITACIÓN / CHARLAS (DISEÑO ORIGINAL)
+   MODAL DETALLADO DE CAPACITACIÓN / CHARLAS
    ========================================================================== */
-.cap-modal-backdrop {
+.cap-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
-  background-color: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.25rem;
+  align-items: center;
+  z-index: 3000;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .cap-modal-box {
   background-color: #ffffff;
   border-radius: 1rem;
   width: 100%;
-  max-width: 640px;
-  max-height: 90vh;
+  max-width: 760px;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
   overflow-y: auto;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  display: flex;
-  flex-direction: column;
+  overscroll-behavior: contain;
+  border-radius: 16px;
+  padding: 34px 38px 28px 38px;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  text-align: left;
   border: 1px solid #e2e8f0;
-  animation: capModalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalFadeIn 0.25s ease-out;
 }
 
-@keyframes capModalFadeIn {
+.cap-modal-content::-webkit-scrollbar {
+  width: 7px;
+}
+
+.cap-modal-content::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.cap-modal-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+
+.cap-modal-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+@keyframes modalFadeIn {
   from {
     opacity: 0;
-    transform: scale(0.97);
+    transform: scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-.cap-modal-header {
+.cap-modal-banner-wrap {
+  width: calc(100% + 76px);
+  margin: -34px -38px 24px -38px;
+  height: 200px;
+  overflow: hidden;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  background: #f1f5f9;
+  position: relative;
+}
+
+.cap-modal-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cap-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #cbd5e1;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.cap-modal-close:hover {
+  background: #e11d48;
+  color: #ffffff;
+  border-color: #e11d48;
+  transform: rotate(90deg);
+}
+
+.cap-modal-header-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.cap-modal-title {
+  color: #1e3a8a;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1.35;
+  margin: 0 0 20px 0;
+  text-transform: uppercase;
+  padding-right: 40px;
+}
+
+/* Grilla de metadatos en 2 columnas amplias */
+.cap-modal-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 24px;
+  padding: 16px 20px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+  .cap-modal-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cap-modal-meta-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #334155;
 }
 
-.cap-modal-close-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0.375rem;
-  border-radius: 0.375rem;
-  color: #64748b;
+.cap-modal-meta-row strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.cap-info-icon {
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -656,129 +943,483 @@
   object-fit: cover;
 }
 
-.cap-modal-headline {
-  font-size: 1.35rem;
-  line-height: 1.35;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-}
-
-.cap-modal-lead {
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: #475569;
-  margin: 0;
-}
-
-.cap-modal-meta-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-}
-
-@media (min-width: 640px) {
-  .cap-modal-meta-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.cap-meta-card-label {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.cap-meta-card-value {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.cap-modal-meta-card {
-  background-color: #f8fafc;
-  padding: 0.875rem 1rem;
-  border-radius: 0.5rem;
+.cap-modal-desc-box {
+  background-color: #ffffff;
+  padding: 16px 20px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.cap-modal-desc-box-title {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.cap-modal-topics-box {
-  background-color: #f8fafc;
-  border-radius: 0.75rem;
-  padding: 1rem 1.25rem;
-  border: 1px solid #e2e8f0;
-}
-
-.cap-topics-heading {
-  font-size: 0.8125rem;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1e293b;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin: 0 0 0.5rem 0;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.cap-modal-desc-box-content {
+  font-size: 0.92rem;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
 }
 
 .cap-modal-footer {
   display: flex;
-  flex-direction: column-reverse;
-  gap: 0.75rem;
-  padding: 1.25rem 1.5rem;
-  background-color: #f8fafc;
-  border-top: 1px solid #e2e8f0;
+  gap: 14px;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
-@media (min-width: 640px) {
-  .cap-modal-footer {
-    flex-direction: row;
-    justify-content: flex-end;
+.cap-modal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cap-modal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.cap-modal-btn.primary-video {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  color: #ffffff;
+}
+
+.cap-modal-btn.primary-video:hover {
+  background: linear-gradient(135deg, #be123c, #9f1239);
+}
+
+.cap-modal-btn.download {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+}
+
+.cap-modal-btn.download:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.cap-modal-btn-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cap-modal-btn-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* ==========================================================================
+   REPRODUCTOR DE VIDEO INSTITUCIONAL SOBREPUESTO (LIGHTBOX / MODAL)
+   ========================================================================== */
+.cap-video-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: rgba(10, 18, 32, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 16px;
+  box-sizing: border-box;
+  animation: capVideoFadeIn 0.25s ease-out;
+  overflow: hidden;
+}
+
+.cap-video-modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  background: #0f172a;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  animation: capVideoZoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s ease;
+}
+
+.cap-video-modal-box.is-vertical {
+  width: fit-content;
+  max-width: min(440px, 92vw);
+  border: 1px solid rgba(225, 29, 72, 0.35);
+  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(225, 29, 72, 0.25);
+}
+
+.cap-video-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  z-index: 2;
+  gap: 12px;
+}
+
+.cap-video-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.cap-video-pill {
+  background: #e11d48;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.cap-video-pill.is-vertical-pill {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  box-shadow: 0 0 12px rgba(225, 29, 72, 0.45);
+}
+
+.cap-video-modal-title {
+  color: #f8fafc;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cap-video-modal-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cap-video-modal-rotate-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cap-video-modal-rotate-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.cap-video-modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #f8fafc;
+  font-size: 1.5rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.cap-video-modal-close:hover {
+  background: #e11d48;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.cap-video-frame-container {
+  position: relative;
+  width: 100%;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.cap-video-frame-container:not(.is-vertical) {
+  aspect-ratio: 16 / 9;
+  max-height: calc(100vh - 140px);
+  max-height: calc(100dvh - 140px);
+}
+
+.cap-video-frame-container.is-vertical {
+  aspect-ratio: 9 / 16;
+  max-height: calc(100vh - 140px);
+  max-height: calc(100dvh - 140px);
+  height: min(calc(100vh - 140px), calc(100dvh - 140px), 700px);
+  width: auto;
+}
+
+.cap-video-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.cap-video-native-player {
+  width: 100%;
+  height: 100%;
+  max-height: calc(100vh - 140px);
+  max-height: calc(100dvh - 140px);
+  background: #000000;
+  object-fit: contain;
+  display: block;
+}
+
+.cap-video-modal-footer {
+  padding: 8px 16px;
+  background: #0f172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.cap-video-modal-disclaimer {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+@keyframes capVideoFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
-.cap-modal-btn-wa {
+@keyframes capVideoZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ==========================================================================
+   INTERACCIÓN Y VISOR DE INFOGRAFÍA PANTALLA COMPLETA
+   ========================================================================== */
+.cap-infografia-header-hint {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  background-color: #ffffff;
-  color: #334155;
-  font-size: 0.8125rem;
+  gap: 5px;
+  font-size: 0.74rem;
   font-weight: 600;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.cap-infografia-interactive-card {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
   cursor: pointer;
-  transition: all 0.2s ease;
+  background: transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  outline: none;
 }
 
-.cap-modal-btn-wa:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
-  border-color: #94a3b8;
+.cap-infografia-interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: #cbd5e1;
 }
 
-.cap-modal-btn-primary {
+.cap-infografia-interactive-img {
+  display: block;
+  max-width: 100%;
+  max-height: 440px;
+  object-fit: contain;
+  background: transparent;
+  border-radius: 9px;
+}
+
+.cap-infografia-tap-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.84);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  background-color: var(--cap-primary-container);
-  color: #ffffff;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 97, 148, 0.25);
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
 }
 
-.cap-modal-btn-primary:hover {
-  background-color: var(--cap-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 97, 148, 0.35);
+/* Visor limpio sin marcos invasivos */
+.cap-image-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: rgba(10, 15, 26, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: capVideoFadeIn 0.2s ease-out;
+  cursor: zoom-out;
+}
+
+.cap-image-back-btn {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 30px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  transition: all 0.2s ease;
+  z-index: 100001;
+  font-family: inherit;
+  letter-spacing: 0.4px;
+}
+
+.cap-image-back-btn:hover {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.04);
+}
+
+.cap-image-lightbox-clean-img {
+  display: block;
+  max-width: 95vw;
+  max-height: 92vh;
+  max-height: 92dvh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
+  animation: capVideoZoomIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+@media (max-width: 768px) {
+  .cap-image-back-btn {
+    top: 16px;
+    left: 16px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+  }
+
+  .cap-image-lightbox-clean-img {
+    max-width: 98vw;
+    max-height: 90vh;
+    max-height: 90dvh;
+  }
+
+  .cap-modal-content {
+    padding: 24px 20px;
+  }
+
+  .cap-modal-banner-wrap {
+    width: calc(100% + 40px);
+    margin: -24px -20px 20px -20px;
+  }
 }
