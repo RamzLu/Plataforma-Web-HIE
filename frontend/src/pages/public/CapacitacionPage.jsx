@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import "../../styles/pages/CapacitacionPage.css";
-import PageBanner from "../../components/PageBanner";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import PageBanner from "../../components/PageBanner";
 
@@ -9,8 +8,7 @@ import imgCapacitacion1 from "../../assets/fondoCARRUSELnoticias2.jpg";
 import imgCapacitacion2 from "../../assets/fondoCARRUSELnoticias3.jpg";
 import { getCapacitacionesPublicas } from "../../api/capacitaciones.api";
 
-// Imágenes y catálogo armonizado con las especificaciones de diseño de las compañeras
-const CAPACITACIONES_INITIAL = [
+const capacitacionesData = [
   {
     id: 1,
     titulo: "ABORDAJE INICIAL DEL ACV ISQUÉMICO EN GUARDIA",
@@ -29,7 +27,13 @@ const CAPACITACIONES_INITIAL = [
   },
   {
     id: 2,
-    titulo: "Guía Clínica de Reanimación Cardiopulmonar Avanzada (PALS)",
+    titulo: "USO DE LA PLATAFORMA DE TELESALUD Y TELECONSULTAS",
+    modalidadCorta: "Modalidad: Video y PDF Interactivo",
+    imagen: imgCapacitacion2,
+    fecha: "22 de Mayo de 2026",
+    horario: "11:30 hs.",
+    modalidadCompleta: "Virtual - Plataforma Telesalud HIE",
+    modalidadTag: "VIRTUAL",
     descripcion:
       "Taller práctico para el manejo del sistema institucional de teleconsultas, carga de historias clínicas virtuales y atención remota de pacientes.",
     pdfUrl: "/docs/temario-telesalud.pdf",
@@ -39,7 +43,13 @@ const CAPACITACIONES_INITIAL = [
   },
   {
     id: 3,
-    titulo: "Manejo y Detección Temprana del Dengue en Atención Primaria",
+    titulo: "GESTIÓN BASADA EN DATOS CLÍNICOS PARA ENFERMERÍA",
+    modalidadCorta: "Modalidad: Presencial y Evaluación Práctica",
+    imagen: null,
+    fecha: "20 de Mayo de 2026",
+    horario: "10:00 hs.",
+    modalidadCompleta: "Presencial (SUM Hospital Evita)",
+    modalidadTag: "PRESENCIAL",
     descripcion:
       "Capacitación para jefes de enfermería en la transformación de registros administrativos en datos clínicos útiles para la toma de decisiones.",
     pdfUrl: "/docs/temario-gestion-enfermeria.pdf",
@@ -49,7 +59,13 @@ const CAPACITACIONES_INITIAL = [
   },
   {
     id: 4,
-    titulo: "Actualización en Protocolos de Bioseguridad y Control de Infecciones",
+    titulo: "REANIMACIÓN CARDIOPULMONAR (RCP) AVANZADA",
+    modalidadCorta: "Modalidad: Taller Teórico-Práctico",
+    imagen: null,
+    fecha: "05 de Junio de 2026",
+    horario: "08:30 hs.",
+    modalidadCompleta: "Presencial (Gimnasio de Rehabilitación)",
+    modalidadTag: "PRESENCIAL",
     descripcion:
       "Actualización en maniobras de RCP avanzada, uso de desfibrilador externo automático (DEA) y manejo de vía aérea en emergencias médicas.",
     pdfUrl: "/docs/temario-rcp.pdf",
@@ -59,7 +75,13 @@ const CAPACITACIONES_INITIAL = [
   },
   {
     id: 5,
-    titulo: "Manual Farmacoterapéutico en Urgencias Pediátricas",
+    titulo: "CONTROL Y PREVENCIÓN DE INFECCIONES INTRAHOSPITALARIAS",
+    modalidadCorta: "Modalidad: Híbrida (Virtual + Campus)",
+    imagen: null,
+    fecha: "12 de Junio de 2026",
+    horario: "09:00 hs.",
+    modalidadCompleta: "Híbrida - Aula Magna y Zoom",
+    modalidadTag: "HÍBRIDA",
     descripcion:
       "Estrategias y medidas de bioseguridad para la prevención de infecciones asociadas al cuidado de la salud (IACS) en servicios críticos.",
     pdfUrl: "/docs/temario-infecciones.pdf",
@@ -69,7 +91,13 @@ const CAPACITACIONES_INITIAL = [
   },
   {
     id: 6,
-    titulo: "Ateneo Interdisciplinario: Abordaje del Paciente Oncológico Crítico",
+    titulo: "BIOÉTICA Y DERECHOS DEL PACIENTE EN EL ÁMBITO PÚBLICO",
+    modalidadCorta: "Modalidad: Conferencia y Debate",
+    imagen: null,
+    fecha: "18 de Junio de 2026",
+    horario: "11:00 hs.",
+    modalidadCompleta: "Presencial (Auditorio Principal HIE)",
+    modalidadTag: "PRESENCIAL",
     descripcion:
       "Análisis de casos dilemáticos en la práctica médica diaria, consentimiento informado y marco legal de la atención en el hospital público.",
     pdfUrl: "/docs/temario-bioetica.pdf",
@@ -133,7 +161,7 @@ const formatFechaEspanol = (fechaStr) => {
         year: "numeric"
       });
     }
-  } catch { }
+  } catch {}
   return fechaStr;
 };
 
@@ -607,10 +635,10 @@ const CapacitacionPage = () => {
                                 {item.tipo === "video"
                                   ? "play_circle"
                                   : item.tipo === "pdf"
-                                    ? "picture_as_pdf"
-                                    : item.tipo === "imagen" || item.tipo === "infografia"
-                                      ? "view_quilt"
-                                      : "groups"}
+                                  ? "picture_as_pdf"
+                                  : item.tipo === "imagen" || item.tipo === "infografia"
+                                  ? "view_quilt"
+                                  : "groups"}
                               </span>
                               <span>{item.badgeLabel}</span>
                             </span>
@@ -656,10 +684,10 @@ const CapacitacionPage = () => {
                                   {item.tipo === "video"
                                     ? "smart_display"
                                     : item.tipo === "pdf"
-                                      ? "description"
-                                      : item.tipo === "imagen"
-                                        ? "image"
-                                        : "location_on"}
+                                    ? "description"
+                                    : item.tipo === "imagen"
+                                    ? "image"
+                                    : "location_on"}
                                 </span>
                                 <span>{item.modalidadCorta}</span>
                               </div>
@@ -880,24 +908,24 @@ const CapacitacionPage = () => {
                 selectedCurso.contenido.trim() &&
                 selectedCurso.contenido.trim() !== (selectedCurso.descripcion || "").trim())
             ) && (
-                <div className="cap-modal-desc-box">
-                  <div className="cap-modal-desc-box-title">
-                    <span className="cap-info-icon" style={{ width: "16px", height: "16px" }}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                      </svg>
-                    </span>
-                    <span>Temario y Programa Académico</span>
-                  </div>
-                  <div
-                    className="cap-modal-desc-box-content"
-                    style={{ whiteSpace: "pre-line" }}
-                  >
-                    {selectedCurso.temario || selectedCurso.contenido}
-                  </div>
+              <div className="cap-modal-desc-box">
+                <div className="cap-modal-desc-box-title">
+                  <span className="cap-info-icon" style={{ width: "16px", height: "16px" }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                    </svg>
+                  </span>
+                  <span>Temario y Programa Académico</span>
                 </div>
-              )}
+                <div
+                  className="cap-modal-desc-box-content"
+                  style={{ whiteSpace: "pre-line" }}
+                >
+                  {selectedCurso.temario || selectedCurso.contenido}
+                </div>
+              </div>
+            )}
 
             {/* Visualización interactiva de Infografía adjunta */}
             {(selectedCurso.archivoTipo === "imagen" || selectedCurso.tipo === "imagen" || selectedCurso.tipo === "infografia") && selectedCurso.archivoUrl && (
@@ -969,46 +997,46 @@ const CapacitacionPage = () => {
                 selectedCurso.archivoTipo !== "imagen" &&
                 selectedCurso.tipo !== "imagen" &&
                 selectedCurso.tipo !== "infografia")) && (
-                <div className="cap-modal-actions">
-                  {/* BOTÓN VER VIDEO (SE SOBREPONE A LA PANTALLA) */}
-                  {(selectedCurso.videoUrl || (selectedCurso.archivoTipo === "video" && selectedCurso.archivoUrl)) && (
-                    <button
-                      type="button"
-                      onClick={() => handleAbrirVideo(selectedCurso)}
-                      className="cap-modal-btn primary-video"
+              <div className="cap-modal-actions">
+                {/* BOTÓN VER VIDEO (SE SOBREPONE A LA PANTALLA) */}
+                {(selectedCurso.videoUrl || (selectedCurso.archivoTipo === "video" && selectedCurso.archivoUrl)) && (
+                  <button
+                    type="button"
+                    onClick={() => handleAbrirVideo(selectedCurso)}
+                    className="cap-modal-btn primary-video"
+                  >
+                    <div className="cap-modal-btn-icon">
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    </div>
+                    <span>VER CLASE / VIDEO</span>
+                  </button>
+                )}
+
+                {/* BOTÓN DESCARGAR TEMARIO / DOCUMENTO */}
+                {(selectedCurso.archivoUrl || selectedCurso.pdfUrl) &&
+                  selectedCurso.archivoTipo !== "video" &&
+                  selectedCurso.archivoTipo !== "imagen" &&
+                  selectedCurso.tipo !== "imagen" &&
+                  selectedCurso.tipo !== "infografia" && (
+                    <a
+                      href={selectedCurso.archivoUrl || selectedCurso.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                      className="cap-modal-btn download"
                     >
                       <div className="cap-modal-btn-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <polygon points="5 3 19 12 5 21 5 3" />
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
                         </svg>
                       </div>
-                      <span>VER CLASE / VIDEO</span>
-                    </button>
-                  )}
-
-                  {/* BOTÓN DESCARGAR TEMARIO / DOCUMENTO */}
-                  {(selectedCurso.archivoUrl || selectedCurso.pdfUrl) &&
-                    selectedCurso.archivoTipo !== "video" &&
-                    selectedCurso.archivoTipo !== "imagen" &&
-                    selectedCurso.tipo !== "imagen" &&
-                    selectedCurso.tipo !== "infografia" && (
-                      <a
-                        href={selectedCurso.archivoUrl || selectedCurso.pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        download
-                        className="cap-modal-btn download"
-                      >
-                        <div className="cap-modal-btn-icon">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                          </svg>
-                        </div>
-                        <span>DESCARGAR TEMARIO / DOCUMENTO</span>
-                      </a>
-                    )}
-                </div>
-              )}
+                      <span>DESCARGAR TEMARIO / DOCUMENTO</span>
+                    </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1096,52 +1124,6 @@ const CapacitacionPage = () => {
               </p>
             </div>
           </div>
-
-          {selectedItem.contenidoCompleto && (
-            <div className="cap-modal-topics-box">
-              <h4 className="cap-topics-heading">
-                Ejes Temáticos y Contenido:
-              </h4>
-              <div>
-                {selectedItem.contenidoCompleto.split("\n").map((line, i) => (
-                  <p
-                    key={i}
-                    style={{
-                      color: "#475569",
-                      margin: "0 0 6px 0",
-                      fontSize: "0.875rem",
-                      lineHeight: "1.5",
-                    }}
-                  >
-                    {line}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="cap-modal-footer">
-          <button
-            type="button"
-            className="cap-modal-btn-wa"
-            onClick={() => handleOpenWhatsapp(selectedItem)}
-          >
-            <span className="material-symbols-outlined text-[18px]">chat</span>
-            <span>Consultar por WhatsApp</span>
-          </button>
-
-          <a
-            href={selectedItem.enlaceAccion || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cap-modal-btn-primary"
-          >
-            <span>{selectedItem.btnText}</span>
-            <span className="material-symbols-outlined text-[18px]">
-              arrow_forward
-            </span>
-          </a>
         </div>
       )}
 
