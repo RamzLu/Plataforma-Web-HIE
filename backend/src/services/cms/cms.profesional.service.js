@@ -53,7 +53,9 @@ class CmsProfesionalService {
         esServicioClave: isServicio,
         especialidadId: realIdForFrontend,
         publicado: prof.activo,
-        imagenUrl: pubUrl
+        imagenUrl: pubUrl,
+        createdAt: prof.createdAt,
+        updatedAt: prof.updatedAt
       };
     });
   }

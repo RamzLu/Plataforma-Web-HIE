@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
 import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
@@ -40,7 +40,7 @@ const calculateWeeklyDelta = (list) => {
   let currentWeekCount = 0;
   let previousWeekCount = 0;
 
-  list.forEach(item => {
+  list.forEach((item) => {
     if (!item.createdAt) return;
     const itemDate = new Date(item.createdAt);
     
@@ -57,7 +57,8 @@ const calculateWeeklyDelta = (list) => {
 const DeltaBadge = ({ diff, customText }) => {
   const isPositive = diff > 0;
   const isNeutral = diff === 0;
-  const badgeClass = isPositive || isNeutral ? "positive" : "negative";
+  const isNegative = diff < 0;
+  const badgeClass = isNegative ? "negative" : "positive";
 
   let text = customText;
   if (!text) {
@@ -69,27 +70,26 @@ const DeltaBadge = ({ diff, customText }) => {
   return (
     <div className={`stat-badge ${badgeClass}`}>
       {isPositive && (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+          <polyline points="17 6 23 6 23 12"></polyline>
+        </svg>
       )}
-      {diff < 0 && (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+      {isNegative && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+          <polyline points="17 18 23 18 23 12"></polyline>
+        </svg>
       )}
       {isNeutral && (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
       )}
       {text}
     </div>
   );
 };
-
-const specialtiesData = [
-  { name: 'Clínica Médica', value: 12, color: '#6d28d9' },
-  { name: 'Pediatría', value: 8, color: '#0ea5e9' },      
-  { name: 'Ginecología', value: 6, color: '#10b981' },    
-  { name: 'Traumatología', value: 7, color: '#f59e0b' },  
-  { name: 'Oftalmología', value: 4, color: '#f43f5e' },   
-  { name: 'Cirugía General', value: 5, color: '#8b5cf6' }, 
-];
 
 // Paleta de colores para gráficos dinámicos
 const CHART_COLORS = [
@@ -98,40 +98,57 @@ const CHART_COLORS = [
   '#10b981', // Verde
   '#f59e0b', // Naranja
   '#f43f5e', // Rojo
+  '#8b5cf6', // Violeta suave
   '#14b8a6', // Turquesa
   '#ec4899', // Fucsia
+  '#6366f1', // Índigo
 ];
 
-const processDocsData = (docs) => {
-  if (!docs || docs.length === 0) return [];
+const processProfesionalesData = (profesionales) => {
+  if (!profesionales || !Array.isArray(profesionales) || profesionales.length === 0) return [];
   const counts = {};
-  
-  docs.forEach(doc => {
-    let cat = doc.category || doc.categoria || "Sin categorizar";
-    counts[cat] = (counts[cat] || 0) + 1;
+
+  profesionales.forEach((prof) => {
+    const esp = prof.especialidadNombre || "Sin Asignar";
+    counts[esp] = (counts[esp] || 0) + 1;
   });
 
   return Object.keys(counts).map((key, index) => ({
     name: key,
     value: counts[key],
-    color: CHART_COLORS[index % CHART_COLORS.length]
+    color: CHART_COLORS[index % CHART_COLORS.length],
   }));
 };
 
-// NUEVA FUNCIÓN: Agrupa las noticias según su categoría o clasificación temática
-const processNewsCategoriesData = (newsList) => {
-  if (!newsList || newsList.length === 0) return [];
+const processDocsData = (docs) => {
+  if (!docs || !Array.isArray(docs) || docs.length === 0) return [];
   const counts = {};
   
-  newsList.forEach(news => {
-    let cat = news.category || "General";
+  docs.forEach((doc) => {
+    const cat = doc.category || doc.categoria || "General";
     counts[cat] = (counts[cat] || 0) + 1;
   });
 
   return Object.keys(counts).map((key, index) => ({
     name: key,
     value: counts[key],
-    color: CHART_COLORS[index % CHART_COLORS.length]
+    color: CHART_COLORS[index % CHART_COLORS.length],
+  }));
+};
+
+const processNewsCategoriesData = (newsList) => {
+  if (!newsList || !Array.isArray(newsList) || newsList.length === 0) return [];
+  const counts = {};
+  
+  newsList.forEach((news) => {
+    const cat = news.category || "General";
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+
+  return Object.keys(counts).map((key, index) => ({
+    name: key,
+    value: counts[key],
+    color: CHART_COLORS[index % CHART_COLORS.length],
   }));
 };
 
@@ -139,6 +156,7 @@ const CmsDashboardView = ({
   latestNews,
   newsList,
   docsList,
+  profesionalesList,
   dashboardStats,
   setSelectedNews,
   handleQuickAction,
@@ -146,35 +164,73 @@ const CmsDashboardView = ({
 }) => {
   // Estado para controlar qué muestra el gráfico ("profesionales", "documentacion" o "noticias")
   const [chartType, setChartType] = useState("profesionales");
+  const [fallbackProfs, setFallbackProfs] = useState([]);
 
-  const noticias = dashboardStats?.contenidoPublicado || 0;
-  const documentos = dashboardStats?.documentosActivos || 0;
-  const borradores = dashboardStats?.borradores || 0;
-  const totalContenido = noticias + borradores;
-  const actividadPorcentaje = totalContenido > 0 ? Math.round((noticias / totalContenido) * 100) : 0;
-  
+  useEffect(() => {
+    if (!profesionalesList || profesionalesList.length === 0) {
+      fetch("http://localhost:3000/api/cms/profesionales")
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) setFallbackProfs(data);
+        })
+        .catch((err) => console.error("Error cargando profesionales:", err));
+    }
+  }, [profesionalesList]);
+
+  const activeProfs =
+    profesionalesList && profesionalesList.length > 0
+      ? profesionalesList
+      : fallbackProfs;
+
+  // 1. Noticias publicadas
+  const noticiasPublicadas = (newsList && newsList.length > 0)
+    ? newsList.filter((n) => (n.estado || "").toUpperCase() === "PUBLICADO").length
+    : (dashboardStats?.contenidoPublicado || 0);
+
+  // 2. Documentos activos
+  const documentosActivos = (docsList && docsList.length > 0)
+    ? docsList.length
+    : (dashboardStats?.documentosActivos || 0);
+
+  // 3. Profesionales listados
+  const profesionalesTotal = (activeProfs && activeProfs.length > 0)
+    ? activeProfs.length
+    : (dashboardStats?.profesionalesActivos || 0);
+
+  // 4. Tasa de publicación activa (% de noticias publicadas vs total)
+  const totalNoticias = (newsList && newsList.length > 0)
+    ? newsList.length
+    : (noticiasPublicadas + (dashboardStats?.borradores || 0));
+
+  const actividadPorcentaje = totalNoticias > 0
+    ? Math.round((noticiasPublicadas / totalNoticias) * 100)
+    : 0;
+
+  // Variaciones semanales reales calculadas por fecha de creación
   const noticiasDelta = calculateWeeklyDelta(newsList);
   const docsDelta = calculateWeeklyDelta(docsList);
+  const profsDelta = calculateWeeklyDelta(activeProfs);
 
   // Determinamos los datos del gráfico según la selección del usuario
-  let currentChartData = specialtiesData;
+  let currentChartData = [];
+  let chartTitle = "Total Profesionales";
+  let chartCenterLabel = "TOTAL PROF.";
+
   if (chartType === "documentacion") {
     currentChartData = processDocsData(docsList);
+    chartTitle = "Total Documentos";
+    chartCenterLabel = "TOTAL DOCS.";
   } else if (chartType === "noticias") {
     currentChartData = processNewsCategoriesData(newsList);
+    chartTitle = "Noticias por Clasificación";
+    chartCenterLabel = "TOTAL NOT.";
+  } else {
+    currentChartData = processProfesionalesData(activeProfs);
+    chartTitle = "Total Profesionales";
+    chartCenterLabel = "TOTAL PROF.";
   }
 
   const chartTotal = currentChartData.reduce((acc, curr) => acc + curr.value, 0);
-  
-  let chartTitle = "Total Profesionales";
-  let chartCenterLabel = "Total Prof.";
-  if (chartType === "documentacion") {
-    chartTitle = "Total Documentos";
-    chartCenterLabel = "Total Docs.";
-  } else if (chartType === "noticias") {
-    chartTitle = "Noticias por Clasificación";
-    chartCenterLabel = "Total Not.";
-  }
 
   return (
     <div className="cms-dashboard-wrapper">
@@ -189,7 +245,7 @@ const CmsDashboardView = ({
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
               </div>
             </div>
-            <h3 className="stat-value">{noticias}</h3>
+            <h3 className="stat-value">{noticiasPublicadas}</h3>
             <p className="stat-label">Noticias publicadas</p>
             <div style={{ marginTop: "16px" }}>
               <DeltaBadge diff={noticiasDelta} />
@@ -202,7 +258,7 @@ const CmsDashboardView = ({
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               </div>
             </div>
-            <h3 className="stat-value">{documentos}</h3>
+            <h3 className="stat-value">{documentosActivos}</h3>
             <p className="stat-label">Documentos activos</p>
             <div style={{ marginTop: "16px" }}>
               <DeltaBadge diff={docsDelta} />
@@ -215,10 +271,10 @@ const CmsDashboardView = ({
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </div>
             </div>
-            <h3 className="stat-value">{specialtiesData.reduce((acc, curr) => acc + curr.value, 0)}</h3>
+            <h3 className="stat-value">{profesionalesTotal}</h3>
             <p className="stat-label">Profesionales listados</p>
             <div style={{ marginTop: "16px" }}>
-              <DeltaBadge diff={2} customText="2 más que la sem. pasada" />
+              <DeltaBadge diff={profsDelta} />
             </div>
           </div>
 
@@ -231,7 +287,10 @@ const CmsDashboardView = ({
             <h3 className="stat-value">{actividadPorcentaje}%</h3>
             <p className="stat-label">Tasa de publicación activa</p>
             <div style={{ marginTop: "16px" }}>
-              <DeltaBadge diff={actividadPorcentaje >= 50 ? 1 : -1} customText={actividadPorcentaje >= 50 ? "Óptimo" : "Requiere atención"} />
+              <DeltaBadge
+                diff={actividadPorcentaje >= 75 ? 1 : actividadPorcentaje >= 50 ? 0 : -1}
+                customText={actividadPorcentaje >= 75 ? "Óptimo" : actividadPorcentaje >= 50 ? "Regular" : "Requiere atención"}
+              />
             </div>
           </div>
         </div>

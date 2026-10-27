@@ -46,10 +46,12 @@ const CmsPage = () => {
 
   const [newsList, setNewsList] = useState([]);
   const [docsList, setDocsList] = useState([]);
+  const [profesionalesList, setProfesionalesList] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({
     contenidoPublicado: 0,
     borradores: 0,
     documentosActivos: 0,
+    profesionalesActivos: 0,
     visitas: "0",
   });
   const [loading, setLoading] = useState(true);
@@ -102,24 +104,33 @@ const fetchNoticias = async () => {
       if (data && data.length > 0) {
         setDocsList(data);
         localStorage.setItem("portal_docs_data", JSON.stringify(data));
-        updateStats(newsList, data);
       } else {
         const cachedDocs = JSON.parse(localStorage.getItem("portal_docs_data")) || [];
         setDocsList(cachedDocs);
-        updateStats(newsList, cachedDocs);
       }
     } catch (error) {
       console.error("Error obteniendo documentos:", error);
       const cachedDocs = JSON.parse(localStorage.getItem("portal_docs_data")) || [];
       setDocsList(cachedDocs);
-      updateStats(newsList, cachedDocs);
+    }
+  };
+
+  const fetchProfesionales = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/cms/profesionales");
+      if (!response.ok) throw new Error("Error al obtener profesionales");
+      const data = await response.json();
+      if (data && Array.isArray(data)) {
+        setProfesionalesList(data);
+      }
+    } catch (error) {
+      console.error("Error obteniendo profesionales:", error);
     }
   };
 
   const handleAddNewDoc = (nuevoDoc) => {
     const updatedList = [nuevoDoc, ...docsList];
     setDocsList(updatedList);
-    updateStats(newsList, updatedList);
     localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
   };
 
@@ -128,19 +139,19 @@ const fetchNoticias = async () => {
       item.id === updatedDoc.id ? updatedDoc : item,
     );
     setDocsList(updatedList);
-    updateStats(newsList, updatedList);
     localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
   };
 
 const handleDeleteDoc = (id) => {
     const filtered = docsList.filter((d) => d.id !== id);
     setDocsList(filtered);
-    updateStats(newsList, filtered);
     localStorage.setItem("portal_docs_data", JSON.stringify(filtered));
   };
+
   useEffect(() => {
     fetchNoticias();
     fetchDocs();
+    fetchProfesionales();
   }, []);
 
   useEffect(() => {
@@ -189,18 +200,24 @@ const handleDeleteDoc = (id) => {
       });
   }, [newsList]);
 
-const updateStats = (currentNews, currentDocs = docsList) => {
-  const publicadas = currentNews.filter((n) => n.estado === "PUBLICADO").length;
-  const borradoresPendientes = currentNews.filter((n) => n.estado === "BORRADOR").length;
-  const totalDocumentos = currentDocs ? currentDocs.length : 0;
+  const updateStats = (currentNews = newsList, currentDocs = docsList, currentProfs = profesionalesList) => {
+    const publicadas = (currentNews || []).filter((n) => (n.estado || "").toUpperCase() === "PUBLICADO").length;
+    const borradoresPendientes = (currentNews || []).filter((n) => (n.estado || "").toUpperCase() === "BORRADOR").length;
+    const totalDocumentos = currentDocs ? currentDocs.length : 0;
+    const totalProfesionales = currentProfs ? currentProfs.length : 0;
 
-  setDashboardStats({
-    contenidoPublicado: publicadas,
-    borradores: borradoresPendientes,
-    documentosActivos: totalDocumentos,
-    visitas: "0",
-  });
-};
+    setDashboardStats({
+      contenidoPublicado: publicadas,
+      borradores: borradoresPendientes,
+      documentosActivos: totalDocumentos,
+      profesionalesActivos: totalProfesionales,
+      visitas: "0",
+    });
+  };
+
+  useEffect(() => {
+    updateStats(newsList, docsList, profesionalesList);
+  }, [newsList, docsList, profesionalesList]);
 
   const handleAddNewNews = (nuevaNoticia) => {
     const updatedList = [nuevaNoticia, ...newsList];
@@ -474,6 +491,7 @@ if (!authenticated) {
               latestNews={latestNews}
               newsList={newsList}         
               docsList={docsList}         
+              profesionalesList={profesionalesList}
               dashboardStats={dashboardStats}
               setSelectedNews={setSelectedNews}
               handleQuickAction={() => setActiveTab("noticias")}
