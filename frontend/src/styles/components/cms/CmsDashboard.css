@@ -5,18 +5,6 @@
   box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05); 
   border: 1px solid #e2e8f0; 
 }
-.activity-row {
-  padding: 14px 16px;
-  border-bottom: 1px solid #f1f5f9;
-  transition: background-color 0.15s ease;
-  display: grid;
-  grid-template-columns: 2.5fr 1.2fr 1fr 1fr;
-  align-items: center;
-}
-
-.activity-row:hover {
-  background-color: #f8fafc !important;
-}
 
 .cms-card-title {
   color: #0c2340;
@@ -417,26 +405,48 @@ select.chart-btn:hover, select.chart-btn:focus {
   margin: -15px 0 0 0;
 }
 
-.activity-table-head {
+.recent-activity-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.recent-activity-head,
+.recent-activity-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  padding: 10px 15px;
+  grid-template-columns: minmax(260px, 2.8fr) minmax(140px, 1.4fr) minmax(110px, 1.1fr) minmax(110px, 1fr);
+  align-items: center;
+  padding: 14px 16px;
+  gap: 12px;
+}
+
+.recent-activity-head {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #cbd5e1;
   font-size: 0.8rem;
   font-weight: 700;
   color: #0c2340;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid #cbd5e1;
 }
 
-.activity-table-body {
+.recent-activity-row {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.recent-activity-row:hover {
+  background-color: #f8fafc !important;
+}
+
+.recent-activity-body {
   display: flex;
   flex-direction: column;
 }
 
-.col-content {
+.recent-col-content {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow: hidden;
 }
 
 .activity-title {
@@ -451,6 +461,33 @@ select.chart-btn:hover, select.chart-btn:focus {
   padding-left: 10px;
 }
 
+.recent-col-editor {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-col-estado {
+  display: flex;
+  align-items: center;
+}
+
+.recent-col-fecha {
+  font-size: 0.9rem;
+  color: #475569;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.col-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .col-editor {
   font-size: 0.9rem;
   font-weight: 600;
@@ -459,10 +496,7 @@ select.chart-btn:hover, select.chart-btn:focus {
 
 .col-estado {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  min-width: 170px;
+  align-items: center;
 }
 
 .status-badge {

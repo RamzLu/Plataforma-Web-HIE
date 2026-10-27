@@ -348,7 +348,7 @@ const CmsNoticiasView = ({
       </div>
 
       <div className="cms-news-table-container">
-        <div className="activity-table-head news-table-head">
+        <div className="news-table-head">
           <div className="col-content">CONTENIDO</div>
           <div className="col-fecha">FECHA</div>
           <div className="col-editor">EDITOR</div>
@@ -371,7 +371,7 @@ const CmsNoticiasView = ({
             </div>
           ) : (
             filteredNews.map((news) => (
-              <div className="activity-row news-table-row" key={news.id}>
+              <div className="news-table-row" key={news.id}>
                 <div className="col-content" style={{ flexDirection: "row", alignItems: "center", gap: "15px" }}>
                   <div className="news-thumb-box">
                     {news.images && news.images.length > 0 ? (

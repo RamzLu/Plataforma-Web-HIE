@@ -194,32 +194,32 @@ const CmsRecentActivity = ({
       </div>
 
       <div className="recent-activity-table">
-        <div className="activity-table-head">
-          <div className="col-content">CONTENIDO</div>
-          <div className="col-editor">EDITOR</div>
-          <div className="col-estado">ESTADO</div>
-          <div className="col-fecha">FECHA</div>
+        <div className="recent-activity-head">
+          <div className="recent-col-content">CONTENIDO</div>
+          <div className="recent-col-editor">EDITOR</div>
+          <div className="recent-col-estado">ESTADO</div>
+          <div className="recent-col-fecha">FECHA</div>
         </div>
 
-        <div className="activity-table-body">
+        <div className="recent-activity-body">
           {recentItems.length > 0 ? (
             recentItems.map((item) => (
-              <div className="activity-row" key={item.id}>
-                <div className="col-content">
+              <div className="recent-activity-row" key={item.id}>
+                <div className="recent-col-content">
                   <span className="activity-title">• {item.titulo}</span>
                   <span className="activity-meta">
                     {formatActivityTime(item.timestamp)} | {item.categoria}
                   </span>
                 </div>
-                <div className="col-editor" data-label="Editor">
+                <div className="recent-col-editor" data-label="Editor">
                   {item.editor}
                 </div>
-                <div className="col-estado" data-label="Estado">
+                <div className="recent-col-estado" data-label="Estado">
                   <span className={`status-badge ${item.estado.toLowerCase()}`}>
                     {item.estado}
                   </span>
                 </div>
-                <div className="col-fecha" data-label="Fecha">
+                <div className="recent-col-fecha" data-label="Fecha">
                   {formatActivityDate(item.timestamp)}
                 </div>
               </div>

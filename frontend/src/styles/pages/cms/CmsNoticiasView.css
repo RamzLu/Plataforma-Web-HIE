@@ -20,25 +20,67 @@
   width: 100%;
   background-color: #ffffff !important;
   border-radius: 12px !important;
-  overflow: hidden;
   border: 1px solid #cbd5e1 !important;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
   margin-top: 20px;
+  overflow-x: auto;
 }
 
-.activity-table-head {
-  background-color: #f1f5f9 !important;
-  border-bottom: 2px solid #cbd5e1 !important;
+.news-table-head,
+.news-table-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 2.5fr) minmax(110px, 0.9fr) minmax(140px, 1.3fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, 0.7fr);
+  align-items: center;
+  padding: 14px 16px;
+  gap: 12px;
+  min-width: 850px;
+}
+
+.news-table-head {
+  background-color: #f1f5f9;
+  border-bottom: 2px solid #cbd5e1;
   font-weight: 700;
   color: #0c2340;
-  padding: 14px 16px;
-  display: grid;
-  grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1.2fr;
   font-size: 0.8rem;
   letter-spacing: 0.5px;
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+.news-table-row {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.news-table-row:hover {
+  background-color: #f8fafc;
+}
+
+.news-table-row .col-editor {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.news-table-row .col-fecha {
+  font-size: 0.88rem;
+  color: #475569;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.news-table-row .col-categoria {
+  display: flex;
+  align-items: center;
+}
+
+.news-table-row .col-estado {
+  display: flex;
+  align-items: center;
 }
 
 .activity-table-body {
@@ -636,7 +678,7 @@
 }
 
 .news-table-row .col-content {
-  padding-right: 30px; 
+  min-width: 0;
 }
 
 /* 2. Contenedor relativo para mantener la píldora en el centro de la fila */
