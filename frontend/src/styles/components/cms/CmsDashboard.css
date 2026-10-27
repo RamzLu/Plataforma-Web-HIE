@@ -555,6 +555,22 @@ select.chart-btn:hover, select.chart-btn:focus {
   white-space: nowrap;
 }
 
+.status-badge.eliminado {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
 .status-badge.pendiente {
   background-color: #e2e8f0;
   color: #475569;

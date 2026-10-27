@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import "../../styles/pages/cms/CmsContenidoGraficoView.css";
 import {
   getContenidosGraficos,
@@ -704,6 +705,13 @@ const CmsContenidoGraficoView = () => {
   // Eliminar Recurso
   const handleConfirmDelete = () => {
     if (!selectedRecurso) return;
+    const nombreRecurso = selectedRecurso.titulo || selectedRecurso.nombreOriginal || "Recurso";
+    recordCmsActivity({
+      titulo: `Eliminó contenido gráfico: "${nombreRecurso}"`,
+      categoria: "Contenido Gráfico",
+      editor: keycloak?.tokenParsed?.name || "Editor CMS",
+      estado: "ELIMINADO",
+    });
     setRecursos((prev) => prev.filter((r) => r.id !== selectedRecurso.id));
     toast.success("Recurso eliminado correctamente.");
     setShowDeleteModal(false);

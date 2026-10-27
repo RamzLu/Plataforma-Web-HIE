@@ -3,6 +3,7 @@ import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn
 import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import "../../styles/pages/cms/CmsInstitucionView.css";
 import {
   CmsDeleteModal,
@@ -363,6 +364,14 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
     try {
       await deleteAutoridad(autoridadToDelete.id, keycloak?.token);
+
+      const nombreAutoridad = `${autoridadToDelete.nombre || ""} ${autoridadToDelete.apellido || ""}`.trim() || "Autoridad";
+      recordCmsActivity({
+        titulo: `Eliminó autoridad: "${nombreAutoridad}"`,
+        categoria: "Autoridades",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
 
       setAutoridades((prev) => prev.filter((a) => a.id !== autoridadToDelete.id));
       toast.success("Autoridad eliminada correctamente.", { id: toastId });

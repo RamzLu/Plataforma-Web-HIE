@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { createDocumento, updateDocumento, deleteDocumento } from "../../api/documentos.api.js";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
 import "../../styles/pages/cms/CmsDocsView.css";
@@ -121,7 +122,16 @@ const CmsDocsView = ({
         return;
       }
 
+      const docToDelete = (docsList || []).find((d) => d.id === id);
+      const tituloDoc = docToDelete?.title || docToDelete?.titulo || "Documento";
+
       await deleteDocumento(id, token);
+      recordCmsActivity({
+        titulo: `Eliminó documento: "${tituloDoc}"`,
+        categoria: docToDelete?.category || "Documentación",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
 
       if (onDeleteDoc) onDeleteDoc(id);
       toast.success("Documento eliminado correctamente.");

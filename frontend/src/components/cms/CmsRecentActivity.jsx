@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getCmsActivityLog } from "../../utils/cmsActivityLogger";
 
 const formatActivityDate = (timestamp) => {
   if (!timestamp) return "Reciente";
@@ -54,7 +55,8 @@ const resolveEstado = (rawStatus) => {
   const upper = String(rawStatus).toUpperCase().trim();
   if (upper.includes("BORRADOR") || upper === "DRAFT") return "BORRADOR";
   if (upper.includes("ARCHIVADO") || upper === "ARCHIVED") return "ARCHIVADO";
-  // Regla de negocio solicitada: siempre como Publicado, salvo que sea Borrador o Archivado
+  if (upper.includes("ELIMINADO") || upper === "DELETED") return "ELIMINADO";
+  // Regla de negocio solicitada: siempre como Publicado, salvo que sea Borrador, Archivado o Eliminado
   return "PUBLICADO";
 };
 
@@ -67,6 +69,19 @@ const CmsRecentActivity = ({
   const [extraCaps, setExtraCaps] = useState([]);
   const [extraRes, setExtraRes] = useState([]);
   const [loadingExtras, setLoadingExtras] = useState(true);
+  const [loggedActivities, setLoggedActivities] = useState(() => getCmsActivityLog());
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setLoggedActivities(getCmsActivityLog());
+    };
+    window.addEventListener("cms_activity_updated", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("cms_activity_updated", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -177,6 +192,18 @@ const CmsRecentActivity = ({
       editor: r.editor || "Editor CMS",
       estado: estado,
       timestamp: rawDate ? new Date(rawDate).getTime() : 0,
+    });
+  });
+
+  // 6. Actividades registradas (Eliminaciones por el CM)
+  (loggedActivities || []).forEach((log) => {
+    activities.push({
+      id: log.id || `log-${log.timestamp}`,
+      titulo: log.titulo,
+      categoria: log.categoria || "General",
+      editor: log.editor || userName,
+      estado: resolveEstado(log.estado),
+      timestamp: log.timestamp || Date.now(),
     });
   });
 

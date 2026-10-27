@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import {
   BookOpen,
   Calendar,
@@ -577,6 +578,12 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
     try {
       const token = keycloak?.token || localStorage.getItem("token") || "";
       await deleteCapacitacion(itemAEliminar.id, token);
+      recordCmsActivity({
+        titulo: `Eliminó capacitación: "${itemAEliminar.titulo || "Capacitación"}"`,
+        categoria: "Capacitaciones",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
       toast.success("Capacitación eliminada correctamente.");
       await cargarCapacitaciones();
     } catch (error) {

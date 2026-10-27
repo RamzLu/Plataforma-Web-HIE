@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import {
   FileText,
   Upload,
@@ -394,6 +395,12 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     try {
       const token = keycloak?.token;
       await deleteResidencia(itemAEliminar.id, token);
+      recordCmsActivity({
+        titulo: `Eliminó residencia: "${itemAEliminar.nombre || "Residencia"}"`,
+        categoria: "Residencias",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
       toast.success("Residencia eliminada con éxito.", {
         id: toastId,
       });

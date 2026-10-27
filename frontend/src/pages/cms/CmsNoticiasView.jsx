@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
@@ -174,7 +175,16 @@ const CmsNoticiasView = ({
         return;
       }
 
+      const noticia = (filteredNews || []).find((n) => n.id === id) || (newsList || []).find((n) => n.id === id);
+      const tituloNoticia = noticia?.title || noticia?.titulo || "Noticia";
+
       await deleteNoticia(id, token);
+      recordCmsActivity({
+        titulo: `Eliminó noticia: "${tituloNoticia}"`,
+        categoria: noticia?.category || "Noticias",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
       onDeleteNews(id);
       toast.success("Noticia eliminada correctamente.");
       setShowDeleteModal(false);

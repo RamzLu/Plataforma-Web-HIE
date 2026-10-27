@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import { getEspecialidades, createEspecialidad, updateEspecialidad, deleteEspecialidad } from "../../api/especialidades.api.js";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import "../../styles/components/cms/CmsDashboard.css"; 
 import "../../styles/pages/cms/CmsNoticiasView.css";
 import "../../styles/pages/cms/CmsEspecialidadesView.css"; 
@@ -125,6 +126,13 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     setIsDeleting(true); 
     try {
       await deleteEspecialidad(itemAEliminar.id, keycloak.token, itemAEliminar.esServicio);
+      const tipo = itemAEliminar.esServicio ? "servicio" : "especialidad";
+      recordCmsActivity({
+        titulo: `Eliminó ${tipo}: "${itemAEliminar.nombre || ""}"`,
+        categoria: itemAEliminar.esServicio ? "Servicios" : "Especialidades",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
       toast.success("Eliminado con éxito.");
       setShowDeleteModal(false);
       cargarDatos();

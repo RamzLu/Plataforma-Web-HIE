@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import { getEspecialidades } from "../../api/especialidades.api.js";
 import Cropper from "react-easy-crop";
 import "../../styles/pages/cms/CmsProfesionalesView.css";
@@ -182,6 +183,14 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
       
       if (!response.ok) throw new Error("Error al eliminar");
       
+      const nombreCompleto = `${profesionalToDelete.nombre || ""} ${profesionalToDelete.apellido || ""}`.trim() || "Profesional";
+      recordCmsActivity({
+        titulo: `Eliminó al profesional ${nombreCompleto}`,
+        categoria: profesionalToDelete.especialidadNombre || "Profesionales",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
+
       setProfesionales(profesionales.filter(p => p.id !== profesionalToDelete.id));
       toast.success("Profesional eliminado correctamente.", { id: toastId });
       setShowDeleteModal(false);
