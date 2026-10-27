@@ -504,6 +504,7 @@ if (!authenticated) {
               setSelectedNews={setSelectedNews}
               handleQuickAction={handleQuickAction}
               loading={loading}
+              userName={userName}
             />
           )}
 

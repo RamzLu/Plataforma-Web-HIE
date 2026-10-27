@@ -7,10 +7,10 @@
 }
 .activity-row {
   padding: 14px 16px;
-  border-bottom: 1px solid #09274d43;
+  border-bottom: 1px solid #f1f5f9;
   transition: background-color 0.15s ease;
   display: grid;
-  grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1.2fr;
+  grid-template-columns: 2.5fr 1.2fr 1fr 1fr;
   align-items: center;
 }
 
@@ -474,19 +474,51 @@ select.chart-btn:hover, select.chart-btn:focus {
 }
 
 .status-badge.publicado {
-background: #dcfce7;
-    color: #15803d;
-    border: 1px solid #bbf7d0;
-    padding: 6px 14px;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.status-badge.borrador {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.status-badge.archivado {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .status-badge.pendiente {

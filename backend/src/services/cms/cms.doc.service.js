@@ -38,7 +38,8 @@ class CmsDocService {
         fileType: doc.archivo?.extension ? doc.archivo.extension.toUpperCase() : "PDF",
         fileSize: doc.archivo?.tamanioBytes ? `${(Number(doc.archivo.tamanioBytes) / (1024 * 1024)).toFixed(1)} MB` : "",
         fileUrl: pubUrl,
-        updatedAt: new Date(doc.updatedAt || doc.createdAt).toLocaleDateString("es-AR")
+        createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt || doc.createdAt
       };
     });
   }

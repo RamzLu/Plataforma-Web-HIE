@@ -161,6 +161,7 @@ const CmsDashboardView = ({
   setSelectedNews,
   handleQuickAction,
   loading,
+  userName,
 }) => {
   // Estado para controlar qué muestra el gráfico ("profesionales", "documentacion" o "noticias")
   const [chartType, setChartType] = useState("profesionales");
@@ -453,7 +454,12 @@ const CmsDashboardView = ({
       </div>
 
       <CmsQuickAccess onActionClick={handleQuickAction} />
-      <CmsRecentActivity />
+      <CmsRecentActivity
+        newsList={newsList}
+        docsList={docsList}
+        profesionalesList={activeProfs}
+        userName={userName}
+      />
     </div>
   );
 };
