@@ -28,7 +28,7 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 
-const CmsResidenciasView = () => {
+const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de residencias de la BD
   const [residencias, setResidencias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -200,6 +200,13 @@ const CmsResidenciasView = () => {
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
+
+  useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   // Apertura modal edición
   const handleOpenEdit = (res) => {

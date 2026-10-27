@@ -49,7 +49,7 @@ async function getCroppedImg(imageSrc, pixelCrop, fileName = "foto-perfil.jpg") 
   });
 }
 
-const CmsProfesionalesView = () => {
+const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => {
   const [profesionales, setProfesionales] = useState([]);
   const [areasDisponibles, setAreasDisponibles] = useState([]); 
   const [searchTerm, setSearchTerm] = useState("");
@@ -137,6 +137,13 @@ const CmsProfesionalesView = () => {
     setHasUnsavedChanges(false);
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   const handleOpenEdit = (prof) => {
     setEditingId(prof.id);

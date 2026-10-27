@@ -65,6 +65,8 @@ const CmsNoticiasView = ({
   onUpdateNews,
   onViewNews,
   loading,
+  initialCreateModal = false,
+  onModalOpened,
 }) => {
   const [viewTab, setViewTab] = useState("PUBLICADO");
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
@@ -107,6 +109,13 @@ const CmsNoticiasView = ({
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
+
+  React.useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   const handleOpenEdit = (news) => {
     setEditingId(news.id);

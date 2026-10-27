@@ -185,7 +185,7 @@ const INITIAL_CAPACITACIONES = [
   },
 ];
 
-const CmsCapacitacionesView = () => {
+const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de capacitaciones obtenidas desde la base de datos
   const [capacitaciones, setCapacitaciones] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -386,6 +386,13 @@ const CmsCapacitacionesView = () => {
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
+
+  useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   const handleOpenEdit = (item) => {
     setEditingId(item.id);

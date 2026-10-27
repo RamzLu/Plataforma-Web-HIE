@@ -31,18 +31,6 @@ const CmsQuickAccess = ({ onActionClick }) => {
       )
     },
     {
-      id: "carrusel", 
-      title: "Nuevo banner",
-      colorClass: "quick-teal",
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <circle cx="8.5" cy="8.5" r="1.5"></circle>
-          <polyline points="21 15 16 10 5 21"></polyline>
-        </svg>
-      )
-    },
-    {
       id: "profesionales",
       title: "Añadir profesional",
       colorClass: "quick-indigo",
@@ -52,6 +40,50 @@ const CmsQuickAccess = ({ onActionClick }) => {
           <circle cx="8.5" cy="7" r="4"></circle>
           <line x1="20" y1="8" x2="20" y2="14"></line>
           <line x1="23" y1="11" x2="17" y2="11"></line>
+        </svg>
+      )
+    },
+    {
+      id: "capacitaciones",
+      title: "Nueva capacitación",
+      colorClass: "quick-emerald",
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+        </svg>
+      )
+    },
+    {
+      id: "residencias",
+      title: "Nueva residencia",
+      colorClass: "quick-amber",
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+      )
+    },
+    {
+      id: "especialidades",
+      title: "Nueva especialidad",
+      colorClass: "quick-rose",
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+      )
+    },
+    {
+      id: "institucional",
+      title: "Nueva autoridad",
+      colorClass: "quick-cyan",
+      icon: (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+          <path d="M9 22v-4h6v4"></path>
+          <path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"></path>
         </svg>
       )
     }
@@ -71,7 +103,7 @@ const CmsQuickAccess = ({ onActionClick }) => {
           <div 
             key={action.id} 
             className={`quick-action-card ${action.colorClass}`}
-            onClick={() => onActionClick(action.id, true)}
+            onClick={() => onActionClick && onActionClick(action.id, true)}
           >
             <div className="quick-action-icon">
               {action.icon}
@@ -80,7 +112,7 @@ const CmsQuickAccess = ({ onActionClick }) => {
             <div className="quick-action-plus">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <line x1="5" y1="12" x2="12" y2="19"></line>
               </svg>
             </div>
           </div>

@@ -54,9 +54,17 @@ const CmsPage = () => {
     profesionalesActivos: 0,
     visitas: "0",
   });
+  const [openCreateOnTab, setOpenCreateOnTab] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const isKeycloakInitialized = useRef(false);
+
+  const handleQuickAction = (tabId, openModal = true) => {
+    setActiveTab(tabId);
+    if (openModal) {
+      setOpenCreateOnTab(true);
+    }
+  };
 
 const fetchNoticias = async () => {
   try {
@@ -494,7 +502,7 @@ if (!authenticated) {
               profesionalesList={profesionalesList}
               dashboardStats={dashboardStats}
               setSelectedNews={setSelectedNews}
-              handleQuickAction={() => setActiveTab("noticias")}
+              handleQuickAction={handleQuickAction}
               loading={loading}
             />
           )}
@@ -507,6 +515,8 @@ if (!authenticated) {
               onUpdateNews={handleUpdateNews}
               onViewNews={setSelectedNews}
               loading={loading}
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
             />
           )}
 
@@ -522,27 +532,44 @@ if (!authenticated) {
               onUpdateDoc={handleUpdateDoc}
               loading={loading}
               userName={userName}
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
             />
           )}
 
           {activeTab === "institucional" && (
-            <CmsInstitucionView />
+            <CmsInstitucionView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab === "profesionales" && (
-            <CmsProfesionalesView />
+            <CmsProfesionalesView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab === "especialidades" && (
-            <CmsEspecialidadesView />
+            <CmsEspecialidadesView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab === "residencias" && (
-            <CmsResidenciasView />
+            <CmsResidenciasView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab === "capacitaciones" && (
-            <CmsCapacitacionesView />
+            <CmsCapacitacionesView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab !== "dashboard" && 

@@ -388,6 +388,23 @@ select.chart-btn:hover, select.chart-btn:focus {
 .quick-indigo { background-color: #eef2ff; }
 .quick-indigo .quick-action-icon { background-color: #e0e7ff; color: #4f46e5; }
 .quick-indigo:hover { border-color: #c7d2fe; }
+
+.quick-emerald { background-color: #f0fdf4; }
+.quick-emerald .quick-action-icon { background-color: #dcfce7; color: #16a34a; }
+.quick-emerald:hover { border-color: #bbf7d0; }
+
+.quick-amber { background-color: #fffbeb; }
+.quick-amber .quick-action-icon { background-color: #fef3c7; color: #d97706; }
+.quick-amber:hover { border-color: #fde68a; }
+
+.quick-rose { background-color: #fff1f2; }
+.quick-rose .quick-action-icon { background-color: #ffe4e6; color: #e11d48; }
+.quick-rose:hover { border-color: #fecdd3; }
+
+.quick-cyan { background-color: #ecfeff; }
+.quick-cyan .quick-action-icon { background-color: #cffafe; color: #0891b2; }
+.quick-cyan:hover { border-color: #a5f3fc; }
+
 .recent-activity-header {
   margin-bottom: 20px;
   border-bottom: 1px solid #e2e8f0;

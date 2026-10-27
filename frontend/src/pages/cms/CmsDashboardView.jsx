@@ -378,7 +378,7 @@ const CmsDashboardView = ({
       <div className="cms-dashboard-card" style={{ marginBottom: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <h3 className="cms-card-title" style={{ margin: 0 }}>Últimas Noticias del Portal</h3>
-          <button className="cms-btn-outline" onClick={handleQuickAction} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: "white", cursor: "pointer", fontWeight: "600", fontSize: "0.85rem", color: "#0c2340" }}>
+          <button className="cms-btn-outline" onClick={() => handleQuickAction && handleQuickAction("noticias", false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: "white", cursor: "pointer", fontWeight: "600", fontSize: "0.85rem", color: "#0c2340" }}>
             Gestionar todas
           </button>
         </div>

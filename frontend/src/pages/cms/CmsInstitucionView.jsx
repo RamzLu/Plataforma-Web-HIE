@@ -64,7 +64,7 @@ async function getCroppedImg(imageSrc, pixelCrop, fileName = "autoridad.jpg") {
   });
 }
 
-const CmsInstitucionView = () => {
+const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -174,6 +174,13 @@ const CmsInstitucionView = () => {
     setHasUnsavedChanges(false);
     setShowAutoridadModal(true);
   };
+
+  useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreateAutoridad();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   // --- ABRIR MODAL EDITAR ---
   const handleOpenEditAutoridad = (autoridad) => {

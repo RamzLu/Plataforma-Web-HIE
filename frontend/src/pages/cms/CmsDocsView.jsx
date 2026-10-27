@@ -26,6 +26,8 @@ const CmsDocsView = ({
   onUpdateDoc,
   loading,
   userName,
+  initialCreateModal = false,
+  onModalOpened,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -61,6 +63,13 @@ const CmsDocsView = ({
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
+
+  React.useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   const handleOpenEdit = (doc) => {
     setEditingId(doc.id);

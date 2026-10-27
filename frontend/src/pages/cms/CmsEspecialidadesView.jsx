@@ -11,7 +11,7 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 
-const CmsEspecialidadesView = () => {
+const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) => {
   const [especialidades, setEspecialidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -69,6 +69,13 @@ const CmsEspecialidadesView = () => {
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
+
+  useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   const handleOpenEdit = (esp) => {
     setEditingId(esp.id);
