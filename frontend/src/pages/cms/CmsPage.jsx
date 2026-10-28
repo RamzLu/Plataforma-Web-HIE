@@ -8,6 +8,7 @@ import "../../styles/components/cms/CmsModals.css";
 
 import CmsSidebar from "../../components/cms/CmsSidebar";
 import CmsHeader from "../../components/cms/CmsHeader";
+import AccessDeniedScreen from "../../components/ui/AccessDeniedScreen";
 import CmsDashboardView from "../cms/CmsDashboardView";
 import CmsNoticiasView from "../cms/CmsNoticiasView";
 import CmsBannersView from "../cms/CmsBannersView";
@@ -163,14 +164,19 @@ const handleDeleteDoc = (id) => {
   }, []);
 
   useEffect(() => {
+    const checkCmsRole = () =>
+      keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("cm");
+    const checkAdminRole = () =>
+      keycloak.hasRealmRole("admin-hief") ||
+      keycloak.hasRealmRole("admin-hie") ||
+      keycloak.hasRealmRole("admin");
+
     if (isKeycloakInitialized.current || keycloak.authenticated) {
       if (keycloak.authenticated) {
         setInitialized(true);
         setAuthenticated(true);
-        setIsCms(
-          keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"),
-        );
-        setIsAdmin(keycloak.hasRealmRole("admin"));
+        setIsCms(checkCmsRole());
+        setIsAdmin(checkAdminRole());
         const name =
           keycloak.tokenParsed?.name ||
           keycloak.tokenParsed?.preferred_username ||
@@ -189,10 +195,8 @@ const handleDeleteDoc = (id) => {
         setInitialized(true);
         setAuthenticated(auth);
         if (auth) {
-          setIsCms(
-            keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"),
-          );
-          setIsAdmin(keycloak.hasRealmRole("admin"));
+          setIsCms(checkCmsRole());
+          setIsAdmin(checkAdminRole());
 
           const name =
             keycloak.tokenParsed?.name ||
@@ -364,87 +368,10 @@ if (!authenticated) {
 
   if (!isCms) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh', 
-        backgroundColor: '#f8fafc',
-        fontFamily: "'Manrope', system-ui, sans-serif",
-        padding: '20px',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          width: '64px',
-          height: '64px',
-          backgroundColor: '#fee2e2',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '20px'
-        }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-        </div>
-        
-        <h2 style={{ 
-          color: '#0c2340', 
-          fontWeight: '800', 
-          fontSize: '1.5rem',
-          letterSpacing: '0.5px',
-          margin: '0 0 10px 0'
-        }}>
-          Acceso Denegado
-        </h2>
-        <p style={{ 
-          color: '#64748b', 
-          fontSize: '1rem', 
-          margin: '0 0 30px 0',
-          maxWidth: '400px',
-          lineHeight: '1.5'
-        }}>
-          Tu cuenta no tiene los permisos de Redactor para ingresar al CMS.
-        </p>
-        
-        <button 
-          onClick={() => {
-            if (keycloak && typeof keycloak.logout === 'function') {
-              keycloak.logout();
-            } else {
-              localStorage.removeItem("cms_active_tab");
-              window.location.href = "/";
-            }
-          }}
-          style={{
-            backgroundColor: '#0c2340',
-            color: '#ffffff',
-            border: 'none',
-            padding: '12px 32px',
-            borderRadius: '8px',
-            fontWeight: '700',
-            fontSize: '0.95rem',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            boxShadow: '0 4px 12px rgba(12, 35, 64, 0.15)'
-          }}
-          onMouseOver={(e) => {
-            e.target.style.backgroundColor = '#1e3a5f';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseOut={(e) => {
-            e.target.style.backgroundColor = '#0c2340';
-            e.target.style.transform = 'translateY(0)';
-          }}
-        >
-          Cerrar Sesión
-        </button>
-      </div>
+      <AccessDeniedScreen
+        userName={userName}
+        requiredPanel="el Panel CMS (Redacción)"
+      />
     );
   }
 
