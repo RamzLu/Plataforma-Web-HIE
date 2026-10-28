@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { obtenerBanners, crearBanner, actualizarBanner, eliminarBanner } from "../controllers/cms/cms.banners.controller.js";
-import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia } from "../controllers/cms/cms.noticia.controller.js";
+import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia, evaluarNoticia } from "../controllers/cms/cms.noticia.controller.js";
 import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento } from "../controllers/cms/cms.doc.controller.js";
 import { obtenerProfesionales, crearProfesional, eliminarProfesional, actualizarProfesional } from "../controllers/cms/cms.profesional.controller.js";
 import * as especialidadCtrl from '../controllers/cms/cms.especialidad.controller.js';
@@ -41,6 +41,7 @@ const router = Router();
 router.get('/noticias', obtenerNoticias);
 router.post('/noticias', verifyToken, uploadMemory.array('imagenes', 10), crearNoticia);
 router.put('/noticias/:id', verifyToken, uploadMemory.array('imagenes', 10), actualizarNoticia);
+router.patch('/noticias/:id/estado', verifyToken, evaluarNoticia);
 router.delete('/noticias/:id', verifyToken, eliminarNoticia);
 
 // ==========================================

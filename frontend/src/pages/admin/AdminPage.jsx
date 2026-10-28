@@ -4,6 +4,7 @@ import '../../styles/pages/AdminPage.css';
 import "../../styles/components/admin/AdminLayout.css"; 
 
 import keycloak from '../../config/keycloak';
+import { getNoticias } from '../../api/noticias.api';
 
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminHeader from '../../components/admin/AdminHeader';
@@ -25,12 +26,27 @@ const AdminPage = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("Cargando...");
+  const [pendingNoticiasCount, setPendingNoticiasCount] = useState(0);
   
   const isKeycloakInitialized = useRef(false);
 
   useEffect(() => {
     localStorage.setItem("admin_active_tab", activeTab);
   }, [activeTab]);
+
+  useEffect(() => {
+    if (!authenticated || !isAdmin) return;
+    getNoticias(true)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const pending = data.filter(
+            (n) => (n.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+          ).length;
+          setPendingNoticiasCount(pending);
+        }
+      })
+      .catch(() => {});
+  }, [authenticated, isAdmin]);
 
   useEffect(() => {
     const checkAdminRole = () =>
@@ -165,7 +181,11 @@ const AdminPage = () => {
 
   return (
     <div className="admin-layout bg-slate-50">
-      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <AdminSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        pendingNoticiasCount={pendingNoticiasCount}
+      />
       
       <div className="admin-main-wrapper">
         <AdminHeader 
@@ -176,7 +196,9 @@ const AdminPage = () => {
         <main className="admin-content-area">
           {/* RENDERIZADO MODULAR DE TUS VISTAS */}
           {activeTab === "dashboard" && <AdminDashboardView />}
-          {activeTab === "noticias" && <AdminNoticiasView />}
+          {activeTab === "noticias" && (
+            <AdminNoticiasView onPendingCountChange={setPendingNoticiasCount} />
+          )}
           {activeTab === "servicios" && <AdminEspecialidadesServiciosView />}
           {activeTab === "usuarios" && <AdminUsuariosView />}
           {activeTab === "roles" && <AdminRolesView />}

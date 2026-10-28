@@ -7,21 +7,28 @@ export const getNoticias = async (isAdmin = false) => {
 
 export const createNoticia = async (formData, token) => {
   const response = await api.post("/cms/noticias", formData, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
 export const updateNoticia = async (id, formData, token) => {
   const response = await api.put(`/cms/noticias/${id}`, formData, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const evaluarNoticiaEstado = async (id, payload, token) => {
+  const response = await api.patch(`/cms/noticias/${id}/estado`, payload, {
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
 export const deleteNoticia = async (id, token) => {
   const response = await api.delete(`/cms/noticias/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };

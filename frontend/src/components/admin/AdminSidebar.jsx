@@ -15,12 +15,11 @@ import {
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 
-const AdminSidebar = ({ activeTab, setActiveTab }) => {
+const AdminSidebar = ({ activeTab, setActiveTab, pendingNoticiasCount = 0 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
   const [expandedSection, setExpandedSection] = useState("Aprobación de Contenidos");
 
-  // Matriz de navegación con mock data (pendingCount simulado)
   const menuSections = [
     {
       title: "General",
@@ -31,7 +30,7 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
     {
       title: "Aprobación de Contenidos",
       items: [
-        { id: "noticias", label: "Noticias", icon: <FileText />, pendingCount: 9 },
+        { id: "noticias", label: "Noticias", icon: <FileText />, pendingCount: pendingNoticiasCount },
         { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope />, pendingCount: 1 },
         { id: "profesionales", label: "Profesionales", icon: <Contact />, pendingCount: 2 }, 
         { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: 0 },

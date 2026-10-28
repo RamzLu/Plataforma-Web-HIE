@@ -90,7 +90,8 @@ const fetchNoticias = async () => {
         isDraft: noticia.isDraft || false,
         images: noticia.images || [],
         editor: noticia.editor || "Editor CMS",
-        editedBy: noticia.editedBy || null
+        editedBy: noticia.editedBy || null,
+        rejectionReason: noticia.rejectionReason || null
       }));
 
       setNewsList(noticiasFormateadas);

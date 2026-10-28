@@ -1,97 +1,239 @@
-import React, { useState } from 'react';
-import { Eye, X, CheckCircle, XCircle, CalendarClock, AlertTriangle } from 'lucide-react';
-// IMPORTANTE: Verifica la ruta de tu logo
-import avatarHospital from "../../assets/logoHospitalEvita.png"
+import React, { useState, useEffect, useCallback } from 'react';
+import { Eye, CheckCircle, XCircle, CalendarClock, AlertTriangle } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+import keycloak from '../../config/keycloak';
+import { getNoticias, evaluarNoticiaEstado } from '../../api/noticias.api';
+import avatarHospital from '../../assets/logoHospitalEvita.png';
 import '../../styles/pages/admin/AdminNoticiasView.css';
 
-const mockPayloadNoticias = [
-  { 
-    id: 1, 
-    title: 'Nueva sala de oncología habilitada', 
-    date: '16/09/2026', 
-    editor: 'Ana López', 
-    category: 'Noticias', 
-    status: 'Pendiente de aprobación',
-    content: '<p>Médicos Neumonólogos y Técnicos en Endoscopía del Hospital Interdistrital Evita participaron del Curso Teórico-Práctico...<br/><br/>🙌 Esta importante instancia de capacitación y actualización profesional permitió a nuestros equipos continuar fortaleciendo sus conocimientos.</p>',
-    scheduledDate: null,
-    images: ['https://via.placeholder.com/800x600/f1f5f9/94a3b8?text=Oncologia+1', 'https://via.placeholder.com/800x600/f8fafc/64748b?text=Oncologia+2'] 
-  },
-  { 
-    id: 2, 
-    title: 'Campaña de Prevención del Dengue: Medidas precautorias', 
-    date: '15/09/2026', 
-    editor: 'Carlos Ruiz', 
-    category: 'Noticias', 
-    status: 'Pendiente de aprobación',
-    content: '<p>Ante la llegada de las primeras lluvias de la temporada, el Ministerio recuerda las principales medidas preventivas...</p>',
-    scheduledDate: '20/09/2026 08:00 AM',
-    images: ['https://via.placeholder.com/800x600/e2e8f0/475569?text=Dengue+Prevencion']
-  },
-  { 
-    id: 3, 
-    title: 'Actualización de turnos web para consultorios externos, este es un título extremadamente largo para comprobar que la fila no se desborde', 
-    date: '14/09/2026', 
-    editor: 'Ana López', 
-    category: 'Noticias', 
-    status: 'Aprobado',
-    content: '<p>A partir del próximo mes, los turnos para todas las especialidades médicas podrán solicitarse a través del nuevo portal web...</p>',
-    scheduledDate: null,
-    images: []
-  }
-];
-
-const AdminNoticiasView = () => {
-  const [noticias, setNoticias] = useState(mockPayloadNoticias);
+const AdminNoticiasView = ({ onPendingCountChange }) => {
+  const [noticias, setNoticias] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedNews, setSelectedNews] = useState(null);
-  
+
   const [isRejecting, setIsRejecting] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReason, setRejectReason] = useState('');
+
+  const syncPendingCount = useCallback(
+    (list) => {
+      if (typeof onPendingCountChange === 'function') {
+        const count = list.filter(
+          (item) => (item.estado || '').toUpperCase() === 'PENDIENTE_APROBACION'
+        ).length;
+        onPendingCountChange(count);
+      }
+    },
+    [onPendingCountChange]
+  );
+
+  const cargarNoticias = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getNoticias(true);
+      if (Array.isArray(data)) {
+        const filtradas = data
+          .filter((n) => (n.estado || '').toUpperCase() !== 'BORRADOR')
+          .map((noticia) => {
+            const estadoUpper = (noticia.estado || 'PENDIENTE_APROBACION').toUpperCase();
+            let statusLabel = 'Pendiente de aprobación';
+            if (estadoUpper === 'PUBLICADO' || estadoUpper === 'APROBADO') {
+              statusLabel = 'Aprobado';
+            } else if (estadoUpper === 'RECHAZADO') {
+              statusLabel = 'Rechazado';
+            } else if (estadoUpper === 'PROGRAMADO') {
+              statusLabel = 'Programado';
+            }
+
+            return {
+              id: noticia.id,
+              title: noticia.title || noticia.titulo,
+              date:
+                noticia.date ||
+                (noticia.createdAt
+                  ? new Date(noticia.createdAt).toLocaleDateString('es-AR')
+                  : 'Hoy'),
+              editor: noticia.editor || 'Editor CMS',
+              editedBy: noticia.editedBy || null,
+              category: noticia.category || 'Noticias',
+              estado: estadoUpper,
+              status: statusLabel,
+              content: Array.isArray(noticia.body)
+                ? noticia.body.join('')
+                : noticia.contenido || noticia.body || '',
+              fechaPublicacion: noticia.fechaPublicacion || null,
+              scheduledDate: noticia.fechaPublicacion
+                ? new Date(noticia.fechaPublicacion).toLocaleString('es-AR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }) + ' hs'
+                : null,
+              createdAt: noticia.createdAt,
+              updatedAt: noticia.updatedAt,
+              images: noticia.images || [],
+              rejectionReason: noticia.rejectionReason || null,
+            };
+          })
+          .sort((a, b) => {
+            const aPending = a.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
+            const bPending = b.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
+            if (aPending !== bPending) return aPending - bPending;
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+          });
+
+        setNoticias(filtradas);
+        syncPendingCount(filtradas);
+      } else {
+        setNoticias([]);
+        syncPendingCount([]);
+      }
+    } catch (error) {
+      console.error('Error al cargar noticias en el panel de administración:', error);
+      toast.error('No se pudieron cargar las noticias para revisión.');
+    } finally {
+      setLoading(false);
+    }
+  }, [syncPendingCount]);
+
+  useEffect(() => {
+    cargarNoticias();
+  }, [cargarNoticias]);
 
   const handleOpenModal = (noticia) => {
     setSelectedNews(noticia);
-    setIsRejecting(false); 
-    setRejectReason("");
+    setIsRejecting(false);
+    setRejectReason(noticia.rejectionReason || '');
   };
 
   const handleCloseModal = () => {
+    if (submitting) return;
     setSelectedNews(null);
     setIsRejecting(false);
+    setRejectReason('');
   };
 
-  const handleApprove = () => {
-    alert(`Noticia "${selectedNews.title}" APROBADA exitosamente.`);
-    handleCloseModal();
+  const handleApprove = async () => {
+    if (!selectedNews || submitting) return;
+    try {
+      setSubmitting(true);
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
+      }
+
+      const response = await evaluarNoticiaEstado(
+        selectedNews.id,
+        { estado: 'APROBADO' },
+        keycloak.token
+      );
+
+      const estadoFinal = (response?.noticia?.estado || 'PUBLICADO').toUpperCase();
+      const nuevoStatusLabel = estadoFinal === 'PROGRAMADO' ? 'Programado' : 'Aprobado';
+
+      const updatedList = noticias.map((item) =>
+        item.id === selectedNews.id
+          ? {
+              ...item,
+              estado: estadoFinal,
+              status: nuevoStatusLabel,
+              rejectionReason: null,
+              updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
+            }
+          : item
+      );
+
+      setNoticias(updatedList);
+      syncPendingCount(updatedList);
+
+      if (estadoFinal === 'PROGRAMADO') {
+        toast.success(`Noticia "${selectedNews.title}" APROBADA y programada exitosamente.`);
+      } else {
+        toast.success(`Noticia "${selectedNews.title}" APROBADA y publicada exitosamente.`);
+      }
+
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error al aprobar la noticia:', error);
+      toast.error(
+        error?.response?.data?.message || 'Ocurrió un error al aprobar la noticia.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleTriggerReject = () => {
-    setIsRejecting(true); 
+    setIsRejecting(true);
   };
 
-  const handleConfirmReject = () => {
+  const handleConfirmReject = async () => {
     if (!rejectReason.trim()) {
-      alert("Debes ingresar obligatoriamente un motivo para enviar la corrección al Editor CMS.");
+      toast.error('Debes ingresar obligatoriamente un motivo para enviar la corrección al Editor CMS.');
       return;
     }
-    alert(`Noticia RECHAZADA. Motivo enviado: "${rejectReason}"`);
-    handleCloseModal();
+    if (!selectedNews || submitting) return;
+
+    try {
+      setSubmitting(true);
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
+      }
+
+      const motivoLimpio = rejectReason.trim();
+      const response = await evaluarNoticiaEstado(
+        selectedNews.id,
+        {
+          estado: 'RECHAZADO',
+          rejectionReason: motivoLimpio,
+        },
+        keycloak.token
+      );
+
+      const updatedList = noticias.map((item) =>
+        item.id === selectedNews.id
+          ? {
+              ...item,
+              estado: 'RECHAZADO',
+              status: 'Rechazado',
+              rejectionReason: motivoLimpio,
+              updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
+            }
+          : item
+      );
+
+      setNoticias(updatedList);
+      syncPendingCount(updatedList);
+
+      toast.success('Noticia RECHAZADA. El motivo fue enviado al equipo de redacción (CMS).');
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error al rechazar la noticia:', error);
+      toast.error(
+        error?.response?.data?.message || 'Ocurrió un error al rechazar la noticia.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getBadgeClass = (status) => {
-    if (status === 'Aprobado') return 'status-aprobado-admin';
+    if (status === 'Aprobado' || status === 'Programado') return 'status-aprobado-admin';
     if (status === 'Rechazado') return 'status-rechazado-admin';
     return 'status-pendiente-admin';
   };
 
   const getLayoutClass = (numImages) => {
-    if (numImages >= 4) return "layout-4-admin";
-    if (numImages === 3) return "layout-3-admin";
-    if (numImages === 2) return "layout-2-admin";
-    return "layout-1-admin";
+    if (numImages >= 4) return 'layout-4-admin';
+    if (numImages === 3) return 'layout-3-admin';
+    if (numImages === 2) return 'layout-2-admin';
+    return 'layout-1-admin';
   };
 
   return (
     <div className="admin-review-container-admin">
-      
       <div className="admin-page-header-admin">
         <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
         <h1>Revisión Editorial</h1>
@@ -100,8 +242,11 @@ const AdminNoticiasView = () => {
 
       <div className="dashboard-card-admin">
         <h2 className="dashboard-card-title-admin">Listado de las Noticias</h2>
-       <p className="news-view-subtitle-admin">Área de Revisión: Aprobación y rechazo de notificaciones recibidas desde el CMS</p> <br />
-        
+        <p className="news-view-subtitle-admin">
+          Área de Revisión: Aprobación y rechazo de notificaciones recibidas desde el CMS
+        </p>{' '}
+        <br />
+
         <div className="data-table-container-admin">
           <div className="data-table-header-admin">
             <div className="data-table-col-admin">CONTENIDO</div>
@@ -109,63 +254,117 @@ const AdminNoticiasView = () => {
             <div className="data-table-col-admin">EDITOR</div>
             <div className="data-table-col-admin">CATEGORÍA</div>
             <div className="data-table-col-admin">ESTADO</div>
-            <div className="data-table-col-admin" style={{ textAlign: 'center' }}>ACCIONES</div>
+            <div className="data-table-col-admin" style={{ textAlign: 'center' }}>
+              ACCIONES
+            </div>
           </div>
 
           <div className="data-table-body-admin">
-            {noticias.map((item) => (
-              <div className="activity-row-admin" key={item.id}>
-                
-                {/* CELDA 1: MIN-WIDTH PROTEGIDO */}
-                <div className="col-content-admin-box">
-                  <div className="news-thumb-box-admin" onClick={() => handleOpenModal(item)}>
-                    {item.images && item.images.length > 0 ? (
-                      <img src={item.images[0]} alt="Miniatura" className="news-thumb-img-admin" />
-                    ) : (
-                      <div className="news-thumb-mock-admin">HIE</div>
-                    )}
-                  </div>
-                  <div className="news-title-interactive-admin" onClick={() => handleOpenModal(item)}>
-                    <span className="news-title-clamped-admin" title={item.title}>
-                      {item.title}
-                    </span>
-                    {item.editor && (
-                      <span style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "4px" }}>
-                        Editado por {item.editor} Sistema
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* CELDA 2: FECHA */}
-                <div className="col-text-admin" style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span>{item.date}</span>
-                  <span style={{ fontSize: "0.75rem", color: "#64748b", fontStyle: "italic" }}>(Editado)</span>
-                </div>
-                
-                {/* CELDA 3: EDITOR */}
-                <div className="col-text-admin">{item.editor}</div>
-                
-                {/* CELDA 4: CATEGORÍA */}
-                <div className="col-categoria-data-admin col-text-admin">
-                  <span className="category-pill-admin">Noticias</span>
-                </div>
-
-                {/* CELDA 5: ESTADO */}
-                <div>
-                  <span className={`status-pill-admin ${getBadgeClass(item.status)}`}>
-                    {item.status}
-                  </span>
-                </div>
-                
-                {/* CELDA 6: ACCIONES (SOLO VER) */}
-                <div className="col-acciones-admin">
-                  <button className="icon-btn-admin" title="Ver Solicitud" onClick={() => handleOpenModal(item)}>
-                    <Eye size={18} />
-                  </button>
-                </div>
+            {loading ? (
+              <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
+                Cargando solicitudes de noticias...
               </div>
-            ))}
+            ) : noticias.length === 0 ? (
+              <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
+                No hay noticias enviadas para revisión en este momento.
+              </div>
+            ) : (
+              noticias.map((item) => {
+                const wasEdited =
+                  item.updatedAt &&
+                  item.createdAt &&
+                  new Date(item.updatedAt).getTime() >
+                    new Date(item.createdAt).getTime() + 5000;
+
+                return (
+                  <div className="activity-row-admin" key={item.id}>
+                    {/* CELDA 1: MIN-WIDTH PROTEGIDO */}
+                    <div className="col-content-admin-box">
+                      <div
+                        className="news-thumb-box-admin"
+                        onClick={() => handleOpenModal(item)}
+                      >
+                        {item.images && item.images.length > 0 ? (
+                          <img
+                            src={item.images[0]}
+                            alt="Miniatura"
+                            className="news-thumb-img-admin"
+                          />
+                        ) : (
+                          <div className="news-thumb-mock-admin">HIE</div>
+                        )}
+                      </div>
+                      <div
+                        className="news-title-interactive-admin"
+                        onClick={() => handleOpenModal(item)}
+                      >
+                        <span className="news-title-clamped-admin" title={item.title}>
+                          {item.title}
+                        </span>
+                        {item.editor && (
+                          <span
+                            style={{
+                              fontSize: '0.75rem',
+                              color: '#64748b',
+                              marginTop: '4px',
+                            }}
+                          >
+                            Editado por {item.editedBy || item.editor} Sistema
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* CELDA 2: FECHA */}
+                    <div
+                      className="col-text-admin"
+                      style={{ display: 'flex', flexDirection: 'column' }}
+                    >
+                      <span>{item.date}</span>
+                      {wasEdited && (
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            color: '#64748b',
+                            fontStyle: 'italic',
+                          }}
+                        >
+                          (Editado)
+                        </span>
+                      )}
+                    </div>
+
+                    {/* CELDA 3: EDITOR */}
+                    <div className="col-text-admin">{item.editor}</div>
+
+                    {/* CELDA 4: CATEGORÍA */}
+                    <div className="col-categoria-data-admin col-text-admin">
+                      <span className="category-pill-admin">
+                        {item.category || 'Noticias'}
+                      </span>
+                    </div>
+
+                    {/* CELDA 5: ESTADO */}
+                    <div>
+                      <span className={`status-pill-admin ${getBadgeClass(item.status)}`}>
+                        {item.status}
+                      </span>
+                    </div>
+
+                    {/* CELDA 6: ACCIONES (SOLO VER) */}
+                    <div className="col-acciones-admin">
+                      <button
+                        className="icon-btn-admin"
+                        title="Ver Solicitud"
+                        onClick={() => handleOpenModal(item)}
+                      >
+                        <Eye size={18} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
@@ -176,25 +375,37 @@ const AdminNoticiasView = () => {
       {selectedNews && (
         <div className="modal-overlay-admin" onClick={handleCloseModal}>
           <div className="modal-content-esp-admin" onClick={(e) => e.stopPropagation()}>
-            
             {selectedNews.scheduledDate && (
               <div className="scheduled-alert-admin">
                 <CalendarClock size={20} />
-                <span>Atención: Esta noticia está programada para publicarse automáticamente el {selectedNews.scheduledDate}.</span>
+                <span>
+                  Atención: Esta noticia está programada para publicarse automáticamente el{' '}
+                  {selectedNews.scheduledDate}.
+                </span>
               </div>
             )}
 
             <div className="modal-header-esp-admin">
               <h2>COMUNICADO INSTITUCIONAL</h2>
-              <button className="btn-close-modal-admin" onClick={handleCloseModal}>
+              <button
+                className="btn-close-modal-admin"
+                onClick={handleCloseModal}
+                disabled={submitting}
+              >
                 <svg viewBox="0 0 24 24" fill="none">
                   <path d="M18 6L6 18M6 6l12 12"></path>
                 </svg>
               </button>
             </div>
 
-            <div className="modal-body-esp-admin">
-              
+            <div
+              className="modal-body-esp-admin"
+              style={
+                !selectedNews.images || selectedNews.images.length === 0
+                  ? { gridTemplateColumns: '1fr' }
+                  : undefined
+              }
+            >
               {/* COLUMNA IZQUIERDA (Info y Título) */}
               <div className="preview-mock-left-admin">
                 <div className="modal-author-row-admin">
@@ -219,8 +430,12 @@ const AdminNoticiasView = () => {
               {/* COLUMNA DERECHA (Mosaico de Imágenes) */}
               {selectedNews.images && selectedNews.images.length > 0 && (
                 <div className="news-modal-images-section-admin">
-                  <div className={`news-modal-images-grid-admin ${getLayoutClass(selectedNews.images.length)}`}>
-                    {selectedNews.images.map((img, idx) => (
+                  <div
+                    className={`news-modal-images-grid-admin ${getLayoutClass(
+                      selectedNews.images.length
+                    )}`}
+                  >
+                    {selectedNews.images.slice(0, 4).map((img, idx) => (
                       <div className="modal-news-img-box-admin" key={idx}>
                         <img src={img} alt={`Foto noticia ${idx + 1}`} />
                       </div>
@@ -229,19 +444,42 @@ const AdminNoticiasView = () => {
                 </div>
               )}
 
+              {/* SI YA FUE RECHAZADA, MOSTRAR EL MOTIVO ACTUAL */}
+              {!isRejecting &&
+                selectedNews.estado === 'RECHAZADO' &&
+                selectedNews.rejectionReason && (
+                  <div className="rejection-area-admin">
+                    <label>
+                      <AlertTriangle
+                        size={16}
+                        style={{ display: 'inline', verticalAlign: 'text-bottom' }}
+                      />{' '}
+                      Motivo del rechazo enviado al CMS:
+                    </label>
+                    <p style={{ margin: 0, color: '#7f1d1d', fontSize: '0.92rem' }}>
+                      {selectedNews.rejectionReason}
+                    </p>
+                  </div>
+                )}
+
               {/* ÁREA DE JUSTIFICACIÓN DE RECHAZO */}
               {isRejecting && (
                 <div className="rejection-area-admin">
                   <label htmlFor="rejection-reason">
-                    <AlertTriangle size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> Mensaje de Justificación (Requerido):
+                    <AlertTriangle
+                      size={16}
+                      style={{ display: 'inline', verticalAlign: 'text-bottom' }}
+                    />{' '}
+                    Mensaje de Justificación (Requerido):
                   </label>
-                  <textarea 
+                  <textarea
                     id="rejection-reason"
                     className="rejection-textarea-admin"
                     placeholder="Explica al editor el motivo del rechazo para que pueda corregirlo..."
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
                     autoFocus
+                    disabled={submitting}
                   />
                 </div>
               )}
@@ -251,25 +489,46 @@ const AdminNoticiasView = () => {
             <div className="modal-footer-esp-admin">
               {!isRejecting ? (
                 <>
-                  <button className="btn-modal-admin btn-modal-danger-admin" onClick={handleTriggerReject}>
+                  <button
+                    className="btn-modal-admin btn-modal-danger-admin"
+                    onClick={handleTriggerReject}
+                    disabled={submitting}
+                  >
                     <XCircle size={18} /> Rechazar
                   </button>
-                  <button className="btn-modal-admin btn-modal-success-admin" onClick={handleApprove}>
-                    <CheckCircle size={18} /> Aprobar {selectedNews.scheduledDate && 'y Programar'}
-                  </button>
+                  {selectedNews.estado !== 'PUBLICADO' &&
+                    selectedNews.estado !== 'APROBADO' && (
+                      <button
+                        className="btn-modal-admin btn-modal-success-admin"
+                        onClick={handleApprove}
+                        disabled={submitting}
+                      >
+                        <CheckCircle size={18} />{' '}
+                        {submitting
+                          ? 'Procesando...'
+                          : `Aprobar ${selectedNews.scheduledDate ? 'y Programar' : ''}`}
+                      </button>
+                    )}
                 </>
               ) : (
                 <>
-                  <button className="btn-modal-admin btn-modal-cancel-admin" onClick={() => setIsRejecting(false)}>
+                  <button
+                    className="btn-modal-admin btn-modal-cancel-admin"
+                    onClick={() => setIsRejecting(false)}
+                    disabled={submitting}
+                  >
                     Cancelar
                   </button>
-                  <button className="btn-modal-admin btn-modal-confirm-reject-admin" onClick={handleConfirmReject}>
-                    Confirmar Rechazo
+                  <button
+                    className="btn-modal-admin btn-modal-confirm-reject-admin"
+                    onClick={handleConfirmReject}
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Enviando...' : 'Confirmar Rechazo'}
                   </button>
                 </>
               )}
             </div>
-
           </div>
         </div>
       )}
