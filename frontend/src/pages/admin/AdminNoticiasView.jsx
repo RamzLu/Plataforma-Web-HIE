@@ -12,6 +12,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selectedNews, setSelectedNews] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('PENDIENTE');
 
   const [isRejecting, setIsRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -279,6 +280,32 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     return 'layout-1-admin';
   };
 
+  const pendingCount = noticias.filter((n) => n.estado === 'PENDIENTE_APROBACION').length;
+  const approvedCount = noticias.filter(
+    (n) =>
+      n.estado === 'PUBLICADO' ||
+      n.estado === 'APROBADO' ||
+      n.estado === 'PROGRAMADO'
+  ).length;
+  const rejectedCount = noticias.filter((n) => n.estado === 'RECHAZADO').length;
+
+  const filteredNoticias = noticias.filter((item) => {
+    if (statusFilter === 'PENDIENTE') {
+      return item.estado === 'PENDIENTE_APROBACION';
+    }
+    if (statusFilter === 'APROBADO') {
+      return (
+        item.estado === 'PUBLICADO' ||
+        item.estado === 'APROBADO' ||
+        item.estado === 'PROGRAMADO'
+      );
+    }
+    if (statusFilter === 'RECHAZADO') {
+      return item.estado === 'RECHAZADO';
+    }
+    return true;
+  });
+
   return (
     <div className="admin-review-container-admin">
       <div className="admin-page-header-admin">
@@ -291,8 +318,42 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         <h2 className="dashboard-card-title-admin">Listado de las Noticias</h2>
         <p className="news-view-subtitle-admin">
           Área de Revisión: Aprobación y rechazo de notificaciones recibidas desde el CMS
-        </p>{' '}
-        <br />
+        </p>
+
+        <div className="admin-news-filter-bar">
+          <div className="admin-news-tabs-group" role="tablist" aria-label="Filtrar noticias por estado">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === 'PENDIENTE'}
+              className={`admin-news-tab-item ${statusFilter === 'PENDIENTE' ? 'active' : ''}`}
+              onClick={() => setStatusFilter('PENDIENTE')}
+            >
+              Pendientes
+              <span className="admin-news-tab-count count-pending">{pendingCount}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === 'APROBADO'}
+              className={`admin-news-tab-item ${statusFilter === 'APROBADO' ? 'active' : ''}`}
+              onClick={() => setStatusFilter('APROBADO')}
+            >
+              Aprobados
+              <span className="admin-news-tab-count count-approved">{approvedCount}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === 'RECHAZADO'}
+              className={`admin-news-tab-item ${statusFilter === 'RECHAZADO' ? 'active' : ''}`}
+              onClick={() => setStatusFilter('RECHAZADO')}
+            >
+              Rechazados
+              <span className="admin-news-tab-count count-rejected">{rejectedCount}</span>
+            </button>
+          </div>
+        </div>
 
         <div className="data-table-container-admin">
           <div className="data-table-header-admin">
@@ -311,12 +372,16 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
                 Cargando solicitudes de noticias...
               </div>
-            ) : noticias.length === 0 ? (
+            ) : filteredNoticias.length === 0 ? (
               <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
-                No hay noticias enviadas para revisión en este momento.
+                {statusFilter === 'PENDIENTE'
+                  ? 'No hay noticias pendientes de aprobación en este momento.'
+                  : statusFilter === 'APROBADO'
+                  ? 'No hay noticias aprobadas registradas.'
+                  : 'No hay noticias rechazadas registradas.'}
               </div>
             ) : (
-              noticias.map((item) => {
+              filteredNoticias.map((item) => {
                 const wasEdited =
                   item.updatedAt &&
                   item.createdAt &&

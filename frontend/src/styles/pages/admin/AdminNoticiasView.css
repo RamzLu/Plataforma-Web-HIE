@@ -691,3 +691,99 @@
     right: 20px;
   }
 }
+
+/* =========================================
+   FILTRO POR PESTAÑAS EN LISTADO DE NOTICIAS ADMIN
+========================================= */
+.admin-news-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 18px 0 20px 0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-news-tabs-group {
+  display: inline-flex;
+  background-color: #f8fafc;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.admin-news-tab-item {
+  border: none;
+  background: transparent;
+  padding: 8px 18px;
+  border-radius: 7px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-news-tab-item:hover {
+  color: #0c2340;
+}
+
+.admin-news-tab-item.active {
+  background-color: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.16);
+}
+
+.admin-news-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background-color: #e2e8f0;
+  color: #334155;
+}
+
+.admin-news-tab-item.active .admin-news-tab-count {
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.admin-news-tab-count.count-pending {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.admin-news-tab-item.active .admin-news-tab-count.count-pending {
+  background-color: #f59e0b;
+  color: #ffffff;
+}
+
+.admin-news-tab-count.count-approved {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.admin-news-tab-item.active .admin-news-tab-count.count-approved {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.admin-news-tab-count.count-rejected {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.admin-news-tab-item.active .admin-news-tab-count.count-rejected {
+  background-color: #ef4444;
+  color: #ffffff;
+}
