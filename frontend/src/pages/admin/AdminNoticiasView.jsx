@@ -106,7 +106,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   const handleOpenModal = (noticia) => {
     setSelectedNews(noticia);
     setIsRejecting(false);
-    setRejectReason(noticia.rejectionReason || '');
+    setRejectReason('');
   };
 
   const handleCloseModal = () => {
@@ -117,7 +117,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   };
 
   const handleApprove = async () => {
-    if (!selectedNews || submitting) return;
+    if (!selectedNews || selectedNews.estado !== 'PENDIENTE_APROBACION' || submitting) return;
     try {
       setSubmitting(true);
       if (keycloak.authenticated) {
@@ -166,15 +166,16 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   };
 
   const handleTriggerReject = () => {
+    if (!selectedNews || selectedNews.estado !== 'PENDIENTE_APROBACION') return;
     setIsRejecting(true);
   };
 
   const handleConfirmReject = async () => {
+    if (!selectedNews || selectedNews.estado !== 'PENDIENTE_APROBACION' || submitting) return;
     if (!rejectReason.trim()) {
       toast.error('Debes ingresar obligatoriamente un motivo para enviar la corrección al Editor CMS.');
       return;
     }
-    if (!selectedNews || submitting) return;
 
     try {
       setSubmitting(true);
@@ -355,7 +356,11 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                     <div className="col-acciones-admin">
                       <button
                         className="icon-btn-admin"
-                        title="Ver Solicitud"
+                        title={
+                          item.estado === 'PENDIENTE_APROBACION'
+                            ? 'Revisar y evaluar solicitud'
+                            : 'Ver vista previa'
+                        }
                         onClick={() => handleOpenModal(item)}
                       >
                         <Eye size={18} />
@@ -375,15 +380,17 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       {selectedNews && (
         <div className="modal-overlay-admin" onClick={handleCloseModal}>
           <div className="modal-content-esp-admin" onClick={(e) => e.stopPropagation()}>
-            {selectedNews.scheduledDate && (
-              <div className="scheduled-alert-admin">
-                <CalendarClock size={20} />
-                <span>
-                  Atención: Esta noticia está programada para publicarse automáticamente el{' '}
-                  {selectedNews.scheduledDate}.
-                </span>
-              </div>
-            )}
+            {selectedNews.scheduledDate &&
+              (selectedNews.estado === 'PENDIENTE_APROBACION' ||
+                selectedNews.estado === 'PROGRAMADO') && (
+                <div className="scheduled-alert-admin">
+                  <CalendarClock size={20} />
+                  <span>
+                    Atención: Esta noticia está programada para publicarse automáticamente el{' '}
+                    {selectedNews.scheduledDate}.
+                  </span>
+                </div>
+              )}
 
             <div className="modal-header-esp-admin">
               <h2>COMUNICADO INSTITUCIONAL</h2>
@@ -444,26 +451,24 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 </div>
               )}
 
-              {/* SI YA FUE RECHAZADA, MOSTRAR EL MOTIVO ACTUAL */}
-              {!isRejecting &&
-                selectedNews.estado === 'RECHAZADO' &&
-                selectedNews.rejectionReason && (
-                  <div className="rejection-area-admin">
-                    <label>
-                      <AlertTriangle
-                        size={16}
-                        style={{ display: 'inline', verticalAlign: 'text-bottom' }}
-                      />{' '}
-                      Motivo del rechazo enviado al CMS:
-                    </label>
-                    <p style={{ margin: 0, color: '#7f1d1d', fontSize: '0.92rem' }}>
-                      {selectedNews.rejectionReason}
-                    </p>
-                  </div>
-                )}
+              {/* SI YA FUE RECHAZADA, MOSTRAR EL MOTIVO EN MODO SOLO LECTURA */}
+              {selectedNews.estado === 'RECHAZADO' && selectedNews.rejectionReason && (
+                <div className="rejection-area-admin">
+                  <label>
+                    <AlertTriangle
+                      size={16}
+                      style={{ display: 'inline', verticalAlign: 'text-bottom' }}
+                    />{' '}
+                    Motivo del rechazo enviado al CMS:
+                  </label>
+                  <p style={{ margin: 0, color: '#7f1d1d', fontSize: '0.92rem' }}>
+                    {selectedNews.rejectionReason}
+                  </p>
+                </div>
+              )}
 
-              {/* ÁREA DE JUSTIFICACIÓN DE RECHAZO */}
-              {isRejecting && (
+              {/* ÁREA DE JUSTIFICACIÓN DE RECHAZO (SOLO PARA SOLICITUDES PENDIENTES) */}
+              {selectedNews.estado === 'PENDIENTE_APROBACION' && isRejecting && (
                 <div className="rejection-area-admin">
                   <label htmlFor="rejection-reason">
                     <AlertTriangle
@@ -485,50 +490,49 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               )}
             </div>
 
-            {/* CONTROLES INFERIORES DEL MODAL (Aprobar/Rechazar) */}
-            <div className="modal-footer-esp-admin">
-              {!isRejecting ? (
-                <>
-                  <button
-                    className="btn-modal-admin btn-modal-danger-admin"
-                    onClick={handleTriggerReject}
-                    disabled={submitting}
-                  >
-                    <XCircle size={18} /> Rechazar
-                  </button>
-                  {selectedNews.estado !== 'PUBLICADO' &&
-                    selectedNews.estado !== 'APROBADO' && (
-                      <button
-                        className="btn-modal-admin btn-modal-success-admin"
-                        onClick={handleApprove}
-                        disabled={submitting}
-                      >
-                        <CheckCircle size={18} />{' '}
-                        {submitting
-                          ? 'Procesando...'
-                          : `Aprobar ${selectedNews.scheduledDate ? 'y Programar' : ''}`}
-                      </button>
-                    )}
-                </>
-              ) : (
-                <>
-                  <button
-                    className="btn-modal-admin btn-modal-cancel-admin"
-                    onClick={() => setIsRejecting(false)}
-                    disabled={submitting}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    className="btn-modal-admin btn-modal-confirm-reject-admin"
-                    onClick={handleConfirmReject}
-                    disabled={submitting}
-                  >
-                    {submitting ? 'Enviando...' : 'Confirmar Rechazo'}
-                  </button>
-                </>
-              )}
-            </div>
+            {/* CONTROLES INFERIORES: EL ADMIN SOLO PUEDE ACEPTAR O RECHAZAR CAMBIOS PENDIENTES DEL CMS */}
+            {selectedNews.estado === 'PENDIENTE_APROBACION' && (
+              <div className="modal-footer-esp-admin">
+                {!isRejecting ? (
+                  <>
+                    <button
+                      className="btn-modal-admin btn-modal-danger-admin"
+                      onClick={handleTriggerReject}
+                      disabled={submitting}
+                    >
+                      <XCircle size={18} /> Rechazar
+                    </button>
+                    <button
+                      className="btn-modal-admin btn-modal-success-admin"
+                      onClick={handleApprove}
+                      disabled={submitting}
+                    >
+                      <CheckCircle size={18} />{' '}
+                      {submitting
+                        ? 'Procesando...'
+                        : `Aprobar ${selectedNews.scheduledDate ? 'y Programar' : ''}`}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="btn-modal-admin btn-modal-cancel-admin"
+                      onClick={() => setIsRejecting(false)}
+                      disabled={submitting}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      className="btn-modal-admin btn-modal-confirm-reject-admin"
+                      onClick={handleConfirmReject}
+                      disabled={submitting}
+                    >
+                      {submitting ? 'Enviando...' : 'Confirmar Rechazo'}
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

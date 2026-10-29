@@ -444,6 +444,15 @@ class CmsNoticiaService {
       throw error;
     }
 
+    // El administrador únicamente puede aprobar o rechazar solicitudes pendientes enviadas desde el CMS
+    if (noticiaExistente.estado !== "PENDIENTE_APROBACION") {
+      const error = new Error(
+        "Solo se pueden aprobar o rechazar noticias que estén pendientes de aprobación."
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
     const usuarioAdmin = await obtenerOCrearUsuarioLocal(user);
     const estadoUpper = estado.toUpperCase();
 
