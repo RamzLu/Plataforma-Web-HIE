@@ -4,6 +4,7 @@ import "../../styles/pages/cms/CmsContenidoGraficoView.css";
 import {
   getContenidosGraficos,
   updateContenidoGrafico,
+  cambiarEstadoContenidoGrafico,
 } from "../../api/contenidoGrafico.api.js";
 import { CmsContenidoGraficoEditModal } from "../../components/cms/CmsContenidoGraficoCorrectionModal";
 
@@ -20,6 +21,7 @@ import defaultImg4 from "../../assets/fondoHospitalCarrusel4.jpg";
 const INITIAL_ESPACIOS_FIJOS = [
   {
     id: "espacio-banner-inicio",
+    espacioKey: "espacio-banner-inicio",
     orden: 1,
     nombre: "Banner Principal de Inicio",
     titulo: "Banner Principal de Inicio",
@@ -63,6 +65,7 @@ const INITIAL_ESPACIOS_FIJOS = [
   },
   {
     id: "espacio-seccion-pacientes",
+    espacioKey: "espacio-seccion-pacientes",
     orden: 2,
     nombre: "Sección Pacientes y Comunidad",
     titulo: "Sección Pacientes y Comunidad",
@@ -97,6 +100,7 @@ const INITIAL_ESPACIOS_FIJOS = [
   },
   {
     id: "espacio-banner-especialidades",
+    espacioKey: "espacio-banner-especialidades",
     orden: 3,
     nombre: "Banner Principal de Especialidades",
     titulo: "Banner Principal de Especialidades",
@@ -122,6 +126,7 @@ const INITIAL_ESPACIOS_FIJOS = [
   },
   {
     id: "espacio-galeria-especialidades",
+    espacioKey: "espacio-galeria-especialidades",
     orden: 4,
     nombre: "Imagen de Pacientes y Consultorios",
     titulo: "Imagen de Pacientes y Consultorios",
@@ -157,6 +162,7 @@ const INITIAL_ESPACIOS_FIJOS = [
   },
   {
     id: "espacio-banner-capacitacion",
+    espacioKey: "espacio-banner-capacitacion",
     orden: 5,
     nombre: "Banner Principal de Capacitación",
     titulo: "Banner Principal de Capacitación",
@@ -182,6 +188,7 @@ const INITIAL_ESPACIOS_FIJOS = [
   },
   {
     id: "espacio-actividades-docencia",
+    espacioKey: "espacio-actividades-docencia",
     orden: 6,
     nombre: "Espacio Talleres y Simulación Clínica",
     titulo: "Espacio Talleres y Simulación Clínica",
@@ -207,6 +214,7 @@ const INITIAL_ESPACIOS_FIJOS = [
   },
   {
     id: "espacio-banner-institucional",
+    espacioKey: "espacio-banner-institucional",
     orden: 7,
     nombre: "Banner Principal Institucional",
     titulo: "Banner Principal Institucional",
@@ -232,6 +240,7 @@ const INITIAL_ESPACIOS_FIJOS = [
   },
   {
     id: "espacio-derechos-pacientes",
+    espacioKey: "espacio-derechos-pacientes",
     orden: 8,
     nombre: "Espacio Derechos de Pacientes y Bioseguridad",
     titulo: "Espacio Derechos de Pacientes y Bioseguridad",
@@ -257,35 +266,67 @@ const INITIAL_ESPACIOS_FIJOS = [
   },
 ];
 
-// Normaliza registros heredados para garantizar que cada espacio tenga su array `imagenes`
+const DEFAULT_FALLBACK_ASSETS = [defaultImg1, defaultImg2, defaultImg3, defaultImg4];
+
+// Normaliza registros del backend o de localStorage para garantizar que cada espacio tenga su array `imagenes` y su URL de respaldo
 const normalizeEspacios = (list) => {
   if (!Array.isArray(list) || list.length === 0) return INITIAL_ESPACIOS_FIJOS;
   return list.map((item, idx) => {
+    const matchedSeed =
+      INITIAL_ESPACIOS_FIJOS.find(
+        (s) =>
+          s.espacioKey === item.espacioKey ||
+          s.id === item.id ||
+          s.orden === item.orden ||
+          s.nombre.toLowerCase() === (item.nombre || item.titulo || "").toLowerCase()
+      ) || INITIAL_ESPACIOS_FIJOS[idx % INITIAL_ESPACIOS_FIJOS.length];
+
     const hasImagenes = Array.isArray(item.imagenes) && item.imagenes.length > 0;
     const isBanner =
       item.tipo === "Banner Principal" ||
       item.ubicacion?.toLowerCase().includes("cabecera") ||
       item.ubicacion?.toLowerCase().includes("banner principal");
 
+    const normalizedImagenes = hasImagenes
+      ? item.imagenes.map((img, slideIdx) => {
+          const seedSlide = matchedSeed?.imagenes?.[slideIdx];
+          const fallbackUrl =
+            seedSlide?.url ||
+            DEFAULT_FALLBACK_ASSETS[(idx + slideIdx) % DEFAULT_FALLBACK_ASSETS.length];
+          return {
+            ...img,
+            id: img.id || `img-${item.id || idx}-${slideIdx + 1}`,
+            url: img.url || fallbackUrl,
+            altText: img.altText || seedSlide?.altText || "",
+            titulo: isBanner ? img.titulo || seedSlide?.titulo || "" : "",
+            enlaceTexto: img.enlaceTexto ?? seedSlide?.enlaceTexto ?? "",
+            enlaceUrl: img.enlaceUrl ?? seedSlide?.enlaceUrl ?? "",
+            fileName: img.fileName || seedSlide?.fileName || `imagen_${slideIdx + 1}.jpg`,
+          };
+        })
+      : [
+          {
+            id: `img-${item.id || idx}-1`,
+            url: item.imageUrl || matchedSeed?.imagenes?.[0]?.url || defaultImg1,
+            altText: item.altText || matchedSeed?.imagenes?.[0]?.altText || "",
+            titulo: isBanner ? item.titulo || "" : "",
+            enlaceTexto: item.enlaceTexto || (item.enlaceUrl ? "Ver más" : ""),
+            enlaceUrl: item.enlaceUrl || "",
+            fileName: item.fileName || "imagen_espacio.jpg",
+          },
+        ];
+
     return {
       ...item,
-      orden: item.orden || idx + 1,
-      nombre: item.nombre || item.titulo || `Espacio Gráfico #${idx + 1}`,
+      id: item.id || matchedSeed.id,
+      espacioKey: item.espacioKey || matchedSeed.espacioKey || item.id,
+      orden: item.orden || matchedSeed.orden || idx + 1,
+      nombre: item.nombre || item.titulo || matchedSeed.nombre || `Espacio Gráfico #${idx + 1}`,
+      descripcion: item.descripcion || matchedSeed.descripcion || "",
       tipo: item.tipo || (isBanner ? "Banner Principal" : item.ubicacion || "Espacio Fijo"),
       dimensiones: item.dimensiones || (isBanner ? "1920x1080px" : "1200x675px"),
-      imagenes: hasImagenes
-        ? item.imagenes
-        : [
-            {
-              id: `img-${item.id || idx}-1`,
-              url: item.imageUrl || defaultImg1,
-              altText: item.altText || "",
-              titulo: isBanner ? item.titulo || "" : "",
-              enlaceTexto: item.enlaceTexto || (item.enlaceUrl ? "Ver más" : ""),
-              enlaceUrl: item.enlaceUrl || "",
-              fileName: item.fileName || "imagen_espacio.jpg",
-            },
-          ],
+      page: item.page || item.pagina || matchedSeed.page || "Inicio",
+      imagenes: normalizedImagenes,
     };
   });
 };
@@ -325,12 +366,18 @@ const CmsContenidoGraficoView = () => {
   const [reviewAction, setReviewAction] = useState("approve");
   const [reviewRejectionText, setReviewRejectionText] = useState("");
 
-  // Persistir cambios en LocalStorage
+  // Persistir cambios en LocalStorage (excluyendo objetos File binarios)
   useEffect(() => {
-    localStorage.setItem("hie_espacios_graficos_fijos", JSON.stringify(espacios));
+    const serializable = espacios.map((esp) => ({
+      ...esp,
+      imagenes: Array.isArray(esp.imagenes)
+        ? esp.imagenes.map(({ fileObj, ...rest }) => rest)
+        : [],
+    }));
+    localStorage.setItem("hie_espacios_graficos_fijos", JSON.stringify(serializable));
   }, [espacios]);
 
-  // Sincronización opcional con backend si se encuentra disponible
+  // Sincronización con backend al montar la vista
   useEffect(() => {
     const fetchFromBackend = async () => {
       try {
@@ -339,7 +386,7 @@ const CmsContenidoGraficoView = () => {
           setEspacios(normalizeEspacios(data));
         }
       } catch {
-        // Opera con los espacios fijos predefinidos localmente
+        // Opera con los espacios fijos predefinidos localmente si el servidor no está activo
       }
     };
     fetchFromBackend();
@@ -397,13 +444,29 @@ const CmsContenidoGraficoView = () => {
   // Guardar las imágenes y metadatos modificados dentro del espacio fijo
   const handleSaveEspacioModified = async (updatedEspacio) => {
     setEspacios((prev) =>
-      prev.map((item) => (item.id === updatedEspacio.id ? updatedEspacio : item))
+      prev.map((item) =>
+        item.id === updatedEspacio.id || item.espacioKey === updatedEspacio.espacioKey
+          ? updatedEspacio
+          : item
+      )
     );
 
     try {
-      await updateContenidoGrafico(updatedEspacio.id, updatedEspacio);
+      const res = await updateContenidoGrafico(updatedEspacio.id, updatedEspacio);
+      if (res?.espacio) {
+        const [normalized] = normalizeEspacios([res.espacio]);
+        setEspacios((prev) =>
+          prev.map((item) =>
+            item.id === updatedEspacio.id ||
+            item.id === normalized.id ||
+            (item.espacioKey && item.espacioKey === normalized.espacioKey)
+              ? normalized
+              : item
+          )
+        );
+      }
     } catch {
-      // Guardado local ya aplicado
+      // Guardado local ya aplicado si el backend no responde
     }
 
     if (selectedEspacio?.estado === "RECHAZADO" && updatedEspacio.estado === "PENDIENTE_APROBACION") {
@@ -419,7 +482,7 @@ const CmsContenidoGraficoView = () => {
   };
 
   // Dictamen de Revisión Editorial (Aprobar / Rechazar con motivo)
-  const handleProcessReview = () => {
+  const handleProcessReview = async () => {
     if (!selectedEspacio) return;
 
     if (reviewAction === "reject") {
@@ -428,6 +491,8 @@ const CmsContenidoGraficoView = () => {
         return;
       }
 
+      const nuevoMotivo = reviewRejectionText.trim();
+
       setEspacios((prev) =>
         prev.map((item) =>
           item.id === selectedEspacio.id
@@ -435,12 +500,32 @@ const CmsContenidoGraficoView = () => {
                 ...item,
                 estado: "RECHAZADO",
                 activo: false,
-                rejectionReason: reviewRejectionText.trim(),
+                rejectionReason: nuevoMotivo,
                 updatedAt: new Date().toISOString(),
               }
             : item
         )
       );
+
+      try {
+        const res = await cambiarEstadoContenidoGrafico(selectedEspacio.id, {
+          estado: "RECHAZADO",
+          rejectionReason: nuevoMotivo,
+        });
+        if (res?.espacio) {
+          const [normalized] = normalizeEspacios([res.espacio]);
+          setEspacios((prev) =>
+            prev.map((item) =>
+              item.id === selectedEspacio.id || item.id === normalized.id
+                ? normalized
+                : item
+            )
+          );
+        }
+      } catch {
+        // Estado local actualizado
+      }
+
       toast.error(`Espacio "${selectedEspacio.nombre}" observado para corrección.`);
     } else {
       setEspacios((prev) =>
@@ -456,6 +541,26 @@ const CmsContenidoGraficoView = () => {
             : item
         )
       );
+
+      try {
+        const res = await cambiarEstadoContenidoGrafico(selectedEspacio.id, {
+          estado: "APROBADO",
+          rejectionReason: null,
+        });
+        if (res?.espacio) {
+          const [normalized] = normalizeEspacios([res.espacio]);
+          setEspacios((prev) =>
+            prev.map((item) =>
+              item.id === selectedEspacio.id || item.id === normalized.id
+                ? normalized
+                : item
+            )
+          );
+        }
+      } catch {
+        // Estado local actualizado
+      }
+
       toast.success(`Espacio "${selectedEspacio.nombre}" aprobado y publicado.`);
     }
 

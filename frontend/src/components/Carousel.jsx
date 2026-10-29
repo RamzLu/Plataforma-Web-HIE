@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import "../styles/components/Carousel.css";
 
 import defaultImg1 from "../assets/fondoHospitalCarrusel1.jpg";
@@ -8,40 +8,70 @@ import defaultImg3 from "../assets/fondoHospitalCarrusel3.jpg";
 import defaultImg4 from "../assets/fondoHospitalCarrusel4.jpg";
 
 const defaultSlides = [
-  { id: "def-1", imageUrl: defaultImg1, orden: 1 },
-  { id: "def-2", imageUrl: defaultImg2, orden: 2 },
-  { id: "def-3", imageUrl: defaultImg3, orden: 3 },
-  { id: "def-4", imageUrl: defaultImg4, orden: 4 },
+  {
+    id: "def-1",
+    imageUrl: defaultImg1,
+    altText: "Fachada principal del Hospital Interdistrital Evita de Formosa",
+    orden: 1,
+  },
+  {
+    id: "def-2",
+    imageUrl: defaultImg2,
+    altText: "Atención médica y equipamiento del Hospital Interdistrital Evita",
+    orden: 2,
+  },
+  {
+    id: "def-3",
+    imageUrl: defaultImg3,
+    altText: "Servicios hospitalarios y cuidado integral de la comunidad",
+    orden: 3,
+  },
+  {
+    id: "def-4",
+    imageUrl: defaultImg4,
+    altText: "Equipo profesional de salud del Hospital Interdistrital Evita",
+    orden: 4,
+  },
 ];
 
 const Carousel = ({ page = "Inicio" }) => {
   const [slides, setSlides] = useState(defaultSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
-  
-  // Estados para el texto estático leídos desde LocalStorage
-  const [customTitle, setCustomTitle] = useState("6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL");
+
+  // Estados para el texto estático de respaldo
+  const [customTitle, setCustomTitle] = useState(
+    "6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL"
+  );
   const [customBtn, setCustomBtn] = useState("CONOCENOS");
 
   useEffect(() => {
-    // Al montar el componente, buscamos si hay textos configurados en LocalStorage
     const savedTitle = localStorage.getItem("hie_carousel_text");
     const savedBtn = localStorage.getItem("hie_carousel_btn");
-    
+
     if (savedTitle) setCustomTitle(savedTitle);
     if (savedBtn) setCustomBtn(savedBtn);
 
     const fetchPublicBanners = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/cms/banners");
+        const apiBase =
+          import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+        const response = await fetch(`${apiBase}/cms/banners`);
         if (response.ok) {
           const data = await response.json();
-          
-          const bannersFiltrados = data
-            .filter((b) => (b.page === page || !b.page) && (b.activo === true || b.isActive === true))
+
+          const bannersFiltrados = (Array.isArray(data) ? data : [])
+            .filter(
+              (b) =>
+                (b.page?.toLowerCase() === page.toLowerCase() || !b.page) &&
+                (!b.tipo || b.tipo === "Banner Principal") &&
+                (b.activo === true || b.isActive === true) &&
+                Boolean(b.imageUrl)
+            )
             .sort((a, b) => (a.orden || 0) - (b.orden || 0));
 
           if (bannersFiltrados.length > 0) {
             setSlides(bannersFiltrados);
+            setCurrentSlide(0);
           }
         }
       } catch (error) {
@@ -72,6 +102,11 @@ const Carousel = ({ page = "Inicio" }) => {
 
   if (!slides || slides.length === 0) return null;
 
+  const activeSlide = slides[currentSlide] || slides[0];
+  const displayTitle = activeSlide?.titulo || customTitle;
+  const displayBtnText = activeSlide?.enlaceTexto || customBtn;
+  const displayBtnUrl = activeSlide?.enlaceUrl || activeSlide?.enlace || "/acerca-de";
+
   return (
     <div className="carousel-container">
       <div className="carousel-track">
@@ -88,7 +123,7 @@ const Carousel = ({ page = "Inicio" }) => {
             {slide.imageUrl && (
               <img
                 src={slide.imageUrl}
-                alt={`Banner ${index + 1}`}
+                alt={slide.altText || `Banner ${index + 1}`}
                 className="carousel-img"
               />
             )}
@@ -96,16 +131,18 @@ const Carousel = ({ page = "Inicio" }) => {
         ))}
       </div>
 
-      {/* Capa estática superpuesta con el título institucional y el botón independientes de la imagen */}
+      {/* Capa superpuesta con el título y botón del slide activo (o valores institucionales por defecto) */}
       <div className="carousel-static-overlay">
         <div className="carousel-content-box">
-          <h1 
-            className="carousel-title" 
-            dangerouslySetInnerHTML={{ __html: customTitle.replace(/\n/g, '<br />') }} 
+          <h1
+            className="carousel-title"
+            dangerouslySetInnerHTML={{
+              __html: String(displayTitle).replace(/\n/g, "<br />"),
+            }}
           />
-          {customBtn && (
-            <Link to="/acerca-de" className="carousel-btn-conocenos">
-              {customBtn}
+          {displayBtnText && (
+            <Link to={displayBtnUrl} className="carousel-btn-conocenos">
+              {displayBtnText}
             </Link>
           )}
         </div>

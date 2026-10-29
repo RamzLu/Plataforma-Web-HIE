@@ -1,6 +1,11 @@
 import { Router } from 'express';
 
-import { obtenerBanners, crearBanner, actualizarBanner, eliminarBanner } from "../controllers/cms/cms.banners.controller.js";
+import {
+  obtenerEspaciosGraficos,
+  obtenerBanners,
+  actualizarBanner,
+  cambiarEstadoEspacioGrafico,
+} from "../controllers/cms/cms.banners.controller.js";
 import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia } from "../controllers/cms/cms.noticia.controller.js";
 import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento } from "../controllers/cms/cms.doc.controller.js";
 import { obtenerProfesionales, crearProfesional, eliminarProfesional, actualizarProfesional } from "../controllers/cms/cms.profesional.controller.js";
@@ -52,17 +57,14 @@ router.put('/documentacion/:id', verifyToken, uploadMemory.single('archivo'), ac
 router.delete('/documentacion/:id', verifyToken, eliminarDocumento);
 
 // ==========================================
-// MÓDULO: BANNERS Y CONTENIDO GRÁFICO
+// MÓDULO: BANNERS Y CONTENIDO GRÁFICO (ESPACIOS FIJOS)
 // ==========================================
 router.get("/banners", obtenerBanners);
-router.post("/banners", verifyToken, uploadMemory.single("imagen"), crearBanner);
-router.put("/banners/:id", verifyToken, uploadMemory.single("imagen"), actualizarBanner); 
-router.delete("/banners/:id", verifyToken, eliminarBanner); 
+router.put("/banners/:id", verifyToken, uploadMemory.any(), actualizarBanner);
 
-router.get("/contenido-grafico", obtenerBanners);
-router.post("/contenido-grafico", verifyToken, uploadMemory.single("imagen"), crearBanner);
-router.put("/contenido-grafico/:id", verifyToken, uploadMemory.single("imagen"), actualizarBanner); 
-router.delete("/contenido-grafico/:id", verifyToken, eliminarBanner); 
+router.get("/contenido-grafico", obtenerEspaciosGraficos);
+router.put("/contenido-grafico/:id", verifyToken, uploadMemory.any(), actualizarBanner);
+router.patch("/contenido-grafico/:id/estado", verifyToken, cambiarEstadoEspacioGrafico);
 
 // ==========================================
 // MÓDULO: PROFESIONALES
