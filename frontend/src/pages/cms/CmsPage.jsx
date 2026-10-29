@@ -87,6 +87,8 @@ const fetchNoticias = async () => {
         fechaPublicacion: noticia.fechaPublicacion || null,
         category: noticia.category || "General",
         estado: noticia.estado || "PUBLICADO",
+        requestedEstado: noticia.requestedEstado || null,
+        previousEstado: noticia.previousEstado || null,
         isDraft: noticia.isDraft || false,
         images: noticia.images || [],
         editor: noticia.editor || "Editor CMS",

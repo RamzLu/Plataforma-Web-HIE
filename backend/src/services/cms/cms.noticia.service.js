@@ -9,6 +9,7 @@ const supabase = createClient(
 );
 
 const REJECTION_KEY_PREFIX = "noticia_rejection_";
+const PENDING_META_KEY_PREFIX = "noticia_pending_meta_";
 
 class CmsNoticiaService {
   async obtenerMapaMotivosRechazo() {
@@ -62,6 +63,62 @@ class CmsNoticiaService {
     });
   }
 
+  async obtenerMapaPendingMeta() {
+    try {
+      const configs = await prisma.configuracion.findMany({
+        where: {
+          clave: { startsWith: PENDING_META_KEY_PREFIX },
+        },
+      });
+      const map = new Map();
+      for (const item of configs) {
+        const noticiaId = item.clave.replace(PENDING_META_KEY_PREFIX, "");
+        try {
+          map.set(noticiaId, JSON.parse(item.valor));
+        } catch (_) {
+          // Ignorar JSON malformado
+        }
+      }
+      return map;
+    } catch (_) {
+      return new Map();
+    }
+  }
+
+  async obtenerPendingMeta(noticiaId) {
+    try {
+      const clave = `${PENDING_META_KEY_PREFIX}${noticiaId}`;
+      const config = await prisma.configuracion.findUnique({
+        where: { clave },
+      });
+      return config ? JSON.parse(config.valor) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async guardarPendingMeta(noticiaId, meta) {
+    const clave = `${PENDING_META_KEY_PREFIX}${noticiaId}`;
+    const valor = JSON.stringify(meta);
+    await prisma.configuracion.upsert({
+      where: { clave },
+      update: { valor, updatedAt: new Date() },
+      create: {
+        clave,
+        valor,
+        descripcion: `Metadatos de solicitud pendiente para noticia ID ${noticiaId}`,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async limpiarPendingMeta(noticiaId) {
+    const clave = `${PENDING_META_KEY_PREFIX}${noticiaId}`;
+    await prisma.configuracion.deleteMany({
+      where: { clave },
+    });
+  }
+
   async crearNoticia(data, archivosSubidos, user) {
     const { titulo, contenido, estado, fechaPublicacion, categoriaNombre } = data;
 
@@ -72,7 +129,7 @@ class CmsNoticiaService {
     }
 
     const estadoSolicitado = estado ? estado.toUpperCase() : "BORRADOR";
-    // Cuando el CM sube una noticia para publicar o programar, queda en PENDIENTE_APROBACION hasta que el Admin la apruebe
+    // Cuando el CM crea una noticia nueva como BORRADOR queda en BORRADOR; si solicita publicar o programar pasa a PENDIENTE_APROBACION
     const estadoFinal =
       estadoSolicitado === "BORRADOR" ? "BORRADOR" : "PENDIENTE_APROBACION";
 
@@ -109,6 +166,15 @@ class CmsNoticiaService {
         categoria_noticia: true,
       },
     });
+
+    if (estadoFinal === "PENDIENTE_APROBACION") {
+      const targetNormalizado = tieneFechaProgramada ? "PROGRAMADO" : "PUBLICADO";
+      await this.guardarPendingMeta(nuevaNoticia.id.toString(), {
+        previousEstado: null,
+        targetEstado: targetNormalizado,
+        snapshotPublico: null,
+      });
+    }
 
     const imagenesUrlsGuardadas = [];
 
@@ -150,6 +216,13 @@ class CmsNoticiaService {
       ? `${nuevaNoticia.usuario_noticia_createdByTousuario.nombre} ${nuevaNoticia.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
       : "Editor CMS";
 
+    const requestedEstado =
+      estadoFinal === "PENDIENTE_APROBACION"
+        ? tieneFechaProgramada
+          ? "PROGRAMADO"
+          : "PUBLICADO"
+        : null;
+
     return {
       message: "Exito",
       noticia: {
@@ -158,6 +231,8 @@ class CmsNoticiaService {
         categoriaId: nuevaNoticia.categoriaId.toString(),
         category: nuevaNoticia.categoria_noticia.nombre,
         estado: nuevaNoticia.estado,
+        requestedEstado,
+        previousEstado: null,
         isDraft: nuevaNoticia.estado === "BORRADOR",
         images: imagenesUrlsGuardadas,
         editor: editorNombre,
@@ -168,18 +243,17 @@ class CmsNoticiaService {
   }
 
   async obtenerNoticias(isAdmin) {
-    const whereClause =
-      isAdmin === "true"
-        ? {}
-        : {
-            estado: {
-              in: ["PUBLICADO", "APROBADO"],
-            },
-          };
+    const esConsultaInterna = isAdmin === "true";
 
-    const [noticias, motivosMap] = await Promise.all([
+    const [noticias, motivosMap, pendingMetaMap] = await Promise.all([
       prisma.noticia.findMany({
-        where: whereClause,
+        where: esConsultaInterna
+          ? {}
+          : {
+              estado: {
+                in: ["PUBLICADO", "APROBADO", "PENDIENTE_APROBACION", "RECHAZADO"],
+              },
+            },
         orderBy: { createdAt: "desc" },
         include: {
           usuario_noticia_createdByTousuario: true,
@@ -189,9 +263,57 @@ class CmsNoticiaService {
         },
       }),
       this.obtenerMapaMotivosRechazo(),
+      this.obtenerMapaPendingMeta(),
     ]);
 
-    return noticias.map((noticia) => {
+    const resultado = [];
+
+    for (const noticia of noticias) {
+      const idStr = noticia.id.toString();
+      const pendingMeta = pendingMetaMap.get(idStr) || null;
+      const estadoUpper = (noticia.estado || "").toUpperCase();
+
+      if (!esConsultaInterna) {
+        const esPublicadaDirecta =
+          estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO";
+        const mantienePublicacionPrevia =
+          (estadoUpper === "PENDIENTE_APROBACION" || estadoUpper === "RECHAZADO") &&
+          (pendingMeta?.previousEstado === "PUBLICADO" ||
+            pendingMeta?.previousEstado === "APROBADO") &&
+          Boolean(pendingMeta?.snapshotPublico);
+
+        if (!esPublicadaDirecta && !mantienePublicacionPrevia) {
+          continue;
+        }
+
+        if (mantienePublicacionPrevia) {
+          const snap = pendingMeta.snapshotPublico;
+          const editorNombreSnap = noticia.usuario_noticia_createdByTousuario
+            ? `${noticia.usuario_noticia_createdByTousuario.nombre} ${noticia.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
+            : "Editor CMS";
+
+          resultado.push({
+            id: idStr,
+            title: snap.titulo,
+            titulo: snap.titulo,
+            body: [snap.contenido],
+            contenido: snap.contenido,
+            date: new Date(noticia.createdAt).toLocaleDateString("es-AR"),
+            fechaPublicacion: noticia.fechaPublicacion,
+            createdAt: noticia.createdAt,
+            updatedAt: noticia.updatedAt,
+            category: snap.category || "General",
+            estado: "PUBLICADO",
+            isDraft: false,
+            images: snap.images || [],
+            editor: editorNombreSnap,
+            editedBy: null,
+            rejectionReason: null,
+          });
+          continue;
+        }
+      }
+
       const imgs = noticia.noticia_archivo.map((na) => {
         const { data } = supabase.storage
           .from("noticias-imagenes")
@@ -212,9 +334,7 @@ class CmsNoticiaService {
         catName = "General";
       }
 
-      const idStr = noticia.id.toString();
-
-      return {
+      resultado.push({
         id: idStr,
         title: noticia.titulo,
         titulo: noticia.titulo,
@@ -226,13 +346,18 @@ class CmsNoticiaService {
         updatedAt: noticia.updatedAt,
         category: catName,
         estado: noticia.estado,
+        requestedEstado:
+          estadoUpper === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
+        previousEstado: pendingMeta?.previousEstado || null,
         isDraft: noticia.estado === "BORRADOR",
         images: imgs,
         editor: editorNombre,
         editedBy: editadoPorNombre,
         rejectionReason: motivosMap.get(idStr) || null,
-      };
-    });
+      });
+    }
+
+    return resultado;
   }
 
   async eliminarNoticia(id) {
@@ -255,6 +380,7 @@ class CmsNoticiaService {
 
     await prisma.noticia.delete({ where: { id: BigInt(id) } });
     await this.limpiarMotivoRechazo(id.toString());
+    await this.limpiarPendingMeta(id.toString());
     return { message: "Exito" };
   }
 
@@ -265,13 +391,54 @@ class CmsNoticiaService {
 
     const noticiaExistente = await prisma.noticia.findUnique({
       where: { id: BigInt(id) },
-      include: { noticia_archivo: { include: { archivo: true } } },
+      include: {
+        noticia_archivo: { include: { archivo: true } },
+        categoria_noticia: true,
+      },
     });
 
     if (!noticiaExistente) {
       const error = new Error("Noticia no encontrada.");
       error.statusCode = 404;
       throw error;
+    }
+
+    const idStr = id.toString();
+    const metaExistente = await this.obtenerPendingMeta(idStr);
+    const estadoAnterior = (noticiaExistente.estado || "").toUpperCase();
+    const estadoSolicitado = estado ? estado.toUpperCase() : estadoAnterior;
+
+    // Determinamos si la noticia ya había sido aprobada/publicada previamente
+    const origenPrevio = metaExistente?.previousEstado || estadoAnterior;
+    const provieneDePublicada =
+      estadoAnterior === "PUBLICADO" ||
+      estadoAnterior === "APROBADO" ||
+      estadoAnterior === "PROGRAMADO" ||
+      origenPrevio === "PUBLICADO" ||
+      origenPrevio === "APROBADO" ||
+      origenPrevio === "PROGRAMADO";
+
+    // Construimos o preservamos el snapshot público si la noticia estaba PUBLICADO/APROBADO en el portal
+    let snapshotPublico = metaExistente?.snapshotPublico || null;
+    if (estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO") {
+      const imgsPrevias = noticiaExistente.noticia_archivo.map((na) => {
+        const { data: pubData } = supabase.storage
+          .from("noticias-imagenes")
+          .getPublicUrl(na.archivo.nombreArchivo);
+        return pubData.publicUrl;
+      });
+      let catPrevia = noticiaExistente.categoria_noticia
+        ? noticiaExistente.categoria_noticia.nombre
+        : "General";
+      if (catPrevia.toLowerCase() === "noticias" || catPrevia.toLowerCase() === "noticia") {
+        catPrevia = "General";
+      }
+      snapshotPublico = {
+        titulo: noticiaExistente.titulo,
+        contenido: noticiaExistente.contenido,
+        category: catPrevia,
+        images: imgsPrevias,
+      };
     }
 
     const dataUpdate = {
@@ -281,24 +448,39 @@ class CmsNoticiaService {
       updatedBy: usuarioEditor.id,
     };
 
-    const estadoSolicitado = estado ? estado.toUpperCase() : noticiaExistente.estado;
+    let requestedEstadoFinal = null;
 
-    if (estadoSolicitado === "BORRADOR") {
+    if (estadoSolicitado === "BORRADOR" && !provieneDePublicada) {
+      // Solo puede guardarse directamente como BORRADOR si aún nunca estuvo publicada/aprobada
       dataUpdate.estado = "BORRADOR";
       dataUpdate.fechaPublicacion = null;
+      await this.limpiarPendingMeta(idStr);
     } else {
-      // Cualquier envío a publicación o programación desde el CM requiere aprobación del Admin
+      // Si proviene de una noticia ya PUBLICADO/PROGRAMADO (incluso si el CM elige pasarla a BORRADOR)
+      // o si solicita publicar/programar, requiere obligatoriamente aprobación del Admin
       dataUpdate.estado = "PENDIENTE_APROBACION";
-      if (
+
+      if (estadoSolicitado === "BORRADOR") {
+        dataUpdate.fechaPublicacion = null;
+        requestedEstadoFinal = "BORRADOR";
+      } else if (
         (estadoSolicitado === "PROGRAMADO" || estadoSolicitado === "PENDIENTE_APROBACION") &&
         fechaPublicacion
       ) {
         dataUpdate.fechaPublicacion = new Date(fechaPublicacion);
-      } else if (estadoSolicitado === "PUBLICADO") {
+        requestedEstadoFinal = "PROGRAMADO";
+      } else {
         dataUpdate.fechaPublicacion = null;
+        requestedEstadoFinal = "PUBLICADO";
       }
-      // Si se reenvía a aprobación, limpiamos el motivo de rechazo anterior
-      await this.limpiarMotivoRechazo(id.toString());
+
+      await this.guardarPendingMeta(idStr, {
+        previousEstado: provieneDePublicada ? origenPrevio : estadoAnterior,
+        targetEstado: requestedEstadoFinal,
+        snapshotPublico,
+      });
+
+      await this.limpiarMotivoRechazo(idStr);
     }
 
     if (categoriaNombre) {
@@ -322,7 +504,10 @@ class CmsNoticiaService {
 
       if (!categoria) {
         categoria = await prisma.categoria_noticia.create({
-          data: { nombre: nombreCatActualizar, descripcion: `Clasificación ${nombreCatActualizar}` },
+          data: {
+            nombre: nombreCatActualizar,
+            descripcion: `Clasificación ${nombreCatActualizar}`,
+          },
         });
       }
       dataUpdate.categoriaId = categoria.id;
@@ -334,6 +519,7 @@ class CmsNoticiaService {
     });
 
     const urlsConservadas = imagenesExistentes ? JSON.parse(imagenesExistentes) : [];
+    const urlsProtegidasSnapshot = snapshotPublico?.images || [];
 
     for (const na of noticiaExistente.noticia_archivo) {
       const archivo = na.archivo;
@@ -342,9 +528,13 @@ class CmsNoticiaService {
         .getPublicUrl(archivo.nombreArchivo);
 
       if (!urlsConservadas.includes(urlData.publicUrl)) {
-        await supabase.storage.from("noticias-imagenes").remove([archivo.nombreArchivo]);
-        await prisma.noticia_archivo.deleteMany({ where: { archivoId: archivo.id } });
-        await prisma.archivo.delete({ where: { id: archivo.id } });
+        await prisma.noticia_archivo.deleteMany({
+          where: { noticiaId: noticiaActualizada.id, archivoId: archivo.id },
+        });
+        if (!urlsProtegidasSnapshot.includes(urlData.publicUrl)) {
+          await supabase.storage.from("noticias-imagenes").remove([archivo.nombreArchivo]);
+          await prisma.archivo.delete({ where: { id: archivo.id } }).catch(() => {});
+        }
       }
     }
 
@@ -406,7 +596,8 @@ class CmsNoticiaService {
       catFinal = "General";
     }
 
-    const motivoActual = await this.obtenerMotivoRechazo(id.toString());
+    const motivoActual = await this.obtenerMotivoRechazo(idStr);
+    const metaActual = await this.obtenerPendingMeta(idStr);
 
     return {
       message: "Exito",
@@ -416,6 +607,11 @@ class CmsNoticiaService {
         categoriaId: noticiaActualizada.categoriaId.toString(),
         category: catFinal,
         estado: noticiaActualizada.estado,
+        requestedEstado:
+          noticiaActualizada.estado === "PENDIENTE_APROBACION"
+            ? metaActual?.targetEstado || null
+            : null,
+        previousEstado: metaActual?.previousEstado || null,
         isDraft: noticiaActualizada.estado === "BORRADOR",
         images: imgs,
         editor: editorOriginal,
@@ -453,11 +649,14 @@ class CmsNoticiaService {
       throw error;
     }
 
+    const idStr = id.toString();
+    const pendingMeta = await this.obtenerPendingMeta(idStr);
     const usuarioAdmin = await obtenerOCrearUsuarioLocal(user);
     const estadoUpper = estado.toUpperCase();
 
     let nuevoEstado = noticiaExistente.estado;
     let motivoGuardado = null;
+    const extraUpdateData = {};
 
     if (estadoUpper === "RECHAZADO") {
       if (!rejectionReason || !rejectionReason.trim()) {
@@ -467,18 +666,26 @@ class CmsNoticiaService {
       }
       nuevoEstado = "RECHAZADO";
       motivoGuardado = rejectionReason.trim();
-      await this.guardarMotivoRechazo(id.toString(), motivoGuardado);
+      await this.guardarMotivoRechazo(idStr, motivoGuardado);
     } else if (
       estadoUpper === "APROBADO" ||
       estadoUpper === "PUBLICADO" ||
       estadoUpper === "PROGRAMADO"
     ) {
-      const ahora = new Date();
-      const tieneProgramacionFutura =
-        noticiaExistente.fechaPublicacion && new Date(noticiaExistente.fechaPublicacion) > ahora;
+      if (pendingMeta?.targetEstado === "BORRADOR") {
+        // El Admin aprobó la solicitud del CM de pasar una noticia publicada a BORRADOR
+        nuevoEstado = "BORRADOR";
+        extraUpdateData.fechaPublicacion = null;
+      } else {
+        const ahora = new Date();
+        const tieneProgramacionFutura =
+          noticiaExistente.fechaPublicacion && new Date(noticiaExistente.fechaPublicacion) > ahora;
 
-      nuevoEstado = tieneProgramacionFutura ? "PROGRAMADO" : "PUBLICADO";
-      await this.limpiarMotivoRechazo(id.toString());
+        nuevoEstado = tieneProgramacionFutura ? "PROGRAMADO" : "PUBLICADO";
+      }
+
+      await this.limpiarMotivoRechazo(idStr);
+      await this.limpiarPendingMeta(idStr);
     } else {
       nuevoEstado = estadoUpper;
     }
@@ -488,6 +695,7 @@ class CmsNoticiaService {
       data: {
         estado: nuevoEstado,
         updatedAt: new Date(),
+        ...extraUpdateData,
       },
       include: {
         usuario_noticia_createdByTousuario: true,
@@ -502,12 +710,12 @@ class CmsNoticiaService {
         data: {
           usuarioId: usuarioAdmin.id,
           entidad: "noticia",
-          entidadId: id.toString(),
+          entidadId: idStr,
           accion: nuevoEstado === "RECHAZADO" ? "RECHAZAR" : "APROBAR",
           detalle:
             nuevoEstado === "RECHAZADO"
               ? `Noticia rechazada. Motivo: ${motivoGuardado}`
-              : `Noticia aprobada (${nuevoEstado}).`,
+              : `Solicitud aprobada (estado resultante: ${nuevoEstado}).`,
         },
       });
     } catch (_) {
@@ -534,6 +742,8 @@ class CmsNoticiaService {
       catFinal = "General";
     }
 
+    const metaRestante = await this.obtenerPendingMeta(idStr);
+
     return {
       message: "Exito",
       noticia: {
@@ -548,6 +758,8 @@ class CmsNoticiaService {
         updatedAt: noticiaActualizada.updatedAt,
         category: catFinal,
         estado: noticiaActualizada.estado,
+        requestedEstado: null,
+        previousEstado: metaRestante?.previousEstado || null,
         isDraft: noticiaActualizada.estado === "BORRADOR",
         images: imgs,
         editor: editorOriginal,

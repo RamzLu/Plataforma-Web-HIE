@@ -161,7 +161,8 @@ const CmsNoticiasView = ({
       : "PUBLICADO";
 
     setEstado(
-      rawEstado === "BORRADOR"
+      rawEstado === "BORRADOR" ||
+        (rawEstado === "PENDIENTE_APROBACION" && news.requestedEstado === "BORRADOR")
         ? "BORRADOR"
         : news.fechaPublicacion
         ? "PROGRAMADO"
@@ -324,16 +325,12 @@ const CmsNoticiasView = ({
         return;
       }
 
-      // Toda publicación que no sea BORRADOR pasa a PENDIENTE_APROBACION hasta que el Admin la apruebe
-      const estadoParaBackend =
-        estadoSolicitado === "BORRADOR" ? "BORRADOR" : "PENDIENTE_APROBACION";
-
       const remoteUrls = imagenesUrls.filter((u) => !String(u).startsWith("blob:"));
 
       const formData = new FormData();
       formData.append("titulo", titulo);
       formData.append("contenido", textoContenido);
-      formData.append("estado", estadoParaBackend);
+      formData.append("estado", estadoSolicitado);
       formData.append("categoriaNombre", categoria);
       formData.append("imagenesExistentes", JSON.stringify(remoteUrls));
 
@@ -349,29 +346,35 @@ const CmsNoticiasView = ({
 
       if (editingId) {
         data = await updateNoticia(editingId, formData, token);
-        if (correctionNews) {
+        const estadoDevuelto = (data.noticia?.estado || "").toUpperCase();
+        if (estadoSolicitado === "BORRADOR" && estadoDevuelto === "PENDIENTE_APROBACION") {
           toast.success(
-            estadoParaBackend === "BORRADOR"
+            "Solicitud para pasar la noticia a Borrador enviada al administrador para su aprobación."
+          );
+        } else if (correctionNews) {
+          toast.success(
+            estadoDevuelto === "BORRADOR"
               ? "Cambios guardados como borrador."
               : "Noticia corregida y reenviada a aprobación del administrador."
           );
         } else {
           toast.success(
-            estadoParaBackend === "BORRADOR"
+            estadoDevuelto === "BORRADOR"
               ? "Borrador actualizado con éxito."
               : "Noticia enviada a revisión del administrador para su aprobación."
           );
         }
       } else {
         data = await createNoticia(formData, token);
+        const estadoDevuelto = (data.noticia?.estado || "").toUpperCase();
         toast.success(
-          estadoParaBackend === "BORRADOR"
+          estadoDevuelto === "BORRADOR"
             ? "Borrador guardado con éxito."
             : "Noticia creada y enviada al administrador para su aprobación."
         );
       }
 
-      const estadoGuardado = data.noticia?.estado || estadoParaBackend;
+      const estadoGuardado = data.noticia?.estado || "PENDIENTE_APROBACION";
 
       const noticiaFormateada = {
         id: data.noticia?.id || editingId,
@@ -384,6 +387,8 @@ const CmsNoticiasView = ({
         updatedAt: data.noticia?.updatedAt || new Date().toISOString(),
         category: categoria || "General",
         estado: estadoGuardado,
+        requestedEstado: data.noticia?.requestedEstado || null,
+        previousEstado: data.noticia?.previousEstado || null,
         isDraft: estadoGuardado === "BORRADOR",
         images: data.noticia?.images || imagenesUrls || [],
         editor: data.noticia?.editor || "Editor CMS",
@@ -417,6 +422,19 @@ const CmsNoticiasView = ({
       setSaving(false);
     }
   };
+
+  const editingOriginalNews = editingId
+    ? newsList.find((n) => String(n.id) === String(editingId))
+    : null;
+  const editingWasPublished = Boolean(
+    editingOriginalNews &&
+      (["PUBLICADO", "APROBADO", "PROGRAMADO"].includes(
+        (editingOriginalNews.estado || "").toUpperCase()
+      ) ||
+        ["PUBLICADO", "APROBADO", "PROGRAMADO"].includes(
+          (editingOriginalNews.previousEstado || "").toUpperCase()
+        ))
+  );
 
   return (
     <div className="cms-dashboard-card">
@@ -681,6 +699,13 @@ const CmsNoticiasView = ({
                             : estadoUpper}
                         </span>
                       )}
+
+                      {estadoUpper === "PENDIENTE_APROBACION" &&
+                        news.requestedEstado === "BORRADOR" && (
+                          <span className="status-programmed-date">
+                            Cambio a: Borrador
+                          </span>
+                        )}
 
                       {(estadoUpper === "PROGRAMADO" ||
                         estadoUpper === "PENDIENTE_APROBACION") &&
@@ -960,8 +985,12 @@ const CmsNoticiasView = ({
                         className="news-form-input"
                       >
                         <option value="PUBLICADO">Publicar (Enviar a aprobación)</option>
-                        <option value="BORRADOR">Borrador</option>
-                        <option value="PROGRAMADO">Programado</option>
+                        <option value="BORRADOR">
+                          {editingWasPublished
+                            ? "Borrador (Enviar a aprobación)"
+                            : "Borrador"}
+                        </option>
+                        <option value="PROGRAMADO">Programado (Enviar a aprobación)</option>
                       </select>
                     </div>
                   </div>
@@ -1410,6 +1439,17 @@ const CmsNoticiasView = ({
         isOpen={showConfirmDraftModal}
         onClose={() => setShowConfirmDraftModal(false)}
         onConfirm={(e) => handleSave(e, "BORRADOR", true)}
+        title={
+          editingWasPublished ? "Solicitar paso a borrador" : "Guardar como borrador"
+        }
+        message={
+          editingWasPublished
+            ? "Como esta noticia ya fue aprobada/publicada, cambiar su estado a Borrador requiere la aprobación del administrador. Seguirá visible en el portal público hasta que se apruebe el cambio. ¿Deseas enviar la solicitud?"
+            : undefined
+        }
+        confirmText={
+          editingWasPublished ? "Enviar a aprobación" : "Sí, guardar borrador"
+        }
         itemType="esta noticia"
         loading={saving}
       />

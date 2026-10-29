@@ -123,6 +123,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 updatedAt: noticia.updatedAt,
                 images: noticia.images || [],
                 rejectionReason: noticia.rejectionReason || null,
+                requestedEstado: noticia.requestedEstado || null,
+                previousEstado: noticia.previousEstado || null,
               };
             })
             .sort((a, b) => {
@@ -202,6 +204,18 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       );
 
       const estadoFinal = (response?.noticia?.estado || 'PUBLICADO').toUpperCase();
+
+      if (estadoFinal === 'BORRADOR') {
+        const updatedList = noticias.filter((item) => item.id !== selectedNews.id);
+        setNoticias(updatedList);
+        syncPendingCount(updatedList);
+        toast.success(
+          `Cambio aprobado: la noticia "${selectedNews.title}" pasó a estado Borrador en el CMS.`
+        );
+        handleCloseModal();
+        return;
+      }
+
       const nuevoStatusLabel = estadoFinal === 'PROGRAMADO' ? 'Programado' : 'Aprobado';
 
       const updatedList = noticias.map((item) =>
@@ -210,6 +224,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               ...item,
               estado: estadoFinal,
               status: nuevoStatusLabel,
+              requestedEstado: null,
               rejectionReason: null,
               updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
             }
@@ -500,10 +515,22 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                     </div>
 
                     {/* CELDA 5: ESTADO */}
-                    <div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
                       <span className={`status-pill-admin ${getBadgeClass(item.status)}`}>
                         {item.status}
                       </span>
+                      {item.estado === 'PENDIENTE_APROBACION' &&
+                        item.requestedEstado === 'BORRADOR' && (
+                          <span
+                            style={{
+                              fontSize: '0.74rem',
+                              fontWeight: 700,
+                              color: '#b45309',
+                            }}
+                          >
+                            Solicita pasar a Borrador
+                          </span>
+                        )}
                     </div>
 
                     {/* CELDA 6: ACCIONES (SOLO VER) */}
@@ -534,6 +561,17 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       {selectedNews && (
         <div className="modal-overlay-admin" onClick={handleCloseModal}>
           <div className="modal-content-esp-admin" onClick={(e) => e.stopPropagation()}>
+            {selectedNews.estado === 'PENDIENTE_APROBACION' &&
+              selectedNews.requestedEstado === 'BORRADOR' && (
+                <div className="scheduled-alert-admin">
+                  <AlertTriangle size={20} />
+                  <span>
+                    Solicitud de cambio de estado: El editor del CMS solicita pasar esta noticia
+                    publicada a <strong>Borrador</strong> (retirarla del portal público).
+                  </span>
+                </div>
+              )}
+
             {selectedNews.scheduledDate &&
               (selectedNews.estado === 'PENDIENTE_APROBACION' ||
                 selectedNews.estado === 'PROGRAMADO') && (
@@ -681,6 +719,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       <CheckCircle size={18} />{' '}
                       {submitting
                         ? 'Procesando...'
+                        : selectedNews.requestedEstado === 'BORRADOR'
+                        ? 'Aprobar paso a Borrador'
                         : `Aprobar ${selectedNews.scheduledDate ? 'y Programar' : ''}`}
                     </button>
                   </>
