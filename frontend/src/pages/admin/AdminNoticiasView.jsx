@@ -15,6 +15,51 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
 
   const [isRejecting, setIsRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [lightbox, setLightbox] = useState({
+    isOpen: false,
+    images: [],
+    index: 0,
+  });
+
+  const openLightbox = (images, index) => {
+    setLightbox({ isOpen: true, images, index });
+  };
+
+  const closeLightbox = () => {
+    setLightbox({ isOpen: false, images: [], index: 0 });
+  };
+
+  const nextLightboxImage = useCallback((e) => {
+    if (e) e.stopPropagation();
+    setLightbox((prev) => ({
+      ...prev,
+      index: (prev.index + 1) % prev.images.length,
+    }));
+  }, []);
+
+  const prevLightboxImage = useCallback((e) => {
+    if (e) e.stopPropagation();
+    setLightbox((prev) => ({
+      ...prev,
+      index: (prev.index - 1 + prev.images.length) % prev.images.length,
+    }));
+  }, []);
+
+  useEffect(() => {
+    if (!lightbox.isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        closeLightbox();
+      } else if (e.key === 'ArrowRight' && lightbox.images.length > 1) {
+        nextLightboxImage();
+      } else if (e.key === 'ArrowLeft' && lightbox.images.length > 1) {
+        prevLightboxImage();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightbox.isOpen, lightbox.images.length, nextLightboxImage, prevLightboxImage]);
 
   const syncPendingCount = useCallback(
     (list) => {
@@ -111,6 +156,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
 
   const handleCloseModal = () => {
     if (submitting) return;
+    closeLightbox();
     setSelectedNews(null);
     setIsRejecting(false);
     setRejectReason('');
@@ -442,11 +488,28 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       selectedNews.images.length
                     )}`}
                   >
-                    {selectedNews.images.slice(0, 4).map((img, idx) => (
-                      <div className="modal-news-img-box-admin" key={idx}>
-                        <img src={img} alt={`Foto noticia ${idx + 1}`} />
-                      </div>
-                    ))}
+                    {selectedNews.images.slice(0, 4).map((img, idx) => {
+                      const isLastAndHidden =
+                        idx === 3 && selectedNews.images.length > 4;
+                      const fotosRestantes = selectedNews.images.length - 4;
+                      const imageUrls = selectedNews.images.map((i) => i.url || i);
+
+                      return (
+                        <div
+                          className="modal-news-img-box-admin"
+                          key={idx}
+                          onClick={() => openLightbox(imageUrls, idx)}
+                          title="Haga clic para maximizar la imagen"
+                        >
+                          <img src={img.url || img} alt={`Foto noticia ${idx + 1}`} />
+                          {isLastAndHidden && (
+                            <div className="mosaic-overlay-admin">
+                              <span>+{fotosRestantes}</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -532,6 +595,49 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                   </>
                 )}
               </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {lightbox.isOpen && (
+        <div className="lightbox-overlay-admin" onClick={closeLightbox}>
+          <button
+            type="button"
+            className="lightbox-close-admin"
+            onClick={closeLightbox}
+            aria-label="Cerrar imagen maximizada"
+          >
+            &times;
+          </button>
+          <div
+            className="lightbox-content-admin"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {lightbox.images.length > 1 && (
+              <button
+                type="button"
+                className="lightbox-arrow-admin lb-left-admin"
+                onClick={prevLightboxImage}
+                aria-label="Imagen anterior"
+              >
+                &#10094;
+              </button>
+            )}
+            <img
+              src={lightbox.images[lightbox.index]}
+              alt={`Vista ampliada ${lightbox.index + 1}`}
+              className="lightbox-img-admin"
+            />
+            {lightbox.images.length > 1 && (
+              <button
+                type="button"
+                className="lightbox-arrow-admin lb-right-admin"
+                onClick={nextLightboxImage}
+                aria-label="Imagen siguiente"
+              >
+                &#10095;
+              </button>
             )}
           </div>
         </div>

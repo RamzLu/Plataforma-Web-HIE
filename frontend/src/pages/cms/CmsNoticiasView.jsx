@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
@@ -91,6 +91,8 @@ const CmsNoticiasView = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [editingId, setEditingId] = useState(null);
+  const [correctionNews, setCorrectionNews] = useState(null);
+
   const [titulo, setTitulo] = useState("");
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("General");
@@ -102,10 +104,6 @@ const CmsNoticiasView = ({
 
   const [noticiaAEliminar, setNoticiaAEliminar] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
-
-  // Estado para el Modal de Corrección (Noticias Rechazadas)
-  const [correctionNews, setCorrectionNews] = useState(null);
-  const correctionFileInputRef = useRef(null);
 
   const filteredNews = (newsList || []).filter((n) => {
     const estadoItem = n.estado
@@ -126,6 +124,7 @@ const CmsNoticiasView = ({
 
   const handleOpenCreate = () => {
     setEditingId(null);
+    setCorrectionNews(null);
     setTitulo("");
     setCuerpoHtml("");
     setCategoria("General");
@@ -146,6 +145,7 @@ const CmsNoticiasView = ({
 
   const handleOpenEdit = (news) => {
     setEditingId(news.id);
+    setCorrectionNews(null);
     setTitulo(news.title || "");
 
     const contenidoCrudo = news.body?.[0] || news.contenido || "";
@@ -179,129 +179,40 @@ const CmsNoticiasView = ({
     }
   };
 
-  // --- MANEJADORES MODAL CORREGIR CONTENIDO RECHAZADO ---
+  // --- ABRIR MODAL DE CORRECCIÓN (IGUAL AL DE EDITAR + MOTIVO DE RECHAZO ARRIBA) ---
   const handleOpenCorrection = (news) => {
+    setEditingId(news.id);
     setCorrectionNews(news);
     setTitulo(news.title || "");
+
     const contenidoCrudo = news.body?.[0] || news.contenido || "";
     setCuerpoHtml(
       typeof contenidoCrudo === "string" ? contenidoCrudo : String(contenidoCrudo)
     );
+
     setCategoria(news.category || "General");
+    setEstado(news.fechaPublicacion ? "PROGRAMADO" : "PUBLICADO");
     setImagenesUrls(news.images || []);
     setArchivosSeleccionados([]);
     setFechaProgramada(news.fechaPublicacion ? new Date(news.fechaPublicacion) : null);
-  };
-
-  const handleCloseCorrection = () => {
-    if (saving) return;
-    setCorrectionNews(null);
-  };
-
-  const handleCorrectionSubmit = async (targetEstado) => {
-    if (!correctionNews || saving) return;
-
-    const textoContenido =
-      typeof cuerpoHtml === "string"
-        ? cuerpoHtml
-        : Array.isArray(cuerpoHtml)
-        ? cuerpoHtml[0] || ""
-        : String(cuerpoHtml || "");
-
-    if (!titulo.trim() || !textoContenido.replace(/<[^>]+>/g, "").trim()) {
-      toast.error("Por favor completa el título y el contenido.");
-      return;
-    }
-
-    setSaving(true);
-    try {
-      if (keycloak.authenticated) {
-        await keycloak.updateToken(30).catch(() => {});
-      }
-      const token = keycloak.token;
-      if (!token) {
-        toast.error("Tu sesión ha expirado.");
-        keycloak.login();
-        return;
-      }
-
-      // Solo conservamos las URLs remotas existentes (no los blob: nuevos)
-      const remoteUrls = imagenesUrls.filter((u) => !String(u).startsWith("blob:"));
-
-      const formData = new FormData();
-      formData.append("titulo", titulo);
-      formData.append("contenido", textoContenido);
-      formData.append("estado", targetEstado);
-      formData.append("categoriaNombre", categoria);
-      formData.append("imagenesExistentes", JSON.stringify(remoteUrls));
-
-      if (fechaProgramada && targetEstado !== "BORRADOR") {
-        formData.append("fechaPublicacion", fechaProgramada.toISOString());
-      }
-
-      archivosSeleccionados.forEach((file) => {
-        formData.append("imagenes", file);
-      });
-
-      const data = await updateNoticia(correctionNews.id, formData, token);
-      const estadoDevuelto = data.noticia?.estado || targetEstado;
-
-      const noticiaFormateada = {
-        id: data.noticia?.id || correctionNews.id,
-        title: titulo,
-        body: [textoContenido],
-        date:
-          data.noticia?.createdAt
-            ? new Date(data.noticia.createdAt).toLocaleDateString("es-AR")
-            : correctionNews.date,
-        createdAt: data.noticia?.createdAt || correctionNews.createdAt,
-        updatedAt: data.noticia?.updatedAt || new Date().toISOString(),
-        category: categoria || "General",
-        estado: estadoDevuelto,
-        isDraft: estadoDevuelto === "BORRADOR",
-        images: data.noticia?.images || imagenesUrls || [],
-        editor: data.noticia?.editor || correctionNews.editor || "Editor CMS",
-        editedBy: data.noticia?.editedBy || null,
-        fechaPublicacion: data.noticia?.fechaPublicacion || null,
-        rejectionReason: data.noticia?.rejectionReason || null,
-      };
-
-      if (onUpdateNews) onUpdateNews(noticiaFormateada);
-
-      if (targetEstado === "BORRADOR") {
-        toast.success("Cambios guardados como borrador.");
-        setViewTab("BORRADOR");
-      } else {
-        toast.success("Noticia corregida y reenviada a aprobación del administrador.");
-        setViewTab("PENDIENTE_APROBACION");
-      }
-
-      setCorrectionNews(null);
-    } catch (error) {
-      toast.error(
-        `Error: ${
-          error.response?.data?.error?.message ||
-          error.response?.data?.message ||
-          error.message ||
-          "Error al actualizar"
-        }`
-      );
-    } finally {
-      setSaving(false);
-    }
+    setHasUnsavedChanges(false);
+    setShowModal(true);
   };
 
   const handleCloseAttempt = () => {
+    if (saving) return;
     if (hasUnsavedChanges) {
       setShowUnsavedModal(true);
     } else {
       setShowModal(false);
+      setCorrectionNews(null);
     }
   };
 
   const handleForceClose = () => {
     setShowUnsavedModal(false);
     setShowModal(false);
+    setCorrectionNews(null);
     setHasUnsavedChanges(false);
   };
 
@@ -361,8 +272,15 @@ const CmsNoticiasView = ({
 
   const handleRemoveImage = (indexToRemove) => {
     setHasUnsavedChanges(true);
+    const targetUrl = imagenesUrls[indexToRemove];
+    if (String(targetUrl).startsWith("blob:")) {
+      // Calculamos qué posición ocupa este blob dentro de archivosSeleccionados
+      const blobIndex = imagenesUrls
+        .slice(0, indexToRemove)
+        .filter((u) => String(u).startsWith("blob:")).length;
+      setArchivosSeleccionados((prev) => prev.filter((_, idx) => idx !== blobIndex));
+    }
     setImagenesUrls((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-    setArchivosSeleccionados((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
@@ -382,7 +300,7 @@ const CmsNoticiasView = ({
       return;
     }
 
-    if (!titulo.trim() || !textoContenido.trim()) {
+    if (!titulo.trim() || !textoContenido.replace(/<[^>]+>/g, "").trim()) {
       toast.error("Por favor completa el título y el contenido.");
       setShowUnsavedModal(false);
       return;
@@ -431,11 +349,19 @@ const CmsNoticiasView = ({
 
       if (editingId) {
         data = await updateNoticia(editingId, formData, token);
-        toast.success(
-          estadoParaBackend === "BORRADOR"
-            ? "Borrador actualizado con éxito."
-            : "Noticia enviada a revisión del administrador para su aprobación."
-        );
+        if (correctionNews) {
+          toast.success(
+            estadoParaBackend === "BORRADOR"
+              ? "Cambios guardados como borrador."
+              : "Noticia corregida y reenviada a aprobación del administrador."
+          );
+        } else {
+          toast.success(
+            estadoParaBackend === "BORRADOR"
+              ? "Borrador actualizado con éxito."
+              : "Noticia enviada a revisión del administrador para su aprobación."
+          );
+        }
       } else {
         data = await createNoticia(formData, token);
         toast.success(
@@ -451,7 +377,9 @@ const CmsNoticiasView = ({
         id: data.noticia?.id || editingId,
         title: titulo,
         body: [textoContenido],
-        date: new Date().toLocaleDateString("es-AR"),
+        date: data.noticia?.createdAt
+          ? new Date(data.noticia.createdAt).toLocaleDateString("es-AR")
+          : new Date().toLocaleDateString("es-AR"),
         createdAt: data.noticia?.createdAt || new Date().toISOString(),
         updatedAt: data.noticia?.updatedAt || new Date().toISOString(),
         category: categoria || "General",
@@ -474,6 +402,7 @@ const CmsNoticiasView = ({
       setHasUnsavedChanges(false);
       setShowUnsavedModal(false);
       setShowConfirmDraftModal(false);
+      setCorrectionNews(null);
       setShowModal(false);
     } catch (error) {
       toast.error(
@@ -872,59 +801,65 @@ const CmsNoticiasView = ({
         </div>
       </div>
 
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
+      <CmsDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleExecuteDelete}
+        itemType="la noticia"
+        isDeleting={deletingId === noticiaAEliminar}
+      />
+
       {/* ========================================================================
-          MODAL CORREGIR CONTENIDO (IGUAL A CONTENIDO GRÁFICO)
+          MODAL CREAR / EDITAR / CORREGIR NOTICIA (SPLIT LAYOUT CON VISTA PREVIA)
       ======================================================================== */}
-      {correctionNews && (
-        <div className="modal-overlay" onClick={handleCloseCorrection}>
+      {showModal && (
+        <div className="modal-overlay" onClick={handleCloseAttempt}>
           <div
-            className="news-correction-modal-card"
+            className="modal-content-esp news-modal-content news-modal-content-wide"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="news-correction-header">
-              <div className="news-correction-title-group">
-                <h2>Corregir Contenido</h2>
-                <span className="news-status-pill-rejected">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                  </svg>
-                  Rechazado
-                </span>
-              </div>
+            <div className="modal-header-esp">
+              {correctionNews ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                  <h2>Corregir contenido</h2>
+                  <span className="news-status-pill-rejected">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    Rechazado
+                  </span>
+                </div>
+              ) : (
+                <h2>{editingId ? "Editar noticia" : "Crear noticia"}</h2>
+              )}
+
               <button
                 type="button"
-                className="news-correction-close-btn"
-                onClick={handleCloseCorrection}
-                disabled={saving}
+                className="btn-close-modal"
+                onClick={handleCloseAttempt}
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
                 </svg>
               </button>
             </div>
 
-            {/* Body */}
-            <div className="news-correction-body">
-              {/* Alerta Roja con el Motivo del Rechazo */}
-              <div className="news-correction-alert">
+            {/* MOTIVO DEL RECHAZO ARRIBA (SOLO EN MODO CORRECCIÓN DE RECHAZADOS) */}
+            {correctionNews && (
+              <div
+                className="news-correction-alert"
+                style={{ margin: "16px 35px 0 35px", flexShrink: 0 }}
+              >
                 <div className="news-correction-alert-header">
                   <svg
                     width="18"
@@ -945,237 +880,29 @@ const CmsNoticiasView = ({
                     "El administrador solicitó correcciones en esta noticia antes de su publicación."}
                 </p>
               </div>
+            )}
 
-              {/* Caja de Imagen / Multimedia */}
-              <div>
-                <div className="news-correction-media-box">
-                  {imagenesUrls && imagenesUrls.length > 0 ? (
-                    <img
-                      src={imagenesUrls[0]}
-                      alt="Vista previa"
-                      className="news-correction-preview-img"
-                    />
-                  ) : (
-                    <div className="news-correction-preview-empty">Sin imagen</div>
-                  )}
-
-                  <div className="news-correction-media-info">
-                    <span className="news-correction-filename">
-                      {imagenesUrls && imagenesUrls.length > 0
-                        ? imagenesUrls.length === 1
-                          ? "recurso_hospital_evita.jpg"
-                          : `${imagenesUrls.length} imágenes adjuntas`
-                        : "Sin imágenes adjuntas"}
-                    </span>
-                    <span className="news-correction-formats">
-                      Formatos permitidos: JPG, PNG o WEBP
-                    </span>
-
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/png, image/jpeg, image/jpg, image/webp"
-                      ref={correctionFileInputRef}
-                      onChange={handleMultipleImagesUpload}
-                      style={{ display: "none" }}
-                    />
-                    <button
-                      type="button"
-                      className="news-btn-change-image"
-                      onClick={() => correctionFileInputRef.current?.click()}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                        <circle cx="12" cy="13" r="4"></circle>
-                      </svg>
-                      Cambiar imagen
-                    </button>
-                  </div>
-                </div>
-
-                {imagenesUrls && imagenesUrls.length > 0 && (
-                  <div className="news-correction-thumbs-strip">
-                    {imagenesUrls.map((url, idx) => (
-                      <div key={idx} className="news-correction-thumb-item">
-                        <img src={url} alt={`Miniatura ${idx + 1}`} />
-                        <button
-                          type="button"
-                          className="news-correction-thumb-remove"
-                          onClick={() => handleRemoveImage(idx)}
-                          title="Quitar imagen"
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Campos del Formulario */}
-              <div>
-                <label className="news-form-label">TÍTULO DEL CONTENIDO</label>
-                <input
-                  type="text"
-                  value={titulo}
-                  onChange={(e) => setTitulo(e.target.value)}
-                  className="news-form-input"
-                  placeholder="Título de la noticia"
-                />
-              </div>
-
-              <div>
-                <label className="news-form-label">CLASIFICACIÓN</label>
-                <select
-                  value={categoria}
-                  onChange={(e) => setCategoria(e.target.value)}
-                  className="news-form-input"
-                >
-                  {CATEGORIAS.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="news-form-label">CUERPO DE LA PUBLICACIÓN</label>
-                <div className="custom-ckeditor-container">
-                  <CKEditor
-                    editor={ClassicEditor}
-                    data={cuerpoHtml || ""}
-                    config={{
-                      licenseKey: "GPL",
-                      plugins: [
-                        Essentials,
-                        Paragraph,
-                        Heading,
-                        Bold,
-                        Italic,
-                        Underline,
-                        Link,
-                        List,
-                        BlockQuote,
-                        Undo,
-                        Alignment,
-                      ],
-                      toolbar: [
-                        "heading",
-                        "|",
-                        "bold",
-                        "italic",
-                        "underline",
-                        "link",
-                        "bulletedList",
-                        "numberedList",
-                        "|",
-                        "alignment:left",
-                        "alignment:center",
-                        "alignment:right",
-                        "alignment:justify",
-                        "|",
-                        "blockQuote",
-                        "|",
-                        "undo",
-                        "redo",
-                      ],
-                      alignment: { options: ["left", "center", "right", "justify"] },
-                    }}
-                    onChange={(event, editor) => {
-                      setCuerpoHtml(editor.getData());
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="news-correction-footer">
-              <button
-                type="button"
-                className="news-btn-cancel-text"
-                onClick={handleCloseCorrection}
-                disabled={saving}
-              >
-                Cancelar
-              </button>
-
-              <div className="news-correction-actions-right">
-                <button
-                  type="button"
-                  className="news-btn-draft-outline"
-                  onClick={() => handleCorrectionSubmit("BORRADOR")}
-                  disabled={saving}
-                >
-                  Guardar Borrador
-                </button>
-                <button
-                  type="button"
-                  className="news-btn-resubmit-primary"
-                  onClick={() => handleCorrectionSubmit("PENDIENTE_APROBACION")}
-                  disabled={saving}
-                >
-                  {saving ? "Enviando..." : "Guardar y Reenviar"}
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
-      <CmsDeleteModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleExecuteDelete}
-        itemType="la noticia"
-        isDeleting={deletingId === noticiaAEliminar}
-      />
-
-      {showModal && (
-        <div className="modal-overlay" onClick={handleCloseAttempt}>
-          <div
-            className="modal-content-esp news-modal-content news-modal-content-wide"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header-esp">
-              <h2>{editingId ? "Editar noticia" : "Crear noticia"}</h2>
-              <button
-                type="button"
-                className="btn-close-modal"
-                onClick={handleCloseAttempt}
-              >
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
             <form
-              onSubmit={(e) => handleSave(e)}
-              style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
+              onSubmit={(e) =>
+                correctionNews
+                  ? handleSave(
+                      e,
+                      estado === "PROGRAMADO" ? "PROGRAMADO" : "PUBLICADO"
+                    )
+                  : handleSave(e)
+              }
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                flex: 1,
+                minHeight: 0,
+              }}
             >
-              <div className="modal-split-layout">
+              <div
+                className="modal-split-layout"
+                style={{ flex: 1, minHeight: 0 }}
+              >
                 <div className="news-form-left">
                   <div>
                     <label className="news-form-label">
@@ -1571,38 +1298,107 @@ const CmsNoticiasView = ({
                 >
                   CANCELAR
                 </button>
-                <button
-                  type="submit"
-                  className="btn-cerrar-rojo"
-                  style={{ backgroundColor: "#2b5b94" }}
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <span
+
+                {correctionNews ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-cancelar-gris"
                       style={{
-                        display: "flex",
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #cbd5e1",
+                        color: "#0c2340",
+                      }}
+                      onClick={(e) => handleSave(e, "BORRADOR", true)}
+                      disabled={saving}
+                    >
+                      GUARDAR BORRADOR
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn-cerrar-rojo"
+                      style={{
+                        backgroundColor: "#2b5b94",
+                        display: "inline-flex",
                         alignItems: "center",
                         gap: "8px",
                       }}
+                      disabled={saving}
                     >
-                      <div
-                        className="cms-spinner"
+                      {saving ? (
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <div
+                            className="cms-spinner"
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              borderWidth: "2px",
+                              borderTopColor: "white",
+                              borderColor: "rgba(255,255,255,0.3)",
+                            }}
+                          ></div>
+                          ENVIANDO...
+                        </span>
+                      ) : (
+                        <>
+                          GUARDAR Y REENVIAR
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                          </svg>
+                        </>
+                      )}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="submit"
+                    className="btn-cerrar-rojo"
+                    style={{ backgroundColor: "#2b5b94" }}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <span
                         style={{
-                          width: "16px",
-                          height: "16px",
-                          borderWidth: "2px",
-                          borderTopColor: "white",
-                          borderColor: "rgba(255,255,255,0.3)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
                         }}
-                      ></div>
-                      GUARDANDO...
-                    </span>
-                  ) : editingId ? (
-                    "ACTUALIZAR"
-                  ) : (
-                    "GUARDAR"
-                  )}
-                </button>
+                      >
+                        <div
+                          className="cms-spinner"
+                          style={{
+                            width: "16px",
+                            height: "16px",
+                            borderWidth: "2px",
+                            borderTopColor: "white",
+                            borderColor: "rgba(255,255,255,0.3)",
+                          }}
+                        ></div>
+                        GUARDANDO...
+                      </span>
+                    ) : editingId ? (
+                      "ACTUALIZAR"
+                    ) : (
+                      "GUARDAR"
+                    )}
+                  </button>
+                )}
               </div>
             </form>
           </div>
