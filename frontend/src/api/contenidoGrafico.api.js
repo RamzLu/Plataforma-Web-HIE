@@ -1,11 +1,13 @@
 import api from "./axiosConfig.js";
 
+/**
+ * Obtiene la lista de espacios gráficos fijos predefinidos en la base de datos.
+ */
 export const getContenidosGraficos = async () => {
   try {
     const response = await api.get("/cms/contenido-grafico");
     return response.data;
   } catch (error) {
-    // Si la ruta nueva no existe aún en el backend, intentar con la ruta compatible de banners
     try {
       const fallback = await api.get("/cms/banners");
       return fallback.data;
@@ -15,55 +17,18 @@ export const getContenidosGraficos = async () => {
   }
 };
 
-export const createContenidoGrafico = async (formData, token) => {
+/**
+ * Actualiza el arreglo de imágenes (carrusel) y metadatos de un espacio fijo existente.
+ */
+export const updateContenidoGrafico = async (id, payload, token) => {
   try {
-    const response = await api.post("/cms/contenido-grafico", formData, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data" 
-      }
+    const response = await api.put(`/cms/contenido-grafico/${id}`, payload, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     return response.data;
   } catch (error) {
-    const fallback = await api.post("/cms/banners", formData, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data" 
-      }
-    });
-    return fallback.data;
-  }
-};
-
-export const updateContenidoGrafico = async (id, formData, token) => {
-  try {
-    const response = await api.put(`/cms/contenido-grafico/${id}`, formData, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data" 
-      }
-    });
-    return response.data;
-  } catch (error) {
-    const fallback = await api.put(`/cms/banners/${id}`, formData, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data" 
-      }
-    });
-    return fallback.data;
-  }
-};
-
-export const deleteContenidoGrafico = async (id, token) => {
-  try {
-    const response = await api.delete(`/cms/contenido-grafico/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data;
-  } catch (error) {
-    const fallback = await api.delete(`/cms/banners/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
+    const fallback = await api.put(`/cms/banners/${id}`, payload, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     return fallback.data;
   }
