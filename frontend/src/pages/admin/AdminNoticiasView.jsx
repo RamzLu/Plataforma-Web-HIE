@@ -74,79 +74,103 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     [onPendingCountChange]
   );
 
-  const cargarNoticias = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await getNoticias(true);
-      if (Array.isArray(data)) {
-        const filtradas = data
-          .filter((n) => (n.estado || '').toUpperCase() !== 'BORRADOR')
-          .map((noticia) => {
-            const estadoUpper = (noticia.estado || 'PENDIENTE_APROBACION').toUpperCase();
-            let statusLabel = 'Pendiente de aprobación';
-            if (estadoUpper === 'PUBLICADO' || estadoUpper === 'APROBADO') {
-              statusLabel = 'Aprobado';
-            } else if (estadoUpper === 'RECHAZADO') {
-              statusLabel = 'Rechazado';
-            } else if (estadoUpper === 'PROGRAMADO') {
-              statusLabel = 'Programado';
-            }
+  const cargarNoticias = useCallback(
+    async (silent = false) => {
+      try {
+        if (!silent) setLoading(true);
+        const data = await getNoticias(true);
+        if (Array.isArray(data)) {
+          const filtradas = data
+            .filter((n) => (n.estado || '').toUpperCase() !== 'BORRADOR')
+            .map((noticia) => {
+              const estadoUpper = (noticia.estado || 'PENDIENTE_APROBACION').toUpperCase();
+              let statusLabel = 'Pendiente de aprobación';
+              if (estadoUpper === 'PUBLICADO' || estadoUpper === 'APROBADO') {
+                statusLabel = 'Aprobado';
+              } else if (estadoUpper === 'RECHAZADO') {
+                statusLabel = 'Rechazado';
+              } else if (estadoUpper === 'PROGRAMADO') {
+                statusLabel = 'Programado';
+              }
 
-            return {
-              id: noticia.id,
-              title: noticia.title || noticia.titulo,
-              date:
-                noticia.date ||
-                (noticia.createdAt
-                  ? new Date(noticia.createdAt).toLocaleDateString('es-AR')
-                  : 'Hoy'),
-              editor: noticia.editor || 'Editor CMS',
-              editedBy: noticia.editedBy || null,
-              category: noticia.category || 'Noticias',
-              estado: estadoUpper,
-              status: statusLabel,
-              content: Array.isArray(noticia.body)
-                ? noticia.body.join('')
-                : noticia.contenido || noticia.body || '',
-              fechaPublicacion: noticia.fechaPublicacion || null,
-              scheduledDate: noticia.fechaPublicacion
-                ? new Date(noticia.fechaPublicacion).toLocaleString('es-AR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  }) + ' hs'
-                : null,
-              createdAt: noticia.createdAt,
-              updatedAt: noticia.updatedAt,
-              images: noticia.images || [],
-              rejectionReason: noticia.rejectionReason || null,
-            };
-          })
-          .sort((a, b) => {
-            const aPending = a.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
-            const bPending = b.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
-            if (aPending !== bPending) return aPending - bPending;
-            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-          });
+              return {
+                id: noticia.id,
+                title: noticia.title || noticia.titulo,
+                date:
+                  noticia.date ||
+                  (noticia.createdAt
+                    ? new Date(noticia.createdAt).toLocaleDateString('es-AR')
+                    : 'Hoy'),
+                editor: noticia.editor || 'Editor CMS',
+                editedBy: noticia.editedBy || null,
+                category: noticia.category || 'Noticias',
+                estado: estadoUpper,
+                status: statusLabel,
+                content: Array.isArray(noticia.body)
+                  ? noticia.body.join('')
+                  : noticia.contenido || noticia.body || '',
+                fechaPublicacion: noticia.fechaPublicacion || null,
+                scheduledDate: noticia.fechaPublicacion
+                  ? new Date(noticia.fechaPublicacion).toLocaleString('es-AR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }) + ' hs'
+                  : null,
+                createdAt: noticia.createdAt,
+                updatedAt: noticia.updatedAt,
+                images: noticia.images || [],
+                rejectionReason: noticia.rejectionReason || null,
+              };
+            })
+            .sort((a, b) => {
+              const aPending = a.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
+              const bPending = b.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
+              if (aPending !== bPending) return aPending - bPending;
+              return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+            });
 
-        setNoticias(filtradas);
-        syncPendingCount(filtradas);
-      } else {
-        setNoticias([]);
-        syncPendingCount([]);
+          setNoticias(filtradas);
+          syncPendingCount(filtradas);
+        } else {
+          setNoticias([]);
+          syncPendingCount([]);
+        }
+      } catch (error) {
+        if (!silent) {
+          console.error('Error al cargar noticias en el panel de administración:', error);
+          toast.error('No se pudieron cargar las noticias para revisión.');
+        }
+      } finally {
+        if (!silent) setLoading(false);
       }
-    } catch (error) {
-      console.error('Error al cargar noticias en el panel de administración:', error);
-      toast.error('No se pudieron cargar las noticias para revisión.');
-    } finally {
-      setLoading(false);
-    }
-  }, [syncPendingCount]);
+    },
+    [syncPendingCount]
+  );
 
   useEffect(() => {
-    cargarNoticias();
+    cargarNoticias(false);
+
+    const intervalId = setInterval(() => {
+      cargarNoticias(true);
+    }, 8000);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        cargarNoticias(true);
+      }
+    };
+
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
   }, [cargarNoticias]);
 
   const handleOpenModal = (noticia) => {
@@ -330,6 +354,12 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               onClick={() => setStatusFilter('PENDIENTE')}
             >
               Pendientes
+              {pendingCount > 0 && (
+                <span
+                  className="admin-news-tab-dot"
+                  title="Tienes solicitudes pendientes de aprobación"
+                />
+              )}
             </button>
             <button
               type="button"

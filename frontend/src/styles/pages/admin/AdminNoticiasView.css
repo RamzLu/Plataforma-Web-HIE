@@ -715,6 +715,7 @@
 }
 
 .admin-news-tab-item {
+  position: relative;
   border: none;
   background: transparent;
   padding: 8px 18px;
@@ -726,6 +727,37 @@
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
+}
+
+.admin-news-tab-dot {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  box-shadow: 0 0 0 2px #f8fafc;
+  animation: pulsePendingDot 2s infinite;
+}
+
+.admin-news-tab-item.active .admin-news-tab-dot {
+  box-shadow: 0 0 0 2px #0f172a;
+}
+
+@keyframes pulsePendingDot {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .admin-news-tab-item:hover {
