@@ -330,7 +330,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               onClick={() => setStatusFilter('PENDIENTE')}
             >
               Pendientes
-              <span className="admin-news-tab-count count-pending">{pendingCount}</span>
             </button>
             <button
               type="button"
@@ -340,7 +339,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               onClick={() => setStatusFilter('APROBADO')}
             >
               Aprobados
-              <span className="admin-news-tab-count count-approved">{approvedCount}</span>
             </button>
             <button
               type="button"
@@ -350,9 +348,24 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               onClick={() => setStatusFilter('RECHAZADO')}
             >
               Rechazados
-              <span className="admin-news-tab-count count-rejected">{rejectedCount}</span>
             </button>
           </div>
+
+          <span
+            className={`admin-news-active-count-badge ${
+              statusFilter === 'PENDIENTE'
+                ? 'count-pending'
+                : statusFilter === 'APROBADO'
+                ? 'count-approved'
+                : 'count-rejected'
+            }`}
+          >
+            {statusFilter === 'PENDIENTE'
+              ? `${pendingCount} ${pendingCount === 1 ? 'pendiente' : 'pendientes'}`
+              : statusFilter === 'APROBADO'
+              ? `${approvedCount} ${approvedCount === 1 ? 'aprobada' : 'aprobadas'}`
+              : `${rejectedCount} ${rejectedCount === 1 ? 'rechazada' : 'rechazadas'}`}
+          </span>
         </div>
 
         <div className="data-table-container-admin">
