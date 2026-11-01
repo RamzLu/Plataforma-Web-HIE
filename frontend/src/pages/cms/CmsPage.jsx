@@ -26,7 +26,6 @@ const CmsPage = () => {
   const [initialized, setInitialized] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [isCms, setIsCms] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("Usuario CMS");
 
   const [activeTab, setActiveTab] = useState(() => {
@@ -164,19 +163,14 @@ const handleDeleteDoc = (id) => {
   }, []);
 
   useEffect(() => {
-    const checkCmsRole = () =>
-      keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("cm");
-    const checkAdminRole = () =>
-      keycloak.hasRealmRole("admin-hief") ||
-      keycloak.hasRealmRole("admin-hie") ||
-      keycloak.hasRealmRole("admin");
+    // Solo el rol 'cm' accede al CMS (admin-hief pertenece al panel de administracion)
+    const checkCmsRole = () => keycloak.hasRealmRole("cm");
 
     if (isKeycloakInitialized.current || keycloak.authenticated) {
       if (keycloak.authenticated) {
         setInitialized(true);
         setAuthenticated(true);
         setIsCms(checkCmsRole());
-        setIsAdmin(checkAdminRole());
         const name =
           keycloak.tokenParsed?.name ||
           keycloak.tokenParsed?.preferred_username ||
@@ -196,7 +190,6 @@ const handleDeleteDoc = (id) => {
         setAuthenticated(auth);
         if (auth) {
           setIsCms(checkCmsRole());
-          setIsAdmin(checkAdminRole());
 
           const name =
             keycloak.tokenParsed?.name ||
@@ -387,7 +380,6 @@ if (!authenticated) {
       <div className="cms-main-wrapper">
         <CmsHeader
           userName={userName}
-          isAdmin={isAdmin}
           testBackendConnection={testBackendConnection}
           onLogoutClick={() => setShowLogoutModal(true)}
           activeTab={activeTab}
@@ -553,7 +545,7 @@ if (!authenticated) {
               <div className="session-user-details">
                 <span className="user-dot"></span>
                 <span className="user-text-logout">
-                  <strong>{isAdmin ? "Administrador" : "Redactor"}</strong> ({keycloak?.tokenParsed?.email || userName})
+                  <strong>Redactor</strong> ({keycloak?.tokenParsed?.email || userName})
                 </span>
               </div>
             </div>

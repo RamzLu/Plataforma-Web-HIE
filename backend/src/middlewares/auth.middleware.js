@@ -66,6 +66,7 @@ export const verifyToken = async (req, res, next) => {
       keycloakId: payload.sub,
       username: payload.preferred_username,
       name: payload.name || payload.preferred_username,
+      email: payload.email,
       roles: payload.realm_access?.roles || [],
     };
 
@@ -94,16 +95,25 @@ export const verifyToken = async (req, res, next) => {
 // 2. Alias para las rutas de Admin
 export const checkJwt = verifyToken;
 
-// 3. Validador de roles
-export const requireRole = (roleName) => {
+// 3. Validador de roles: deja pasar si el usuario tiene AL MENOS UNO de los roles indicados
+export const requireRole = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user || !req.user.roles) {
       return res.status(403).json({ error: 'No se encontraron roles para este usuario.' });
     }
-    const hasRole = req.user.roles.includes(roleName);
+    const hasRole = allowedRoles.some((role) => req.user.roles.includes(role));
     if (!hasRole) {
-      return res.status(403).json({ error: `Se requiere el rol '${roleName}'.` });
+      return res.status(403).json({ error: 'No tenés permisos para realizar esta acción.' });
     }
     next();
   };
 };
+
+// Rol de Keycloak (realm) que puede operar el CMS:
+//  - cm: gestor de contenidos
+// 'admin-hief' (supervision/aprobacion) NO accede al CMS: pertenece al panel de administracion.
+// El super admin de Keycloak (gestiona usuarios/roles) no se contempla todavia.
+export const ROLES_CMS = ['cm'];
+
+// 4. Atajo: token válido + rol de CMS
+export const requireCmsAccess = [verifyToken, requireRole(...ROLES_CMS)];
