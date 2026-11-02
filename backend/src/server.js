@@ -1,5 +1,7 @@
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import rolesRoutes from './routes/roles.routes.js'
 import adminRoutes from './routes/admin.routes.js';
 import cmsRoutes from './routes/cms.routes.js';
@@ -52,9 +54,42 @@ export const corsOptions = {
   maxAge: 86400,
 };
 
-// --- Middlewares ---
-app.use(cors(corsOptions))
-app.use(express.json())
+// Desactivar cabecera X-Powered-By para no exponer la tecnologia del servidor (V9)
+app.disable('x-powered-by');
+
+// --- Rate Limiting (V9: Proteccion contra abuso y fuerza bruta) ---
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 300, // maximo 300 solicitudes por IP cada 15 min
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Demasiadas solicitudes desde esta dirección IP. Por favor, intente nuevamente más tarde.',
+  },
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 60, // maximo 60 operaciones de escritura por IP cada 15 min
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => ['GET', 'HEAD', 'OPTIONS'].includes(req.method),
+  message: {
+    error: 'Se superó el límite de operaciones de escritura. Por favor, espere unos minutos.',
+  },
+});
+
+// --- Middlewares de Seguridad y Parseo (V9) ---
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
+app.use(cors(corsOptions));
+app.use('/api', apiLimiter);
+app.use('/api', writeLimiter);
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Conectamos las rutas
 app.use('/api/roles', rolesRoutes)
