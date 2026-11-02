@@ -1,13 +1,8 @@
 import { prisma } from "../../config/prisma.js";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 
 const BUCKET_NAME = "autoridades-imagenes";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
 
 // Serializa una autoridad de BD a formato JSON seguro (BigInt → string)
 const serializarAutoridad = (autoridad) => {
