@@ -30,7 +30,7 @@ import {
 } from "../controllers/cms/cms.capacitacion.controller.js";
 
 
-import { requireCmsAccess } from '../middlewares/auth.middleware.js'; 
+import { requireCmsAccess, adminViewAccess } from '../middlewares/auth.middleware.js'; 
 import { uploadMemory } from '../middlewares/upload.middleware.js'; 
 
 const router = Router();
@@ -38,7 +38,7 @@ const router = Router();
 // ==========================================
 // MÓDULO: NOTICIAS
 // ==========================================
-router.get('/noticias', obtenerNoticias);
+router.get('/noticias', adminViewAccess, obtenerNoticias);
 router.post('/noticias', requireCmsAccess, uploadMemory.array('imagenes', 10), crearNoticia);
 router.put('/noticias/:id', requireCmsAccess, uploadMemory.array('imagenes', 10), actualizarNoticia);
 router.delete('/noticias/:id', requireCmsAccess, eliminarNoticia);
@@ -46,7 +46,7 @@ router.delete('/noticias/:id', requireCmsAccess, eliminarNoticia);
 // ==========================================
 // MÓDULO: DOCUMENTACIÓN
 // ==========================================
-router.get('/documentacion', obtenerDocumentos);
+router.get('/documentacion', adminViewAccess, obtenerDocumentos);
 router.post('/documentacion', requireCmsAccess, uploadMemory.single('archivo'), crearDocumento);
 router.put('/documentacion/:id', requireCmsAccess, uploadMemory.single('archivo'), actualizarDocumento);
 router.delete('/documentacion/:id', requireCmsAccess, eliminarDocumento);
@@ -54,12 +54,12 @@ router.delete('/documentacion/:id', requireCmsAccess, eliminarDocumento);
 // ==========================================
 // MÓDULO: BANNERS Y CONTENIDO GRÁFICO
 // ==========================================
-router.get("/banners", obtenerBanners);
+router.get("/banners", adminViewAccess, obtenerBanners);
 router.post("/banners", requireCmsAccess, uploadMemory.single("imagen"), crearBanner);
 router.put("/banners/:id", requireCmsAccess, uploadMemory.single("imagen"), actualizarBanner); 
 router.delete("/banners/:id", requireCmsAccess, eliminarBanner); 
 
-router.get("/contenido-grafico", obtenerBanners);
+router.get("/contenido-grafico", adminViewAccess, obtenerBanners);
 router.post("/contenido-grafico", requireCmsAccess, uploadMemory.single("imagen"), crearBanner);
 router.put("/contenido-grafico/:id", requireCmsAccess, uploadMemory.single("imagen"), actualizarBanner); 
 router.delete("/contenido-grafico/:id", requireCmsAccess, eliminarBanner); 
@@ -67,7 +67,7 @@ router.delete("/contenido-grafico/:id", requireCmsAccess, eliminarBanner);
 // ==========================================
 // MÓDULO: PROFESIONALES
 // ==========================================
-router.get("/profesionales", obtenerProfesionales);
+router.get("/profesionales", adminViewAccess, obtenerProfesionales);
 router.post("/profesionales", requireCmsAccess, uploadMemory.single("archivo"), crearProfesional);
 router.put("/profesionales/:id", requireCmsAccess, uploadMemory.single("archivo"), actualizarProfesional);
 router.delete("/profesionales/:id", requireCmsAccess, eliminarProfesional);
@@ -75,7 +75,7 @@ router.delete("/profesionales/:id", requireCmsAccess, eliminarProfesional);
 // ==========================================
 // MÓDULO: ESPECIALIDADES
 // ==========================================
-router.get('/especialidades', especialidadCtrl.obtenerEspecialidades);
+router.get('/especialidades', adminViewAccess, especialidadCtrl.obtenerEspecialidades);
 router.post('/especialidades', requireCmsAccess, especialidadCtrl.crearEspecialidad);
 router.put('/especialidades/:id', requireCmsAccess, especialidadCtrl.actualizarEspecialidad);
 router.delete('/especialidades/:id', requireCmsAccess, especialidadCtrl.eliminarEspecialidad);
@@ -93,7 +93,7 @@ router.put('/institucional/redes', requireCmsAccess, actualizarRedesSociales);
 // ==========================================
 // MÓDULO: RESIDENCIAS
 // ==========================================
-router.get('/residencias', obtenerResidencias);
+router.get('/residencias', adminViewAccess, obtenerResidencias);
 router.post('/residencias', requireCmsAccess, uploadMemory.any(), crearResidencia);
 router.put('/residencias/:id', requireCmsAccess, uploadMemory.any(), actualizarResidencia);
 router.patch('/residencias/:id/estado', requireCmsAccess, cambiarEstadoResidencia);
@@ -102,7 +102,8 @@ router.delete('/residencias/:id', requireCmsAccess, eliminarResidencia);
 // ==========================================
 // MÓDULO: CAPACITACIONES
 // ==========================================
-router.get('/capacitaciones', obtenerCapacitaciones);
+// Listado completo (borradores/archivadas): solo CMS. El portal publico usa /capacitaciones/publicas.
+router.get('/capacitaciones', requireCmsAccess, obtenerCapacitaciones);
 router.get('/capacitaciones/publicas', obtenerCapacitacionesPublicas);
 router.post('/capacitaciones', requireCmsAccess, uploadMemory.any(), crearCapacitacion);
 router.put('/capacitaciones/:id', requireCmsAccess, uploadMemory.any(), actualizarCapacitacion);

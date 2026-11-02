@@ -5,11 +5,11 @@ import api from "./axiosConfig.js";
  */
 export const getContenidosGraficos = async () => {
   try {
-    const response = await api.get("/cms/contenido-grafico");
+    const response = await api.get("/cms/contenido-grafico?admin=true");
     return response.data;
   } catch (error) {
     try {
-      const fallback = await api.get("/cms/banners");
+      const fallback = await api.get("/cms/banners?admin=true");
       return fallback.data;
     } catch {
       throw error;

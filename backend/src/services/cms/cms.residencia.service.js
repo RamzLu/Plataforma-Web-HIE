@@ -18,8 +18,9 @@ class CmsResidenciaService {
   /**
    * Obtener todas las residencias con su archivo y datos formateados
    */
-  async obtenerResidencias() {
+  async obtenerResidencias(esVistaAdmin = false) {
     const residencias = await prisma.residencia.findMany({
+      where: esVistaAdmin === true ? {} : { estado: "PUBLICADO" },
       orderBy: { createdAt: "desc" },
       include: {
         archivo: true,

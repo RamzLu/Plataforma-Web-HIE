@@ -8,8 +8,9 @@ const supabase = createClient(
 );
 
 class CmsProfesionalService {
-  async obtenerProfesionales() {
+  async obtenerProfesionales(esVistaAdmin = false) {
     const profesionales = await prisma.profesional.findMany({
+      where: esVistaAdmin === true ? {} : { activo: true },
       orderBy: { createdAt: "desc" },
       include: {
         especialidad: true,

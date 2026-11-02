@@ -117,3 +117,19 @@ export const ROLES_CMS = ['cm'];
 
 // 4. Atajo: token válido + rol de CMS
 export const requireCmsAccess = [verifyToken, requireRole(...ROLES_CMS)];
+
+// 5. Vista de administracion en endpoints de LECTURA publicos (GET ?admin=true).
+// - Sin ?admin=true: es una consulta publica -> req.adminView = false (solo contenido publicado).
+// - Con ?admin=true: exige token valido (401) y rol de CMS (403); recien ahi req.adminView = true,
+//   lo que habilita ver borradores, programados e inactivos.
+export const adminViewAccess = (req, res, next) => {
+  req.adminView = false;
+  if (req.query.admin !== 'true') return next();
+
+  verifyToken(req, res, () => {
+    requireRole(...ROLES_CMS)(req, res, () => {
+      req.adminView = true;
+      next();
+    });
+  });
+};

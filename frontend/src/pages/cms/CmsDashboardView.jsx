@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { adminFetch } from "../../api/adminFetch.js";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
 import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
@@ -169,7 +170,7 @@ const CmsDashboardView = ({
 
   useEffect(() => {
     if (!profesionalesList || profesionalesList.length === 0) {
-      fetch("http://localhost:3000/api/cms/profesionales")
+      adminFetch("/cms/profesionales")
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) setFallbackProfs(data);

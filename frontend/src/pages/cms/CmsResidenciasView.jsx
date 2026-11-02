@@ -91,7 +91,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   const cargarResidencias = async () => {
     setLoading(true);
     try {
-      const data = await getResidencias();
+      const data = await getResidencias(true);
       setResidencias(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error al cargar residencias:", error);

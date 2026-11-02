@@ -1,7 +1,7 @@
 import api from "./axiosConfig.js";
 
-export const getBanners = async () => {
-  const response = await api.get("/cms/banners");
+export const getBanners = async (isAdmin = false) => {
+  const response = await api.get(isAdmin ? "/cms/banners?admin=true" : "/cms/banners");
   return response.data;
 };
 

@@ -10,8 +10,9 @@ const supabase = createClient(
 );
 
 class CmsBannersService {
-  async obtenerBanners() {
+  async obtenerBanners(esVistaAdmin = false) {
     const banners = await prisma.banner.findMany({
+      where: esVistaAdmin === true ? {} : { activo: true },
       orderBy: { orden: "asc" },
       include: { archivo: true },
     });

@@ -2,7 +2,7 @@ import CmsProfesionalService from "../../services/cms/cms.profesional.service.js
 
 export const obtenerProfesionales = async (req, res, next) => {
   try {
-    const result = await CmsProfesionalService.obtenerProfesionales();
+    const result = await CmsProfesionalService.obtenerProfesionales(req.adminView === true);
     return res.status(200).json(result);
   } catch (error) {
     next(error); 

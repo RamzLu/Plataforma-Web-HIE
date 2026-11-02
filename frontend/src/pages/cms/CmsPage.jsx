@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { adminFetch } from "../../api/adminFetch.js";
 
 import keycloak from "../../config/keycloak";
 
@@ -69,7 +70,7 @@ const CmsPage = () => {
 const fetchNoticias = async () => {
   try {
     setLoading(true);
-    const response = await fetch("http://localhost:3000/api/cms/noticias?admin=true");
+    const response = await adminFetch("/cms/noticias");
     if (!response.ok) throw new Error("Error al obtener noticias del servidor");
     const data = await response.json();
 
@@ -105,7 +106,7 @@ const fetchNoticias = async () => {
 
   const fetchDocs = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/cms/documentacion");
+      const response = await adminFetch("/cms/documentacion");
       if (!response.ok) throw new Error("Error al obtener documentos");
       const data = await response.json();
       
@@ -125,7 +126,7 @@ const fetchNoticias = async () => {
 
   const fetchProfesionales = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/cms/profesionales");
+      const response = await adminFetch("/cms/profesionales");
       if (!response.ok) throw new Error("Error al obtener profesionales");
       const data = await response.json();
       if (data && Array.isArray(data)) {
@@ -156,11 +157,13 @@ const handleDeleteDoc = (id) => {
     localStorage.setItem("portal_docs_data", JSON.stringify(filtered));
   };
 
+  // Las lecturas del CMS exigen token con rol 'cm': se piden recien cuando la sesion esta lista.
   useEffect(() => {
+    if (!authenticated || !isCms) return;
     fetchNoticias();
     fetchDocs();
     fetchProfesionales();
-  }, []);
+  }, [authenticated, isCms]);
 
   useEffect(() => {
     // Solo el rol 'cm' accede al CMS (admin-hief pertenece al panel de administracion)

@@ -2,7 +2,7 @@ import CmsDocService from "../../services/cms/cms.doc.service.js";
 
 export const obtenerDocumentos = async (req, res, next) => {
   try {
-    const result = await CmsDocService.obtenerDocumentos();
+    const result = await CmsDocService.obtenerDocumentos(req.adminView === true);
     return res.status(200).json(result);
   } catch (error) {
     next(error);

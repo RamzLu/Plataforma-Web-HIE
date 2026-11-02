@@ -10,8 +10,9 @@ const supabase = createClient(
 );
 
 class CmsDocService {
-  async obtenerDocumentos() {
+  async obtenerDocumentos(esVistaAdmin = false) {
     const documentos = await prisma.documento.findMany({
+      where: esVistaAdmin === true ? {} : { estado: "PUBLICADO" },
       orderBy: { createdAt: "desc" },
       include: {
         archivo: true,

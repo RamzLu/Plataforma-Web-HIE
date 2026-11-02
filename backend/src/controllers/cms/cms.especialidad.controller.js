@@ -2,8 +2,7 @@ import CmsEspecialidadService from "../../services/cms/cms.especialidad.service.
 
 export const obtenerEspecialidades = async (req, res, next) => {
   try {
-    const { admin } = req.query;
-    const result = await CmsEspecialidadService.obtenerEspecialidades(admin);
+    const result = await CmsEspecialidadService.obtenerEspecialidades(req.adminView === true);
     return res.status(200).json(result);
   } catch (error) { next(error); }
 };

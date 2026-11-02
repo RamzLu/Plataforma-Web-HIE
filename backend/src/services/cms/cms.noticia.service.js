@@ -98,8 +98,8 @@ class CmsNoticiaService {
     };
   }
 
-  async obtenerNoticias(isAdmin) {
-    const whereClause = isAdmin === "true" ? {} : { estado: "PUBLICADO" };
+  async obtenerNoticias(esVistaAdmin = false) {
+    const whereClause = esVistaAdmin === true ? {} : { estado: "PUBLICADO" };
 
     const noticias = await prisma.noticia.findMany({
       where: whereClause,
