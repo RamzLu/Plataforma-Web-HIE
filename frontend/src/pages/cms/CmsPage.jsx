@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { adminFetch } from "../../api/adminFetch.js";
 
 import keycloak from "../../config/keycloak";
@@ -610,7 +611,7 @@ if (!authenticated) {
                 
                 <div 
                   className="info-text" 
-                  dangerouslySetInnerHTML={{ __html: Array.isArray(selectedNews.body) ? selectedNews.body[0] : selectedNews.body }} 
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(Array.isArray(selectedNews.body) ? selectedNews.body[0] : selectedNews.body) }} 
                 />
               </div>
 

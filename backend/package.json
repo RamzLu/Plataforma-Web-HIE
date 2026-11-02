@@ -29,7 +29,8 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
     "node-cron": "^4.6.0",
-    "pg": "^8.23.0"
+    "pg": "^8.23.0",
+    "sanitize-html": "^2.18.1"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",

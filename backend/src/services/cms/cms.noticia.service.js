@@ -2,6 +2,7 @@ import { prisma } from "../../config/prisma.js";
 import { createClient } from "@supabase/supabase-js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { sanitizarHtmlNoticia } from "../../utils/sanitize.utils.js";
 
 const supabase = createClient(
   "https://ipwupwmbygtyiluezzle.supabase.co",
@@ -10,7 +11,9 @@ const supabase = createClient(
 
 class CmsNoticiaService {
   async crearNoticia(data, archivosSubidos, user) {
-    const { titulo, contenido, estado, fechaPublicacion, categoriaNombre } = data;
+    const { titulo, estado, fechaPublicacion, categoriaNombre } = data;
+    // El cuerpo es HTML que luego se muestra en el portal: se sanea antes de validarlo y guardarlo.
+    const contenido = sanitizarHtmlNoticia(data.contenido);
 
     if (!titulo || !contenido) {
       const error = new Error("Faltan campos obligatorios: titulo y contenido.");
@@ -172,7 +175,9 @@ class CmsNoticiaService {
   }
 
 async actualizarNoticia(id, data, archivosSubidos, user) {
-    const { titulo, contenido, imagenesExistentes, estado, fechaPublicacion, categoriaNombre } = data;
+    const { titulo, imagenesExistentes, estado, fechaPublicacion, categoriaNombre } = data;
+    // El cuerpo es HTML que luego se muestra en el portal: se sanea antes de guardarlo.
+    const contenido = data.contenido ? sanitizarHtmlNoticia(data.contenido) : data.contenido;
     
     const usuarioEditor = await obtenerOCrearUsuarioLocal(user);
 

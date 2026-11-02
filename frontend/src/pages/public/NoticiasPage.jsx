@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
 import "../../styles/pages/NoticiasPage.css";
@@ -288,7 +289,7 @@ const NoticiasPage = () => {
                 <h3 className="news-modal-title">{selectedNews.title}</h3>
                 <div className="news-modal-body-text">
                   {selectedNews.body.map((paragraph, idx) => (
-                    <div key={idx} className="info-text" dangerouslySetInnerHTML={{ __html: paragraph }} />
+                    <div key={idx} className="info-text" dangerouslySetInnerHTML={{ __html: sanitizeHtml(paragraph) }} />
                   ))}
                 </div>
               </div>

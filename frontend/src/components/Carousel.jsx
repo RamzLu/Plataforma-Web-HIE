@@ -99,10 +99,14 @@ const Carousel = ({ page = "Inicio" }) => {
       {/* Capa estática superpuesta con el título institucional y el botón independientes de la imagen */}
       <div className="carousel-static-overlay">
         <div className="carousel-content-box">
-          <h1 
-            className="carousel-title" 
-            dangerouslySetInnerHTML={{ __html: customTitle.replace(/\n/g, '<br />') }} 
-          />
+          <h1 className="carousel-title">
+            {customTitle.split("\n").map((linea, i, lineas) => (
+              <React.Fragment key={i}>
+                {linea}
+                {i < lineas.length - 1 && <br />}
+              </React.Fragment>
+            ))}
+          </h1>
           {customBtn && (
             <Link to="/acerca-de" className="carousel-btn-conocenos">
               {customBtn}

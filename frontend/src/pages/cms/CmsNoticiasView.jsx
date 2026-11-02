@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
@@ -588,7 +589,7 @@ const CmsNoticiasView = ({
                         </div>
                         <h3 className="preview-mock-title">{titulo || "El título de la noticia aparecerá aquí..."}</h3>
                         <div className="preview-mock-text ck-content">
-                          {cuerpoHtml ? <div dangerouslySetInnerHTML={{ __html: cuerpoHtml }} /> : <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>El contenido comenzará a aparecer aquí a medida que escribas.</p>}
+                          {cuerpoHtml ? <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(cuerpoHtml) }} /> : <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>El contenido comenzará a aparecer aquí a medida que escribas.</p>}
                         </div>
                       </div>
                       {imagenesUrls.length > 0 ? (
