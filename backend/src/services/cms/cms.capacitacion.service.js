@@ -241,8 +241,11 @@ class CmsCapacitacionService {
 
     // 1. Procesar Imagen de Banner / Portada si existe
     if (bannerFile) {
-      const ext = (bannerFile.originalname.split(".").pop() || "jpg").toLowerCase();
-      const { nombreUnico } = generarNombreUnico(bannerFile.originalname, "cap_banner");
+      const { nombreUnico, extension: ext } = generarNombreUnico(
+        bannerFile.originalname,
+        "cap_banner",
+        bannerFile.mimetype
+      );
 
       try {
         const { error: storageError } = await supabase.storage
@@ -289,21 +292,29 @@ class CmsCapacitacionService {
     let archivoTamano = data.archivoTamano || "";
 
     if (contenidoFile) {
-      const extension = (contenidoFile.originalname.split(".").pop() || "").toLowerCase();
+      const { extension } = generarNombreUnico(
+        contenidoFile.originalname,
+        "cap_check",
+        contenidoFile.mimetype
+      );
       const isDoc =
-        ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt"].includes(extension) ||
+        ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(extension) ||
         contenidoFile.mimetype.includes("pdf") ||
         contenidoFile.mimetype.includes("word") ||
         contenidoFile.mimetype.includes("officedocument");
-      const isVideo = ["mp4", "webm", "mov", "avi", "mkv"].includes(extension) || contenidoFile.mimetype.startsWith("video/");
-      const isImage = ["jpg", "jpeg", "png", "webp", "gif", "svg"].includes(extension) || contenidoFile.mimetype.startsWith("image/");
+      const isVideo = ["mp4", "webm"].includes(extension) || contenidoFile.mimetype.startsWith("video/");
+      const isImage = ["jpg", "jpeg", "png", "webp", "gif"].includes(extension) || contenidoFile.mimetype.startsWith("image/");
 
       if (isDoc) archivoTipoDetectado = "documento";
       else if (isVideo) archivoTipoDetectado = "video";
       else if (isImage) archivoTipoDetectado = "imagen";
 
       const bucket = isDoc ? DOCS_BUCKET : MEDIA_BUCKET;
-      const { nombreUnico } = generarNombreUnico(contenidoFile.originalname, `cap_${archivoTipoDetectado || "file"}`);
+      const { nombreUnico } = generarNombreUnico(
+        contenidoFile.originalname,
+        `cap_${archivoTipoDetectado || "file"}`,
+        contenidoFile.mimetype
+      );
 
       try {
         const { error: storageError } = await supabase.storage
@@ -444,8 +455,11 @@ class CmsCapacitacionService {
 
     // 1. Si se subió un nuevo Banner
     if (bannerFile) {
-      const ext = (bannerFile.originalname.split(".").pop() || "jpg").toLowerCase();
-      const { nombreUnico } = generarNombreUnico(bannerFile.originalname, "cap_banner");
+      const { nombreUnico, extension: ext } = generarNombreUnico(
+        bannerFile.originalname,
+        "cap_banner",
+        bannerFile.mimetype
+      );
 
       try {
         const { error: storageError } = await supabase.storage
@@ -500,14 +514,18 @@ class CmsCapacitacionService {
 
     // Si se subió nuevo archivo de contenido (Video, Documento o Imagen)
     if (contenidoFile) {
-      const extension = (contenidoFile.originalname.split(".").pop() || "").toLowerCase();
+      const { extension } = generarNombreUnico(
+        contenidoFile.originalname,
+        "cap_check",
+        contenidoFile.mimetype
+      );
       const isDoc =
-        ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt"].includes(extension) ||
+        ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(extension) ||
         contenidoFile.mimetype.includes("pdf") ||
         contenidoFile.mimetype.includes("word") ||
         contenidoFile.mimetype.includes("officedocument");
-      const isVideo = ["mp4", "webm", "mov", "avi", "mkv"].includes(extension) || contenidoFile.mimetype.startsWith("video/");
-      const isImage = ["jpg", "jpeg", "png", "webp", "gif", "svg"].includes(extension) || contenidoFile.mimetype.startsWith("image/");
+      const isVideo = ["mp4", "webm"].includes(extension) || contenidoFile.mimetype.startsWith("video/");
+      const isImage = ["jpg", "jpeg", "png", "webp", "gif"].includes(extension) || contenidoFile.mimetype.startsWith("image/");
 
       if (isDoc) {
         archivoTipoDetectado = "documento";
@@ -522,7 +540,11 @@ class CmsCapacitacionService {
       }
 
       const bucket = isDoc ? DOCS_BUCKET : MEDIA_BUCKET;
-      const { nombreUnico } = generarNombreUnico(contenidoFile.originalname, `cap_${archivoTipoDetectado || "file"}`);
+      const { nombreUnico } = generarNombreUnico(
+        contenidoFile.originalname,
+        `cap_${archivoTipoDetectado || "file"}`,
+        contenidoFile.mimetype
+      );
 
       try {
         const { error: storageError } = await supabase.storage
