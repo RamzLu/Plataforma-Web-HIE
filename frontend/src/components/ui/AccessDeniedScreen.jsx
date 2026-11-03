@@ -33,8 +33,8 @@ const AccessDeniedScreen = ({ userName, requiredPanel = "este panel" }) => {
       : tokenName
     : preferredUsername || email || userName || "Usuario autenticado";
 
-  const hasCmRole = hasKeycloakRole(["cms", "cm"]);
-  const hasAdminRole = hasKeycloakRole(["admin-hief", "admin-hie", "admin"]);
+  const hasCmRole = hasKeycloakRole(["cm"]);
+  const hasAdminRole = hasKeycloakRole(["admin-hief"]);
 
   const handleLogoutToKeycloak = () => {
     localStorage.removeItem("admin_active_tab");

@@ -1,13 +1,9 @@
 import { prisma } from "../../config/prisma.js";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
+import { validarUrlHttp, sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
 
 const BUCKET_NAME = "autoridades-imagenes";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
 
 // Serializa una autoridad de BD a formato JSON seguro (BigInt → string)
 const serializarAutoridad = (autoridad) => {
@@ -122,8 +118,8 @@ class CmsAutoridadesService {
     return {
       autoridades: autoridades.map(serializarAutoridad),
       redesSociales: {
-        facebook: facebookContacto?.enlace || "",
-        instagram: instagramContacto?.enlace || "",
+        facebook: sanitizarUrlLectura(facebookContacto?.enlace, ""),
+        instagram: sanitizarUrlLectura(instagramContacto?.enlace, ""),
       },
     };
   }
@@ -268,6 +264,10 @@ class CmsAutoridadesService {
   // ─── REDES SOCIALES ───────────────────────────────────────────────────────
 
   async actualizarRedesSociales({ facebook, instagram }) {
+    // Validar esquemas http(s) antes de persistir para impedir XSS via javascript: en href (V10)
+    const fbEnlace = validarUrlHttp(facebook, "enlace de Facebook");
+    const igEnlace = validarUrlHttp(instagram, "enlace de Instagram");
+
     let institucion = await prisma.informacion_institucional.findFirst();
     if (!institucion) {
       institucion = await prisma.informacion_institucional.create({
@@ -282,8 +282,6 @@ class CmsAutoridadesService {
     }
 
     const institucionId = institucion.id;
-    const fbEnlace = (facebook || "").trim();
-    const igEnlace = (instagram || "").trim();
 
     await Promise.all([
       prisma.contacto_institucional.upsert({

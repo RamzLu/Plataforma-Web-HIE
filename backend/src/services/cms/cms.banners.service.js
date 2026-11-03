@@ -1,17 +1,14 @@
 import { prisma } from "../../config/prisma.js";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../config/supabase.js";
 
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL || "https://ipwupwmbygtyiluezzle.supabase.co",
-  process.env.SUPABASE_ANON_KEY
-);
+import { validarUrlHttp, sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
 
 class CmsBannersService {
-  async obtenerBanners() {
+  async obtenerBanners(esVistaAdmin = false) {
     const banners = await prisma.banner.findMany({
+      where: esVistaAdmin === true ? {} : { activo: true },
       orderBy: { orden: "asc" },
       include: { archivo: true },
     });
@@ -38,6 +35,7 @@ class CmsBannersService {
         id: banner.id.toString(),
         titulo: banner.titulo,
         descripcion: realDescription,
+        enlace: sanitizarUrlLectura(banner.enlace, null, true),
         page: pageName,
         imageUrl,
       };
@@ -46,6 +44,7 @@ class CmsBannersService {
 
   async crearBanner(data, file, user) {
     const { titulo, descripcion, enlace, page, orden, activo } = data;
+    const enlaceValidado = validarUrlHttp(enlace, "enlace del banner", true) || null;
 
     if (!titulo || titulo.trim() === "") {
       const error = new Error("El título del banner es obligatorio para garantizar la accesibilidad.");
@@ -99,7 +98,7 @@ class CmsBannersService {
       data: {
         titulo: titulo.trim(),
         descripcion: descripcionConPage,
-        enlace: enlace || null,
+        enlace: enlaceValidado,
         orden: nuevoOrden,
         activo: activo === "true" || activo === true,
         archivo: { connect: { id: archivoDb.id } },
@@ -130,6 +129,10 @@ class CmsBannersService {
 
   async actualizarBanner(id, data, file) {
     const { titulo, descripcion, enlace, page, activo } = data;
+    const enlaceValidado =
+      enlace !== undefined
+        ? validarUrlHttp(enlace, "enlace del banner", true) || null
+        : undefined;
 
     const bannerExistente = await prisma.banner.findUnique({
       where: { id: BigInt(id) },
@@ -187,7 +190,7 @@ class CmsBannersService {
       data: {
         titulo: titulo ? titulo.trim() : bannerExistente.titulo,
         descripcion: descripcionConPage,
-        enlace: enlace !== undefined ? enlace : bannerExistente.enlace,
+        enlace: enlaceValidado !== undefined ? enlaceValidado : bannerExistente.enlace,
         activo: activo !== undefined ? (activo === "true" || activo === true) : bannerExistente.activo,
         archivo: { connect: { id: nuevoArchivoId } },
         updatedAt: new Date(),

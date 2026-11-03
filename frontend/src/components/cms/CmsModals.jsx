@@ -481,7 +481,7 @@ export const CmsUnsavedChangesModal = ({
  * 4. CmsContenidoGraficoCorrectionModal
  * Modal especializado para corrección editorial y accesibilidad WCAG 2.1 AA.
  * ------------------------------------------------------------------------- */
-export { CmsContenidoGraficoCorrectionModal } from "./CmsContenidoGraficoCorrectionModal";
+export { CmsContenidoGraficoEditModal, CmsContenidoGraficoCorrectionModal } from "./CmsContenidoGraficoCorrectionModal";
 
 export default {
   CmsDeleteModal,

@@ -44,8 +44,8 @@ class CmsEspecialidadService {
     }
   }
 
-  async obtenerEspecialidades(isAdmin) {
-    const whereClause = isAdmin === "true" ? {} : { estado: "PUBLICADO" };
+  async obtenerEspecialidades(esVistaAdmin = false) {
+    const whereClause = esVistaAdmin === true ? {} : { estado: "PUBLICADO" };
     const especialidades = await prisma.especialidad.findMany({ where: whereClause });
     const servicios = await prisma.servicio.findMany({ where: whereClause });
 

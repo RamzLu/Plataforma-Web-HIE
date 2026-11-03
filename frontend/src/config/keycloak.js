@@ -10,3 +10,8 @@ const keycloakConfig = {
 const keycloak = new Keycloak(keycloakConfig);
 
 export default keycloak;
+
+// El backend ahora valida la expiracion del token: lo renovamos antes de que venza.
+keycloak.onTokenExpired = () => {
+  keycloak.updateToken(30).catch(() => keycloak.login());
+};

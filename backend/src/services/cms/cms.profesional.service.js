@@ -1,15 +1,11 @@
 import { prisma } from "../../config/prisma.js";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 
-const supabase = createClient(
-  "https://ipwupwmbygtyiluezzle.supabase.co",
-  process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-);
-
 class CmsProfesionalService {
-  async obtenerProfesionales() {
+  async obtenerProfesionales(esVistaAdmin = false) {
     const profesionales = await prisma.profesional.findMany({
+      where: esVistaAdmin === true ? {} : { activo: true },
       orderBy: { createdAt: "desc" },
       include: {
         especialidad: true,

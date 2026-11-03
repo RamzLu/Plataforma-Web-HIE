@@ -1,11 +1,7 @@
 import { prisma } from "../../config/prisma.js";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL || "https://ipwupwmbygtyiluezzle.supabase.co",
-  process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlwd3Vwd21ieWd0eWlsdWV6emxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxNDM2MDUsImV4cCI6MjEwMjcxOTYwNX0.ytya9DiAojD-DbQ0kDmr_nojF4GUp7XaFLsUIRH2sWE"
-);
+import { sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
 
 const formatBytes = (bytes) => {
   const n = Number(bytes || 0);
@@ -18,8 +14,9 @@ class CmsResidenciaService {
   /**
    * Obtener todas las residencias con su archivo y datos formateados
    */
-  async obtenerResidencias() {
+  async obtenerResidencias(esVistaAdmin = false) {
     const residencias = await prisma.residencia.findMany({
+      where: esVistaAdmin === true ? {} : { estado: "PUBLICADO" },
       orderBy: { createdAt: "desc" },
       include: {
         archivo: true,
@@ -530,7 +527,7 @@ class CmsResidenciaService {
 
     // Documento adjunto (PDF / Word)
     const doc = extra.documento || {};
-    const documentoUrl = doc.documentoUrl || "";
+    const documentoUrl = sanitizarUrlLectura(doc.documentoUrl, "");
     const documentoNombre = doc.documentoNombre || "";
     const documentoTamano = doc.documentoTamano || "";
     const documentoTipo = doc.documentoTipo || (documentoNombre ? documentoNombre.split(".").pop().toUpperCase() : "PDF");

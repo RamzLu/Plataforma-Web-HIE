@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
+import { adminFetch } from "../../api/adminFetch.js";
 
 import keycloak from "../../config/keycloak";
 
@@ -26,7 +28,6 @@ const CmsPage = () => {
   const [initialized, setInitialized] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [isCms, setIsCms] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("Usuario CMS");
 
   const [activeTab, setActiveTab] = useState(() => {
@@ -70,7 +71,7 @@ const CmsPage = () => {
 const fetchNoticias = async () => {
   try {
     setLoading(true);
-    const response = await fetch("http://localhost:3000/api/cms/noticias?admin=true");
+    const response = await adminFetch("/cms/noticias");
     if (!response.ok) throw new Error("Error al obtener noticias del servidor");
     const data = await response.json();
 
@@ -109,7 +110,7 @@ const fetchNoticias = async () => {
 
   const fetchDocs = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/cms/documentacion");
+      const response = await adminFetch("/cms/documentacion");
       if (!response.ok) throw new Error("Error al obtener documentos");
       const data = await response.json();
       
@@ -129,7 +130,7 @@ const fetchNoticias = async () => {
 
   const fetchProfesionales = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/cms/profesionales");
+      const response = await adminFetch("/cms/profesionales");
       if (!response.ok) throw new Error("Error al obtener profesionales");
       const data = await response.json();
       if (data && Array.isArray(data)) {
@@ -160,26 +161,23 @@ const handleDeleteDoc = (id) => {
     localStorage.setItem("portal_docs_data", JSON.stringify(filtered));
   };
 
+  // Las lecturas del CMS exigen token con rol 'cm': se piden recien cuando la sesion esta lista.
   useEffect(() => {
+    if (!authenticated || !isCms) return;
     fetchNoticias();
     fetchDocs();
     fetchProfesionales();
-  }, []);
+  }, [authenticated, isCms]);
 
   useEffect(() => {
-    const checkCmsRole = () =>
-      keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("cm");
-    const checkAdminRole = () =>
-      keycloak.hasRealmRole("admin-hief") ||
-      keycloak.hasRealmRole("admin-hie") ||
-      keycloak.hasRealmRole("admin");
+    // Solo el rol 'cm' accede al CMS (admin-hief pertenece al panel de administracion)
+    const checkCmsRole = () => keycloak.hasRealmRole("cm");
 
     if (isKeycloakInitialized.current || keycloak.authenticated) {
       if (keycloak.authenticated) {
         setInitialized(true);
         setAuthenticated(true);
         setIsCms(checkCmsRole());
-        setIsAdmin(checkAdminRole());
         const name =
           keycloak.tokenParsed?.name ||
           keycloak.tokenParsed?.preferred_username ||
@@ -199,7 +197,6 @@ const handleDeleteDoc = (id) => {
         setAuthenticated(auth);
         if (auth) {
           setIsCms(checkCmsRole());
-          setIsAdmin(checkAdminRole());
 
           const name =
             keycloak.tokenParsed?.name ||
@@ -390,7 +387,6 @@ if (!authenticated) {
       <div className="cms-main-wrapper">
         <CmsHeader
           userName={userName}
-          isAdmin={isAdmin}
           testBackendConnection={testBackendConnection}
           onLogoutClick={() => setShowLogoutModal(true)}
           activeTab={activeTab}
@@ -556,7 +552,7 @@ if (!authenticated) {
               <div className="session-user-details">
                 <span className="user-dot"></span>
                 <span className="user-text-logout">
-                  <strong>{isAdmin ? "Administrador" : "Redactor"}</strong> ({keycloak?.tokenParsed?.email || userName})
+                  <strong>Redactor</strong> ({keycloak?.tokenParsed?.email || userName})
                 </span>
               </div>
             </div>
@@ -618,7 +614,7 @@ if (!authenticated) {
                 
                 <div 
                   className="info-text" 
-                  dangerouslySetInnerHTML={{ __html: Array.isArray(selectedNews.body) ? selectedNews.body[0] : selectedNews.body }} 
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(Array.isArray(selectedNews.body) ? selectedNews.body[0] : selectedNews.body) }} 
                 />
               </div>
 

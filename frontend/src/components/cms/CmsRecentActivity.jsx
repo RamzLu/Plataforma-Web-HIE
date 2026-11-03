@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { adminFetch } from "../../api/adminFetch.js";
 import { getCmsActivityLog } from "../../utils/cmsActivityLogger";
 
 const formatActivityDate = (timestamp) => {
@@ -86,10 +87,10 @@ const CmsRecentActivity = ({
   useEffect(() => {
     let isMounted = true;
     Promise.all([
-      fetch("http://localhost:3000/api/cms/capacitaciones")
+      adminFetch("/cms/capacitaciones")
         .then((r) => r.json())
         .catch(() => []),
-      fetch("http://localhost:3000/api/cms/residencias")
+      adminFetch("/cms/residencias")
         .then((r) => r.json())
         .catch(() => []),
     ]).then(([caps, res]) => {

@@ -1,7 +1,7 @@
 import api from "./axiosConfig.js";
 
-export const getProfesionales = async () => {
-  const response = await api.get("/cms/profesionales");
+export const getProfesionales = async (isAdmin = false) => {
+  const response = await api.get(isAdmin ? "/cms/profesionales?admin=true" : "/cms/profesionales");
   return response.data;
 };
 

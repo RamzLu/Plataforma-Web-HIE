@@ -11,8 +11,7 @@ export const crearNoticia = async (req, res, next) => {
 
 export const obtenerNoticias = async (req, res, next) => {
   try {
-    const { admin } = req.query;
-    const noticias = await CmsNoticiaService.obtenerNoticias(admin);
+    const noticias = await CmsNoticiaService.obtenerNoticias(req.adminView === true);
     return res.status(200).json(noticias);
   } catch (error) {
     next(error);

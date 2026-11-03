@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getDocumentos } from "../../api/documentos.api.js";
+import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import "../../styles/pages/DocumentacionPage.css";
 import PageBanner from "../../components/PageBanner";
 import fondoBanner from "../../assets/banner_documentacion.png";
@@ -187,9 +188,9 @@ const DocumentacionPage = () => {
                         <div className="titulo-wrapper">
                           <span className="titulo-text">
                             {doc.title}
-                            {doc.fileUrl && (
+                            {sanitizeUrl(doc.fileUrl) && (
                               <a 
-                                href={doc.fileUrl} 
+                                href={sanitizeUrl(doc.fileUrl)} 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
                                 className="doc-preview-eye" 
@@ -224,7 +225,7 @@ const DocumentacionPage = () => {
                       <div className="col-acciones">
                         <button
                           className="btn-descargar-pill"
-                          onClick={() => handleDownloadDirect(doc.fileUrl, doc.title)}
+                          onClick={() => handleDownloadDirect(sanitizeUrl(doc.fileUrl), doc.title)}
                         >
                           <svg fill="currentColor" viewBox="0 0 24 24">
                             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />

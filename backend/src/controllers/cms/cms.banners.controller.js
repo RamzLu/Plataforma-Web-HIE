@@ -2,7 +2,7 @@ import CmsBannersService from "../../services/cms/cms.banners.service.js";
 
 export const obtenerBanners = async (req, res, next) => {
   try {
-    const result = await CmsBannersService.obtenerBanners();
+    const result = await CmsBannersService.obtenerBanners(req.adminView === true);
     return res.status(200).json(result);
   } catch (error) {
     next(error);

@@ -2,7 +2,7 @@ import CmsResidenciaService from "../../services/cms/cms.residencia.service.js";
 
 export const obtenerResidencias = async (req, res, next) => {
   try {
-    const residencias = await CmsResidenciaService.obtenerResidencias();
+    const residencias = await CmsResidenciaService.obtenerResidencias(req.adminView === true);
     return res.status(200).json(residencias);
   } catch (error) {
     next(error);

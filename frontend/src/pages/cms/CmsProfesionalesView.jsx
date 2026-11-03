@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { adminFetch } from "../../api/adminFetch.js";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
@@ -87,7 +88,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
   const fetchDatos = async () => {
     setLoading(true);
     try {
-      const resProf = await fetch("http://localhost:3000/api/cms/profesionales");
+      const resProf = await adminFetch("/cms/profesionales");
       if (resProf.ok) {
         const dataProf = await resProf.json();
         setProfesionales(dataProf);

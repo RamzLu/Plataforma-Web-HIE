@@ -7,6 +7,7 @@ import fondoBanner from "../../assets/banner_capacitaciones.png";
 import imgCapacitacion1 from "../../assets/fondoCARRUSELnoticias2.jpg";
 import imgCapacitacion2 from "../../assets/fondoCARRUSELnoticias3.jpg";
 import { getCapacitacionesPublicas } from "../../api/capacitaciones.api";
+import { sanitizeUrl } from "../../utils/sanitizeUrl";
 
 const capacitacionesData = [
   {
@@ -1015,13 +1016,13 @@ const CapacitacionPage = () => {
                 )}
 
                 {/* BOTÓN DESCARGAR TEMARIO / DOCUMENTO */}
-                {(selectedCurso.archivoUrl || selectedCurso.pdfUrl) &&
+                {sanitizeUrl(selectedCurso.archivoUrl || selectedCurso.pdfUrl) &&
                   selectedCurso.archivoTipo !== "video" &&
                   selectedCurso.archivoTipo !== "imagen" &&
                   selectedCurso.tipo !== "imagen" &&
                   selectedCurso.tipo !== "infografia" && (
                     <a
-                      href={selectedCurso.archivoUrl || selectedCurso.pdfUrl}
+                      href={sanitizeUrl(selectedCurso.archivoUrl || selectedCurso.pdfUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       download
