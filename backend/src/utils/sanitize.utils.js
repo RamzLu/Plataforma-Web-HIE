@@ -50,3 +50,73 @@ export const sanitizarHtmlNoticia = (html) => {
   return sanitizeHtml(html, OPCIONES_NOTICIA).trim();
 };
 
+/**
+ * Valida que una URL opcional tenga esquema seguro http: o https: (o ruta interna /... si se habilita).
+ * Rechaza esquemas peligrosos como javascript:, data:, vbscript:, blob: o protocolo relativo (//).
+ * Lanza un Error con statusCode = 400 si la URL es invalida.
+ *
+ * @param {unknown} rawUrl URL enviada por el cliente
+ * @param {string} nombreCampo Nombre descriptivo del campo para el mensaje de error
+ * @param {boolean} permitirRutaRelativa Si es true, permite rutas internas que comiencen con un solo '/'
+ * @returns {string} URL normalizada o cadena vacia si estaba vacia
+ */
+export const validarUrlHttp = (rawUrl, nombreCampo = 'URL', permitirRutaRelativa = false) => {
+  if (rawUrl === null || rawUrl === undefined) return '';
+  if (typeof rawUrl !== 'string') {
+    const err = new Error(`El campo ${nombreCampo} debe ser una cadena de texto válida.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  // Eliminar caracteres de control o espacios invisibles que intenten ofuscar el esquema
+  const limpia = rawUrl.replace(/[\u0000-\u001F\u007F]/g, '').trim();
+  if (!limpia) return '';
+
+  // Prohibir siempre URLs con protocolo relativo (//evil.com)
+  if (limpia.startsWith('//')) {
+    const err = new Error(`La URL en ${nombreCampo} no es válida. Use http:// o https://.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (permitirRutaRelativa && limpia.startsWith('/')) {
+    return limpia;
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(limpia);
+  } catch {
+    const err = new Error(`La URL en ${nombreCampo} no tiene un formato válido. Debe comenzar con http:// o https://.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if ((parsed.protocol !== 'http:' && parsed.protocol !== 'https:') || !parsed.hostname) {
+    const err = new Error(`Protocolo no permitido en ${nombreCampo}. Solo se aceptan enlaces http:// o https://.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  return parsed.toString();
+};
+
+/**
+ * Sanea una URL almacenada al leerla de la base de datos (segunda capa de defensa).
+ * Si la URL no cumple con http(s) (o ruta relativa interna cuando corresponde), devuelve el fallback.
+ *
+ * @param {unknown} rawUrl
+ * @param {string|null} fallback
+ * @param {boolean} permitirRutaRelativa
+ * @returns {string|null}
+ */
+export const sanitizarUrlLectura = (rawUrl, fallback = '', permitirRutaRelativa = false) => {
+  try {
+    const validada = validarUrlHttp(rawUrl, 'URL', permitirRutaRelativa);
+    return validada || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+

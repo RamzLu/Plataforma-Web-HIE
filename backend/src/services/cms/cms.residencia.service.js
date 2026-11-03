@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
+import { sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
 
 const formatBytes = (bytes) => {
   const n = Number(bytes || 0);
@@ -526,7 +527,7 @@ class CmsResidenciaService {
 
     // Documento adjunto (PDF / Word)
     const doc = extra.documento || {};
-    const documentoUrl = doc.documentoUrl || "";
+    const documentoUrl = sanitizarUrlLectura(doc.documentoUrl, "");
     const documentoNombre = doc.documentoNombre || "";
     const documentoTamano = doc.documentoTamano || "";
     const documentoTipo = doc.documentoTipo || (documentoNombre ? documentoNombre.split(".").pop().toUpperCase() : "PDF");

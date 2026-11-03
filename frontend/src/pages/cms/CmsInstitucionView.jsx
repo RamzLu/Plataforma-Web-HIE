@@ -4,6 +4,7 @@ import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
+import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import "../../styles/pages/cms/CmsInstitucionView.css";
 import {
   CmsDeleteModal,
@@ -385,17 +386,31 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
   // --- GUARDAR REDES SOCIALES ---
   const handleSaveSocial = async () => {
+    const fbRaw = (tempSocial.facebook || "").trim();
+    const igRaw = (tempSocial.instagram || "").trim();
+
+    if ((fbRaw && !sanitizeUrl(fbRaw)) || (igRaw && !sanitizeUrl(igRaw))) {
+      toast.error("Los enlaces de redes sociales deben ser URLs válidas con http:// o https://.");
+      return;
+    }
+
     setIsSaving(true);
     const toastId = toast.loading("Actualizando redes sociales...");
 
     try {
-      const data = await updateRedesSociales(tempSocial, keycloak?.token);
+      const data = await updateRedesSociales(
+        {
+          facebook: fbRaw ? sanitizeUrl(fbRaw) : "",
+          instagram: igRaw ? sanitizeUrl(igRaw) : "",
+        },
+        keycloak?.token
+      );
 
       setSocialData(data);
       setIsEditingSocial(false);
       toast.success("¡Redes sociales actualizadas correctamente!", { id: toastId });
     } catch (error) {
-      toast.error("Error al guardar las redes sociales.", { id: toastId });
+      toast.error(error?.message || "Error al guardar las redes sociales.", { id: toastId });
     } finally {
       setIsSaving(false);
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
+import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import {
   FileText,
   Upload,
@@ -623,9 +624,9 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                       <span>{res.categoria}</span>
                       {res.documentoNombre && (
                         <a
-                          href={res.documentoUrl || "#"}
+                          href={sanitizeUrl(res.documentoUrl) || "#"}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           style={{
                             color: "#0284c7",
                             fontWeight: "600",
@@ -635,7 +636,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                             gap: "3px",
                           }}
                           onClick={(e) => {
-                            if (!res.documentoUrl) e.preventDefault();
+                            if (!sanitizeUrl(res.documentoUrl)) e.preventDefault();
                           }}
                         >
                           • {res.documentoTipo || "PDF"}{" "}
@@ -1060,7 +1061,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                           <button
                             type="button"
                             className="res-file-remove-btn"
-                            onClick={() => window.open(formData.bannerUrl, "_blank")}
+                            onClick={() => { const safe = sanitizeUrl(formData.bannerUrl, "", { allowBlob: true }); if (safe) window.open(safe, "_blank", "noopener,noreferrer"); }}
                             title="Ver imagen en tamaño completo"
                             style={{ color: "#0284c7" }}
                           >
@@ -1193,11 +1194,11 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          {formData.documentoUrl && (
+                          {sanitizeUrl(formData.documentoUrl, "", { allowBlob: true }) && (
                             <button
                               type="button"
                               className="res-file-remove-btn"
-                              onClick={() => window.open(formData.documentoUrl, "_blank")}
+                              onClick={() => { const safe = sanitizeUrl(formData.documentoUrl, "", { allowBlob: true }); if (safe) window.open(safe, "_blank", "noopener,noreferrer"); }}
                               title="Visualizar documento"
                               style={{ color: "#0284c7" }}
                             >

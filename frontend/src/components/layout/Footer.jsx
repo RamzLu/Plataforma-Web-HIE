@@ -3,14 +3,18 @@ import { Link } from "react-router-dom";
 import logosGobierno from "../../assets/logosGobierno.png";
 import logoCompleto from "../../assets/logo-completo.png";
 import { getInstitucional } from "../../api/autoridades.api.js";
+import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import "../../styles/layout/Footer.css";
+
+const DEFAULT_FACEBOOK_URL = "https://facebook.com/redevitaformosa";
+const DEFAULT_INSTAGRAM_URL = "https://instagram.com/redevitaformosa";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const [socialData, setSocialData] = useState({
-    facebook: "https://facebook.com/redevitaformosa",
-    instagram: "https://instagram.com/redevitaformosa",
+    facebook: DEFAULT_FACEBOOK_URL,
+    instagram: DEFAULT_INSTAGRAM_URL,
   });
 
   useEffect(() => {
@@ -19,8 +23,8 @@ const Footer = () => {
       .then((data) => {
         if (isMounted && data?.redesSociales) {
           setSocialData({
-            facebook: data.redesSociales.facebook || "https://facebook.com/redevitaformosa",
-            instagram: data.redesSociales.instagram || "https://instagram.com/redevitaformosa",
+            facebook: sanitizeUrl(data.redesSociales.facebook, DEFAULT_FACEBOOK_URL),
+            instagram: sanitizeUrl(data.redesSociales.instagram, DEFAULT_INSTAGRAM_URL),
           });
         }
       })
@@ -80,7 +84,7 @@ const Footer = () => {
             <div className="social-links-container">
               {/* Facebook */}
               <a
-                href={socialData.facebook}
+                href={sanitizeUrl(socialData.facebook, DEFAULT_FACEBOOK_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="social-card-btn facebook-card"
@@ -102,7 +106,7 @@ const Footer = () => {
 
               {/* Instagram */}
               <a
-                href={socialData.instagram}
+                href={sanitizeUrl(socialData.instagram, DEFAULT_INSTAGRAM_URL)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="social-card-btn instagram-card"

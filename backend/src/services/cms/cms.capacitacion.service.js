@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
+import { validarUrlHttp, sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
 
 const DOCS_BUCKET = "capacitaciones-documentos";
 const MEDIA_BUCKET = "capacitaciones-imagenes-videos";
@@ -278,8 +279,8 @@ class CmsCapacitacionService {
 
     // 2. Procesar Archivo de Contenido / Material Didáctico (Video, Documento o Imagen)
     let archivoTipoDetectado = data.archivoTipo || "";
-    let incomingVideoUrl = (data.videoUrl && typeof data.videoUrl === "string" && !data.videoUrl.startsWith("blob:")) ? data.videoUrl.trim() : "";
-    let incomingArchivoUrl = (data.archivoUrl && typeof data.archivoUrl === "string" && !data.archivoUrl.startsWith("blob:")) ? data.archivoUrl.trim() : "";
+    let incomingVideoUrl = (data.videoUrl && typeof data.videoUrl === "string" && !data.videoUrl.startsWith("blob:")) ? validarUrlHttp(data.videoUrl, "URL de video") : "";
+    let incomingArchivoUrl = (data.archivoUrl && typeof data.archivoUrl === "string" && !data.archivoUrl.startsWith("blob:")) ? validarUrlHttp(data.archivoUrl, "URL de archivo") : "";
 
     let archivoUrl = incomingArchivoUrl;
     let videoUrl = incomingVideoUrl;
@@ -792,7 +793,9 @@ class CmsCapacitacionService {
     if (rawVideo && rawVideo.startsWith("blob:")) {
       rawVideo = "";
     }
-    const finalVideoUrl = rawVideo;
+    const finalVideoUrl = sanitizarUrlLectura(rawVideo, "");
+    const safeArchivoUrl = sanitizarUrlLectura(archivoUrl, "");
+    const safeBannerUrl = sanitizarUrlLectura(bannerUrl, "");
 
     const resolvedTipoRecurso = archivoTipo === "video"
       ? "video"
@@ -819,10 +822,10 @@ class CmsCapacitacionService {
       archivoTipo,
       archivoNombre,
       archivoTamano,
-      archivoUrl,
-      bannerUrl,
+      archivoUrl: safeArchivoUrl,
+      bannerUrl: safeBannerUrl,
       bannerNombre,
-      imagenUrl: bannerUrl,
+      imagenUrl: safeBannerUrl,
       estado: c.estado,
       activo: c.activo,
       createdAt: c.createdAt ? c.createdAt.toISOString() : "",
