@@ -30,7 +30,7 @@ import {
 } from "../controllers/cms/cms.capacitacion.controller.js";
 
 
-import { requireCmsAccess, adminViewAccess, verifyToken } from '../middlewares/auth.middleware.js'; 
+import { requireCmsAccess, requireAdminAccess, adminViewAccess, verifyToken } from '../middlewares/auth.middleware.js'; 
 import {
   uploadImagenSingle,
   uploadImagenesArray,
@@ -47,7 +47,7 @@ const router = Router();
 router.get('/noticias', adminViewAccess, obtenerNoticias);
 router.post('/noticias', requireCmsAccess, uploadImagenesArray('imagenes', 10), crearNoticia);
 router.put('/noticias/:id', requireCmsAccess, uploadImagenesArray('imagenes', 10), actualizarNoticia);
-router.patch('/noticias/:id/estado', verifyToken, evaluarNoticia);
+router.patch('/noticias/:id/estado', requireAdminAccess, evaluarNoticia);
 router.delete('/noticias/:id', requireCmsAccess, eliminarNoticia);
 
 // ==========================================

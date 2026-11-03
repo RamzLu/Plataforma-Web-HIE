@@ -109,25 +109,29 @@ export const requireRole = (...allowedRoles) => {
   };
 };
 
-// Rol de Keycloak (realm) que puede operar el CMS:
-//  - cm: gestor de contenidos
-// 'admin-hief' (supervision/aprobacion) NO accede al CMS: pertenece al panel de administracion.
-// El super admin de Keycloak (gestiona usuarios/roles) no se contempla todavia.
+// Roles de Keycloak (realm):
+//  - cm: gestor de contenidos (crea y edita borradores/contenido en el CMS)
+//  - admin-hief / admin-hie / admin: administradores (panel de supervisión y aprobación de noticias)
 export const ROLES_CMS = ['cm'];
+export const ROLES_ADMIN = ['admin-hief'];
+export const ROLES_VISTA_ADMIN = [...ROLES_CMS, ...ROLES_ADMIN];
 
 // 4. Atajo: token válido + rol de CMS
 export const requireCmsAccess = [verifyToken, requireRole(...ROLES_CMS)];
 
-// 5. Vista de administracion en endpoints de LECTURA publicos (GET ?admin=true).
-// - Sin ?admin=true: es una consulta publica -> req.adminView = false (solo contenido publicado).
-// - Con ?admin=true: exige token valido (401) y rol de CMS (403); recien ahi req.adminView = true,
-//   lo que habilita ver borradores, programados e inactivos.
+// 4b. Atajo: token válido + rol de Administración
+export const requireAdminAccess = [verifyToken, requireRole(...ROLES_ADMIN)];
+
+// 5. Vista de administración en endpoints de LECTURA públicos (GET ?admin=true).
+// - Sin ?admin=true: es una consulta pública -> req.adminView = false (solo contenido publicado).
+// - Con ?admin=true: exige token válido (401) y rol con privilegios de gestión (CMS o Administración) (403);
+//   recién ahí req.adminView = true, lo que habilita ver borradores, pendientes de aprobación e inactivos.
 export const adminViewAccess = (req, res, next) => {
   req.adminView = false;
   if (req.query.admin !== 'true') return next();
 
   verifyToken(req, res, () => {
-    requireRole(...ROLES_CMS)(req, res, () => {
+    requireRole(...ROLES_VISTA_ADMIN)(req, res, () => {
       req.adminView = true;
       next();
     });
