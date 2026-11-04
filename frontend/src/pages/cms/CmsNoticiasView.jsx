@@ -254,6 +254,7 @@ const CmsNoticiasView = ({
       setShowDeleteModal(false);
       setNoticiaAEliminar(null);
     } catch (error) {
+      console.error("Error al eliminar noticia:", error);
       toast.error(
         error.response?.data?.error?.message ||
           "Ocurrió un error al intentar eliminar la noticia."
@@ -296,6 +297,7 @@ const CmsNoticiasView = ({
         ? cuerpoHtml[0] || ""
         : String(cuerpoHtml || "");
     const estadoSolicitado = forcedEstado || estado;
+    const estadoFinal = estadoSolicitado;
 
     if (estadoSolicitado === "PROGRAMADO" && !fechaProgramada) {
       toast.error("Por favor, selecciona una fecha y hora para programar la publicación.");
@@ -471,6 +473,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
       setCorrectionNews(null);
       setShowModal(false);
     } catch (error) {
+      console.error("Error al guardar noticia:", error);
       toast.error(
         `Error: ${
           error.response?.data?.error?.message ||
