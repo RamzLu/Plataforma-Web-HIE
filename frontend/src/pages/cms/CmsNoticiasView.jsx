@@ -261,8 +261,42 @@ const CmsNoticiasView = ({
         formData.append("imagenes", file);
       });
 
+      const formatEstadoNombre = (est) => {
+        const upper = String(est || "").toUpperCase().trim();
+        if (upper === "BORRADOR") return "Borrador";
+        if (upper === "PUBLICADO") return "Publicado";
+        if (upper === "PROGRAMADO") return "Programado";
+        if (upper === "ARCHIVADO") return "Archivado";
+        return est;
+      };
+
+      const prevNoticia = editingId
+        ? (newsList || []).find((n) => String(n.id) === String(editingId))
+        : null;
+
+      let accionTitulo = "";
+      if (editingId) {
+        const prevEstado = prevNoticia?.estado ? String(prevNoticia.estado).toUpperCase() : null;
+        const nuevoEstado = String(estadoFinal).toUpperCase();
+
+        if (prevEstado && prevEstado !== nuevoEstado) {
+          accionTitulo = `Actualizó estado de "${titulo}" (${formatEstadoNombre(prevEstado)} a ${formatEstadoNombre(nuevoEstado)})`;
+        } else if (nuevoEstado === "BORRADOR") {
+          accionTitulo = `Actualizó contenido de borrador "${titulo}"`;
+        } else {
+          accionTitulo = `Actualizó contenido de noticia "${titulo}"`;
+        }
+      } else {
+        if (String(estadoFinal).toUpperCase() === "BORRADOR") {
+          accionTitulo = `Creó borrador: "${titulo}"`;
+        } else if (String(estadoFinal).toUpperCase() === "PROGRAMADO") {
+          accionTitulo = `Programó noticia "${titulo}"`;
+        } else {
+          accionTitulo = `Publicó noticia "${titulo}"`;
+        }
+      }
+
       let data;
-      
       if (editingId) {
         data = await updateNoticia(editingId, formData, token);
         toast.success(estadoFinal === "BORRADOR" ? "Borrador actualizado con éxito." : "Noticia actualizada con éxito.");
@@ -270,6 +304,7 @@ const CmsNoticiasView = ({
         data = await createNoticia(formData, token);
         toast.success(estadoFinal === "BORRADOR" ? "Borrador guardado con éxito." : "Noticia creada con éxito.");
       }
+
       const catSlugMap = {
         "cáncer de mama": "cancer-mama",
         "cancer de mama": "cancer-mama",
@@ -284,20 +319,31 @@ const CmsNoticiasView = ({
         localStorage.removeItem(`visited_${catSlugMap[catKey]}`);
       }
 
+      const editorResponsable = keycloak?.tokenParsed?.name || "Editor CMS";
+      recordCmsActivity({
+        titulo: accionTitulo,
+        categoria: categoria || "Noticias",
+        editor: editorResponsable,
+        estado: estadoFinal,
+        timestamp: Date.now(),
+        newsId: String(data.noticia?.id || editingId),
+      });
+
       const noticiaFormateada = {
         id: data.noticia?.id || editingId,
         title: titulo,
         body: [textoContenido],
         date: new Date().toLocaleDateString("es-AR"),
-        createdAt: data.noticia?.createdAt || (newsList || []).find((n) => n.id === editingId)?.createdAt || new Date().toISOString(),
+        createdAt: data.noticia?.createdAt || prevNoticia?.createdAt || new Date().toISOString(),
         updatedAt: data.noticia?.updatedAt || new Date().toISOString(),
         category: categoria || "General",
         estado: estadoFinal,
         isDraft: estadoFinal === "BORRADOR",
         images: data.noticia?.images || imagenesUrls || [],
-        editor: data.noticia?.editor || (newsList || []).find((n) => n.id === editingId)?.editor || keycloak?.tokenParsed?.name || "Editor CMS", 
-        editedBy: editingId ? (data.noticia?.editedBy || keycloak?.tokenParsed?.name || "Editor CMS") : null,
-        fechaPublicacion: data.noticia?.fechaPublicacion || null
+        editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable, 
+        editedBy: editingId ? (data.noticia?.editedBy || editorResponsable) : null,
+        fechaPublicacion: data.noticia?.fechaPublicacion || null,
+        actionTitle: accionTitulo,
       };
 
       if (editingId) {

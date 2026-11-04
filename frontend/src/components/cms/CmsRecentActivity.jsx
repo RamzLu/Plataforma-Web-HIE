@@ -119,11 +119,19 @@ const CmsRecentActivity = ({
       Math.abs(new Date(n.updatedAt).getTime() - new Date(n.createdAt).getTime()) > 1000;
     const isUpdated = Boolean(n.editedBy) || hasDiffDates;
 
+    const matchingLog = (loggedActivities || []).find(
+      (log) => log.newsId && String(log.newsId) === String(n.id)
+    );
+
     let activityTitle = "";
-    if (isUpdated) {
+    if (n.actionTitle) {
+      activityTitle = n.actionTitle;
+    } else if (matchingLog && matchingLog.titulo) {
+      activityTitle = matchingLog.titulo;
+    } else if (isUpdated) {
       activityTitle = isDraft
-        ? `Actualizó borrador: "${title}"`
-        : `Actualizó noticia "${title}"`;
+        ? `Actualizó contenido de borrador "${title}"`
+        : `Actualizó contenido de noticia "${title}"`;
     } else {
       activityTitle = isDraft
         ? `Creó borrador: "${title}"`
@@ -131,8 +139,8 @@ const CmsRecentActivity = ({
     }
 
     const editorName = isUpdated
-      ? n.editedBy || n.editor || userName || "Editor CMS"
-      : n.editor || n.editedBy || userName || "Editor CMS";
+      ? matchingLog?.editor || n.editedBy || n.editor || userName || "Editor CMS"
+      : matchingLog?.editor || n.editor || n.editedBy || userName || "Editor CMS";
 
     activities.push({
       id: `news-${n.id}`,
@@ -140,7 +148,7 @@ const CmsRecentActivity = ({
       categoria: n.category || "Noticias",
       editor: editorName,
       estado: estado,
-      timestamp: rawDate ? new Date(rawDate).getTime() : 0,
+      timestamp: matchingLog?.timestamp || (rawDate ? new Date(rawDate).getTime() : 0),
     });
   });
 
@@ -216,8 +224,10 @@ const CmsRecentActivity = ({
     });
   });
 
-  // 6. Actividades registradas (Eliminaciones por el CM)
   (loggedActivities || []).forEach((log) => {
+    if (log.newsId && (newsList || []).some((n) => String(n.id) === String(log.newsId))) {
+      return;
+    }
     activities.push({
       id: log.id || `log-${log.timestamp}`,
       titulo: log.titulo,
