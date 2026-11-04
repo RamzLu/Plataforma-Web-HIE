@@ -454,14 +454,14 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                         className="news-thumb-box-admin"
                         onClick={() => handleOpenModal(item)}
                       >
-                        {item.images && item.images.length > 0 ? (
+                        {item.images && item.images.length > 0 && item.images[0] ? (
                           <img
                             src={item.images[0]}
                             alt="Miniatura"
                             className="news-thumb-img-admin"
                           />
                         ) : (
-                          <div className="news-thumb-mock-admin">HIE</div>
+                          <DefaultNewsImage alt="Miniatura" compact />
                         )}
                       </div>
                       <div

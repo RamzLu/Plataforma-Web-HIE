@@ -644,14 +644,14 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                     }}
                   >
                     <div className="news-thumb-box">
-                      {news.images && news.images.length > 0 ? (
+                      {news.images && news.images.length > 0 && news.images[0] ? (
                         <img
                           src={news.images[0]}
                           alt="Miniatura"
                           className="news-thumb-img"
                         />
                       ) : (
-                        <div className="news-thumb-mock">HIE</div>
+                        <DefaultNewsImage alt="Miniatura" compact />
                       )}
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
