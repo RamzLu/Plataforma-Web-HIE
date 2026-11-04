@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { useParams, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import PageBanner from "../../components/PageBanner";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 import fondoBannerNoticias from "../../assets/banner_noticias.png";
@@ -12,6 +13,17 @@ const CATEGORY_MAP = {
   "tu-corazon": "Tu Corazón",
   "donacion": "Donación",
   "dengue": "Dengue"
+};
+
+const normalizeCategoryName = (name) => {
+  if (!name) return "";
+  return name
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
 };
 
 const cleanHtmlText = (html) => {
@@ -36,20 +48,18 @@ const NoticiasCategoriaPage = () => {
       navigate("/noticias");
       return;
     }
-
-    // --- NUEVO: GUARDAMOS LA HORA EXACTA DE LA VISITA EN LA MEMORIA DEL NAVEGADOR ---
     localStorage.setItem(`visited_${categoria}`, Date.now().toString());
 
     const fetchNoticiasCategoria = async () => {
       setLoading(true);
       try {
         const data = await getNoticias(false);
-        const targetCategory = (dbCategoryName || "").trim().toLowerCase();
+        const targetKey = normalizeCategoryName(categoria || dbCategoryName);
 
         const noticiasFiltradas = data
           .filter(n => {
-            const currentCategory = (n.category || "").trim().toLowerCase();
-            return currentCategory === targetCategory;
+            const currentKey = normalizeCategoryName(n.category);
+            return currentKey === targetKey;
           })
           .map(noticia => ({
             id: noticia.id,
@@ -149,8 +159,10 @@ const NoticiasCategoriaPage = () => {
                     </button>
                   </div>
                   <div className="full-news-images">
-                    {news.images && news.images.length > 0 && (
+                    {news.images && news.images.length > 0 && news.images[0] ? (
                       <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => openLightbox(news.images, 0)} />
+                    ) : (
+                      <DefaultNewsImage alt={news.title} onClick={() => setSelectedNews(news)} />
                     )}
                   </div>
                 </article>
@@ -190,7 +202,7 @@ const NoticiasCategoriaPage = () => {
                   ))}
                 </div>
               </div>
-              {selectedNews.images && selectedNews.images.length > 0 && (
+              {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
                 <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
                   {selectedNews.images.slice(0, 4).map((img, index) => {
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
@@ -204,6 +216,10 @@ const NoticiasCategoriaPage = () => {
                       </div>
                     );
                   })}
+                </div>
+              ) : (
+                <div className="news-modal-default-img-wrap">
+                  <DefaultNewsImage alt={selectedNews.title} />
                 </div>
               )}
             </div>

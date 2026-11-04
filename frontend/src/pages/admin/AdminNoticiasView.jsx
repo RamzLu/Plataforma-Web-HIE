@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import keycloak from '../../config/keycloak';
 import { getNoticias, evaluarNoticiaEstado } from '../../api/noticias.api';
 import avatarHospital from '../../assets/logoHospitalEvita.png';
+import DefaultNewsImage from '../../components/ui/DefaultNewsImage';
 import '../../styles/pages/admin/AdminNoticiasView.css';
 
 const AdminNoticiasView = ({ onPendingCountChange }) => {
@@ -426,7 +427,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           </div>
 
           <div className="data-table-body-admin">
-            {loading ? (
+{loading ? (
               <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
                 Cargando solicitudes de noticias...
               </div>
@@ -448,8 +449,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
 
                 return (
                   <div className="activity-row-admin" key={item.id}>
-                    {/* CELDA 1: MIN-WIDTH PROTEGIDO */}
-                    <div className="col-content-admin-box">
+                                        <div className="col-content-admin-box">
                       <div
                         className="news-thumb-box-admin"
                         onClick={() => handleOpenModal(item)}
@@ -485,8 +485,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       </div>
                     </div>
 
-                    {/* CELDA 2: FECHA */}
-                    <div
+                                        <div
                       className="col-text-admin"
                       style={{ display: 'flex', flexDirection: 'column' }}
                     >
@@ -504,18 +503,15 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       )}
                     </div>
 
-                    {/* CELDA 3: EDITOR */}
-                    <div className="col-text-admin">{item.editor}</div>
+                                        <div className="col-text-admin">{item.editor}</div>
 
-                    {/* CELDA 4: CATEGORÍA */}
-                    <div className="col-categoria-data-admin col-text-admin">
+                                        <div className="col-categoria-data-admin col-text-admin">
                       <span className="category-pill-admin">
                         {item.category || 'Noticias'}
                       </span>
                     </div>
 
-                    {/* CELDA 5: ESTADO */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
                       <span className={`status-pill-admin ${getBadgeClass(item.status)}`}>
                         {item.status}
                       </span>
@@ -533,8 +529,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                         )}
                     </div>
 
-                    {/* CELDA 6: ACCIONES (SOLO VER) */}
-                    <div className="col-acciones-admin">
+                                        <div className="col-acciones-admin">
                       <button
                         className="icon-btn-admin"
                         title={
@@ -555,10 +550,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         </div>
       </div>
 
-      {/* ===============================================================
-          MODAL DE VISUALIZACIÓN AISLADO PARA ADMIN
-          =============================================================== */}
-      {selectedNews && (
+            {selectedNews && (
         <div className="modal-overlay-admin" onClick={handleCloseModal}>
           <div className="modal-content-esp-admin" onClick={(e) => e.stopPropagation()}>
             {selectedNews.estado === 'PENDIENTE_APROBACION' &&
@@ -597,15 +589,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               </button>
             </div>
 
-            <div
-              className="modal-body-esp-admin"
-              style={
-                !selectedNews.images || selectedNews.images.length === 0
-                  ? { gridTemplateColumns: '1fr' }
-                  : undefined
-              }
-            >
-              {/* COLUMNA IZQUIERDA (Info y Título) */}
+<div className="modal-body-esp-admin">
               <div className="preview-mock-left-admin">
                 <div className="modal-author-row-admin">
                   <div className="hospital-avatar-admin">
@@ -626,8 +610,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 </div>
               </div>
 
-              {/* COLUMNA DERECHA (Mosaico de Imágenes) */}
-              {selectedNews.images && selectedNews.images.length > 0 && (
+                            {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
                 <div className="news-modal-images-section-admin">
                   <div
                     className={`news-modal-images-grid-admin ${getLayoutClass(
@@ -658,10 +641,13 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                     })}
                   </div>
                 </div>
+              ) : (
+                <div className="news-modal-default-img-wrap-admin">
+                  <DefaultNewsImage alt={selectedNews.title} />
+                </div>
               )}
 
-              {/* SI YA FUE RECHAZADA, MOSTRAR EL MOTIVO EN MODO SOLO LECTURA */}
-              {selectedNews.estado === 'RECHAZADO' && selectedNews.rejectionReason && (
+{selectedNews.estado === 'RECHAZADO' && selectedNews.rejectionReason && (
                 <div className="rejection-area-admin">
                   <label>
                     <AlertTriangle
@@ -676,7 +662,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 </div>
               )}
 
-              {/* ÁREA DE JUSTIFICACIÓN DE RECHAZO (SOLO PARA SOLICITUDES PENDIENTES) */}
               {selectedNews.estado === 'PENDIENTE_APROBACION' && isRejecting && (
                 <div className="rejection-area-admin">
                   <label htmlFor="rejection-reason">
@@ -699,8 +684,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               )}
             </div>
 
-            {/* CONTROLES INFERIORES: EL ADMIN SOLO PUEDE ACEPTAR O RECHAZAR CAMBIOS PENDIENTES DEL CMS */}
-            {selectedNews.estado === 'PENDIENTE_APROBACION' && (
+{selectedNews.estado === 'PENDIENTE_APROBACION' && (
               <div className="modal-footer-esp-admin">
                 {!isRejecting ? (
                   <>
@@ -744,7 +728,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 )}
               </div>
             )}
-          </div>
+
+                </div>
         </div>
       )}
 

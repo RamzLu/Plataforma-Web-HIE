@@ -1,6 +1,3 @@
-// Utilidad para registrar y persistir acciones del editor/CM en el CMS
-// como eliminaciones, modificaciones críticas o acciones manuales.
-
 const STORAGE_KEY = "cms_activity_log";
 
 export const recordCmsActivity = ({
@@ -9,6 +6,7 @@ export const recordCmsActivity = ({
   editor = "Editor CMS",
   estado = "ELIMINADO",
   timestamp = Date.now(),
+  newsId = null,
 }) => {
   try {
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
@@ -19,12 +17,11 @@ export const recordCmsActivity = ({
       editor,
       estado,
       timestamp,
+      ...(newsId ? { newsId: String(newsId) } : {}),
     };
-    // Mantenemos las últimas 50 actividades registradas
     const updated = [newActivity, ...existing].slice(0, 50);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
-    // Notificamos tanto a la pestaña activa como a otras pestañas
     window.dispatchEvent(new CustomEvent("cms_activity_updated", { detail: newActivity }));
     return newActivity;
   } catch (err) {
@@ -44,7 +41,7 @@ export const getCmsActivityLog = () => {
           categoria: "Noticias",
           editor: "Luana Abigail Ramirez Sistema",
           estado: "ELIMINADO",
-          timestamp: Date.now() - 1000 * 60 * 30, // Hace 30 minutos
+          timestamp: Date.now() - 1000 * 60 * 30,
         },
       ];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialLog));

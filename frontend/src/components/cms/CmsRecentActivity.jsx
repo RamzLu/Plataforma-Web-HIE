@@ -108,19 +108,47 @@ const CmsRecentActivity = ({
 
   const activities = [];
 
-  // 1. Noticias
   (newsList || []).forEach((n) => {
     const rawDate = n.updatedAt || n.createdAt;
     const estado = resolveEstado(n.estado);
     const isDraft = estado === "BORRADOR";
     const title = n.title || n.titulo || "Sin título";
+    const hasDiffDates =
+      n.updatedAt &&
+      n.createdAt &&
+      Math.abs(new Date(n.updatedAt).getTime() - new Date(n.createdAt).getTime()) > 1000;
+    const isUpdated = Boolean(n.editedBy) || hasDiffDates;
+
+    const matchingLog = (loggedActivities || []).find(
+      (log) => log.newsId && String(log.newsId) === String(n.id)
+    );
+
+    let activityTitle = "";
+    if (n.actionTitle) {
+      activityTitle = n.actionTitle;
+    } else if (matchingLog && matchingLog.titulo) {
+      activityTitle = matchingLog.titulo;
+    } else if (isUpdated) {
+      activityTitle = isDraft
+        ? `Actualizó contenido de borrador "${title}"`
+        : `Actualizó contenido de noticia "${title}"`;
+    } else {
+      activityTitle = isDraft
+        ? `Creó borrador: "${title}"`
+        : `Publicó noticia "${title}"`;
+    }
+
+    const editorName = isUpdated
+      ? matchingLog?.editor || n.editedBy || n.editor || userName || "Editor CMS"
+      : matchingLog?.editor || n.editor || n.editedBy || userName || "Editor CMS";
+
     activities.push({
       id: `news-${n.id}`,
-      titulo: isDraft ? `Creó borrador: "${title}"` : `Publicó noticia "${title}"`,
+      titulo: activityTitle,
       categoria: n.category || "Noticias",
-      editor: n.editor || n.editedBy || "Luana Ramirez",
+      editor: editorName,
       estado: estado,
-      timestamp: rawDate ? new Date(rawDate).getTime() : 0,
+      timestamp: matchingLog?.timestamp || (rawDate ? new Date(rawDate).getTime() : 0),
     });
   });
 
@@ -196,8 +224,10 @@ const CmsRecentActivity = ({
     });
   });
 
-  // 6. Actividades registradas (Eliminaciones por el CM)
   (loggedActivities || []).forEach((log) => {
+    if (log.newsId && (newsList || []).some((n) => String(n.id) === String(log.newsId))) {
+      return;
+    }
     activities.push({
       id: log.id || `log-${log.timestamp}`,
       titulo: log.titulo,

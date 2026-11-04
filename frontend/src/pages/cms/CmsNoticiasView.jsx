@@ -3,6 +3,7 @@ import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
@@ -181,7 +182,7 @@ const CmsNoticiasView = ({
     }
   };
 
-  // --- ABRIR MODAL DE CORRECCIÓN (IGUAL AL DE EDITAR + MOTIVO DE RECHAZO ARRIBA) ---
+  
   const handleOpenCorrection = (news) => {
     setEditingId(news.id);
     setCorrectionNews(news);
@@ -276,7 +277,7 @@ const CmsNoticiasView = ({
     setHasUnsavedChanges(true);
     const targetUrl = imagenesUrls[indexToRemove];
     if (String(targetUrl).startsWith("blob:")) {
-      // Calculamos qué posición ocupa este blob dentro de archivosSeleccionados
+      
       const blobIndex = imagenesUrls
         .slice(0, indexToRemove)
         .filter((u) => String(u).startsWith("blob:")).length;
@@ -343,8 +344,42 @@ const CmsNoticiasView = ({
         formData.append("imagenes", file);
       });
 
-      let data;
+      const formatEstadoNombre = (est) => {
+        const upper = String(est || "").toUpperCase().trim();
+        if (upper === "BORRADOR") return "Borrador";
+        if (upper === "PUBLICADO") return "Publicado";
+        if (upper === "PROGRAMADO") return "Programado";
+        if (upper === "ARCHIVADO") return "Archivado";
+        return est;
+      };
 
+      const prevNoticia = editingId
+        ? (newsList || []).find((n) => String(n.id) === String(editingId))
+        : null;
+
+      let accionTitulo = "";
+      if (editingId) {
+        const prevEstado = prevNoticia?.estado ? String(prevNoticia.estado).toUpperCase() : null;
+        const nuevoEstado = String(estadoFinal).toUpperCase();
+
+        if (prevEstado && prevEstado !== nuevoEstado) {
+          accionTitulo = `Actualizó estado de "${titulo}" (${formatEstadoNombre(prevEstado)} a ${formatEstadoNombre(nuevoEstado)})`;
+        } else if (nuevoEstado === "BORRADOR") {
+          accionTitulo = `Actualizó contenido de borrador "${titulo}"`;
+        } else {
+          accionTitulo = `Actualizó contenido de noticia "${titulo}"`;
+        }
+      } else {
+        if (String(estadoFinal).toUpperCase() === "BORRADOR") {
+          accionTitulo = `Creó borrador: "${titulo}"`;
+        } else if (String(estadoFinal).toUpperCase() === "PROGRAMADO") {
+          accionTitulo = `Programó noticia "${titulo}"`;
+        } else {
+          accionTitulo = `Publicó noticia "${titulo}"`;
+        }
+      }
+
+      let data;
       if (editingId) {
         data = await updateNoticia(editingId, formData, token);
         const estadoDevuelto = (data.noticia?.estado || "").toUpperCase();
@@ -375,16 +410,40 @@ const CmsNoticiasView = ({
         );
       }
 
-      const estadoGuardado = data.noticia?.estado || "PENDIENTE_APROBACION";
+const estadoGuardado = data.noticia?.estado || "PENDIENTE_APROBACION";
+
+      const catSlugMap = {
+        "cáncer de mama": "cancer-mama",
+        "cancer de mama": "cancer-mama",
+        "tu corazón": "tu-corazon",
+        "tu corazon": "tu-corazon",
+        "donación": "donacion",
+        "donacion": "donacion",
+        "dengue": "dengue"
+      };
+      const catKey = (categoria || "").trim().toLowerCase();
+      if (catSlugMap[catKey]) {
+        localStorage.removeItem(`visited_${catSlugMap[catKey]}`);
+      }
+
+      const editorResponsable = keycloak?.tokenParsed?.name || "Editor CMS";
+      recordCmsActivity({
+        titulo: accionTitulo,
+        categoria: categoria || "Noticias",
+        editor: editorResponsable,
+        estado: estadoFinal,
+        timestamp: Date.now(),
+        newsId: String(data.noticia?.id || editingId),
+      });
 
       const noticiaFormateada = {
         id: data.noticia?.id || editingId,
         title: titulo,
         body: [textoContenido],
-        date: data.noticia?.createdAt
+date: data.noticia?.createdAt
           ? new Date(data.noticia.createdAt).toLocaleDateString("es-AR")
           : new Date().toLocaleDateString("es-AR"),
-        createdAt: data.noticia?.createdAt || new Date().toISOString(),
+        createdAt: data.noticia?.createdAt || prevNoticia?.createdAt || new Date().toISOString(),
         updatedAt: data.noticia?.updatedAt || new Date().toISOString(),
         category: categoria || "General",
         estado: estadoGuardado,
@@ -392,10 +451,11 @@ const CmsNoticiasView = ({
         previousEstado: data.noticia?.previousEstado || null,
         isDraft: estadoGuardado === "BORRADOR",
         images: data.noticia?.images || imagenesUrls || [],
-        editor: data.noticia?.editor || "Editor CMS",
-        editedBy: data.noticia?.editedBy || null,
+editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
+        editedBy: editingId ? (data.noticia?.editedBy || editorResponsable) : null,
         fechaPublicacion: data.noticia?.fechaPublicacion || null,
         rejectionReason: data.noticia?.rejectionReason || null,
+        actionTitle: accionTitulo,
       };
 
       if (editingId) {
@@ -637,6 +697,7 @@ const CmsNoticiasView = ({
                         </div>
                       )}
                     </div>
+
                   </div>
 
                   <div className="col-fecha">
@@ -827,8 +888,7 @@ const CmsNoticiasView = ({
         </div>
       </div>
 
-      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
-      <CmsDeleteModal
+            <CmsDeleteModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleExecuteDelete}
@@ -836,10 +896,7 @@ const CmsNoticiasView = ({
         isDeleting={deletingId === noticiaAEliminar}
       />
 
-      {/* ========================================================================
-          MODAL CREAR / EDITAR / CORREGIR NOTICIA (SPLIT LAYOUT CON VISTA PREVIA)
-      ======================================================================== */}
-      {showModal && (
+            {showModal && (
         <div className="modal-overlay" onClick={handleCloseAttempt}>
           <div
             className="modal-content-esp news-modal-content news-modal-content-wide"
@@ -880,8 +937,7 @@ const CmsNoticiasView = ({
               </button>
             </div>
 
-            {/* MOTIVO DEL RECHAZO ARRIBA (SOLO EN MODO CORRECCIÓN DE RECHAZADOS) */}
-            {correctionNews && (
+                        {correctionNews && (
               <div
                 className="news-correction-alert"
                 style={{ margin: "16px 35px 0 35px", flexShrink: 0 }}
@@ -1290,27 +1346,8 @@ const CmsNoticiasView = ({
                           })}
                         </div>
                       ) : (
-                        <div className="preview-mosaic-empty">
-                          <svg
-                            width="40"
-                            height="40"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            style={{ opacity: 0.4, marginBottom: "10px" }}
-                          >
-                            <rect
-                              x="3"
-                              y="3"
-                              width="18"
-                              height="18"
-                              rx="2"
-                              ry="2"
-                            ></rect>
-                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                            <polyline points="21 15 16 10 5 21"></polyline>
-                          </svg>
-                          [Imágenes]
+<div className="preview-mosaic-empty-wrap" style={{ width: "100%", height: "380px", borderRadius: "10px", overflow: "hidden", position: "sticky", top: "30px", alignSelf: "start" }}>
+                          <DefaultNewsImage alt="Imagen predeterminada institucional" />
                         </div>
                       )}
                     </div>
@@ -1318,8 +1355,7 @@ const CmsNoticiasView = ({
                 </div>
               </div>
 
-              {/* Footer del Modal */}
-              <div className="modal-footer-esp">
+                            <div className="modal-footer-esp">
                 <button
                   type="button"
                   className="btn-cancelar-gris"
@@ -1435,8 +1471,7 @@ const CmsNoticiasView = ({
         </div>
       )}
 
-      {/* MODAL DE CONFIRMACIÓN: GUARDAR COMO BORRADOR */}
-      <CmsConfirmDraftModal
+            <CmsConfirmDraftModal
         isOpen={showConfirmDraftModal}
         onClose={() => setShowConfirmDraftModal(false)}
         onConfirm={(e) => handleSave(e, "BORRADOR", true)}
@@ -1455,8 +1490,7 @@ const CmsNoticiasView = ({
         loading={saving}
       />
 
-      {/* MODAL DE CAMBIOS SIN GUARDAR */}
-      <CmsUnsavedChangesModal
+            <CmsUnsavedChangesModal
         isOpen={showUnsavedModal}
         onKeepEditing={() => setShowUnsavedModal(false)}
         onDiscard={handleForceClose}

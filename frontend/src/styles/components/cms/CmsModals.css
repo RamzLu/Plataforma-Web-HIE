@@ -144,6 +144,16 @@
 /* =========================================
    MOSAICO DINÁMICO DE IMÁGENES (TIPO FACEBOOK)
 ========================================= */
+.news-modal-default-img-wrap {
+  width: 100%;
+  height: 480px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(12, 35, 64, 0.1);
+  position: sticky;
+  top: 0;
+}
+
 .mosaic-gallery {
   display: grid;
   gap: 4px; /* Espaciado ajustado para crear el efecto cuadrícula */
