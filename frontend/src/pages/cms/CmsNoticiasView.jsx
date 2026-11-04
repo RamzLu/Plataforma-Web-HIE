@@ -289,12 +289,14 @@ const CmsNoticiasView = ({
         title: titulo,
         body: [textoContenido],
         date: new Date().toLocaleDateString("es-AR"),
+        createdAt: data.noticia?.createdAt || (newsList || []).find((n) => n.id === editingId)?.createdAt || new Date().toISOString(),
+        updatedAt: data.noticia?.updatedAt || new Date().toISOString(),
         category: categoria || "General",
         estado: estadoFinal,
         isDraft: estadoFinal === "BORRADOR",
         images: data.noticia?.images || imagenesUrls || [],
-        editor: data.noticia?.editor || "Editor CMS", 
-        editedBy: data.noticia?.editedBy || null,
+        editor: data.noticia?.editor || (newsList || []).find((n) => n.id === editingId)?.editor || keycloak?.tokenParsed?.name || "Editor CMS", 
+        editedBy: editingId ? (data.noticia?.editedBy || keycloak?.tokenParsed?.name || "Editor CMS") : null,
         fechaPublicacion: data.noticia?.fechaPublicacion || null
       };
 

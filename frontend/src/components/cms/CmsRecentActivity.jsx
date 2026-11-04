@@ -108,17 +108,37 @@ const CmsRecentActivity = ({
 
   const activities = [];
 
-  // 1. Noticias
   (newsList || []).forEach((n) => {
     const rawDate = n.updatedAt || n.createdAt;
     const estado = resolveEstado(n.estado);
     const isDraft = estado === "BORRADOR";
     const title = n.title || n.titulo || "Sin título";
+    const hasDiffDates =
+      n.updatedAt &&
+      n.createdAt &&
+      Math.abs(new Date(n.updatedAt).getTime() - new Date(n.createdAt).getTime()) > 1000;
+    const isUpdated = Boolean(n.editedBy) || hasDiffDates;
+
+    let activityTitle = "";
+    if (isUpdated) {
+      activityTitle = isDraft
+        ? `Actualizó borrador: "${title}"`
+        : `Actualizó noticia "${title}"`;
+    } else {
+      activityTitle = isDraft
+        ? `Creó borrador: "${title}"`
+        : `Publicó noticia "${title}"`;
+    }
+
+    const editorName = isUpdated
+      ? n.editedBy || n.editor || userName || "Editor CMS"
+      : n.editor || n.editedBy || userName || "Editor CMS";
+
     activities.push({
       id: `news-${n.id}`,
-      titulo: isDraft ? `Creó borrador: "${title}"` : `Publicó noticia "${title}"`,
+      titulo: activityTitle,
       categoria: n.category || "Noticias",
-      editor: n.editor || n.editedBy || "Luana Ramirez",
+      editor: editorName,
       estado: estado,
       timestamp: rawDate ? new Date(rawDate).getTime() : 0,
     });
