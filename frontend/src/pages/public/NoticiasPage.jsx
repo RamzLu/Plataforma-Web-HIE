@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import "../../styles/pages/NoticiasPage.css";
 import PageBanner from "../../components/PageBanner";
 import iconMama from "../../assets/icon-mama.png";
@@ -77,8 +78,10 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
         <button className="read-more-btn" onClick={() => onOpenNews(news)}>Ver más</button>
       </div>
       <div className="full-news-images">
-        {news.images && news.images.length > 0 && (
+        {news.images && news.images.length > 0 && news.images[0] ? (
           <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => onOpenLightbox(news.images, 0)} />
+        ) : (
+          <DefaultNewsImage alt={news.title} onClick={() => onOpenNews(news)} />
         )}
       </div>
     </article>
@@ -95,8 +98,7 @@ const NoticiasPage = () => {
   const [noticias, setNoticias] = useState([]);
   const [loading, setLoading] = useState(true); 
   
-  // Guardará la fecha exacta (timestamp) de la noticia más nueva de cada categoría
-  const [nuevasPorCategoria, setNuevasPorCategoria] = useState({});
+    const [nuevasPorCategoria, setNuevasPorCategoria] = useState({});
 
   const [lightbox, setLightbox] = useState({ isOpen: false, images: [], index: 0 });
 
@@ -304,7 +306,7 @@ const NoticiasPage = () => {
                   ))}
                 </div>
               </div>
-              {selectedNews.images && selectedNews.images.length > 0 && (
+              {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
                 <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
                   {selectedNews.images.slice(0, 4).map((img, index) => {
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
@@ -316,6 +318,10 @@ const NoticiasPage = () => {
                       </div>
                     );
                   })}
+                </div>
+              ) : (
+                <div className="news-modal-default-img-wrap">
+                  <DefaultNewsImage alt={selectedNews.title} />
                 </div>
               )}
             </div>

@@ -23,6 +23,7 @@ import CmsEspecialidadesView from "../cms/CmsEspecialidadesView";
 import CmsResidenciasView from "../cms/CmsResidenciasView";
 import CmsCapacitacionesView from "../cms/CmsCapacitacionesView";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 
 const CmsPage = () => {
   const [initialized, setInitialized] = useState(false);
@@ -615,16 +616,12 @@ if (!authenticated) {
                 />
               </div>
 
-              {selectedNews.images && selectedNews.images.length > 0 && (
+              {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
                 <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
-                  
                   {selectedNews.images.slice(0, 4).map((img, index) => {
-                    
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
                     const fotosRestantes = selectedNews.images.length - 4;
-
                     const imageUrls = selectedNews.images.map(i => i.url || i);
-
                     return (
                       <div 
                         key={index} 
@@ -632,7 +629,6 @@ if (!authenticated) {
                         onClick={() => openLightbox(imageUrls, index)} 
                       >
                         <img src={img.url || img} alt={`Imagen ${index + 1}`} />
-                        
                         {isLastAndHidden && (
                           <div className="mosaic-overlay">
                             <span>+{fotosRestantes}</span>
@@ -641,6 +637,10 @@ if (!authenticated) {
                       </div>
                     );
                   })}
+                </div>
+              ) : (
+                <div className="news-modal-default-img-wrap">
+                  <DefaultNewsImage alt={selectedNews.title} />
                 </div>
               )}
 

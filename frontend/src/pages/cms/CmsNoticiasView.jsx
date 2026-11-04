@@ -3,6 +3,7 @@ import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
@@ -446,10 +447,10 @@ const CmsNoticiasView = ({
               <div className="news-table-row" key={news.id}>
                 <div className="col-content" style={{ flexDirection: "row", alignItems: "center", gap: "15px" }}>
                   <div className="news-thumb-box">
-                    {news.images && news.images.length > 0 ? (
+                    {news.images && news.images.length > 0 && news.images[0] ? (
                       <img src={news.images[0]} alt="Miniatura" className="news-thumb-img" />
                     ) : (
-                      <div className="news-thumb-mock">HIE</div>
+                      <DefaultNewsImage alt="Miniatura" compact />
                     )}
                   </div>
                   <div className="news-title-interactive" onClick={() => onViewNews && onViewNews(news)} title="Ver comunicado completo">
@@ -667,9 +668,8 @@ const CmsNoticiasView = ({
                           })}
                         </div>
                       ) : (
-                        <div className="preview-mosaic-empty">
-                          <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ opacity: 0.4, marginBottom: '10px' }}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                          [Imágenes]
+                        <div className="preview-mosaic-empty-wrap" style={{ width: "100%", height: "380px", borderRadius: "10px", overflow: "hidden", position: "sticky", top: "30px", alignSelf: "start" }}>
+                          <DefaultNewsImage alt="Imagen predeterminada institucional" />
                         </div>
                       )}
                     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { useParams, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import PageBanner from "../../components/PageBanner";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 import fondoBannerNoticias from "../../assets/banner_noticias.png";
@@ -158,8 +159,10 @@ const NoticiasCategoriaPage = () => {
                     </button>
                   </div>
                   <div className="full-news-images">
-                    {news.images && news.images.length > 0 && (
+                    {news.images && news.images.length > 0 && news.images[0] ? (
                       <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => openLightbox(news.images, 0)} />
+                    ) : (
+                      <DefaultNewsImage alt={news.title} onClick={() => setSelectedNews(news)} />
                     )}
                   </div>
                 </article>
@@ -199,7 +202,7 @@ const NoticiasCategoriaPage = () => {
                   ))}
                 </div>
               </div>
-              {selectedNews.images && selectedNews.images.length > 0 && (
+              {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
                 <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
                   {selectedNews.images.slice(0, 4).map((img, index) => {
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
@@ -213,6 +216,10 @@ const NoticiasCategoriaPage = () => {
                       </div>
                     );
                   })}
+                </div>
+              ) : (
+                <div className="news-modal-default-img-wrap">
+                  <DefaultNewsImage alt={selectedNews.title} />
                 </div>
               )}
             </div>

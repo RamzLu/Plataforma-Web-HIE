@@ -3,6 +3,7 @@ import { adminFetch } from "../../api/adminFetch.js";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
 import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import "../../styles/components/cms/CmsDashboard.css";
 
 const cleanHtmlText = (html) => {
@@ -398,17 +399,14 @@ const CmsDashboardView = ({
               <div key={news.id} className="cms-news-card-wrapper">
                 <div className="cms-news-item">
                   <div className="cms-news-img-placeholder">
-                    {news.images && news.images.length > 0 ? (
+                    {news.images && news.images.length > 0 && news.images[0] ? (
                       <img
                         src={news.images[0]}
                         alt={news.title}
                         className="cms-real-news-img"
                       />
                     ) : (
-                      <div className="cms-news-img-mock">
-                        <span className="gold-text">HIE</span>
-                        <span className="blue-sub">Sin imagen</span>
-                      </div>
+                      <DefaultNewsImage alt={news.title} />
                     )}
                   </div>
 

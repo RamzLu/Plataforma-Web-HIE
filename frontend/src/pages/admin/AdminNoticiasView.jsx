@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, X, CheckCircle, XCircle, CalendarClock, AlertTriangle } from 'lucide-react';
-// IMPORTANTE: Verifica la ruta de tu logo
-import avatarHospital from "../../assets/logoHospitalEvita.png"
+import avatarHospital from "../../assets/logoHospitalEvita.png";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import '../../styles/pages/admin/AdminNoticiasView.css';
 
 const mockPayloadNoticias = [
@@ -116,13 +116,12 @@ const AdminNoticiasView = () => {
             {noticias.map((item) => (
               <div className="activity-row-admin" key={item.id}>
                 
-                {/* CELDA 1: MIN-WIDTH PROTEGIDO */}
-                <div className="col-content-admin-box">
+                                <div className="col-content-admin-box">
                   <div className="news-thumb-box-admin" onClick={() => handleOpenModal(item)}>
-                    {item.images && item.images.length > 0 ? (
+                    {item.images && item.images.length > 0 && item.images[0] ? (
                       <img src={item.images[0]} alt="Miniatura" className="news-thumb-img-admin" />
                     ) : (
-                      <div className="news-thumb-mock-admin">HIE</div>
+                      <DefaultNewsImage alt="Miniatura" compact />
                     )}
                   </div>
                   <div className="news-title-interactive-admin" onClick={() => handleOpenModal(item)}>
@@ -137,29 +136,24 @@ const AdminNoticiasView = () => {
                   </div>
                 </div>
 
-                {/* CELDA 2: FECHA */}
-                <div className="col-text-admin" style={{ display: 'flex', flexDirection: 'column' }}>
+                                <div className="col-text-admin" style={{ display: 'flex', flexDirection: 'column' }}>
                   <span>{item.date}</span>
                   <span style={{ fontSize: "0.75rem", color: "#64748b", fontStyle: "italic" }}>(Editado)</span>
                 </div>
                 
-                {/* CELDA 3: EDITOR */}
-                <div className="col-text-admin">{item.editor}</div>
+                                <div className="col-text-admin">{item.editor}</div>
                 
-                {/* CELDA 4: CATEGORÍA */}
-                <div className="col-categoria-data-admin col-text-admin">
+                                <div className="col-categoria-data-admin col-text-admin">
                   <span className="category-pill-admin">Noticias</span>
                 </div>
 
-                {/* CELDA 5: ESTADO */}
-                <div>
+                                <div>
                   <span className={`status-pill-admin ${getBadgeClass(item.status)}`}>
                     {item.status}
                   </span>
                 </div>
                 
-                {/* CELDA 6: ACCIONES (SOLO VER) */}
-                <div className="col-acciones-admin">
+                                <div className="col-acciones-admin">
                   <button className="icon-btn-admin" title="Ver Solicitud" onClick={() => handleOpenModal(item)}>
                     <Eye size={18} />
                   </button>
@@ -170,10 +164,7 @@ const AdminNoticiasView = () => {
         </div>
       </div>
 
-      {/* ===============================================================
-          MODAL DE VISUALIZACIÓN AISLADO PARA ADMIN
-          =============================================================== */}
-      {selectedNews && (
+            {selectedNews && (
         <div className="modal-overlay-admin" onClick={handleCloseModal}>
           <div className="modal-content-esp-admin" onClick={(e) => e.stopPropagation()}>
             
@@ -195,8 +186,7 @@ const AdminNoticiasView = () => {
 
             <div className="modal-body-esp-admin">
               
-              {/* COLUMNA IZQUIERDA (Info y Título) */}
-              <div className="preview-mock-left-admin">
+                            <div className="preview-mock-left-admin">
                 <div className="modal-author-row-admin">
                   <div className="hospital-avatar-admin">
                     <img src={avatarHospital} alt="Avatar Hospital" />
@@ -216,8 +206,7 @@ const AdminNoticiasView = () => {
                 </div>
               </div>
 
-              {/* COLUMNA DERECHA (Mosaico de Imágenes) */}
-              {selectedNews.images && selectedNews.images.length > 0 && (
+                            {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
                 <div className="news-modal-images-section-admin">
                   <div className={`news-modal-images-grid-admin ${getLayoutClass(selectedNews.images.length)}`}>
                     {selectedNews.images.map((img, idx) => (
@@ -227,10 +216,13 @@ const AdminNoticiasView = () => {
                     ))}
                   </div>
                 </div>
+              ) : (
+                <div className="news-modal-default-img-wrap-admin">
+                  <DefaultNewsImage alt={selectedNews.title} />
+                </div>
               )}
 
-              {/* ÁREA DE JUSTIFICACIÓN DE RECHAZO */}
-              {isRejecting && (
+                            {isRejecting && (
                 <div className="rejection-area-admin">
                   <label htmlFor="rejection-reason">
                     <AlertTriangle size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> Mensaje de Justificación (Requerido):
@@ -247,8 +239,7 @@ const AdminNoticiasView = () => {
               )}
             </div>
 
-            {/* CONTROLES INFERIORES DEL MODAL (Aprobar/Rechazar) */}
-            <div className="modal-footer-esp-admin">
+                        <div className="modal-footer-esp-admin">
               {!isRejecting ? (
                 <>
                   <button className="btn-modal-admin btn-modal-danger-admin" onClick={handleTriggerReject}>
