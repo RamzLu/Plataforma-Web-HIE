@@ -29,6 +29,17 @@ const categoriasDestacadas = [
   { id: 4, title: "DENGUE", slug: "dengue", color: "#005c89", icon: iconDengueStatic, iconAnimated: iconDengue },
 ];
 
+const normalizeCategoryName = (name) => {
+  if (!name) return "";
+  return name
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+};
+
 const miniCarouselData = [
   { id: 1, img: imgAlta1, caption: "Campañas de prevención" },
   { id: 2, img: imgAlta2, caption: "Infraestructura médica" },
@@ -117,8 +128,6 @@ const NoticiasPage = () => {
       setLoading(true);
       try {
         const data = await getNoticias(false);
-
-        // 1. Filtrar las Generales
         const noticiasFormateadas = data
           .filter(noticia => {
             const catName = (noticia.category || "general").trim().toLowerCase();
@@ -134,23 +143,30 @@ const NoticiasPage = () => {
           }));
 
         setNoticias(noticiasFormateadas);
-
-        // 2. DETECCIÓN DE NOTICIAS NUEVAS (Guardamos la fecha de la más reciente)
         const categoriasNuevas = {};
-        const unDiaMs = 24 * 60 * 60 * 1000;
-        const ahora = new Date().getTime();
+        const ahora = Date.now();
+        const DIAS_RECIENTES = 30;
+        const tiempoLimiteMs = DIAS_RECIENTES * 24 * 60 * 60 * 1000;
 
         data.forEach(noticia => {
-          const catName = (noticia.category || "").trim().toLowerCase();
+          const catKey = normalizeCategoryName(noticia.category);
           
-          if (catName !== "general" && catName !== "noticias") {
-            const fechaCreacion = noticia.createdAt ? new Date(noticia.createdAt).getTime() : ahora;
-            
-            if (ahora - fechaCreacion <= unDiaMs) {
-               // Guardamos el timestamp de la noticia más reciente de esta categoría
-               if (!categoriasNuevas[catName] || fechaCreacion > categoriasNuevas[catName]) {
-                 categoriasNuevas[catName] = fechaCreacion;
-               }
+          if (
+            catKey &&
+            catKey !== "general" &&
+            catKey !== "noticias" &&
+            catKey !== "noticiasgenerales"
+          ) {
+            const fechaNoticia = Math.max(
+              noticia.updatedAt ? new Date(noticia.updatedAt).getTime() : 0,
+              noticia.createdAt ? new Date(noticia.createdAt).getTime() : 0,
+              noticia.fechaPublicacion ? new Date(noticia.fechaPublicacion).getTime() : 0
+            );
+
+            if (fechaNoticia > 0 && ahora - fechaNoticia <= tiempoLimiteMs) {
+              if (!categoriasNuevas[catKey] || fechaNoticia > categoriasNuevas[catKey]) {
+                categoriasNuevas[catKey] = fechaNoticia;
+              }
             }
           }
         });
@@ -227,17 +243,12 @@ const NoticiasPage = () => {
 
           <div className="articles-grid">
             {categoriasDestacadas.map((cat) => {
-              // 1. Obtenemos el timestamp de la noticia más reciente de esta categoría (si la hay)
-              const timestampNoticiaNueva = nuevasPorCategoria[cat.title.toLowerCase()];
-              
-              // 2. Buscamos en localStorage cuándo fue la última vez que el usuario entró a esta categoría
+              const catKey = normalizeCategoryName(cat.slug);
+              const timestampNoticiaNueva = nuevasPorCategoria[catKey];
               const ultimaVisita = localStorage.getItem(`visited_${cat.slug}`);
-              
-              // 3. Decidimos si mostrar la etiqueta
               let isNew = false;
               if (timestampNoticiaNueva) {
-                // Si nunca visitó la página, o su última visita fue ANTES de que se publicara la noticia nueva
-                if (!ultimaVisita || parseInt(ultimaVisita) < timestampNoticiaNueva) {
+                if (!ultimaVisita || parseInt(ultimaVisita, 10) < timestampNoticiaNueva) {
                   isNew = true;
                 }
               }

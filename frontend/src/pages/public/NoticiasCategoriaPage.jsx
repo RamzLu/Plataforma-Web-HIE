@@ -14,6 +14,17 @@ const CATEGORY_MAP = {
   "dengue": "Dengue"
 };
 
+const normalizeCategoryName = (name) => {
+  if (!name) return "";
+  return name
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+};
+
 const cleanHtmlText = (html) => {
   if (!html || typeof html !== "string") return "";
   return html.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ").trim();
@@ -36,20 +47,18 @@ const NoticiasCategoriaPage = () => {
       navigate("/noticias");
       return;
     }
-
-    // --- NUEVO: GUARDAMOS LA HORA EXACTA DE LA VISITA EN LA MEMORIA DEL NAVEGADOR ---
     localStorage.setItem(`visited_${categoria}`, Date.now().toString());
 
     const fetchNoticiasCategoria = async () => {
       setLoading(true);
       try {
         const data = await getNoticias(false);
-        const targetCategory = (dbCategoryName || "").trim().toLowerCase();
+        const targetKey = normalizeCategoryName(categoria || dbCategoryName);
 
         const noticiasFiltradas = data
           .filter(n => {
-            const currentCategory = (n.category || "").trim().toLowerCase();
-            return currentCategory === targetCategory;
+            const currentKey = normalizeCategoryName(n.category);
+            return currentKey === targetKey;
           })
           .map(noticia => ({
             id: noticia.id,

@@ -270,6 +270,19 @@ const CmsNoticiasView = ({
         data = await createNoticia(formData, token);
         toast.success(estadoFinal === "BORRADOR" ? "Borrador guardado con éxito." : "Noticia creada con éxito.");
       }
+      const catSlugMap = {
+        "cáncer de mama": "cancer-mama",
+        "cancer de mama": "cancer-mama",
+        "tu corazón": "tu-corazon",
+        "tu corazon": "tu-corazon",
+        "donación": "donacion",
+        "donacion": "donacion",
+        "dengue": "dengue"
+      };
+      const catKey = (categoria || "").trim().toLowerCase();
+      if (catSlugMap[catKey]) {
+        localStorage.removeItem(`visited_${catSlugMap[catKey]}`);
+      }
 
       const noticiaFormateada = {
         id: data.noticia?.id || editingId,
