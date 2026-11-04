@@ -35,3 +35,4 @@ const DefaultNewsImage = ({
 };
 
 export default DefaultNewsImage;
+
