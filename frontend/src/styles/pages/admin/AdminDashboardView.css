@@ -11,7 +11,6 @@
   gap: 24px;
   width: 100%;
   background-color: #f8fafc;
-  min-height: 100vh;
   box-sizing: border-box;
 }
 
@@ -140,25 +139,27 @@
 }
 
 .admin-title-badge {
-  font-size: 0.75rem;
-  color: #64748b;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .admin-page-title h1 {
-  font-size: 3.2rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0;
-  letter-spacing: -0.02em;
+  font-size: clamp(2rem, 3.2vw, 2.8rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
 }
 
 .admin-page-title p {
-  color: #64748b;
-  font-size: 0.95rem;
+  color: #475569;
+  font-size: 1rem;
   margin: 0;
-  line-height: 1.5;
+}
+
+.admin-dashboard-container > .admin-page-title {
+  align-items: flex-end;
+  margin-bottom: 0;
 }
 
 /* NUEVA NOTIFICACIÓN TIPO BADGE EN LA CABECERA */
@@ -651,17 +652,6 @@
 .admin-dashboard-container {
   gap: 22px;
   background: transparent;
-}
-
-.admin-page-title h1 {
-  color: #0c2340;
-  font-size: clamp(2rem, 3.2vw, 2.8rem);
-  font-weight: 650;
-  letter-spacing: -0.045em;
-}
-
-.admin-page-title p {
-  color: #64748b;
 }
 
 .admin-header-alert-box,

@@ -4,12 +4,10 @@ import {
   Building2,
   CalendarDays,
   CheckCircle,
-  Eye,
   Globe2,
   Search,
   Stethoscope,
   UserRound,
-  Users,
   X,
   XCircle,
 } from 'lucide-react';
@@ -70,6 +68,47 @@ const initialProfesionales = [
     editor: 'María Gómez',
     fechaCarga: '29/10/2026',
     fechaActualizacion: '01/11/2026',
+    fechaPublicacion: '2026-11-03T10:30:00',
+    estado: 'APROBADO',
+    activo: true,
+    publicado: true,
+    motivoRechazo: '',
+  },
+  {
+    id: 'prof-005',
+    nombre: 'Gabriel Benítez',
+    cargo: 'Médico especialista',
+    matricula: 'MP 2204',
+    especialidad: 'Traumatología',
+    area: 'Consultorios externos',
+    tipo: 'Especialidad médica',
+    descripcion:
+      'Atención y seguimiento de afecciones del sistema musculoesquelético.',
+    imagen: fotoDoctor,
+    editor: 'María Gómez',
+    fechaCarga: '25/10/2026',
+    fechaActualizacion: '28/10/2026',
+    fechaPublicacion: '2026-11-01T09:15:00',
+    estado: 'APROBADO',
+    activo: true,
+    publicado: true,
+    motivoRechazo: '',
+  },
+  {
+    id: 'prof-006',
+    nombre: 'Elena Sosa',
+    cargo: 'Licenciada en Kinesiología',
+    matricula: 'MP 4160',
+    especialidad: 'Kinesiología y rehabilitación',
+    area: 'Rehabilitación',
+    tipo: 'Servicio de apoyo',
+    descripcion:
+      'Acompañamiento terapéutico y rehabilitación funcional.',
+    imagen: fotoDoctora,
+    editor: 'Carlos Benítez',
+    fechaCarga: '22/10/2026',
+    fechaActualizacion: '26/10/2026',
+    fechaPublicacion: '2026-10-30T14:00:00',
     estado: 'APROBADO',
     activo: true,
     publicado: true,
@@ -107,6 +146,8 @@ const AdminProfesionalesView = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [typeFilter, setTypeFilter] = useState('TODOS');
+  const [publishedTypeFilter, setPublishedTypeFilter] = useState('TODOS');
+  const [publishedSearch, setPublishedSearch] = useState('');
   const [search, setSearch] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [isRejecting, setIsRejecting] = useState(false);
@@ -118,8 +159,14 @@ const AdminProfesionalesView = () => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
     return profesionales.filter((item) => {
-      const matchesStatus = statusFilter === 'TODOS' || item.estado === statusFilter;
+      const matchesStatus =
+        statusFilter === 'TODOS' ||
+        (statusFilter === 'PUBLICADO'
+          ? item.publicado
+          : item.estado === statusFilter);
       const matchesType = typeFilter === 'TODOS' || item.tipo === typeFilter;
+      const matchesPublication =
+        statusFilter === 'PUBLICADO' ? item.publicado : !item.publicado;
       const searchableText = [
         item.nombre,
         item.cargo,
@@ -131,6 +178,7 @@ const AdminProfesionalesView = () => {
         .toLocaleLowerCase('es');
 
       return (
+        matchesPublication &&
         matchesStatus &&
         matchesType &&
         (!normalizedSearch || searchableText.includes(normalizedSearch))
@@ -139,8 +187,26 @@ const AdminProfesionalesView = () => {
   }, [profesionales, search, statusFilter, typeFilter]);
 
   const pendingCount = profesionales.filter((item) => item.estado === 'PENDIENTE').length;
-  const approvedCount = profesionales.filter((item) => item.estado === 'APROBADO').length;
-  const publishedCount = profesionales.filter((item) => item.publicado && item.activo).length;
+  const approvedCount = profesionales.filter(
+    (item) => item.estado === 'APROBADO' && !item.publicado
+  ).length;
+  const rejectedCount = profesionales.filter((item) => item.estado === 'RECHAZADO').length;
+  const publishedProfesionales = useMemo(() => {
+    const normalizedSearch = publishedSearch.trim().toLocaleLowerCase('es');
+
+    return profesionales
+      .filter((item) => {
+        const searchableText = `${item.nombre} ${item.cargo} ${item.especialidad} ${item.area}`
+          .toLocaleLowerCase('es');
+        return (
+          item.publicado &&
+          (publishedTypeFilter === 'TODOS' || item.tipo === publishedTypeFilter) &&
+          (!normalizedSearch || searchableText.includes(normalizedSearch))
+        );
+      })
+      .sort((a, b) => new Date(b.fechaPublicacion || 0) - new Date(a.fechaPublicacion || 0));
+  }, [profesionales, publishedSearch, publishedTypeFilter]);
+  const publishedCount = profesionales.filter((item) => item.publicado).length;
 
   const closeDetails = () => {
     setSelectedId(null);
@@ -190,7 +256,7 @@ const AdminProfesionalesView = () => {
 
   return (
     <div className="admin-prof-page">
-      <header className="admin-prof-header">
+      <header className="admin-prof-header admin-view-heading">
         <div>
           <span className="admin-prof-overtitle">PANEL DE CONTROL DIRECTIVO</span>
           <h1>Revisión de Profesionales</h1>
@@ -212,42 +278,75 @@ const AdminProfesionalesView = () => {
         </div>
       )}
 
-      <section className="admin-prof-summary" aria-label="Resumen de profesionales">
-        <article className="admin-prof-summary-card is-pending">
+      <div className="admin-prof-summary-toolbar">
+        <button
+          type="button"
+          className={`admin-prof-reset-filter ${statusFilter === 'TODOS' ? 'is-active' : ''}`}
+          aria-pressed={statusFilter === 'TODOS'}
+          onClick={() => setStatusFilter('TODOS')}
+        >
+          Todos
+        </button>
+      </div>
+      <section className="admin-prof-summary" aria-label="Filtrar profesionales por estado">
+        <button
+          type="button"
+          className={`admin-prof-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'PENDIENTE'}
+          onClick={() => setStatusFilter('PENDIENTE')}
+        >
           <span className="admin-prof-summary-icon"><UserRound size={19} /></span>
           <div>
-            <span>Pendientes de revisión</span>
+            <span>Pendientes de aprobación</span>
             <strong>{pendingCount}</strong>
           </div>
-        </article>
-        <article className="admin-prof-summary-card is-approved">
+        </button>
+        <button
+          type="button"
+          className={`admin-prof-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'APROBADO'}
+          onClick={() => setStatusFilter('APROBADO')}
+        >
           <span className="admin-prof-summary-icon"><BadgeCheck size={19} /></span>
           <div>
-            <span>Aprobados</span>
+            <span>Aprobados para CMS</span>
             <strong>{approvedCount}</strong>
           </div>
-        </article>
-        <article className="admin-prof-summary-card is-published">
+        </button>
+        <button
+          type="button"
+          className={`admin-prof-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'PUBLICADO'}
+          onClick={() => setStatusFilter('PUBLICADO')}
+        >
           <span className="admin-prof-summary-icon"><Globe2 size={19} /></span>
           <div>
             <span>Visibles al público</span>
             <strong>{publishedCount}</strong>
           </div>
-        </article>
-        <article className="admin-prof-summary-card is-total">
-          <span className="admin-prof-summary-icon"><Users size={19} /></span>
+        </button>
+        <button
+          type="button"
+          className={`admin-prof-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'RECHAZADO'}
+          onClick={() => setStatusFilter('RECHAZADO')}
+        >
+          <span className="admin-prof-summary-icon"><XCircle size={19} /></span>
           <div>
-            <span>Registros consultados</span>
-            <strong>{profesionales.length}</strong>
+            <span>Rechazados</span>
+            <strong>{rejectedCount}</strong>
           </div>
-        </article>
+        </button>
       </section>
 
+      <div className={`admin-prof-content-grid ${statusFilter === 'PUBLICADO' ? 'is-published-filter' : ''}`}>
       <section className="admin-prof-card" aria-labelledby="admin-prof-list-title">
         <div className="admin-prof-card-heading">
           <div>
-            <h2 id="admin-prof-list-title">Directorio profesional</h2>
-            <p>Consultá perfiles, asociaciones y estado editorial de cada registro.</p>
+            <h2 id="admin-prof-list-title">
+              {statusFilter === 'PUBLICADO' ? 'Profesionales visibles al público' : 'Solicitudes editoriales'}
+            </h2>
+            <p>Revisá los perfiles pendientes, aprobados o rechazados enviados por el CMS.</p>
           </div>
           <span className="admin-prof-results-count">
             {filteredProfesionales.length} {filteredProfesionales.length === 1 ? 'resultado' : 'resultados'}
@@ -264,15 +363,6 @@ const AdminProfesionalesView = () => {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
-          </label>
-          <label className="admin-prof-filter">
-            <span>Estado editorial</span>
-            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-              <option value="TODOS">Todos los estados</option>
-              <option value="PENDIENTE">Pendiente de aprobación</option>
-              <option value="APROBADO">Aprobado</option>
-              <option value="RECHAZADO">Rechazado</option>
-            </select>
           </label>
           <label className="admin-prof-filter">
             <span>Asociación</span>
@@ -292,8 +382,6 @@ const AdminProfesionalesView = () => {
                 <th scope="col">Especialidad / área</th>
                 <th scope="col">Editor / fecha</th>
                 <th scope="col">Estado editorial</th>
-                <th scope="col">Publicación</th>
-                <th scope="col"><span className="admin-prof-visually-hidden">Acciones</span></th>
               </tr>
             </thead>
             <tbody>
@@ -309,7 +397,13 @@ const AdminProfesionalesView = () => {
                         )}
                       </div>
                       <div className="admin-prof-person-copy">
-                        <strong>{item.nombre}</strong>
+                        <button
+                          type="button"
+                          className="admin-prof-name-button"
+                          onClick={() => setSelectedId(item.id)}
+                        >
+                          {item.nombre}
+                        </button>
                         <span>{item.cargo}</span>
                       </div>
                     </div>
@@ -327,36 +421,17 @@ const AdminProfesionalesView = () => {
                     </div>
                   </td>
                   <td data-label="Estado editorial">
-                    <span className={`admin-prof-status is-${item.estado.toLowerCase()}`}>
-                      {estadoLabels[item.estado]}
-                    </span>
-                  </td>
-                  <td data-label="Publicación">
-                    <span className={`admin-prof-publication ${item.publicado ? 'is-visible' : ''} ${!item.activo ? 'is-inactive' : ''}`}>
-                      {item.publicado && item.activo
-                        ? 'Publicado'
-                        : item.publicado
-                          ? 'Desactivado'
-                          : item.estado === 'APROBADO'
-                            ? 'Pendiente de publicación'
-                            : 'No publicado'}
-                    </span>
-                  </td>
-                  <td data-label="Acciones">
-                    <button
-                      type="button"
-                      className="admin-prof-view-button"
-                      aria-label={`Ver información de ${item.nombre}`}
-                      onClick={() => setSelectedId(item.id)}
+                    <span
+                      className={`admin-prof-status is-${item.publicado ? 'aprobado' : item.estado.toLowerCase()}`}
                     >
-                      <Eye size={18} />
-                    </button>
+                      {item.publicado ? 'Publicado' : estadoLabels[item.estado]}
+                    </span>
                   </td>
                 </tr>
               ))}
               {filteredProfesionales.length === 0 && (
                 <tr>
-                  <td className="admin-prof-empty" colSpan="6">
+                  <td className="admin-prof-empty" colSpan="4">
                     No se encontraron profesionales con esos filtros.
                   </td>
                 </tr>
@@ -368,6 +443,96 @@ const AdminProfesionalesView = () => {
           La agrupación por tipo es referencial y queda sujeta a validación institucional; no reemplaza las asociaciones registradas.
         </p>
       </section>
+
+      {statusFilter !== 'PUBLICADO' && (
+      <aside className="admin-prof-published-panel" aria-labelledby="admin-prof-published-title">
+        <div className="admin-prof-published-heading">
+          <div className="admin-prof-published-heading-icon"><Globe2 size={18} /></div>
+          <div>
+            <h2 id="admin-prof-published-title">Publicados</h2>
+            <p>Perfiles visibles al público</p>
+          </div>
+          <span className="admin-prof-published-count">{publishedCount}</span>
+        </div>
+
+        <label className="admin-prof-published-search">
+          <Search size={16} aria-hidden="true" />
+          <span className="admin-prof-visually-hidden">Buscar en profesionales publicados</span>
+          <input
+            type="search"
+            placeholder="Buscar publicados..."
+            value={publishedSearch}
+            onChange={(event) => setPublishedSearch(event.target.value)}
+          />
+        </label>
+
+        <div className="admin-prof-published-filters" role="group" aria-label="Filtrar publicados por tipo">
+          {[
+            { value: 'TODOS', label: 'Todos' },
+            { value: 'Especialidad médica', label: 'Especialidades' },
+            { value: 'Servicio de apoyo', label: 'Servicios' },
+          ].map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              className={publishedTypeFilter === filter.value ? 'is-active' : ''}
+              aria-pressed={publishedTypeFilter === filter.value}
+              onClick={() => setPublishedTypeFilter(filter.value)}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+
+        <p className="admin-prof-published-sort">
+          Ordenados por fecha de publicación, más recientes primero
+        </p>
+
+        <div className="admin-prof-published-list">
+          {publishedProfesionales.map((item, index) => (
+            <button
+              className="admin-prof-published-item"
+              type="button"
+              key={item.id}
+              onClick={() => setSelectedId(item.id)}
+              aria-label={`Ver profesional publicado ${item.nombre}`}
+            >
+              <span className="admin-prof-published-order">{String(index + 1).padStart(2, '0')}</span>
+              <span className="admin-prof-published-avatar">
+                {item.imagen ? (
+                  <img src={item.imagen} alt="" />
+                ) : (
+                  getInitials(item.nombre)
+                )}
+              </span>
+              <span className="admin-prof-published-copy">
+                <strong>{item.nombre}</strong>
+                <span>{item.especialidad}</span>
+                <small>
+                  {item.fechaPublicacion
+                    ? new Date(item.fechaPublicacion).toLocaleDateString('es-AR', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })
+                    : 'Fecha no disponible'}
+                </small>
+              </span>
+              <span
+                className={`admin-prof-published-indicator ${item.activo ? 'is-active' : 'is-inactive'}`}
+                title={item.activo ? 'Activo' : 'Desactivado'}
+              />
+            </button>
+          ))}
+          {publishedProfesionales.length === 0 && (
+            <p className="admin-prof-published-empty">
+              No hay profesionales publicados para este filtro.
+            </p>
+          )}
+        </div>
+      </aside>
+      )}
+      </div>
 
       {selectedProfessional && (
         <div className="admin-prof-overlay" onClick={closeDetails}>

@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import {
+  BadgeCheck,
   CheckCircle,
-  Eye,
+  Clock3,
+  Globe2,
   Search,
   Stethoscope,
   X,
@@ -65,7 +67,7 @@ const initialItems = [
 ];
 
 const statusClass = (status) => {
-  if (status === 'Aprobado') return 'admin-es-status-approved';
+  if (status === 'Aprobado' || status === 'Publicado') return 'admin-es-status-approved';
   if (status === 'Rechazado') return 'admin-es-status-rejected';
   return 'admin-es-status-pending';
 };
@@ -84,7 +86,12 @@ const AdminEspecialidadesServiciosView = () => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
     return items.filter((item) => {
       const matchesType = typeFilter === 'Todos' || item.type === typeFilter;
-      const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
+      const matchesStatus =
+        statusFilter === 'Todos' ||
+        (statusFilter === 'PENDIENTE' && item.status === 'Pendiente de aprobación') ||
+        (statusFilter === 'APROBADO' && item.status === 'Aprobado' && !item.published) ||
+        (statusFilter === 'PUBLICADO' && item.published && item.active) ||
+        (statusFilter === 'RECHAZADO' && item.status === 'Rechazado');
       const matchesSearch = !normalizedSearch
         || `${item.name} ${item.association} ${item.editor}`.toLocaleLowerCase('es').includes(normalizedSearch);
       return matchesType && matchesStatus && matchesSearch;
@@ -133,10 +140,13 @@ const AdminEspecialidadesServiciosView = () => {
   };
 
   const pendingCount = items.filter((item) => item.status === 'Pendiente de aprobación').length;
+  const approvedCount = items.filter((item) => item.status === 'Aprobado' && !item.published).length;
+  const publishedCount = items.filter((item) => item.published && item.active).length;
+  const rejectedCount = items.filter((item) => item.status === 'Rechazado').length;
 
   return (
     <div className="admin-es-page">
-      <header className="admin-es-page-header">
+      <header className="admin-es-page-header admin-view-heading">
         <span className="admin-es-overtitle">PANEL DE CONTROL DIRECTIVO</span>
         <h1>Servicios y Especialidades</h1>
         <p>Revisá la información enviada por el CMS y gestioná su aprobación y vigencia pública.</p>
@@ -151,14 +161,63 @@ const AdminEspecialidadesServiciosView = () => {
         </div>
       )}
 
+      <div className="admin-es-summary-toolbar">
+        <button
+          type="button"
+          className={`admin-es-reset-filter ${statusFilter === 'Todos' ? 'is-active' : ''}`}
+          aria-pressed={statusFilter === 'Todos'}
+          onClick={() => setStatusFilter('Todos')}
+        >
+          Todos
+        </button>
+      </div>
+      <section className="admin-es-summary" aria-label="Filtrar servicios y especialidades por estado">
+        <button
+          type="button"
+          className={`admin-es-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'PENDIENTE'}
+          onClick={() => setStatusFilter('PENDIENTE')}
+        >
+          <span><Clock3 size={19} /></span>
+          <div><small>Pendientes de aprobación</small><strong>{pendingCount}</strong></div>
+        </button>
+        <button
+          type="button"
+          className={`admin-es-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'APROBADO'}
+          onClick={() => setStatusFilter('APROBADO')}
+        >
+          <span><BadgeCheck size={19} /></span>
+          <div><small>Aprobados para CMS</small><strong>{approvedCount}</strong></div>
+        </button>
+        <button
+          type="button"
+          className={`admin-es-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'PUBLICADO'}
+          onClick={() => setStatusFilter('PUBLICADO')}
+        >
+          <span><Globe2 size={19} /></span>
+          <div><small>Visibles al público</small><strong>{publishedCount}</strong></div>
+        </button>
+        <button
+          type="button"
+          className={`admin-es-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'RECHAZADO'}
+          onClick={() => setStatusFilter('RECHAZADO')}
+        >
+          <span><XCircle size={19} /></span>
+          <div><small>Rechazados</small><strong>{rejectedCount}</strong></div>
+        </button>
+      </section>
+
       <section className="admin-es-card" aria-labelledby="admin-es-list-title">
         <div className="admin-es-card-heading">
           <div>
             <h2 id="admin-es-list-title">Información cargada</h2>
             <p>Revisá descripciones, requisitos, horarios, ubicación y asociaciones antes de aprobar.</p>
           </div>
-          <span className="admin-es-pending-count">
-            {pendingCount} {pendingCount === 1 ? 'pendiente' : 'pendientes'}
+          <span className="admin-es-result-count">
+            {filteredItems.length} {filteredItems.length === 1 ? 'resultado' : 'resultados'}
           </span>
         </div>
 
@@ -181,15 +240,6 @@ const AdminEspecialidadesServiciosView = () => {
               <option>Especialidad</option>
             </select>
           </label>
-          <label className="admin-es-filter">
-            <span>Estado</span>
-            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-              <option>Todos</option>
-              <option>Pendiente de aprobación</option>
-              <option>Aprobado</option>
-              <option>Rechazado</option>
-            </select>
-          </label>
         </div>
 
         <div className="admin-es-table-wrap">
@@ -202,7 +252,6 @@ const AdminEspecialidadesServiciosView = () => {
                 <th scope="col">Editor / fecha</th>
                 <th scope="col">Revisión</th>
                 <th scope="col">Publicación</th>
-                <th scope="col"><span className="admin-es-visually-hidden">Acciones</span></th>
               </tr>
             </thead>
             <tbody>
@@ -224,7 +273,11 @@ const AdminEspecialidadesServiciosView = () => {
                     <span>{item.editor}</span>
                     <small>{item.updatedAt}</small>
                   </td>
-                  <td><span className={`admin-es-status ${statusClass(item.status)}`}>{item.status}</span></td>
+                  <td>
+                    <span className={`admin-es-status ${statusClass(item.published ? 'Publicado' : item.status)}`}>
+                      {item.published ? 'Publicado' : item.status}
+                    </span>
+                  </td>
                   <td>
                     <span className={`admin-es-publication ${item.published ? 'is-published' : ''}`}>
                       {!item.active
@@ -233,24 +286,14 @@ const AdminEspecialidadesServiciosView = () => {
                           ? 'Publicado'
                           : item.status === 'Aprobado'
                             ? 'Disponible para CMS'
-                            : 'No disponible'}
+                            : 'No disponible'                            }
                     </span>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="admin-es-view-button"
-                      aria-label={`Ver detalle de ${item.name}`}
-                      onClick={() => setSelectedItem(item)}
-                    >
-                      <Eye size={18} />
-                    </button>
                   </td>
                 </tr>
               ))}
               {filteredItems.length === 0 && (
                 <tr>
-                  <td className="admin-es-empty" colSpan="7">No se encontraron servicios o especialidades.</td>
+                  <td className="admin-es-empty" colSpan="6">No se encontraron servicios o especialidades.</td>
                 </tr>
               )}
             </tbody>

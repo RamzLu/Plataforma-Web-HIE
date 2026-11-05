@@ -429,7 +429,7 @@ margin-left: revert;
 .admin-page-title h1 {
   color: #0c2340;
   font-size: 3.2rem;
-  font-weight: 200 !important;
+  font-weight: 200;
   margin: 5px 0;
 }
 
