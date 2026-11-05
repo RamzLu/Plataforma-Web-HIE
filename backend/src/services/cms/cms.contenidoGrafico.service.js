@@ -61,20 +61,67 @@ export const ESPACIOS_FIJOS_DEFINICIONES = [
   {
     id: "espacio-seccion-pacientes",
     orden: 2,
-    nombre: "Sección Pacientes y Comunidad",
-    descripcion: "Contenedor visual destinado a guías de atención, turnos y orientación al paciente",
-    tipo: "Sección Pacientes",
+    nombre: "Información para Pacientes",
+    descripcion:
+      "Sección interactiva de 5 desplegables informativos con sus imágenes asociadas en Inicio",
+    tipo: "Acordeón Informativo",
     ubicacionClave: "espacio-seccion-pacientes",
     page: "Inicio",
-    dimensiones: "1200x675px",
-    aspectRatio: 16 / 9,
+    dimensiones: "1200x900px",
+    aspectRatio: 4 / 3,
+    esAcordeonFijo: true,
+    cantidadItemsFijos: 5,
     defaults: {
-      altText: "Orientación e información útil para pacientes y familiares",
+      altText: "Sección de orientación e información útil para pacientes",
       textoSuperpuesto: "",
       textoBoton: "",
       enlaceUrl: "",
       imagenes: [
-        { presetKey: "carrusel-inicio-2", fileName: "orientacion_pacientes.jpg" },
+        {
+          titulo: "HORARIOS DE ATENCIÓN",
+          textoDesplegable:
+            "Estamos disponibles de 06:00 a 20:00 hs. para ayudarte a agendar citas y responder tus dudas generales.",
+          altText:
+            "Profesional de salud brindando acompañamiento y orientación al paciente",
+          presetKey: "pacientes-atencion",
+          fileName: "imagenPacientes.jpg",
+        },
+        {
+          titulo: "VISITAR A UN PACIENTE",
+          textoDesplegable:
+            "Por favor, consulte los horarios y protocolos vigentes en recepción para la visita a pacientes internados.",
+          altText:
+            "Orientación sobre horarios y protocolos de visita a pacientes internados",
+          presetKey: "pacientes-visita",
+          fileName: "imgVisita.jpg",
+        },
+        {
+          titulo: "CRITERIOS DE ADMISIÓN",
+          textoDesplegable:
+            "Conozca los requisitos y documentación necesaria para la admisión en nuestras instalaciones.",
+          altText:
+            "Requisitos y documentación para admisión de pacientes en el hospital",
+          presetKey: "pacientes-admision",
+          fileName: "imgAdmision.jpg",
+        },
+        {
+          titulo: "TURNOS Y CONTACTO",
+          textoDesplegable:
+            "Comuníquese a través de nuestras vías oficiales para agendar o modificar su turno de atención.",
+          altText:
+            "Canales oficiales para gestión de turnos médicos y contacto",
+          presetKey: "pacientes-turnos",
+          fileName: "imgTurnos.jpg",
+        },
+        {
+          titulo: "LABORATORIO",
+          textoDesplegable:
+            "Información detallada sobre preparación previa, ayuno y horarios de extracción para análisis clínicos.",
+          altText:
+            "Servicio de laboratorio y extracciones para análisis clínicos",
+          presetKey: "pacientes-laboratorio",
+          fileName: "imgLaboratorio.jpg",
+        },
       ],
     },
   },
@@ -149,6 +196,11 @@ const PRESET_KEYS_VALIDAS = new Set([
   "carrusel-inicio-2",
   "carrusel-inicio-3",
   "carrusel-inicio-4",
+  "pacientes-atencion",
+  "pacientes-visita",
+  "pacientes-admision",
+  "pacientes-turnos",
+  "pacientes-laboratorio",
   "banner-especialidades",
   "banner-capacitaciones",
   "banner-noticias",
@@ -163,7 +215,7 @@ const crearError = (mensaje, statusCode = 400) => {
 };
 
 /**
- * Limpia texto plano conservando saltos de línea (\n) para textos multilínea como el del carrusel,
+ * Limpia texto plano conservando saltos de línea (\n) para textos multilínea,
  * eliminando caracteres de control peligrosos y etiquetas HTML.
  */
 const limpiarTextoPlanoMultilinea = (valor, maxLen = 300) => {
@@ -260,6 +312,93 @@ function parsearMetadatosDescripcion(rawDesc) {
  * Construye la representación de un espacio fijo combinando su definición con las filas en BD.
  */
 function formatearEspacioDesdeFilas(def, filas = []) {
+  // Caso especial: Sección de desplegables fijos (ej. Información para Pacientes con 5 ítems fijos)
+  if (def.esAcordeonFijo) {
+    const filasOrdenadas = Array.isArray(filas)
+      ? [...filas].sort((a, b) => (a.orden || 0) - (b.orden || 0))
+      : [];
+
+    const filaPorOrden = new Map();
+    filasOrdenadas.forEach((f, i) => {
+      const ord = Number.isInteger(f.orden) && f.orden >= 1 ? f.orden : i + 1;
+      if (!filaPorOrden.has(ord)) {
+        filaPorOrden.set(ord, f);
+      }
+    });
+
+    const imagenesAcordeon = def.defaults.imagenes.map((presetItem, idx) => {
+      const ordenEsperado = idx + 1;
+      const fila = filaPorOrden.get(ordenEsperado) || null;
+
+      if (!fila) {
+        return {
+          id: `preset-${def.id}-${ordenEsperado}`,
+          archivoId: null,
+          url: null,
+          presetKey: presetItem.presetKey,
+          fileName: presetItem.fileName,
+          orden: ordenEsperado,
+          titulo: presetItem.titulo,
+          textoDesplegable: presetItem.textoDesplegable,
+          altText: presetItem.altText,
+        };
+      }
+
+      const metaFila = parsearMetadatosDescripcion(fila.descripcion);
+      const urlPublica = resolverUrlPublicaArchivo(fila.archivo);
+      const presetKey =
+        !urlPublica && metaFila.presetKey && PRESET_KEYS_VALIDAS.has(metaFila.presetKey)
+          ? metaFila.presetKey
+          : !urlPublica
+          ? presetItem.presetKey
+          : null;
+
+      return {
+        id: fila.id.toString(),
+        archivoId: fila.archivoId ? fila.archivoId.toString() : null,
+        url: urlPublica,
+        presetKey,
+        fileName:
+          fila.archivo?.nombreOriginal ||
+          metaFila.fileName ||
+          presetItem.fileName,
+        orden: ordenEsperado,
+        titulo: fila.titulo || presetItem.titulo,
+        textoDesplegable:
+          typeof metaFila.textoDesplegable === "string" && metaFila.textoDesplegable.trim()
+            ? metaFila.textoDesplegable
+            : presetItem.textoDesplegable,
+        altText: fila.altText || presetItem.altText,
+      };
+    });
+
+    const primeraFila = filasOrdenadas[0] || null;
+
+    return {
+      id: def.id,
+      orden: def.orden,
+      nombre: def.nombre,
+      descripcion: def.descripcion,
+      tipo: def.tipo,
+      page: def.page,
+      ubicacion: def.tipo,
+      dimensiones: def.dimensiones,
+      aspectRatio: def.aspectRatio,
+      esAcordeonFijo: true,
+      cantidadItemsFijos: def.cantidadItemsFijos,
+      estado: primeraFila?.estado || "PUBLICADO",
+      activo: primeraFila ? primeraFila.activo !== false : true,
+      rejectionReason: primeraFila?.rejectionReason || null,
+      altText: imagenesAcordeon[0]?.altText || def.defaults.altText,
+      textoSuperpuesto: "",
+      textoBoton: "",
+      enlaceUrl: "",
+      updatedAt: primeraFila?.updatedAt ? primeraFila.updatedAt.toISOString() : null,
+      imagenes: imagenesAcordeon,
+    };
+  }
+
+  // Espacios de tipo carrusel o banner
   if (!Array.isArray(filas) || filas.length === 0) {
     const imagenesDefault = def.defaults.imagenes.map((preset, idx) => ({
       id: `preset-${def.id}-${idx + 1}`,
@@ -394,7 +533,7 @@ class CmsContenidoGraficoService {
   }
 
   /**
-   * Obtiene la configuración pública vigente de un espacio gráfico fijo puntual (ej. `espacio-banner-inicio`).
+   * Obtiene la configuración pública vigente de un espacio gráfico fijo puntual.
    */
   async obtenerEspacioPublico(espacioKey) {
     const claveLimpia = String(espacioKey || "").trim();
@@ -421,7 +560,7 @@ class CmsContenidoGraficoService {
   }
 
   /**
-   * Actualiza un espacio gráfico fijo existente (texto superpuesto, ALT, botón, redirección e imágenes).
+   * Actualiza un espacio gráfico fijo existente.
    */
   async actualizarEspacioGrafico(espacioKey, body, files, user) {
     const claveLimpia = String(espacioKey || "").trim();
@@ -434,7 +573,287 @@ class CmsContenidoGraficoService {
     }
 
     const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
+    const uploadedFiles = Array.isArray(files) ? files : files ? [files] : [];
 
+    // Asegurar registros de catálogo tipo y ubicación
+    const tipoDb = await prisma.tipo_contenido_grafico.upsert({
+      where: { nombre: def.tipo },
+      update: { activo: true },
+      create: {
+        nombre: def.tipo,
+        descripcion: `Bloque de tipo ${def.tipo}`,
+        activo: true,
+      },
+    });
+
+    const ubicacionDb = await prisma.ubicacion_contenido_grafico.upsert({
+      where: { nombre: def.ubicacionClave },
+      update: { descripcion: def.nombre, activo: true },
+      create: {
+        nombre: def.ubicacionClave,
+        descripcion: def.nombre,
+        activo: true,
+      },
+    });
+
+    const filasExistentes = await prisma.contenido_grafico.findMany({
+      where: { ubicacionId: ubicacionDb.id },
+      include: { archivo: true },
+    });
+
+    const filasPorId = new Map(
+      filasExistentes.map((f) => [f.id.toString(), f])
+    );
+
+    // =========================================================================
+    // FLUJO A: SECCIÓN DE DESPLEGABLES FIJOS (ej. Información para Pacientes)
+    // =========================================================================
+    if (def.esAcordeonFijo) {
+      const slidesDescriptor = parsearArregloJson(
+        body.slides,
+        "desplegables de la sección"
+      );
+
+      if (
+        !Array.isArray(slidesDescriptor) ||
+        slidesDescriptor.length !== def.cantidadItemsFijos
+      ) {
+        throw crearError(
+          `La sección "${def.nombre}" cuenta con exactamente ${def.cantidadItemsFijos} desplegables fijos; no se permite agregar ni eliminar ítems.`
+        );
+      }
+
+      const slidesResueltos = [];
+
+      for (let i = 0; i < slidesDescriptor.length; i++) {
+        const item = slidesDescriptor[i];
+        if (!item || typeof item !== "object") {
+          throw crearError(`Datos inválidos en el desplegable #${i + 1}.`);
+        }
+
+        const itemTitulo = limpiarTextoSimple(item.titulo, 120);
+        if (!itemTitulo) {
+          throw crearError(
+            `El título del desplegable #${i + 1} es obligatorio.`
+          );
+        }
+
+        const itemTextoDesplegable = limpiarTextoPlanoMultilinea(
+          item.textoDesplegable,
+          600
+        );
+        if (!itemTextoDesplegable) {
+          throw crearError(
+            `El texto informativo del desplegable #${i + 1} ("${itemTitulo}") es obligatorio.`
+          );
+        }
+
+        const itemAltText = limpiarTextoSimple(item.altText, 300);
+        if (!itemAltText) {
+          throw crearError(
+            `El Texto Alternativo (ALT) de la imagen en el desplegable #${i + 1} ("${itemTitulo}") es obligatorio.`
+          );
+        }
+
+        if (item.kind === "existing") {
+          const filaPrev = filasPorId.get(String(item.id || ""));
+          if (!filaPrev) {
+            throw crearError(
+              `La imagen existente del desplegable #${i + 1} ya no se encuentra disponible. Recargue la vista e intente nuevamente.`
+            );
+          }
+          const metaPrev = parsearMetadatosDescripcion(filaPrev.descripcion);
+          slidesResueltos.push({
+            kind: "existing",
+            titulo: itemTitulo,
+            textoDesplegable: itemTextoDesplegable,
+            altText: itemAltText,
+            archivoId: filaPrev.archivoId,
+            presetKey: metaPrev.presetKey || null,
+            fileName:
+              filaPrev.archivo?.nombreOriginal ||
+              metaPrev.fileName ||
+              `pacientes_${i + 1}.jpg`,
+            createdByOriginal: filaPrev.createdBy,
+          });
+        } else if (item.kind === "preset") {
+          const presetKey = String(item.presetKey || "").trim();
+          if (!PRESET_KEYS_VALIDAS.has(presetKey)) {
+            throw crearError(
+              `Imagen predeterminada inválida en el desplegable #${i + 1}.`
+            );
+          }
+          slidesResueltos.push({
+            kind: "preset",
+            titulo: itemTitulo,
+            textoDesplegable: itemTextoDesplegable,
+            altText: itemAltText,
+            archivoId: null,
+            presetKey,
+            fileName: limpiarTextoSimple(item.fileName || `${presetKey}.jpg`, 150),
+            createdByOriginal: null,
+          });
+        } else if (item.kind === "new") {
+          const fileIndex = Number(item.fileIndex);
+          if (
+            !Number.isInteger(fileIndex) ||
+            fileIndex < 0 ||
+            fileIndex >= uploadedFiles.length
+          ) {
+            throw crearError(
+              `No se recibió el archivo correspondiente a la nueva imagen del desplegable #${i + 1}.`
+            );
+          }
+          slidesResueltos.push({
+            kind: "new",
+            titulo: itemTitulo,
+            textoDesplegable: itemTextoDesplegable,
+            altText: itemAltText,
+            file: uploadedFiles[fileIndex],
+            presetKey: null,
+            createdByOriginal: null,
+          });
+        } else {
+          throw crearError(`Tipo de imagen desconocido en el desplegable #${i + 1}.`);
+        }
+      }
+
+      const archivosNuevosCreados = [];
+      let bucketSubida = null;
+
+      try {
+        for (const slide of slidesResueltos) {
+          if (slide.kind !== "new") continue;
+          if (!bucketSubida) {
+            bucketSubida = await obtenerBucketSubida();
+          }
+
+          const file = slide.file;
+          const { nombreUnico, extension } = generarNombreUnico(
+            file.originalname,
+            "cg_pacientes",
+            file.mimetype
+          );
+
+          const { error: storageError } = await supabase.storage
+            .from(bucketSubida)
+            .upload(nombreUnico, file.buffer, {
+              contentType: file.mimetype,
+              upsert: true,
+            });
+
+          if (storageError) {
+            console.error(
+              "[Storage] Error al subir imagen de Pacientes:",
+              storageError.message
+            );
+            throw crearError(
+              "No se pudo almacenar una de las imágenes en el servidor.",
+              500
+            );
+          }
+
+          const archivoDb = await prisma.archivo.create({
+            data: {
+              nombreOriginal: file.originalname,
+              nombreArchivo: nombreUnico,
+              ruta: `${bucketSubida}/${nombreUnico}`,
+              extension,
+              mimeType: file.mimetype,
+              tamanioBytes: BigInt(file.size),
+            },
+          });
+
+          archivosNuevosCreados.push(archivoDb);
+          slide.archivoId = archivoDb.id;
+          slide.fileName = file.originalname;
+        }
+
+        const ahora = new Date();
+
+        await prisma.$transaction(async (tx) => {
+          await tx.contenido_grafico.deleteMany({
+            where: { ubicacionId: ubicacionDb.id },
+          });
+
+          for (let idx = 0; idx < slidesResueltos.length; idx++) {
+            const s = slidesResueltos[idx];
+            const metaJson = JSON.stringify({
+              textoDesplegable: s.textoDesplegable,
+              presetKey: s.presetKey || null,
+              fileName: s.fileName || null,
+            });
+
+            await tx.contenido_grafico.create({
+              data: {
+                titulo: s.titulo.slice(0, 200),
+                descripcion: metaJson,
+                altText: s.altText,
+                archivoId: s.archivoId || null,
+                enlaceUrl: null,
+                orden: idx + 1,
+                activo: true,
+                tipoId: tipoDb.id,
+                ubicacionId: ubicacionDb.id,
+                estado: "PUBLICADO",
+                createdBy: s.createdByOriginal || usuarioLocal.id,
+                updatedBy: usuarioLocal.id,
+                rejectionReason: null,
+                pagina: def.page,
+                updatedAt: ahora,
+              },
+            });
+          }
+        });
+      } catch (err) {
+        for (const arch of archivosNuevosCreados) {
+          await eliminarArchivoAlmacenado(arch);
+        }
+        throw err;
+      }
+
+      const archivosConservadosIds = new Set(
+        slidesResueltos
+          .filter((s) => s.archivoId)
+          .map((s) => s.archivoId.toString())
+      );
+
+      for (const filaAntigua of filasExistentes) {
+        if (
+          filaAntigua.archivo &&
+          !archivosConservadosIds.has(filaAntigua.archivo.id.toString())
+        ) {
+          await eliminarArchivoAlmacenado(filaAntigua.archivo);
+        }
+      }
+
+      await prisma.auditoria
+        .create({
+          data: {
+            usuarioId: usuarioLocal.id,
+            accion: "ACTUALIZAR",
+            entidad: "contenido_grafico",
+            entidadId: def.id,
+            descripcion: `Actualizó "${def.nombre}" (${slidesResueltos.length} desplegables)`,
+          },
+        })
+        .catch(() => {});
+
+      const filasActualizadas = await prisma.contenido_grafico.findMany({
+        where: { ubicacionId: ubicacionDb.id },
+        orderBy: [{ orden: "asc" }, { id: "asc" }],
+        include: { archivo: true },
+      });
+
+      return {
+        message: `Sección "${def.nombre}" actualizada correctamente.`,
+        espacio: formatearEspacioDesdeFilas(def, filasActualizadas),
+      };
+    }
+
+    // =========================================================================
+    // FLUJO B: CARRUSEL PRINCIPAL / BANNERS
+    // =========================================================================
     const altText = limpiarTextoSimple(body.altText, 300);
     if (!altText) {
       throw crearError(
@@ -476,39 +895,6 @@ class CmsContenidoGraficoService {
     if (slidesDescriptor.length > 15) {
       throw crearError("Se permite un máximo de 15 imágenes en el carrusel.");
     }
-
-    const uploadedFiles = Array.isArray(files) ? files : files ? [files] : [];
-
-    // Asegurar registros de catálogo tipo y ubicación
-    const tipoDb = await prisma.tipo_contenido_grafico.upsert({
-      where: { nombre: def.tipo },
-      update: { activo: true },
-      create: {
-        nombre: def.tipo,
-        descripcion: `Bloque de tipo ${def.tipo}`,
-        activo: true,
-      },
-    });
-
-    const ubicacionDb = await prisma.ubicacion_contenido_grafico.upsert({
-      where: { nombre: def.ubicacionClave },
-      update: { descripcion: def.nombre, activo: true },
-      create: {
-        nombre: def.ubicacionClave,
-        descripcion: def.nombre,
-        activo: true,
-      },
-    });
-
-    // Consultar filas actuales de este espacio fijo
-    const filasExistentes = await prisma.contenido_grafico.findMany({
-      where: { ubicacionId: ubicacionDb.id },
-      include: { archivo: true },
-    });
-
-    const filasPorId = new Map(
-      filasExistentes.map((f) => [f.id.toString(), f])
-    );
 
     // Validar descriptores antes de tocar Storage o BD
     const slidesResueltos = [];
@@ -709,4 +1095,3 @@ class CmsContenidoGraficoService {
 }
 
 export default new CmsContenidoGraficoService();
-

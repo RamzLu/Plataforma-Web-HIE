@@ -2,6 +2,11 @@ import carruselImg1 from "../assets/fondoHospitalCarrusel1.jpg";
 import carruselImg2 from "../assets/fondoHospitalCarrusel2.jpg";
 import carruselImg3 from "../assets/fondoHospitalCarrusel3.jpg";
 import carruselImg4 from "../assets/fondoHospitalCarrusel4.jpg";
+import imgPacientesAtencion from "../assets/imagenPacientes.jpg";
+import imgPacientesVisita from "../assets/imgVisita.jpg";
+import imgPacientesAdmision from "../assets/imgAdmision.jpg";
+import imgPacientesTurnos from "../assets/imgTurnos.jpg";
+import imgPacientesLaboratorio from "../assets/imgLaboratorio.jpg";
 import bannerEspecialidades from "../assets/banner_especialidades.png";
 import bannerCapacitaciones from "../assets/banner_capacitaciones.png";
 import bannerNoticias from "../assets/banner_noticias.png";
@@ -16,6 +21,11 @@ export const PRESET_IMAGES_MAP = {
   "carrusel-inicio-2": carruselImg2,
   "carrusel-inicio-3": carruselImg3,
   "carrusel-inicio-4": carruselImg4,
+  "pacientes-atencion": imgPacientesAtencion,
+  "pacientes-visita": imgPacientesVisita,
+  "pacientes-admision": imgPacientesAdmision,
+  "pacientes-turnos": imgPacientesTurnos,
+  "pacientes-laboratorio": imgPacientesLaboratorio,
   "banner-especialidades": bannerEspecialidades,
   "banner-capacitaciones": bannerCapacitaciones,
   "banner-noticias": bannerNoticias,
@@ -112,3 +122,88 @@ export const DEFAULT_CARRUSEL_INICIO = {
   ],
 };
 
+/**
+ * Configuración predeterminada de la sección "Información para Pacientes" (5 desplegables fijos).
+ */
+export const DEFAULT_PACIENTES_INICIO = {
+  id: "espacio-seccion-pacientes",
+  orden: 2,
+  nombre: "Información para Pacientes",
+  descripcion:
+    "Sección interactiva de 5 desplegables informativos con sus imágenes asociadas en Inicio",
+  tipo: "Acordeón Informativo",
+  page: "Inicio",
+  ubicacion: "Acordeón Informativo",
+  dimensiones: "1200x900px",
+  aspectRatio: 4 / 3,
+  esAcordeonFijo: true,
+  cantidadItemsFijos: 5,
+  estado: "PUBLICADO",
+  activo: true,
+  rejectionReason: null,
+  altText: "Sección de orientación e información útil para pacientes",
+  textoSuperpuesto: "",
+  textoBoton: "",
+  enlaceUrl: "",
+  imagenes: [
+    {
+      id: "preset-espacio-seccion-pacientes-1",
+      url: null,
+      presetKey: "pacientes-atencion",
+      fileName: "imagenPacientes.jpg",
+      orden: 1,
+      titulo: "HORARIOS DE ATENCIÓN",
+      textoDesplegable:
+        "Estamos disponibles de 06:00 a 20:00 hs. para ayudarte a agendar citas y responder tus dudas generales.",
+      altText:
+        "Profesional de salud brindando acompañamiento y orientación al paciente",
+    },
+    {
+      id: "preset-espacio-seccion-pacientes-2",
+      url: null,
+      presetKey: "pacientes-visita",
+      fileName: "imgVisita.jpg",
+      orden: 2,
+      titulo: "VISITAR A UN PACIENTE",
+      textoDesplegable:
+        "Por favor, consulte los horarios y protocolos vigentes en recepción para la visita a pacientes internados.",
+      altText:
+        "Orientación sobre horarios y protocolos de visita a pacientes internados",
+    },
+    {
+      id: "preset-espacio-seccion-pacientes-3",
+      url: null,
+      presetKey: "pacientes-admision",
+      fileName: "imgAdmision.jpg",
+      orden: 3,
+      titulo: "CRITERIOS DE ADMISIÓN",
+      textoDesplegable:
+        "Conozca los requisitos y documentación necesaria para la admisión en nuestras instalaciones.",
+      altText:
+        "Requisitos y documentación para admisión de pacientes en el hospital",
+    },
+    {
+      id: "preset-espacio-seccion-pacientes-4",
+      url: null,
+      presetKey: "pacientes-turnos",
+      fileName: "imgTurnos.jpg",
+      orden: 4,
+      titulo: "TURNOS Y CONTACTO",
+      textoDesplegable:
+        "Comuníquese a través de nuestras vías oficiales para agendar o modificar su turno de atención.",
+      altText: "Canales oficiales para gestión de turnos médicos y contacto",
+    },
+    {
+      id: "preset-espacio-seccion-pacientes-5",
+      url: null,
+      presetKey: "pacientes-laboratorio",
+      fileName: "imgLaboratorio.jpg",
+      orden: 5,
+      titulo: "LABORATORIO",
+      textoDesplegable:
+        "Información detallada sobre preparación previa, ayuno y horarios de extracción para análisis clínicos.",
+      altText:
+        "Servicio de laboratorio y extracciones para análisis clínicos",
+    },
+  ],
+};

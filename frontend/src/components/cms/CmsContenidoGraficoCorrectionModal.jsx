@@ -3,11 +3,13 @@ import toast from "react-hot-toast";
 import Cropper from "react-easy-crop";
 import { CmsUnsavedChangesModal } from "./CmsModals";
 import {
+  DEFAULT_PACIENTES_INICIO,
   PORTAL_INTERNAL_ROUTES,
   resolveGraphicImageUrl,
 } from "../../utils/contenidoGraficoPresets.js";
 
 const CARRUSEL_INICIO_ASPECT = 1501 / 641;
+const PACIENTES_INICIO_ASPECT = 4 / 3;
 const MAX_OUTPUT_WIDTH = 1920;
 
 const createImage = (url) =>
@@ -22,7 +24,7 @@ const createImage = (url) =>
 async function getCroppedImg(
   imageSrc,
   pixelCrop,
-  fileName = "carrusel-inicio.jpg"
+  fileName = "contenido-grafico.jpg"
 ) {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -53,7 +55,7 @@ async function getCroppedImg(
     canvas.height
   );
 
-  const baseName = fileName.replace(/\.[^/.]+$/, "") || "carrusel-imagen";
+  const baseName = fileName.replace(/\.[^/.]+$/, "") || "imagen-recortada";
   const safeJpgName = `${baseName}.jpg`;
 
   return new Promise((resolve) => {
@@ -76,6 +78,9 @@ const getAspectRatioFromEspacio = (espacio) => {
   if (espacio?.id === "espacio-banner-inicio") {
     return CARRUSEL_INICIO_ASPECT;
   }
+  if (espacio?.id === "espacio-seccion-pacientes") {
+    return PACIENTES_INICIO_ASPECT;
+  }
   if (typeof espacio?.aspectRatio === "number" && espacio.aspectRatio > 0) {
     return espacio.aspectRatio;
   }
@@ -90,7 +95,6 @@ const getAspectRatioFromEspacio = (espacio) => {
 
 /**
  * Réplica visual exacta del Carrusel de Inicio tal como se renderiza en el portal público (`Carousel.jsx`).
- * Se reutiliza tanto en el modal de edición como en el modal de vista previa rápida.
  */
 export const PortalCarouselPreview = ({
   imagenes = [],
@@ -140,7 +144,6 @@ export const PortalCarouselPreview = ({
         </div>
       )}
 
-      {/* Capa estática idéntica a .carousel-static-overlay del portal */}
       <div className="cg-portal-static-overlay">
         <div className="cg-portal-content-box">
           {textoSuperpuesto && textoSuperpuesto.trim() !== "" && (
@@ -163,7 +166,6 @@ export const PortalCarouselPreview = ({
         </div>
       </div>
 
-      {/* Flechas laterales e indicadores inferiores idénticos al portal */}
       {total > 1 && (
         <>
           <button
@@ -202,6 +204,116 @@ export const PortalCarouselPreview = ({
   );
 };
 
+/**
+ * Réplica visual exacta de la sección "Información para Pacientes" (`PatientInfoSection.jsx`),
+ * sin el bloque ni botón de WhatsApp y con los 5 desplegables interactivos sincronizados con su imagen derecha.
+ */
+export const PortalPatientInfoPreview = ({
+  items = [],
+  activeIndex = 0,
+  onSelectItem,
+}) => {
+  const safeItems =
+    Array.isArray(items) && items.length > 0
+      ? items
+      : DEFAULT_PACIENTES_INICIO.imagenes;
+
+  const safeIndex =
+    safeItems.length > 0
+      ? Math.min(Math.max(0, activeIndex), safeItems.length - 1)
+      : 0;
+
+  const activeItem = safeItems[safeIndex] || safeItems[0] || null;
+  const activeImgUrl = resolveGraphicImageUrl(activeItem);
+
+  return (
+    <div
+      className="cg-portal-pacientes-preview"
+      role="region"
+      aria-label="Vista previa de la sección Información para Pacientes"
+    >
+      <div className="cg-portal-pacientes-header">
+        <span className="cg-portal-pacientes-subtitle">INFORMACIÓN PARA</span>
+        <h3 className="cg-portal-pacientes-title">PACIENTES</h3>
+      </div>
+
+      <div className="cg-portal-pacientes-split">
+        <div className="cg-portal-pacientes-accordion">
+          {safeItems.map((item, idx) => {
+            const isOpen = idx === safeIndex;
+            const lineas = String(item.textoDesplegable || "").split("\n");
+            return (
+              <div
+                key={item.id || idx}
+                className={`cg-portal-pacientes-item ${isOpen ? "active" : ""}`}
+              >
+                <button
+                  type="button"
+                  className="cg-portal-pacientes-item-btn"
+                  onClick={() => onSelectItem && onSelectItem(idx)}
+                  aria-expanded={isOpen}
+                >
+                  <span>
+                    {item.titulo && item.titulo.trim()
+                      ? item.titulo
+                      : `DESPLEGABLE #${idx + 1}`}
+                  </span>
+                  <svg
+                    className="cg-portal-pacientes-chevron"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+                {isOpen && (
+                  <div className="cg-portal-pacientes-item-body">
+                    <p>
+                      {item.textoDesplegable && item.textoDesplegable.trim() ? (
+                        lineas.map((linea, idxLinea) => (
+                          <React.Fragment key={idxLinea}>
+                            {linea}
+                            {idxLinea < lineas.length - 1 && <br />}
+                          </React.Fragment>
+                        ))
+                      ) : (
+                        <em style={{ color: "#94a3b8" }}>
+                          Escriba el texto informativo para este desplegable...
+                        </em>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="cg-portal-pacientes-img-box">
+          {activeImgUrl ? (
+            <img
+              key={activeImgUrl}
+              src={activeImgUrl}
+              alt={
+                activeItem?.altText ||
+                activeItem?.titulo ||
+                "Información para Pacientes"
+              }
+              className="cg-portal-pacientes-img"
+            />
+          ) : (
+            <div className="cg-portal-pacientes-img-empty">
+              Sin imagen asignada
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const CmsContenidoGraficoEditModal = ({
   isOpen,
   onClose,
@@ -224,27 +336,58 @@ export const CmsContenidoGraficoEditModal = ({
 
   // Estados de la herramienta de recorte al seleccionar una imagen nueva
   const [imageSrc, setImageSrc] = useState(null);
-  const [pendingFileName, setPendingFileName] = useState("imagen-carrusel.jpg");
+  const [pendingFileName, setPendingFileName] = useState("imagen.jpg");
+  const [cropMode, setCropMode] = useState("add"); // "add" | "replace"
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
 
   const isCarruselInicio = espacio?.id === "espacio-banner-inicio";
+  const isSeccionPacientes = espacio?.id === "espacio-seccion-pacientes";
+
   const dimensionesRequeridas =
-    espacio?.dimensiones || (isCarruselInicio ? "1920x820px" : "1920x1080px");
+    espacio?.dimensiones ||
+    (isCarruselInicio
+      ? "1920x820px"
+      : isSeccionPacientes
+      ? "1200x900px"
+      : "1920x1080px");
   const cropAspect = getAspectRatioFromEspacio(espacio);
   const isRejected =
     espacio?.estado === "RECHAZADO" || Boolean(espacio?.rejectionReason);
 
   useEffect(() => {
     if (isOpen && espacio) {
-      const listaInicial = Array.isArray(espacio.imagenes)
-        ? espacio.imagenes.map((img, i) => ({
-            ...img,
-            id: img.id || `img-init-${i}`,
-          }))
-        : [];
+      let listaInicial = [];
+
+      if (espacio.id === "espacio-seccion-pacientes") {
+        const defaultsPacientes = DEFAULT_PACIENTES_INICIO.imagenes;
+        const recibidas = Array.isArray(espacio.imagenes) ? espacio.imagenes : [];
+
+        listaInicial = defaultsPacientes.map((defItem, idx) => {
+          const existente = recibidas[idx] || null;
+          if (!existente) {
+            return { ...defItem };
+          }
+          return {
+            ...defItem,
+            ...existente,
+            id: existente.id || defItem.id,
+            titulo: existente.titulo ?? defItem.titulo,
+            textoDesplegable:
+              existente.textoDesplegable ?? defItem.textoDesplegable,
+            altText: existente.altText ?? defItem.altText,
+          };
+        });
+      } else {
+        listaInicial = Array.isArray(espacio.imagenes)
+          ? espacio.imagenes.map((img, i) => ({
+              ...img,
+              id: img.id || `img-init-${i}`,
+            }))
+          : [];
+      }
 
       setImagenes(listaInicial);
       setAltText(espacio.altText || "");
@@ -269,20 +412,30 @@ export const CmsContenidoGraficoEditModal = ({
   const handleCloseAttempt = () => {
     if (isSaving) return;
     if (hasUnsavedChanges) {
-      setShowUnsavedChangesConfirm();
+      setShowUnsavedModal(true);
     } else {
       onClose();
     }
-  };
-
-  const setShowUnsavedChangesConfirm = () => {
-    setShowUnsavedModal(true);
   };
 
   const handleForceClose = () => {
     setShowUnsavedModal(false);
     setHasUnsavedChanges(false);
     onClose();
+  };
+
+  const handleUpdateActiveItemField = (field, value) => {
+    setImagenes((prev) =>
+      prev.map((item, idx) =>
+        idx === safeIndex ? { ...item, [field]: value } : item
+      )
+    );
+    setHasUnsavedChanges(true);
+  };
+
+  const triggerFilePicker = (mode = "add") => {
+    setCropMode(mode);
+    fileInputRef.current?.click();
   };
 
   const handleSelectNewImage = (e) => {
@@ -297,7 +450,7 @@ export const CmsContenidoGraficoEditModal = ({
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      setPendingFileName(file.name || "imagen-carrusel.jpg");
+      setPendingFileName(file.name || "imagen.jpg");
       setCrop({ x: 0, y: 0 });
       setZoom(1);
       setImageSrc(reader.result);
@@ -313,7 +466,7 @@ export const CmsContenidoGraficoEditModal = ({
     setCroppedAreaPixels(croppedAreaPx);
   };
 
-  const handleConfirmCropAndAdd = async () => {
+  const handleConfirmCrop = async () => {
     try {
       const result = await getCroppedImg(
         imageSrc,
@@ -326,25 +479,47 @@ export const CmsContenidoGraficoEditModal = ({
       }
 
       const { file, url, fileName } = result;
-      const nuevaImagen = {
-        id: `new-${Date.now()}`,
-        url,
-        fileObj: file,
-        fileName,
-        presetKey: null,
-        isNewUpload: true,
-      };
 
-      setImagenes((prev) => {
-        const updated = [...prev, nuevaImagen];
-        setActiveIndex(updated.length - 1);
-        return updated;
-      });
+      if (cropMode === "replace" || isSeccionPacientes) {
+        setImagenes((prev) =>
+          prev.map((item, idx) =>
+            idx === safeIndex
+              ? {
+                  ...item,
+                  id: `new-${Date.now()}-${idx}`,
+                  url,
+                  fileObj: file,
+                  fileName,
+                  presetKey: null,
+                  isNewUpload: true,
+                }
+              : item
+          )
+        );
+        toast.success(
+          `Imagen del desplegable #${safeIndex + 1} recortada y actualizada.`
+        );
+      } else {
+        const nuevaImagen = {
+          id: `new-${Date.now()}`,
+          url,
+          fileObj: file,
+          fileName,
+          presetKey: null,
+          isNewUpload: true,
+        };
+
+        setImagenes((prev) => {
+          const updated = [...prev, nuevaImagen];
+          setActiveIndex(updated.length - 1);
+          return updated;
+        });
+        toast.success("Imagen recortada y añadida al carrusel.");
+      }
 
       setHasUnsavedChanges(true);
       setIsCropping(false);
       setImageSrc(null);
-      toast.success("Imagen recortada y añadida al carrusel.");
     } catch (e) {
       console.error(e);
       toast.error("Error al recortar la imagen seleccionada.");
@@ -372,7 +547,6 @@ export const CmsContenidoGraficoEditModal = ({
     setHasUnsavedChanges(true);
   };
 
-  // Soporte para reordenar las imágenes arrastrándolas en la tira del carrusel
   const handleDragStart = (idx) => {
     setDraggedIdx(idx);
   };
@@ -402,6 +576,87 @@ export const CmsContenidoGraficoEditModal = ({
     e.preventDefault();
     if (isSaving) return;
 
+    // =========================================================================
+    // ENVÍO ESPECÍFICO: INFORMACIÓN PARA PACIENTES (5 DESPLEGABLES FIJOS)
+    // =========================================================================
+    if (isSeccionPacientes) {
+      if (imagenes.length !== 5) {
+        toast.error(
+          "La sección Información para Pacientes debe contener sus 5 desplegables fijos."
+        );
+        return;
+      }
+
+      for (let i = 0; i < imagenes.length; i++) {
+        const item = imagenes[i];
+        if (!String(item.titulo || "").trim()) {
+          setActiveIndex(i);
+          toast.error(`Complete el título del desplegable #${i + 1}.`);
+          return;
+        }
+        if (!String(item.textoDesplegable || "").trim()) {
+          setActiveIndex(i);
+          toast.error(
+            `Complete el texto informativo del desplegable #${i + 1} ("${item.titulo}").`
+          );
+          return;
+        }
+        if (!String(item.altText || "").trim()) {
+          setActiveIndex(i);
+          toast.error(
+            `Complete el Texto Alternativo (ALT) de la imagen en el desplegable #${i + 1} ("${item.titulo}").`
+          );
+          return;
+        }
+      }
+
+      const formData = new FormData();
+      const slidesDescriptor = [];
+      let fileCounter = 0;
+
+      for (const img of imagenes) {
+        const camposTexto = {
+          titulo: String(img.titulo || "").trim(),
+          textoDesplegable: String(img.textoDesplegable || "").trim(),
+          altText: String(img.altText || "").trim(),
+        };
+
+        if (img.fileObj instanceof File) {
+          formData.append(
+            "imagenes",
+            img.fileObj,
+            img.fileName || "pacientes.jpg"
+          );
+          slidesDescriptor.push({
+            kind: "new",
+            fileIndex: fileCounter,
+            ...camposTexto,
+          });
+          fileCounter += 1;
+        } else if (img.id && /^\d+$/.test(String(img.id))) {
+          slidesDescriptor.push({
+            kind: "existing",
+            id: String(img.id),
+            ...camposTexto,
+          });
+        } else if (img.presetKey) {
+          slidesDescriptor.push({
+            kind: "preset",
+            presetKey: img.presetKey,
+            fileName: img.fileName || `${img.presetKey}.jpg`,
+            ...camposTexto,
+          });
+        }
+      }
+
+      formData.append("slides", JSON.stringify(slidesDescriptor));
+      await onSaveEspacio(espacio.id, formData);
+      return;
+    }
+
+    // =========================================================================
+    // ENVÍO DE CARRUSEL PRINCIPAL / BANNERS
+    // =========================================================================
     if (imagenes.length === 0) {
       toast.error("El carrusel debe tener al menos una imagen.");
       return;
@@ -426,7 +681,6 @@ export const CmsContenidoGraficoEditModal = ({
       return;
     }
 
-    // Construir FormData real con archivos recortados y orden de slides
     const formData = new FormData();
     formData.append("altText", altText.trim());
     formData.append("textoSuperpuesto", textoSuperpuesto.trim());
@@ -502,6 +756,15 @@ export const CmsContenidoGraficoEditModal = ({
           </button>
         </div>
 
+        {/* INPUT OCULTO COMPARTIDO PARA CARGA Y RECORTE */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleSelectNewImage}
+          accept="image/jpeg,image/png,image/webp"
+          style={{ display: "none" }}
+        />
+
         {/* FORMULARIO */}
         <form
           onSubmit={handleSubmit}
@@ -528,7 +791,9 @@ export const CmsContenidoGraficoEditModal = ({
                       fontWeight: "normal",
                     }}
                   >
-                    (Medida recomendada: {dimensionesRequeridas} aprox.)
+                    {isSeccionPacientes
+                      ? `(Imagen 4:3 de ${dimensionesRequeridas} aprox. • Haga clic en cualquier desplegable para verlo y editarlo)`
+                      : `(Medida recomendada: ${dimensionesRequeridas} aprox.)`}
                   </span>
                 </label>
 
@@ -540,6 +805,12 @@ export const CmsContenidoGraficoEditModal = ({
                     textoSuperpuesto={textoSuperpuesto}
                     textoBoton={textoBoton}
                     altText={altText}
+                  />
+                ) : isSeccionPacientes ? (
+                  <PortalPatientInfoPreview
+                    items={imagenes}
+                    activeIndex={safeIndex}
+                    onSelectItem={setActiveIndex}
                   />
                 ) : (
                   <div className="cg-mockup-stage">
@@ -558,67 +829,15 @@ export const CmsContenidoGraficoEditModal = ({
                 )}
               </div>
 
-              {/* 2. TEXTO ALTERNATIVO DE LA SECCIÓN (ALT) */}
-              <div className="esp-full-width">
-                <label className="esp-form-label" htmlFor="cg-input-alt">
-                  Texto Alternativo de la Sección (ALT){" "}
-                  <span className="esp-asterisk">*</span>
-                </label>
-                <input
-                  id="cg-input-alt"
-                  type="text"
-                  className="esp-form-input"
-                  placeholder="Descripción general de la sección para lectores de pantalla (personas ciegas)..."
-                  value={altText}
-                  onChange={(e) => {
-                    setAltText(e.target.value);
-                    setHasUnsavedChanges(true);
-                  }}
-                  disabled={isSaving}
-                  required
-                />
-              </div>
-
-              {/* 3. TEXTO SUPERPUESTO EN EL CARRUSEL */}
-              {isCarruselInicio && (
-                <div className="esp-full-width">
-                  <label className="esp-form-label" htmlFor="cg-input-overlay-text">
-                    Texto Superpuesto en el Carrusel{" "}
-                    <span className="esp-asterisk">*</span>
-                    <span
-                      style={{
-                        textTransform: "none",
-                        color: "#94a3b8",
-                        fontWeight: "normal",
-                        marginLeft: "6px",
-                      }}
-                    >
-                      (Presione Enter para dividir en renglones como en la portada)
-                    </span>
-                  </label>
-                  <textarea
-                    id="cg-input-overlay-text"
-                    className="esp-form-input"
-                    rows={3}
-                    placeholder={"Ej.\n6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL"}
-                    value={textoSuperpuesto}
-                    onChange={(e) => {
-                      setTextoSuperpuesto(e.target.value);
-                      setHasUnsavedChanges(true);
-                    }}
-                    disabled={isSaving}
-                    required
-                    style={{ resize: "vertical", lineHeight: "1.4" }}
-                  />
-                </div>
-              )}
-
-              {/* 4. TEXTO DEL BOTÓN Y REDIRECCIÓN INTERNA DEL PORTAL */}
-              {isCarruselInicio && (
+              {/* ===============================================================
+                  CAMPOS ESPECÍFICOS: INFORMACIÓN PARA PACIENTES (5 DESPLEGABLES)
+                  =============================================================== */}
+              {isSeccionPacientes ? (
                 <>
-                  <div>
-                    <label className="esp-form-label" htmlFor="cg-input-btn-text">
-                      Texto del Botón{" "}
+                  {/* Selector de cuál de los 5 desplegables fijos se está editando */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Desplegables de la Sección{" "}
                       <span
                         style={{
                           textTransform: "none",
@@ -626,191 +845,451 @@ export const CmsContenidoGraficoEditModal = ({
                           fontWeight: "normal",
                         }}
                       >
-                        (Opcional)
+                        (5 ítems fijos • seleccione uno para editar su título, texto e imagen)
                       </span>
                     </label>
+
+                    <div className="cg-pacientes-tabs-grid" role="tablist">
+                      {imagenes.map((item, idx) => {
+                        const isSelected = idx === safeIndex;
+                        const thumbUrl = resolveGraphicImageUrl(item);
+                        const isIncomplete =
+                          !String(item.titulo || "").trim() ||
+                          !String(item.textoDesplegable || "").trim() ||
+                          !String(item.altText || "").trim();
+
+                        return (
+                          <button
+                            key={item.id || idx}
+                            type="button"
+                            role="tab"
+                            aria-selected={isSelected}
+                            className={`cg-pacientes-tab-card ${
+                              isSelected ? "selected" : ""
+                            } ${isIncomplete ? "incomplete" : ""}`}
+                            onClick={() => setActiveIndex(idx)}
+                          >
+                            <div className="cg-pacientes-tab-thumb-wrap">
+                              {thumbUrl && (
+                                <img
+                                  src={thumbUrl}
+                                  alt=""
+                                  className="cg-pacientes-tab-thumb"
+                                />
+                              )}
+                              <span className="cg-pacientes-tab-num">
+                                #{idx + 1}
+                              </span>
+                            </div>
+                            <span className="cg-pacientes-tab-label">
+                              {item.titulo && item.titulo.trim()
+                                ? item.titulo
+                                : `Desplegable #${idx + 1}`}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Panel de edición del desplegable activo */}
+                  {activeImage && (
+                    <div className="esp-full-width cg-pacientes-editor-card">
+                      <div className="cg-pacientes-editor-header">
+                        <span className="cg-pacientes-editor-badge">
+                          Editando Desplegable #{safeIndex + 1} de 5
+                        </span>
+                        <span className="cg-pacientes-editor-hint">
+                          Los cambios se reflejan en vivo en la previsualización superior
+                        </span>
+                      </div>
+
+                      <div className="cg-pacientes-editor-fields">
+                        <div>
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-pac-item-titulo"
+                          >
+                            Título del Desplegable{" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <input
+                            id="cg-pac-item-titulo"
+                            type="text"
+                            className="esp-form-input"
+                            placeholder="Ej. HORARIOS DE ATENCIÓN"
+                            value={activeImage.titulo || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField("titulo", e.target.value)
+                            }
+                            disabled={isSaving}
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-pac-item-desc"
+                          >
+                            Texto Desplegable (Contenido Informativo){" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <textarea
+                            id="cg-pac-item-desc"
+                            className="esp-form-input"
+                            rows={3}
+                            placeholder="Información que verá el paciente al desplegar este ítem..."
+                            value={activeImage.textoDesplegable || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField(
+                                "textoDesplegable",
+                                e.target.value
+                              )
+                            }
+                            disabled={isSaving}
+                            required
+                            style={{ resize: "vertical", lineHeight: "1.45" }}
+                          />
+                        </div>
+
+                        <div className="cg-pacientes-img-row">
+                          <div className="cg-pacientes-img-current">
+                            {resolveGraphicImageUrl(activeImage) && (
+                              <img
+                                src={resolveGraphicImageUrl(activeImage)}
+                                alt={
+                                  activeImage.altText ||
+                                  `Imagen del desplegable #${safeIndex + 1}`
+                                }
+                                className="cg-pacientes-img-current-thumb"
+                              />
+                            )}
+                            <div className="cg-pacientes-img-meta">
+                              <span className="cg-pacientes-img-meta-title">
+                                Imagen asociada al desplegable #{safeIndex + 1}
+                              </span>
+                              <span className="cg-pacientes-img-meta-file">
+                                {activeImage.fileName ||
+                                  `imagen_desplegable_${safeIndex + 1}.jpg`}{" "}
+                                {activeImage.isNewUpload && (
+                                  <strong style={{ color: "#0284c7" }}>
+                                    • Lista para guardar
+                                  </strong>
+                                )}
+                              </span>
+                              <button
+                                type="button"
+                                className="cg-prof-style-btn"
+                                disabled={isSaving}
+                                onClick={() => triggerFilePicker("replace")}
+                                style={{ marginTop: "6px", width: "fit-content" }}
+                              >
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                  <polyline points="17 8 12 3 7 8"></polyline>
+                                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span>Cambiar imagen...</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-pac-item-alt"
+                          >
+                            Texto Alternativo de esta Imagen (ALT){" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <input
+                            id="cg-pac-item-alt"
+                            type="text"
+                            className="esp-form-input"
+                            placeholder="Descripción de esta imagen para lectores de pantalla (personas ciegas)..."
+                            value={activeImage.altText || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField("altText", e.target.value)
+                            }
+                            disabled={isSaving}
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* ===============================================================
+                      CAMPOS DE CARRUSEL PRINCIPAL / BANNERS
+                      =============================================================== */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label" htmlFor="cg-input-alt">
+                      Texto Alternativo de la Sección (ALT){" "}
+                      <span className="esp-asterisk">*</span>
+                    </label>
                     <input
-                      id="cg-input-btn-text"
+                      id="cg-input-alt"
                       type="text"
                       className="esp-form-input"
-                      placeholder="Ej. CONOCENOS (dejar vacío sin botón)"
-                      value={textoBoton}
+                      placeholder="Descripción general de la sección para lectores de pantalla (personas ciegas)..."
+                      value={altText}
                       onChange={(e) => {
-                        const val = e.target.value;
-                        setTextoBoton(val);
-                        if (!val.trim()) {
-                          setEnlaceUrl("");
-                        }
+                        setAltText(e.target.value);
                         setHasUnsavedChanges(true);
                       }}
                       disabled={isSaving}
+                      required
                     />
                   </div>
 
-                  <div>
-                    <label className="esp-form-label" htmlFor="cg-select-redirect">
-                      Redirección del Botón{" "}
-                      {tieneBoton ? (
+                  {isCarruselInicio && (
+                    <div className="esp-full-width">
+                      <label
+                        className="esp-form-label"
+                        htmlFor="cg-input-overlay-text"
+                      >
+                        Texto Superpuesto en el Carrusel{" "}
                         <span className="esp-asterisk">*</span>
-                      ) : (
                         <span
                           style={{
                             textTransform: "none",
                             color: "#94a3b8",
                             fontWeight: "normal",
+                            marginLeft: "6px",
                           }}
                         >
-                          (Se activa al escribir texto en el botón)
+                          (Presione Enter para dividir en renglones como en la portada)
                         </span>
-                      )}
+                      </label>
+                      <textarea
+                        id="cg-input-overlay-text"
+                        className="esp-form-input"
+                        rows={3}
+                        placeholder={
+                          "Ej.\n6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL"
+                        }
+                        value={textoSuperpuesto}
+                        onChange={(e) => {
+                          setTextoSuperpuesto(e.target.value);
+                          setHasUnsavedChanges(true);
+                        }}
+                        disabled={isSaving}
+                        required
+                        style={{ resize: "vertical", lineHeight: "1.4" }}
+                      />
+                    </div>
+                  )}
+
+                  {isCarruselInicio && (
+                    <>
+                      <div>
+                        <label
+                          className="esp-form-label"
+                          htmlFor="cg-input-btn-text"
+                        >
+                          Texto del Botón{" "}
+                          <span
+                            style={{
+                              textTransform: "none",
+                              color: "#94a3b8",
+                              fontWeight: "normal",
+                            }}
+                          >
+                            (Opcional)
+                          </span>
+                        </label>
+                        <input
+                          id="cg-input-btn-text"
+                          type="text"
+                          className="esp-form-input"
+                          placeholder="Ej. CONOCENOS (dejar vacío sin botón)"
+                          value={textoBoton}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setTextoBoton(val);
+                            if (!val.trim()) {
+                              setEnlaceUrl("");
+                            }
+                            setHasUnsavedChanges(true);
+                          }}
+                          disabled={isSaving}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          className="esp-form-label"
+                          htmlFor="cg-select-redirect"
+                        >
+                          Redirección del Botón{" "}
+                          {tieneBoton ? (
+                            <span className="esp-asterisk">*</span>
+                          ) : (
+                            <span
+                              style={{
+                                textTransform: "none",
+                                color: "#94a3b8",
+                                fontWeight: "normal",
+                              }}
+                            >
+                              (Se activa al escribir texto en el botón)
+                            </span>
+                          )}
+                        </label>
+                        <select
+                          id="cg-select-redirect"
+                          className="esp-form-input"
+                          value={tieneBoton ? enlaceUrl : ""}
+                          onChange={(e) => {
+                            setEnlaceUrl(e.target.value);
+                            setHasUnsavedChanges(true);
+                          }}
+                          disabled={!tieneBoton || isSaving}
+                          required={tieneBoton}
+                        >
+                          <option value="">
+                            -- Seleccione una sección del portal --
+                          </option>
+                          {PORTAL_INTERNAL_ROUTES.map((route) => (
+                            <option key={route.value} value={route.value}>
+                              {route.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Imágenes del Carrusel{" "}
+                      <span
+                        style={{
+                          textTransform: "none",
+                          color: "#94a3b8",
+                          fontWeight: "normal",
+                        }}
+                      >
+                        ({imagenes.length}{" "}
+                        {imagenes.length === 1 ? "imagen" : "imágenes"} • puede
+                        arrastrar para cambiar el orden)
+                      </span>
                     </label>
-                    <select
-                      id="cg-select-redirect"
-                      className="esp-form-input"
-                      value={tieneBoton ? enlaceUrl : ""}
-                      onChange={(e) => {
-                        setEnlaceUrl(e.target.value);
-                        setHasUnsavedChanges(true);
+
+                    <div
+                      style={{
+                        background: "#ffffff",
+                        padding: "16px",
+                        borderRadius: "8px",
+                        border: "1px solid #cbd5e1",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "14px",
                       }}
-                      disabled={!tieneBoton || isSaving}
-                      required={tieneBoton}
                     >
-                      <option value="">-- Seleccione una sección del portal --</option>
-                      {PORTAL_INTERNAL_ROUTES.map((route) => (
-                        <option key={route.value} value={route.value}>
-                          {route.label}
-                        </option>
-                      ))}
-                    </select>
+                      <div className="cg-carousel-strip" role="list">
+                        {imagenes.map((img, idx) => {
+                          const isSelected = idx === safeIndex;
+                          const thumbUrl = resolveGraphicImageUrl(img);
+                          return (
+                            <div
+                              key={img.id || idx}
+                              role="listitem"
+                              draggable={!isSaving}
+                              onDragStart={() => handleDragStart(idx)}
+                              onDragOver={handleDragOver}
+                              onDrop={() => handleDrop(idx)}
+                              className={`cg-carousel-thumb-item ${
+                                isSelected ? "selected" : ""
+                              }`}
+                              onClick={() => setActiveIndex(idx)}
+                              title={`Imagen #${idx + 1} (clic para previsualizar, arrastrar para reordenar)`}
+                            >
+                              {thumbUrl && (
+                                <img
+                                  src={thumbUrl}
+                                  alt={`Miniatura ${idx + 1}`}
+                                  className="cg-carousel-thumb-img"
+                                />
+                              )}
+                              <span className="cg-carousel-thumb-number">
+                                #{idx + 1}
+                              </span>
+                              {imagenes.length > 1 && (
+                                <button
+                                  type="button"
+                                  className="cg-carousel-delete-btn"
+                                  onClick={(e) => handleRemoveImage(idx, e)}
+                                  disabled={isSaving}
+                                  title="Eliminar esta imagen"
+                                >
+                                  <span
+                                    className="material-symbols-outlined"
+                                    style={{ fontSize: "15px" }}
+                                  >
+                                    delete
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="cg-carousel-under-actions">
+                        <button
+                          type="button"
+                          className="cg-prof-style-btn"
+                          disabled={isSaving}
+                          onClick={() => triggerFilePicker("add")}
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                          </svg>
+                          <span>Agregar imagen...</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="cg-prof-style-btn danger"
+                          disabled={
+                            !activeImage || imagenes.length <= 1 || isSaving
+                          }
+                          onClick={(e) => handleRemoveImage(safeIndex, e)}
+                        >
+                          <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: "16px" }}
+                          >
+                            delete
+                          </span>
+                          <span>Eliminar seleccionada</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
-
-              {/* 5. GESTOR DE IMÁGENES DEL CARRUSEL */}
-              <div className="esp-full-width">
-                <label className="esp-form-label">
-                  Imágenes del Carrusel{" "}
-                  <span
-                    style={{
-                      textTransform: "none",
-                      color: "#94a3b8",
-                      fontWeight: "normal",
-                    }}
-                  >
-                    ({imagenes.length}{" "}
-                    {imagenes.length === 1 ? "imagen" : "imágenes"} • puede arrastrar para cambiar el orden)
-                  </span>
-                </label>
-
-                <div
-                  style={{
-                    background: "#ffffff",
-                    padding: "16px",
-                    borderRadius: "8px",
-                    border: "1px solid #cbd5e1",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "14px",
-                  }}
-                >
-                  {/* Tira de miniaturas ubicadas por orden */}
-                  <div className="cg-carousel-strip" role="list">
-                    {imagenes.map((img, idx) => {
-                      const isSelected = idx === safeIndex;
-                      const thumbUrl = resolveGraphicImageUrl(img);
-                      return (
-                        <div
-                          key={img.id || idx}
-                          role="listitem"
-                          draggable={!isSaving}
-                          onDragStart={() => handleDragStart(idx)}
-                          onDragOver={handleDragOver}
-                          onDrop={() => handleDrop(idx)}
-                          className={`cg-carousel-thumb-item ${
-                            isSelected ? "selected" : ""
-                          }`}
-                          onClick={() => setActiveIndex(idx)}
-                          title={`Imagen #${idx + 1} (clic para previsualizar, arrastrar para reordenar)`}
-                        >
-                          {thumbUrl && (
-                            <img
-                              src={thumbUrl}
-                              alt={`Miniatura ${idx + 1}`}
-                              className="cg-carousel-thumb-img"
-                            />
-                          )}
-                          <span className="cg-carousel-thumb-number">
-                            #{idx + 1}
-                          </span>
-                          {imagenes.length > 1 && (
-                            <button
-                              type="button"
-                              className="cg-carousel-delete-btn"
-                              onClick={(e) => handleRemoveImage(idx, e)}
-                              disabled={isSaving}
-                              title="Eliminar esta imagen"
-                            >
-                              <span
-                                className="material-symbols-outlined"
-                                style={{ fontSize: "15px" }}
-                              >
-                                delete
-                              </span>
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Acciones debajo: únicamente Agregar y Eliminar */}
-                  <div className="cg-carousel-under-actions">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleSelectNewImage}
-                      accept="image/jpeg,image/png,image/webp"
-                      style={{ display: "none" }}
-                    />
-
-                    <button
-                      type="button"
-                      className="cg-prof-style-btn"
-                      disabled={isSaving}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                      </svg>
-                      <span>Agregar imagen...</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className="cg-prof-style-btn danger"
-                      disabled={!activeImage || imagenes.length <= 1 || isSaving}
-                      onClick={(e) => handleRemoveImage(safeIndex, e)}
-                    >
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: "16px" }}
-                      >
-                        delete
-                      </span>
-                      <span>Eliminar seleccionada</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -831,7 +1310,13 @@ export const CmsContenidoGraficoEditModal = ({
               disabled={isSaving}
             >
               {isSaving ? (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
                   <span
                     className="cms-spinner"
                     style={{
@@ -878,7 +1363,11 @@ export const CmsContenidoGraficoEditModal = ({
               textAlign: "center",
             }}
           >
-            Recortar imagen al tamaño del carrusel
+            {isSeccionPacientes
+              ? `Recortar imagen para "${
+                  activeImage?.titulo || `Desplegable #${safeIndex + 1}`
+                }"`
+              : "Recortar imagen al tamaño del bloque"}
           </h2>
           <p
             style={{
@@ -889,7 +1378,8 @@ export const CmsContenidoGraficoEditModal = ({
               textAlign: "center",
             }}
           >
-            Ajuste el encuadre a la proporción exacta en la que se verá en el portal ({dimensionesRequeridas} aprox.)
+            Ajuste el encuadre a la proporción exacta en la que se verá en el
+            portal ({dimensionesRequeridas} aprox.)
           </p>
 
           <div
@@ -964,7 +1454,7 @@ export const CmsContenidoGraficoEditModal = ({
             </button>
             <button
               type="button"
-              onClick={handleConfirmCropAndAdd}
+              onClick={handleConfirmCrop}
               style={{
                 padding: "12px 28px",
                 borderRadius: "50px",
@@ -978,7 +1468,9 @@ export const CmsContenidoGraficoEditModal = ({
                 letterSpacing: "1px",
               }}
             >
-              Recortar y Agregar
+              {cropMode === "replace" || isSeccionPacientes
+                ? "Recortar y Reemplazar"
+                : "Recortar y Agregar"}
             </button>
           </div>
         </div>
