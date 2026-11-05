@@ -1,7 +1,7 @@
 import api from "./axiosConfig";
 
 export const getNoticias = async (isAdmin = false) => {
-  const response = await api.get(`/cms/noticias?admin=${isAdmin}`);
+  const response = await api.get(isAdmin ? "/cms/noticias?admin=true" : "/cms/noticias");
   return response.data;
 };
 

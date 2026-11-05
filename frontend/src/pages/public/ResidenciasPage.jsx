@@ -7,6 +7,7 @@ import fondoBanner from "../../assets/banner_residencias.png";
 import medicosImg from "../../assets/medicos-residencias.jpg";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import { getResidencias } from "../../api/residencias.api";
+import { sanitizeUrl } from "../../utils/sanitizeUrl";
 
 const ResidenciasPage = () => {
   const [residencias, setResidencias] = useState([]);
@@ -237,7 +238,7 @@ const ResidenciasPage = () => {
                   residencia.createdAt
                 );
 
-                const documentoUrl = residencia.documentoUrl || residencia.archivoUrl;
+                const documentoUrl = sanitizeUrl(residencia.documentoUrl || residencia.archivoUrl);
                 const documentoNombre = residencia.documentoNombre || residencia.archivoNombre;
 
                 return (

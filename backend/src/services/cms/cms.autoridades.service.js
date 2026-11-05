@@ -1,13 +1,9 @@
 import { prisma } from "../../config/prisma.js";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
+import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
 const BUCKET_NAME = "autoridades-imagenes";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
 
 // Serializa una autoridad de BD a formato JSON seguro (BigInt → string)
 const serializarAutoridad = (autoridad) => {
@@ -48,7 +44,8 @@ async function subirImagenYRegistrar(file) {
     });
 
   if (storageError) {
-    const err = new Error("Error al subir imagen a Supabase: " + storageError.message);
+    console.error("[Storage] Error al subir imagen de autoridad:", storageError.message);
+    const err = new Error("No se pudo almacenar la imagen de la autoridad.");
     err.statusCode = 500;
     throw err;
   }
@@ -122,8 +119,8 @@ class CmsAutoridadesService {
     return {
       autoridades: autoridades.map(serializarAutoridad),
       redesSociales: {
-        facebook: facebookContacto?.enlace || "",
-        instagram: instagramContacto?.enlace || "",
+        facebook: sanitizarUrlLectura(facebookContacto?.enlace, ""),
+        instagram: sanitizarUrlLectura(instagramContacto?.enlace, ""),
       },
     };
   }
@@ -172,10 +169,11 @@ class CmsAutoridadesService {
   // ─── ACTUALIZAR AUTORIDAD ─────────────────────────────────────────────────
 
   async actualizarAutoridad(id, data, file) {
+    const idBigInt = parsearIdBigInt(id, "ID de autoridad");
     const { nombre, cargo, descripcion, orden } = data;
 
     const existente = await prisma.autoridad.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true },
     });
 
@@ -194,7 +192,7 @@ class CmsAutoridadesService {
     }
 
     const actualizada = await prisma.autoridad.update({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       data: {
         nombre: nombre?.trim() ?? existente.nombre,
         cargo: cargo?.trim() ?? existente.cargo,
@@ -225,8 +223,9 @@ class CmsAutoridadesService {
   // ─── ELIMINAR AUTORIDAD ───────────────────────────────────────────────────
 
   async eliminarAutoridad(id) {
+    const idBigInt = parsearIdBigInt(id, "ID de autoridad");
     const existente = await prisma.autoridad.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true },
     });
 
@@ -237,7 +236,7 @@ class CmsAutoridadesService {
     }
 
     // Primero eliminar la autoridad (para liberar FK), luego limpiar imagen
-    await prisma.autoridad.delete({ where: { id: BigInt(id) } });
+    await prisma.autoridad.delete({ where: { id: idBigInt } });
     await limpiarImagenAnterior(existente.archivo);
 
     return { message: "¡Autoridad eliminada correctamente!" };
@@ -252,11 +251,13 @@ class CmsAutoridadesService {
       throw err;
     }
 
+    const idsValidados = ordenIds.map((id) => parsearIdBigInt(id, "ID de autoridad"));
+
     // Se utiliza Promise.all para compatibilidad con el pooler de Supabase
     await Promise.all(
-      ordenIds.map((id, index) =>
+      idsValidados.map((idBigInt, index) =>
         prisma.autoridad.update({
-          where: { id: BigInt(id) },
+          where: { id: idBigInt },
           data: { orden: index + 1 },
         })
       )
@@ -268,6 +269,10 @@ class CmsAutoridadesService {
   // ─── REDES SOCIALES ───────────────────────────────────────────────────────
 
   async actualizarRedesSociales({ facebook, instagram }) {
+    // Validar esquemas http(s) antes de persistir para impedir XSS via javascript: en href (V10)
+    const fbEnlace = validarUrlHttp(facebook, "enlace de Facebook");
+    const igEnlace = validarUrlHttp(instagram, "enlace de Instagram");
+
     let institucion = await prisma.informacion_institucional.findFirst();
     if (!institucion) {
       institucion = await prisma.informacion_institucional.create({
@@ -282,8 +287,6 @@ class CmsAutoridadesService {
     }
 
     const institucionId = institucion.id;
-    const fbEnlace = (facebook || "").trim();
-    const igEnlace = (instagram || "").trim();
 
     await Promise.all([
       prisma.contacto_institucional.upsert({

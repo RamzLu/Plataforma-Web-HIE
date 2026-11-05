@@ -7,6 +7,7 @@ import keycloak from '../../config/keycloak';
 
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminHeader from '../../components/admin/AdminHeader';
+import AccessDeniedScreen from '../../components/ui/AccessDeniedScreen';
 // IMPORTAMOS TUS NUEVAS VISTAS MODULARES
 import AdminDashboardView from '../admin/AdminDashboardView';
 import AdminNoticiasView from '../admin/AdminNoticiasView';
@@ -32,11 +33,16 @@ const AdminPage = () => {
   }, [activeTab]);
 
   useEffect(() => {
+    const checkAdminRole = () =>
+      keycloak.hasRealmRole("admin-hief") ||
+      keycloak.hasRealmRole("admin-hie") ||
+      keycloak.hasRealmRole("admin");
+
     if (isKeycloakInitialized.current || keycloak.authenticated) {
       if (keycloak.authenticated) {
         setInitialized(true);
         setAuthenticated(true);
-        setIsAdmin(keycloak.hasRealmRole("admin-hief")); 
+        setIsAdmin(checkAdminRole()); 
         const name = keycloak.tokenParsed?.name || keycloak.tokenParsed?.preferred_username || "Administrador de TI";
         setUserName(name);
       }
@@ -51,7 +57,7 @@ const AdminPage = () => {
         setAuthenticated(auth);
         
         if (auth) {
-          setIsAdmin(keycloak.hasRealmRole("admin-hief")); 
+          setIsAdmin(checkAdminRole()); 
           const name = keycloak.tokenParsed?.name || keycloak.tokenParsed?.preferred_username || "Administrador de TI";
           setUserName(name);
         }
@@ -74,43 +80,86 @@ const AdminPage = () => {
 
   if (!initialized) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
-        <span className="text-slate-500 font-medium animate-pulse">
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        backgroundColor: '#f8fafc',
+        fontFamily: "'Manrope', system-ui, sans-serif"
+      }}>
+        <div className="cms-spinner" style={{ 
+          width: '50px', 
+          height: '50px', 
+          borderWidth: '4px', 
+          borderTopColor: '#0c2340',
+          borderColor: 'rgba(12, 35, 64, 0.1)'
+        }}></div>
+        <h2 style={{ 
+          marginTop: '25px', 
+          color: '#0c2340', 
+          fontWeight: '700', 
+          fontSize: '1.2rem',
+          letterSpacing: '0.5px'
+        }}>
+          Iniciando Plataforma
+        </h2>
+        <p style={{ 
+          color: '#64748b', 
+          fontSize: '0.9rem', 
+          marginTop: '8px' 
+        }}>
           Conectando con el servidor de seguridad...
-        </span>
+        </p>
       </div>
     );
   }
 
   if (!authenticated) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
-        <span className="text-slate-500 font-medium">Redirigiendo a inicio de sesión...</span>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        backgroundColor: '#f8fafc',
+        fontFamily: "'Manrope', system-ui, sans-serif"
+      }}>
+        <div className="cms-spinner" style={{ 
+          width: '50px', 
+          height: '50px', 
+          borderWidth: '4px', 
+          borderTopColor: '#0284c7',
+          borderColor: 'rgba(2, 132, 199, 0.1)'
+        }}></div>
+        <h2 style={{ 
+          marginTop: '25px', 
+          color: '#0c2340', 
+          fontWeight: '700', 
+          fontSize: '1.2rem',
+          letterSpacing: '0.5px'
+        }}>
+          Redirigiendo a Seguridad
+        </h2>
+        <p style={{ 
+          color: '#64748b', 
+          fontSize: '0.9rem', 
+          marginTop: '8px' 
+        }}>
+          Redirigiendo a inicio de sesión...
+        </p>
       </div>
     );
   }
 
   if (!isAdmin) {
     return (
-      <div className="flex flex-col h-screen w-full items-center justify-center bg-slate-50 p-4">
-        <div className="bg-white p-10 rounded-2xl shadow-sm text-center border border-slate-200 max-w-md w-full">
-          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Acceso Denegado al Panel TI</h2>
-          <p className="text-slate-500 mb-8 text-sm leading-relaxed">
-            Tu cuenta actual no tiene los permisos necesarios (Rol "admin"). Por favor, cierra sesión e ingresa con tus credenciales administrativas.
-          </p>
-          <button 
-            onClick={handleLogout}
-            className="w-full bg-[#0c2340] text-white py-2.5 rounded-lg font-medium hover:bg-[#0a1c33] transition-colors"
-          >
-            Cerrar Sesión Actual
-          </button>
-        </div>
-      </div>
+      <AccessDeniedScreen
+        userName={userName}
+        requiredPanel="el Panel de Administración (TI)"
+      />
     );
   }
 

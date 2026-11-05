@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getNoticias } from "../api/noticias.api.js";
 import "../styles/sections/HomeNewsPreview.css";
 import AnimatedContent from "../components/ui/AnimatedContent";
+import DefaultNewsImage from "./ui/DefaultNewsImage";
 
-// Función sencilla para limpiar el HTML que viene del editor de texto del CMS
 const cleanHtmlText = (html) => {
   if (!html || typeof html !== "string") return "";
   return html.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ").trim();
@@ -17,12 +18,10 @@ const HomeNewsPreview = () => {
     const fetchLatestNews = async () => {
       setLoading(true);
       try {
-        const response = await fetch("http://localhost:3000/api/cms/noticias");
-        if (response.ok) {
-          const data = await response.json();
-          // Ordenamos por ID descendente para tener las más nuevas y tomamos solo 3
-          const ultimasTres = data
-            .sort((a, b) => b.id - a.id)
+        const data = await getNoticias(false);
+        if (Array.isArray(data)) {
+          const ultimasTres = [...data]
+            .sort((a, b) => Number(b.id) - Number(a.id))
             .slice(0, 3);
           setLatestNews(ultimasTres);
         }
@@ -84,12 +83,14 @@ const HomeNewsPreview = () => {
                   >
                     <article className="preview-card" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                       <div className="preview-img-container">
-                        {news.images && news.images.length > 0 && (
+                        {news.images && news.images.length > 0 && news.images[0] ? (
                           <img
                             src={news.images[0]}
                             alt={news.titulo || news.title}
                             className="preview-img"
                           />
+                        ) : (
+                          <DefaultNewsImage alt={news.titulo || news.title} />
                         )}
                       </div>
                       <div 

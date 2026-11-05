@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
+import { adminFetch } from "../../api/adminFetch.js";
 
 import keycloak from "../../config/keycloak";
 
@@ -8,6 +10,7 @@ import "../../styles/components/cms/CmsModals.css";
 
 import CmsSidebar from "../../components/cms/CmsSidebar";
 import CmsHeader from "../../components/cms/CmsHeader";
+import AccessDeniedScreen from "../../components/ui/AccessDeniedScreen";
 import CmsDashboardView from "../cms/CmsDashboardView";
 import CmsNoticiasView from "../cms/CmsNoticiasView";
 import CmsBannersView from "../cms/CmsBannersView";
@@ -20,12 +23,12 @@ import CmsEspecialidadesView from "../cms/CmsEspecialidadesView";
 import CmsResidenciasView from "../cms/CmsResidenciasView";
 import CmsCapacitacionesView from "../cms/CmsCapacitacionesView";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 
 const CmsPage = () => {
   const [initialized, setInitialized] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [isCms, setIsCms] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("Usuario CMS");
 
   const [activeTab, setActiveTab] = useState(() => {
@@ -46,20 +49,30 @@ const CmsPage = () => {
 
   const [newsList, setNewsList] = useState([]);
   const [docsList, setDocsList] = useState([]);
+  const [profesionalesList, setProfesionalesList] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({
     contenidoPublicado: 0,
     borradores: 0,
     documentosActivos: 0,
+    profesionalesActivos: 0,
     visitas: "0",
   });
+  const [openCreateOnTab, setOpenCreateOnTab] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const isKeycloakInitialized = useRef(false);
 
+  const handleQuickAction = (tabId, openModal = true) => {
+    setActiveTab(tabId);
+    if (openModal) {
+      setOpenCreateOnTab(true);
+    }
+  };
+
 const fetchNoticias = async () => {
   try {
     setLoading(true);
-    const response = await fetch("http://localhost:3000/api/cms/noticias?admin=true");
+    const response = await adminFetch("/cms/noticias");
     if (!response.ok) throw new Error("Error al obtener noticias del servidor");
     const data = await response.json();
 
@@ -93,33 +106,51 @@ const fetchNoticias = async () => {
   }
 };
 
+  const leerCacheLocal = (clave) => {
+    try {
+      const raw = localStorage.getItem(clave);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
   const fetchDocs = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/cms/documentacion");
+      const response = await adminFetch("/cms/documentacion");
       if (!response.ok) throw new Error("Error al obtener documentos");
       const data = await response.json();
       
       if (data && data.length > 0) {
         setDocsList(data);
         localStorage.setItem("portal_docs_data", JSON.stringify(data));
-        updateStats(newsList, data);
       } else {
-        const cachedDocs = JSON.parse(localStorage.getItem("portal_docs_data")) || [];
-        setDocsList(cachedDocs);
-        updateStats(newsList, cachedDocs);
+        setDocsList(leerCacheLocal("portal_docs_data"));
       }
     } catch (error) {
       console.error("Error obteniendo documentos:", error);
-      const cachedDocs = JSON.parse(localStorage.getItem("portal_docs_data")) || [];
-      setDocsList(cachedDocs);
-      updateStats(newsList, cachedDocs);
+      setDocsList(leerCacheLocal("portal_docs_data"));
+    }
+  };
+
+  const fetchProfesionales = async () => {
+    try {
+      const response = await adminFetch("/cms/profesionales");
+      if (!response.ok) throw new Error("Error al obtener profesionales");
+      const data = await response.json();
+      if (data && Array.isArray(data)) {
+        setProfesionalesList(data);
+      }
+    } catch (error) {
+      console.error("Error obteniendo profesionales:", error);
     }
   };
 
   const handleAddNewDoc = (nuevoDoc) => {
     const updatedList = [nuevoDoc, ...docsList];
     setDocsList(updatedList);
-    updateStats(newsList, updatedList);
     localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
   };
 
@@ -128,30 +159,32 @@ const fetchNoticias = async () => {
       item.id === updatedDoc.id ? updatedDoc : item,
     );
     setDocsList(updatedList);
-    updateStats(newsList, updatedList);
     localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
   };
 
 const handleDeleteDoc = (id) => {
     const filtered = docsList.filter((d) => d.id !== id);
     setDocsList(filtered);
-    updateStats(newsList, filtered);
     localStorage.setItem("portal_docs_data", JSON.stringify(filtered));
   };
+
+  // Las lecturas del CMS exigen token con rol 'cm': se piden recien cuando la sesion esta lista.
   useEffect(() => {
+    if (!authenticated || !isCms) return;
     fetchNoticias();
     fetchDocs();
-  }, []);
+    fetchProfesionales();
+  }, [authenticated, isCms]);
 
   useEffect(() => {
+    // Solo el rol 'cm' accede al CMS (admin-hief pertenece al panel de administracion)
+    const checkCmsRole = () => keycloak.hasRealmRole("cm");
+
     if (isKeycloakInitialized.current || keycloak.authenticated) {
       if (keycloak.authenticated) {
         setInitialized(true);
         setAuthenticated(true);
-        setIsCms(
-          keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"),
-        );
-        setIsAdmin(keycloak.hasRealmRole("admin"));
+        setIsCms(checkCmsRole());
         const name =
           keycloak.tokenParsed?.name ||
           keycloak.tokenParsed?.preferred_username ||
@@ -170,10 +203,7 @@ const handleDeleteDoc = (id) => {
         setInitialized(true);
         setAuthenticated(auth);
         if (auth) {
-          setIsCms(
-            keycloak.hasRealmRole("cms") || keycloak.hasRealmRole("admin"),
-          );
-          setIsAdmin(keycloak.hasRealmRole("admin"));
+          setIsCms(checkCmsRole());
 
           const name =
             keycloak.tokenParsed?.name ||
@@ -189,18 +219,24 @@ const handleDeleteDoc = (id) => {
       });
   }, [newsList]);
 
-const updateStats = (currentNews, currentDocs = docsList) => {
-  const publicadas = currentNews.filter((n) => n.estado === "PUBLICADO").length;
-  const borradoresPendientes = currentNews.filter((n) => n.estado === "BORRADOR").length;
-  const totalDocumentos = currentDocs ? currentDocs.length : 0;
+  const updateStats = (currentNews = newsList, currentDocs = docsList, currentProfs = profesionalesList) => {
+    const publicadas = (currentNews || []).filter((n) => (n.estado || "").toUpperCase() === "PUBLICADO").length;
+    const borradoresPendientes = (currentNews || []).filter((n) => (n.estado || "").toUpperCase() === "BORRADOR").length;
+    const totalDocumentos = currentDocs ? currentDocs.length : 0;
+    const totalProfesionales = currentProfs ? currentProfs.length : 0;
 
-  setDashboardStats({
-    contenidoPublicado: publicadas,
-    borradores: borradoresPendientes,
-    documentosActivos: totalDocumentos,
-    visitas: "0",
-  });
-};
+    setDashboardStats({
+      contenidoPublicado: publicadas,
+      borradores: borradoresPendientes,
+      documentosActivos: totalDocumentos,
+      profesionalesActivos: totalProfesionales,
+      visitas: "0",
+    });
+  };
+
+  useEffect(() => {
+    updateStats(newsList, docsList, profesionalesList);
+  }, [newsList, docsList, profesionalesList]);
 
   const handleAddNewNews = (nuevaNoticia) => {
     const updatedList = [nuevaNoticia, ...newsList];
@@ -226,11 +262,8 @@ const updateStats = (currentNews, currentDocs = docsList) => {
 
   const testBackendConnection = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/cms/noticias", {
-        headers: {
-          Authorization: `Bearer ${keycloak.token}`,
-        },
-      });
+      const response = await adminFetch("/cms/noticias");
+      if (!response.ok) throw new Error("Error en la respuesta del servidor");
       const data = await response.json();
       console.log("Respuesta del Backend:", data);
       alert("Conexión exitosa. Revisa la consola.");
@@ -339,87 +372,10 @@ if (!authenticated) {
 
   if (!isCms) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh', 
-        backgroundColor: '#f8fafc',
-        fontFamily: "'Manrope', system-ui, sans-serif",
-        padding: '20px',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          width: '64px',
-          height: '64px',
-          backgroundColor: '#fee2e2',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '20px'
-        }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-        </div>
-        
-        <h2 style={{ 
-          color: '#0c2340', 
-          fontWeight: '800', 
-          fontSize: '1.5rem',
-          letterSpacing: '0.5px',
-          margin: '0 0 10px 0'
-        }}>
-          Acceso Denegado
-        </h2>
-        <p style={{ 
-          color: '#64748b', 
-          fontSize: '1rem', 
-          margin: '0 0 30px 0',
-          maxWidth: '400px',
-          lineHeight: '1.5'
-        }}>
-          Tu cuenta no tiene los permisos de Redactor para ingresar al CMS.
-        </p>
-        
-        <button 
-          onClick={() => {
-            if (keycloak && typeof keycloak.logout === 'function') {
-              keycloak.logout();
-            } else {
-              localStorage.removeItem("cms_active_tab");
-              window.location.href = "/";
-            }
-          }}
-          style={{
-            backgroundColor: '#0c2340',
-            color: '#ffffff',
-            border: 'none',
-            padding: '12px 32px',
-            borderRadius: '8px',
-            fontWeight: '700',
-            fontSize: '0.95rem',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            boxShadow: '0 4px 12px rgba(12, 35, 64, 0.15)'
-          }}
-          onMouseOver={(e) => {
-            e.target.style.backgroundColor = '#1e3a5f';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseOut={(e) => {
-            e.target.style.backgroundColor = '#0c2340';
-            e.target.style.transform = 'translateY(0)';
-          }}
-        >
-          Cerrar Sesión
-        </button>
-      </div>
+      <AccessDeniedScreen
+        userName={userName}
+        requiredPanel="el Panel CMS (Redacción)"
+      />
     );
   }
 
@@ -435,7 +391,6 @@ if (!authenticated) {
       <div className="cms-main-wrapper">
         <CmsHeader
           userName={userName}
-          isAdmin={isAdmin}
           testBackendConnection={testBackendConnection}
           onLogoutClick={() => setShowLogoutModal(true)}
           activeTab={activeTab}
@@ -474,10 +429,12 @@ if (!authenticated) {
               latestNews={latestNews}
               newsList={newsList}         
               docsList={docsList}         
+              profesionalesList={profesionalesList}
               dashboardStats={dashboardStats}
               setSelectedNews={setSelectedNews}
-              handleQuickAction={() => setActiveTab("noticias")}
+              handleQuickAction={handleQuickAction}
               loading={loading}
+              userName={userName}
             />
           )}
 
@@ -489,6 +446,8 @@ if (!authenticated) {
               onUpdateNews={handleUpdateNews}
               onViewNews={setSelectedNews}
               loading={loading}
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
             />
           )}
 
@@ -504,27 +463,44 @@ if (!authenticated) {
               onUpdateDoc={handleUpdateDoc}
               loading={loading}
               userName={userName}
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
             />
           )}
 
           {activeTab === "institucional" && (
-            <CmsInstitucionView />
+            <CmsInstitucionView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab === "profesionales" && (
-            <CmsProfesionalesView />
+            <CmsProfesionalesView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab === "especialidades" && (
-            <CmsEspecialidadesView />
+            <CmsEspecialidadesView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab === "residencias" && (
-            <CmsResidenciasView />
+            <CmsResidenciasView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab === "capacitaciones" && (
-            <CmsCapacitacionesView />
+            <CmsCapacitacionesView
+              initialCreateModal={openCreateOnTab}
+              onModalOpened={() => setOpenCreateOnTab(false)}
+            />
           )}
 
           {activeTab !== "dashboard" && 
@@ -580,7 +556,7 @@ if (!authenticated) {
               <div className="session-user-details">
                 <span className="user-dot"></span>
                 <span className="user-text-logout">
-                  <strong>{isAdmin ? "Administrador" : "Redactor"}</strong> ({keycloak?.tokenParsed?.email || userName})
+                  <strong>Redactor</strong> ({keycloak?.tokenParsed?.email || userName})
                 </span>
               </div>
             </div>
@@ -642,20 +618,16 @@ if (!authenticated) {
                 
                 <div 
                   className="info-text" 
-                  dangerouslySetInnerHTML={{ __html: Array.isArray(selectedNews.body) ? selectedNews.body[0] : selectedNews.body }} 
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(Array.isArray(selectedNews.body) ? selectedNews.body[0] : selectedNews.body) }} 
                 />
               </div>
 
-              {selectedNews.images && selectedNews.images.length > 0 && (
+              {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
                 <div className={`mosaic-gallery layout-${selectedNews.images.length >= 4 ? 4 : selectedNews.images.length}`}>
-                  
                   {selectedNews.images.slice(0, 4).map((img, index) => {
-                    
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
                     const fotosRestantes = selectedNews.images.length - 4;
-
                     const imageUrls = selectedNews.images.map(i => i.url || i);
-
                     return (
                       <div 
                         key={index} 
@@ -663,7 +635,6 @@ if (!authenticated) {
                         onClick={() => openLightbox(imageUrls, index)} 
                       >
                         <img src={img.url || img} alt={`Imagen ${index + 1}`} />
-                        
                         {isLastAndHidden && (
                           <div className="mosaic-overlay">
                             <span>+{fotosRestantes}</span>
@@ -672,6 +643,10 @@ if (!authenticated) {
                       </div>
                     );
                   })}
+                </div>
+              ) : (
+                <div className="news-modal-default-img-wrap">
+                  <DefaultNewsImage alt={selectedNews.title} />
                 </div>
               )}
 

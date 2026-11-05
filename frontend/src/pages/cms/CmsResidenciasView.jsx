@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
+import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import {
   FileText,
   Upload,
@@ -28,7 +30,7 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 
-const CmsResidenciasView = () => {
+const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de residencias de la BD
   const [residencias, setResidencias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -90,7 +92,7 @@ const CmsResidenciasView = () => {
   const cargarResidencias = async () => {
     setLoading(true);
     try {
-      const data = await getResidencias();
+      const data = await getResidencias(true);
       setResidencias(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error al cargar residencias:", error);
@@ -200,6 +202,13 @@ const CmsResidenciasView = () => {
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
+
+  useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   // Apertura modal edición
   const handleOpenEdit = (res) => {
@@ -387,6 +396,12 @@ const CmsResidenciasView = () => {
     try {
       const token = keycloak?.token;
       await deleteResidencia(itemAEliminar.id, token);
+      recordCmsActivity({
+        titulo: `Eliminó residencia: "${itemAEliminar.nombre || "Residencia"}"`,
+        categoria: "Residencias",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
       toast.success("Residencia eliminada con éxito.", {
         id: toastId,
       });
@@ -609,9 +624,9 @@ const CmsResidenciasView = () => {
                       <span>{res.categoria}</span>
                       {res.documentoNombre && (
                         <a
-                          href={res.documentoUrl || "#"}
+                          href={sanitizeUrl(res.documentoUrl) || "#"}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           style={{
                             color: "#0284c7",
                             fontWeight: "600",
@@ -621,7 +636,7 @@ const CmsResidenciasView = () => {
                             gap: "3px",
                           }}
                           onClick={(e) => {
-                            if (!res.documentoUrl) e.preventDefault();
+                            if (!sanitizeUrl(res.documentoUrl)) e.preventDefault();
                           }}
                         >
                           • {res.documentoTipo || "PDF"}{" "}
@@ -1046,7 +1061,7 @@ const CmsResidenciasView = () => {
                           <button
                             type="button"
                             className="res-file-remove-btn"
-                            onClick={() => window.open(formData.bannerUrl, "_blank")}
+                            onClick={() => { const safe = sanitizeUrl(formData.bannerUrl, "", { allowBlob: true }); if (safe) window.open(safe, "_blank", "noopener,noreferrer"); }}
                             title="Ver imagen en tamaño completo"
                             style={{ color: "#0284c7" }}
                           >
@@ -1179,11 +1194,11 @@ const CmsResidenciasView = () => {
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          {formData.documentoUrl && (
+                          {sanitizeUrl(formData.documentoUrl, "", { allowBlob: true }) && (
                             <button
                               type="button"
                               className="res-file-remove-btn"
-                              onClick={() => window.open(formData.documentoUrl, "_blank")}
+                              onClick={() => { const safe = sanitizeUrl(formData.documentoUrl, "", { allowBlob: true }); if (safe) window.open(safe, "_blank", "noopener,noreferrer"); }}
                               title="Visualizar documento"
                               style={{ color: "#0284c7" }}
                             >

@@ -1,15 +1,12 @@
 import { prisma } from "../../config/prisma.js";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-
-const supabase = createClient(
-  "https://ipwupwmbygtyiluezzle.supabase.co",
-  process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-);
+import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
 class CmsProfesionalService {
-  async obtenerProfesionales() {
+  async obtenerProfesionales(esVistaAdmin = false) {
     const profesionales = await prisma.profesional.findMany({
+      where: esVistaAdmin === true ? {} : { activo: true },
       orderBy: { createdAt: "desc" },
       include: {
         especialidad: true,
@@ -53,7 +50,9 @@ class CmsProfesionalService {
         esServicioClave: isServicio,
         especialidadId: realIdForFrontend,
         publicado: prof.activo,
-        imagenUrl: pubUrl
+        imagenUrl: pubUrl,
+        createdAt: prof.createdAt,
+        updatedAt: prof.updatedAt
       };
     });
   }
@@ -66,12 +65,13 @@ class CmsProfesionalService {
       error.statusCode = 400; throw error;
     }
 
+    const espIdBigInt = parsearIdBigInt(especialidadId, "ID de área o especialidad");
     let finalEspecialidadId;
     let finalAreaNombre = null;
 
     // Lógica Puente: Si es servicio, validamos en tabla Servicio y usamos puente en Area
     if (esServicio === 'true') {
-      const servicio = await prisma.servicio.findUnique({ where: { id: BigInt(especialidadId) }});
+      const servicio = await prisma.servicio.findUnique({ where: { id: espIdBigInt }});
       if (!servicio) {
         const error = new Error("El servicio clave seleccionado no existe.");
         error.statusCode = 404; throw error;
@@ -82,7 +82,7 @@ class CmsProfesionalService {
       if (!genEsp) genEsp = await prisma.especialidad.create({ data: { nombre: "Servicio Clave", descripcion: "Clasificación interna para servicios" }});
       finalEspecialidadId = genEsp.id;
     } else {
-      const esp = await prisma.especialidad.findUnique({ where: { id: BigInt(especialidadId) }});
+      const esp = await prisma.especialidad.findUnique({ where: { id: espIdBigInt }});
       if (!esp) {
         const error = new Error("La especialidad seleccionada no existe.");
         error.statusCode = 404; throw error;
@@ -96,7 +96,8 @@ class CmsProfesionalService {
       const { error: storageError } = await supabase.storage.from("noticias-imagenes").upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
 
       if (storageError) {
-        const error = new Error("Error subiendo imagen: " + storageError.message);
+        console.error("Error subiendo imagen de profesional a Supabase:", storageError.message);
+        const error = new Error("No se pudo almacenar la fotografía del profesional.");
         error.statusCode = 500; throw error;
       }
 
@@ -142,10 +143,12 @@ class CmsProfesionalService {
   }
 
   async actualizarProfesional(id, data, file) {
+    const idBigInt = parsearIdBigInt(id, "ID de profesional");
     const { nombre, apellido, matricula, cargo, descripcion, especialidadId, esServicio } = data;
+    const espIdBigInt = parsearIdBigInt(especialidadId, "ID de área o especialidad");
 
     const profesionalExistente = await prisma.profesional.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true }
     });
 
@@ -158,16 +161,22 @@ class CmsProfesionalService {
     let finalAreaNombre = null;
 
     if (esServicio === 'true') {
-      const servicio = await prisma.servicio.findUnique({ where: { id: BigInt(especialidadId) }});
-      if (!servicio) throw new Error("El servicio seleccionado no existe.");
+      const servicio = await prisma.servicio.findUnique({ where: { id: espIdBigInt }});
+      if (!servicio) {
+        const error = new Error("El servicio seleccionado no existe.");
+        error.statusCode = 404; throw error;
+      }
       finalAreaNombre = servicio.nombre;
       
       let genEsp = await prisma.especialidad.findFirst({ where: { nombre: "Servicio Clave" }});
       if (!genEsp) genEsp = await prisma.especialidad.create({ data: { nombre: "Servicio Clave" }});
       finalEspecialidadId = genEsp.id;
     } else {
-      const esp = await prisma.especialidad.findUnique({ where: { id: BigInt(especialidadId) }});
-      if (!esp) throw new Error("La especialidad seleccionada no existe.");
+      const esp = await prisma.especialidad.findUnique({ where: { id: espIdBigInt }});
+      if (!esp) {
+        const error = new Error("La especialidad seleccionada no existe.");
+        error.statusCode = 404; throw error;
+      }
       finalEspecialidadId = esp.id;
     }
 
@@ -183,7 +192,8 @@ class CmsProfesionalService {
       const { error: storageError } = await supabase.storage.from("noticias-imagenes").upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
 
       if (storageError) {
-        const err = new Error("Error subiendo imagen: " + storageError.message);
+        console.error("Error subiendo imagen de profesional a Supabase:", storageError.message);
+        const err = new Error("No se pudo almacenar la fotografía del profesional.");
         err.statusCode = 500; throw err;
       }
 
@@ -197,7 +207,7 @@ class CmsProfesionalService {
     }
 
     const profActualizado = await prisma.profesional.update({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       data: {
         nombre, apellido, matricula, cargo, descripcion, especialidadId: finalEspecialidadId, archivoId, updatedAt: new Date()
       },
@@ -230,19 +240,23 @@ class CmsProfesionalService {
   }
 
   async eliminarProfesional(id) {
+    const idBigInt = parsearIdBigInt(id, "ID de profesional");
     const profesional = await prisma.profesional.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true }
     });
 
-    if (!profesional) throw new Error("Profesional no encontrado.");
+    if (!profesional) {
+      const error = new Error("Profesional no encontrado.");
+      error.statusCode = 404; throw error;
+    }
 
     if (profesional.archivo) {
       await supabase.storage.from("noticias-imagenes").remove([profesional.archivo.nombreArchivo]);
       await prisma.archivo.delete({ where: { id: profesional.archivo.id } });
     }
 
-    await prisma.profesional.delete({ where: { id: BigInt(id) } });
+    await prisma.profesional.delete({ where: { id: idBigInt } });
     return { message: "¡Profesional eliminado con éxito!" };
   }
 }

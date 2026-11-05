@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import {
   BookOpen,
   Calendar,
@@ -185,7 +186,7 @@ const INITIAL_CAPACITACIONES = [
   },
 ];
 
-const CmsCapacitacionesView = () => {
+const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de capacitaciones obtenidas desde la base de datos
   const [capacitaciones, setCapacitaciones] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -387,6 +388,13 @@ const CmsCapacitacionesView = () => {
     setShowModal(true);
   };
 
+  useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
+
   const handleOpenEdit = (item) => {
     setEditingId(item.id);
     setBannerSeleccionado(null);
@@ -570,6 +578,12 @@ const CmsCapacitacionesView = () => {
     try {
       const token = keycloak?.token || localStorage.getItem("token") || "";
       await deleteCapacitacion(itemAEliminar.id, token);
+      recordCmsActivity({
+        titulo: `Eliminó capacitación: "${itemAEliminar.titulo || "Capacitación"}"`,
+        categoria: "Capacitaciones",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
       toast.success("Capacitación eliminada correctamente.");
       await cargarCapacitaciones();
     } catch (error) {

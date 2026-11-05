@@ -1909,3 +1909,490 @@
   background-color: #004b73;
 }
 
+/* ==========================================================================
+   PREVISUALIZACIÓN FIEL AL PORTAL PÚBLICO - CARRUSEL PRINCIPAL DE INICIO
+   Replica exactamente proporción (1501/641), degradado, tipografía y botón
+   de Carousel.jsx / Carousel.css mediante unidades proporcionales (cqw).
+   ========================================================================== */
+.cg-portal-carousel-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1501 / 641;
+  background-color: #0c2340;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  container-type: inline-size;
+  box-shadow: 0 4px 12px rgba(12, 35, 64, 0.14);
+}
+
+.cg-portal-carousel-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cg-portal-carousel-slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(12, 35, 64, 0.85) 0%,
+    rgba(12, 35, 64, 0.4) 50%,
+    rgba(12, 35, 64, 0.1) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cg-portal-carousel-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cg-portal-carousel-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
+}
+
+.cg-portal-static-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 8%;
+  padding-right: 6%;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.cg-portal-content-box {
+  max-width: 52%;
+}
+
+.cg-portal-title {
+  color: #ffffff;
+  font-size: clamp(0.95rem, 3.35cqw, 2.25rem);
+  font-weight: 200;
+  line-height: 1.15;
+  margin: 0 0 1.65cqw 0;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.04cqw;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  word-break: break-word;
+}
+
+.cg-portal-btn-conocenos {
+  display: inline-block;
+  background: transparent;
+  color: #ffffff;
+  border: 1.5px solid #ffffff;
+  padding: 0.8cqw 2.2cqw;
+  border-radius: 30px;
+  font-size: clamp(0.58rem, 0.98cqw, 0.95rem);
+  font-weight: 700;
+  letter-spacing: 0.07cqw;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.cg-portal-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(12, 35, 64, 0.6);
+  color: #ffffff;
+  border: none;
+  width: clamp(26px, 3.1cqw, 42px);
+  height: clamp(26px, 3.1cqw, 42px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: clamp(11px, 1.2cqw, 18px);
+  z-index: 10;
+  transition: background-color 0.2s ease;
+}
+
+.cg-portal-arrow:hover {
+  background-color: rgba(12, 35, 64, 0.9);
+}
+
+.cg-portal-arrow-left {
+  left: 1.4cqw;
+}
+
+.cg-portal-arrow-right {
+  right: 1.4cqw;
+}
+
+.cg-portal-indicators {
+  position: absolute;
+  bottom: 1.3cqw;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6cqw;
+  z-index: 10;
+}
+
+.cg-portal-indicator {
+  width: clamp(5px, 0.55cqw, 8px);
+  height: clamp(5px, 0.55cqw, 8px);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.48);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.cg-portal-indicator.active {
+  background-color: #ffffff;
+  transform: scale(1.2);
+}
+
+/* ==========================================================================
+   PREVISUALIZACIÓN FIEL AL PORTAL PÚBLICO - INFORMACIÓN PARA PACIENTES
+   Replica exactamente PatientInfoSection.jsx / PatientInfoSection.css (sin WhatsApp)
+   ========================================================================== */
+.cg-portal-pacientes-preview {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.6rem;
+  padding: clamp(16px, 3.6cqw, 34px) clamp(16px, 3.8cqw, 38px);
+  container-type: inline-size;
+  box-shadow: 0 4px 12px rgba(12, 35, 64, 0.08);
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.8cqw, 28px);
+}
+
+.cg-portal-pacientes-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.cg-portal-pacientes-subtitle {
+  color: #64748b;
+  font-size: clamp(0.62rem, 1.15cqw, 0.8rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cg-portal-pacientes-title {
+  color: #2b5b94;
+  font-size: clamp(1.15rem, 2.75cqw, 1.85rem);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  margin: 2px 0 0 0;
+  text-transform: uppercase;
+}
+
+.cg-portal-pacientes-split {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: clamp(16px, 4.2cqw, 40px);
+  align-items: start;
+}
+
+.cg-portal-pacientes-accordion {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #819ec6;
+}
+
+.cg-portal-pacientes-item {
+  border-bottom: 1px solid #819ec6;
+}
+
+.cg-portal-pacientes-item-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: clamp(9px, 1.65cqw, 16px) 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(0.68rem, 1.22cqw, 0.85rem);
+  font-weight: 500;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: color 0.2s ease;
+}
+
+.cg-portal-pacientes-item-btn:hover {
+  color: #0c2340;
+}
+
+.cg-portal-pacientes-item.active .cg-portal-pacientes-item-btn {
+  color: #1b477f;
+  font-weight: 700;
+}
+
+.cg-portal-pacientes-chevron {
+  width: clamp(13px, 1.55cqw, 16px);
+  height: clamp(13px, 1.55cqw, 16px);
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, color 0.2s ease;
+}
+
+.cg-portal-pacientes-item.active .cg-portal-pacientes-chevron {
+  transform: rotate(90deg);
+  color: #0c2340;
+}
+
+.cg-portal-pacientes-item-body {
+  padding: 0 0 clamp(10px, 1.8cqw, 16px) 0;
+  color: #64748b;
+  font-size: clamp(0.68rem, 1.18cqw, 0.84rem);
+  line-height: 1.55;
+}
+
+.cg-portal-pacientes-item-body p {
+  margin: 0;
+}
+
+.cg-portal-pacientes-img-box {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f1f5f9;
+  box-shadow: 0 14px 22px -5px rgba(0, 0, 0, 0.09),
+    0 8px 8px -5px rgba(0, 0, 0, 0.04);
+}
+
+.cg-portal-pacientes-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.cg-portal-pacientes-img-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 620px) {
+  .cg-portal-pacientes-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   CONTROLES DE EDICIÓN DE LOS 5 DESPLEGABLES DE INFORMACIÓN PARA PACIENTES
+   ========================================================================== */
+.cg-pacientes-tabs-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 680px) {
+  .cg-pacientes-tabs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.cg-pacientes-tab-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 7px;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
+  background-color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.cg-pacientes-tab-card:hover {
+  border-color: #94a3b8;
+  background-color: #f8fafc;
+}
+
+.cg-pacientes-tab-card.selected {
+  border-color: #0284c7;
+  background-color: #f0f9ff;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.16);
+}
+
+.cg-pacientes-tab-card.incomplete {
+  border-color: #f43f5e;
+}
+
+.cg-pacientes-tab-thumb-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: #e2e8f0;
+}
+
+.cg-pacientes-tab-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cg-pacientes-tab-num {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background-color: rgba(12, 35, 64, 0.8);
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.cg-pacientes-tab-label {
+  font-size: 0.69rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 1.7rem;
+}
+
+.cg-pacientes-tab-card.selected .cg-pacientes-tab-label {
+  color: #0369a1;
+}
+
+.cg-pacientes-editor-card {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cg-pacientes-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cg-pacientes-editor-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cg-pacientes-editor-hint {
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+.cg-pacientes-editor-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cg-pacientes-img-row {
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+.cg-pacientes-img-current {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cg-pacientes-img-current-thumb {
+  width: 128px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  flex-shrink: 0;
+  background-color: #e2e8f0;
+}
+
+.cg-pacientes-img-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.cg-pacientes-img-meta-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cg-pacientes-img-meta-file {
+  font-size: 0.8rem;
+  color: #64748b;
+  word-break: break-all;
+}
+
+

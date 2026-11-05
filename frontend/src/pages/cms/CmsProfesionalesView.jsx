@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { adminFetch } from "../../api/adminFetch.js";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import { getEspecialidades } from "../../api/especialidades.api.js";
+import {
+  createProfesional,
+  updateProfesional,
+  deleteProfesional,
+} from "../../api/profesionales.api.js";
 import Cropper from "react-easy-crop";
 import "../../styles/pages/cms/CmsProfesionalesView.css";
 import {
@@ -49,7 +56,7 @@ async function getCroppedImg(imageSrc, pixelCrop, fileName = "foto-perfil.jpg") 
   });
 }
 
-const CmsProfesionalesView = () => {
+const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => {
   const [profesionales, setProfesionales] = useState([]);
   const [areasDisponibles, setAreasDisponibles] = useState([]); 
   const [searchTerm, setSearchTerm] = useState("");
@@ -86,7 +93,7 @@ const CmsProfesionalesView = () => {
   const fetchDatos = async () => {
     setLoading(true);
     try {
-      const resProf = await fetch("http://localhost:3000/api/cms/profesionales");
+      const resProf = await adminFetch("/cms/profesionales");
       if (resProf.ok) {
         const dataProf = await resProf.json();
         setProfesionales(dataProf);
@@ -138,6 +145,13 @@ const CmsProfesionalesView = () => {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
+
   const handleOpenEdit = (prof) => {
     setEditingId(prof.id);
     setFormData({
@@ -168,13 +182,16 @@ const CmsProfesionalesView = () => {
     
     try {
       const token = keycloak?.token;
-      const response = await fetch(`http://localhost:3000/api/cms/profesionales/${profesionalToDelete.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+      await deleteProfesional(profesionalToDelete.id, token);
+      
+      const nombreCompleto = `${profesionalToDelete.nombre || ""} ${profesionalToDelete.apellido || ""}`.trim() || "Profesional";
+      recordCmsActivity({
+        titulo: `Eliminó al profesional ${nombreCompleto}`,
+        categoria: profesionalToDelete.especialidadNombre || "Profesionales",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
       });
-      
-      if (!response.ok) throw new Error("Error al eliminar");
-      
+
       setProfesionales(profesionales.filter(p => p.id !== profesionalToDelete.id));
       toast.success("Profesional eliminado correctamente.", { id: toastId });
       setShowDeleteModal(false);
@@ -238,20 +255,9 @@ const CmsProfesionalesView = () => {
         dataForm.append("archivo", archivoFoto);
       }
 
-      const method = editingId ? "PUT" : "POST";
-      const url = editingId 
-        ? `http://localhost:3000/api/cms/profesionales/${editingId}`
-        : "http://localhost:3000/api/cms/profesionales";
-
-      const response = await fetch(url, {
-        method: method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: dataForm
-      });
-
-      if (!response.ok) throw new Error("Error al guardar");
-
-      const resultado = await response.json();
+      const resultado = editingId
+        ? await updateProfesional(editingId, dataForm, token)
+        : await createProfesional(dataForm, token);
       
       if (editingId) {
         setProfesionales(profesionales.map(p => p.id === editingId ? resultado.profesional : p));

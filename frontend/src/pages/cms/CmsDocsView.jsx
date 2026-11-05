@@ -1,5 +1,7 @@
 import React, { useState, useRef } from "react";
 import { createDocumento, updateDocumento, deleteDocumento } from "../../api/documentos.api.js";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
+import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
 import "../../styles/pages/cms/CmsDocsView.css";
@@ -26,6 +28,8 @@ const CmsDocsView = ({
   onUpdateDoc,
   loading,
   userName,
+  initialCreateModal = false,
+  onModalOpened,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -61,6 +65,13 @@ const CmsDocsView = ({
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
+
+  React.useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   const handleOpenEdit = (doc) => {
     setEditingId(doc.id);
@@ -112,7 +123,16 @@ const CmsDocsView = ({
         return;
       }
 
+      const docToDelete = (docsList || []).find((d) => d.id === id);
+      const tituloDoc = docToDelete?.title || docToDelete?.titulo || "Documento";
+
       await deleteDocumento(id, token);
+      recordCmsActivity({
+        titulo: `Eliminó documento: "${tituloDoc}"`,
+        categoria: docToDelete?.category || "Documentación",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
 
       if (onDeleteDoc) onDeleteDoc(id);
       toast.success("Documento eliminado correctamente.");
@@ -314,8 +334,8 @@ const CmsDocsView = ({
                   <div className="doc-info">
                     <div className="doc-title-row">
                       <span className="doc-title">{doc.title}</span>
-                      {doc.fileUrl && (
-                        <a className="doc-preview-link" href={doc.fileUrl} target="_blank" rel="noreferrer" title="Ver documento">
+                      {sanitizeUrl(doc.fileUrl) && (
+                        <a className="doc-preview-link" href={sanitizeUrl(doc.fileUrl)} target="_blank" rel="noopener noreferrer" title="Ver documento">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
@@ -509,7 +529,7 @@ const CmsDocsView = ({
                     <span className="preview-subtext">{previewUrl ? (isPdf ? "Visualizador PDF integrado" : "Vista previa no disponible") : "Esperando archivo..."}</span>
                   </div>
                   <div className="preview-toolbar">
-                    <button type="button" className="icon-tool-btn" onClick={() => previewUrl && window.open(previewUrl, '_blank')} disabled={!previewUrl} aria-label="Abrir en pestaña nueva">
+                    <button type="button" className="icon-tool-btn" onClick={() => { const safe = sanitizeUrl(previewUrl, "", { allowBlob: true }); if (safe) window.open(safe, '_blank', 'noopener,noreferrer'); }} disabled={!previewUrl} aria-label="Abrir en pestaña nueva">
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="15 3 21 3 21 9"></polyline>
                         <polyline points="9 21 3 21 3 15"></polyline>

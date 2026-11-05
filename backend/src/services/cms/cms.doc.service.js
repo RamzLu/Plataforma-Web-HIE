@@ -1,17 +1,14 @@
 import { prisma } from "../../config/prisma.js";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../../config/supabase.js";
 
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
-
-const supabase = createClient(
-  "https://ipwupwmbygtyiluezzle.supabase.co",
-  process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-);
+import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
 class CmsDocService {
-  async obtenerDocumentos() {
+  async obtenerDocumentos(esVistaAdmin = false) {
     const documentos = await prisma.documento.findMany({
+      where: esVistaAdmin === true ? {} : { estado: "PUBLICADO" },
       orderBy: { createdAt: "desc" },
       include: {
         archivo: true,
@@ -38,7 +35,8 @@ class CmsDocService {
         fileType: doc.archivo?.extension ? doc.archivo.extension.toUpperCase() : "PDF",
         fileSize: doc.archivo?.tamanioBytes ? `${(Number(doc.archivo.tamanioBytes) / (1024 * 1024)).toFixed(1)} MB` : "",
         fileUrl: pubUrl,
-        updatedAt: new Date(doc.updatedAt || doc.createdAt).toLocaleDateString("es-AR")
+        createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt || doc.createdAt
       };
     });
   }
@@ -72,7 +70,8 @@ class CmsDocService {
       .upload(nombreUnico, archivoSubido.buffer, { contentType: archivoSubido.mimetype, upsert: true });
 
     if (storageError) {
-      const error = new Error("Error subiendo a Supabase: " + storageError.message);
+      console.error("Error subiendo documento a Supabase:", storageError.message);
+      const error = new Error("No se pudo almacenar el documento.");
       error.statusCode = 500;
       throw error;
     }
@@ -112,6 +111,7 @@ class CmsDocService {
   }
 
   async actualizarDocumento(id, data, archivoSubido) {
+    const idBigInt = parsearIdBigInt(id, "ID de documento");
     const { titulo, categoria, estado } = data;
 
     let estadoPrisma = "BORRADOR";
@@ -119,7 +119,7 @@ class CmsDocService {
     if (estado?.toLowerCase() === "programado") estadoPrisma = "PROGRAMADO";
 
     const docExistente = await prisma.documento.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true }
     });
 
@@ -156,7 +156,8 @@ class CmsDocService {
         .upload(nombreUnico, archivoSubido.buffer, { contentType: archivoSubido.mimetype, upsert: true });
 
       if (storageError) {
-        const error = new Error("Error subiendo archivo nuevo: " + storageError.message);
+        console.error("Error subiendo archivo nuevo a Supabase:", storageError.message);
+        const error = new Error("No se pudo almacenar el nuevo documento.");
         error.statusCode = 500;
         throw error;
       }
@@ -175,7 +176,7 @@ class CmsDocService {
     }
 
     const documentoActualizado = await prisma.documento.update({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       data: {
         titulo: titulo || docExistente.titulo,
         categoriaId: categoriaId,
@@ -202,8 +203,9 @@ class CmsDocService {
   }
 
   async eliminarDocumento(id) {
+    const idBigInt = parsearIdBigInt(id, "ID de documento");
     const doc = await prisma.documento.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true }
     });
     
@@ -212,7 +214,7 @@ class CmsDocService {
         await supabase.storage.from("documentos").remove([doc.archivo.nombreArchivo]);
       }
       
-      await prisma.documento.delete({ where: { id: BigInt(id) } });
+      await prisma.documento.delete({ where: { id: idBigInt } });
       
       if (doc.archivoId) {
         await prisma.archivo.delete({ where: { id: doc.archivoId } });

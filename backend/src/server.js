@@ -1,11 +1,12 @@
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import rolesRoutes from './routes/roles.routes.js'
 import adminRoutes from './routes/admin.routes.js';
 import cmsRoutes from './routes/cms.routes.js';
 import errorHandler from './middlewares/error.middleware.js';
 
-// Importaciones para el CRON JOB
 import cron from 'node-cron';
 import CmsNoticiaService from './services/cms/cms.noticia.service.js';
 
@@ -13,23 +14,94 @@ const app = express()
 const PORT = process.env.PORT || 3000
 const PORT_frontend = process.env.PORT_FRONTEND || 5173
 
-// --- Middlewares ---
-app.use(cors())
-app.use(express.json())
+const normalizarOrigen = (url = '') => url.trim().replace(/\/+$/, '');
 
-// Conectamos las rutas
+const origenesConfigurados = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '')
+  .split(',')
+  .map(normalizarOrigen)
+  .filter(Boolean);
+
+const allowedOrigins = new Set(
+  origenesConfigurados.length > 0
+    ? origenesConfigurados
+    : [
+        `http://localhost:${PORT_frontend}`,
+        `http://127.0.0.1:${PORT_frontend}`,
+      ]
+);
+
+export const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const origenNormalizado = normalizarOrigen(origin);
+    if (allowedOrigins.has(origenNormalizado)) {
+      return callback(null, true);
+    }
+
+    const corsError = new Error('Origen no permitido por la política de CORS.');
+    corsError.statusCode = 403;
+    return callback(corsError, false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  maxAge: 86400,
+};
+
+app.disable('x-powered-by');
+
+if (process.env.TRUST_PROXY !== undefined) {
+  const hops = Number(process.env.TRUST_PROXY);
+  app.set('trust proxy', Number.isNaN(hops) ? process.env.TRUST_PROXY === 'true' : hops);
+} else if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: 'Demasiadas solicitudes desde esta dirección IP. Por favor, intente nuevamente más tarde.',
+  },
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => ['GET', 'HEAD', 'OPTIONS'].includes(req.method),
+  message: {
+    error: 'Se superó el límite de operaciones de escritura. Por favor, espere unos minutos.',
+  },
+});
+
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
+app.use(cors(corsOptions));
+app.use('/api', apiLimiter);
+app.use('/api', writeLimiter);
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
 app.use('/api/roles', rolesRoutes)
 app.use('/api/admin', adminRoutes);
 app.use('/api/cms', cmsRoutes);
 
 app.use(errorHandler);
 
-// --- TAREAS PROGRAMADAS (CRON JOB) ---
 cron.schedule('* * * * *', async () => {
   await CmsNoticiaService.publicarNoticiasProgramadas();
 });
 
-// --- Iniciar Servidor ---
 app.listen(PORT, () => {
   console.log(` Servidor corriendo en http://localhost:${PORT}`)
   console.log(` Frontend corriendo en http://localhost:${PORT_frontend}`)

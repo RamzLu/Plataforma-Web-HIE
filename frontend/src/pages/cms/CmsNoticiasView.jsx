@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
+import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
@@ -65,6 +68,8 @@ const CmsNoticiasView = ({
   onUpdateNews,
   onViewNews,
   loading,
+  initialCreateModal = false,
+  onModalOpened,
 }) => {
   const [viewTab, setViewTab] = useState("PUBLICADO");
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
@@ -107,6 +112,13 @@ const CmsNoticiasView = ({
     setHasUnsavedChanges(false);
     setShowModal(true);
   };
+
+  React.useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreate();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   const handleOpenEdit = (news) => {
     setEditingId(news.id);
@@ -165,7 +177,16 @@ const CmsNoticiasView = ({
         return;
       }
 
+      const noticia = (filteredNews || []).find((n) => n.id === id) || (newsList || []).find((n) => n.id === id);
+      const tituloNoticia = noticia?.title || noticia?.titulo || "Noticia";
+
       await deleteNoticia(id, token);
+      recordCmsActivity({
+        titulo: `Eliminó noticia: "${tituloNoticia}"`,
+        categoria: noticia?.category || "Noticias",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
       onDeleteNews(id);
       toast.success("Noticia eliminada correctamente.");
       setShowDeleteModal(false);
@@ -241,8 +262,42 @@ const CmsNoticiasView = ({
         formData.append("imagenes", file);
       });
 
+      const formatEstadoNombre = (est) => {
+        const upper = String(est || "").toUpperCase().trim();
+        if (upper === "BORRADOR") return "Borrador";
+        if (upper === "PUBLICADO") return "Publicado";
+        if (upper === "PROGRAMADO") return "Programado";
+        if (upper === "ARCHIVADO") return "Archivado";
+        return est;
+      };
+
+      const prevNoticia = editingId
+        ? (newsList || []).find((n) => String(n.id) === String(editingId))
+        : null;
+
+      let accionTitulo = "";
+      if (editingId) {
+        const prevEstado = prevNoticia?.estado ? String(prevNoticia.estado).toUpperCase() : null;
+        const nuevoEstado = String(estadoFinal).toUpperCase();
+
+        if (prevEstado && prevEstado !== nuevoEstado) {
+          accionTitulo = `Actualizó estado de "${titulo}" (${formatEstadoNombre(prevEstado)} a ${formatEstadoNombre(nuevoEstado)})`;
+        } else if (nuevoEstado === "BORRADOR") {
+          accionTitulo = `Actualizó contenido de borrador "${titulo}"`;
+        } else {
+          accionTitulo = `Actualizó contenido de noticia "${titulo}"`;
+        }
+      } else {
+        if (String(estadoFinal).toUpperCase() === "BORRADOR") {
+          accionTitulo = `Creó borrador: "${titulo}"`;
+        } else if (String(estadoFinal).toUpperCase() === "PROGRAMADO") {
+          accionTitulo = `Programó noticia "${titulo}"`;
+        } else {
+          accionTitulo = `Publicó noticia "${titulo}"`;
+        }
+      }
+
       let data;
-      
       if (editingId) {
         data = await updateNoticia(editingId, formData, token);
         toast.success(estadoFinal === "BORRADOR" ? "Borrador actualizado con éxito." : "Noticia actualizada con éxito.");
@@ -251,18 +306,45 @@ const CmsNoticiasView = ({
         toast.success(estadoFinal === "BORRADOR" ? "Borrador guardado con éxito." : "Noticia creada con éxito.");
       }
 
+      const catSlugMap = {
+        "cáncer de mama": "cancer-mama",
+        "cancer de mama": "cancer-mama",
+        "tu corazón": "tu-corazon",
+        "tu corazon": "tu-corazon",
+        "donación": "donacion",
+        "donacion": "donacion",
+        "dengue": "dengue"
+      };
+      const catKey = (categoria || "").trim().toLowerCase();
+      if (catSlugMap[catKey]) {
+        localStorage.removeItem(`visited_${catSlugMap[catKey]}`);
+      }
+
+      const editorResponsable = keycloak?.tokenParsed?.name || "Editor CMS";
+      recordCmsActivity({
+        titulo: accionTitulo,
+        categoria: categoria || "Noticias",
+        editor: editorResponsable,
+        estado: estadoFinal,
+        timestamp: Date.now(),
+        newsId: String(data.noticia?.id || editingId),
+      });
+
       const noticiaFormateada = {
         id: data.noticia?.id || editingId,
         title: titulo,
         body: [textoContenido],
         date: new Date().toLocaleDateString("es-AR"),
+        createdAt: data.noticia?.createdAt || prevNoticia?.createdAt || new Date().toISOString(),
+        updatedAt: data.noticia?.updatedAt || new Date().toISOString(),
         category: categoria || "General",
         estado: estadoFinal,
         isDraft: estadoFinal === "BORRADOR",
         images: data.noticia?.images || imagenesUrls || [],
-        editor: data.noticia?.editor || "Editor CMS", 
-        editedBy: data.noticia?.editedBy || null,
-        fechaPublicacion: data.noticia?.fechaPublicacion || null
+        editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable, 
+        editedBy: editingId ? (data.noticia?.editedBy || editorResponsable) : null,
+        fechaPublicacion: data.noticia?.fechaPublicacion || null,
+        actionTitle: accionTitulo,
       };
 
       if (editingId) {
@@ -339,7 +421,7 @@ const CmsNoticiasView = ({
       </div>
 
       <div className="cms-news-table-container">
-        <div className="activity-table-head news-table-head">
+        <div className="news-table-head">
           <div className="col-content">CONTENIDO</div>
           <div className="col-fecha">FECHA</div>
           <div className="col-editor">EDITOR</div>
@@ -362,13 +444,13 @@ const CmsNoticiasView = ({
             </div>
           ) : (
             filteredNews.map((news) => (
-              <div className="activity-row news-table-row" key={news.id}>
+              <div className="news-table-row" key={news.id}>
                 <div className="col-content" style={{ flexDirection: "row", alignItems: "center", gap: "15px" }}>
                   <div className="news-thumb-box">
-                    {news.images && news.images.length > 0 ? (
+                    {news.images && news.images.length > 0 && news.images[0] ? (
                       <img src={news.images[0]} alt="Miniatura" className="news-thumb-img" />
                     ) : (
-                      <div className="news-thumb-mock">HIE</div>
+                      <DefaultNewsImage alt="Miniatura" compact />
                     )}
                   </div>
                   <div className="news-title-interactive" onClick={() => onViewNews && onViewNews(news)} title="Ver comunicado completo">
@@ -569,7 +651,7 @@ const CmsNoticiasView = ({
                         </div>
                         <h3 className="preview-mock-title">{titulo || "El título de la noticia aparecerá aquí..."}</h3>
                         <div className="preview-mock-text ck-content">
-                          {cuerpoHtml ? <div dangerouslySetInnerHTML={{ __html: cuerpoHtml }} /> : <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>El contenido comenzará a aparecer aquí a medida que escribas.</p>}
+                          {cuerpoHtml ? <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(cuerpoHtml) }} /> : <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>El contenido comenzará a aparecer aquí a medida que escribas.</p>}
                         </div>
                       </div>
                       {imagenesUrls.length > 0 ? (
@@ -586,9 +668,8 @@ const CmsNoticiasView = ({
                           })}
                         </div>
                       ) : (
-                        <div className="preview-mosaic-empty">
-                          <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ opacity: 0.4, marginBottom: '10px' }}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                          [Imágenes]
+                        <div className="preview-mosaic-empty-wrap" style={{ width: "100%", height: "380px", borderRadius: "10px", overflow: "hidden", position: "sticky", top: "30px", alignSelf: "start" }}>
+                          <DefaultNewsImage alt="Imagen predeterminada institucional" />
                         </div>
                       )}
                     </div>

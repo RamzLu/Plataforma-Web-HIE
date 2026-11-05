@@ -3,6 +3,8 @@ import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn
 import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
+import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import "../../styles/pages/cms/CmsInstitucionView.css";
 import {
   CmsDeleteModal,
@@ -64,7 +66,7 @@ async function getCroppedImg(imageSrc, pixelCrop, fileName = "autoridad.jpg") {
   });
 }
 
-const CmsInstitucionView = () => {
+const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -174,6 +176,13 @@ const CmsInstitucionView = () => {
     setHasUnsavedChanges(false);
     setShowAutoridadModal(true);
   };
+
+  useEffect(() => {
+    if (initialCreateModal) {
+      handleOpenCreateAutoridad();
+      if (onModalOpened) onModalOpened();
+    }
+  }, [initialCreateModal]);
 
   // --- ABRIR MODAL EDITAR ---
   const handleOpenEditAutoridad = (autoridad) => {
@@ -357,6 +366,14 @@ const CmsInstitucionView = () => {
     try {
       await deleteAutoridad(autoridadToDelete.id, keycloak?.token);
 
+      const nombreAutoridad = `${autoridadToDelete.nombre || ""} ${autoridadToDelete.apellido || ""}`.trim() || "Autoridad";
+      recordCmsActivity({
+        titulo: `Eliminó autoridad: "${nombreAutoridad}"`,
+        categoria: "Autoridades",
+        editor: keycloak?.tokenParsed?.name || "Editor CMS",
+        estado: "ELIMINADO",
+      });
+
       setAutoridades((prev) => prev.filter((a) => a.id !== autoridadToDelete.id));
       toast.success("Autoridad eliminada correctamente.", { id: toastId });
       setAutoridadToDelete(null);
@@ -369,17 +386,31 @@ const CmsInstitucionView = () => {
 
   // --- GUARDAR REDES SOCIALES ---
   const handleSaveSocial = async () => {
+    const fbRaw = (tempSocial.facebook || "").trim();
+    const igRaw = (tempSocial.instagram || "").trim();
+
+    if ((fbRaw && !sanitizeUrl(fbRaw)) || (igRaw && !sanitizeUrl(igRaw))) {
+      toast.error("Los enlaces de redes sociales deben ser URLs válidas con http:// o https://.");
+      return;
+    }
+
     setIsSaving(true);
     const toastId = toast.loading("Actualizando redes sociales...");
 
     try {
-      const data = await updateRedesSociales(tempSocial, keycloak?.token);
+      const data = await updateRedesSociales(
+        {
+          facebook: fbRaw ? sanitizeUrl(fbRaw) : "",
+          instagram: igRaw ? sanitizeUrl(igRaw) : "",
+        },
+        keycloak?.token
+      );
 
       setSocialData(data);
       setIsEditingSocial(false);
       toast.success("¡Redes sociales actualizadas correctamente!", { id: toastId });
     } catch (error) {
-      toast.error("Error al guardar las redes sociales.", { id: toastId });
+      toast.error(error?.message || "Error al guardar las redes sociales.", { id: toastId });
     } finally {
       setIsSaving(false);
     }

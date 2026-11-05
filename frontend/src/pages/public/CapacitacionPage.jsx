@@ -7,6 +7,7 @@ import fondoBanner from "../../assets/banner_capacitaciones.png";
 import imgCapacitacion1 from "../../assets/fondoCARRUSELnoticias2.jpg";
 import imgCapacitacion2 from "../../assets/fondoCARRUSELnoticias3.jpg";
 import { getCapacitacionesPublicas } from "../../api/capacitaciones.api";
+import { sanitizeUrl } from "../../utils/sanitizeUrl";
 
 const capacitacionesData = [
   {
@@ -107,7 +108,6 @@ const capacitacionesData = [
   },
 ];
 
-// Opciones de filtrado por Formato de Contenido
 const FILTROS_FORMATO = [
   { id: "all", label: "TODOS", icon: "grid_view" },
   { id: "video", label: "VIDEO", icon: "play_circle" },
@@ -115,7 +115,6 @@ const FILTROS_FORMATO = [
   { id: "pdf", label: "PDF", icon: "picture_as_pdf" },
 ];
 
-// Opciones de filtrado por Modalidad
 const FILTROS_MODALIDAD = [
   { id: "all", label: "TODAS", icon: "dashboard" },
   { id: "presencial", label: "PRESENCIAL", icon: "apartment" },
@@ -169,7 +168,6 @@ const formatItemData = (item) => {
   const modalidadTag = (item.modalidad || item.modalidadTag || "PRESENCIAL").toUpperCase();
 
   let tipo = "presencial";
-  // archivoTipo tiene prioridad máxima: refleja exactamente qué material fue cargado en el CMS
   if (item.archivoTipo === "documento") {
     tipo = "pdf";
   } else if (item.archivoTipo === "video") {
@@ -250,7 +248,6 @@ const parseVideoUrl = (url) => {
   if (!url || typeof url !== "string") return { isEmbed: false, isVertical: false, src: "" };
   const clean = url.trim();
 
-  // YouTube Shorts: youtube.com/shorts/ID
   const ytShortMatch = clean.match(/(?:youtube\.com\/shorts\/)([\w-]{11})/i);
   if (ytShortMatch && ytShortMatch[1]) {
     return {
@@ -260,7 +257,6 @@ const parseVideoUrl = (url) => {
     };
   }
 
-  // YouTube general: watch?v=ID or youtu.be/ID or embed/ID
   const ytMatch = clean.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
   if (ytMatch && ytMatch[1]) {
     return {
@@ -270,7 +266,6 @@ const parseVideoUrl = (url) => {
     };
   }
 
-  // Vimeo
   const vimeoMatch = clean.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
   if (vimeoMatch && vimeoMatch[1]) {
     return {
@@ -280,11 +275,11 @@ const parseVideoUrl = (url) => {
     };
   }
 
-  // Direct video file (e.g. Supabase storage URL .mp4, .webm, etc.)
+  const safeDirectSrc = sanitizeUrl(clean);
   return {
     isEmbed: false,
     isVertical: false,
-    src: clean,
+    src: safeDirectSrc,
   };
 };
 
@@ -332,7 +327,6 @@ const CapacitacionPage = () => {
     setModalidadFilter("all");
   };
 
-  // Bloquear el scroll de la página cuando cualquier modal esté abierto
   useEffect(() => {
     const isModalOpen = Boolean(selectedCurso || activeVideo || activeImage);
     if (isModalOpen) {
@@ -352,7 +346,6 @@ const CapacitacionPage = () => {
     }
   }, [selectedCurso, activeVideo, activeImage]);
 
-  // Cerrar modales con tecla Escape
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -380,11 +373,9 @@ const CapacitacionPage = () => {
     });
   };
 
-  // Filtrado reactivo por formato de contenido (video, imagen, pdf), modalidad (presencial, virtual, hibrido) y búsqueda
   const itemsFiltrados = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     return capacitaciones.map(formatItemData).filter((item) => {
-      // 1. Filtrado por Formato de contenido
       let matchFormato = false;
       if (formatoFilter === "all") {
         matchFormato = true;
@@ -396,7 +387,6 @@ const CapacitacionPage = () => {
         matchFormato = item.tipo === "pdf";
       }
 
-      // 2. Filtrado por Modalidad
       let matchModalidad = false;
       const modNorm = getModalidadNormalizada(item);
       if (modalidadFilter === "all") {
@@ -409,7 +399,6 @@ const CapacitacionPage = () => {
         matchModalidad = modNorm === "hibrido";
       }
 
-      // 3. Filtrado por término de búsqueda
       const matchSearch =
         !term ||
         (item.titulo && item.titulo.toLowerCase().includes(term)) ||
@@ -425,9 +414,6 @@ const CapacitacionPage = () => {
 
   return (
     <main className="documentacion-page capacitacion-page-root">
-      {/* ==========================================================================
-          1. BANNER INSTITUCIONAL UNIFICADO
-          ========================================================================== */}
       <PageBanner
         currentPage="capacitaciones"
         title="CAPACITACIONES Y CHARLAS"
@@ -437,9 +423,6 @@ const CapacitacionPage = () => {
       />
 
       <div className="documentacion-container capacitacion-container">
-        {/* ==========================================================================
-            2. BUSCADOR INSTITUCIONAL EN PÍLDORA (Estilo Stella)
-            ========================================================================== */}
         <div className="doc-search-wrapper">
           <div className="doc-search-bar">
             <svg
@@ -467,11 +450,7 @@ const CapacitacionPage = () => {
           </div>
         </div>
 
-        {/* ==========================================================================
-            3. FILTROS AVANZADOS: FORMATO DE CONTENIDO Y MODALIDAD
-            ========================================================================== */}
         <div className="cap-filters-container">
-          {/* Fila 1: Formato de Contenido (video, imagen, pdf) */}
           <div className="cap-filter-row">
             <div className="cap-filter-header">
               <span className="material-symbols-outlined cap-filter-icon">folder_open</span>
@@ -492,7 +471,6 @@ const CapacitacionPage = () => {
             </div>
           </div>
 
-          {/* Fila 2: Modalidad (virtual, presencial o hibrido) */}
           <div className="cap-filter-row">
             <div className="cap-filter-header">
               <span className="material-symbols-outlined cap-filter-icon">tune</span>
@@ -513,7 +491,6 @@ const CapacitacionPage = () => {
             </div>
           </div>
 
-          {/* Botón flotante para limpiar filtros si hay alguno aplicado */}
           {(formatoFilter !== "all" || modalidadFilter !== "all" || searchTerm) && (
             <div className="cap-filter-reset-wrap">
               <button
@@ -529,9 +506,6 @@ const CapacitacionPage = () => {
           )}
         </div>
 
-        {/* ==========================================================================
-            4. CONTENIDO PRINCIPAL: CABECERA EDITORIAL Y GRILLA DE TARJETAS
-            ========================================================================== */}
         <div className="w-full-anim-wrapper">
           <AnimatedContent distance={30} direction="vertical" delay={0.08}>
             <div className="cap-grid-section">
@@ -594,7 +568,6 @@ const CapacitacionPage = () => {
                         onClick={() => setSelectedCurso(item)}
                       >
                         <div className="training-card-top">
-                          {/* Cabecera Gráfica con Proporción 16:9 y Badge Temático */}
                           <div className="training-media-container">
                             {item.imagen ? (
                               <img
@@ -626,7 +599,6 @@ const CapacitacionPage = () => {
                               </div>
                             )}
 
-                            {/* Badge Temático Flotante con Icono y Etiqueta Normalizada */}
                             <span className={`training-floating-badge badge-${item.tipo}`}>
                               <span
                                 className="material-symbols-outlined"
@@ -644,7 +616,6 @@ const CapacitacionPage = () => {
                             </span>
                           </div>
 
-                          {/* Cuerpo Editorial de la Tarjeta */}
                           <div className="training-card-body">
                             <div className="training-date-tag">
                               <span
@@ -695,7 +666,6 @@ const CapacitacionPage = () => {
                           </div>
                         </div>
 
-                        {/* Botón de Acción Anclado */}
                         <div className="training-card-action">
                           <button
                             type="button"
@@ -724,9 +694,6 @@ const CapacitacionPage = () => {
           </AnimatedContent>
         </div>
 
-        {/* ==========================================================================
-            5. BANNER INFORMATIVO: ACCESO A LA REVISTA CIENTÍFICA (Stella)
-            ========================================================================== */}
         <section className="cap-docencia-section">
           <div className="cap-docencia-card">
             <div className="cap-docencia-left">
@@ -766,9 +733,6 @@ const CapacitacionPage = () => {
         </section>
       </div>
 
-      {/* ==========================================================================
-          MODAL DETALLADO DE CAPACITACIÓN / CHARLAS
-          ========================================================================== */}
       {selectedCurso && (
         <div
           className="cap-modal-overlay"
@@ -786,7 +750,6 @@ const CapacitacionPage = () => {
               &times;
             </button>
 
-            {/* Banner de portada si está disponible */}
             {selectedCurso.imagen && (
               <div className="cap-modal-banner-wrap">
                 <img
@@ -828,7 +791,6 @@ const CapacitacionPage = () => {
 
             <h2 className="cap-modal-title">{selectedCurso.titulo}</h2>
 
-            {/* Grilla moderna de metadatos en 2 columnas */}
             <div className="cap-modal-meta-grid">
               <div className="cap-modal-meta-row">
                 <span className="cap-info-icon">
@@ -885,7 +847,6 @@ const CapacitacionPage = () => {
               )}
             </div>
 
-            {/* Caja de Descripción (oculta automáticamente si está vacía) */}
             {Boolean(selectedCurso.descripcion && selectedCurso.descripcion.trim()) && (
               <div className="cap-modal-desc-box">
                 <div className="cap-modal-desc-box-title">
@@ -901,7 +862,6 @@ const CapacitacionPage = () => {
               </div>
             )}
 
-            {/* Caja de Temario / Programa Académico (oculta si está vacía) */}
             {Boolean(
               (selectedCurso.temario && selectedCurso.temario.trim()) ||
               (selectedCurso.contenido &&
@@ -927,7 +887,6 @@ const CapacitacionPage = () => {
               </div>
             )}
 
-            {/* Visualización interactiva de Infografía adjunta */}
             {(selectedCurso.archivoTipo === "imagen" || selectedCurso.tipo === "imagen" || selectedCurso.tipo === "infografia") && selectedCurso.archivoUrl && (
               <div className="cap-modal-desc-box">
                 <div className="cap-modal-desc-box-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
@@ -976,7 +935,6 @@ const CapacitacionPage = () => {
                     className="cap-infografia-interactive-img"
                   />
 
-                  {/* Badge permanente para que en móviles y desktop sea 100% obvio */}
                   <div className="cap-infografia-tap-badge">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="15" height="15">
                       <circle cx="11" cy="11" r="8"></circle>
@@ -990,7 +948,6 @@ const CapacitacionPage = () => {
               </div>
             )}
 
-            {/* Acciones principales del modal (solo si hay video o documento descargable) */}
             {((selectedCurso.videoUrl || (selectedCurso.archivoTipo === "video" && selectedCurso.archivoUrl)) ||
               ((selectedCurso.archivoUrl || selectedCurso.pdfUrl) &&
                 selectedCurso.archivoTipo !== "video" &&
@@ -998,7 +955,6 @@ const CapacitacionPage = () => {
                 selectedCurso.tipo !== "imagen" &&
                 selectedCurso.tipo !== "infografia")) && (
               <div className="cap-modal-actions">
-                {/* BOTÓN VER VIDEO (SE SOBREPONE A LA PANTALLA) */}
                 {(selectedCurso.videoUrl || (selectedCurso.archivoTipo === "video" && selectedCurso.archivoUrl)) && (
                   <button
                     type="button"
@@ -1014,14 +970,13 @@ const CapacitacionPage = () => {
                   </button>
                 )}
 
-                {/* BOTÓN DESCARGAR TEMARIO / DOCUMENTO */}
-                {(selectedCurso.archivoUrl || selectedCurso.pdfUrl) &&
+                {sanitizeUrl(selectedCurso.archivoUrl || selectedCurso.pdfUrl) &&
                   selectedCurso.archivoTipo !== "video" &&
                   selectedCurso.archivoTipo !== "imagen" &&
                   selectedCurso.tipo !== "imagen" &&
                   selectedCurso.tipo !== "infografia" && (
                     <a
-                      href={selectedCurso.archivoUrl || selectedCurso.pdfUrl}
+                      href={sanitizeUrl(selectedCurso.archivoUrl || selectedCurso.pdfUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       download
@@ -1041,9 +996,6 @@ const CapacitacionPage = () => {
         </div>
       )}
 
-      {/* ==========================================================================
-          MODAL REPRODUCTOR DE VIDEO SOBREPUESTO A LA PANTALLA
-          ========================================================================== */}
       {activeVideo && (
         <div
           className="cap-video-modal-overlay"
@@ -1127,15 +1079,11 @@ const CapacitacionPage = () => {
         </div>
       )}
 
-      {/* ==========================================================================
-          VISOR DE INFOGRAFÍA PANTALLA COMPLETA (SIN MARCOS INVASIVOS)
-          ========================================================================== */}
       {activeImage && (
         <div
           className="cap-image-lightbox-overlay"
           onClick={() => setActiveImage(null)}
         >
-          {/* Botón flotante para volver atrás */}
           <button
             type="button"
             className="cap-image-back-btn"
@@ -1149,7 +1097,6 @@ const CapacitacionPage = () => {
             <span>Volver</span>
           </button>
 
-          {/* Imagen ampliada limpia y maximizada */}
           <img
             src={activeImage.url}
             alt={activeImage.titulo || "Infografía ampliada"}

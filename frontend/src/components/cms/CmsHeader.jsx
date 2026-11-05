@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const CmsHeader = ({ userName, isAdmin, onLogoutClick, activeTab }) => {
+const CmsHeader = ({ userName, onLogoutClick, activeTab }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -78,7 +78,7 @@ const CmsHeader = ({ userName, isAdmin, onLogoutClick, activeTab }) => {
             <div className="cms-user-info">
               <span className="cms-user-name" style={{ color: '#0f172a', fontWeight: '700' }}>{userName}</span>
               <span className="cms-user-role" style={{ color: '#64748b', fontSize: '0.8rem' }}>
-                {isAdmin ? "Administrador" : "Editor CMS"}
+                Editor CMS
               </span>
             </div>
             {/* Flechita indicadora de menú */}
