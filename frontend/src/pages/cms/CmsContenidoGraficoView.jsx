@@ -12,11 +12,13 @@ import {
   PortalAprendePreview,
   PortalCarouselPreview,
   PortalPatientInfoPreview,
+  PortalResidenciasHeroPreview,
 } from "../../components/cms/CmsContenidoGraficoCorrectionModal";
 import {
   DEFAULT_APRENDE_INICIO,
   DEFAULT_CARRUSEL_INICIO,
   DEFAULT_PACIENTES_INICIO,
+  DEFAULT_RESIDENCIAS_HERO,
   getPortalRouteLabel,
   resolveGraphicImageUrl,
 } from "../../utils/contenidoGraficoPresets.js";
@@ -26,6 +28,7 @@ const CmsContenidoGraficoView = () => {
     DEFAULT_CARRUSEL_INICIO,
     DEFAULT_PACIENTES_INICIO,
     DEFAULT_APRENDE_INICIO,
+    DEFAULT_RESIDENCIAS_HERO,
   ]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -132,6 +135,18 @@ const CmsContenidoGraficoView = () => {
           try {
             sessionStorage.setItem(
               "hie_public_aprende_inicio_cache",
+              JSON.stringify(espacioActualizado)
+            );
+          } catch {
+            // Ignorar si sessionStorage no está disponible
+          }
+        } else if (
+          espacioActualizado.id === "espacio-residencias-destacado" ||
+          espacioActualizado.id === "espacio-banner-capacitacion"
+        ) {
+          try {
+            sessionStorage.setItem(
+              "hie_public_residencias_destacado_cache",
               JSON.stringify(espacioActualizado)
             );
           } catch {
@@ -545,6 +560,30 @@ const CmsContenidoGraficoView = () => {
                   activeIndex={previewSlideIndex}
                   onSelectItem={setPreviewSlideIndex}
                 />
+              ) : selectedEspacio.id === "espacio-residencias-destacado" ||
+                selectedEspacio.id === "espacio-banner-capacitacion" ||
+                selectedEspacio.esTarjetaResidencias ? (
+                <PortalResidenciasHeroPreview
+                  titulo={
+                    selectedEspacio.titulo ||
+                    selectedEspacio.textoSuperpuesto ||
+                    DEFAULT_RESIDENCIAS_HERO.titulo
+                  }
+                  parrafoDescripcion={
+                    selectedEspacio.parrafoDescripcion ||
+                    DEFAULT_RESIDENCIAS_HERO.parrafoDescripcion
+                  }
+                  textoBoton={
+                    selectedEspacio.textoBoton ||
+                    DEFAULT_RESIDENCIAS_HERO.textoBoton
+                  }
+                  enlaceUrl={
+                    selectedEspacio.enlaceUrl ||
+                    DEFAULT_RESIDENCIAS_HERO.enlaceUrl
+                  }
+                  imagen={previewImages[0]}
+                  altText={selectedEspacio.altText}
+                />
               ) : (
                 <div className="cg-preview-banner-box">
                   {activePreviewUrl ? (
@@ -590,7 +629,10 @@ const CmsContenidoGraficoView = () => {
                   </p>
                 </div>
 
-                {selectedEspacio.id === "espacio-banner-inicio" && (
+                {(selectedEspacio.id === "espacio-banner-inicio" ||
+                  selectedEspacio.id === "espacio-residencias-destacado" ||
+                  selectedEspacio.id === "espacio-banner-capacitacion" ||
+                  selectedEspacio.esTarjetaResidencias) && (
                   <div className="cg-detail-card">
                     <span className="cg-detail-label">Botón y Redirección</span>
                     <p className="cg-detail-value">

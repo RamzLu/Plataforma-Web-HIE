@@ -54,7 +54,8 @@ export const ESPACIOS_FIJOS_DEFINICIONES = [
     id: "espacio-banner-inicio",
     orden: 1,
     nombre: "Carrusel Principal de Inicio",
-    descripcion: "Carrusel hero de bienvenida en la portada principal del portal",
+    descripcion:
+      "Carrusel hero de bienvenida en la portada principal del portal",
     tipo: "Carrusel Principal",
     ubicacionClave: "espacio-banner-inicio",
     page: "Inicio",
@@ -63,22 +64,33 @@ export const ESPACIOS_FIJOS_DEFINICIONES = [
     defaults: {
       altText:
         "Carrusel principal de bienvenida del Hospital Interdistrital Evita de Formosa",
-      textoSuperpuesto:
-        "6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL",
+      textoSuperpuesto: "6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL",
       textoBoton: "CONOCENOS",
       enlaceUrl: "/acerca-de",
       imagenes: [
-        { presetKey: "carrusel-inicio-1", fileName: "fondoHospitalCarrusel1.jpg" },
-        { presetKey: "carrusel-inicio-2", fileName: "fondoHospitalCarrusel2.jpg" },
-        { presetKey: "carrusel-inicio-3", fileName: "fondoHospitalCarrusel3.jpg" },
-        { presetKey: "carrusel-inicio-4", fileName: "fondoHospitalCarrusel4.jpg" },
+        {
+          presetKey: "carrusel-inicio-1",
+          fileName: "fondoHospitalCarrusel1.jpg",
+        },
+        {
+          presetKey: "carrusel-inicio-2",
+          fileName: "fondoHospitalCarrusel2.jpg",
+        },
+        {
+          presetKey: "carrusel-inicio-3",
+          fileName: "fondoHospitalCarrusel3.jpg",
+        },
+        {
+          presetKey: "carrusel-inicio-4",
+          fileName: "fondoHospitalCarrusel4.jpg",
+        },
       ],
     },
   },
   {
     id: "espacio-seccion-pacientes",
     orden: 2,
-    nombre: "Información para Pacientes",
+    nombre: "Sección Información para Pacientes",
     descripcion:
       "Sección interactiva de 5 desplegables informativos con sus imágenes asociadas en Inicio",
     tipo: "Acordeón Informativo",
@@ -145,9 +157,9 @@ export const ESPACIOS_FIJOS_DEFINICIONES = [
   {
     id: "espacio-aprende-inicio",
     orden: 3,
-    nombre: "Aprendé con el Evita",
+    nombre: "Sección Educación para la Salud",
     descripcion:
-      "Bloque de educación para la salud con imagen principal, textos y 3 tarjetas con redirección en Inicio",
+      "Bloque de educación médica y preventiva con imagen editorial y 3 tarjetas con redirección en Inicio",
     tipo: "Bloque Educativo + 3 Tarjetas",
     ubicacionClave: "espacio-aprende-inicio",
     page: "Inicio",
@@ -210,50 +222,59 @@ export const ESPACIOS_FIJOS_DEFINICIONES = [
     },
   },
   {
-    id: "espacio-banner-capacitacion",
+    id: "espacio-residencias-destacado",
     orden: 4,
-    nombre: "Banner Principal de Capacitación",
-    descripcion: "Cabecera visual del área de Docencia e Investigación",
-    tipo: "Banner de Cabecera",
-    ubicacionClave: "espacio-banner-capacitacion",
-    page: "Capacitación",
-    dimensiones: "1920x600px",
-    aspectRatio: 16 / 5,
+    nombre: "Sección Bienvenida de Residencias",
+    descripcion:
+      "Tarjeta destacada de bienvenida y convocatoria de especialidades en Residencias",
+    tipo: "Tarjeta Destacada",
+    ubicacionClave: "espacio-residencias-destacado",
+    page: "Residencias",
+    dimensiones: "1350x1180px aprox.",
+    aspectRatio: 1348 / 1181,
+    esTarjetaResidencias: true,
+    cantidadItemsFijos: 1,
     defaults: {
-      altText: "Cabecera de la sección de Capacitación y Docencia Hospitalaria",
-      textoSuperpuesto: "CAPACITACIÓN Y DOCENCIA",
-      textoBoton: "",
-      enlaceUrl: "",
+      altText: "Equipo médico y residentes del Hospital Interdistrital Evita",
+      titulo: "Excelencia en Alta Complejidad & Vocación Pública",
+      parrafoDescripcion:
+        "El Hospital Interdistrital Evita convoca a profesionales de las ciencias médicas para integrarse a sus equipos interdisciplinarios. Formación tutelada en servicio, tecnología biomédica de vanguardia y dedicación humanizada al servicio de toda la región.",
+      textoBoton: "Ver Especialidades Disponibles",
+      enlaceUrl: "/especialidades",
+      textoSuperpuesto: "",
       imagenes: [
-        { presetKey: "banner-capacitaciones", fileName: "banner_capacitaciones.png" },
-      ],
-    },
-  },
-  {
-    id: "espacio-banner-institucional",
-    orden: 5,
-    nombre: "Banner Principal Institucional",
-    descripcion: "Portada fija de la sección Acerca del Hospital y Autoridades",
-    tipo: "Banner de Cabecera",
-    ubicacionClave: "espacio-banner-institucional",
-    page: "Institucional",
-    dimensiones: "1920x820px",
-    aspectRatio: 1501 / 641,
-    defaults: {
-      altText: "Vista panorámica del edificio del Hospital Interdistrital Evita",
-      textoSuperpuesto: "ACERCA DEL HOSPITAL",
-      textoBoton: "",
-      enlaceUrl: "",
-      imagenes: [
-        { presetKey: "carrusel-inicio-1", fileName: "institucional_fachada.jpg" },
+        {
+          presetKey: "residencias-hero",
+          fileName: "medicos-residencias.jpg",
+          titulo: "Excelencia en Alta Complejidad & Vocación Pública",
+          parrafoDescripcion:
+            "El Hospital Interdistrital Evita convoca a profesionales de las ciencias médicas para integrarse a sus equipos interdisciplinarios. Formación tutelada en servicio, tecnología biomédica de vanguardia y dedicación humanizada al servicio de toda la región.",
+          textoBoton: "Ver Especialidades Disponibles",
+          enlaceUrl: "/especialidades",
+          altText:
+            "Equipo médico y residentes del Hospital Interdistrital Evita",
+        },
       ],
     },
   },
 ];
 
+const ALIASES_ESPACIOS = {
+  "espacio-banner-capacitacion": "espacio-residencias-destacado",
+  "espacio-banner-especialidades": "espacio-aprende-inicio",
+};
+
 const ESPACIOS_MAP = new Map(
-  ESPACIOS_FIJOS_DEFINICIONES.map((def) => [def.id, def])
+  ESPACIOS_FIJOS_DEFINICIONES.map((def) => [def.id, def]),
 );
+
+// Registrar alias en ESPACIOS_MAP
+Object.entries(ALIASES_ESPACIOS).forEach(([alias, targetId]) => {
+  const targetDef = ESPACIOS_MAP.get(targetId);
+  if (targetDef) {
+    ESPACIOS_MAP.set(alias, targetDef);
+  }
+});
 
 const PRESET_KEYS_VALIDAS = new Set([
   "carrusel-inicio-1",
@@ -274,6 +295,7 @@ const PRESET_KEYS_VALIDAS = new Set([
   "banner-noticias",
   "banner-documentacion",
   "banner-residencias",
+  "residencias-hero",
 ]);
 
 const COLORES_TARJETA_APRENDE = ["green", "yellow", "blue"];
@@ -321,10 +343,18 @@ async function obtenerBucketSubida() {
       return resolvedUploadBucket;
     }
 
-    const { error: createErr } = await supabase.storage.createBucket(PRIMARY_BUCKET, {
-      public: true,
-    });
-    if (!createErr || String(createErr.message || "").toLowerCase().includes("already exists")) {
+    const { error: createErr } = await supabase.storage.createBucket(
+      PRIMARY_BUCKET,
+      {
+        public: true,
+      },
+    );
+    if (
+      !createErr ||
+      String(createErr.message || "")
+        .toLowerCase()
+        .includes("already exists")
+    ) {
       resolvedUploadBucket = PRIMARY_BUCKET;
       return resolvedUploadBucket;
     }
@@ -345,7 +375,9 @@ function resolverUrlPublicaArchivo(archivo) {
   if (typeof archivo.ruta === "string" && archivo.ruta.includes("/")) {
     bucket = archivo.ruta.split("/")[0] || PRIMARY_BUCKET;
   }
-  const { data } = supabase.storage.from(bucket).getPublicUrl(archivo.nombreArchivo);
+  const { data } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(archivo.nombreArchivo);
   return data?.publicUrl || null;
 }
 
@@ -358,7 +390,10 @@ async function eliminarArchivoAlmacenado(archivo) {
   if (typeof archivo.ruta === "string" && archivo.ruta.includes("/")) {
     bucket = archivo.ruta.split("/")[0] || PRIMARY_BUCKET;
   }
-  await supabase.storage.from(bucket).remove([archivo.nombreArchivo]).catch(() => {});
+  await supabase.storage
+    .from(bucket)
+    .remove([archivo.nombreArchivo])
+    .catch(() => {});
   await prisma.archivo.delete({ where: { id: archivo.id } }).catch(() => {});
 }
 
@@ -431,11 +466,13 @@ function formatearEspacioDesdeFilas(def, filas = []) {
       const metaFila = parsearMetadatosDescripcion(fila.descripcion);
       const urlPublica = resolverUrlPublicaArchivo(fila.archivo);
       const presetKey =
-        !urlPublica && metaFila.presetKey && PRESET_KEYS_VALIDAS.has(metaFila.presetKey)
+        !urlPublica &&
+        metaFila.presetKey &&
+        PRESET_KEYS_VALIDAS.has(metaFila.presetKey)
           ? metaFila.presetKey
           : !urlPublica
-          ? presetItem.presetKey
-          : null;
+            ? presetItem.presetKey
+            : null;
 
       if (esPrincipal) {
         return {
@@ -466,7 +503,7 @@ function formatearEspacioDesdeFilas(def, filas = []) {
       }
 
       const enlaceSaneado = normalizarRutaInternaPortal(
-        sanitizarUrlLectura(fila.enlaceUrl, presetItem.enlaceUrl, true)
+        sanitizarUrlLectura(fila.enlaceUrl, presetItem.enlaceUrl, true),
       );
 
       return {
@@ -522,7 +559,9 @@ function formatearEspacioDesdeFilas(def, filas = []) {
       textoSuperpuesto: "",
       textoBoton: "",
       enlaceUrl: "",
-      updatedAt: primeraFila?.updatedAt ? primeraFila.updatedAt.toISOString() : null,
+      updatedAt: primeraFila?.updatedAt
+        ? primeraFila.updatedAt.toISOString()
+        : null,
       imagenes: itemsAprende,
     };
   }
@@ -562,11 +601,13 @@ function formatearEspacioDesdeFilas(def, filas = []) {
       const metaFila = parsearMetadatosDescripcion(fila.descripcion);
       const urlPublica = resolverUrlPublicaArchivo(fila.archivo);
       const presetKey =
-        !urlPublica && metaFila.presetKey && PRESET_KEYS_VALIDAS.has(metaFila.presetKey)
+        !urlPublica &&
+        metaFila.presetKey &&
+        PRESET_KEYS_VALIDAS.has(metaFila.presetKey)
           ? metaFila.presetKey
           : !urlPublica
-          ? presetItem.presetKey
-          : null;
+            ? presetItem.presetKey
+            : null;
 
       return {
         id: fila.id.toString(),
@@ -580,7 +621,8 @@ function formatearEspacioDesdeFilas(def, filas = []) {
         orden: ordenEsperado,
         titulo: fila.titulo || presetItem.titulo,
         textoDesplegable:
-          typeof metaFila.textoDesplegable === "string" && metaFila.textoDesplegable.trim()
+          typeof metaFila.textoDesplegable === "string" &&
+          metaFila.textoDesplegable.trim()
             ? metaFila.textoDesplegable
             : presetItem.textoDesplegable,
         altText: fila.altText || presetItem.altText,
@@ -608,12 +650,140 @@ function formatearEspacioDesdeFilas(def, filas = []) {
       textoSuperpuesto: "",
       textoBoton: "",
       enlaceUrl: "",
-      updatedAt: primeraFila?.updatedAt ? primeraFila.updatedAt.toISOString() : null,
+      updatedAt: primeraFila?.updatedAt
+        ? primeraFila.updatedAt.toISOString()
+        : null,
       imagenes: imagenesAcordeon,
     };
   }
 
-  // Caso 3: Espacios de tipo carrusel o banner
+  // Caso 3: Sección destacada de Residencias (1 tarjeta informativa con imagen y botón de redirección)
+  if (def.esTarjetaResidencias) {
+    const filasOrdenadas = Array.isArray(filas)
+      ? [...filas].sort((a, b) => (a.orden || 0) - (b.orden || 0))
+      : [];
+    const primeraFila = filasOrdenadas[0] || null;
+
+    if (!primeraFila) {
+      const imgDefault = def.defaults.imagenes[0];
+      return {
+        id: def.id,
+        orden: def.orden,
+        nombre: def.nombre,
+        descripcion: def.descripcion,
+        tipo: def.tipo,
+        page: def.page,
+        ubicacion: def.tipo,
+        dimensiones: def.dimensiones,
+        aspectRatio: def.aspectRatio,
+        esTarjetaResidencias: true,
+        cantidadItemsFijos: 1,
+        estado: "PUBLICADO",
+        activo: true,
+        rejectionReason: null,
+        altText: def.defaults.altText,
+        titulo: def.defaults.titulo,
+        parrafoDescripcion: def.defaults.parrafoDescripcion,
+        textoBoton: def.defaults.textoBoton,
+        enlaceUrl: def.defaults.enlaceUrl,
+        textoSuperpuesto: "",
+        updatedAt: null,
+        imagenes: [
+          {
+            id: `preset-${def.id}-1`,
+            archivoId: null,
+            url: null,
+            presetKey: imgDefault.presetKey,
+            fileName: imgDefault.fileName,
+            orden: 1,
+            titulo: imgDefault.titulo,
+            parrafoDescripcion: imgDefault.parrafoDescripcion,
+            textoBoton: imgDefault.textoBoton,
+            enlaceUrl: imgDefault.enlaceUrl,
+            altText: imgDefault.altText,
+          },
+        ],
+      };
+    }
+
+    const metaFila = parsearMetadatosDescripcion(primeraFila.descripcion);
+    const urlPublica = resolverUrlPublicaArchivo(primeraFila.archivo);
+    const presetKey =
+      !urlPublica &&
+      metaFila.presetKey &&
+      PRESET_KEYS_VALIDAS.has(metaFila.presetKey)
+        ? metaFila.presetKey
+        : !urlPublica
+          ? def.defaults.imagenes[0].presetKey
+          : null;
+
+    const titulo = primeraFila.titulo || def.defaults.titulo;
+    const parrafoDescripcion =
+      typeof metaFila.parrafoDescripcion === "string" &&
+      metaFila.parrafoDescripcion.trim()
+        ? metaFila.parrafoDescripcion
+        : def.defaults.parrafoDescripcion;
+    const textoBoton =
+      typeof metaFila.textoBoton === "string" && metaFila.textoBoton.trim()
+        ? metaFila.textoBoton
+        : def.defaults.textoBoton;
+    const enlaceSaneado = normalizarRutaInternaPortal(
+      sanitizarUrlLectura(primeraFila.enlaceUrl, def.defaults.enlaceUrl, true),
+    );
+    const enlaceUrl =
+      enlaceSaneado && RUTAS_INTERNAS_PERMITIDAS.has(enlaceSaneado)
+        ? enlaceSaneado
+        : def.defaults.enlaceUrl;
+    const altText = primeraFila.altText || def.defaults.altText;
+
+    const itemImagen = {
+      id: primeraFila.id.toString(),
+      archivoId: primeraFila.archivoId
+        ? primeraFila.archivoId.toString()
+        : null,
+      url: urlPublica,
+      presetKey,
+      fileName:
+        primeraFila.archivo?.nombreOriginal ||
+        metaFila.fileName ||
+        def.defaults.imagenes[0].fileName,
+      orden: 1,
+      titulo,
+      parrafoDescripcion,
+      textoBoton,
+      enlaceUrl,
+      altText,
+    };
+
+    return {
+      id: def.id,
+      orden: def.orden,
+      nombre: def.nombre,
+      descripcion: def.descripcion,
+      tipo: def.tipo,
+      page: def.page,
+      ubicacion: def.tipo,
+      dimensiones: def.dimensiones,
+      aspectRatio: def.aspectRatio,
+      esTarjetaResidencias: true,
+      cantidadItemsFijos: 1,
+      estado: primeraFila.estado || "PUBLICADO",
+      activo: primeraFila.activo !== false,
+      rejectionReason: primeraFila.rejectionReason || null,
+      altText,
+      titulo,
+      parrafoDescripcion,
+      textoBoton,
+      enlaceUrl,
+      textoSuperpuesto: "",
+      updatedAt: primeraFila.updatedAt
+        ? primeraFila.updatedAt.toISOString()
+        : null,
+      imagenes: [itemImagen],
+    };
+  }
+
+  // Caso 4: Espacios de tipo carrusel o banner
   if (!Array.isArray(filas) || filas.length === 0) {
     const imagenesDefault = def.defaults.imagenes.map((preset, idx) => ({
       id: `preset-${def.id}-${idx + 1}`,
@@ -645,7 +815,9 @@ function formatearEspacioDesdeFilas(def, filas = []) {
     };
   }
 
-  const filasOrdenadas = [...filas].sort((a, b) => (a.orden || 0) - (b.orden || 0));
+  const filasOrdenadas = [...filas].sort(
+    (a, b) => (a.orden || 0) - (b.orden || 0),
+  );
   const primeraFila = filasOrdenadas[0];
   const metaPrincipal = parsearMetadatosDescripcion(primeraFila.descripcion);
 
@@ -661,7 +833,7 @@ function formatearEspacioDesdeFilas(def, filas = []) {
 
   const enlaceSaneado = textoBoton
     ? normalizarRutaInternaPortal(
-        sanitizarUrlLectura(primeraFila.enlaceUrl, "", true)
+        sanitizarUrlLectura(primeraFila.enlaceUrl, "", true),
       )
     : "";
 
@@ -669,7 +841,9 @@ function formatearEspacioDesdeFilas(def, filas = []) {
     const metaFila = parsearMetadatosDescripcion(fila.descripcion);
     const urlPublica = resolverUrlPublicaArchivo(fila.archivo);
     const presetKey =
-      !urlPublica && metaFila.presetKey && PRESET_KEYS_VALIDAS.has(metaFila.presetKey)
+      !urlPublica &&
+      metaFila.presetKey &&
+      PRESET_KEYS_VALIDAS.has(metaFila.presetKey)
         ? metaFila.presetKey
         : null;
 
@@ -703,7 +877,9 @@ function formatearEspacioDesdeFilas(def, filas = []) {
     textoSuperpuesto,
     textoBoton,
     enlaceUrl: enlaceSaneado || "",
-    updatedAt: primeraFila.updatedAt ? primeraFila.updatedAt.toISOString() : null,
+    updatedAt: primeraFila.updatedAt
+      ? primeraFila.updatedAt.toISOString()
+      : null,
     imagenes,
   };
 }
@@ -711,12 +887,17 @@ function formatearEspacioDesdeFilas(def, filas = []) {
 /**
  * Resuelve la referencia de archivo/preset de un ítem enviado en `slides`.
  */
-function resolverFuenteImagenItem(item, etiquetaPosicion, filasPorId, uploadedFiles) {
+function resolverFuenteImagenItem(
+  item,
+  etiquetaPosicion,
+  filasPorId,
+  uploadedFiles,
+) {
   if (item.kind === "existing") {
     const filaPrev = filasPorId.get(String(item.id || ""));
     if (!filaPrev) {
       throw crearError(
-        `La imagen existente de ${etiquetaPosicion} ya no se encuentra disponible. Recargue la vista e intente nuevamente.`
+        `La imagen existente de ${etiquetaPosicion} ya no se encuentra disponible. Recargue la vista e intente nuevamente.`,
       );
     }
     const metaPrev = parsearMetadatosDescripcion(filaPrev.descripcion);
@@ -725,9 +906,7 @@ function resolverFuenteImagenItem(item, etiquetaPosicion, filasPorId, uploadedFi
       archivoId: filaPrev.archivoId,
       presetKey: metaPrev.presetKey || null,
       fileName:
-        filaPrev.archivo?.nombreOriginal ||
-        metaPrev.fileName ||
-        "imagen.jpg",
+        filaPrev.archivo?.nombreOriginal || metaPrev.fileName || "imagen.jpg",
       createdByOriginal: filaPrev.createdBy,
     };
   }
@@ -735,7 +914,9 @@ function resolverFuenteImagenItem(item, etiquetaPosicion, filasPorId, uploadedFi
   if (item.kind === "preset") {
     const presetKey = String(item.presetKey || "").trim();
     if (!PRESET_KEYS_VALIDAS.has(presetKey)) {
-      throw crearError(`Imagen predeterminada inválida en ${etiquetaPosicion}.`);
+      throw crearError(
+        `Imagen predeterminada inválida en ${etiquetaPosicion}.`,
+      );
     }
     return {
       kind: "preset",
@@ -754,7 +935,7 @@ function resolverFuenteImagenItem(item, etiquetaPosicion, filasPorId, uploadedFi
       fileIndex >= uploadedFiles.length
     ) {
       throw crearError(
-        `No se recibió el archivo correspondiente a la nueva imagen de ${etiquetaPosicion}.`
+        `No se recibió el archivo correspondiente a la nueva imagen de ${etiquetaPosicion}.`,
       );
     }
     return {
@@ -773,7 +954,10 @@ class CmsContenidoGraficoService {
    * Lista todos los espacios gráficos fijos del portal junto con sus imágenes y textos actuales.
    */
   async obtenerEspaciosGraficos(esVistaAdmin = false) {
-    const ubicacionesClaves = ESPACIOS_FIJOS_DEFINICIONES.map((d) => d.ubicacionClave);
+    const ubicacionesClaves = [
+      ...ESPACIOS_FIJOS_DEFINICIONES.map((d) => d.ubicacionClave),
+      ...Object.keys(ALIASES_ESPACIOS),
+    ];
 
     const filas = await prisma.contenido_grafico.findMany({
       where: {
@@ -798,14 +982,18 @@ class CmsContenidoGraficoService {
     for (const fila of filas) {
       const clave = fila.ubicacion_contenido_grafico?.nombre;
       if (!clave) continue;
-      if (!filasPorEspacio.has(clave)) {
-        filasPorEspacio.set(clave, []);
+      const claveCanonica = ALIASES_ESPACIOS[clave] || clave;
+      if (!filasPorEspacio.has(claveCanonica)) {
+        filasPorEspacio.set(claveCanonica, []);
       }
-      filasPorEspacio.get(clave).push(fila);
+      filasPorEspacio.get(claveCanonica).push(fila);
     }
 
     return ESPACIOS_FIJOS_DEFINICIONES.map((def) =>
-      formatearEspacioDesdeFilas(def, filasPorEspacio.get(def.ubicacionClave) || [])
+      formatearEspacioDesdeFilas(
+        def,
+        filasPorEspacio.get(def.ubicacionClave) || [],
+      ),
     );
   }
 
@@ -814,15 +1002,24 @@ class CmsContenidoGraficoService {
    */
   async obtenerEspacioPublico(espacioKey) {
     const claveLimpia = String(espacioKey || "").trim();
-    const def = ESPACIOS_MAP.get(claveLimpia);
+    const claveCanonica = ALIASES_ESPACIOS[claveLimpia] || claveLimpia;
+    const def =
+      ESPACIOS_MAP.get(claveCanonica) || ESPACIOS_MAP.get(claveLimpia);
     if (!def) {
       throw crearError("El espacio gráfico solicitado no existe.", 404);
     }
 
+    const nombresBusqueda = [def.ubicacionClave];
+    Object.entries(ALIASES_ESPACIOS).forEach(([alias, target]) => {
+      if (target === def.id || target === def.ubicacionClave) {
+        nombresBusqueda.push(alias);
+      }
+    });
+
     const filas = await prisma.contenido_grafico.findMany({
       where: {
         ubicacion_contenido_grafico: {
-          nombre: def.ubicacionClave,
+          nombre: { in: nombresBusqueda },
         },
         activo: true,
         estado: { in: ["PUBLICADO", "APROBADO"] },
@@ -841,11 +1038,13 @@ class CmsContenidoGraficoService {
    */
   async actualizarEspacioGrafico(espacioKey, body, files, user) {
     const claveLimpia = String(espacioKey || "").trim();
-    const def = ESPACIOS_MAP.get(claveLimpia);
+    const claveCanonica = ALIASES_ESPACIOS[claveLimpia] || claveLimpia;
+    const def =
+      ESPACIOS_MAP.get(claveCanonica) || ESPACIOS_MAP.get(claveLimpia);
     if (!def) {
       throw crearError(
         "El espacio gráfico no existe. No está permitido crear nuevas secciones.",
-        404
+        404,
       );
     }
 
@@ -879,7 +1078,7 @@ class CmsContenidoGraficoService {
     });
 
     const filasPorId = new Map(
-      filasExistentes.map((f) => [f.id.toString(), f])
+      filasExistentes.map((f) => [f.id.toString(), f]),
     );
 
     // =========================================================================
@@ -888,7 +1087,7 @@ class CmsContenidoGraficoService {
     if (def.esSeccionAprende) {
       const slidesDescriptor = parsearArregloJson(
         body.slides,
-        "elementos de Aprendé con el Evita"
+        "elementos de Aprendé con el Evita",
       );
 
       if (
@@ -896,7 +1095,7 @@ class CmsContenidoGraficoService {
         slidesDescriptor.length !== def.cantidadItemsFijos
       ) {
         throw crearError(
-          `La sección "${def.nombre}" requiere exactamente su imagen principal y sus 3 tarjetas fijas.`
+          `La sección "${def.nombre}" requiere exactamente su imagen principal y sus 3 tarjetas fijas.`,
         );
       }
 
@@ -917,41 +1116,41 @@ class CmsContenidoGraficoService {
           item,
           nombreElemento,
           filasPorId,
-          uploadedFiles
+          uploadedFiles,
         );
 
         const itemAltText = limpiarTextoSimple(item.altText, 300);
         if (!itemAltText) {
           throw crearError(
-            `El Texto Alternativo (ALT) de ${nombreElemento} es obligatorio.`
+            `El Texto Alternativo (ALT) de ${nombreElemento} es obligatorio.`,
           );
         }
 
         if (esPrincipal) {
           const subtituloEncabezado = limpiarTextoSimple(
             item.subtituloEncabezado,
-            100
+            100,
           );
           if (!subtituloEncabezado) {
             throw crearError(
-              "El subtítulo superior del encabezado (ej. EDUCACIÓN PARA LA SALUD) es obligatorio."
+              "El subtítulo superior del encabezado (ej. EDUCACIÓN PARA LA SALUD) es obligatorio.",
             );
           }
 
           const tituloEncabezado = limpiarTextoSimple(item.titulo, 150);
           if (!tituloEncabezado) {
             throw crearError(
-              "El título principal de la sección (ej. APRENDÉ CON EL EVITA) es obligatorio."
+              "El título principal de la sección (ej. APRENDÉ CON EL EVITA) es obligatorio.",
             );
           }
 
           const parrafoDescripcion = limpiarTextoPlanoMultilinea(
             item.parrafoDescripcion,
-            650
+            650,
           );
           if (!parrafoDescripcion) {
             throw crearError(
-              "El párrafo descriptivo de Aprendé con el Evita es obligatorio."
+              "El párrafo descriptivo de Aprendé con el Evita es obligatorio.",
             );
           }
 
@@ -967,37 +1166,35 @@ class CmsContenidoGraficoService {
         } else {
           const etiquetaSuperior = limpiarTextoSimple(
             item.etiquetaSuperior,
-            60
+            60,
           );
           if (!etiquetaSuperior) {
             throw crearError(
-              `La etiqueta superior de la tarjeta #${i} (ej. TIP DE SALUD) es obligatoria.`
+              `La etiqueta superior de la tarjeta #${i} (ej. TIP DE SALUD) es obligatoria.`,
             );
           }
 
           const tituloTarjeta = limpiarTextoSimple(item.titulo, 120);
           if (!tituloTarjeta) {
-            throw crearError(
-              `El título de la tarjeta #${i} es obligatorio.`
-            );
+            throw crearError(`El título de la tarjeta #${i} es obligatorio.`);
           }
 
           const rawEnlace = normalizarRutaInternaPortal(item.enlaceUrl);
           if (!rawEnlace) {
             throw crearError(
-              `Seleccione a qué sección del portal redirige "MÁS INFORMACIÓN" en la tarjeta #${i} ("${tituloTarjeta}").`
+              `Seleccione a qué sección del portal redirige "MÁS INFORMACIÓN" en la tarjeta #${i} ("${tituloTarjeta}").`,
             );
           }
           if (!RUTAS_INTERNAS_PERMITIDAS.has(rawEnlace)) {
             throw crearError(
-              `La redirección seleccionada en la tarjeta #${i} no pertenece a una sección válida del portal.`
+              `La redirección seleccionada en la tarjeta #${i} no pertenece a una sección válida del portal.`,
             );
           }
 
           const enlaceValidado = validarUrlHttp(
             rawEnlace,
             `redirección de tarjeta #${i}`,
-            true
+            true,
           );
 
           slidesResueltos.push({
@@ -1026,7 +1223,7 @@ class CmsContenidoGraficoService {
           const { nombreUnico, extension } = generarNombreUnico(
             file.originalname,
             "cg_aprende",
-            file.mimetype
+            file.mimetype,
           );
 
           const { error: storageError } = await supabase.storage
@@ -1039,11 +1236,11 @@ class CmsContenidoGraficoService {
           if (storageError) {
             console.error(
               "[Storage] Error al subir imagen de Aprendé con el Evita:",
-              storageError.message
+              storageError.message,
             );
             throw crearError(
               "No se pudo almacenar una de las imágenes en el servidor.",
-              500
+              500,
             );
           }
 
@@ -1120,7 +1317,7 @@ class CmsContenidoGraficoService {
       const archivosConservadosIds = new Set(
         slidesResueltos
           .filter((s) => s.archivoId)
-          .map((s) => s.archivoId.toString())
+          .map((s) => s.archivoId.toString()),
       );
 
       for (const filaAntigua of filasExistentes) {
@@ -1162,7 +1359,7 @@ class CmsContenidoGraficoService {
     if (def.esAcordeonFijo) {
       const slidesDescriptor = parsearArregloJson(
         body.slides,
-        "desplegables de la sección"
+        "desplegables de la sección",
       );
 
       if (
@@ -1170,7 +1367,7 @@ class CmsContenidoGraficoService {
         slidesDescriptor.length !== def.cantidadItemsFijos
       ) {
         throw crearError(
-          `La sección "${def.nombre}" cuenta con exactamente ${def.cantidadItemsFijos} desplegables fijos; no se permite agregar ni eliminar ítems.`
+          `La sección "${def.nombre}" cuenta con exactamente ${def.cantidadItemsFijos} desplegables fijos; no se permite agregar ni eliminar ítems.`,
         );
       }
 
@@ -1185,24 +1382,24 @@ class CmsContenidoGraficoService {
         const itemTitulo = limpiarTextoSimple(item.titulo, 120);
         if (!itemTitulo) {
           throw crearError(
-            `El título del desplegable #${i + 1} es obligatorio.`
+            `El título del desplegable #${i + 1} es obligatorio.`,
           );
         }
 
         const itemTextoDesplegable = limpiarTextoPlanoMultilinea(
           item.textoDesplegable,
-          600
+          600,
         );
         if (!itemTextoDesplegable) {
           throw crearError(
-            `El texto informativo del desplegable #${i + 1} ("${itemTitulo}") es obligatorio.`
+            `El texto informativo del desplegable #${i + 1} ("${itemTitulo}") es obligatorio.`,
           );
         }
 
         const itemAltText = limpiarTextoSimple(item.altText, 300);
         if (!itemAltText) {
           throw crearError(
-            `El Texto Alternativo (ALT) de la imagen en el desplegable #${i + 1} ("${itemTitulo}") es obligatorio.`
+            `El Texto Alternativo (ALT) de la imagen en el desplegable #${i + 1} ("${itemTitulo}") es obligatorio.`,
           );
         }
 
@@ -1210,7 +1407,7 @@ class CmsContenidoGraficoService {
           item,
           `el desplegable #${i + 1}`,
           filasPorId,
-          uploadedFiles
+          uploadedFiles,
         );
 
         slidesResueltos.push({
@@ -1235,7 +1432,7 @@ class CmsContenidoGraficoService {
           const { nombreUnico, extension } = generarNombreUnico(
             file.originalname,
             "cg_pacientes",
-            file.mimetype
+            file.mimetype,
           );
 
           const { error: storageError } = await supabase.storage
@@ -1248,11 +1445,11 @@ class CmsContenidoGraficoService {
           if (storageError) {
             console.error(
               "[Storage] Error al subir imagen de Pacientes:",
-              storageError.message
+              storageError.message,
             );
             throw crearError(
               "No se pudo almacenar una de las imágenes en el servidor.",
-              500
+              500,
             );
           }
 
@@ -1318,7 +1515,7 @@ class CmsContenidoGraficoService {
       const archivosConservadosIds = new Set(
         slidesResueltos
           .filter((s) => s.archivoId)
-          .map((s) => s.archivoId.toString())
+          .map((s) => s.archivoId.toString()),
       );
 
       for (const filaAntigua of filasExistentes) {
@@ -1355,17 +1552,228 @@ class CmsContenidoGraficoService {
     }
 
     // =========================================================================
-    // FLUJO C: CARRUSEL PRINCIPAL / BANNERS
+    // FLUJO C: SECCIÓN RESIDENCIAS (TARJETA DESTACADA CON 1 IMAGEN Y BOTÓN)
+    // =========================================================================
+    if (def.esTarjetaResidencias) {
+      const slidesDescriptor = parsearArregloJson(
+        body.slides,
+        "imagen de la tarjeta de Residencias",
+      );
+
+      if (!Array.isArray(slidesDescriptor) || slidesDescriptor.length !== 1) {
+        throw crearError(
+          `La sección "${def.nombre}" requiere exactamente 1 imagen asociada.`,
+        );
+      }
+
+      const item = slidesDescriptor[0];
+      if (!item || typeof item !== "object") {
+        throw crearError("Datos inválidos de la imagen de Residencias.");
+      }
+
+      const baseImg = resolverFuenteImagenItem(
+        item,
+        "la tarjeta de Residencias",
+        filasPorId,
+        uploadedFiles,
+      );
+
+      const titulo = limpiarTextoSimple(body.titulo || item.titulo, 150);
+      if (!titulo) {
+        throw crearError("El título de la sección es obligatorio.");
+      }
+
+      const parrafoDescripcion = limpiarTextoPlanoMultilinea(
+        body.parrafoDescripcion || item.parrafoDescripcion,
+        600,
+      );
+      if (!parrafoDescripcion) {
+        throw crearError(
+          "El párrafo descriptivo de la sección es obligatorio.",
+        );
+      }
+
+      const textoBoton = limpiarTextoSimple(
+        body.textoBoton || item.textoBoton,
+        80,
+      );
+      if (!textoBoton) {
+        throw crearError("El texto del botón es obligatorio.");
+      }
+
+      const rawEnlace = normalizarRutaInternaPortal(
+        body.enlaceUrl || item.enlaceUrl,
+      );
+      if (!rawEnlace) {
+        throw crearError(
+          "Debe seleccionar la sección del portal a la que redirige el botón.",
+        );
+      }
+      if (!RUTAS_INTERNAS_PERMITIDAS.has(rawEnlace)) {
+        throw crearError(
+          "La redirección seleccionada no pertenece a una sección válida del portal.",
+        );
+      }
+
+      const enlaceValidado = validarUrlHttp(
+        rawEnlace,
+        "redirección del botón",
+        true,
+      );
+
+      const altText = limpiarTextoSimple(body.altText || item.altText, 300);
+      if (!altText) {
+        throw crearError("El Texto Alternativo (ALT) es obligatorio.");
+      }
+
+      const slideResuelto = {
+        ...baseImg,
+        titulo,
+        parrafoDescripcion,
+        textoBoton,
+        enlaceUrl: enlaceValidado,
+        altText,
+      };
+
+      const archivosNuevosCreados = [];
+      let bucketSubida = null;
+
+      try {
+        if (slideResuelto.kind === "new") {
+          bucketSubida = await obtenerBucketSubida();
+          const file = slideResuelto.file;
+          const { nombreUnico, extension } = generarNombreUnico(
+            file.originalname,
+            "cg_residencias",
+            file.mimetype,
+          );
+
+          const { error: storageError } = await supabase.storage
+            .from(bucketSubida)
+            .upload(nombreUnico, file.buffer, {
+              contentType: file.mimetype,
+              upsert: true,
+            });
+
+          if (storageError) {
+            console.error(
+              "[Storage] Error al subir imagen de Residencias:",
+              storageError.message,
+            );
+            throw crearError(
+              "No se pudo almacenar la imagen en el servidor.",
+              500,
+            );
+          }
+
+          const archivoDb = await prisma.archivo.create({
+            data: {
+              nombreOriginal: file.originalname,
+              nombreArchivo: nombreUnico,
+              ruta: `${bucketSubida}/${nombreUnico}`,
+              extension,
+              mimeType: file.mimetype,
+              tamanioBytes: BigInt(file.size),
+            },
+          });
+
+          archivosNuevosCreados.push(archivoDb);
+          slideResuelto.archivoId = archivoDb.id;
+          slideResuelto.fileName = file.originalname;
+        }
+
+        const ahora = new Date();
+
+        await prisma.$transaction(async (tx) => {
+          await tx.contenido_grafico.deleteMany({
+            where: { ubicacionId: ubicacionDb.id },
+          });
+
+          const metaJson = JSON.stringify({
+            parrafoDescripcion: slideResuelto.parrafoDescripcion,
+            textoBoton: slideResuelto.textoBoton,
+            presetKey: slideResuelto.presetKey || null,
+            fileName: slideResuelto.fileName || null,
+          });
+
+          await tx.contenido_grafico.create({
+            data: {
+              titulo: slideResuelto.titulo.slice(0, 200),
+              descripcion: metaJson,
+              altText: slideResuelto.altText,
+              archivoId: slideResuelto.archivoId || null,
+              enlaceUrl: slideResuelto.enlaceUrl,
+              orden: 1,
+              activo: true,
+              tipoId: tipoDb.id,
+              ubicacionId: ubicacionDb.id,
+              estado: "PUBLICADO",
+              createdBy: slideResuelto.createdByOriginal || usuarioLocal.id,
+              updatedBy: usuarioLocal.id,
+              rejectionReason: null,
+              pagina: def.page,
+              updatedAt: ahora,
+            },
+          });
+        });
+      } catch (err) {
+        for (const arch of archivosNuevosCreados) {
+          await eliminarArchivoAlmacenado(arch);
+        }
+        throw err;
+      }
+
+      if (slideResuelto.archivoId) {
+        for (const filaAntigua of filasExistentes) {
+          if (
+            filaAntigua.archivo &&
+            filaAntigua.archivo.id.toString() !==
+              slideResuelto.archivoId.toString()
+          ) {
+            await eliminarArchivoAlmacenado(filaAntigua.archivo);
+          }
+        }
+      }
+
+      await prisma.auditoria
+        .create({
+          data: {
+            usuarioId: usuarioLocal.id,
+            accion: "ACTUALIZAR",
+            entidad: "contenido_grafico",
+            entidadId: def.id,
+            descripcion: `Actualizó "${def.nombre}" en Residencias`,
+          },
+        })
+        .catch(() => {});
+
+      const filasActualizadas = await prisma.contenido_grafico.findMany({
+        where: { ubicacionId: ubicacionDb.id },
+        orderBy: [{ orden: "asc" }, { id: "asc" }],
+        include: { archivo: true },
+      });
+
+      return {
+        message: `Sección "${def.nombre}" actualizada correctamente.`,
+        espacio: formatearEspacioDesdeFilas(def, filasActualizadas),
+      };
+    }
+
+    // =========================================================================
+    // FLUJO D: CARRUSEL PRINCIPAL / BANNERS
     // =========================================================================
     const altText = limpiarTextoSimple(body.altText, 300);
     if (!altText) {
       throw crearError(
-        "El Texto Alternativo (ALT) es obligatorio para describir la sección a personas con discapacidad visual."
+        "El Texto Alternativo (ALT) es obligatorio para describir la sección a personas con discapacidad visual.",
       );
     }
 
     const esCarruselInicio = def.id === "espacio-banner-inicio";
-    const textoSuperpuesto = limpiarTextoPlanoMultilinea(body.textoSuperpuesto, 300);
+    const textoSuperpuesto = limpiarTextoPlanoMultilinea(
+      body.textoSuperpuesto,
+      300,
+    );
 
     if (esCarruselInicio && !textoSuperpuesto) {
       throw crearError("El texto superpuesto del carrusel es obligatorio.");
@@ -1378,20 +1786,23 @@ class CmsContenidoGraficoService {
       const rawUrl = normalizarRutaInternaPortal(body.enlaceUrl);
       if (!rawUrl) {
         throw crearError(
-          "Debe seleccionar obligatoriamente a qué sección del portal redirecciona el botón."
+          "Debe seleccionar obligatoriamente a qué sección del portal redirecciona el botón.",
         );
       }
 
       if (esCarruselInicio && !RUTAS_INTERNAS_PERMITIDAS.has(rawUrl)) {
         throw crearError(
-          "La sección de redirección seleccionada no pertenece a una ruta válida del portal."
+          "La sección de redirección seleccionada no pertenece a una ruta válida del portal.",
         );
       }
 
       enlaceValidado = validarUrlHttp(rawUrl, "redirección del botón", true);
     }
 
-    const slidesDescriptor = parsearArregloJson(body.slides, "imágenes del carrusel");
+    const slidesDescriptor = parsearArregloJson(
+      body.slides,
+      "imágenes del carrusel",
+    );
     if (!Array.isArray(slidesDescriptor) || slidesDescriptor.length === 0) {
       throw crearError("El espacio debe contar con al menos una imagen.");
     }
@@ -1403,14 +1814,16 @@ class CmsContenidoGraficoService {
     for (let i = 0; i < slidesDescriptor.length; i++) {
       const item = slidesDescriptor[i];
       if (!item || typeof item !== "object") {
-        throw crearError(`Descriptor de imagen inválido en la posición #${i + 1}.`);
+        throw crearError(
+          `Descriptor de imagen inválido en la posición #${i + 1}.`,
+        );
       }
 
       const baseImg = resolverFuenteImagenItem(
         item,
         `la posición #${i + 1}`,
         filasPorId,
-        uploadedFiles
+        uploadedFiles,
       );
 
       slidesResueltos.push(baseImg);
@@ -1430,7 +1843,7 @@ class CmsContenidoGraficoService {
         const { nombreUnico, extension } = generarNombreUnico(
           file.originalname,
           "cg_inicio",
-          file.mimetype
+          file.mimetype,
         );
 
         const { error: storageError } = await supabase.storage
@@ -1443,9 +1856,12 @@ class CmsContenidoGraficoService {
         if (storageError) {
           console.error(
             "[Storage] Error al subir imagen de contenido gráfico:",
-            storageError.message
+            storageError.message,
           );
-          throw crearError("No se pudo almacenar una de las imágenes en el servidor.", 500);
+          throw crearError(
+            "No se pudo almacenar una de las imágenes en el servidor.",
+            500,
+          );
         }
 
         const archivoDb = await prisma.archivo.create({
@@ -1512,7 +1928,7 @@ class CmsContenidoGraficoService {
     const archivosConservadosIds = new Set(
       slidesResueltos
         .filter((s) => s.archivoId)
-        .map((s) => s.archivoId.toString())
+        .map((s) => s.archivoId.toString()),
     );
 
     for (const filaAntigua of filasExistentes) {

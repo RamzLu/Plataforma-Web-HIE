@@ -5,6 +5,7 @@ import { CmsUnsavedChangesModal } from "./CmsModals";
 import {
   DEFAULT_APRENDE_INICIO,
   DEFAULT_PACIENTES_INICIO,
+  DEFAULT_RESIDENCIAS_HERO,
   PORTAL_INTERNAL_ROUTES,
   normalizeInternalPortalPath,
   resolveGraphicImageUrl,
@@ -14,6 +15,7 @@ const CARRUSEL_INICIO_ASPECT = 1501 / 641;
 const PACIENTES_INICIO_ASPECT = 4 / 3;
 const APRENDE_MAIN_ASPECT = 630 / 480;
 const APRENDE_CARD_ASPECT = 1;
+const RESIDENCIAS_HERO_ASPECT = 1348 / 1181;
 const MAX_OUTPUT_WIDTH = 1920;
 
 const COLORES_TARJETA_APRENDE = ["green", "yellow", "blue"];
@@ -91,6 +93,13 @@ const getAspectRatioFromEspacio = (espacio, activeIndex = 0) => {
   }
   if (espacio?.id === "espacio-aprende-inicio") {
     return activeIndex === 0 ? APRENDE_MAIN_ASPECT : APRENDE_CARD_ASPECT;
+  }
+  if (
+    espacio?.id === "espacio-residencias-destacado" ||
+    espacio?.id === "espacio-banner-capacitacion" ||
+    espacio?.esTarjetaResidencias
+  ) {
+    return RESIDENCIAS_HERO_ASPECT;
   }
   if (typeof espacio?.aspectRatio === "number" && espacio.aspectRatio > 0) {
     return espacio.aspectRatio;
@@ -484,6 +493,97 @@ export const PortalAprendePreview = ({
   );
 };
 
+/**
+ * Réplica visual exacta de la tarjeta destacada de Residencias Médicas (`ResidenciasPage.jsx`).
+ * Permite previsualizar en tiempo real el título con & estilizado, párrafo, botón y la imagen derecha.
+ */
+export const PortalResidenciasHeroPreview = ({
+  titulo = "Excelencia en Alta Complejidad & Vocación Pública",
+  parrafoDescripcion = "",
+  textoBoton = "Ver Especialidades Disponibles",
+  enlaceUrl = "/especialidades",
+  imagen = null,
+  altText = "",
+  onSelectImage,
+}) => {
+  const imgUrl = resolveGraphicImageUrl(imagen);
+  const lineas = String(parrafoDescripcion || "").split("\n");
+
+  const renderTitulo = (texto) => {
+    if (!texto) return "Excelencia en Alta Complejidad & Vocación Pública";
+    if (texto.includes("&")) {
+      const partes = texto.split("&");
+      return (
+        <>
+          {partes[0]}
+          <span style={{ color: "#006eb3", fontWeight: 300 }}>&</span>
+          {partes.slice(1).join("&")}
+        </>
+      );
+    }
+    return texto;
+  };
+
+  return (
+    <div
+      className="cg-portal-residencias-preview"
+      role="region"
+      aria-label="Vista previa de la tarjeta destacada de Residencias"
+    >
+      <div className="cg-portal-residencias-content">
+        <h3 className="cg-portal-residencias-title">
+          {renderTitulo(titulo)}
+        </h3>
+        <p className="cg-portal-residencias-desc">
+          {parrafoDescripcion && parrafoDescripcion.trim() ? (
+            lineas.map((linea, idxL) => (
+              <React.Fragment key={idxL}>
+                {linea}
+                {idxL < lineas.length - 1 && <br />}
+              </React.Fragment>
+            ))
+          ) : (
+            <em style={{ color: "#94a3b8" }}>
+              Escriba el párrafo descriptivo de la convocatoria...
+            </em>
+          )}
+        </p>
+
+        {textoBoton && textoBoton.trim() ? (
+          <div className="cg-portal-residencias-btn">
+            <span>{textoBoton}</span>
+            <span style={{ fontSize: "1.1em", lineHeight: 1 }}>→</span>
+          </div>
+        ) : null}
+      </div>
+
+      <div
+        className={`cg-portal-residencias-media ${
+          onSelectImage ? "is-clickable" : ""
+        }`}
+        onClick={() => onSelectImage && onSelectImage()}
+        title={
+          onSelectImage
+            ? "Clic para cambiar o recortar la imagen de la sección"
+            : undefined
+        }
+      >
+        {imgUrl ? (
+          <img
+            src={imgUrl}
+            alt={altText || titulo || "Equipo médico de residencias"}
+            className="cg-portal-residencias-img"
+          />
+        ) : (
+          <div className="cg-portal-residencias-empty">
+            Sin imagen asignada (1350x1180px aprox.)
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const CmsContenidoGraficoEditModal = ({
   isOpen,
   onClose,
@@ -494,6 +594,8 @@ export const CmsContenidoGraficoEditModal = ({
   const [imagenes, setImagenes] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [altText, setAltText] = useState("");
+  const [titulo, setTitulo] = useState("");
+  const [parrafoDescripcion, setParrafoDescripcion] = useState("");
   const [textoSuperpuesto, setTextoSuperpuesto] = useState("");
   const [textoBoton, setTextoBoton] = useState("");
   const [enlaceUrl, setEnlaceUrl] = useState("");
@@ -516,6 +618,10 @@ export const CmsContenidoGraficoEditModal = ({
   const isCarruselInicio = espacio?.id === "espacio-banner-inicio";
   const isSeccionPacientes = espacio?.id === "espacio-seccion-pacientes";
   const isSeccionAprende = espacio?.id === "espacio-aprende-inicio";
+  const isTarjetaResidencias =
+    espacio?.id === "espacio-residencias-destacado" ||
+    espacio?.id === "espacio-banner-capacitacion" ||
+    Boolean(espacio?.esTarjetaResidencias);
 
   const safeIndex =
     imagenes.length > 0 ? Math.min(activeIndex, imagenes.length - 1) : 0;
@@ -526,12 +632,14 @@ export const CmsContenidoGraficoEditModal = ({
     ? safeIndex === 0
       ? "1260x960px"
       : "600x600px (1:1 cuadrada)"
-    : espacio?.dimensiones ||
-      (isCarruselInicio
-        ? "1920x820px"
-        : isSeccionPacientes
-          ? "1200x900px"
-          : "1920x1080px");
+    : isTarjetaResidencias
+      ? "1350x1180px aprox. (~1.15:1)"
+      : espacio?.dimensiones ||
+        (isCarruselInicio
+          ? "1920x820px"
+          : isSeccionPacientes
+            ? "1200x900px"
+            : "1920x1080px");
 
   const cropAspect = getAspectRatioFromEspacio(espacio, safeIndex);
   const isRejected =
@@ -600,6 +708,59 @@ export const CmsContenidoGraficoEditModal = ({
             ),
           };
         });
+      } else if (
+        espacio.id === "espacio-residencias-destacado" ||
+        espacio.id === "espacio-banner-capacitacion" ||
+        espacio.esTarjetaResidencias
+      ) {
+        const defHero = DEFAULT_RESIDENCIAS_HERO;
+        const recibidas =
+          Array.isArray(espacio.imagenes) && espacio.imagenes.length > 0
+            ? espacio.imagenes
+            : defHero.imagenes;
+        const imgItem = recibidas[0] || defHero.imagenes[0];
+
+        const tituloFinal =
+          espacio.titulo ??
+          imgItem.titulo ??
+          espacio.textoSuperpuesto ??
+          defHero.titulo;
+        const parrafoFinal =
+          espacio.parrafoDescripcion ??
+          imgItem.parrafoDescripcion ??
+          defHero.parrafoDescripcion;
+        const botonFinal =
+          espacio.textoBoton ??
+          imgItem.textoBoton ??
+          defHero.textoBoton;
+        const enlaceFinal = normalizeInternalPortalPath(
+          espacio.enlaceUrl ??
+          imgItem.enlaceUrl ??
+          defHero.enlaceUrl,
+        );
+        const altFinal =
+          espacio.altText ??
+          imgItem.altText ??
+          defHero.altText;
+
+        listaInicial = [
+          {
+            ...imgItem,
+            id: imgItem.id || "residencias-hero-0",
+            titulo: tituloFinal,
+            parrafoDescripcion: parrafoFinal,
+            textoBoton: botonFinal,
+            enlaceUrl: enlaceFinal,
+            altText: altFinal,
+          },
+        ];
+
+        setTitulo(tituloFinal);
+        setParrafoDescripcion(parrafoFinal);
+        setTextoBoton(botonFinal);
+        setEnlaceUrl(enlaceFinal);
+        setAltText(altFinal);
+        setTextoSuperpuesto("");
       } else {
         listaInicial = Array.isArray(espacio.imagenes)
           ? espacio.imagenes.map((img, i) => ({
@@ -607,13 +768,21 @@ export const CmsContenidoGraficoEditModal = ({
               id: img.id || `img-init-${i}`,
             }))
           : [];
+        setTitulo("");
+        setParrafoDescripcion("");
       }
 
       setImagenes(listaInicial);
-      setAltText(espacio.altText || "");
-      setTextoSuperpuesto(espacio.textoSuperpuesto ?? "");
-      setTextoBoton(espacio.textoBoton ?? "");
-      setEnlaceUrl(normalizeInternalPortalPath(espacio.enlaceUrl ?? ""));
+      if (
+        espacio.id !== "espacio-residencias-destacado" &&
+        espacio.id !== "espacio-banner-capacitacion" &&
+        !espacio.esTarjetaResidencias
+      ) {
+        setAltText(espacio.altText || "");
+        setTextoSuperpuesto(espacio.textoSuperpuesto ?? "");
+        setTextoBoton(espacio.textoBoton ?? "");
+        setEnlaceUrl(normalizeInternalPortalPath(espacio.enlaceUrl ?? ""));
+      }
       setActiveIndex(0);
       setHasUnsavedChanges(false);
       setShowUnsavedModal(false);
@@ -695,7 +864,7 @@ export const CmsContenidoGraficoEditModal = ({
 
       const { file, url, fileName } = result;
 
-      if (cropMode === "replace" || isSeccionPacientes || isSeccionAprende) {
+      if (cropMode === "replace" || isSeccionPacientes || isSeccionAprende || isTarjetaResidencias) {
         setImagenes((prev) =>
           prev.map((item, idx) =>
             idx === safeIndex
@@ -717,6 +886,8 @@ export const CmsContenidoGraficoEditModal = ({
               ? "Imagen principal recortada y actualizada."
               : `Imagen de la Tarjeta #${safeIndex} recortada y actualizada.`,
           );
+        } else if (isTarjetaResidencias) {
+          toast.success("Imagen de la tarjeta de Residencias recortada y actualizada.");
         } else {
           toast.success(
             `Imagen del desplegable #${safeIndex + 1} recortada y actualizada.`,
@@ -821,6 +992,68 @@ export const CmsContenidoGraficoEditModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSaving) return;
+
+    // =========================================================================
+    // ENVÍO ESPECÍFICO: RESIDENCIAS (TARJETA DESTACADA CON 1 IMAGEN Y BOTÓN)
+    // =========================================================================
+    if (isTarjetaResidencias) {
+      if (!String(titulo || "").trim()) {
+        toast.error("Complete el título de la sección.");
+        return;
+      }
+      if (!String(parrafoDescripcion || "").trim()) {
+        toast.error("Complete el párrafo descriptivo de la sección.");
+        return;
+      }
+      if (!String(textoBoton || "").trim()) {
+        toast.error("Complete el texto del botón de la sección.");
+        return;
+      }
+      if (!String(enlaceUrl || "").trim()) {
+        toast.error("Seleccione a qué sección del portal redirige el botón.");
+        return;
+      }
+      if (!String(altText || "").trim()) {
+        toast.error("Complete el Texto Alternativo (ALT) de la imagen.");
+        return;
+      }
+      if (!Array.isArray(imagenes) || imagenes.length === 0) {
+        toast.error("La sección debe contar con una imagen.");
+        return;
+      }
+
+      const formData = new FormData();
+      const fileCounterRef = { current: 0 };
+      const currentImg = imagenes[0];
+
+      const src = serializeSlideSource(
+        currentImg,
+        formData,
+        fileCounterRef,
+        "medicos-residencias.jpg",
+      );
+
+      const slideDescriptor = [
+        {
+          ...src,
+          titulo: String(titulo).trim(),
+          parrafoDescripcion: String(parrafoDescripcion).trim(),
+          textoBoton: String(textoBoton).trim(),
+          enlaceUrl: normalizeInternalPortalPath(enlaceUrl),
+          altText: String(altText).trim(),
+        },
+      ];
+
+      formData.append("titulo", String(titulo).trim());
+      formData.append("parrafoDescripcion", String(parrafoDescripcion).trim());
+      formData.append("textoBoton", String(textoBoton).trim());
+      formData.append("enlaceUrl", normalizeInternalPortalPath(enlaceUrl));
+      formData.append("altText", String(altText).trim());
+      formData.append("slides", JSON.stringify(slideDescriptor));
+
+      await onSaveEspacio(espacio.id, formData);
+      return;
+    }
 
     // =========================================================================
     // ENVÍO ESPECÍFICO: APRENDÉ CON EL EVITA (1 PRINCIPAL + 3 TARJETAS FIJAS)
@@ -1102,7 +1335,9 @@ export const CmsContenidoGraficoEditModal = ({
                       ? "(Imagen 4:3 de 1200x900px aprox. • Haga clic en cualquier desplegable para verlo y editarlo)"
                       : isSeccionAprende
                         ? "(Haga clic en el bloque general o en cualquiera de las 3 tarjetas para editarlo)"
-                        : `(Medida recomendada: ${dimensionesRequeridas} aprox.)`}
+                        : isTarjetaResidencias
+                          ? "(Tarjeta destacada con imagen de 1350x1180px aprox. • Haga clic en la imagen para cambiarla o recortarla)"
+                          : `(Medida recomendada: ${dimensionesRequeridas} aprox.)`}
                   </span>
                 </label>
 
@@ -1127,6 +1362,16 @@ export const CmsContenidoGraficoEditModal = ({
                     activeIndex={safeIndex}
                     onSelectItem={setActiveIndex}
                   />
+                ) : isTarjetaResidencias ? (
+                  <PortalResidenciasHeroPreview
+                    titulo={titulo}
+                    parrafoDescripcion={parrafoDescripcion}
+                    textoBoton={textoBoton}
+                    enlaceUrl={enlaceUrl}
+                    imagen={activeImage}
+                    altText={altText}
+                    onSelectImage={() => triggerFilePicker("replace")}
+                  />
                 ) : (
                   <div className="cg-mockup-stage">
                     {activeImage && resolveGraphicImageUrl(activeImage) ? (
@@ -1146,9 +1391,175 @@ export const CmsContenidoGraficoEditModal = ({
               </div>
 
               {/* ===============================================================
-                  CAMPOS ESPECÍFICOS: APRENDÉ CON EL EVITA (BLOQUE + 3 TARJETAS)
+                  CAMPOS ESPECÍFICOS: RESIDENCIAS (TARJETA DESTACADA)
                   =============================================================== */}
-              {isSeccionAprende ? (
+              {isTarjetaResidencias ? (
+                <div className="esp-full-width cg-pacientes-editor-card">
+                  <div className="cg-pacientes-editor-header">
+                    <span className="cg-pacientes-editor-badge">
+                      Editando Tarjeta Informativa de Residencias
+                    </span>
+                    <span className="cg-pacientes-editor-hint">
+                      Se actualiza en vivo en la previsualización superior
+                    </span>
+                  </div>
+
+                  <div className="esp-form-grid" style={{ gap: "16px" }}>
+                    <div className="esp-full-width">
+                      <label className="esp-form-label" htmlFor="cg-res-titulo">
+                        Título de la Sección <span className="esp-asterisk">*</span>
+                      </label>
+                      <input
+                        id="cg-res-titulo"
+                        type="text"
+                        className="esp-form-input"
+                        placeholder="Ej. Excelencia en Alta Complejidad & Vocación Pública"
+                        value={titulo}
+                        onChange={(e) => {
+                          setTitulo(e.target.value);
+                          setHasUnsavedChanges(true);
+                        }}
+                        disabled={isSaving}
+                        required
+                      />
+                    </div>
+
+                    <div className="esp-full-width">
+                      <label className="esp-form-label" htmlFor="cg-res-parrafo">
+                        Párrafo Descriptivo <span className="esp-asterisk">*</span>
+                      </label>
+                      <textarea
+                        id="cg-res-parrafo"
+                        className="esp-form-input"
+                        rows={3}
+                        placeholder="Descripción y convocatoria de la sección..."
+                        value={parrafoDescripcion}
+                        onChange={(e) => {
+                          setParrafoDescripcion(e.target.value);
+                          setHasUnsavedChanges(true);
+                        }}
+                        disabled={isSaving}
+                        required
+                        style={{ resize: "vertical", lineHeight: "1.45" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="esp-form-label" htmlFor="cg-res-boton">
+                        Texto del Botón <span className="esp-asterisk">*</span>
+                      </label>
+                      <input
+                        id="cg-res-boton"
+                        type="text"
+                        className="esp-form-input"
+                        placeholder="Ej. Ver Especialidades Disponibles"
+                        value={textoBoton}
+                        onChange={(e) => {
+                          setTextoBoton(e.target.value);
+                          setHasUnsavedChanges(true);
+                        }}
+                        disabled={isSaving}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="esp-form-label" htmlFor="cg-res-enlace">
+                        Redirección del Botón (Sección del Portal){" "}
+                        <span className="esp-asterisk">*</span>
+                      </label>
+                      <select
+                        id="cg-res-enlace"
+                        className="esp-form-input"
+                        value={enlaceUrl}
+                        onChange={(e) => {
+                          setEnlaceUrl(e.target.value);
+                          setHasUnsavedChanges(true);
+                        }}
+                        disabled={isSaving}
+                        required
+                      >
+                        <option value="">-- Seleccionar sección del portal --</option>
+                        {PORTAL_INTERNAL_ROUTES.map((route) => (
+                          <option key={route.value} value={route.value}>
+                            {route.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="esp-full-width cg-pacientes-img-row">
+                      <div className="cg-pacientes-img-current">
+                        {resolveGraphicImageUrl(activeImage) && (
+                          <img
+                            src={resolveGraphicImageUrl(activeImage)}
+                            alt={altText || "Imagen de residencias"}
+                            className="cg-pacientes-img-current-thumb"
+                            style={{ aspectRatio: "1.15 / 1" }}
+                          />
+                        )}
+                        <div className="cg-pacientes-img-meta">
+                          <span className="cg-pacientes-img-meta-title">
+                            Imagen de la Tarjeta (1350x1180px aprox.)
+                          </span>
+                          <span className="cg-pacientes-img-meta-file">
+                            {activeImage?.fileName || "medicos-residencias.jpg"}
+                            {activeImage?.isNewUpload && (
+                              <strong style={{ color: "#0284c7" }}>
+                                {" "}• Lista para guardar
+                              </strong>
+                            )}
+                          </span>
+                          <button
+                            type="button"
+                            className="cg-prof-style-btn"
+                            disabled={isSaving}
+                            onClick={() => triggerFilePicker("replace")}
+                            style={{
+                              marginTop: "6px",
+                              width: "fit-content",
+                            }}
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="17 8 12 3 7 8"></polyline>
+                              <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span>Cambiar imagen / Recortar...</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="esp-full-width">
+                      <label className="esp-form-label" htmlFor="cg-res-alt">
+                        Texto Alternativo de la Imagen (ALT){" "}
+                        <span className="esp-asterisk">*</span>
+                      </label>
+                      <input
+                        id="cg-res-alt"
+                        type="text"
+                        className="esp-form-input"
+                        placeholder="Descripción de la imagen para personas con discapacidad visual..."
+                        value={altText}
+                        onChange={(e) => {
+                          setAltText(e.target.value);
+                          setHasUnsavedChanges(true);
+                        }}
+                        disabled={isSaving}
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : isSeccionAprende ? (
                 <>
                   <div className="esp-full-width">
                     <label className="esp-form-label">

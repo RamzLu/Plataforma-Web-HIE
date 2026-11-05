@@ -16,6 +16,7 @@ import bannerCapacitaciones from "../assets/banner_capacitaciones.png";
 import bannerNoticias from "../assets/banner_noticias.png";
 import bannerDocumentacion from "../assets/banner_documentacion.png";
 import bannerResidencias from "../assets/banner_residencias.png";
+import medicosResidencias from "../assets/medicos-residencias.jpg";
 
 /**
  * Mapa de imágenes institucionales predeterminadas por clave estable.
@@ -39,6 +40,7 @@ export const PRESET_IMAGES_MAP = {
   "banner-noticias": bannerNoticias,
   "banner-documentacion": bannerDocumentacion,
   "banner-residencias": bannerResidencias,
+  "residencias-hero": medicosResidencias,
 };
 
 /**
@@ -175,7 +177,7 @@ export const DEFAULT_CARRUSEL_INICIO = {
 export const DEFAULT_PACIENTES_INICIO = {
   id: "espacio-seccion-pacientes",
   orden: 2,
-  nombre: "Información para Pacientes",
+  nombre: "Sección Información para Pacientes",
   descripcion:
     "Sección interactiva de 5 desplegables informativos con sus imágenes asociadas en Inicio",
   tipo: "Acordeón Informativo",
@@ -261,9 +263,9 @@ export const DEFAULT_PACIENTES_INICIO = {
 export const DEFAULT_APRENDE_INICIO = {
   id: "espacio-aprende-inicio",
   orden: 3,
-  nombre: "Aprendé con el Evita",
+  nombre: "Sección Educación para la Salud",
   descripcion:
-    "Bloque de educación para la salud con imagen principal, textos y 3 tarjetas con redirección en Inicio",
+    "Bloque de educación médica y preventiva con imagen editorial y 3 tarjetas con redirección en Inicio",
   tipo: "Bloque Educativo + 3 Tarjetas",
   page: "Inicio",
   ubicacion: "Bloque Educativo + 3 Tarjetas",
@@ -335,6 +337,50 @@ export const DEFAULT_APRENDE_INICIO = {
       titulo: "Cursos y Jornadas HIE",
       altText: "Cursos y Jornadas HIE",
       enlaceUrl: "/capacitacion",
+    },
+  ],
+};
+
+/**
+ * Configuración predeterminada de la tarjeta destacada de Residencias Médicas
+ * ("Excelencia en Alta Complejidad & Vocación Pública").
+ */
+export const DEFAULT_RESIDENCIAS_HERO = {
+  id: "espacio-residencias-destacado",
+  orden: 4,
+  nombre: "Sección Bienvenida de Residencias",
+  descripcion:
+    "Tarjeta destacada de bienvenida y convocatoria de especialidades en Residencias",
+  tipo: "Tarjeta Destacada",
+  page: "Residencias",
+  ubicacion: "Tarjeta Destacada",
+  dimensiones: "1350x1180px aprox.",
+  aspectRatio: 1348 / 1181,
+  esTarjetaResidencias: true,
+  cantidadItemsFijos: 1,
+  estado: "PUBLICADO",
+  activo: true,
+  rejectionReason: null,
+  altText: "Equipo médico y residentes del Hospital Interdistrital Evita",
+  titulo: "Excelencia en Alta Complejidad & Vocación Pública",
+  parrafoDescripcion:
+    "El Hospital Interdistrital Evita convoca a profesionales de las ciencias médicas para integrarse a sus equipos interdisciplinarios. Formación tutelada en servicio, tecnología biomédica de vanguardia y dedicación humanizada al servicio de toda la región.",
+  textoBoton: "Ver Especialidades Disponibles",
+  enlaceUrl: "/especialidades",
+  textoSuperpuesto: "",
+  imagenes: [
+    {
+      id: "preset-espacio-residencias-destacado-1",
+      url: null,
+      presetKey: "residencias-hero",
+      fileName: "medicos-residencias.jpg",
+      orden: 1,
+      titulo: "Excelencia en Alta Complejidad & Vocación Pública",
+      parrafoDescripcion:
+        "El Hospital Interdistrital Evita convoca a profesionales de las ciencias médicas para integrarse a sus equipos interdisciplinarios. Formación tutelada en servicio, tecnología biomédica de vanguardia y dedicación humanizada al servicio de toda la región.",
+      textoBoton: "Ver Especialidades Disponibles",
+      enlaceUrl: "/especialidades",
+      altText: "Equipo médico y residentes del Hospital Interdistrital Evita",
     },
   ],
 };
