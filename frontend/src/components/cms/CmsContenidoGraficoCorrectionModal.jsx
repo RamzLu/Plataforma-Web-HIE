@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import Cropper from "react-easy-crop";
-import defaultImg1 from "../../assets/fondoHospitalCarrusel1.jpg";
+import { CmsUnsavedChangesModal } from "./CmsModals";
+import {
+  PORTAL_INTERNAL_ROUTES,
+  resolveGraphicImageUrl,
+} from "../../utils/contenidoGraficoPresets.js";
 
-// Funciones auxiliares de recorte (idénticas al módulo de Profesionales)
+const CARRUSEL_INICIO_ASPECT = 1501 / 641;
+const MAX_OUTPUT_WIDTH = 1920;
+
 const createImage = (url) =>
   new Promise((resolve, reject) => {
     const image = new Image();
@@ -16,16 +22,24 @@ const createImage = (url) =>
 async function getCroppedImg(
   imageSrc,
   pixelCrop,
-  fileName = "contenido-grafico.jpg"
+  fileName = "carrusel-inicio.jpg"
 ) {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 
-  if (!ctx) return null;
+  if (!ctx || !pixelCrop) return null;
 
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  const scale =
+    pixelCrop.width > MAX_OUTPUT_WIDTH
+      ? MAX_OUTPUT_WIDTH / pixelCrop.width
+      : 1;
+
+  canvas.width = Math.round(pixelCrop.width * scale);
+  canvas.height = Math.round(pixelCrop.height * scale);
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
   ctx.drawImage(
     image,
@@ -35,22 +49,37 @@ async function getCroppedImg(
     pixelCrop.height,
     0,
     0,
-    pixelCrop.width,
-    pixelCrop.height
+    canvas.width,
+    canvas.height
   );
 
+  const baseName = fileName.replace(/\.[^/.]+$/, "") || "carrusel-imagen";
+  const safeJpgName = `${baseName}.jpg`;
+
   return new Promise((resolve) => {
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const file = new File([blob], fileName, { type: "image/jpeg" });
-      resolve({ file, url: URL.createObjectURL(blob) });
-    }, "image/jpeg");
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          resolve(null);
+          return;
+        }
+        const file = new File([blob], safeJpgName, { type: "image/jpeg" });
+        resolve({ file, url: URL.createObjectURL(blob), fileName: safeJpgName });
+      },
+      "image/jpeg",
+      0.92
+    );
   });
 }
 
-const getAspectRatioFromDimensions = (dimStr) => {
-  if (!dimStr) return 16 / 9;
-  const match = String(dimStr).match(/(\d+)\s*[x×]\s*(\d+)/i);
+const getAspectRatioFromEspacio = (espacio) => {
+  if (espacio?.id === "espacio-banner-inicio") {
+    return CARRUSEL_INICIO_ASPECT;
+  }
+  if (typeof espacio?.aspectRatio === "number" && espacio.aspectRatio > 0) {
+    return espacio.aspectRatio;
+  }
+  const match = String(espacio?.dimensiones || "").match(/(\d+)\s*[x×]\s*(\d+)/i);
   if (match) {
     const width = parseFloat(match[1]);
     const height = parseFloat(match[2]);
@@ -60,60 +89,171 @@ const getAspectRatioFromDimensions = (dimStr) => {
 };
 
 /**
- * CmsContenidoGraficoEditModal
- * Respeta el estilo unificado de los modales del CMS (.esp-modal-wrapper, .modal-header-esp,
- * .esp-modal-body, .esp-form-label, .esp-form-input, .modal-footer-esp).
+ * Réplica visual exacta del Carrusel de Inicio tal como se renderiza en el portal público (`Carousel.jsx`).
+ * Se reutiliza tanto en el modal de edición como en el modal de vista previa rápida.
  */
+export const PortalCarouselPreview = ({
+  imagenes = [],
+  activeIndex = 0,
+  onChangeSlide,
+  textoSuperpuesto = "",
+  textoBoton = "",
+  altText = "",
+}) => {
+  const total = imagenes.length;
+  const safeIndex = total > 0 ? Math.min(activeIndex, total - 1) : 0;
+  const currentImg = imagenes[safeIndex] || null;
+  const currentImgUrl = resolveGraphicImageUrl(currentImg);
+
+  const handlePrev = (e) => {
+    if (e) e.stopPropagation();
+    if (total <= 1 || !onChangeSlide) return;
+    onChangeSlide((safeIndex - 1 + total) % total);
+  };
+
+  const handleNext = (e) => {
+    if (e) e.stopPropagation();
+    if (total <= 1 || !onChangeSlide) return;
+    onChangeSlide((safeIndex + 1) % total);
+  };
+
+  const lineasTexto = String(textoSuperpuesto || "").split("\n");
+  const botonLimpio = String(textoBoton || "").trim();
+
+  return (
+    <div
+      className="cg-portal-carousel-preview"
+      role="region"
+      aria-label={altText || "Vista previa del carrusel de inicio"}
+    >
+      {currentImgUrl ? (
+        <div className="cg-portal-carousel-slide">
+          <img
+            src={currentImgUrl}
+            alt={altText || `Imagen ${safeIndex + 1}`}
+            className="cg-portal-carousel-img"
+          />
+        </div>
+      ) : (
+        <div className="cg-portal-carousel-empty">
+          No hay imágenes cargadas en el carrusel
+        </div>
+      )}
+
+      {/* Capa estática idéntica a .carousel-static-overlay del portal */}
+      <div className="cg-portal-static-overlay">
+        <div className="cg-portal-content-box">
+          {textoSuperpuesto && textoSuperpuesto.trim() !== "" && (
+            <div
+              className="cg-portal-title"
+              style={{ marginBottom: botonLimpio ? undefined : 0 }}
+            >
+              {lineasTexto.map((linea, i) => (
+                <React.Fragment key={i}>
+                  {linea}
+                  {i < lineasTexto.length - 1 && <br />}
+                </React.Fragment>
+              ))}
+            </div>
+          )}
+
+          {botonLimpio && (
+            <span className="cg-portal-btn-conocenos">{botonLimpio}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Flechas laterales e indicadores inferiores idénticos al portal */}
+      {total > 1 && (
+        <>
+          <button
+            type="button"
+            className="cg-portal-arrow cg-portal-arrow-left"
+            onClick={handlePrev}
+            aria-label="Imagen anterior"
+          >
+            &#10094;
+          </button>
+          <button
+            type="button"
+            className="cg-portal-arrow cg-portal-arrow-right"
+            onClick={handleNext}
+            aria-label="Siguiente imagen"
+          >
+            &#10095;
+          </button>
+
+          <div className="cg-portal-indicators">
+            {imagenes.map((img, idx) => (
+              <button
+                key={img.id || idx}
+                type="button"
+                className={`cg-portal-indicator ${
+                  idx === safeIndex ? "active" : ""
+                }`}
+                onClick={() => onChangeSlide && onChangeSlide(idx)}
+                aria-label={`Ver imagen ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 export const CmsContenidoGraficoEditModal = ({
   isOpen,
   onClose,
   espacio,
   onSaveEspacio,
+  isSaving = false,
 }) => {
   const [imagenes, setImagenes] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [altText, setAltText] = useState("");
+  const [textoSuperpuesto, setTextoSuperpuesto] = useState("");
+  const [textoBoton, setTextoBoton] = useState("");
+  const [enlaceUrl, setEnlaceUrl] = useState("");
+
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [draggedIdx, setDraggedIdx] = useState(null);
+
   const fileInputRef = useRef(null);
 
-  // Estados de la herramienta de recorte (react-easy-crop)
+  // Estados de la herramienta de recorte al seleccionar una imagen nueva
   const [imageSrc, setImageSrc] = useState(null);
   const [pendingFileName, setPendingFileName] = useState("imagen-carrusel.jpg");
-  const [cropMode, setCropMode] = useState("add");
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
 
-  const isBannerPrincipal =
-    espacio?.tipo === "Banner Principal" ||
-    espacio?.ubicacion?.toLowerCase().includes("banner principal") ||
-    espacio?.nombre?.toLowerCase().includes("banner principal") ||
-    espacio?.titulo?.toLowerCase().includes("banner principal");
-
-  const dimensionesRequeridas = espacio?.dimensiones || "1920x1080px";
-  const cropAspect = getAspectRatioFromDimensions(dimensionesRequeridas);
+  const isCarruselInicio = espacio?.id === "espacio-banner-inicio";
+  const dimensionesRequeridas =
+    espacio?.dimensiones || (isCarruselInicio ? "1920x820px" : "1920x1080px");
+  const cropAspect = getAspectRatioFromEspacio(espacio);
   const isRejected =
     espacio?.estado === "RECHAZADO" || Boolean(espacio?.rejectionReason);
 
   useEffect(() => {
     if (isOpen && espacio) {
-      if (Array.isArray(espacio.imagenes) && espacio.imagenes.length > 0) {
-        setImagenes(espacio.imagenes.map((img) => ({ ...img })));
-      } else if (espacio.imageUrl) {
-        setImagenes([
-          {
-            id: `img-${espacio.id}-1`,
-            url: espacio.imageUrl || defaultImg1,
-            altText: espacio.altText || "",
-            titulo: espacio.titulo || "",
-            enlaceTexto: espacio.enlaceTexto || "",
-            enlaceUrl: espacio.enlaceUrl || "",
-            fileName: espacio.fileName || "imagen_actual.jpg",
-          },
-        ]);
-      } else {
-        setImagenes([]);
-      }
+      const listaInicial = Array.isArray(espacio.imagenes)
+        ? espacio.imagenes.map((img, i) => ({
+            ...img,
+            id: img.id || `img-init-${i}`,
+          }))
+        : [];
+
+      setImagenes(listaInicial);
+      setAltText(espacio.altText || "");
+      setTextoSuperpuesto(espacio.textoSuperpuesto ?? "");
+      setTextoBoton(espacio.textoBoton ?? "");
+      setEnlaceUrl(espacio.enlaceUrl ?? "");
       setActiveIndex(0);
+      setHasUnsavedChanges(false);
+      setShowUnsavedModal(false);
       setIsCropping(false);
       setImageSrc(null);
     }
@@ -124,16 +264,28 @@ export const CmsContenidoGraficoEditModal = ({
   const safeIndex =
     imagenes.length > 0 ? Math.min(activeIndex, imagenes.length - 1) : 0;
   const activeImage = imagenes[safeIndex] || null;
+  const tieneBoton = textoBoton.trim().length > 0;
 
-  const handleMetadataChange = (field, value) => {
-    setImagenes((prev) =>
-      prev.map((img, idx) =>
-        idx === safeIndex ? { ...img, [field]: value } : img
-      )
-    );
+  const handleCloseAttempt = () => {
+    if (isSaving) return;
+    if (hasUnsavedChanges) {
+      setShowUnsavedChangesConfirm();
+    } else {
+      onClose();
+    }
   };
 
-  const handleAddImageFiles = (e) => {
+  const setShowUnsavedChangesConfirm = () => {
+    setShowUnsavedModal(true);
+  };
+
+  const handleForceClose = () => {
+    setShowUnsavedModal(false);
+    setHasUnsavedChanges(false);
+    onClose();
+  };
+
+  const handleSelectNewImage = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -146,7 +298,6 @@ export const CmsContenidoGraficoEditModal = ({
     reader.readAsDataURL(file);
     reader.onload = () => {
       setPendingFileName(file.name || "imagen-carrusel.jpg");
-      setCropMode("add");
       setCrop({ x: 0, y: 0 });
       setZoom(1);
       setImageSrc(reader.result);
@@ -158,21 +309,11 @@ export const CmsContenidoGraficoEditModal = ({
     }
   };
 
-  const handleOpenCropExisting = () => {
-    if (!activeImage?.url) return;
-    setPendingFileName(activeImage.fileName || "imagen-recortada.jpg");
-    setCropMode("edit");
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
-    setImageSrc(activeImage.url);
-    setIsCropping(true);
-  };
-
-  const onCropComplete = (croppedArea, croppedAreaPx) => {
+  const onCropComplete = (_croppedArea, croppedAreaPx) => {
     setCroppedAreaPixels(croppedAreaPx);
   };
 
-  const handleSaveCrop = async () => {
+  const handleConfirmCropAndAdd = async () => {
     try {
       const result = await getCroppedImg(
         imageSrc,
@@ -184,47 +325,39 @@ export const CmsContenidoGraficoEditModal = ({
         return;
       }
 
-      const { file, url } = result;
+      const { file, url, fileName } = result;
+      const nuevaImagen = {
+        id: `new-${Date.now()}`,
+        url,
+        fileObj: file,
+        fileName,
+        presetKey: null,
+        isNewUpload: true,
+      };
 
-      if (cropMode === "edit" && activeImage) {
-        setImagenes((prev) =>
-          prev.map((img, idx) =>
-            idx === safeIndex
-              ? { ...img, url, fileObj: file, fileName: pendingFileName }
-              : img
-          )
-        );
-        toast.success("Imagen recortada correctamente.");
-      } else {
-        const nuevaImagen = {
-          id: `img-${Date.now()}`,
-          url,
-          fileObj: file,
-          fileName: pendingFileName,
-          altText: "",
-          titulo: isBannerPrincipal ? espacio.nombre || "" : "",
-          enlaceTexto: "",
-          enlaceUrl: "",
-        };
+      setImagenes((prev) => {
+        const updated = [...prev, nuevaImagen];
+        setActiveIndex(updated.length - 1);
+        return updated;
+      });
 
-        setImagenes((prev) => {
-          const updated = [...prev, nuevaImagen];
-          setActiveIndex(updated.length - 1);
-          return updated;
-        });
-        toast.success("Imagen añadida al carrusel.");
-      }
-
+      setHasUnsavedChanges(true);
       setIsCropping(false);
       setImageSrc(null);
+      toast.success("Imagen recortada y añadida al carrusel.");
     } catch (e) {
       console.error(e);
-      toast.error("Error al recortar la imagen.");
+      toast.error("Error al recortar la imagen seleccionada.");
     }
   };
 
   const handleRemoveImage = (indexToRemove, e) => {
     if (e) e.stopPropagation();
+
+    if (imagenes.length <= 1) {
+      toast.error("El carrusel debe conservar al menos una imagen.");
+      return;
+    }
 
     setImagenes((prev) => {
       const next = prev.filter((_, idx) => idx !== indexToRemove);
@@ -235,82 +368,114 @@ export const CmsContenidoGraficoEditModal = ({
       }
       return next;
     });
-    toast.success("Imagen eliminada del carrusel.");
+
+    setHasUnsavedChanges(true);
   };
 
-  const handlePrevSlide = () => {
-    if (imagenes.length <= 1) return;
-    setActiveIndex((prev) => (prev - 1 + imagenes.length) % imagenes.length);
+  // Soporte para reordenar las imágenes arrastrándolas en la tira del carrusel
+  const handleDragStart = (idx) => {
+    setDraggedIdx(idx);
   };
 
-  const handleNextSlide = () => {
-    if (imagenes.length <= 1) return;
-    setActiveIndex((prev) => (prev + 1) % imagenes.length);
+  const handleDragOver = (e) => {
+    e.preventDefault();
   };
 
-  const handleSubmit = (e, targetStatus = null) => {
-    if (e) e.preventDefault();
+  const handleDrop = (targetIdx) => {
+    if (draggedIdx === null || draggedIdx === targetIdx) {
+      setDraggedIdx(null);
+      return;
+    }
+
+    setImagenes((prev) => {
+      const copy = [...prev];
+      const [moved] = copy.splice(draggedIdx, 1);
+      copy.splice(targetIdx, 0, moved);
+      return copy;
+    });
+    setActiveIndex(targetIdx);
+    setDraggedIdx(null);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isSaving) return;
 
     if (imagenes.length === 0) {
-      toast.error("El espacio debe tener al menos una imagen.");
+      toast.error("El carrusel debe tener al menos una imagen.");
       return;
     }
 
-    const missingAltIndex = imagenes.findIndex(
-      (img) => !img.altText || !img.altText.trim()
-    );
-    if (missingAltIndex !== -1) {
-      setActiveIndex(missingAltIndex);
+    if (!altText.trim()) {
       toast.error(
-        `El Texto Alternativo es obligatorio en la imagen #${missingAltIndex + 1}.`
+        "El Texto Alternativo (ALT) es obligatorio para describir la sección."
       );
       return;
     }
 
-    if (isBannerPrincipal) {
-      const missingTitleIndex = imagenes.findIndex(
-        (img) => !img.titulo || !img.titulo.trim()
+    if (isCarruselInicio && !textoSuperpuesto.trim()) {
+      toast.error("El texto superpuesto del carrusel es obligatorio.");
+      return;
+    }
+
+    if (tieneBoton && !enlaceUrl.trim()) {
+      toast.error(
+        "Seleccione a qué sección del portal debe redireccionar el botón."
       );
-      if (missingTitleIndex !== -1) {
-        setActiveIndex(missingTitleIndex);
-        toast.error(
-          `El Título es obligatorio en la imagen #${missingTitleIndex + 1}.`
-        );
-        return;
+      return;
+    }
+
+    // Construir FormData real con archivos recortados y orden de slides
+    const formData = new FormData();
+    formData.append("altText", altText.trim());
+    formData.append("textoSuperpuesto", textoSuperpuesto.trim());
+    formData.append("textoBoton", tieneBoton ? textoBoton.trim() : "");
+    formData.append("enlaceUrl", tieneBoton ? enlaceUrl.trim() : "");
+
+    const slidesDescriptor = [];
+    let fileCounter = 0;
+
+    for (const img of imagenes) {
+      if (img.fileObj instanceof File) {
+        formData.append("imagenes", img.fileObj, img.fileName || "carrusel.jpg");
+        slidesDescriptor.push({
+          kind: "new",
+          fileIndex: fileCounter,
+        });
+        fileCounter += 1;
+      } else if (img.presetKey && String(img.id || "").startsWith("preset-")) {
+        slidesDescriptor.push({
+          kind: "preset",
+          presetKey: img.presetKey,
+          fileName: img.fileName || `${img.presetKey}.jpg`,
+        });
+      } else if (img.id && /^\d+$/.test(String(img.id))) {
+        slidesDescriptor.push({
+          kind: "existing",
+          id: String(img.id),
+        });
+      } else if (img.presetKey) {
+        slidesDescriptor.push({
+          kind: "preset",
+          presetKey: img.presetKey,
+          fileName: img.fileName || `${img.presetKey}.jpg`,
+        });
       }
     }
 
-    const primaryImage = imagenes[0];
-    const nuevoEstado =
-      targetStatus ||
-      (isRejected ? "PENDIENTE_APROBACION" : espacio.estado || "APROBADO");
+    formData.append("slides", JSON.stringify(slidesDescriptor));
 
-    onSaveEspacio({
-      ...espacio,
-      imagenes,
-      imageUrl: primaryImage.url,
-      altText: primaryImage.altText,
-      titulo: isBannerPrincipal
-        ? primaryImage.titulo || espacio.nombre || espacio.titulo
-        : espacio.nombre || espacio.titulo,
-      enlaceTexto: primaryImage.enlaceTexto || "",
-      enlaceUrl: primaryImage.enlaceUrl || "",
-      estado: nuevoEstado,
-      rejectionReason:
-        nuevoEstado === "PENDIENTE_APROBACION" || nuevoEstado === "APROBADO"
-          ? null
-          : espacio.rejectionReason,
-      updatedAt: new Date().toISOString(),
-    });
+    await onSaveEspacio(espacio.id, formData);
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleCloseAttempt}>
       <div
         className="modal-content-esp esp-modal-wrapper"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* CABECERA UNIFICADA DEL CMS (.modal-header-esp) */}
+        {/* CABECERA UNIFICADA DEL CMS */}
         <div className="modal-header-esp">
           <h2>
             {isRejected
@@ -320,7 +485,8 @@ export const CmsContenidoGraficoEditModal = ({
           <button
             type="button"
             className="btn-close-modal"
-            onClick={onClose}
+            onClick={handleCloseAttempt}
+            disabled={isSaving}
             aria-label="Cerrar modal"
           >
             <svg
@@ -336,14 +502,13 @@ export const CmsContenidoGraficoEditModal = ({
           </button>
         </div>
 
-        {/* FORMULARIO CON EL ESTILO UNIFICADO (.esp-modal-body y .esp-form-grid) */}
+        {/* FORMULARIO */}
         <form
-          onSubmit={(e) => handleSubmit(e)}
+          onSubmit={handleSubmit}
           style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
         >
           <div className="esp-modal-body">
             <div className="esp-form-grid">
-              {/* MOTIVO DE RECHAZO (Solo si el espacio está rechazado) */}
               {isRejected && espacio.rejectionReason && (
                 <div className="esp-full-width">
                   <div className="cg-simple-rejection-box" role="alert">
@@ -352,7 +517,7 @@ export const CmsContenidoGraficoEditModal = ({
                 </div>
               )}
 
-              {/* 1. ÁREA DE PREVISUALIZACIÓN EN LA PÁGINA */}
+              {/* 1. PREVISUALIZACIÓN FIEL AL PORTAL PÚBLICO */}
               <div className="esp-full-width">
                 <label className="esp-form-label">
                   Previsualización en la página{" "}
@@ -363,149 +528,165 @@ export const CmsContenidoGraficoEditModal = ({
                       fontWeight: "normal",
                     }}
                   >
-                    (Medida requerida: {dimensionesRequeridas})
+                    (Medida recomendada: {dimensionesRequeridas} aprox.)
                   </span>
                 </label>
 
-                <div className="cg-mockup-stage">
-                  {activeImage ? (
-                    <>
+                {isCarruselInicio ? (
+                  <PortalCarouselPreview
+                    imagenes={imagenes}
+                    activeIndex={safeIndex}
+                    onChangeSlide={setActiveIndex}
+                    textoSuperpuesto={textoSuperpuesto}
+                    textoBoton={textoBoton}
+                    altText={altText}
+                  />
+                ) : (
+                  <div className="cg-mockup-stage">
+                    {activeImage && resolveGraphicImageUrl(activeImage) ? (
                       <img
-                        src={activeImage.url}
-                        alt={activeImage.altText || "Vista previa"}
+                        src={resolveGraphicImageUrl(activeImage)}
+                        alt={altText || "Vista previa"}
                         className="cg-mockup-image"
                       />
-
-                      <span className="cg-mockup-measure-pill">
-                        {espacio.page} • {dimensionesRequeridas}
-                      </span>
-
-                      {imagenes.length > 1 && (
-                        <>
-                          <button
-                            type="button"
-                            className="cg-mockup-nav-arrow prev"
-                            onClick={handlePrevSlide}
-                            aria-label="Imagen anterior"
-                          >
-                            <span className="material-symbols-outlined">
-                              chevron_left
-                            </span>
-                          </button>
-                          <button
-                            type="button"
-                            className="cg-mockup-nav-arrow next"
-                            onClick={handleNextSlide}
-                            aria-label="Siguiente imagen"
-                          >
-                            <span className="material-symbols-outlined">
-                              chevron_right
-                            </span>
-                          </button>
-                        </>
-                      )}
-
-                      {((isBannerPrincipal && activeImage.titulo) ||
-                        activeImage.enlaceTexto ||
-                        activeImage.enlaceUrl) && (
-                        <div className="cg-mockup-page-overlay">
-                          {isBannerPrincipal && activeImage.titulo && (
-                            <h3 className="cg-mockup-overlay-title">
-                              {activeImage.titulo}
-                            </h3>
-                          )}
-                          {(activeImage.enlaceTexto || activeImage.enlaceUrl) && (
-                            <span className="cg-mockup-overlay-cta">
-                              {activeImage.enlaceTexto || activeImage.enlaceUrl}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="cg-mockup-empty-state">
-                      No hay imágenes cargadas en este espacio ({dimensionesRequeridas})
-                    </div>
-                  )}
-                </div>
+                    ) : (
+                      <div className="cg-mockup-empty-state">
+                        No hay imágenes cargadas en este espacio ({dimensionesRequeridas})
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* 2. FILA DE METADATOS (Estilo .esp-form-label + .esp-form-input) */}
-              <div className={isBannerPrincipal ? "" : "esp-full-width"}>
+              {/* 2. TEXTO ALTERNATIVO DE LA SECCIÓN (ALT) */}
+              <div className="esp-full-width">
                 <label className="esp-form-label" htmlFor="cg-input-alt">
-                  Texto Alternativo (ALT) <span className="esp-asterisk">*</span>
+                  Texto Alternativo de la Sección (ALT){" "}
+                  <span className="esp-asterisk">*</span>
                 </label>
                 <input
                   id="cg-input-alt"
                   type="text"
                   className="esp-form-input"
-                  placeholder="Describa la imagen para accesibilidad..."
-                  value={activeImage?.altText || ""}
-                  onChange={(e) =>
-                    handleMetadataChange("altText", e.target.value)
-                  }
-                  disabled={!activeImage}
+                  placeholder="Descripción general de la sección para lectores de pantalla (personas ciegas)..."
+                  value={altText}
+                  onChange={(e) => {
+                    setAltText(e.target.value);
+                    setHasUnsavedChanges(true);
+                  }}
+                  disabled={isSaving}
                   required
                 />
               </div>
 
-              {/* Título condicional: Solo si es tipo "Banner Principal" */}
-              {isBannerPrincipal && (
-                <div>
-                  <label className="esp-form-label" htmlFor="cg-input-titulo">
-                    Título <span className="esp-asterisk">*</span>
+              {/* 3. TEXTO SUPERPUESTO EN EL CARRUSEL */}
+              {isCarruselInicio && (
+                <div className="esp-full-width">
+                  <label className="esp-form-label" htmlFor="cg-input-overlay-text">
+                    Texto Superpuesto en el Carrusel{" "}
+                    <span className="esp-asterisk">*</span>
+                    <span
+                      style={{
+                        textTransform: "none",
+                        color: "#94a3b8",
+                        fontWeight: "normal",
+                        marginLeft: "6px",
+                      }}
+                    >
+                      (Presione Enter para dividir en renglones como en la portada)
+                    </span>
                   </label>
-                  <input
-                    id="cg-input-titulo"
-                    type="text"
+                  <textarea
+                    id="cg-input-overlay-text"
                     className="esp-form-input"
-                    placeholder="Ej. Atención Médica de Alta Complejidad..."
-                    value={activeImage?.titulo || ""}
-                    onChange={(e) =>
-                      handleMetadataChange("titulo", e.target.value)
-                    }
-                    disabled={!activeImage}
+                    rows={3}
+                    placeholder={"Ej.\n6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL"}
+                    value={textoSuperpuesto}
+                    onChange={(e) => {
+                      setTextoSuperpuesto(e.target.value);
+                      setHasUnsavedChanges(true);
+                    }}
+                    disabled={isSaving}
                     required
+                    style={{ resize: "vertical", lineHeight: "1.4" }}
                   />
                 </div>
               )}
 
-              {/* Input doble para Enlaces: Texto a mostrar y URL */}
-              <div>
-                <label className="esp-form-label" htmlFor="cg-input-link-text">
-                  Texto del Botón / Enlace (Opcional)
-                </label>
-                <input
-                  id="cg-input-link-text"
-                  type="text"
-                  className="esp-form-input"
-                  placeholder="Ej. Conocer especialidades"
-                  value={activeImage?.enlaceTexto || ""}
-                  onChange={(e) =>
-                    handleMetadataChange("enlaceTexto", e.target.value)
-                  }
-                  disabled={!activeImage}
-                />
-              </div>
+              {/* 4. TEXTO DEL BOTÓN Y REDIRECCIÓN INTERNA DEL PORTAL */}
+              {isCarruselInicio && (
+                <>
+                  <div>
+                    <label className="esp-form-label" htmlFor="cg-input-btn-text">
+                      Texto del Botón{" "}
+                      <span
+                        style={{
+                          textTransform: "none",
+                          color: "#94a3b8",
+                          fontWeight: "normal",
+                        }}
+                      >
+                        (Opcional)
+                      </span>
+                    </label>
+                    <input
+                      id="cg-input-btn-text"
+                      type="text"
+                      className="esp-form-input"
+                      placeholder="Ej. CONOCENOS (dejar vacío sin botón)"
+                      value={textoBoton}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setTextoBoton(val);
+                        if (!val.trim()) {
+                          setEnlaceUrl("");
+                        }
+                        setHasUnsavedChanges(true);
+                      }}
+                      disabled={isSaving}
+                    />
+                  </div>
 
-              <div>
-                <label className="esp-form-label" htmlFor="cg-input-link-url">
-                  URL del Enlace (Opcional)
-                </label>
-                <input
-                  id="cg-input-link-url"
-                  type="text"
-                  className="esp-form-input"
-                  placeholder="Ej. /especialidades o https://..."
-                  value={activeImage?.enlaceUrl || ""}
-                  onChange={(e) =>
-                    handleMetadataChange("enlaceUrl", e.target.value)
-                  }
-                  disabled={!activeImage}
-                />
-              </div>
+                  <div>
+                    <label className="esp-form-label" htmlFor="cg-select-redirect">
+                      Redirección del Botón{" "}
+                      {tieneBoton ? (
+                        <span className="esp-asterisk">*</span>
+                      ) : (
+                        <span
+                          style={{
+                            textTransform: "none",
+                            color: "#94a3b8",
+                            fontWeight: "normal",
+                          }}
+                        >
+                          (Se activa al escribir texto en el botón)
+                        </span>
+                      )}
+                    </label>
+                    <select
+                      id="cg-select-redirect"
+                      className="esp-form-input"
+                      value={tieneBoton ? enlaceUrl : ""}
+                      onChange={(e) => {
+                        setEnlaceUrl(e.target.value);
+                        setHasUnsavedChanges(true);
+                      }}
+                      disabled={!tieneBoton || isSaving}
+                      required={tieneBoton}
+                    >
+                      <option value="">-- Seleccione una sección del portal --</option>
+                      {PORTAL_INTERNAL_ROUTES.map((route) => (
+                        <option key={route.value} value={route.value}>
+                          {route.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
 
-              {/* 3. GESTOR DE CARRUSEL (Mismo contenedor blanco con borde #cbd5e1 que Profesionales) */}
+              {/* 5. GESTOR DE IMÁGENES DEL CARRUSEL */}
               <div className="esp-full-width">
                 <label className="esp-form-label">
                   Imágenes del Carrusel{" "}
@@ -517,7 +698,7 @@ export const CmsContenidoGraficoEditModal = ({
                     }}
                   >
                     ({imagenes.length}{" "}
-                    {imagenes.length === 1 ? "imagen" : "imágenes"})
+                    {imagenes.length === 1 ? "imagen" : "imágenes"} • puede arrastrar para cambiar el orden)
                   </span>
                 </label>
 
@@ -532,52 +713,62 @@ export const CmsContenidoGraficoEditModal = ({
                     gap: "14px",
                   }}
                 >
-                  {/* Tira de miniaturas existentes */}
+                  {/* Tira de miniaturas ubicadas por orden */}
                   <div className="cg-carousel-strip" role="list">
                     {imagenes.map((img, idx) => {
                       const isSelected = idx === safeIndex;
+                      const thumbUrl = resolveGraphicImageUrl(img);
                       return (
                         <div
                           key={img.id || idx}
                           role="listitem"
+                          draggable={!isSaving}
+                          onDragStart={() => handleDragStart(idx)}
+                          onDragOver={handleDragOver}
+                          onDrop={() => handleDrop(idx)}
                           className={`cg-carousel-thumb-item ${
                             isSelected ? "selected" : ""
                           }`}
                           onClick={() => setActiveIndex(idx)}
-                          title={`Imagen #${idx + 1}`}
+                          title={`Imagen #${idx + 1} (clic para previsualizar, arrastrar para reordenar)`}
                         >
-                          <img
-                            src={img.url}
-                            alt={img.altText || `Imagen ${idx + 1}`}
-                            className="cg-carousel-thumb-img"
-                          />
+                          {thumbUrl && (
+                            <img
+                              src={thumbUrl}
+                              alt={`Miniatura ${idx + 1}`}
+                              className="cg-carousel-thumb-img"
+                            />
+                          )}
                           <span className="cg-carousel-thumb-number">
                             #{idx + 1}
                           </span>
-                          <button
-                            type="button"
-                            className="cg-carousel-delete-btn"
-                            onClick={(e) => handleRemoveImage(idx, e)}
-                            title="Eliminar esta imagen"
-                          >
-                            <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: "15px" }}
+                          {imagenes.length > 1 && (
+                            <button
+                              type="button"
+                              className="cg-carousel-delete-btn"
+                              onClick={(e) => handleRemoveImage(idx, e)}
+                              disabled={isSaving}
+                              title="Eliminar esta imagen"
                             >
-                              delete
-                            </span>
-                          </button>
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: "15px" }}
+                              >
+                                delete
+                              </span>
+                            </button>
+                          )}
                         </div>
                       );
                     })}
                   </div>
 
-                  {/* Botones debajo de las imágenes (mismo estilo que Profesionales) */}
+                  {/* Acciones debajo: únicamente Agregar y Eliminar */}
                   <div className="cg-carousel-under-actions">
                     <input
                       type="file"
                       ref={fileInputRef}
-                      onChange={handleAddImageFiles}
+                      onChange={handleSelectNewImage}
                       accept="image/jpeg,image/png,image/webp"
                       style={{ display: "none" }}
                     />
@@ -585,6 +776,7 @@ export const CmsContenidoGraficoEditModal = ({
                     <button
                       type="button"
                       className="cg-prof-style-btn"
+                      disabled={isSaving}
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <svg
@@ -604,23 +796,8 @@ export const CmsContenidoGraficoEditModal = ({
 
                     <button
                       type="button"
-                      className="cg-prof-style-btn"
-                      disabled={!activeImage}
-                      onClick={handleOpenCropExisting}
-                    >
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: "16px" }}
-                      >
-                        crop
-                      </span>
-                      <span>Recortar seleccionada</span>
-                    </button>
-
-                    <button
-                      type="button"
                       className="cg-prof-style-btn danger"
-                      disabled={!activeImage}
+                      disabled={!activeImage || imagenes.length <= 1 || isSaving}
                       onClick={(e) => handleRemoveImage(safeIndex, e)}
                     >
                       <span
@@ -637,12 +814,13 @@ export const CmsContenidoGraficoEditModal = ({
             </div>
           </div>
 
-          {/* PIE DEL MODAL UNIFICADO (.modal-footer-esp) */}
+          {/* PIE DEL MODAL */}
           <div className="modal-footer-esp">
             <button
               type="button"
               className="btn-cancelar-gris"
-              onClick={onClose}
+              onClick={handleCloseAttempt}
+              disabled={isSaving}
             >
               CANCELAR
             </button>
@@ -650,46 +828,77 @@ export const CmsContenidoGraficoEditModal = ({
               type="submit"
               className="btn-cerrar-rojo"
               style={{ backgroundColor: "#2b5b94" }}
+              disabled={isSaving}
             >
-              {isRejected ? "GUARDAR Y REENVIAR" : "ACTUALIZAR"}
+              {isSaving ? (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                  <span
+                    className="cms-spinner"
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      borderWidth: "2px",
+                      borderTopColor: "#ffffff",
+                      borderColor: "rgba(255,255,255,0.3)",
+                    }}
+                  />
+                  ACTUALIZANDO...
+                </span>
+              ) : (
+                "ACTUALIZAR"
+              )}
             </button>
           </div>
         </form>
       </div>
 
-      {/* OVERLAY DEL CROPPER DE IMAGEN (Idéntico al de Profesionales) */}
+      {/* RECORTADOR EMERGENTE AUTOMÁTICO AL SELECCIONAR UNA IMAGEN NUEVA */}
       {isCropping && imageSrc && (
         <div
           onClick={(e) => e.stopPropagation()}
           style={{
             position: "fixed",
             inset: 0,
-            backgroundColor: "rgba(15, 23, 42, 0.9)",
+            backgroundColor: "rgba(15, 23, 42, 0.92)",
             zIndex: 100000,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            padding: "20px",
           }}
         >
           <h2
             style={{
               color: "#fff",
-              marginBottom: "20px",
-              fontWeight: "300",
-              letterSpacing: "1px",
+              marginBottom: "8px",
+              fontWeight: "400",
+              letterSpacing: "0.5px",
+              fontSize: "1.25rem",
+              textAlign: "center",
             }}
           >
-            Encuadra la imagen del espacio ({dimensionesRequeridas})
+            Recortar imagen al tamaño del carrusel
           </h2>
+          <p
+            style={{
+              color: "#94a3b8",
+              marginTop: 0,
+              marginBottom: "20px",
+              fontSize: "0.85rem",
+              textAlign: "center",
+            }}
+          >
+            Ajuste el encuadre a la proporción exacta en la que se verá en el portal ({dimensionesRequeridas} aprox.)
+          </p>
 
           <div
             style={{
               position: "relative",
-              width: "90%",
-              maxWidth: "640px",
+              width: "92%",
+              maxWidth: "740px",
               height: "380px",
-              backgroundColor: "#333",
+              backgroundColor: "#0c2340",
               borderRadius: "12px",
               overflow: "hidden",
               boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
@@ -708,11 +917,10 @@ export const CmsContenidoGraficoEditModal = ({
             />
           </div>
 
-          {/* Controles de Zoom */}
           <div
             style={{
               width: "90%",
-              maxWidth: "400px",
+              maxWidth: "420px",
               marginTop: "20px",
               display: "flex",
               alignItems: "center",
@@ -725,14 +933,14 @@ export const CmsContenidoGraficoEditModal = ({
               value={zoom}
               min={1}
               max={3}
-              step={0.1}
-              aria-labelledby="Zoom"
+              step={0.05}
+              aria-label="Zoom de imagen"
               onChange={(e) => setZoom(Number(e.target.value))}
               style={{ flex: 1, cursor: "pointer" }}
             />
           </div>
 
-          <div style={{ marginTop: "30px", display: "flex", gap: "15px" }}>
+          <div style={{ marginTop: "28px", display: "flex", gap: "15px" }}>
             <button
               type="button"
               onClick={() => {
@@ -756,9 +964,9 @@ export const CmsContenidoGraficoEditModal = ({
             </button>
             <button
               type="button"
-              onClick={handleSaveCrop}
+              onClick={handleConfirmCropAndAdd}
               style={{
-                padding: "12px 24px",
+                padding: "12px 28px",
                 borderRadius: "50px",
                 backgroundColor: "#0284c7",
                 color: "#fff",
@@ -770,11 +978,19 @@ export const CmsContenidoGraficoEditModal = ({
                 letterSpacing: "1px",
               }}
             >
-              Recortar y Guardar
+              Recortar y Agregar
             </button>
           </div>
         </div>
       )}
+
+      {/* ADVERTENCIA DE CAMBIOS SIN GUARDAR */}
+      <CmsUnsavedChangesModal
+        isOpen={showUnsavedModal}
+        onKeepEditing={() => setShowUnsavedModal(false)}
+        onDiscard={handleForceClose}
+        message="¿Deseas descartar los cambios realizados en este espacio gráfico?"
+      />
     </div>
   );
 };
