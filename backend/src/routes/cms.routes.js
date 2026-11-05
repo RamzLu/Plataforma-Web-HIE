@@ -30,7 +30,8 @@ import {
 } from "../controllers/cms/cms.capacitacion.controller.js";
 
 
-import { requireCmsAccess, requireAdminAccess, adminViewAccess, verifyToken } from '../middlewares/auth.middleware.js'; 
+import { requireCmsAccess, requireAdminAccess, adminViewAccess } from '../middlewares/auth.middleware.js'; 
+import { parsearIdBigInt } from '../utils/sanitize.utils.js';
 import {
   uploadImagenSingle,
   uploadImagenesArray,
@@ -40,6 +41,15 @@ import {
 } from '../middlewares/upload.middleware.js'; 
 
 const router = Router();
+
+router.param('id', (req, _res, next, id) => {
+  try {
+    parsearIdBigInt(id, 'ID del recurso');
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 // ==========================================
 // MÓDULO: NOTICIAS

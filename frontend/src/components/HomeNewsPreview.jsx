@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getNoticias } from "../api/noticias.api.js";
 import "../styles/sections/HomeNewsPreview.css";
 import AnimatedContent from "../components/ui/AnimatedContent";
 import DefaultNewsImage from "./ui/DefaultNewsImage";
@@ -17,11 +18,10 @@ const HomeNewsPreview = () => {
     const fetchLatestNews = async () => {
       setLoading(true);
       try {
-        const response = await fetch("http://localhost:3000/api/cms/noticias");
-        if (response.ok) {
-          const data = await response.json();
-                    const ultimasTres = data
-            .sort((a, b) => b.id - a.id)
+        const data = await getNoticias(false);
+        if (Array.isArray(data)) {
+          const ultimasTres = [...data]
+            .sort((a, b) => Number(b.id) - Number(a.id))
             .slice(0, 3);
           setLatestNews(ultimasTres);
         }

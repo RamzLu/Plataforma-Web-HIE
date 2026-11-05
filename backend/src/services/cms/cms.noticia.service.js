@@ -2,7 +2,7 @@ import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
-import { sanitizarHtmlNoticia } from "../../utils/sanitize.utils.js";
+import { sanitizarHtmlNoticia, parsearIdBigInt, parsearArregloJson } from "../../utils/sanitize.utils.js";
 
 const REJECTION_KEY_PREFIX = "noticia_rejection_";
 const PENDING_META_KEY_PREFIX = "noticia_pending_meta_";
@@ -184,7 +184,8 @@ class CmsNoticiaService {
         .upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
 
       if (storageError) {
-        const error = new Error("Error al subir imagen: " + storageError.message);
+        console.error("Error al subir imagen de noticia a Supabase:", storageError.message);
+        const error = new Error("No se pudo almacenar la imagen de la noticia.");
         error.statusCode = 500;
         throw error;
       }
@@ -359,8 +360,9 @@ class CmsNoticiaService {
   }
 
   async eliminarNoticia(id) {
+    const idBigInt = parsearIdBigInt(id, "ID de noticia");
     const noticia = await prisma.noticia.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { noticia_archivo: { include: { archivo: true } } },
     });
 
@@ -376,20 +378,22 @@ class CmsNoticiaService {
       await prisma.archivo.delete({ where: { id: na.archivo.id } });
     }
 
-    await prisma.noticia.delete({ where: { id: BigInt(id) } });
+    await prisma.noticia.delete({ where: { id: idBigInt } });
     await this.limpiarMotivoRechazo(id.toString());
     await this.limpiarPendingMeta(id.toString());
     return { message: "Exito" };
   }
 
   async actualizarNoticia(id, data, archivosSubidos, user) {
+    const idBigInt = parsearIdBigInt(id, "ID de noticia");
     const { titulo, imagenesExistentes, estado, fechaPublicacion, categoriaNombre } = data;
+    const urlsConservadas = parsearArregloJson(imagenesExistentes, "imagenesExistentes");
     // El cuerpo es HTML que luego se muestra en el portal: se sanea antes de guardarlo.
     const contenido = data.contenido ? sanitizarHtmlNoticia(data.contenido) : data.contenido;
     const usuarioEditor = await obtenerOCrearUsuarioLocal(user);
 
     const noticiaExistente = await prisma.noticia.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: {
         noticia_archivo: { include: { archivo: true } },
         categoria_noticia: true,
@@ -513,11 +517,10 @@ class CmsNoticiaService {
     }
 
     const noticiaActualizada = await prisma.noticia.update({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       data: dataUpdate,
     });
 
-    const urlsConservadas = imagenesExistentes ? JSON.parse(imagenesExistentes) : [];
     const urlsProtegidasSnapshot = snapshotPublico?.images || [];
 
     for (const na of noticiaExistente.noticia_archivo) {
@@ -545,7 +548,8 @@ class CmsNoticiaService {
         .upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
 
       if (storageError) {
-        const err = new Error("Error al subir imagen: " + storageError.message);
+        console.error("Error al subir imagen de noticia a Supabase:", storageError.message);
+        const err = new Error("No se pudo almacenar la imagen de la noticia.");
         err.statusCode = 500;
         throw err;
       }
@@ -566,7 +570,7 @@ class CmsNoticiaService {
     }
 
     const noticiaConArchivos = await prisma.noticia.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: {
         usuario_noticia_createdByTousuario: true,
         usuario_noticia_updatedByTousuario: true,
@@ -621,6 +625,7 @@ class CmsNoticiaService {
   }
 
   async evaluarNoticia(id, data, user) {
+    const idBigInt = parsearIdBigInt(id, "ID de noticia");
     const { estado, rejectionReason } = data;
 
     if (!estado) {
@@ -630,7 +635,7 @@ class CmsNoticiaService {
     }
 
     const noticiaExistente = await prisma.noticia.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
     });
 
     if (!noticiaExistente) {
@@ -690,7 +695,7 @@ class CmsNoticiaService {
     }
 
     const noticiaActualizada = await prisma.noticia.update({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       data: {
         estado: nuevoEstado,
         updatedAt: new Date(),

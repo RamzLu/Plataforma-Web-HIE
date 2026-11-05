@@ -6,6 +6,7 @@ import keycloak from '../../config/keycloak';
 import { getNoticias, evaluarNoticiaEstado } from '../../api/noticias.api';
 import avatarHospital from '../../assets/logoHospitalEvita.png';
 import DefaultNewsImage from '../../components/ui/DefaultNewsImage';
+import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
 import '../../styles/pages/admin/AdminNoticiasView.css';
 
 const AdminNoticiasView = ({ onPendingCountChange }) => {
@@ -606,7 +607,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 </div>
 
                 <div className="news-modal-body-text-admin">
-                  <div dangerouslySetInnerHTML={{ __html: selectedNews.content }} />
+                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedNews.content) }} />
                 </div>
               </div>
 

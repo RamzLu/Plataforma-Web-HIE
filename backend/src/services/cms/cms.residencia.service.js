@@ -1,7 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-import { sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
+import { sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
 const formatBytes = (bytes) => {
   const n = Number(bytes || 0);
@@ -11,12 +11,9 @@ const formatBytes = (bytes) => {
 };
 
 class CmsResidenciaService {
-  /**
-   * Obtener todas las residencias con su archivo y datos formateados
-   */
   async obtenerResidencias(esVistaAdmin = false) {
     const residencias = await prisma.residencia.findMany({
-      where: esVistaAdmin === true ? {} : { estado: "PUBLICADO" },
+      where: esVistaAdmin === true ? {} : { estado: "PUBLICADO", activo: true },
       orderBy: { createdAt: "desc" },
       include: {
         archivo: true,
@@ -26,9 +23,6 @@ class CmsResidenciaService {
     return residencias.map((res) => this._formatResidencia(res));
   }
 
-  /**
-   * Crear una nueva residencia (soporta Banner y Documento adjunto)
-   */
   async crearResidencia(data, files) {
     if (!data.nombre || !data.nombre.trim()) {
       const error = new Error("El nombre de la residencia es obligatorio.");
@@ -42,7 +36,6 @@ class CmsResidenciaService {
 
     let imagenId = null;
 
-    // 1. Procesar Imagen de Banner si existe
     if (bannerFile) {
       const { nombreUnico, extension } = generarNombreUnico(bannerFile.originalname, "residencia_banner");
       const { error: storageError } = await supabase.storage
@@ -54,7 +47,7 @@ class CmsResidenciaService {
 
       if (storageError) {
         console.error("Error subiendo imagen de banner a Supabase:", storageError);
-        const error = new Error("Error al subir imagen de banner: " + storageError.message);
+        const error = new Error("No se pudo almacenar el banner de la residencia.");
         error.statusCode = 500;
         throw error;
       }
@@ -73,7 +66,6 @@ class CmsResidenciaService {
       imagenId = archivoBannerDb.id;
     }
 
-    // 2. Procesar Documento adjunto (PDF / Word) si existe
     let documentoMeta = null;
     if (docFile) {
       const { nombreUnico, extension } = generarNombreUnico(docFile.originalname, "residencia_doc");
@@ -86,7 +78,7 @@ class CmsResidenciaService {
 
       if (storageError) {
         console.error("Error subiendo documento a Supabase:", storageError);
-        const error = new Error("Error al subir documento adjunto: " + storageError.message);
+        const error = new Error("No se pudo almacenar el documento adjunto de la residencia.");
         error.statusCode = 500;
         throw error;
       }
@@ -114,7 +106,6 @@ class CmsResidenciaService {
       };
     }
 
-    // 3. Estructurar el contenido en JSON
     const contenidoPayload = {
       categoria: data.categoria || "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
       descripcionPrograma: data.descripcionPrograma || "",
@@ -164,11 +155,8 @@ class CmsResidenciaService {
     };
   }
 
-  /**
-   * Actualizar una residencia existente
-   */
   async actualizarResidencia(id, data, files) {
-    const idBigInt = BigInt(id);
+    const idBigInt = parsearIdBigInt(id, "ID de residencia");
 
     const residenciaExistente = await prisma.residencia.findUnique({
       where: { id: idBigInt },
@@ -187,7 +175,6 @@ class CmsResidenciaService {
 
     let finalImagenId = residenciaExistente.imagenId;
 
-    // Manejo de eliminación explícita de Banner
     if (data.eliminarBanner === "true" || data.eliminarBanner === true) {
       if (residenciaExistente.archivo) {
         try {
@@ -202,7 +189,6 @@ class CmsResidenciaService {
       finalImagenId = null;
     }
 
-    // Si se subió un nuevo Banner
     if (bannerFile) {
       if (residenciaExistente.archivo) {
         try {
@@ -224,7 +210,8 @@ class CmsResidenciaService {
         });
 
       if (storageError) {
-        const error = new Error("Error al subir banner a Supabase: " + storageError.message);
+        console.error("Error subiendo banner a Supabase:", storageError);
+        const error = new Error("No se pudo almacenar el banner de la residencia.");
         error.statusCode = 500;
         throw error;
       }
@@ -243,7 +230,6 @@ class CmsResidenciaService {
       finalImagenId = nuevoArchivoBanner.id;
     }
 
-    // Parsear contenido previo
     let contenidoPrevio = {};
     if (residenciaExistente.contenido) {
       try {
@@ -255,7 +241,6 @@ class CmsResidenciaService {
 
     let documentoMeta = contenidoPrevio.documento || null;
 
-    // Manejo de eliminación explícita de Documento
     if (data.eliminarDocumento === "true" || data.eliminarDocumento === true) {
       if (documentoMeta?.documentoId) {
         try {
@@ -264,7 +249,7 @@ class CmsResidenciaService {
               .from("documentos")
               .remove([documentoMeta.documentoArchivoNombre]);
           }
-          await prisma.archivo.delete({ where: { id: BigInt(documentoMeta.documentoId) } });
+          await prisma.archivo.delete({ where: { id: parsearIdBigInt(documentoMeta.documentoId, "ID de documento") } });
         } catch (e) {
           console.warn("No se pudo remover documento previo:", e.message);
         }
@@ -272,7 +257,6 @@ class CmsResidenciaService {
       documentoMeta = null;
     }
 
-    // Si se subió un nuevo Documento
     if (docFile) {
       if (documentoMeta?.documentoId) {
         try {
@@ -281,7 +265,7 @@ class CmsResidenciaService {
               .from("documentos")
               .remove([documentoMeta.documentoArchivoNombre]);
           }
-          await prisma.archivo.delete({ where: { id: BigInt(documentoMeta.documentoId) } });
+          await prisma.archivo.delete({ where: { id: parsearIdBigInt(documentoMeta.documentoId, "ID de documento") } });
         } catch (e) {
           console.warn("No se pudo remover documento previo:", e.message);
         }
@@ -296,7 +280,8 @@ class CmsResidenciaService {
         });
 
       if (storageError) {
-        const error = new Error("Error al subir documento a Supabase: " + storageError.message);
+        console.error("Error subiendo documento a Supabase:", storageError);
+        const error = new Error("No se pudo almacenar el documento de la residencia.");
         error.statusCode = 500;
         throw error;
       }
@@ -376,9 +361,6 @@ class CmsResidenciaService {
     };
   }
 
-  /**
-   * Cambiar el estado editorial de una residencia (PUBLICADO, BORRADOR, ARCHIVADO)
-   */
   async cambiarEstado(id, nuevoEstado) {
     if (!nuevoEstado) {
       const error = new Error("El nuevo estado es obligatorio.");
@@ -397,7 +379,7 @@ class CmsResidenciaService {
       throw error;
     }
 
-    const idBigInt = BigInt(id);
+    const idBigInt = parsearIdBigInt(id, "ID de residencia");
 
     const residenciaExistente = await prisma.residencia.findUnique({
       where: { id: idBigInt },
@@ -426,11 +408,8 @@ class CmsResidenciaService {
     };
   }
 
-  /**
-   * Eliminar una residencia y sus archivos (banner y documento)
-   */
   async eliminarResidencia(id) {
-    const idBigInt = BigInt(id);
+    const idBigInt = parsearIdBigInt(id, "ID de residencia");
 
     const residencia = await prisma.residencia.findUnique({
       where: { id: idBigInt },
@@ -443,7 +422,6 @@ class CmsResidenciaService {
       throw error;
     }
 
-    // 1. Eliminar banner
     if (residencia.archivo) {
       try {
         await supabase.storage
@@ -454,7 +432,6 @@ class CmsResidenciaService {
       }
     }
 
-    // 2. Eliminar documento si existe en contenido
     if (residencia.contenido) {
       try {
         const parsed = JSON.parse(residencia.contenido);
@@ -465,7 +442,7 @@ class CmsResidenciaService {
         }
         if (parsed.documento?.documentoId) {
           await prisma.archivo.delete({
-            where: { id: BigInt(parsed.documento.documentoId) },
+            where: { id: parsearIdBigInt(parsed.documento.documentoId, "ID de documento") },
           }).catch(() => {});
         }
       } catch (e) {}
@@ -491,9 +468,6 @@ class CmsResidenciaService {
     };
   }
 
-  /**
-   * Formatear el registro de residencia para el cliente
-   */
   _formatResidencia(res) {
     let extra = {
       categoria: "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
@@ -514,7 +488,6 @@ class CmsResidenciaService {
       } catch (e) {}
     }
 
-    // Banner URL e Info
     let bannerUrl = "";
     let bannerNombre = "";
     if (res.archivo) {
@@ -525,7 +498,6 @@ class CmsResidenciaService {
       bannerUrl = data?.publicUrl || "";
     }
 
-    // Documento adjunto (PDF / Word)
     const doc = extra.documento || {};
     const documentoUrl = sanitizarUrlLectura(doc.documentoUrl, "");
     const documentoNombre = doc.documentoNombre || "";
@@ -545,7 +517,6 @@ class CmsResidenciaService {
       createdAt: res.createdAt ? res.createdAt.toISOString() : "",
       updatedAt: res.updatedAt ? res.updatedAt.toISOString() : "",
 
-      // Campos específicos solicitados por el usuario
       categoria: extra.categoria || "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
       descripcionPrograma: extra.descripcionPrograma || "",
       cupos: extra.cupos || "",
@@ -553,19 +524,16 @@ class CmsResidenciaService {
       requisitos: extra.requisitos || "",
       reglamentoRotacion: extra.reglamentoRotacion || "",
 
-      // Imagen de Banner
       bannerId: res.imagenId ? res.imagenId.toString() : null,
       bannerNombre,
       bannerUrl,
 
-      // Carga de Documentos
       documentoId: doc.documentoId || null,
       documentoNombre,
       documentoTamano,
       documentoTipo,
       documentoUrl,
 
-      // Compatibilidad con tabla
       archivoNombre: documentoNombre,
       archivoUrl: documentoUrl,
       archivoTamano: documentoTamano,

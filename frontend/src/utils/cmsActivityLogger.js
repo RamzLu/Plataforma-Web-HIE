@@ -1,5 +1,14 @@
 const STORAGE_KEY = "cms_activity_log";
 
+const generarIdActividad = () => {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID().slice(0, 8);
+  }
+  const bytes = new Uint8Array(4);
+  globalThis.crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+};
+
 export const recordCmsActivity = ({
   titulo,
   categoria = "General",
@@ -9,9 +18,10 @@ export const recordCmsActivity = ({
   newsId = null,
 }) => {
   try {
-    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const existing = Array.isArray(parsed) ? parsed : [];
     const newActivity = {
-      id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      id: `act-${Date.now()}-${generarIdActividad()}`,
       titulo,
       categoria,
       editor,
@@ -47,7 +57,8 @@ export const getCmsActivityLog = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialLog));
       return initialLog;
     }
-    return JSON.parse(raw || "[]");
+    const parsed = JSON.parse(raw || "[]");
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
