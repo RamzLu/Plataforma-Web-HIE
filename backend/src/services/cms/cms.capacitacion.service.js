@@ -6,6 +6,12 @@ import { validarUrlHttp, sanitizarUrlLectura } from "../../utils/sanitize.utils.
 const DOCS_BUCKET = "capacitaciones-documentos";
 const MEDIA_BUCKET = "capacitaciones-imagenes-videos";
 
+const normalizarUrlOpcional = (rawUrl, nombreCampo) => {
+  if (rawUrl === null || rawUrl === undefined) return "";
+  if (typeof rawUrl === "string" && rawUrl.trim().startsWith("blob:")) return "";
+  return validarUrlHttp(rawUrl, nombreCampo);
+};
+
 const formatBytes = (bytes) => {
   const n = Number(bytes || 0);
   if (n > 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
@@ -137,9 +143,6 @@ const INITIAL_SEED_CAPACITACIONES = [
 ];
 
 class CmsCapacitacionService {
-  /**
-   * Auto-sembrado si la tabla está vacía para que el CMS arranque con datos iniciales
-   */
   async _asegurarDatosIniciales() {
     try {
       const count = await prisma.capacitacion.count();
@@ -182,9 +185,6 @@ class CmsCapacitacionService {
     }
   }
 
-  /**
-   * Obtener todas las capacitaciones para el CMS
-   */
   async obtenerCapacitaciones() {
     await this._asegurarDatosIniciales();
     const capacitaciones = await prisma.capacitacion.findMany({
@@ -197,9 +197,6 @@ class CmsCapacitacionService {
     return capacitaciones.map((c) => this._formatCapacitacion(c));
   }
 
-  /**
-   * Obtener capacitaciones publicadas para el Portal Público
-   */
   async obtenerCapacitacionesPublicas() {
     await this._asegurarDatosIniciales();
     const capacitaciones = await prisma.capacitacion.findMany({
@@ -216,9 +213,6 @@ class CmsCapacitacionService {
     return capacitaciones.map((c) => this._formatCapacitacion(c));
   }
 
-  /**
-   * Crear una capacitación desde el CMS (soporta Banner y Archivo de contenido por separado)
-   */
   async crearCapacitacion(data, files) {
     if (!data.titulo || !data.titulo.trim()) {
       const error = new Error("El título de la capacitación es obligatorio.");
@@ -231,11 +225,10 @@ class CmsCapacitacionService {
     const contenidoFile = filesArray.find((f) => f.fieldname === "archivo" || f.fieldname === "contenido" || f.fieldname === "material");
 
     let imagenId = null;
-    let bannerUrl = (data.bannerUrl || data.imagenUrl || "").trim();
-    if (bannerUrl.startsWith("blob:")) bannerUrl = "";
+    const rawBannerInput = data.bannerUrl !== undefined ? data.bannerUrl : data.imagenUrl;
+    let bannerUrl = rawBannerInput !== undefined ? normalizarUrlOpcional(rawBannerInput, "URL de banner") : "";
     let bannerNombre = data.bannerNombre || "";
 
-    // 1. Procesar Imagen de Banner / Portada si existe
     if (bannerFile) {
       const { nombreUnico, extension: ext } = generarNombreUnico(
         bannerFile.originalname,
@@ -277,10 +270,10 @@ class CmsCapacitacionService {
       }
     }
 
-    // 2. Procesar Archivo de Contenido / Material Didáctico (Video, Documento o Imagen)
     let archivoTipoDetectado = data.archivoTipo || "";
-    let incomingVideoUrl = (data.videoUrl && typeof data.videoUrl === "string" && !data.videoUrl.startsWith("blob:")) ? validarUrlHttp(data.videoUrl, "URL de video") : "";
-    let incomingArchivoUrl = (data.archivoUrl && typeof data.archivoUrl === "string" && !data.archivoUrl.startsWith("blob:")) ? validarUrlHttp(data.archivoUrl, "URL de archivo") : "";
+    let incomingVideoUrl = normalizarUrlOpcional(data.videoUrl, "URL de video");
+    let incomingArchivoUrl = normalizarUrlOpcional(data.archivoUrl, "URL de archivo");
+    const enlaceUrlValidado = normalizarUrlOpcional(data.enlaceUrl, "URL de enlace") || null;
 
     let archivoUrl = incomingArchivoUrl;
     let videoUrl = incomingVideoUrl;
@@ -339,7 +332,6 @@ class CmsCapacitacionService {
       archivoTamano = formatBytes(contenidoFile.size);
     }
 
-    // 3. Fechas
     let fechaInicioDate = null;
     if (data.fechaInicio) {
       const parsed = new Date(data.fechaInicio);
@@ -352,7 +344,6 @@ class CmsCapacitacionService {
       if (!isNaN(parsed.getTime())) fechaFinDate = parsed;
     }
 
-    // 4. Normalizar estado
     let estadoNormalizado = "PUBLICADO";
     if (data.estado) {
       const upper = data.estado.toUpperCase();
@@ -363,7 +354,6 @@ class CmsCapacitacionService {
 
     const finalVideoUrl = videoUrl || (archivoTipoDetectado === "video" ? archivoUrl : null);
 
-    // 5. Payload extendido en campo contenido (JSON)
     const contenidoPayload = {
       temario: data.contenido || data.temario || "",
       modalidad: data.modalidad || "Presencial",
@@ -388,7 +378,7 @@ class CmsCapacitacionService {
         contenido: JSON.stringify(contenidoPayload),
         imagenId: imagenId,
         videoUrl: finalVideoUrl,
-        enlaceUrl: data.enlaceUrl || null,
+        enlaceUrl: enlaceUrlValidado,
         fechaInicio: fechaInicioDate,
         fechaFin: fechaFinDate,
         estado: estadoNormalizado,
@@ -406,9 +396,6 @@ class CmsCapacitacionService {
     };
   }
 
-  /**
-   * Actualizar una capacitación existente (soporta Banner y Archivo de contenido por separado)
-   */
   async actualizarCapacitacion(id, data, files) {
     const idBigInt = BigInt(id);
     const existing = await prisma.capacitacion.findUnique({
@@ -436,20 +423,18 @@ class CmsCapacitacionService {
     const contenidoFile = filesArray.find((f) => f.fieldname === "archivo" || f.fieldname === "contenido" || f.fieldname === "material");
 
     let imagenId = existing.imagenId;
-    let bannerUrl = extra.bannerUrl || extra.imagenUrl || "";
+    let bannerUrl = sanitizarUrlLectura(extra.bannerUrl || extra.imagenUrl || "", "");
     if (data.bannerUrl !== undefined) {
-      bannerUrl = (data.bannerUrl && !data.bannerUrl.startsWith("blob:")) ? data.bannerUrl : "";
+      bannerUrl = normalizarUrlOpcional(data.bannerUrl, "URL de banner");
     }
     let bannerNombre = extra.bannerNombre || (existing.archivo?.nombreOriginal || "");
 
-    // Control de eliminación de banner
     if (data.eliminarBanner === "true" || data.eliminarBanner === true) {
       imagenId = null;
       bannerUrl = "";
       bannerNombre = "";
     }
 
-    // 1. Si se subió un nuevo Banner
     if (bannerFile) {
       const { nombreUnico, extension: ext } = generarNombreUnico(
         bannerFile.originalname,
@@ -490,10 +475,11 @@ class CmsCapacitacionService {
       }
     }
 
-    // 2. Control de Archivo de Contenido
     let archivoTipoDetectado = data.archivoTipo !== undefined ? data.archivoTipo : (extra.archivoTipo || "");
-    let archivoUrl = data.archivoUrl !== undefined ? data.archivoUrl : (extra.archivoUrl || "");
-    if (archivoUrl.startsWith("blob:")) archivoUrl = "";
+    let archivoUrl =
+      data.archivoUrl !== undefined
+        ? normalizarUrlOpcional(data.archivoUrl, "URL de archivo")
+        : sanitizarUrlLectura(extra.archivoUrl || "", "");
     let archivoNombre = data.archivoNombre !== undefined ? data.archivoNombre : (extra.archivoNombre || "");
     let archivoTamano = data.archivoTamano !== undefined ? data.archivoTamano : (extra.archivoTamano || "");
 
@@ -504,11 +490,19 @@ class CmsCapacitacionService {
       archivoTamano = "";
     }
 
-    let cleanExistingVideo = existing.videoUrl && !existing.videoUrl.startsWith("blob:") ? existing.videoUrl : "";
-    let cleanIncomingVideo = data.videoUrl && !data.videoUrl.startsWith("blob:") ? data.videoUrl : "";
-    let videoUrl = cleanIncomingVideo !== undefined ? cleanIncomingVideo : cleanExistingVideo;
+    const cleanExistingVideo =
+      existing.videoUrl && !existing.videoUrl.startsWith("blob:")
+        ? sanitizarUrlLectura(existing.videoUrl, "")
+        : "";
+    let videoUrl =
+      data.videoUrl !== undefined
+        ? normalizarUrlOpcional(data.videoUrl, "URL de video")
+        : cleanExistingVideo;
+    const enlaceUrlActualizado =
+      data.enlaceUrl !== undefined
+        ? normalizarUrlOpcional(data.enlaceUrl, "URL de enlace") || null
+        : (sanitizarUrlLectura(existing.enlaceUrl, null) || null);
 
-    // Si se subió nuevo archivo de contenido (Video, Documento o Imagen)
     if (contenidoFile) {
       const { extension } = generarNombreUnico(
         contenidoFile.originalname,
@@ -525,13 +519,11 @@ class CmsCapacitacionService {
 
       if (isDoc) {
         archivoTipoDetectado = "documento";
-        // Si el nuevo material es un documento, ya no hay video como contenido didáctico
         videoUrl = "";
       } else if (isVideo) {
         archivoTipoDetectado = "video";
       } else if (isImage) {
         archivoTipoDetectado = "imagen";
-        // Si el nuevo material es una imagen/infografía, ya no hay video como contenido didáctico
         videoUrl = "";
       }
 
@@ -568,12 +560,9 @@ class CmsCapacitacionService {
       archivoNombre = contenidoFile.originalname;
       archivoTamano = formatBytes(contenidoFile.size);
     } else if (archivoTipoDetectado === "documento" || archivoTipoDetectado === "imagen") {
-      // Si el tipo de archivo guardado en DB es documento/imagen, limpiar videoUrl
-      // (puede haber quedado de una carga anterior de video)
       videoUrl = "";
     }
 
-    // Fechas
     let fechaInicioDate = existing.fechaInicio;
     if (data.fechaInicio !== undefined) {
       if (data.fechaInicio) {
@@ -594,7 +583,6 @@ class CmsCapacitacionService {
       }
     }
 
-    // Normalizar estado
     let estadoNormalizado = existing.estado;
     if (data.estado) {
       const upper = data.estado.toUpperCase();
@@ -608,7 +596,6 @@ class CmsCapacitacionService {
     const contenidoPayload = {
       temario: data.contenido !== undefined ? data.contenido : (extra.temario || ""),
       modalidad: data.modalidad || extra.modalidad || "Presencial",
-      // tipoRecurso: si cambió el archivo, derivar del nuevo tipo; si no, respetar lo que manda el frontend o lo existente
       tipoRecurso: archivoTipoDetectado
         ? (archivoTipoDetectado === "video" ? "video" : archivoTipoDetectado === "documento" ? "pdf" : archivoTipoDetectado === "imagen" ? "imagen" : archivoTipoDetectado)
         : (data.tipoRecurso || extra.tipoRecurso || "presencial"),
@@ -633,7 +620,7 @@ class CmsCapacitacionService {
         contenido: JSON.stringify(contenidoPayload),
         imagenId: imagenId,
         videoUrl: finalVideoUrl,
-        enlaceUrl: data.enlaceUrl !== undefined ? data.enlaceUrl : existing.enlaceUrl,
+        enlaceUrl: enlaceUrlActualizado,
         fechaInicio: fechaInicioDate,
         fechaFin: fechaFinDate,
         estado: estadoNormalizado,
@@ -651,9 +638,6 @@ class CmsCapacitacionService {
     };
   }
 
-  /**
-   * Cambiar estado directamente (Publicado, Borrador, Archivado)
-   */
   async cambiarEstado(id, nuevoEstado) {
     const idBigInt = BigInt(id);
     const upper = (nuevoEstado || "").toUpperCase();
@@ -678,9 +662,6 @@ class CmsCapacitacionService {
     };
   }
 
-  /**
-   * Eliminar una capacitación
-   */
   async eliminarCapacitacion(id) {
     const idBigInt = BigInt(id);
     const existing = await prisma.capacitacion.findUnique({
@@ -694,7 +675,6 @@ class CmsCapacitacionService {
       throw error;
     }
 
-    // Intentar limpiar archivo de Supabase si existe
     if (existing.archivo?.nombreArchivo) {
       try {
         const bucket = existing.archivo.ruta?.startsWith(DOCS_BUCKET) ? DOCS_BUCKET : MEDIA_BUCKET;
@@ -720,9 +700,6 @@ class CmsCapacitacionService {
     };
   }
 
-  /**
-   * Formateador unificado de capacitación para CMS y Frontend
-   */
   _formatCapacitacion(c) {
     let extra = {
       temario: "",
@@ -750,7 +727,6 @@ class CmsCapacitacionService {
       }
     }
 
-    // 1. Resolver Banner (Portada de la tarjeta)
     let bannerUrl = extra.bannerUrl || extra.imagenUrl || "";
     let bannerNombre = extra.bannerNombre || "";
 
@@ -763,7 +739,6 @@ class CmsCapacitacionService {
       bannerUrl = "";
     }
 
-    // 2. Resolver Archivo de Contenido (Video, Documento PDF o Imagen didáctica)
     let archivoUrl = extra.archivoUrl || "";
     let archivoNombre = extra.archivoNombre || "";
     let archivoTamano = extra.archivoTamano || "";
@@ -773,15 +748,12 @@ class CmsCapacitacionService {
       archivoUrl = "";
     }
 
-    // Auto-detección de archivoTipo por extensión si no fue persistido explícitamente
     if (!archivoTipo && archivoUrl) {
       if (archivoUrl.match(/\.(mp4|webm|mov|mkv)$/i)) archivoTipo = "video";
       else if (archivoUrl.match(/\.(png|jpg|jpeg|webp|gif|svg)$/i)) archivoTipo = "imagen";
       else if (archivoUrl.match(/\.(pdf|doc|docx)$/i)) archivoTipo = "documento";
     }
 
-    // Si el archivoTipo es documento o imagen, no usar videoUrl aunque exista en la DB
-    // (puede haber quedado de una carga anterior cuando era video)
     let rawVideo;
     if (archivoTipo === "documento" || archivoTipo === "imagen") {
       rawVideo = "";
