@@ -9,10 +9,12 @@ import {
 } from "../../api/contenidoGrafico.api.js";
 import {
   CmsContenidoGraficoEditModal,
+  PortalAprendePreview,
   PortalCarouselPreview,
   PortalPatientInfoPreview,
 } from "../../components/cms/CmsContenidoGraficoCorrectionModal";
 import {
+  DEFAULT_APRENDE_INICIO,
   DEFAULT_CARRUSEL_INICIO,
   DEFAULT_PACIENTES_INICIO,
   getPortalRouteLabel,
@@ -23,6 +25,7 @@ const CmsContenidoGraficoView = () => {
   const [espacios, setEspacios] = useState([
     DEFAULT_CARRUSEL_INICIO,
     DEFAULT_PACIENTES_INICIO,
+    DEFAULT_APRENDE_INICIO,
   ]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -120,6 +123,15 @@ const CmsContenidoGraficoView = () => {
           try {
             sessionStorage.setItem(
               "hie_public_pacientes_inicio_cache",
+              JSON.stringify(espacioActualizado)
+            );
+          } catch {
+            // Ignorar si sessionStorage no está disponible
+          }
+        } else if (espacioActualizado.id === "espacio-aprende-inicio") {
+          try {
+            sessionStorage.setItem(
+              "hie_public_aprende_inicio_cache",
               JSON.stringify(espacioActualizado)
             );
           } catch {
@@ -527,6 +539,12 @@ const CmsContenidoGraficoView = () => {
                   activeIndex={previewSlideIndex}
                   onSelectItem={setPreviewSlideIndex}
                 />
+              ) : selectedEspacio.id === "espacio-aprende-inicio" ? (
+                <PortalAprendePreview
+                  items={previewImages}
+                  activeIndex={previewSlideIndex}
+                  onSelectItem={setPreviewSlideIndex}
+                />
               ) : (
                 <div className="cg-preview-banner-box">
                   {activePreviewUrl ? (
@@ -555,10 +573,15 @@ const CmsContenidoGraficoView = () => {
                       ? `Texto Alternativo (ALT) • Desplegable #${
                           previewSlideIndex + 1
                         }`
+                      : selectedEspacio.id === "espacio-aprende-inicio"
+                      ? previewSlideIndex === 0
+                        ? "Texto Alternativo (ALT) • Imagen Principal"
+                        : `Texto Alternativo (ALT) • Tarjeta #${previewSlideIndex}`
                       : "Texto Alternativo de la Sección (ALT)"}
                   </span>
                   <p className="cg-detail-value">
-                    {selectedEspacio.id === "espacio-seccion-pacientes"
+                    {selectedEspacio.id === "espacio-seccion-pacientes" ||
+                    selectedEspacio.id === "espacio-aprende-inicio"
                       ? activePreviewImg?.altText ||
                         selectedEspacio.altText ||
                         "Sin texto alternativo definido"
@@ -592,15 +615,34 @@ const CmsContenidoGraficoView = () => {
                   </div>
                 )}
 
+                {selectedEspacio.id === "espacio-aprende-inicio" && (
+                  <div className="cg-detail-card">
+                    <span className="cg-detail-label">
+                      {previewSlideIndex === 0
+                        ? "Elemento Seleccionado"
+                        : `Redirección • Tarjeta #${previewSlideIndex}`}
+                    </span>
+                    <p className="cg-detail-value">
+                      {previewSlideIndex === 0
+                        ? "Encabezado, Párrafo e Imagen Principal"
+                        : getPortalRouteLabel(activePreviewImg?.enlaceUrl) ||
+                          "Sin redirección"}
+                    </p>
+                  </div>
+                )}
+
                 <div className="cg-detail-card">
                   <span className="cg-detail-label">
-                    {selectedEspacio.id === "espacio-seccion-pacientes"
+                    {selectedEspacio.id === "espacio-seccion-pacientes" ||
+                    selectedEspacio.id === "espacio-aprende-inicio"
                       ? "Estructura de la Sección"
                       : "Total en Carrusel"}
                   </span>
                   <p className="cg-detail-value">
                     {selectedEspacio.id === "espacio-seccion-pacientes"
                       ? "5 desplegables fijos con imagen propia"
+                      : selectedEspacio.id === "espacio-aprende-inicio"
+                      ? "1 imagen principal + 3 tarjetas con redirección"
                       : `${previewImages.length} ${
                           previewImages.length === 1
                             ? "imagen activa"

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getEspacioGraficoPublico } from "../api/contenidoGrafico.api.js";
 import {
   DEFAULT_CARRUSEL_INICIO,
+  normalizeInternalPortalPath,
   resolveGraphicImageUrl,
 } from "../utils/contenidoGraficoPresets.js";
 import "../styles/components/Carousel.css";
@@ -82,7 +83,7 @@ const Carousel = () => {
   const textoSuperpuesto =
     config.textoSuperpuesto ?? DEFAULT_CARRUSEL_INICIO.textoSuperpuesto;
   const textoBoton = String(config.textoBoton ?? "").trim();
-  const enlaceUrl = String(config.enlaceUrl ?? "").trim();
+  const enlaceUrl = normalizeInternalPortalPath(config.enlaceUrl ?? "");
   const mostrarBoton = Boolean(textoBoton && enlaceUrl);
 
   return (

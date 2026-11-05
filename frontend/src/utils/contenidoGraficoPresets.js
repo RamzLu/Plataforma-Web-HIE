@@ -7,6 +7,10 @@ import imgPacientesVisita from "../assets/imgVisita.jpg";
 import imgPacientesAdmision from "../assets/imgAdmision.jpg";
 import imgPacientesTurnos from "../assets/imgTurnos.jpg";
 import imgPacientesLaboratorio from "../assets/imgLaboratorio.jpg";
+import aprendeMainImg from "../assets/aprendeMain.jpg";
+import aprendeDengueImg from "../assets/aprendeDengue.jpg";
+import aprendeLaboratorioImg from "../assets/aprendeLaboratorio.jpg";
+import aprendeCapacitacionImg from "../assets/aprendeCapacitacion.jpg";
 import bannerEspecialidades from "../assets/banner_especialidades.png";
 import bannerCapacitaciones from "../assets/banner_capacitaciones.png";
 import bannerNoticias from "../assets/banner_noticias.png";
@@ -26,6 +30,10 @@ export const PRESET_IMAGES_MAP = {
   "pacientes-admision": imgPacientesAdmision,
   "pacientes-turnos": imgPacientesTurnos,
   "pacientes-laboratorio": imgPacientesLaboratorio,
+  "aprende-main": aprendeMainImg,
+  "aprende-dengue": aprendeDengueImg,
+  "aprende-laboratorio": aprendeLaboratorioImg,
+  "aprende-capacitacion": aprendeCapacitacionImg,
   "banner-especialidades": bannerEspecialidades,
   "banner-capacitaciones": bannerCapacitaciones,
   "banner-noticias": bannerNoticias,
@@ -34,23 +42,63 @@ export const PRESET_IMAGES_MAP = {
 };
 
 /**
- * Secciones reales del portal público disponibles para redirección de botones.
+ * Secciones reales del portal público disponibles para redirección de botones y tarjetas.
  */
 export const PORTAL_INTERNAL_ROUTES = [
   { value: "/acerca-de", label: "Acerca del Hospital (/acerca-de)" },
-  { value: "/especialidades", label: "Especialidades y Servicios (/especialidades)" },
-  { value: "/profesionales", label: "Directorio de Profesionales (/profesionales)" },
-  { value: "/noticias", label: "Noticias (/noticias)" },
+  {
+    value: "/especialidades",
+    label: "Especialidades y Servicios (/especialidades)",
+  },
+  {
+    value: "/profesionales",
+    label: "Directorio de Profesionales (/profesionales)",
+  },
+  { value: "/noticias", label: "Noticias Generales (/noticias)" },
+  {
+    value: "/noticias/dengue",
+    label: "Noticias • Prevención del Dengue (/noticias/dengue)",
+  },
+  {
+    value: "/noticias/cancer-mama",
+    label: "Noticias • Cáncer de Mama (/noticias/cancer-mama)",
+  },
+  {
+    value: "/noticias/tu-corazon",
+    label: "Noticias • Tu Corazón (/noticias/tu-corazon)",
+  },
+  {
+    value: "/noticias/donacion",
+    label: "Noticias • Donación (/noticias/donacion)",
+  },
   { value: "/documentacion", label: "Documentación (/documentacion)" },
   { value: "/capacitacion", label: "Capacitación y Docencia (/capacitacion)" },
   { value: "/residencias", label: "Residencias Médicas (/residencias)" },
   { value: "/plano", label: "Plano Institucional (/plano)" },
 ];
 
+const LEGACY_CATEGORY_QUERY_MAP = {
+  "/noticias?categoria=dengue": "/noticias/dengue",
+  "/noticias?categoria=cancer-mama": "/noticias/cancer-mama",
+  "/noticias?categoria=tu-corazon": "/noticias/tu-corazon",
+  "/noticias?categoria=donacion": "/noticias/donacion",
+};
+
+/**
+ * Normaliza enlaces internos heredados (ej. `/noticias?categoria=dengue` -> `/noticias/dengue`)
+ * para que coincidan con el enrutador real de `App.jsx` (`/noticias/:categoria`).
+ */
+export const normalizeInternalPortalPath = (path) => {
+  if (!path || typeof path !== "string") return "";
+  const trimmed = path.trim();
+  return LEGACY_CATEGORY_QUERY_MAP[trimmed] || trimmed;
+};
+
 export const getPortalRouteLabel = (path) => {
-  if (!path) return "";
-  const found = PORTAL_INTERNAL_ROUTES.find((r) => r.value === path);
-  return found ? found.label : path;
+  const normalized = normalizeInternalPortalPath(path);
+  if (!normalized) return "";
+  const found = PORTAL_INTERNAL_ROUTES.find((r) => r.value === normalized);
+  return found ? found.label : normalized;
 };
 
 /**
@@ -86,8 +134,7 @@ export const DEFAULT_CARRUSEL_INICIO = {
   rejectionReason: null,
   altText:
     "Carrusel principal de bienvenida del Hospital Interdistrital Evita de Formosa",
-  textoSuperpuesto:
-    "6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL",
+  textoSuperpuesto: "6 AÑOS DE\nVOCACIÓN Y\nCOMPETENCIA\nPROFESIONAL",
   textoBoton: "CONOCENOS",
   enlaceUrl: "/acerca-de",
   imagenes: [
@@ -202,8 +249,92 @@ export const DEFAULT_PACIENTES_INICIO = {
       titulo: "LABORATORIO",
       textoDesplegable:
         "Información detallada sobre preparación previa, ayuno y horarios de extracción para análisis clínicos.",
-      altText:
-        "Servicio de laboratorio y extracciones para análisis clínicos",
+      altText: "Servicio de laboratorio y extracciones para análisis clínicos",
+    },
+  ],
+};
+
+/**
+ * Configuración predeterminada de la sección "Aprendé con el Evita"
+ * (1 bloque general con imagen principal izquierda + 3 tarjetas fijas con redirección).
+ */
+export const DEFAULT_APRENDE_INICIO = {
+  id: "espacio-aprende-inicio",
+  orden: 3,
+  nombre: "Aprendé con el Evita",
+  descripcion:
+    "Bloque de educación para la salud con imagen principal, textos y 3 tarjetas con redirección en Inicio",
+  tipo: "Bloque Educativo + 3 Tarjetas",
+  page: "Inicio",
+  ubicacion: "Bloque Educativo + 3 Tarjetas",
+  dimensiones: "1260x960px / 600x600px",
+  aspectRatio: 630 / 480,
+  esSeccionAprende: true,
+  cantidadItemsFijos: 4,
+  estado: "PUBLICADO",
+  activo: true,
+  rejectionReason: null,
+  altText: "Educación para la salud - Hospital Evita",
+  subtituloEncabezado: "EDUCACIÓN PARA LA SALUD",
+  tituloEncabezado: "APRENDÉ CON EL EVITA",
+  parrafoDescripcion:
+    "Tu espacio de educación médica y preventiva. Encontrá información clara, consejos prácticos y guías de orientación en formato rápido para cuidar tu bienestar y el de tu familia.",
+  textoSuperpuesto: "",
+  textoBoton: "",
+  enlaceUrl: "",
+  imagenes: [
+    {
+      id: "preset-espacio-aprende-inicio-1",
+      rolItem: "principal",
+      url: null,
+      presetKey: "aprende-main",
+      fileName: "aprendeMain.jpg",
+      orden: 1,
+      subtituloEncabezado: "EDUCACIÓN PARA LA SALUD",
+      titulo: "APRENDÉ CON EL EVITA",
+      parrafoDescripcion:
+        "Tu espacio de educación médica y preventiva. Encontrá información clara, consejos prácticos y guías de orientación en formato rápido para cuidar tu bienestar y el de tu familia.",
+      altText: "Educación para la salud - Hospital Evita",
+      enlaceUrl: "",
+    },
+    {
+      id: "preset-espacio-aprende-inicio-2",
+      rolItem: "tarjeta",
+      url: null,
+      presetKey: "aprende-dengue",
+      fileName: "aprendeDengue.jpg",
+      orden: 2,
+      etiquetaSuperior: "TIP DE SALUD",
+      badgeColor: "green",
+      titulo: "Prevención del Dengue",
+      altText: "Prevención del Dengue",
+      enlaceUrl: "/noticias/dengue",
+    },
+    {
+      id: "preset-espacio-aprende-inicio-3",
+      rolItem: "tarjeta",
+      url: null,
+      presetKey: "aprende-laboratorio",
+      fileName: "aprendeLaboratorio.jpg",
+      orden: 3,
+      etiquetaSuperior: "GUÍA PRÁCTICA",
+      badgeColor: "yellow",
+      titulo: "Ayuno para Laboratorio",
+      altText: "Ayuno para laboratorio",
+      enlaceUrl: "/documentacion",
+    },
+    {
+      id: "preset-espacio-aprende-inicio-4",
+      rolItem: "tarjeta",
+      url: null,
+      presetKey: "aprende-capacitacion",
+      fileName: "aprendeCapacitacion.jpg",
+      orden: 4,
+      etiquetaSuperior: "FORMACIÓN",
+      badgeColor: "blue",
+      titulo: "Cursos y Jornadas HIE",
+      altText: "Cursos y Jornadas HIE",
+      enlaceUrl: "/capacitacion",
     },
   ],
 };

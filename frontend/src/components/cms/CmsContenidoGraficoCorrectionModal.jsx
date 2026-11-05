@@ -3,14 +3,20 @@ import toast from "react-hot-toast";
 import Cropper from "react-easy-crop";
 import { CmsUnsavedChangesModal } from "./CmsModals";
 import {
+  DEFAULT_APRENDE_INICIO,
   DEFAULT_PACIENTES_INICIO,
   PORTAL_INTERNAL_ROUTES,
+  normalizeInternalPortalPath,
   resolveGraphicImageUrl,
 } from "../../utils/contenidoGraficoPresets.js";
 
 const CARRUSEL_INICIO_ASPECT = 1501 / 641;
 const PACIENTES_INICIO_ASPECT = 4 / 3;
+const APRENDE_MAIN_ASPECT = 630 / 480;
+const APRENDE_CARD_ASPECT = 1;
 const MAX_OUTPUT_WIDTH = 1920;
+
+const COLORES_TARJETA_APRENDE = ["green", "yellow", "blue"];
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -24,7 +30,7 @@ const createImage = (url) =>
 async function getCroppedImg(
   imageSrc,
   pixelCrop,
-  fileName = "contenido-grafico.jpg"
+  fileName = "contenido-grafico.jpg",
 ) {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -33,9 +39,7 @@ async function getCroppedImg(
   if (!ctx || !pixelCrop) return null;
 
   const scale =
-    pixelCrop.width > MAX_OUTPUT_WIDTH
-      ? MAX_OUTPUT_WIDTH / pixelCrop.width
-      : 1;
+    pixelCrop.width > MAX_OUTPUT_WIDTH ? MAX_OUTPUT_WIDTH / pixelCrop.width : 1;
 
   canvas.width = Math.round(pixelCrop.width * scale);
   canvas.height = Math.round(pixelCrop.height * scale);
@@ -52,7 +56,7 @@ async function getCroppedImg(
     0,
     0,
     canvas.width,
-    canvas.height
+    canvas.height,
   );
 
   const baseName = fileName.replace(/\.[^/.]+$/, "") || "imagen-recortada";
@@ -66,25 +70,34 @@ async function getCroppedImg(
           return;
         }
         const file = new File([blob], safeJpgName, { type: "image/jpeg" });
-        resolve({ file, url: URL.createObjectURL(blob), fileName: safeJpgName });
+        resolve({
+          file,
+          url: URL.createObjectURL(blob),
+          fileName: safeJpgName,
+        });
       },
       "image/jpeg",
-      0.92
+      0.92,
     );
   });
 }
 
-const getAspectRatioFromEspacio = (espacio) => {
+const getAspectRatioFromEspacio = (espacio, activeIndex = 0) => {
   if (espacio?.id === "espacio-banner-inicio") {
     return CARRUSEL_INICIO_ASPECT;
   }
   if (espacio?.id === "espacio-seccion-pacientes") {
     return PACIENTES_INICIO_ASPECT;
   }
+  if (espacio?.id === "espacio-aprende-inicio") {
+    return activeIndex === 0 ? APRENDE_MAIN_ASPECT : APRENDE_CARD_ASPECT;
+  }
   if (typeof espacio?.aspectRatio === "number" && espacio.aspectRatio > 0) {
     return espacio.aspectRatio;
   }
-  const match = String(espacio?.dimensiones || "").match(/(\d+)\s*[x×]\s*(\d+)/i);
+  const match = String(espacio?.dimensiones || "").match(
+    /(\d+)\s*[x×]\s*(\d+)/i,
+  );
   if (match) {
     const width = parseFloat(match[1]);
     const height = parseFloat(match[2]);
@@ -314,6 +327,163 @@ export const PortalPatientInfoPreview = ({
   );
 };
 
+/**
+ * Réplica visual exacta de la sección "Aprendé con el Evita" (`AprendeSection.jsx`).
+ * Permite hacer clic sobre la imagen/encabezado general o sobre cualquiera de las 3 tarjetas
+ * para seleccionar esa parte y editarla inmediatamente.
+ */
+export const PortalAprendePreview = ({
+  items = [],
+  activeIndex = 0,
+  onSelectItem,
+}) => {
+  const safeItems =
+    Array.isArray(items) && items.length >= 4
+      ? items
+      : DEFAULT_APRENDE_INICIO.imagenes;
+
+  const principal = safeItems[0] || DEFAULT_APRENDE_INICIO.imagenes[0];
+  const tarjetas = safeItems.slice(1, 4);
+
+  const mainImgUrl = resolveGraphicImageUrl(principal);
+  const isMainSelected = activeIndex === 0;
+  const lineasParrafo = String(principal?.parrafoDescripcion || "").split("\n");
+
+  return (
+    <div
+      className="cg-portal-aprende-preview"
+      role="region"
+      aria-label="Vista previa de la sección Aprendé con el Evita"
+    >
+      <div className="cg-portal-aprende-grid">
+        {/* Columna izquierda: Imagen editorial grande */}
+        <div
+          className={`cg-portal-aprende-left ${
+            isMainSelected ? "is-selected" : ""
+          } ${onSelectItem ? "is-clickable" : ""}`}
+          onClick={() => onSelectItem && onSelectItem(0)}
+          title={
+            onSelectItem
+              ? "Clic para editar la imagen principal y el encabezado"
+              : undefined
+          }
+        >
+          {mainImgUrl ? (
+            <img
+              src={mainImgUrl}
+              alt={
+                principal?.altText || "Educación para la salud - Hospital Evita"
+              }
+              className="cg-portal-aprende-main-img"
+            />
+          ) : (
+            <div className="cg-portal-aprende-empty">Sin imagen principal</div>
+          )}
+        </div>
+
+        {/* Columna derecha: Encabezado, párrafo y las 3 tarjetas */}
+        <div className="cg-portal-aprende-right">
+          <div
+            className={`cg-portal-aprende-text-block ${
+              isMainSelected ? "is-selected" : ""
+            } ${onSelectItem ? "is-clickable" : ""}`}
+            onClick={() => onSelectItem && onSelectItem(0)}
+            title={
+              onSelectItem
+                ? "Clic para editar subtítulo, título y párrafo descriptivo"
+                : undefined
+            }
+          >
+            <span className="cg-portal-aprende-subtitle">
+              {principal?.subtituloEncabezado &&
+              principal.subtituloEncabezado.trim()
+                ? principal.subtituloEncabezado
+                : "EDUCACIÓN PARA LA SALUD"}
+            </span>
+            <h3 className="cg-portal-aprende-title">
+              {principal?.titulo && principal.titulo.trim()
+                ? principal.titulo
+                : "APRENDÉ CON EL EVITA"}
+            </h3>
+            <p className="cg-portal-aprende-desc">
+              {principal?.parrafoDescripcion &&
+              principal.parrafoDescripcion.trim() ? (
+                lineasParrafo.map((linea, idxL) => (
+                  <React.Fragment key={idxL}>
+                    {linea}
+                    {idxL < lineasParrafo.length - 1 && <br />}
+                  </React.Fragment>
+                ))
+              ) : (
+                <em style={{ color: "#94a3b8" }}>
+                  Escriba el párrafo descriptivo de la sección...
+                </em>
+              )}
+            </p>
+          </div>
+
+          <div className="cg-portal-aprende-cards">
+            {tarjetas.map((card, idx) => {
+              const itemIndex = idx + 1;
+              const isCardSelected = activeIndex === itemIndex;
+              const cardImgUrl = resolveGraphicImageUrl(card);
+              const badgeColor =
+                card.badgeColor || COLORES_TARJETA_APRENDE[idx] || "blue";
+
+              return (
+                <div
+                  key={card.id || itemIndex}
+                  className={`cg-portal-aprende-card ${
+                    isCardSelected ? "is-selected" : ""
+                  } ${onSelectItem ? "is-clickable" : ""}`}
+                  onClick={() => onSelectItem && onSelectItem(itemIndex)}
+                  title={
+                    onSelectItem
+                      ? `Clic para editar la Tarjeta #${itemIndex}`
+                      : undefined
+                  }
+                >
+                  <div className="cg-portal-aprende-card-img-wrap">
+                    {cardImgUrl ? (
+                      <img
+                        src={cardImgUrl}
+                        alt={
+                          card.altText || card.titulo || `Tarjeta ${itemIndex}`
+                        }
+                        className="cg-portal-aprende-card-img"
+                      />
+                    ) : (
+                      <div className="cg-portal-aprende-empty">Sin img</div>
+                    )}
+                  </div>
+
+                  <div className="cg-portal-aprende-card-info">
+                    <span className={`cg-portal-aprende-badge ${badgeColor}`}>
+                      {card.etiquetaSuperior && card.etiquetaSuperior.trim()
+                        ? card.etiquetaSuperior
+                        : `ETIQUETA #${itemIndex}`}
+                    </span>
+                    <h4 className="cg-portal-aprende-card-title">
+                      {card.titulo && card.titulo.trim()
+                        ? card.titulo
+                        : `Título tarjeta #${itemIndex}`}
+                    </h4>
+                  </div>
+
+                  <div className="cg-portal-aprende-card-link">
+                    <span>MÁS INFORMACIÓN</span>
+                    <span className="cg-portal-aprende-arrow">→</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const CmsContenidoGraficoEditModal = ({
   isOpen,
   onClose,
@@ -345,15 +515,25 @@ export const CmsContenidoGraficoEditModal = ({
 
   const isCarruselInicio = espacio?.id === "espacio-banner-inicio";
   const isSeccionPacientes = espacio?.id === "espacio-seccion-pacientes";
+  const isSeccionAprende = espacio?.id === "espacio-aprende-inicio";
 
-  const dimensionesRequeridas =
-    espacio?.dimensiones ||
-    (isCarruselInicio
-      ? "1920x820px"
-      : isSeccionPacientes
-      ? "1200x900px"
-      : "1920x1080px");
-  const cropAspect = getAspectRatioFromEspacio(espacio);
+  const safeIndex =
+    imagenes.length > 0 ? Math.min(activeIndex, imagenes.length - 1) : 0;
+  const activeImage = imagenes[safeIndex] || null;
+  const tieneBoton = textoBoton.trim().length > 0;
+
+  const dimensionesRequeridas = isSeccionAprende
+    ? safeIndex === 0
+      ? "1260x960px"
+      : "600x600px (1:1 cuadrada)"
+    : espacio?.dimensiones ||
+      (isCarruselInicio
+        ? "1920x820px"
+        : isSeccionPacientes
+          ? "1200x900px"
+          : "1920x1080px");
+
+  const cropAspect = getAspectRatioFromEspacio(espacio, safeIndex);
   const isRejected =
     espacio?.estado === "RECHAZADO" || Boolean(espacio?.rejectionReason);
 
@@ -363,13 +543,13 @@ export const CmsContenidoGraficoEditModal = ({
 
       if (espacio.id === "espacio-seccion-pacientes") {
         const defaultsPacientes = DEFAULT_PACIENTES_INICIO.imagenes;
-        const recibidas = Array.isArray(espacio.imagenes) ? espacio.imagenes : [];
+        const recibidas = Array.isArray(espacio.imagenes)
+          ? espacio.imagenes
+          : [];
 
         listaInicial = defaultsPacientes.map((defItem, idx) => {
           const existente = recibidas[idx] || null;
-          if (!existente) {
-            return { ...defItem };
-          }
+          if (!existente) return { ...defItem };
           return {
             ...defItem,
             ...existente,
@@ -378,6 +558,46 @@ export const CmsContenidoGraficoEditModal = ({
             textoDesplegable:
               existente.textoDesplegable ?? defItem.textoDesplegable,
             altText: existente.altText ?? defItem.altText,
+          };
+        });
+      } else if (espacio.id === "espacio-aprende-inicio") {
+        const defaultsAprende = DEFAULT_APRENDE_INICIO.imagenes;
+        const recibidas = Array.isArray(espacio.imagenes)
+          ? espacio.imagenes
+          : [];
+
+        listaInicial = defaultsAprende.map((defItem, idx) => {
+          const existente = recibidas[idx] || null;
+          if (!existente) return { ...defItem };
+
+          if (idx === 0) {
+            return {
+              ...defItem,
+              ...existente,
+              id: existente.id || defItem.id,
+              rolItem: "principal",
+              subtituloEncabezado:
+                existente.subtituloEncabezado ?? defItem.subtituloEncabezado,
+              titulo: existente.titulo ?? defItem.titulo,
+              parrafoDescripcion:
+                existente.parrafoDescripcion ?? defItem.parrafoDescripcion,
+              altText: existente.altText ?? defItem.altText,
+            };
+          }
+
+          return {
+            ...defItem,
+            ...existente,
+            id: existente.id || defItem.id,
+            rolItem: "tarjeta",
+            etiquetaSuperior:
+              existente.etiquetaSuperior ?? defItem.etiquetaSuperior,
+            badgeColor: COLORES_TARJETA_APRENDE[idx - 1] || defItem.badgeColor,
+            titulo: existente.titulo ?? defItem.titulo,
+            altText: existente.altText ?? defItem.altText,
+            enlaceUrl: normalizeInternalPortalPath(
+              existente.enlaceUrl ?? defItem.enlaceUrl,
+            ),
           };
         });
       } else {
@@ -393,7 +613,7 @@ export const CmsContenidoGraficoEditModal = ({
       setAltText(espacio.altText || "");
       setTextoSuperpuesto(espacio.textoSuperpuesto ?? "");
       setTextoBoton(espacio.textoBoton ?? "");
-      setEnlaceUrl(espacio.enlaceUrl ?? "");
+      setEnlaceUrl(normalizeInternalPortalPath(espacio.enlaceUrl ?? ""));
       setActiveIndex(0);
       setHasUnsavedChanges(false);
       setShowUnsavedModal(false);
@@ -403,11 +623,6 @@ export const CmsContenidoGraficoEditModal = ({
   }, [isOpen, espacio]);
 
   if (!isOpen || !espacio) return null;
-
-  const safeIndex =
-    imagenes.length > 0 ? Math.min(activeIndex, imagenes.length - 1) : 0;
-  const activeImage = imagenes[safeIndex] || null;
-  const tieneBoton = textoBoton.trim().length > 0;
 
   const handleCloseAttempt = () => {
     if (isSaving) return;
@@ -427,8 +642,8 @@ export const CmsContenidoGraficoEditModal = ({
   const handleUpdateActiveItemField = (field, value) => {
     setImagenes((prev) =>
       prev.map((item, idx) =>
-        idx === safeIndex ? { ...item, [field]: value } : item
-      )
+        idx === safeIndex ? { ...item, [field]: value } : item,
+      ),
     );
     setHasUnsavedChanges(true);
   };
@@ -471,7 +686,7 @@ export const CmsContenidoGraficoEditModal = ({
       const result = await getCroppedImg(
         imageSrc,
         croppedAreaPixels,
-        pendingFileName
+        pendingFileName,
       );
       if (!result) {
         toast.error("No se pudo procesar el recorte de la imagen.");
@@ -480,7 +695,7 @@ export const CmsContenidoGraficoEditModal = ({
 
       const { file, url, fileName } = result;
 
-      if (cropMode === "replace" || isSeccionPacientes) {
+      if (cropMode === "replace" || isSeccionPacientes || isSeccionAprende) {
         setImagenes((prev) =>
           prev.map((item, idx) =>
             idx === safeIndex
@@ -493,12 +708,20 @@ export const CmsContenidoGraficoEditModal = ({
                   presetKey: null,
                   isNewUpload: true,
                 }
-              : item
-          )
+              : item,
+          ),
         );
-        toast.success(
-          `Imagen del desplegable #${safeIndex + 1} recortada y actualizada.`
-        );
+        if (isSeccionAprende) {
+          toast.success(
+            safeIndex === 0
+              ? "Imagen principal recortada y actualizada."
+              : `Imagen de la Tarjeta #${safeIndex} recortada y actualizada.`,
+          );
+        } else {
+          toast.success(
+            `Imagen del desplegable #${safeIndex + 1} recortada y actualizada.`,
+          );
+        }
       } else {
         const nuevaImagen = {
           id: `new-${Date.now()}`,
@@ -572,9 +795,134 @@ export const CmsContenidoGraficoEditModal = ({
     setHasUnsavedChanges(true);
   };
 
+  const serializeSlideSource = (img, formData, fileCounterRef, defaultName) => {
+    if (img.fileObj instanceof File) {
+      formData.append("imagenes", img.fileObj, img.fileName || defaultName);
+      const idx = fileCounterRef.current;
+      fileCounterRef.current += 1;
+      return {
+        kind: "new",
+        fileIndex: idx,
+      };
+    }
+    if (img.id && /^\d+$/.test(String(img.id))) {
+      return {
+        kind: "existing",
+        id: String(img.id),
+      };
+    }
+    return {
+      kind: "preset",
+      presetKey: img.presetKey,
+      fileName: img.fileName || `${img.presetKey || "imagen"}.jpg`,
+    };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSaving) return;
+
+    // =========================================================================
+    // ENVÍO ESPECÍFICO: APRENDÉ CON EL EVITA (1 PRINCIPAL + 3 TARJETAS FIJAS)
+    // =========================================================================
+    if (isSeccionAprende) {
+      if (imagenes.length !== 4) {
+        toast.error(
+          "La sección Aprendé con el Evita requiere su bloque general y sus 3 tarjetas fijas.",
+        );
+        return;
+      }
+
+      const mainItem = imagenes[0];
+      if (!String(mainItem.subtituloEncabezado || "").trim()) {
+        setActiveIndex(0);
+        toast.error("Complete el subtítulo superior del encabezado.");
+        return;
+      }
+      if (!String(mainItem.titulo || "").trim()) {
+        setActiveIndex(0);
+        toast.error("Complete el título principal de la sección.");
+        return;
+      }
+      if (!String(mainItem.parrafoDescripcion || "").trim()) {
+        setActiveIndex(0);
+        toast.error("Complete el párrafo descriptivo de la sección.");
+        return;
+      }
+      if (!String(mainItem.altText || "").trim()) {
+        setActiveIndex(0);
+        toast.error(
+          "Complete el Texto Alternativo (ALT) de la imagen principal izquierda.",
+        );
+        return;
+      }
+
+      for (let c = 1; c < 4; c++) {
+        const card = imagenes[c];
+        if (!String(card.etiquetaSuperior || "").trim()) {
+          setActiveIndex(c);
+          toast.error(
+            `Complete la etiqueta superior de la Tarjeta #${c} (ej. TIP DE SALUD).`,
+          );
+          return;
+        }
+        if (!String(card.titulo || "").trim()) {
+          setActiveIndex(c);
+          toast.error(`Complete el título de la Tarjeta #${c}.`);
+          return;
+        }
+        if (!String(card.enlaceUrl || "").trim()) {
+          setActiveIndex(c);
+          toast.error(
+            `Seleccione a qué sección redirige "MÁS INFORMACIÓN" en la Tarjeta #${c}.`,
+          );
+          return;
+        }
+        if (!String(card.altText || "").trim()) {
+          setActiveIndex(c);
+          toast.error(
+            `Complete el Texto Alternativo (ALT) de la imagen en la Tarjeta #${c}.`,
+          );
+          return;
+        }
+      }
+
+      const formData = new FormData();
+      const fileCounterRef = { current: 0 };
+
+      const slidesDescriptor = imagenes.map((img, idx) => {
+        const src = serializeSlideSource(
+          img,
+          formData,
+          fileCounterRef,
+          `aprende_${idx}.jpg`,
+        );
+
+        if (idx === 0) {
+          return {
+            ...src,
+            rolItem: "principal",
+            subtituloEncabezado: String(img.subtituloEncabezado || "").trim(),
+            titulo: String(img.titulo || "").trim(),
+            parrafoDescripcion: String(img.parrafoDescripcion || "").trim(),
+            altText: String(img.altText || "").trim(),
+          };
+        }
+
+        return {
+          ...src,
+          rolItem: "tarjeta",
+          etiquetaSuperior: String(img.etiquetaSuperior || "").trim(),
+          titulo: String(img.titulo || "").trim(),
+          enlaceUrl: String(img.enlaceUrl || "").trim(),
+          altText: String(img.altText || "").trim(),
+        };
+      });
+
+      formData.append("slides", JSON.stringify(slidesDescriptor));
+      await onSaveEspacio(espacio.id, formData);
+      return;
+    }
 
     // =========================================================================
     // ENVÍO ESPECÍFICO: INFORMACIÓN PARA PACIENTES (5 DESPLEGABLES FIJOS)
@@ -582,7 +930,7 @@ export const CmsContenidoGraficoEditModal = ({
     if (isSeccionPacientes) {
       if (imagenes.length !== 5) {
         toast.error(
-          "La sección Información para Pacientes debe contener sus 5 desplegables fijos."
+          "La sección Información para Pacientes debe contener sus 5 desplegables fijos.",
         );
         return;
       }
@@ -597,57 +945,33 @@ export const CmsContenidoGraficoEditModal = ({
         if (!String(item.textoDesplegable || "").trim()) {
           setActiveIndex(i);
           toast.error(
-            `Complete el texto informativo del desplegable #${i + 1} ("${item.titulo}").`
+            `Complete el texto informativo del desplegable #${i + 1} ("${item.titulo}").`,
           );
           return;
         }
         if (!String(item.altText || "").trim()) {
           setActiveIndex(i);
           toast.error(
-            `Complete el Texto Alternativo (ALT) de la imagen en el desplegable #${i + 1} ("${item.titulo}").`
+            `Complete el Texto Alternativo (ALT) de la imagen en el desplegable #${i + 1} ("${item.titulo}").`,
           );
           return;
         }
       }
 
       const formData = new FormData();
-      const slidesDescriptor = [];
-      let fileCounter = 0;
+      const fileCounterRef = { current: 0 };
 
-      for (const img of imagenes) {
-        const camposTexto = {
-          titulo: String(img.titulo || "").trim(),
-          textoDesplegable: String(img.textoDesplegable || "").trim(),
-          altText: String(img.altText || "").trim(),
-        };
-
-        if (img.fileObj instanceof File) {
-          formData.append(
-            "imagenes",
-            img.fileObj,
-            img.fileName || "pacientes.jpg"
-          );
-          slidesDescriptor.push({
-            kind: "new",
-            fileIndex: fileCounter,
-            ...camposTexto,
-          });
-          fileCounter += 1;
-        } else if (img.id && /^\d+$/.test(String(img.id))) {
-          slidesDescriptor.push({
-            kind: "existing",
-            id: String(img.id),
-            ...camposTexto,
-          });
-        } else if (img.presetKey) {
-          slidesDescriptor.push({
-            kind: "preset",
-            presetKey: img.presetKey,
-            fileName: img.fileName || `${img.presetKey}.jpg`,
-            ...camposTexto,
-          });
-        }
-      }
+      const slidesDescriptor = imagenes.map((img, idx) => ({
+        ...serializeSlideSource(
+          img,
+          formData,
+          fileCounterRef,
+          `pacientes_${idx + 1}.jpg`,
+        ),
+        titulo: String(img.titulo || "").trim(),
+        textoDesplegable: String(img.textoDesplegable || "").trim(),
+        altText: String(img.altText || "").trim(),
+      }));
 
       formData.append("slides", JSON.stringify(slidesDescriptor));
       await onSaveEspacio(espacio.id, formData);
@@ -664,7 +988,7 @@ export const CmsContenidoGraficoEditModal = ({
 
     if (!altText.trim()) {
       toast.error(
-        "El Texto Alternativo (ALT) es obligatorio para describir la sección."
+        "El Texto Alternativo (ALT) es obligatorio para describir la sección.",
       );
       return;
     }
@@ -676,7 +1000,7 @@ export const CmsContenidoGraficoEditModal = ({
 
     if (tieneBoton && !enlaceUrl.trim()) {
       toast.error(
-        "Seleccione a qué sección del portal debe redireccionar el botón."
+        "Seleccione a qué sección del portal debe redireccionar el botón.",
       );
       return;
     }
@@ -687,39 +1011,17 @@ export const CmsContenidoGraficoEditModal = ({
     formData.append("textoBoton", tieneBoton ? textoBoton.trim() : "");
     formData.append("enlaceUrl", tieneBoton ? enlaceUrl.trim() : "");
 
-    const slidesDescriptor = [];
-    let fileCounter = 0;
-
-    for (const img of imagenes) {
-      if (img.fileObj instanceof File) {
-        formData.append("imagenes", img.fileObj, img.fileName || "carrusel.jpg");
-        slidesDescriptor.push({
-          kind: "new",
-          fileIndex: fileCounter,
-        });
-        fileCounter += 1;
-      } else if (img.presetKey && String(img.id || "").startsWith("preset-")) {
-        slidesDescriptor.push({
-          kind: "preset",
-          presetKey: img.presetKey,
-          fileName: img.fileName || `${img.presetKey}.jpg`,
-        });
-      } else if (img.id && /^\d+$/.test(String(img.id))) {
-        slidesDescriptor.push({
-          kind: "existing",
-          id: String(img.id),
-        });
-      } else if (img.presetKey) {
-        slidesDescriptor.push({
-          kind: "preset",
-          presetKey: img.presetKey,
-          fileName: img.fileName || `${img.presetKey}.jpg`,
-        });
-      }
-    }
+    const fileCounterRef = { current: 0 };
+    const slidesDescriptor = imagenes.map((img, idx) =>
+      serializeSlideSource(
+        img,
+        formData,
+        fileCounterRef,
+        `carrusel_${idx + 1}.jpg`,
+      ),
+    );
 
     formData.append("slides", JSON.stringify(slidesDescriptor));
-
     await onSaveEspacio(espacio.id, formData);
   };
 
@@ -768,14 +1070,19 @@ export const CmsContenidoGraficoEditModal = ({
         {/* FORMULARIO */}
         <form
           onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
         >
           <div className="esp-modal-body">
             <div className="esp-form-grid">
               {isRejected && espacio.rejectionReason && (
                 <div className="esp-full-width">
                   <div className="cg-simple-rejection-box" role="alert">
-                    <strong>Motivo del rechazo:</strong> {espacio.rejectionReason}
+                    <strong>Motivo del rechazo:</strong>{" "}
+                    {espacio.rejectionReason}
                   </div>
                 </div>
               )}
@@ -792,8 +1099,10 @@ export const CmsContenidoGraficoEditModal = ({
                     }}
                   >
                     {isSeccionPacientes
-                      ? `(Imagen 4:3 de ${dimensionesRequeridas} aprox. • Haga clic en cualquier desplegable para verlo y editarlo)`
-                      : `(Medida recomendada: ${dimensionesRequeridas} aprox.)`}
+                      ? "(Imagen 4:3 de 1200x900px aprox. • Haga clic en cualquier desplegable para verlo y editarlo)"
+                      : isSeccionAprende
+                        ? "(Haga clic en el bloque general o en cualquiera de las 3 tarjetas para editarlo)"
+                        : `(Medida recomendada: ${dimensionesRequeridas} aprox.)`}
                   </span>
                 </label>
 
@@ -812,6 +1121,12 @@ export const CmsContenidoGraficoEditModal = ({
                     activeIndex={safeIndex}
                     onSelectItem={setActiveIndex}
                   />
+                ) : isSeccionAprende ? (
+                  <PortalAprendePreview
+                    items={imagenes}
+                    activeIndex={safeIndex}
+                    onSelectItem={setActiveIndex}
+                  />
                 ) : (
                   <div className="cg-mockup-stage">
                     {activeImage && resolveGraphicImageUrl(activeImage) ? (
@@ -822,7 +1137,8 @@ export const CmsContenidoGraficoEditModal = ({
                       />
                     ) : (
                       <div className="cg-mockup-empty-state">
-                        No hay imágenes cargadas en este espacio ({dimensionesRequeridas})
+                        No hay imágenes cargadas en este espacio (
+                        {dimensionesRequeridas})
                       </div>
                     )}
                   </div>
@@ -830,11 +1146,434 @@ export const CmsContenidoGraficoEditModal = ({
               </div>
 
               {/* ===============================================================
-                  CAMPOS ESPECÍFICOS: INFORMACIÓN PARA PACIENTES (5 DESPLEGABLES)
+                  CAMPOS ESPECÍFICOS: APRENDÉ CON EL EVITA (BLOQUE + 3 TARJETAS)
                   =============================================================== */}
-              {isSeccionPacientes ? (
+              {isSeccionAprende ? (
                 <>
-                  {/* Selector de cuál de los 5 desplegables fijos se está editando */}
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Componentes de la Sección{" "}
+                      <span
+                        style={{
+                          textTransform: "none",
+                          color: "#94a3b8",
+                          fontWeight: "normal",
+                        }}
+                      >
+                        (Seleccione el bloque general o una de las 3 tarjetas
+                        fijas)
+                      </span>
+                    </label>
+
+                    <div className="cg-aprende-tabs-grid" role="tablist">
+                      {imagenes.map((item, idx) => {
+                        const isSelected = idx === safeIndex;
+                        const thumbUrl = resolveGraphicImageUrl(item);
+                        const isMain = idx === 0;
+                        const isIncomplete = isMain
+                          ? !String(item.subtituloEncabezado || "").trim() ||
+                            !String(item.titulo || "").trim() ||
+                            !String(item.parrafoDescripcion || "").trim() ||
+                            !String(item.altText || "").trim()
+                          : !String(item.etiquetaSuperior || "").trim() ||
+                            !String(item.titulo || "").trim() ||
+                            !String(item.enlaceUrl || "").trim() ||
+                            !String(item.altText || "").trim();
+
+                        return (
+                          <button
+                            key={item.id || idx}
+                            type="button"
+                            role="tab"
+                            aria-selected={isSelected}
+                            className={`cg-pacientes-tab-card ${
+                              isSelected ? "selected" : ""
+                            } ${isIncomplete ? "incomplete" : ""}`}
+                            onClick={() => setActiveIndex(idx)}
+                          >
+                            <div
+                              className="cg-pacientes-tab-thumb-wrap"
+                              style={{
+                                aspectRatio: isMain ? "4 / 3" : "1 / 1",
+                              }}
+                            >
+                              {thumbUrl && (
+                                <img
+                                  src={thumbUrl}
+                                  alt=""
+                                  className="cg-pacientes-tab-thumb"
+                                />
+                              )}
+                              <span className="cg-pacientes-tab-num">
+                                {isMain ? "Principal" : `Tarjeta #${idx}`}
+                              </span>
+                            </div>
+                            <span className="cg-pacientes-tab-label">
+                              {isMain
+                                ? "Encabezado, Párrafo e Imagen Izq."
+                                : item.titulo && item.titulo.trim()
+                                  ? item.titulo
+                                  : `Tarjeta #${idx}`}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {activeImage && safeIndex === 0 && (
+                    <div className="esp-full-width cg-pacientes-editor-card">
+                      <div className="cg-pacientes-editor-header">
+                        <span className="cg-pacientes-editor-badge">
+                          Editando Bloque General e Imagen Izquierda
+                        </span>
+                        <span className="cg-pacientes-editor-hint">
+                          Se actualiza en vivo en la previsualización superior
+                        </span>
+                      </div>
+
+                      <div className="esp-form-grid" style={{ gap: "16px" }}>
+                        <div>
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-aprende-subtitulo"
+                          >
+                            Subtítulo Superior{" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <input
+                            id="cg-aprende-subtitulo"
+                            type="text"
+                            className="esp-form-input"
+                            placeholder="Ej. EDUCACIÓN PARA LA SALUD"
+                            value={activeImage.subtituloEncabezado || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField(
+                                "subtituloEncabezado",
+                                e.target.value,
+                              )
+                            }
+                            disabled={isSaving}
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-aprende-titulo"
+                          >
+                            Título Principal{" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <input
+                            id="cg-aprende-titulo"
+                            type="text"
+                            className="esp-form-input"
+                            placeholder="Ej. APRENDÉ CON EL EVITA"
+                            value={activeImage.titulo || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField(
+                                "titulo",
+                                e.target.value,
+                              )
+                            }
+                            disabled={isSaving}
+                            required
+                          />
+                        </div>
+
+                        <div className="esp-full-width">
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-aprende-parrafo"
+                          >
+                            Párrafo Descriptivo{" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <textarea
+                            id="cg-aprende-parrafo"
+                            className="esp-form-input"
+                            rows={3}
+                            placeholder="Descripción introductoria del bloque Aprendé con el Evita..."
+                            value={activeImage.parrafoDescripcion || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField(
+                                "parrafoDescripcion",
+                                e.target.value,
+                              )
+                            }
+                            disabled={isSaving}
+                            required
+                            style={{ resize: "vertical", lineHeight: "1.45" }}
+                          />
+                        </div>
+
+                        <div className="esp-full-width cg-pacientes-img-row">
+                          <div className="cg-pacientes-img-current">
+                            {resolveGraphicImageUrl(activeImage) && (
+                              <img
+                                src={resolveGraphicImageUrl(activeImage)}
+                                alt={
+                                  activeImage.altText ||
+                                  "Imagen principal izquierda"
+                                }
+                                className="cg-pacientes-img-current-thumb"
+                              />
+                            )}
+                            <div className="cg-pacientes-img-meta">
+                              <span className="cg-pacientes-img-meta-title">
+                                Imagen Principal Izquierda (1260x960px aprox.)
+                              </span>
+                              <span className="cg-pacientes-img-meta-file">
+                                {activeImage.fileName || "aprendeMain.jpg"}
+                                {activeImage.isNewUpload && (
+                                  <strong style={{ color: "#0284c7" }}>
+                                    {" "}
+                                    • Lista para guardar
+                                  </strong>
+                                )}
+                              </span>
+                              <button
+                                type="button"
+                                className="cg-prof-style-btn"
+                                disabled={isSaving}
+                                onClick={() => triggerFilePicker("replace")}
+                                style={{
+                                  marginTop: "6px",
+                                  width: "fit-content",
+                                }}
+                              >
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                  <polyline points="17 8 12 3 7 8"></polyline>
+                                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span>Cambiar imagen...</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="esp-full-width">
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-aprende-main-alt"
+                          >
+                            Texto Alternativo de la Imagen Principal (ALT){" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <input
+                            id="cg-aprende-main-alt"
+                            type="text"
+                            className="esp-form-input"
+                            placeholder="Descripción de la imagen grande izquierda para lectores de pantalla..."
+                            value={activeImage.altText || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField(
+                                "altText",
+                                e.target.value,
+                              )
+                            }
+                            disabled={isSaving}
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeImage && safeIndex > 0 && (
+                    <div className="esp-full-width cg-pacientes-editor-card">
+                      <div className="cg-pacientes-editor-header">
+                        <span className="cg-pacientes-editor-badge">
+                          Editando Tarjeta #{safeIndex} de 3
+                        </span>
+                        <span className="cg-pacientes-editor-hint">
+                          Incluye etiqueta superior, título, redirección e
+                          imagen cuadrada
+                        </span>
+                      </div>
+
+                      <div className="esp-form-grid" style={{ gap: "16px" }}>
+                        <div>
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-aprende-card-badge"
+                          >
+                            Etiqueta Superior{" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <input
+                            id="cg-aprende-card-badge"
+                            type="text"
+                            className="esp-form-input"
+                            placeholder="Ej. TIP DE SALUD / GUÍA PRÁCTICA / FORMACIÓN"
+                            value={activeImage.etiquetaSuperior || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField(
+                                "etiquetaSuperior",
+                                e.target.value,
+                              )
+                            }
+                            disabled={isSaving}
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-aprende-card-titulo"
+                          >
+                            Título de la Tarjeta{" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <input
+                            id="cg-aprende-card-titulo"
+                            type="text"
+                            className="esp-form-input"
+                            placeholder="Ej. Prevención del Dengue"
+                            value={activeImage.titulo || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField(
+                                "titulo",
+                                e.target.value,
+                              )
+                            }
+                            disabled={isSaving}
+                            required
+                          />
+                        </div>
+
+                        <div className="esp-full-width">
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-aprende-card-redirect"
+                          >
+                            Redirección de "MÁS INFORMACIÓN →"{" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <select
+                            id="cg-aprende-card-redirect"
+                            className="esp-form-input"
+                            value={activeImage.enlaceUrl || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField(
+                                "enlaceUrl",
+                                e.target.value,
+                              )
+                            }
+                            disabled={isSaving}
+                            required
+                          >
+                            <option value="">
+                              -- Seleccione a qué sección del portal redirige --
+                            </option>
+                            {PORTAL_INTERNAL_ROUTES.map((route) => (
+                              <option key={route.value} value={route.value}>
+                                {route.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="esp-full-width cg-pacientes-img-row">
+                          <div className="cg-pacientes-img-current">
+                            {resolveGraphicImageUrl(activeImage) && (
+                              <img
+                                src={resolveGraphicImageUrl(activeImage)}
+                                alt={
+                                  activeImage.altText ||
+                                  `Imagen de la tarjeta #${safeIndex}`
+                                }
+                                className="cg-pacientes-img-current-thumb"
+                                style={{ width: "96px", aspectRatio: "1 / 1" }}
+                              />
+                            )}
+                            <div className="cg-pacientes-img-meta">
+                              <span className="cg-pacientes-img-meta-title">
+                                Imagen Cuadrada de la Tarjeta #{safeIndex}{" "}
+                                (600x600px aprox.)
+                              </span>
+                              <span className="cg-pacientes-img-meta-file">
+                                {activeImage.fileName ||
+                                  `tarjeta_${safeIndex}.jpg`}
+                                {activeImage.isNewUpload && (
+                                  <strong style={{ color: "#0284c7" }}>
+                                    {" "}
+                                    • Lista para guardar
+                                  </strong>
+                                )}
+                              </span>
+                              <button
+                                type="button"
+                                className="cg-prof-style-btn"
+                                disabled={isSaving}
+                                onClick={() => triggerFilePicker("replace")}
+                                style={{
+                                  marginTop: "6px",
+                                  width: "fit-content",
+                                }}
+                              >
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                  <polyline points="17 8 12 3 7 8"></polyline>
+                                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <span>Cambiar imagen...</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="esp-full-width">
+                          <label
+                            className="esp-form-label"
+                            htmlFor="cg-aprende-card-alt"
+                          >
+                            Texto Alternativo de esta Imagen (ALT){" "}
+                            <span className="esp-asterisk">*</span>
+                          </label>
+                          <input
+                            id="cg-aprende-card-alt"
+                            type="text"
+                            className="esp-form-input"
+                            placeholder="Descripción de la imagen de esta tarjeta para lectores de pantalla..."
+                            value={activeImage.altText || ""}
+                            onChange={(e) =>
+                              handleUpdateActiveItemField(
+                                "altText",
+                                e.target.value,
+                              )
+                            }
+                            disabled={isSaving}
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : isSeccionPacientes ? (
+                /* ===============================================================
+                   CAMPOS ESPECÍFICOS: INFORMACIÓN PARA PACIENTES (5 DESPLEGABLES)
+                   =============================================================== */
+                <>
                   <div className="esp-full-width">
                     <label className="esp-form-label">
                       Desplegables de la Sección{" "}
@@ -845,7 +1584,8 @@ export const CmsContenidoGraficoEditModal = ({
                           fontWeight: "normal",
                         }}
                       >
-                        (5 ítems fijos • seleccione uno para editar su título, texto e imagen)
+                        (5 ítems fijos • seleccione uno para editar su título,
+                        texto e imagen)
                       </span>
                     </label>
 
@@ -892,7 +1632,6 @@ export const CmsContenidoGraficoEditModal = ({
                     </div>
                   </div>
 
-                  {/* Panel de edición del desplegable activo */}
                   {activeImage && (
                     <div className="esp-full-width cg-pacientes-editor-card">
                       <div className="cg-pacientes-editor-header">
@@ -900,7 +1639,8 @@ export const CmsContenidoGraficoEditModal = ({
                           Editando Desplegable #{safeIndex + 1} de 5
                         </span>
                         <span className="cg-pacientes-editor-hint">
-                          Los cambios se reflejan en vivo en la previsualización superior
+                          Los cambios se reflejan en vivo en la previsualización
+                          superior
                         </span>
                       </div>
 
@@ -920,7 +1660,10 @@ export const CmsContenidoGraficoEditModal = ({
                             placeholder="Ej. HORARIOS DE ATENCIÓN"
                             value={activeImage.titulo || ""}
                             onChange={(e) =>
-                              handleUpdateActiveItemField("titulo", e.target.value)
+                              handleUpdateActiveItemField(
+                                "titulo",
+                                e.target.value,
+                              )
                             }
                             disabled={isSaving}
                             required
@@ -944,7 +1687,7 @@ export const CmsContenidoGraficoEditModal = ({
                             onChange={(e) =>
                               handleUpdateActiveItemField(
                                 "textoDesplegable",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             disabled={isSaving}
@@ -983,7 +1726,10 @@ export const CmsContenidoGraficoEditModal = ({
                                 className="cg-prof-style-btn"
                                 disabled={isSaving}
                                 onClick={() => triggerFilePicker("replace")}
-                                style={{ marginTop: "6px", width: "fit-content" }}
+                                style={{
+                                  marginTop: "6px",
+                                  width: "fit-content",
+                                }}
                               >
                                 <svg
                                   width="16"
@@ -1018,7 +1764,10 @@ export const CmsContenidoGraficoEditModal = ({
                             placeholder="Descripción de esta imagen para lectores de pantalla (personas ciegas)..."
                             value={activeImage.altText || ""}
                             onChange={(e) =>
-                              handleUpdateActiveItemField("altText", e.target.value)
+                              handleUpdateActiveItemField(
+                                "altText",
+                                e.target.value,
+                              )
                             }
                             disabled={isSaving}
                             required
@@ -1069,7 +1818,8 @@ export const CmsContenidoGraficoEditModal = ({
                             marginLeft: "6px",
                           }}
                         >
-                          (Presione Enter para dividir en renglones como en la portada)
+                          (Presione Enter para dividir en renglones como en la
+                          portada)
                         </span>
                       </label>
                       <textarea
@@ -1363,11 +2113,15 @@ export const CmsContenidoGraficoEditModal = ({
               textAlign: "center",
             }}
           >
-            {isSeccionPacientes
-              ? `Recortar imagen para "${
-                  activeImage?.titulo || `Desplegable #${safeIndex + 1}`
-                }"`
-              : "Recortar imagen al tamaño del bloque"}
+            {isSeccionAprende
+              ? safeIndex === 0
+                ? "Recortar Imagen Principal Izquierda"
+                : `Recortar Imagen Cuadrada para Tarjeta #${safeIndex}`
+              : isSeccionPacientes
+                ? `Recortar imagen para "${
+                    activeImage?.titulo || `Desplegable #${safeIndex + 1}`
+                  }"`
+                : "Recortar imagen al tamaño del bloque"}
           </h2>
           <p
             style={{
@@ -1468,7 +2222,7 @@ export const CmsContenidoGraficoEditModal = ({
                 letterSpacing: "1px",
               }}
             >
-              {cropMode === "replace" || isSeccionPacientes
+              {cropMode === "replace" || isSeccionPacientes || isSeccionAprende
                 ? "Recortar y Reemplazar"
                 : "Recortar y Agregar"}
             </button>

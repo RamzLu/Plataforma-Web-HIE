@@ -14,7 +14,7 @@ const FALLBACK_BUCKET = "noticias-imagenes";
 let resolvedUploadBucket = null;
 
 /**
- * Rutas internas válidas del portal público a las que puede redirigir un botón.
+ * Rutas internas válidas del portal público a las que puede redirigir un botón o tarjeta.
  */
 export const RUTAS_INTERNAS_PERMITIDAS = new Set([
   "/",
@@ -22,11 +22,28 @@ export const RUTAS_INTERNAS_PERMITIDAS = new Set([
   "/especialidades",
   "/profesionales",
   "/noticias",
+  "/noticias/dengue",
+  "/noticias/cancer-mama",
+  "/noticias/tu-corazon",
+  "/noticias/donacion",
   "/documentacion",
   "/capacitacion",
   "/residencias",
   "/plano",
 ]);
+
+const MAPA_RUTAS_LEGADAS_NOTICIAS = {
+  "/noticias?categoria=dengue": "/noticias/dengue",
+  "/noticias?categoria=cancer-mama": "/noticias/cancer-mama",
+  "/noticias?categoria=tu-corazon": "/noticias/tu-corazon",
+  "/noticias?categoria=donacion": "/noticias/donacion",
+};
+
+const normalizarRutaInternaPortal = (rawUrl) => {
+  if (typeof rawUrl !== "string") return "";
+  const limpia = rawUrl.trim();
+  return MAPA_RUTAS_LEGADAS_NOTICIAS[limpia] || limpia;
+};
 
 /**
  * Catálogo canónico de espacios gráficos fijos del portal.
@@ -126,22 +143,69 @@ export const ESPACIOS_FIJOS_DEFINICIONES = [
     },
   },
   {
-    id: "espacio-banner-especialidades",
+    id: "espacio-aprende-inicio",
     orden: 3,
-    nombre: "Banner Principal de Especialidades",
-    descripcion: "Cabecera visual de la página de Especialidades Médicas y Servicios",
-    tipo: "Banner de Cabecera",
-    ubicacionClave: "espacio-banner-especialidades",
-    page: "Especialidades",
-    dimensiones: "1920x600px",
-    aspectRatio: 16 / 5,
+    nombre: "Aprendé con el Evita",
+    descripcion:
+      "Bloque de educación para la salud con imagen principal, textos y 3 tarjetas con redirección en Inicio",
+    tipo: "Bloque Educativo + 3 Tarjetas",
+    ubicacionClave: "espacio-aprende-inicio",
+    page: "Inicio",
+    dimensiones: "1260x960px / 600x600px",
+    aspectRatio: 630 / 480,
+    esSeccionAprende: true,
+    cantidadItemsFijos: 4,
     defaults: {
-      altText: "Cabecera de la sección de Especialidades Médicas y Servicios",
-      textoSuperpuesto: "ESPECIALIDADES Y SERVICIOS",
+      altText: "Educación para la salud - Hospital Evita",
+      subtituloEncabezado: "EDUCACIÓN PARA LA SALUD",
+      tituloEncabezado: "APRENDÉ CON EL EVITA",
+      parrafoDescripcion:
+        "Tu espacio de educación médica y preventiva. Encontrá información clara, consejos prácticos y guías de orientación en formato rápido para cuidar tu bienestar y el de tu familia.",
+      textoSuperpuesto: "",
       textoBoton: "",
       enlaceUrl: "",
       imagenes: [
-        { presetKey: "banner-especialidades", fileName: "banner_especialidades.png" },
+        {
+          rolItem: "principal",
+          subtituloEncabezado: "EDUCACIÓN PARA LA SALUD",
+          titulo: "APRENDÉ CON EL EVITA",
+          parrafoDescripcion:
+            "Tu espacio de educación médica y preventiva. Encontrá información clara, consejos prácticos y guías de orientación en formato rápido para cuidar tu bienestar y el de tu familia.",
+          altText: "Educación para la salud - Hospital Evita",
+          presetKey: "aprende-main",
+          fileName: "aprendeMain.jpg",
+          enlaceUrl: "",
+        },
+        {
+          rolItem: "tarjeta",
+          etiquetaSuperior: "TIP DE SALUD",
+          badgeColor: "green",
+          titulo: "Prevención del Dengue",
+          altText: "Prevención del Dengue",
+          enlaceUrl: "/noticias/dengue",
+          presetKey: "aprende-dengue",
+          fileName: "aprendeDengue.jpg",
+        },
+        {
+          rolItem: "tarjeta",
+          etiquetaSuperior: "GUÍA PRÁCTICA",
+          badgeColor: "yellow",
+          titulo: "Ayuno para Laboratorio",
+          altText: "Ayuno para laboratorio",
+          enlaceUrl: "/documentacion",
+          presetKey: "aprende-laboratorio",
+          fileName: "aprendeLaboratorio.jpg",
+        },
+        {
+          rolItem: "tarjeta",
+          etiquetaSuperior: "FORMACIÓN",
+          badgeColor: "blue",
+          titulo: "Cursos y Jornadas HIE",
+          altText: "Cursos y Jornadas HIE",
+          enlaceUrl: "/capacitacion",
+          presetKey: "aprende-capacitacion",
+          fileName: "aprendeCapacitacion.jpg",
+        },
       ],
     },
   },
@@ -201,12 +265,18 @@ const PRESET_KEYS_VALIDAS = new Set([
   "pacientes-admision",
   "pacientes-turnos",
   "pacientes-laboratorio",
+  "aprende-main",
+  "aprende-dengue",
+  "aprende-laboratorio",
+  "aprende-capacitacion",
   "banner-especialidades",
   "banner-capacitaciones",
   "banner-noticias",
   "banner-documentacion",
   "banner-residencias",
 ]);
+
+const COLORES_TARJETA_APRENDE = ["green", "yellow", "blue"];
 
 const crearError = (mensaje, statusCode = 400) => {
   const err = new Error(mensaje);
@@ -312,7 +382,152 @@ function parsearMetadatosDescripcion(rawDesc) {
  * Construye la representación de un espacio fijo combinando su definición con las filas en BD.
  */
 function formatearEspacioDesdeFilas(def, filas = []) {
-  // Caso especial: Sección de desplegables fijos (ej. Información para Pacientes con 5 ítems fijos)
+  // Caso 1: Sección "Aprendé con el Evita" (1 bloque principal + 3 tarjetas fijas = 4 elementos)
+  if (def.esSeccionAprende) {
+    const filasOrdenadas = Array.isArray(filas)
+      ? [...filas].sort((a, b) => (a.orden || 0) - (b.orden || 0))
+      : [];
+
+    const filaPorOrden = new Map();
+    filasOrdenadas.forEach((f, i) => {
+      const ord = Number.isInteger(f.orden) && f.orden >= 1 ? f.orden : i + 1;
+      if (!filaPorOrden.has(ord)) {
+        filaPorOrden.set(ord, f);
+      }
+    });
+
+    const itemsAprende = def.defaults.imagenes.map((presetItem, idx) => {
+      const ordenEsperado = idx + 1;
+      const esPrincipal = idx === 0;
+      const fila = filaPorOrden.get(ordenEsperado) || null;
+
+      if (!fila) {
+        return {
+          id: `preset-${def.id}-${ordenEsperado}`,
+          archivoId: null,
+          url: null,
+          presetKey: presetItem.presetKey,
+          fileName: presetItem.fileName,
+          orden: ordenEsperado,
+          rolItem: esPrincipal ? "principal" : "tarjeta",
+          subtituloEncabezado: esPrincipal
+            ? presetItem.subtituloEncabezado
+            : undefined,
+          parrafoDescripcion: esPrincipal
+            ? presetItem.parrafoDescripcion
+            : undefined,
+          etiquetaSuperior: !esPrincipal
+            ? presetItem.etiquetaSuperior
+            : undefined,
+          badgeColor: !esPrincipal
+            ? COLORES_TARJETA_APRENDE[idx - 1] || "blue"
+            : undefined,
+          titulo: presetItem.titulo,
+          altText: presetItem.altText,
+          enlaceUrl: presetItem.enlaceUrl || "",
+        };
+      }
+
+      const metaFila = parsearMetadatosDescripcion(fila.descripcion);
+      const urlPublica = resolverUrlPublicaArchivo(fila.archivo);
+      const presetKey =
+        !urlPublica && metaFila.presetKey && PRESET_KEYS_VALIDAS.has(metaFila.presetKey)
+          ? metaFila.presetKey
+          : !urlPublica
+          ? presetItem.presetKey
+          : null;
+
+      if (esPrincipal) {
+        return {
+          id: fila.id.toString(),
+          archivoId: fila.archivoId ? fila.archivoId.toString() : null,
+          url: urlPublica,
+          presetKey,
+          fileName:
+            fila.archivo?.nombreOriginal ||
+            metaFila.fileName ||
+            presetItem.fileName,
+          orden: ordenEsperado,
+          rolItem: "principal",
+          subtituloEncabezado:
+            typeof metaFila.subtituloEncabezado === "string" &&
+            metaFila.subtituloEncabezado.trim()
+              ? metaFila.subtituloEncabezado
+              : presetItem.subtituloEncabezado,
+          titulo: fila.titulo || presetItem.titulo,
+          parrafoDescripcion:
+            typeof metaFila.parrafoDescripcion === "string" &&
+            metaFila.parrafoDescripcion.trim()
+              ? metaFila.parrafoDescripcion
+              : presetItem.parrafoDescripcion,
+          altText: fila.altText || presetItem.altText,
+          enlaceUrl: "",
+        };
+      }
+
+      const enlaceSaneado = normalizarRutaInternaPortal(
+        sanitizarUrlLectura(fila.enlaceUrl, presetItem.enlaceUrl, true)
+      );
+
+      return {
+        id: fila.id.toString(),
+        archivoId: fila.archivoId ? fila.archivoId.toString() : null,
+        url: urlPublica,
+        presetKey,
+        fileName:
+          fila.archivo?.nombreOriginal ||
+          metaFila.fileName ||
+          presetItem.fileName,
+        orden: ordenEsperado,
+        rolItem: "tarjeta",
+        etiquetaSuperior:
+          typeof metaFila.etiquetaSuperior === "string" &&
+          metaFila.etiquetaSuperior.trim()
+            ? metaFila.etiquetaSuperior
+            : presetItem.etiquetaSuperior,
+        badgeColor: COLORES_TARJETA_APRENDE[idx - 1] || "blue",
+        titulo: fila.titulo || presetItem.titulo,
+        altText: fila.altText || presetItem.altText,
+        enlaceUrl:
+          enlaceSaneado && RUTAS_INTERNAS_PERMITIDAS.has(enlaceSaneado)
+            ? enlaceSaneado
+            : presetItem.enlaceUrl,
+      };
+    });
+
+    const primeraFila = filasOrdenadas[0] || null;
+    const itemPrincipal = itemsAprende[0];
+
+    return {
+      id: def.id,
+      orden: def.orden,
+      nombre: def.nombre,
+      descripcion: def.descripcion,
+      tipo: def.tipo,
+      page: def.page,
+      ubicacion: def.tipo,
+      dimensiones: def.dimensiones,
+      aspectRatio: def.aspectRatio,
+      esSeccionAprende: true,
+      cantidadItemsFijos: def.cantidadItemsFijos,
+      estado: primeraFila?.estado || "PUBLICADO",
+      activo: primeraFila ? primeraFila.activo !== false : true,
+      rejectionReason: primeraFila?.rejectionReason || null,
+      altText: itemPrincipal?.altText || def.defaults.altText,
+      subtituloEncabezado:
+        itemPrincipal?.subtituloEncabezado || def.defaults.subtituloEncabezado,
+      tituloEncabezado: itemPrincipal?.titulo || def.defaults.tituloEncabezado,
+      parrafoDescripcion:
+        itemPrincipal?.parrafoDescripcion || def.defaults.parrafoDescripcion,
+      textoSuperpuesto: "",
+      textoBoton: "",
+      enlaceUrl: "",
+      updatedAt: primeraFila?.updatedAt ? primeraFila.updatedAt.toISOString() : null,
+      imagenes: itemsAprende,
+    };
+  }
+
+  // Caso 2: Sección de desplegables fijos (ej. Información para Pacientes con 5 ítems fijos)
   if (def.esAcordeonFijo) {
     const filasOrdenadas = Array.isArray(filas)
       ? [...filas].sort((a, b) => (a.orden || 0) - (b.orden || 0))
@@ -398,7 +613,7 @@ function formatearEspacioDesdeFilas(def, filas = []) {
     };
   }
 
-  // Espacios de tipo carrusel o banner
+  // Caso 3: Espacios de tipo carrusel o banner
   if (!Array.isArray(filas) || filas.length === 0) {
     const imagenesDefault = def.defaults.imagenes.map((preset, idx) => ({
       id: `preset-${def.id}-${idx + 1}`,
@@ -445,7 +660,9 @@ function formatearEspacioDesdeFilas(def, filas = []) {
       : "";
 
   const enlaceSaneado = textoBoton
-    ? sanitizarUrlLectura(primeraFila.enlaceUrl, "", true)
+    ? normalizarRutaInternaPortal(
+        sanitizarUrlLectura(primeraFila.enlaceUrl, "", true)
+      )
     : "";
 
   const imagenes = filasOrdenadas.map((fila, idx) => {
@@ -489,6 +706,66 @@ function formatearEspacioDesdeFilas(def, filas = []) {
     updatedAt: primeraFila.updatedAt ? primeraFila.updatedAt.toISOString() : null,
     imagenes,
   };
+}
+
+/**
+ * Resuelve la referencia de archivo/preset de un ítem enviado en `slides`.
+ */
+function resolverFuenteImagenItem(item, etiquetaPosicion, filasPorId, uploadedFiles) {
+  if (item.kind === "existing") {
+    const filaPrev = filasPorId.get(String(item.id || ""));
+    if (!filaPrev) {
+      throw crearError(
+        `La imagen existente de ${etiquetaPosicion} ya no se encuentra disponible. Recargue la vista e intente nuevamente.`
+      );
+    }
+    const metaPrev = parsearMetadatosDescripcion(filaPrev.descripcion);
+    return {
+      kind: "existing",
+      archivoId: filaPrev.archivoId,
+      presetKey: metaPrev.presetKey || null,
+      fileName:
+        filaPrev.archivo?.nombreOriginal ||
+        metaPrev.fileName ||
+        "imagen.jpg",
+      createdByOriginal: filaPrev.createdBy,
+    };
+  }
+
+  if (item.kind === "preset") {
+    const presetKey = String(item.presetKey || "").trim();
+    if (!PRESET_KEYS_VALIDAS.has(presetKey)) {
+      throw crearError(`Imagen predeterminada inválida en ${etiquetaPosicion}.`);
+    }
+    return {
+      kind: "preset",
+      archivoId: null,
+      presetKey,
+      fileName: limpiarTextoSimple(item.fileName || `${presetKey}.jpg`, 150),
+      createdByOriginal: null,
+    };
+  }
+
+  if (item.kind === "new") {
+    const fileIndex = Number(item.fileIndex);
+    if (
+      !Number.isInteger(fileIndex) ||
+      fileIndex < 0 ||
+      fileIndex >= uploadedFiles.length
+    ) {
+      throw crearError(
+        `No se recibió el archivo correspondiente a la nueva imagen de ${etiquetaPosicion}.`
+      );
+    }
+    return {
+      kind: "new",
+      file: uploadedFiles[fileIndex],
+      presetKey: null,
+      createdByOriginal: null,
+    };
+  }
+
+  throw crearError(`Tipo de imagen desconocido en ${etiquetaPosicion}.`);
 }
 
 class CmsContenidoGraficoService {
@@ -606,7 +883,281 @@ class CmsContenidoGraficoService {
     );
 
     // =========================================================================
-    // FLUJO A: SECCIÓN DE DESPLEGABLES FIJOS (ej. Información para Pacientes)
+    // FLUJO A: SECCIÓN "APRENDÉ CON EL EVITA" (1 BLOQUE PRINCIPAL + 3 TARJETAS)
+    // =========================================================================
+    if (def.esSeccionAprende) {
+      const slidesDescriptor = parsearArregloJson(
+        body.slides,
+        "elementos de Aprendé con el Evita"
+      );
+
+      if (
+        !Array.isArray(slidesDescriptor) ||
+        slidesDescriptor.length !== def.cantidadItemsFijos
+      ) {
+        throw crearError(
+          `La sección "${def.nombre}" requiere exactamente su imagen principal y sus 3 tarjetas fijas.`
+        );
+      }
+
+      const slidesResueltos = [];
+
+      for (let i = 0; i < slidesDescriptor.length; i++) {
+        const item = slidesDescriptor[i];
+        const esPrincipal = i === 0;
+        const nombreElemento = esPrincipal
+          ? "la imagen principal izquierda"
+          : `la tarjeta #${i}`;
+
+        if (!item || typeof item !== "object") {
+          throw crearError(`Datos inválidos en ${nombreElemento}.`);
+        }
+
+        const baseImg = resolverFuenteImagenItem(
+          item,
+          nombreElemento,
+          filasPorId,
+          uploadedFiles
+        );
+
+        const itemAltText = limpiarTextoSimple(item.altText, 300);
+        if (!itemAltText) {
+          throw crearError(
+            `El Texto Alternativo (ALT) de ${nombreElemento} es obligatorio.`
+          );
+        }
+
+        if (esPrincipal) {
+          const subtituloEncabezado = limpiarTextoSimple(
+            item.subtituloEncabezado,
+            100
+          );
+          if (!subtituloEncabezado) {
+            throw crearError(
+              "El subtítulo superior del encabezado (ej. EDUCACIÓN PARA LA SALUD) es obligatorio."
+            );
+          }
+
+          const tituloEncabezado = limpiarTextoSimple(item.titulo, 150);
+          if (!tituloEncabezado) {
+            throw crearError(
+              "El título principal de la sección (ej. APRENDÉ CON EL EVITA) es obligatorio."
+            );
+          }
+
+          const parrafoDescripcion = limpiarTextoPlanoMultilinea(
+            item.parrafoDescripcion,
+            650
+          );
+          if (!parrafoDescripcion) {
+            throw crearError(
+              "El párrafo descriptivo de Aprendé con el Evita es obligatorio."
+            );
+          }
+
+          slidesResueltos.push({
+            ...baseImg,
+            rolItem: "principal",
+            subtituloEncabezado,
+            titulo: tituloEncabezado,
+            parrafoDescripcion,
+            altText: itemAltText,
+            enlaceUrl: null,
+          });
+        } else {
+          const etiquetaSuperior = limpiarTextoSimple(
+            item.etiquetaSuperior,
+            60
+          );
+          if (!etiquetaSuperior) {
+            throw crearError(
+              `La etiqueta superior de la tarjeta #${i} (ej. TIP DE SALUD) es obligatoria.`
+            );
+          }
+
+          const tituloTarjeta = limpiarTextoSimple(item.titulo, 120);
+          if (!tituloTarjeta) {
+            throw crearError(
+              `El título de la tarjeta #${i} es obligatorio.`
+            );
+          }
+
+          const rawEnlace = normalizarRutaInternaPortal(item.enlaceUrl);
+          if (!rawEnlace) {
+            throw crearError(
+              `Seleccione a qué sección del portal redirige "MÁS INFORMACIÓN" en la tarjeta #${i} ("${tituloTarjeta}").`
+            );
+          }
+          if (!RUTAS_INTERNAS_PERMITIDAS.has(rawEnlace)) {
+            throw crearError(
+              `La redirección seleccionada en la tarjeta #${i} no pertenece a una sección válida del portal.`
+            );
+          }
+
+          const enlaceValidado = validarUrlHttp(
+            rawEnlace,
+            `redirección de tarjeta #${i}`,
+            true
+          );
+
+          slidesResueltos.push({
+            ...baseImg,
+            rolItem: "tarjeta",
+            etiquetaSuperior,
+            badgeColor: COLORES_TARJETA_APRENDE[i - 1] || "blue",
+            titulo: tituloTarjeta,
+            altText: itemAltText,
+            enlaceUrl: enlaceValidado,
+          });
+        }
+      }
+
+      const archivosNuevosCreados = [];
+      let bucketSubida = null;
+
+      try {
+        for (const slide of slidesResueltos) {
+          if (slide.kind !== "new") continue;
+          if (!bucketSubida) {
+            bucketSubida = await obtenerBucketSubida();
+          }
+
+          const file = slide.file;
+          const { nombreUnico, extension } = generarNombreUnico(
+            file.originalname,
+            "cg_aprende",
+            file.mimetype
+          );
+
+          const { error: storageError } = await supabase.storage
+            .from(bucketSubida)
+            .upload(nombreUnico, file.buffer, {
+              contentType: file.mimetype,
+              upsert: true,
+            });
+
+          if (storageError) {
+            console.error(
+              "[Storage] Error al subir imagen de Aprendé con el Evita:",
+              storageError.message
+            );
+            throw crearError(
+              "No se pudo almacenar una de las imágenes en el servidor.",
+              500
+            );
+          }
+
+          const archivoDb = await prisma.archivo.create({
+            data: {
+              nombreOriginal: file.originalname,
+              nombreArchivo: nombreUnico,
+              ruta: `${bucketSubida}/${nombreUnico}`,
+              extension,
+              mimeType: file.mimetype,
+              tamanioBytes: BigInt(file.size),
+            },
+          });
+
+          archivosNuevosCreados.push(archivoDb);
+          slide.archivoId = archivoDb.id;
+          slide.fileName = file.originalname;
+        }
+
+        const ahora = new Date();
+
+        await prisma.$transaction(async (tx) => {
+          await tx.contenido_grafico.deleteMany({
+            where: { ubicacionId: ubicacionDb.id },
+          });
+
+          for (let idx = 0; idx < slidesResueltos.length; idx++) {
+            const s = slidesResueltos[idx];
+            const metaJson =
+              s.rolItem === "principal"
+                ? JSON.stringify({
+                    rolItem: "principal",
+                    subtituloEncabezado: s.subtituloEncabezado,
+                    parrafoDescripcion: s.parrafoDescripcion,
+                    presetKey: s.presetKey || null,
+                    fileName: s.fileName || null,
+                  })
+                : JSON.stringify({
+                    rolItem: "tarjeta",
+                    etiquetaSuperior: s.etiquetaSuperior,
+                    badgeColor: s.badgeColor,
+                    presetKey: s.presetKey || null,
+                    fileName: s.fileName || null,
+                  });
+
+            await tx.contenido_grafico.create({
+              data: {
+                titulo: s.titulo.slice(0, 200),
+                descripcion: metaJson,
+                altText: s.altText,
+                archivoId: s.archivoId || null,
+                enlaceUrl: s.enlaceUrl || null,
+                orden: idx + 1,
+                activo: true,
+                tipoId: tipoDb.id,
+                ubicacionId: ubicacionDb.id,
+                estado: "PUBLICADO",
+                createdBy: s.createdByOriginal || usuarioLocal.id,
+                updatedBy: usuarioLocal.id,
+                rejectionReason: null,
+                pagina: def.page,
+                updatedAt: ahora,
+              },
+            });
+          }
+        });
+      } catch (err) {
+        for (const arch of archivosNuevosCreados) {
+          await eliminarArchivoAlmacenado(arch);
+        }
+        throw err;
+      }
+
+      const archivosConservadosIds = new Set(
+        slidesResueltos
+          .filter((s) => s.archivoId)
+          .map((s) => s.archivoId.toString())
+      );
+
+      for (const filaAntigua of filasExistentes) {
+        if (
+          filaAntigua.archivo &&
+          !archivosConservadosIds.has(filaAntigua.archivo.id.toString())
+        ) {
+          await eliminarArchivoAlmacenado(filaAntigua.archivo);
+        }
+      }
+
+      await prisma.auditoria
+        .create({
+          data: {
+            usuarioId: usuarioLocal.id,
+            accion: "ACTUALIZAR",
+            entidad: "contenido_grafico",
+            entidadId: def.id,
+            descripcion: `Actualizó "${def.nombre}" (encabezado, imagen principal y 3 tarjetas)`,
+          },
+        })
+        .catch(() => {});
+
+      const filasActualizadas = await prisma.contenido_grafico.findMany({
+        where: { ubicacionId: ubicacionDb.id },
+        orderBy: [{ orden: "asc" }, { id: "asc" }],
+        include: { archivo: true },
+      });
+
+      return {
+        message: `Sección "${def.nombre}" actualizada correctamente.`,
+        espacio: formatearEspacioDesdeFilas(def, filasActualizadas),
+      };
+    }
+
+    // =========================================================================
+    // FLUJO B: SECCIÓN DE DESPLEGABLES FIJOS (ej. Información para Pacientes)
     // =========================================================================
     if (def.esAcordeonFijo) {
       const slidesDescriptor = parsearArregloJson(
@@ -655,67 +1206,19 @@ class CmsContenidoGraficoService {
           );
         }
 
-        if (item.kind === "existing") {
-          const filaPrev = filasPorId.get(String(item.id || ""));
-          if (!filaPrev) {
-            throw crearError(
-              `La imagen existente del desplegable #${i + 1} ya no se encuentra disponible. Recargue la vista e intente nuevamente.`
-            );
-          }
-          const metaPrev = parsearMetadatosDescripcion(filaPrev.descripcion);
-          slidesResueltos.push({
-            kind: "existing",
-            titulo: itemTitulo,
-            textoDesplegable: itemTextoDesplegable,
-            altText: itemAltText,
-            archivoId: filaPrev.archivoId,
-            presetKey: metaPrev.presetKey || null,
-            fileName:
-              filaPrev.archivo?.nombreOriginal ||
-              metaPrev.fileName ||
-              `pacientes_${i + 1}.jpg`,
-            createdByOriginal: filaPrev.createdBy,
-          });
-        } else if (item.kind === "preset") {
-          const presetKey = String(item.presetKey || "").trim();
-          if (!PRESET_KEYS_VALIDAS.has(presetKey)) {
-            throw crearError(
-              `Imagen predeterminada inválida en el desplegable #${i + 1}.`
-            );
-          }
-          slidesResueltos.push({
-            kind: "preset",
-            titulo: itemTitulo,
-            textoDesplegable: itemTextoDesplegable,
-            altText: itemAltText,
-            archivoId: null,
-            presetKey,
-            fileName: limpiarTextoSimple(item.fileName || `${presetKey}.jpg`, 150),
-            createdByOriginal: null,
-          });
-        } else if (item.kind === "new") {
-          const fileIndex = Number(item.fileIndex);
-          if (
-            !Number.isInteger(fileIndex) ||
-            fileIndex < 0 ||
-            fileIndex >= uploadedFiles.length
-          ) {
-            throw crearError(
-              `No se recibió el archivo correspondiente a la nueva imagen del desplegable #${i + 1}.`
-            );
-          }
-          slidesResueltos.push({
-            kind: "new",
-            titulo: itemTitulo,
-            textoDesplegable: itemTextoDesplegable,
-            altText: itemAltText,
-            file: uploadedFiles[fileIndex],
-            presetKey: null,
-            createdByOriginal: null,
-          });
-        } else {
-          throw crearError(`Tipo de imagen desconocido en el desplegable #${i + 1}.`);
-        }
+        const baseImg = resolverFuenteImagenItem(
+          item,
+          `el desplegable #${i + 1}`,
+          filasPorId,
+          uploadedFiles
+        );
+
+        slidesResueltos.push({
+          ...baseImg,
+          titulo: itemTitulo,
+          textoDesplegable: itemTextoDesplegable,
+          altText: itemAltText,
+        });
       }
 
       const archivosNuevosCreados = [];
@@ -852,7 +1355,7 @@ class CmsContenidoGraficoService {
     }
 
     // =========================================================================
-    // FLUJO B: CARRUSEL PRINCIPAL / BANNERS
+    // FLUJO C: CARRUSEL PRINCIPAL / BANNERS
     // =========================================================================
     const altText = limpiarTextoSimple(body.altText, 300);
     if (!altText) {
@@ -872,7 +1375,7 @@ class CmsContenidoGraficoService {
     let enlaceValidado = null;
 
     if (textoBoton) {
-      const rawUrl = typeof body.enlaceUrl === "string" ? body.enlaceUrl.trim() : "";
+      const rawUrl = normalizarRutaInternaPortal(body.enlaceUrl);
       if (!rawUrl) {
         throw crearError(
           "Debe seleccionar obligatoriamente a qué sección del portal redirecciona el botón."
@@ -896,7 +1399,6 @@ class CmsContenidoGraficoService {
       throw crearError("Se permite un máximo de 15 imágenes en el carrusel.");
     }
 
-    // Validar descriptores antes de tocar Storage o BD
     const slidesResueltos = [];
     for (let i = 0; i < slidesDescriptor.length; i++) {
       const item = slidesDescriptor[i];
@@ -904,59 +1406,16 @@ class CmsContenidoGraficoService {
         throw crearError(`Descriptor de imagen inválido en la posición #${i + 1}.`);
       }
 
-      if (item.kind === "existing") {
-        const filaPrev = filasPorId.get(String(item.id || ""));
-        if (!filaPrev) {
-          throw crearError(
-            `La imagen existente #${i + 1} ya no se encuentra disponible. Recargue la vista e intente nuevamente.`
-          );
-        }
-        const metaPrev = parsearMetadatosDescripcion(filaPrev.descripcion);
-        slidesResueltos.push({
-          kind: "existing",
-          archivoId: filaPrev.archivoId,
-          presetKey: metaPrev.presetKey || null,
-          fileName:
-            filaPrev.archivo?.nombreOriginal ||
-            metaPrev.fileName ||
-            `imagen_${i + 1}.jpg`,
-          createdByOriginal: filaPrev.createdBy,
-        });
-      } else if (item.kind === "preset") {
-        const presetKey = String(item.presetKey || "").trim();
-        if (!PRESET_KEYS_VALIDAS.has(presetKey)) {
-          throw crearError(`Imagen predeterminada inválida en la posición #${i + 1}.`);
-        }
-        slidesResueltos.push({
-          kind: "preset",
-          archivoId: null,
-          presetKey,
-          fileName: limpiarTextoSimple(item.fileName || `${presetKey}.jpg`, 150),
-          createdByOriginal: null,
-        });
-      } else if (item.kind === "new") {
-        const fileIndex = Number(item.fileIndex);
-        if (
-          !Number.isInteger(fileIndex) ||
-          fileIndex < 0 ||
-          fileIndex >= uploadedFiles.length
-        ) {
-          throw crearError(
-            `No se recibió el archivo correspondiente a la nueva imagen en la posición #${i + 1}.`
-          );
-        }
-        slidesResueltos.push({
-          kind: "new",
-          file: uploadedFiles[fileIndex],
-          presetKey: null,
-          createdByOriginal: null,
-        });
-      } else {
-        throw crearError(`Tipo de imagen desconocido en la posición #${i + 1}.`);
-      }
+      const baseImg = resolverFuenteImagenItem(
+        item,
+        `la posición #${i + 1}`,
+        filasPorId,
+        uploadedFiles
+      );
+
+      slidesResueltos.push(baseImg);
     }
 
-    // Subir las imágenes nuevas a Supabase Storage y registrarlas en `archivo`
     const archivosNuevosCreados = [];
     let bucketSubida = null;
 
@@ -1008,7 +1467,6 @@ class CmsContenidoGraficoService {
       const tituloColumna = (textoSuperpuesto || def.nombre).slice(0, 200);
       const ahora = new Date();
 
-      // Reemplazar atómicamente las filas del espacio fijo manteniendo el orden exacto
       await prisma.$transaction(async (tx) => {
         await tx.contenido_grafico.deleteMany({
           where: { ubicacionId: ubicacionDb.id },
@@ -1045,14 +1503,12 @@ class CmsContenidoGraficoService {
         }
       });
     } catch (err) {
-      // Rollback de archivos recién subidos si falló la transacción en BD
       for (const arch of archivosNuevosCreados) {
         await eliminarArchivoAlmacenado(arch);
       }
       throw err;
     }
 
-    // Limpiar archivos antiguos que fueron quitados del carrusel
     const archivosConservadosIds = new Set(
       slidesResueltos
         .filter((s) => s.archivoId)
@@ -1068,7 +1524,6 @@ class CmsContenidoGraficoService {
       }
     }
 
-    // Registrar auditoría (no bloqueante)
     await prisma.auditoria
       .create({
         data: {

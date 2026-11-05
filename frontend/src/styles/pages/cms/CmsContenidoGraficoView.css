@@ -2395,4 +2395,234 @@
   word-break: break-all;
 }
 
+/* ==========================================================================
+   PREVISUALIZACIÓN FIEL AL PORTAL PÚBLICO - APRENDÉ CON EL EVITA
+   Replica exactamente AprendeSection.jsx / AprendeSection.css con selección viva
+   ========================================================================== */
+.cg-portal-aprende-preview {
+  width: 100%;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.6rem;
+  padding: clamp(14px, 3cqw, 28px) clamp(14px, 3.2cqw, 30px);
+  container-type: inline-size;
+  box-shadow: 0 4px 12px rgba(12, 35, 64, 0.08);
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+.cg-portal-aprende-grid {
+  display: grid;
+  grid-template-columns: 1.08fr 1fr;
+  gap: clamp(14px, 3cqw, 32px);
+  align-items: center;
+}
+
+.cg-portal-aprende-left {
+  width: 100%;
+  aspect-ratio: 630 / 480;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid #cbd5e1;
+  background-color: #e2e8f0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cg-portal-aprende-left.is-clickable,
+.cg-portal-aprende-text-block.is-clickable,
+.cg-portal-aprende-card.is-clickable {
+  cursor: pointer;
+}
+
+.cg-portal-aprende-left.is-selected {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+}
+
+.cg-portal-aprende-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cg-portal-aprende-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+.cg-portal-aprende-right {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cg-portal-aprende-text-block {
+  padding: 6px 8px;
+  margin: -6px -8px clamp(10px, 1.9cqw, 18px) -8px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.cg-portal-aprende-text-block.is-selected {
+  border-color: rgba(2, 132, 199, 0.45);
+  background-color: rgba(224, 242, 254, 0.35);
+}
+
+.cg-portal-aprende-subtitle {
+  display: block;
+  color: #64748b;
+  font-size: clamp(0.56rem, 1.02cqw, 0.75rem);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cg-portal-aprende-title {
+  color: #2b5b94;
+  font-size: clamp(1.05rem, 2.75cqw, 1.95rem);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  line-height: 1.12;
+  margin: 3px 0 clamp(6px, 1.1cqw, 10px) 0;
+  text-transform: uppercase;
+}
+
+.cg-portal-aprende-desc {
+  color: #334155;
+  font-size: clamp(0.64rem, 1.18cqw, 0.86rem);
+  font-weight: 300;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.cg-portal-aprende-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(6px, 1.15cqw, 12px);
+}
+
+.cg-portal-aprende-card {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  padding: clamp(6px, 1.1cqw, 11px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
+  min-width: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cg-portal-aprende-card:hover {
+  transform: translateY(-2px);
+}
+
+.cg-portal-aprende-card.is-selected {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+}
+
+.cg-portal-aprende-card-img-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: clamp(5px, 0.9cqw, 9px);
+  background-color: #f1f5f9;
+}
+
+.cg-portal-aprende-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cg-portal-aprende-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  margin-bottom: clamp(6px, 1cqw, 10px);
+  min-width: 0;
+}
+
+.cg-portal-aprende-badge {
+  font-size: clamp(0.5rem, 0.85cqw, 0.65rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.cg-portal-aprende-badge.green {
+  color: #319795;
+}
+
+.cg-portal-aprende-badge.yellow {
+  color: #d69e2e;
+}
+
+.cg-portal-aprende-badge.blue {
+  color: #2b5b94;
+}
+
+.cg-portal-aprende-card-title {
+  font-size: clamp(0.6rem, 1.05cqw, 0.8rem);
+  font-weight: 600;
+  color: #0c2340;
+  margin: 0;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.cg-portal-aprende-card-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+  color: #2b5b94;
+  font-size: clamp(0.48rem, 0.82cqw, 0.64rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.cg-portal-aprende-arrow {
+  font-size: clamp(0.68rem, 1.05cqw, 0.85rem);
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .cg-portal-aprende-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cg-aprende-tabs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .cg-aprende-tabs-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 

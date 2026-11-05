@@ -1,82 +1,158 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../styles/sections/AprendeSection.css";
+import { getEspacioGraficoPublico } from "../api/contenidoGrafico.api.js";
+import {
+  DEFAULT_APRENDE_INICIO,
+  normalizeInternalPortalPath,
+  resolveGraphicImageUrl,
+} from "../utils/contenidoGraficoPresets.js";
 
-import aprendeMainImg from "../assets/aprendeMain.jpg";
-import tipDengueImg from "../assets/aprendeDengue.jpg";
-import guiaLabImg from "../assets/aprendeLaboratorio.jpg";
-import capacitacionImg from "../assets/aprendeCapacitacion.jpg";
+const CACHE_KEY = "hie_public_aprende_inicio_cache";
+
+const leerCacheInicial = () => {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return DEFAULT_APRENDE_INICIO;
+    const parsed = JSON.parse(raw);
+    if (
+      parsed &&
+      Array.isArray(parsed.imagenes) &&
+      parsed.imagenes.length >= 4
+    ) {
+      return parsed;
+    }
+  } catch {
+    // Ignorar errores de almacenamiento
+  }
+  return DEFAULT_APRENDE_INICIO;
+};
+
+const COLORES_TARJETA = ["green", "yellow", "blue"];
 
 const AprendeSection = () => {
+  const [config, setConfig] = useState(leerCacheInicial);
+
+  useEffect(() => {
+    let cancelado = false;
+
+    const cargarSeccionAprende = async () => {
+      try {
+        const data = await getEspacioGraficoPublico("espacio-aprende-inicio");
+        if (
+          !cancelado &&
+          data &&
+          Array.isArray(data.imagenes) &&
+          data.imagenes.length >= 4
+        ) {
+          setConfig(data);
+          try {
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+          } catch {
+            // Ignorar si sessionStorage no está disponible
+          }
+        }
+      } catch (error) {
+        console.error("Error al cargar la sección Aprendé con el Evita:", error);
+      }
+    };
+
+    cargarSeccionAprende();
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
+  const items =
+    Array.isArray(config?.imagenes) && config.imagenes.length >= 4
+      ? config.imagenes
+      : DEFAULT_APRENDE_INICIO.imagenes;
+
+  const principal = items[0] || DEFAULT_APRENDE_INICIO.imagenes[0];
+  const tarjetas = items.slice(1, 4);
+
+  const mainImgUrl = resolveGraphicImageUrl(principal);
+  const subtitulo =
+    principal?.subtituloEncabezado ||
+    config?.subtituloEncabezado ||
+    DEFAULT_APRENDE_INICIO.subtituloEncabezado;
+  const titulo =
+    principal?.titulo ||
+    config?.tituloEncabezado ||
+    DEFAULT_APRENDE_INICIO.tituloEncabezado;
+  const parrafo =
+    principal?.parrafoDescripcion ||
+    config?.parrafoDescripcion ||
+    DEFAULT_APRENDE_INICIO.parrafoDescripcion;
+
+  const lineasParrafo = String(parrafo || "").split("\n");
+
   return (
-    <section className="aprende-section">
+    <section
+      className="aprende-section"
+      aria-label={titulo || "Aprendé con el Evita"}
+    >
       <div className="aprende-container">
         <div className="aprende-left-image">
           <div className="image-frame">
-            <img
-              src={aprendeMainImg}
-              alt="Educación para la salud - Hospital Evita"
-            />
+            {mainImgUrl && (
+              <img
+                src={mainImgUrl}
+                alt={
+                  principal?.altText ||
+                  "Educación para la salud - Hospital Evita"
+                }
+              />
+            )}
           </div>
         </div>
 
         <div className="aprende-right-content">
           <div className="aprende-header">
-            <span className="aprende-subtitle">EDUCACIÓN PARA LA SALUD</span>
-            <h2 className="aprende-title">APRENDÉ CON EL EVITA</h2>
+            <span className="aprende-subtitle">{subtitulo}</span>
+            <h2 className="aprende-title">{titulo}</h2>
           </div>
 
           <p className="aprende-description">
-            Tu espacio de educación médica y preventiva. Encontrá información
-            clara, consejos prácticos y guías de orientación en formato rápido
-            para cuidar tu bienestar y el de tu familia.
+            {lineasParrafo.map((linea, idxLinea) => (
+              <React.Fragment key={idxLinea}>
+                {linea}
+                {idxLinea < lineasParrafo.length - 1 && <br />}
+              </React.Fragment>
+            ))}
           </p>
 
           <div className="aprende-cards-grid">
-            <div className="aprende-card">
-              <div className="card-image-box">
-                <img src={tipDengueImg} alt="Prevención del Dengue" />
-              </div>
-              <div className="card-info">
-                <span className="card-badge green">TIP DE SALUD</span>
-                <h4>Prevención del Dengue</h4>
-              </div>
-              <Link
-                to="/noticias?categoria=dengue"
-                className="card-action-link"
-              >
-                <span>MÁS INFORMACIÓN</span>
-                <span className="arrow">→</span>
-              </Link>
-            </div>
+            {tarjetas.map((card, idx) => {
+              const cardImgUrl = resolveGraphicImageUrl(card);
+              const badgeColor =
+                card.badgeColor || COLORES_TARJETA[idx] || "blue";
+              const enlaceDestino =
+                normalizeInternalPortalPath(card.enlaceUrl) || "/noticias";
 
-            <div className="aprende-card">
-              <div className="card-image-box">
-                <img src={guiaLabImg} alt="Ayuno para laboratorio" />
-              </div>
-              <div className="card-info">
-                <span className="card-badge yellow">GUÍA PRÁCTICA</span>
-                <h4>Ayuno para Laboratorio</h4>
-              </div>
-              <Link to="/documentacion" className="card-action-link">
-                <span>MÁS INFORMACIÓN</span>
-                <span className="arrow">→</span>
-              </Link>
-            </div>
-
-            <div className="aprende-card">
-              <div className="card-image-box">
-                <img src={capacitacionImg} alt="Cursos y Jornadas HIE" />
-              </div>
-              <div className="card-info">
-                <span className="card-badge blue">FORMACIÓN</span>
-                <h4>Cursos y Jornadas HIE</h4>
-              </div>
-              <Link to="/capacitacion" className="card-action-link">
-                <span>MÁS INFORMACIÓN</span>
-                <span className="arrow">→</span>
-              </Link>
-            </div>
+              return (
+                <div key={card.id || idx} className="aprende-card">
+                  <div className="card-image-box">
+                    {cardImgUrl && (
+                      <img
+                        src={cardImgUrl}
+                        alt={card.altText || card.titulo || `Tarjeta ${idx + 1}`}
+                      />
+                    )}
+                  </div>
+                  <div className="card-info">
+                    <span className={`card-badge ${badgeColor}`}>
+                      {card.etiquetaSuperior}
+                    </span>
+                    <h4>{card.titulo}</h4>
+                  </div>
+                  <Link to={enlaceDestino} className="card-action-link">
+                    <span>MÁS INFORMACIÓN</span>
+                    <span className="arrow">→</span>
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
