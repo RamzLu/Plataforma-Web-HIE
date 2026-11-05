@@ -1,7 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-import { validarUrlHttp, sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
+import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
 const DOCS_BUCKET = "capacitaciones-documentos";
 const MEDIA_BUCKET = "capacitaciones-imagenes-videos";
@@ -246,7 +246,9 @@ class CmsCapacitacionService {
 
         if (storageError) {
           console.error("Error al subir banner a Supabase:", storageError.message);
-          throw new Error(`Error en Supabase Storage (${MEDIA_BUCKET}): ${storageError.message}`);
+          const err = new Error("No se pudo almacenar el banner de la capacitación.");
+          err.statusCode = 500;
+          throw err;
         }
 
         const { data: pubData } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(nombreUnico);
@@ -315,7 +317,9 @@ class CmsCapacitacionService {
 
         if (storageError) {
           console.error(`Error en Supabase al subir contenido a ${bucket}:`, storageError.message);
-          throw new Error(`Error en Supabase Storage (${bucket}): ${storageError.message}`);
+          const err = new Error("No se pudo almacenar el archivo de la capacitación.");
+          err.statusCode = 500;
+          throw err;
         } else {
           const { data: pubData } = supabase.storage.from(bucket).getPublicUrl(nombreUnico);
           archivoUrl = pubData?.publicUrl || "";
@@ -397,7 +401,7 @@ class CmsCapacitacionService {
   }
 
   async actualizarCapacitacion(id, data, files) {
-    const idBigInt = BigInt(id);
+    const idBigInt = parsearIdBigInt(id, "ID de capacitación");
     const existing = await prisma.capacitacion.findUnique({
       where: { id: idBigInt },
       include: { archivo: true },
@@ -451,7 +455,10 @@ class CmsCapacitacionService {
           });
 
         if (storageError) {
-          throw new Error(`Error en Supabase Storage (${MEDIA_BUCKET}): ${storageError.message}`);
+          console.error("Error al subir banner a Supabase:", storageError.message);
+          const err = new Error("No se pudo almacenar el banner de la capacitación.");
+          err.statusCode = 500;
+          throw err;
         }
 
         const { data: pubData } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(nombreUnico);
@@ -544,7 +551,9 @@ class CmsCapacitacionService {
 
         if (storageError) {
           console.error(`Error en Supabase al subir a ${bucket}:`, storageError.message);
-          throw new Error(`Error en Supabase Storage (${bucket}): ${storageError.message}`);
+          const err = new Error("No se pudo almacenar el archivo de la capacitación.");
+          err.statusCode = 500;
+          throw err;
         } else {
           const { data: pubData } = supabase.storage.from(bucket).getPublicUrl(nombreUnico);
           archivoUrl = pubData?.publicUrl || "";
@@ -639,7 +648,7 @@ class CmsCapacitacionService {
   }
 
   async cambiarEstado(id, nuevoEstado) {
-    const idBigInt = BigInt(id);
+    const idBigInt = parsearIdBigInt(id, "ID de capacitación");
     const upper = (nuevoEstado || "").toUpperCase();
     if (!["PUBLICADO", "BORRADOR", "ARCHIVADO"].includes(upper)) {
       const error = new Error("Estado no válido.");
@@ -663,7 +672,7 @@ class CmsCapacitacionService {
   }
 
   async eliminarCapacitacion(id) {
-    const idBigInt = BigInt(id);
+    const idBigInt = parsearIdBigInt(id, "ID de capacitación");
     const existing = await prisma.capacitacion.findUnique({
       where: { id: idBigInt },
       include: { archivo: true },

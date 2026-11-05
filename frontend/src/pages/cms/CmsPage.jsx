@@ -106,6 +106,17 @@ const fetchNoticias = async () => {
   }
 };
 
+  const leerCacheLocal = (clave) => {
+    try {
+      const raw = localStorage.getItem(clave);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
   const fetchDocs = async () => {
     try {
       const response = await adminFetch("/cms/documentacion");
@@ -116,13 +127,11 @@ const fetchNoticias = async () => {
         setDocsList(data);
         localStorage.setItem("portal_docs_data", JSON.stringify(data));
       } else {
-        const cachedDocs = JSON.parse(localStorage.getItem("portal_docs_data")) || [];
-        setDocsList(cachedDocs);
+        setDocsList(leerCacheLocal("portal_docs_data"));
       }
     } catch (error) {
       console.error("Error obteniendo documentos:", error);
-      const cachedDocs = JSON.parse(localStorage.getItem("portal_docs_data")) || [];
-      setDocsList(cachedDocs);
+      setDocsList(leerCacheLocal("portal_docs_data"));
     }
   };
 
@@ -253,11 +262,8 @@ const handleDeleteDoc = (id) => {
 
   const testBackendConnection = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/cms/noticias", {
-        headers: {
-          Authorization: `Bearer ${keycloak.token}`,
-        },
-      });
+      const response = await adminFetch("/cms/noticias");
+      if (!response.ok) throw new Error("Error en la respuesta del servidor");
       const data = await response.json();
       console.log("Respuesta del Backend:", data);
       alert("Conexión exitosa. Revisa la consola.");

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom"; 
+import { getBanners } from "../api/banners.api.js";
 import "../styles/components/Carousel.css";
 
 import defaultImg1 from "../assets/fondoHospitalCarrusel1.jpg";
@@ -27,15 +28,13 @@ const Carousel = ({ page = "Inicio" }) => {
     const savedTitle = localStorage.getItem("hie_carousel_text");
     const savedBtn = localStorage.getItem("hie_carousel_btn");
     
-    if (savedTitle) setCustomTitle(savedTitle);
+    if (savedTitle) setCustomTitle(savedTitle.replace(/<br\s*\/?>/gi, "\n"));
     if (savedBtn) setCustomBtn(savedBtn);
 
     const fetchPublicBanners = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/cms/banners");
-        if (response.ok) {
-          const data = await response.json();
-          
+        const data = await getBanners(false);
+        if (Array.isArray(data)) {
           const bannersFiltrados = data
             .filter((b) => (b.page === page || !b.page) && (b.activo === true || b.isActive === true))
             .sort((a, b) => (a.orden || 0) - (b.orden || 0));

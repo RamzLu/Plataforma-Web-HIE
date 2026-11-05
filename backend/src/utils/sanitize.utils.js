@@ -119,4 +119,63 @@ export const sanitizarUrlLectura = (rawUrl, fallback = '', permitirRutaRelativa 
   }
 };
 
+const MAX_POSTGRES_BIGINT = 9223372036854775807n;
+
+export const parsearIdBigInt = (rawId, nombreCampo = 'ID') => {
+  if (rawId === null || rawId === undefined) {
+    const err = new Error(`El ${nombreCampo} es obligatorio.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (typeof rawId === 'bigint') {
+    if (rawId >= 1n && rawId <= MAX_POSTGRES_BIGINT) return rawId;
+    const err = new Error(`El ${nombreCampo} proporcionado está fuera de rango.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const texto = String(rawId).trim();
+  if (!/^[1-9]\d*$/.test(texto)) {
+    const err = new Error(`El ${nombreCampo} proporcionado no tiene un formato numérico válido.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const valor = BigInt(texto);
+  if (valor > MAX_POSTGRES_BIGINT) {
+    const err = new Error(`El ${nombreCampo} proporcionado está fuera de rango.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  return valor;
+};
+
+export const parsearArregloJson = (rawJson, nombreCampo = 'lista de datos') => {
+  if (rawJson === null || rawJson === undefined || rawJson === '') return [];
+  if (Array.isArray(rawJson)) return rawJson;
+  if (typeof rawJson !== 'string') {
+    const err = new Error(`El formato de ${nombreCampo} no es válido.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  try {
+    const parsed = JSON.parse(rawJson);
+    if (!Array.isArray(parsed)) {
+      const err = new Error(`El campo ${nombreCampo} debe ser un arreglo JSON válido.`);
+      err.statusCode = 400;
+      throw err;
+    }
+    return parsed;
+  } catch (error) {
+    if (error.statusCode === 400) throw error;
+    const err = new Error(`El contenido JSON en ${nombreCampo} está mal formado.`);
+    err.statusCode = 400;
+    throw err;
+  }
+};
+
+
 

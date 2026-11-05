@@ -3,6 +3,7 @@ import { supabase } from "../../config/supabase.js";
 
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
 class CmsDocService {
   async obtenerDocumentos(esVistaAdmin = false) {
@@ -69,7 +70,8 @@ class CmsDocService {
       .upload(nombreUnico, archivoSubido.buffer, { contentType: archivoSubido.mimetype, upsert: true });
 
     if (storageError) {
-      const error = new Error("Error subiendo a Supabase: " + storageError.message);
+      console.error("Error subiendo documento a Supabase:", storageError.message);
+      const error = new Error("No se pudo almacenar el documento.");
       error.statusCode = 500;
       throw error;
     }
@@ -109,6 +111,7 @@ class CmsDocService {
   }
 
   async actualizarDocumento(id, data, archivoSubido) {
+    const idBigInt = parsearIdBigInt(id, "ID de documento");
     const { titulo, categoria, estado } = data;
 
     let estadoPrisma = "BORRADOR";
@@ -116,7 +119,7 @@ class CmsDocService {
     if (estado?.toLowerCase() === "programado") estadoPrisma = "PROGRAMADO";
 
     const docExistente = await prisma.documento.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true }
     });
 
@@ -153,7 +156,8 @@ class CmsDocService {
         .upload(nombreUnico, archivoSubido.buffer, { contentType: archivoSubido.mimetype, upsert: true });
 
       if (storageError) {
-        const error = new Error("Error subiendo archivo nuevo: " + storageError.message);
+        console.error("Error subiendo archivo nuevo a Supabase:", storageError.message);
+        const error = new Error("No se pudo almacenar el nuevo documento.");
         error.statusCode = 500;
         throw error;
       }
@@ -172,7 +176,7 @@ class CmsDocService {
     }
 
     const documentoActualizado = await prisma.documento.update({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       data: {
         titulo: titulo || docExistente.titulo,
         categoriaId: categoriaId,
@@ -199,8 +203,9 @@ class CmsDocService {
   }
 
   async eliminarDocumento(id) {
+    const idBigInt = parsearIdBigInt(id, "ID de documento");
     const doc = await prisma.documento.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true }
     });
     
@@ -209,7 +214,7 @@ class CmsDocService {
         await supabase.storage.from("documentos").remove([doc.archivo.nombreArchivo]);
       }
       
-      await prisma.documento.delete({ where: { id: BigInt(id) } });
+      await prisma.documento.delete({ where: { id: idBigInt } });
       
       if (doc.archivoId) {
         await prisma.archivo.delete({ where: { id: doc.archivoId } });

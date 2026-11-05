@@ -1,7 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-import { sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
+import { sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
 const formatBytes = (bytes) => {
   const n = Number(bytes || 0);
@@ -47,7 +47,7 @@ class CmsResidenciaService {
 
       if (storageError) {
         console.error("Error subiendo imagen de banner a Supabase:", storageError);
-        const error = new Error("Error al subir imagen de banner: " + storageError.message);
+        const error = new Error("No se pudo almacenar el banner de la residencia.");
         error.statusCode = 500;
         throw error;
       }
@@ -78,7 +78,7 @@ class CmsResidenciaService {
 
       if (storageError) {
         console.error("Error subiendo documento a Supabase:", storageError);
-        const error = new Error("Error al subir documento adjunto: " + storageError.message);
+        const error = new Error("No se pudo almacenar el documento adjunto de la residencia.");
         error.statusCode = 500;
         throw error;
       }
@@ -156,7 +156,7 @@ class CmsResidenciaService {
   }
 
   async actualizarResidencia(id, data, files) {
-    const idBigInt = BigInt(id);
+    const idBigInt = parsearIdBigInt(id, "ID de residencia");
 
     const residenciaExistente = await prisma.residencia.findUnique({
       where: { id: idBigInt },
@@ -210,7 +210,8 @@ class CmsResidenciaService {
         });
 
       if (storageError) {
-        const error = new Error("Error al subir banner a Supabase: " + storageError.message);
+        console.error("Error subiendo banner a Supabase:", storageError);
+        const error = new Error("No se pudo almacenar el banner de la residencia.");
         error.statusCode = 500;
         throw error;
       }
@@ -248,7 +249,7 @@ class CmsResidenciaService {
               .from("documentos")
               .remove([documentoMeta.documentoArchivoNombre]);
           }
-          await prisma.archivo.delete({ where: { id: BigInt(documentoMeta.documentoId) } });
+          await prisma.archivo.delete({ where: { id: parsearIdBigInt(documentoMeta.documentoId, "ID de documento") } });
         } catch (e) {
           console.warn("No se pudo remover documento previo:", e.message);
         }
@@ -264,7 +265,7 @@ class CmsResidenciaService {
               .from("documentos")
               .remove([documentoMeta.documentoArchivoNombre]);
           }
-          await prisma.archivo.delete({ where: { id: BigInt(documentoMeta.documentoId) } });
+          await prisma.archivo.delete({ where: { id: parsearIdBigInt(documentoMeta.documentoId, "ID de documento") } });
         } catch (e) {
           console.warn("No se pudo remover documento previo:", e.message);
         }
@@ -279,7 +280,8 @@ class CmsResidenciaService {
         });
 
       if (storageError) {
-        const error = new Error("Error al subir documento a Supabase: " + storageError.message);
+        console.error("Error subiendo documento a Supabase:", storageError);
+        const error = new Error("No se pudo almacenar el documento de la residencia.");
         error.statusCode = 500;
         throw error;
       }
@@ -377,7 +379,7 @@ class CmsResidenciaService {
       throw error;
     }
 
-    const idBigInt = BigInt(id);
+    const idBigInt = parsearIdBigInt(id, "ID de residencia");
 
     const residenciaExistente = await prisma.residencia.findUnique({
       where: { id: idBigInt },
@@ -407,7 +409,7 @@ class CmsResidenciaService {
   }
 
   async eliminarResidencia(id) {
-    const idBigInt = BigInt(id);
+    const idBigInt = parsearIdBigInt(id, "ID de residencia");
 
     const residencia = await prisma.residencia.findUnique({
       where: { id: idBigInt },
@@ -440,7 +442,7 @@ class CmsResidenciaService {
         }
         if (parsed.documento?.documentoId) {
           await prisma.archivo.delete({
-            where: { id: BigInt(parsed.documento.documentoId) },
+            where: { id: parsearIdBigInt(parsed.documento.documentoId, "ID de documento") },
           }).catch(() => {});
         }
       } catch (e) {}

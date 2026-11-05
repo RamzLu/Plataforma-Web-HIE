@@ -1,7 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-import { validarUrlHttp, sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
+import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
 const BUCKET_NAME = "autoridades-imagenes";
 
@@ -44,7 +44,8 @@ async function subirImagenYRegistrar(file) {
     });
 
   if (storageError) {
-    const err = new Error("Error al subir imagen a Supabase: " + storageError.message);
+    console.error("[Storage] Error al subir imagen de autoridad:", storageError.message);
+    const err = new Error("No se pudo almacenar la imagen de la autoridad.");
     err.statusCode = 500;
     throw err;
   }
@@ -168,10 +169,11 @@ class CmsAutoridadesService {
   // ─── ACTUALIZAR AUTORIDAD ─────────────────────────────────────────────────
 
   async actualizarAutoridad(id, data, file) {
+    const idBigInt = parsearIdBigInt(id, "ID de autoridad");
     const { nombre, cargo, descripcion, orden } = data;
 
     const existente = await prisma.autoridad.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true },
     });
 
@@ -190,7 +192,7 @@ class CmsAutoridadesService {
     }
 
     const actualizada = await prisma.autoridad.update({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       data: {
         nombre: nombre?.trim() ?? existente.nombre,
         cargo: cargo?.trim() ?? existente.cargo,
@@ -221,8 +223,9 @@ class CmsAutoridadesService {
   // ─── ELIMINAR AUTORIDAD ───────────────────────────────────────────────────
 
   async eliminarAutoridad(id) {
+    const idBigInt = parsearIdBigInt(id, "ID de autoridad");
     const existente = await prisma.autoridad.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true },
     });
 
@@ -233,7 +236,7 @@ class CmsAutoridadesService {
     }
 
     // Primero eliminar la autoridad (para liberar FK), luego limpiar imagen
-    await prisma.autoridad.delete({ where: { id: BigInt(id) } });
+    await prisma.autoridad.delete({ where: { id: idBigInt } });
     await limpiarImagenAnterior(existente.archivo);
 
     return { message: "¡Autoridad eliminada correctamente!" };
@@ -248,11 +251,13 @@ class CmsAutoridadesService {
       throw err;
     }
 
+    const idsValidados = ordenIds.map((id) => parsearIdBigInt(id, "ID de autoridad"));
+
     // Se utiliza Promise.all para compatibilidad con el pooler de Supabase
     await Promise.all(
-      ordenIds.map((id, index) =>
+      idsValidados.map((idBigInt, index) =>
         prisma.autoridad.update({
-          where: { id: BigInt(id) },
+          where: { id: idBigInt },
           data: { orden: index + 1 },
         })
       )

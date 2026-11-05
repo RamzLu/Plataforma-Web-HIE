@@ -4,6 +4,11 @@ import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import { getEspecialidades } from "../../api/especialidades.api.js";
+import {
+  createProfesional,
+  updateProfesional,
+  deleteProfesional,
+} from "../../api/profesionales.api.js";
 import Cropper from "react-easy-crop";
 import "../../styles/pages/cms/CmsProfesionalesView.css";
 import {
@@ -177,12 +182,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     
     try {
       const token = keycloak?.token;
-      const response = await fetch(`http://localhost:3000/api/cms/profesionales/${profesionalToDelete.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (!response.ok) throw new Error("Error al eliminar");
+      await deleteProfesional(profesionalToDelete.id, token);
       
       const nombreCompleto = `${profesionalToDelete.nombre || ""} ${profesionalToDelete.apellido || ""}`.trim() || "Profesional";
       recordCmsActivity({
@@ -255,20 +255,9 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
         dataForm.append("archivo", archivoFoto);
       }
 
-      const method = editingId ? "PUT" : "POST";
-      const url = editingId 
-        ? `http://localhost:3000/api/cms/profesionales/${editingId}`
-        : "http://localhost:3000/api/cms/profesionales";
-
-      const response = await fetch(url, {
-        method: method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: dataForm
-      });
-
-      if (!response.ok) throw new Error("Error al guardar");
-
-      const resultado = await response.json();
+      const resultado = editingId
+        ? await updateProfesional(editingId, dataForm, token)
+        : await createProfesional(dataForm, token);
       
       if (editingId) {
         setProfesionales(profesionales.map(p => p.id === editingId ? resultado.profesional : p));

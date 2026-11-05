@@ -3,7 +3,7 @@ import { supabase } from "../../config/supabase.js";
 
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
-import { validarUrlHttp, sanitizarUrlLectura } from "../../utils/sanitize.utils.js";
+import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
 class CmsBannersService {
   async obtenerBanners(esVistaAdmin = false) {
@@ -70,7 +70,8 @@ class CmsBannersService {
       });
 
     if (storageError) {
-      const error = new Error("Error al subir imagen a Supabase: " + storageError.message);
+      console.error("[Storage] Error al subir imagen de banner:", storageError.message);
+      const error = new Error("No se pudo almacenar la imagen del banner.");
       error.statusCode = 500;
       throw error;
     }
@@ -128,6 +129,7 @@ class CmsBannersService {
   }
 
   async actualizarBanner(id, data, file) {
+    const idBigInt = parsearIdBigInt(id, "ID de banner");
     const { titulo, descripcion, enlace, page, activo } = data;
     const enlaceValidado =
       enlace !== undefined
@@ -135,7 +137,7 @@ class CmsBannersService {
         : undefined;
 
     const bannerExistente = await prisma.banner.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true },
     });
 
@@ -158,7 +160,8 @@ class CmsBannersService {
         });
 
       if (storageError) {
-        const error = new Error("Error al subir nueva imagen: " + storageError.message);
+        console.error("[Storage] Error al actualizar imagen de banner:", storageError.message);
+        const error = new Error("No se pudo almacenar la nueva imagen del banner.");
         error.statusCode = 500;
         throw error;
       }
@@ -186,7 +189,7 @@ class CmsBannersService {
     const descripcionConPage = `[PAGE:${targetPage}]${descripcion || ""}`;
 
     const bannerActualizado = await prisma.banner.update({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       data: {
         titulo: titulo ? titulo.trim() : bannerExistente.titulo,
         descripcion: descripcionConPage,
@@ -220,14 +223,10 @@ class CmsBannersService {
   }
 
   async eliminarBanner(id) {
-    if (!id || !/^\d+$/.test(id)) {
-      const error = new Error("ID de banner inválido o malformado.");
-      error.statusCode = 400;
-      throw error;
-    }
+    const idBigInt = parsearIdBigInt(id, "ID de banner");
 
     const banner = await prisma.banner.findUnique({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
       include: { archivo: true },
     });
 
@@ -242,7 +241,7 @@ class CmsBannersService {
     }
 
     await prisma.banner.delete({
-      where: { id: BigInt(id) },
+      where: { id: idBigInt },
     });
 
     if (banner.archivo) {
