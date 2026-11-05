@@ -122,3 +122,11 @@
   color: #ef4444;
   background-color: #fef2f2;
 }
+
+.admin-layout {
+  background-color: #f3f6fb;
+}
+
+.admin-content-area {
+  background-color: transparent;
+}

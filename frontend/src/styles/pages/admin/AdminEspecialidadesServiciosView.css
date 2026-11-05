@@ -539,3 +539,132 @@
     flex: 1;
   }
 }
+
+.admin-es-page {
+  gap: 22px;
+}
+
+.admin-es-page-header h1 {
+  font-size: clamp(2rem, 3.2vw, 2.8rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+}
+
+.admin-es-card {
+  padding: 28px;
+  border-color: #e7edf5;
+  border-radius: 22px;
+  box-shadow: 0 12px 30px rgb(15 23 42 / 4%);
+}
+
+.admin-es-toolbar {
+  gap: 10px;
+}
+
+.admin-es-search,
+.admin-es-filter select {
+  min-height: 44px;
+  border-color: #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.admin-es-search:focus-within,
+.admin-es-filter select:focus {
+  border-color: #93c5fd;
+  outline: 0;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
+}
+
+.admin-es-table-wrap {
+  border-color: #e5eaf1;
+  border-radius: 16px;
+  box-shadow: 0 5px 16px rgb(15 23 42 / 3%);
+}
+
+.admin-es-table th {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e5eaf1;
+  background: #f8fafd;
+  color: #64748b;
+  letter-spacing: 0.075em;
+}
+
+.admin-es-table td {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  border-bottom-color: #edf1f6;
+}
+
+.admin-es-table tbody tr {
+  transition: background-color 160ms ease;
+}
+
+.admin-es-table tbody tr:hover {
+  background: #f8faff;
+}
+
+.admin-es-item-icon {
+  border-radius: 11px;
+  background: #eff6ff;
+  color: #245b91;
+}
+
+.admin-es-view-button,
+.admin-es-close-button {
+  width: 38px;
+  height: 38px;
+  border-color: #e4eaf2;
+  border-radius: 12px;
+  background: #f8fafd;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.admin-es-view-button:hover,
+.admin-es-close-button:hover {
+  transform: translateY(-1px);
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.admin-es-modal {
+  border-radius: 22px;
+  box-shadow: 0 28px 80px rgb(15 23 42 / 28%);
+}
+
+.admin-es-modal-header {
+  padding: 24px 28px;
+  background: #fbfcfe;
+}
+
+.admin-es-detail {
+  border-color: #e7edf5;
+  border-radius: 13px;
+  background: #fbfcfe;
+}
+
+.admin-es-button {
+  min-height: 42px;
+  border-radius: 12px;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.admin-es-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 16px rgb(15 23 42 / 10%);
+}
+
+@media (max-width: 560px) {
+  .admin-es-card {
+    padding: 17px;
+    border-radius: 18px;
+  }
+
+  .admin-es-modal {
+    border-radius: 20px 20px 0 0;
+  }
+}

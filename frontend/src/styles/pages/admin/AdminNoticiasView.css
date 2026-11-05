@@ -805,3 +805,141 @@
   border: 1px solid #fecaca;
   color: #dc2626;
 }
+
+.admin-review-container-admin {
+  gap: 22px;
+}
+
+.admin-page-header-admin h1 {
+  font-size: clamp(2rem, 3.2vw, 2.8rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+}
+
+.dashboard-card-admin {
+  padding: 28px;
+  border-color: #e7edf5;
+  border-radius: 22px;
+  box-shadow: 0 12px 30px rgb(15 23 42 / 4%);
+}
+
+.data-table-container-admin {
+  border-color: #e5eaf1 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 5px 16px rgb(15 23 42 / 3%) !important;
+}
+
+.data-table-header-admin {
+  border-bottom: 1px solid #e5eaf1 !important;
+  background: #f8fafd !important;
+}
+
+.activity-row-admin {
+  border-bottom-color: #edf1f6;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.activity-row-admin:hover {
+  background: #f8faff;
+  transform: none;
+}
+
+.news-thumb-box-admin {
+  border-radius: 11px;
+  border-color: #e1e8f0;
+}
+
+.icon-btn-admin {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.icon-btn-admin:hover {
+  border-color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.modal-content-esp-admin {
+  border: 1px solid #e4eaf2;
+  border-radius: 22px;
+  box-shadow: 0 28px 80px rgb(15 23 42 / 28%);
+}
+
+.modal-header-esp-admin {
+  background: #fbfcfe;
+}
+
+.modal-footer-esp-admin {
+  background: #fbfcfe;
+}
+
+.btn-modal-admin {
+  min-height: 42px;
+  border-radius: 12px;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.btn-modal-admin:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 16px rgb(15 23 42 / 12%);
+}
+
+.admin-news-tabs-group {
+  border-color: #e5eaf1;
+  border-radius: 13px;
+  background: #f8fafd;
+}
+
+.admin-news-tab-item {
+  border-radius: 10px;
+}
+
+.admin-news-tab-item.active {
+  background: #0c2340;
+}
+
+@media (max-width: 900px) {
+  .dashboard-card-admin {
+    padding: 21px;
+    border-radius: 19px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-card-admin {
+    padding: 16px;
+    border-radius: 17px;
+  }
+
+  .modal-overlay-admin {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-content-esp-admin {
+    max-height: 94dvh;
+    border-radius: 21px 21px 0 0;
+  }
+
+  .modal-header-esp-admin {
+    padding: 17px 18px;
+  }
+
+  .modal-body-esp-admin {
+    padding: 18px;
+    gap: 22px;
+  }
+
+  .modal-footer-esp-admin {
+    flex-wrap: wrap;
+    padding: 14px 18px;
+  }
+
+  .btn-modal-admin {
+    justify-content: center;
+    flex: 1 1 150px;
+  }
+}
