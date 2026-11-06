@@ -1,6 +1,6 @@
 .patient-section {
   width: 100%;
-  background-color: #ffffff; /* Se adapta a blanco puro como la referencia */
+  background-color: #ffffff;
   padding: 80px 20px;
   display: flex;
   justify-content: center;
@@ -12,7 +12,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 50px; /* Mayor separación entre el título y el contenido */
+  gap: 50px;
 }
 
 .patient-section-header {
@@ -39,10 +39,10 @@
   text-transform: uppercase;
 }
 
-/* NUEVO LAYOUT DIVIDIDO */
+/* LAYOUT DIVIDIDO */
 .patient-split-layout {
   display: grid;
-  grid-template-columns: 1fr 1.2fr; /* Columna de imagen ligeramente más ancha */
+  grid-template-columns: 1fr 1.2fr;
   gap: 60px;
   align-items: start;
 }
@@ -50,57 +50,6 @@
 .patient-content-left {
   display: flex;
   flex-direction: column;
-  gap: 35px;
-}
-
-/* BOTÓN WHATSAPP Y TEXTO */
-.cta-turnos-clean {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.cta-turnos-text h3 {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #0c2340;
-  margin: 0 0 6px 0;
-  line-height: 1.4;
-}
-
-.cta-turnos-text p {
-  font-size: 0.95rem;
-  color: #64748b;
-  margin: 0;
-}
-
-/* Estilo Outline inspirado en el botón "QUIERO AFILIARME" */
-.btn-outline-whatsapp {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 32px;
-  border: 1.5px solid #e11d48; /* Borde rojo */
-  color: #e11d48; /* Texto rojo */
-  background-color: transparent;
-  border-radius: 9999px;
-  font-weight: 700;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.btn-outline-whatsapp:hover {
-  background-color: #e11d48;
-  color: #ffffff;
-}
-
-.btn-outline-whatsapp svg {
-  width: 18px;
-  height: 18px;
 }
 
 /* ACORDEÓN MINIMALISTA */
@@ -114,13 +63,12 @@
   border-bottom: 1px solid #819ec6;
 }
 
-
 .accordion-clean-item:hover {
-  border-bottom-color: #0284c7; 
+  border-bottom-color: #0284c7;
 }
 
 .accordion-clean-wrapper:hover {
-  border-top-color: #0284c7; 
+  border-top-color: #0284c7;
 }
 
 .accordion-clean-header {
@@ -163,6 +111,7 @@
   width: 18px;
   height: 18px;
   color: #94a3b8;
+  flex-shrink: 0;
   transition: transform 0.3s ease, color 0.2s ease;
 }
 
@@ -190,11 +139,10 @@
   margin: 0;
 }
 
-/* LADO DERECHO: IMAGEN FLUIDA */
+/* LADO DERECHO: IMAGEN CON PROPORCIÓN 4:3 ALINEADA AL ACORDEÓN */
 .patient-image-right {
   width: 100%;
-  height: 100%;
-  min-height: 520px;
+  aspect-ratio: 4 / 3;
 }
 
 .patient-img-clean {
@@ -203,14 +151,13 @@
   object-fit: cover;
   object-position: center;
   display: block;
-  border-radius: 8px; /* Bordes levemente suavizados para no ser toscos */
+  border-radius: 8px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* =========================================
    ANIMACIÓN SUAVE PARA CAMBIO DE IMAGEN
    ========================================= */
-
 .img-smooth-swap {
   animation: smoothImageSwap 0.45s ease-out forwards;
 }
@@ -231,15 +178,5 @@
   .patient-split-layout {
     grid-template-columns: 1fr;
     gap: 40px;
-  }
-  .patient-image-right {
-    min-height: 350px;
-  }
-}
-
-@media (max-width: 600px) {
-  .btn-outline-whatsapp {
-    width: 100%;
-    justify-content: center;
   }
 }

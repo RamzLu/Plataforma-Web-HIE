@@ -64,13 +64,32 @@ const AboutPage = () => {
 
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // ── Estado de autoridades desde la API ──────────────────────────────────
+  // ── Estado de autoridades y sede central desde la API ─────────────────
   const [autoridades, setAutoridades] = useState([]);
   const [loadingAutoridades, setLoadingAutoridades] = useState(true);
+  const [sedeCentral, setSedeCentral] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("hie_public_sede_central_cache");
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     getInstitucional()
-      .then((data) => setAutoridades(data.autoridades || []))
+      .then((data) => {
+        setAutoridades(data.autoridades || []);
+        if (data.sedeCentral) {
+          setSedeCentral(data.sedeCentral);
+          try {
+            sessionStorage.setItem(
+              "hie_public_sede_central_cache",
+              JSON.stringify(data.sedeCentral)
+            );
+          } catch {}
+        }
+      })
       .catch(() => setAutoridades([]))
       .finally(() => setLoadingAutoridades(false));
   }, []);
@@ -231,26 +250,25 @@ const AboutPage = () => {
             <div className="single-sede-card">
               <div className="sede-img-box">
                 <img
-                  src={fotoHeroHeader}
-                  alt="Edificio Principal Hospital Evita"
+                  src={sedeCentral?.imagenUrl || fotoHeroHeader}
+                  alt={sedeCentral?.altText || "Edificio Principal Hospital Evita"}
                 />
               </div>
 
               <div className="sede-description-box">
-                <span className="sede-tag">SEDE CENTRAL</span>
+                <span className="sede-tag">
+                  {sedeCentral?.tagSuperior || "SEDE CENTRAL"}
+                </span>
                 <h3 className="sede-title">
-                  Edificio Principal - Hospital Evita
+                  {sedeCentral?.titulo || "Edificio Principal - Hospital Evita"}
                 </h3>
                 <p className="sede-address">
-                  <strong>Ubicación:</strong> Av. José de Luca Barberis N° 250,
-                  Formosa, Argentina
+                  <strong>Ubicación:</strong>{" "}
+                  {sedeCentral?.direccion || "Av. José de Luca Barberis N° 250, Formosa, Argentina"}
                 </p>
                 <p className="sede-desc-text">
-                  Infraestructura médica de vanguardia con 19.000 m² cubiertos
-                  diseñados bajo normas internacionales de arquitectura
-                  hospitalaria. Alberga la Guardia Central de Urgencias (24 hs),
-                  bloques quirúrgicos inteligentes, unidades de cuidados
-                  intensivos y el centro de diagnóstico por imágenes.
+                  {sedeCentral?.parrafoDescripcion ||
+                    "Infraestructura médica de vanguardia con 19.000 m² cubiertos diseñados bajo normas internacionales de arquitectura hospitalaria. Alberga la Guardia Central de Urgencias (24 hs), bloques quirúrgicos inteligentes, unidades de cuidados intensivos y el centro de diagnóstico por imágenes."}
                 </p>
                 <div className="sede-badge-list">
                   <span className="badge-item">
@@ -258,13 +276,7 @@ const AboutPage = () => {
                       <circle cx="12" cy="12" r="10"></circle>
                       <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    Guardia Activa 24 Hs.
-                  </span>
-                  <span className="badge-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                    </svg>
-                    (3704) 436-100
+                    {sedeCentral?.badgeAtencion || "Guardia Activa 24 Hs."}
                   </span>
                 </div>
               </div>

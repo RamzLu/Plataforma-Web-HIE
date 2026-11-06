@@ -8,11 +8,63 @@ import medicosImg from "../../assets/medicos-residencias.jpg";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import { getResidencias } from "../../api/residencias.api";
 import { sanitizeUrl } from "../../utils/sanitizeUrl";
+import { getEspacioGraficoPublico } from "../../api/contenidoGrafico.api.js";
+import {
+  DEFAULT_RESIDENCIAS_HERO,
+  normalizeInternalPortalPath,
+  resolveGraphicImageUrl,
+} from "../../utils/contenidoGraficoPresets.js";
+
+const CACHE_KEY_HERO = "hie_public_residencias_destacado_cache";
+
+const leerCacheHeroInicial = () => {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY_HERO);
+    if (!raw) return DEFAULT_RESIDENCIAS_HERO;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      return parsed;
+    }
+  } catch {
+    // Ignorar errores de almacenamiento
+  }
+  return DEFAULT_RESIDENCIAS_HERO;
+};
 
 const ResidenciasPage = () => {
   const [residencias, setResidencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedIds, setExpandedIds] = useState(new Set());
+  const [heroConfig, setHeroConfig] = useState(leerCacheHeroInicial);
+
+  useEffect(() => {
+    let cancelado = false;
+    const cargarHeroResidencias = async () => {
+      try {
+        const data = await getEspacioGraficoPublico(
+          "espacio-residencias-destacado"
+        );
+        if (!cancelado && data && typeof data === "object") {
+          setHeroConfig(data);
+          try {
+            sessionStorage.setItem(CACHE_KEY_HERO, JSON.stringify(data));
+          } catch {
+            // Ignorar
+          }
+        }
+      } catch (error) {
+        console.error(
+          "Error al cargar la tarjeta destacada de Residencias:",
+          error
+        );
+      }
+    };
+
+    cargarHeroResidencias();
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -164,38 +216,84 @@ const ResidenciasPage = () => {
           delay={0.08}
           className="res-hero-animation-wrapper"
         >
-          <section className="res-hero-card" aria-label="Excelencia en Alta Complejidad y Vocación Pública">
+          <section
+            className="res-hero-card"
+            aria-label={
+              heroConfig?.titulo ||
+              "Excelencia en Alta Complejidad y Vocación Pública"
+            }
+          >
             <div className="res-hero-content">
               <h2 className="res-hero-title">
-                Excelencia en Alta Complejidad <span className="res-hero-amp">&</span> Vocación Pública
+                {(() => {
+                  const texto =
+                    heroConfig?.titulo || DEFAULT_RESIDENCIAS_HERO.titulo;
+                  if (texto.includes("&")) {
+                    const partes = texto.split("&");
+                    return (
+                      <>
+                        {partes[0]}
+                        <span className="res-hero-amp">&</span>
+                        {partes.slice(1).join("&")}
+                      </>
+                    );
+                  }
+                  return texto;
+                })()}
               </h2>
               <p className="res-hero-description">
-                El Hospital Interdistrital Evita convoca a profesionales de las ciencias médicas para integrarse a sus equipos interdisciplinarios. Formación tutelada en servicio, tecnología biomédica de vanguardia y dedicación humanizada al servicio de toda la región.
+                {String(
+                  heroConfig?.parrafoDescripcion ||
+                    DEFAULT_RESIDENCIAS_HERO.parrafoDescripcion,
+                )
+                  .split("\n")
+                  .map((linea, idxL, lineas) => (
+                    <React.Fragment key={idxL}>
+                      {linea}
+                      {idxL < lineas.length - 1 && <br />}
+                    </React.Fragment>
+                  ))}
               </p>
-              <Link to="/especialidades" className="res-hero-btn" title="Ir a Especialidades">
-                <span>Ver Especialidades Disponibles</span>
-                <svg
-                  className="res-hero-btn-arrow"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+              {heroConfig?.textoBoton && (
+                <Link
+                  to={
+                    normalizeInternalPortalPath(heroConfig?.enlaceUrl) ||
+                    "/especialidades"
+                  }
+                  className="res-hero-btn"
+                  title={heroConfig?.textoBoton}
                 >
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </Link>
+                  <span>{heroConfig?.textoBoton}</span>
+                  <svg
+                    className="res-hero-btn-arrow"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </Link>
+              )}
             </div>
 
             <div className="res-hero-media">
               <img
-                src={medicosImg}
-                alt="Equipo médico y residentes del Hospital Interdistrital Evita"
+                src={
+                  resolveGraphicImageUrl(heroConfig?.imagenes?.[0]) ||
+                  medicosImg
+                }
+                alt={
+                  heroConfig?.altText ||
+                  heroConfig?.imagenes?.[0]?.altText ||
+                  "Equipo médico y residentes del Hospital Interdistrital Evita"
+                }
                 className="res-hero-img"
                 loading="eager"
               />

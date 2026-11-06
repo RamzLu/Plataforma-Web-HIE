@@ -1,479 +1,221 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
+import keycloak from "../../config/keycloak.js";
+import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import "../../styles/pages/cms/CmsContenidoGraficoView.css";
 import {
   getContenidosGraficos,
   updateContenidoGrafico,
 } from "../../api/contenidoGrafico.api.js";
-import { CmsContenidoGraficoEditModal } from "../../components/cms/CmsContenidoGraficoCorrectionModal";
-
-// Imágenes institucionales de respaldo
-import defaultImg1 from "../../assets/fondoHospitalCarrusel1.jpg";
-import defaultImg2 from "../../assets/fondoHospitalCarrusel2.jpg";
-import defaultImg3 from "../../assets/fondoHospitalCarrusel3.jpg";
-import defaultImg4 from "../../assets/fondoHospitalCarrusel4.jpg";
-
-/**
- * ESPACIOS FIJOS PREDEFINIDOS (PLACEHOLDERS DEL PORTAL)
- * El usuario no crea espacios nuevos; únicamente modifica las imágenes dentro de cada contenedor fijo.
- */
-const INITIAL_ESPACIOS_FIJOS = [
-  {
-    id: "espacio-banner-inicio",
-    orden: 1,
-    nombre: "Banner Principal de Inicio",
-    titulo: "Banner Principal de Inicio",
-    descripcion: "Carrusel hero de bienvenida en la portada principal del portal",
-    tipo: "Banner Principal",
-    dimensiones: "1920x1080px",
-    page: "Inicio",
-    ubicacion: "Banner Principal",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    imagenes: [
-      {
-        id: "img-ini-1",
-        url: defaultImg1,
-        altText: "Fachada principal del Hospital Interdistrital Evita de Formosa al amanecer",
-        titulo: "Atención Médica de Alta Complejidad al Servicio de la Comunidad",
-        enlaceTexto: "Conocer especialidades",
-        enlaceUrl: "/especialidades",
-        fileName: "portada_hospital_evita_1.jpg",
-      },
-      {
-        id: "img-ini-2",
-        url: defaultImg4,
-        altText: "Enfermera aplicando vacuna antigripal a adulto mayor en consultorio",
-        titulo: "Campaña Provincial de Vacunación y Prevención 2026",
-        enlaceTexto: "Ver cronograma",
-        enlaceUrl: "/noticias",
-        fileName: "campana_vacunacion_2026.jpg",
-      },
-      {
-        id: "img-ini-3",
-        url: defaultImg2,
-        altText: "Profesionales médicos realizando control clínico en sala equipada",
-        titulo: "Gestión de Turnos y Consultorios Externos",
-        enlaceTexto: "Solicitar información",
-        enlaceUrl: "/documentacion",
-        fileName: "consultorios_externos.jpg",
-      },
-    ],
-  },
-  {
-    id: "espacio-seccion-pacientes",
-    orden: 2,
-    nombre: "Sección Pacientes y Comunidad",
-    titulo: "Sección Pacientes y Comunidad",
-    descripcion: "Contenedor visual destinado a guías de atención, turnos y orientación al paciente",
-    tipo: "Sección Pacientes",
-    dimensiones: "1200x675px",
-    page: "Inicio",
-    ubicacion: "Sección Pacientes",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    imagenes: [
-      {
-        id: "img-pac-1",
-        url: defaultImg2,
-        altText: "Paciente recibiendo orientación en mesa de entradas del hospital",
-        titulo: "",
-        enlaceTexto: "Guía para el paciente",
-        enlaceUrl: "/documentacion",
-        fileName: "orientacion_pacientes.jpg",
-      },
-      {
-        id: "img-pac-2",
-        url: defaultImg3,
-        altText: "Donantes voluntarios en el Centro Provincial de Hemoterapia",
-        titulo: "",
-        enlaceTexto: "Requisitos para donar sangre",
-        enlaceUrl: "/noticias",
-        fileName: "banco_de_sangre.jpg",
-      },
-    ],
-  },
-  {
-    id: "espacio-banner-especialidades",
-    orden: 3,
-    nombre: "Banner Principal de Especialidades",
-    titulo: "Banner Principal de Especialidades",
-    descripcion: "Cabecera visual de la página de Especialidades Médicas y Servicios",
-    tipo: "Banner Principal",
-    dimensiones: "1920x1080px",
-    page: "Especialidades",
-    ubicacion: "Banner Principal",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    imagenes: [
-      {
-        id: "img-esp-1",
-        url: defaultImg2,
-        altText: "Sala de hemodinamia y equipamiento cardiovascular de última generación",
-        titulo: "Servicios Médicos y Unidades de Alta Complejidad",
-        enlaceTexto: "Explorar cartelera médica",
-        enlaceUrl: "/profesionales",
-        fileName: "cabecera_especialidades.jpg",
-      },
-    ],
-  },
-  {
-    id: "espacio-galeria-especialidades",
-    orden: 4,
-    nombre: "Imagen de Pacientes y Consultorios",
-    titulo: "Imagen de Pacientes y Consultorios",
-    descripcion: "Espacio gráfico en sección media de Especialidades y Diagnóstico por Imágenes",
-    tipo: "Sección Media",
-    dimensiones: "1280x720px",
-    page: "Especialidades",
-    ubicacion: "Sección Media",
-    estado: "RECHAZADO",
-    activo: false,
-    rejectionReason:
-      "Falta incorporar el isologo institucional en la esquina inferior y verificar contraste de la segunda imagen del carrusel.",
-    imagenes: [
-      {
-        id: "img-esp-med-1",
-        url: defaultImg3,
-        altText: "Médica pediatra atendiendo a un paciente infantil en consultorio",
-        titulo: "",
-        enlaceTexto: "Ver servicio de pediatría",
-        enlaceUrl: "/especialidades",
-        fileName: "atencion_pediatrica.jpg",
-      },
-      {
-        id: "img-esp-med-2",
-        url: defaultImg1,
-        altText: "Equipo de resonancia magnética nuclear y consola técnica",
-        titulo: "",
-        enlaceTexto: "Diagnóstico por imágenes",
-        enlaceUrl: "/especialidades",
-        fileName: "resonador_magnetico.jpg",
-      },
-    ],
-  },
-  {
-    id: "espacio-banner-capacitacion",
-    orden: 5,
-    nombre: "Banner Principal de Capacitación",
-    titulo: "Banner Principal de Capacitación",
-    descripcion: "Carrusel principal del área de Docencia, Investigación y Residencias",
-    tipo: "Banner Principal",
-    dimensiones: "1920x1080px",
-    page: "Capacitación",
-    ubicacion: "Banner Principal",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    imagenes: [
-      {
-        id: "img-cap-1",
-        url: defaultImg4,
-        altText: "Equipo quirúrgico entrenando en centro de simulación clínica",
-        titulo: "Formación Continua y Residencias Médicas de Excelencia",
-        enlaceTexto: "Inscripciones abiertas",
-        enlaceUrl: "/residencias",
-        fileName: "residencias_cirugia.jpg",
-      },
-    ],
-  },
-  {
-    id: "espacio-actividades-docencia",
-    orden: 6,
-    nombre: "Espacio Talleres y Simulación Clínica",
-    titulo: "Espacio Talleres y Simulación Clínica",
-    descripcion: "Contenedor visual para jornadas hospitalarias y talleres de enfermería",
-    tipo: "Sección Media",
-    dimensiones: "1200x675px",
-    page: "Capacitación",
-    ubicacion: "Sección Media",
-    estado: "PENDIENTE_APROBACION",
-    activo: false,
-    rejectionReason: null,
-    imagenes: [
-      {
-        id: "img-cap-med-1",
-        url: defaultImg3,
-        altText: "Auditorio institucional durante las jornadas de bioética hospitalaria",
-        titulo: "",
-        enlaceTexto: "Ver programa académico",
-        enlaceUrl: "/capacitacion",
-        fileName: "jornadas_bioetica.jpg",
-      },
-    ],
-  },
-  {
-    id: "espacio-banner-institucional",
-    orden: 7,
-    nombre: "Banner Principal Institucional",
-    titulo: "Banner Principal Institucional",
-    descripcion: "Portada fija de la sección Acerca del Hospital y Autoridades",
-    tipo: "Banner Principal",
-    dimensiones: "1920x1080px",
-    page: "Institucional",
-    ubicacion: "Banner Principal",
-    estado: "APROBADO",
-    activo: true,
-    rejectionReason: null,
-    imagenes: [
-      {
-        id: "img-inst-1",
-        url: defaultImg1,
-        altText: "Vista panorámica del edificio del Hospital Interdistrital Evita",
-        titulo: "Nuestra Misión: Salud Pública con Equidad y Calidad Humana",
-        enlaceTexto: "Conocer plano del hospital",
-        enlaceUrl: "/plano",
-        fileName: "institucional_fachada.jpg",
-      },
-    ],
-  },
-  {
-    id: "espacio-derechos-pacientes",
-    orden: 8,
-    nombre: "Espacio Derechos de Pacientes y Bioseguridad",
-    titulo: "Espacio Derechos de Pacientes y Bioseguridad",
-    descripcion: "Contenedor gráfico informativo en pie de sección institucional",
-    tipo: "Sección Pacientes",
-    dimensiones: "1200x675px",
-    page: "Institucional",
-    ubicacion: "Sección Pacientes",
-    estado: "BORRADOR",
-    activo: false,
-    rejectionReason: null,
-    imagenes: [
-      {
-        id: "img-inst-pac-1",
-        url: defaultImg2,
-        altText: "Infografía sobre los derechos del paciente y consentimiento informado",
-        titulo: "",
-        enlaceTexto: "Descargar guía en PDF",
-        enlaceUrl: "/documentacion",
-        fileName: "derechos_paciente.jpg",
-      },
-    ],
-  },
-];
-
-// Normaliza registros heredados para garantizar que cada espacio tenga su array `imagenes`
-const normalizeEspacios = (list) => {
-  if (!Array.isArray(list) || list.length === 0) return INITIAL_ESPACIOS_FIJOS;
-  return list.map((item, idx) => {
-    const hasImagenes = Array.isArray(item.imagenes) && item.imagenes.length > 0;
-    const isBanner =
-      item.tipo === "Banner Principal" ||
-      item.ubicacion?.toLowerCase().includes("cabecera") ||
-      item.ubicacion?.toLowerCase().includes("banner principal");
-
-    return {
-      ...item,
-      orden: item.orden || idx + 1,
-      nombre: item.nombre || item.titulo || `Espacio Gráfico #${idx + 1}`,
-      tipo: item.tipo || (isBanner ? "Banner Principal" : item.ubicacion || "Espacio Fijo"),
-      dimensiones: item.dimensiones || (isBanner ? "1920x1080px" : "1200x675px"),
-      imagenes: hasImagenes
-        ? item.imagenes
-        : [
-            {
-              id: `img-${item.id || idx}-1`,
-              url: item.imageUrl || defaultImg1,
-              altText: item.altText || "",
-              titulo: isBanner ? item.titulo || "" : "",
-              enlaceTexto: item.enlaceTexto || (item.enlaceUrl ? "Ver más" : ""),
-              enlaceUrl: item.enlaceUrl || "",
-              fileName: item.fileName || "imagen_espacio.jpg",
-            },
-          ],
-    };
-  });
-};
+import {
+  CmsContenidoGraficoEditModal,
+  PortalAprendePreview,
+  PortalCarouselPreview,
+  PortalPatientInfoPreview,
+  PortalResidenciasHeroPreview,
+} from "../../components/cms/CmsContenidoGraficoCorrectionModal";
+import {
+  DEFAULT_APRENDE_INICIO,
+  DEFAULT_CARRUSEL_INICIO,
+  DEFAULT_PACIENTES_INICIO,
+  DEFAULT_RESIDENCIAS_HERO,
+  getPortalRouteLabel,
+  resolveGraphicImageUrl,
+} from "../../utils/contenidoGraficoPresets.js";
 
 const CmsContenidoGraficoView = () => {
-  // Estado principal: Espacios Fijos del portal (cada uno con su array de imágenes para el carrusel)
-  const [espacios, setEspacios] = useState(() => {
-    const savedFixed = localStorage.getItem("hie_espacios_graficos_fijos");
-    if (savedFixed) {
-      try {
-        const parsed = JSON.parse(savedFixed);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return normalizeEspacios(parsed);
-        }
-      } catch (e) {
-        console.error("Error al leer espacios gráficos fijos:", e);
-      }
-    }
-    return INITIAL_ESPACIOS_FIJOS;
-  });
+  const [espacios, setEspacios] = useState([
+    DEFAULT_CARRUSEL_INICIO,
+    DEFAULT_PACIENTES_INICIO,
+    DEFAULT_APRENDE_INICIO,
+    DEFAULT_RESIDENCIAS_HERO,
+  ]);
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Pestaña activa: 'todos' | 'publicados' | 'borradores' | 'pendientes' | 'rechazados'
-  const [viewTab, setViewTab] = useState("todos");
   const [filtroPagina, setFiltroPagina] = useState("");
-
-  // Paginación
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterDropdownRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // Modales operativos (Edición de espacio fijo, Vista previa y Revisión editorial)
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [showReviewModal, setShowReviewModal] = useState(false);
-
-  const [selectedEspacio, setSelectedEspacio] = useState(null);
-  const [previewSlideIndex, setPreviewSlideIndex] = useState(0);
-  const [reviewAction, setReviewAction] = useState("approve");
-  const [reviewRejectionText, setReviewRejectionText] = useState("");
-
-  // Persistir cambios en LocalStorage
   useEffect(() => {
-    localStorage.setItem("hie_espacios_graficos_fijos", JSON.stringify(espacios));
-  }, [espacios]);
-
-  // Sincronización opcional con backend si se encuentra disponible
-  useEffect(() => {
-    const fetchFromBackend = async () => {
-      try {
-        const data = await getContenidosGraficos();
-        if (data && Array.isArray(data) && data.length > 0) {
-          setEspacios(normalizeEspacios(data));
-        }
-      } catch {
-        // Opera con los espacios fijos predefinidos localmente
+    const handleClickOutside = (event) => {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target)
+      ) {
+        setIsFilterOpen(false);
       }
     };
-    fetchFromBackend();
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Filtrado de espacios fijos por pestaña de estado y por página
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [selectedEspacio, setSelectedEspacio] = useState(null);
+  const [previewSlideIndex, setPreviewSlideIndex] = useState(0);
+
+  const cargarEspacios = async () => {
+    setLoading(true);
+    try {
+      // Limpiamos mocks heredados de localStorage para reflejar siempre la verdad del servidor
+      localStorage.removeItem("hie_espacios_graficos_fijos");
+      localStorage.removeItem("hie_carousel_text");
+      localStorage.removeItem("hie_carousel_btn");
+
+      const data = await getContenidosGraficos();
+      if (Array.isArray(data) && data.length > 0) {
+        setEspacios(data);
+      }
+    } catch (error) {
+      console.error("Error al cargar espacios gráficos:", error);
+      toast.error("No se pudieron cargar los espacios gráficos desde el servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarEspacios();
+  }, []);
+
+  const paginasDisponibles = useMemo(() => {
+    const setPaginas = new Set(
+      espacios.map((item) => item.page).filter(Boolean)
+    );
+    return Array.from(setPaginas);
+  }, [espacios]);
+
   const espaciosFiltrados = useMemo(() => {
     return espacios.filter((item) => {
-      const est = (item.estado || "APROBADO").toUpperCase();
-      if (viewTab === "publicados") {
-        if (est !== "APROBADO" && est !== "PUBLICADO") return false;
-      } else if (viewTab === "borradores") {
-        if (est !== "BORRADOR") return false;
-      } else if (viewTab === "pendientes") {
-        if (est !== "PENDIENTE_APROBACION" && est !== "PENDIENTE") return false;
-      } else if (viewTab === "rechazados") {
-        if (est !== "RECHAZADO") return false;
-      }
-
       if (filtroPagina && filtroPagina !== "" && filtroPagina !== "Todas las páginas") {
         if (item.page?.toLowerCase() !== filtroPagina.toLowerCase()) return false;
       }
-
       return true;
     });
-  }, [espacios, viewTab, filtroPagina]);
+  }, [espacios, filtroPagina]);
 
-  // Paginación
   const totalPages = Math.max(1, Math.ceil(espaciosFiltrados.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, espaciosFiltrados.length);
   const currentEspacios = espaciosFiltrados.slice(startIndex, endIndex);
 
-  // Abrir Modal de Edición de Espacio Fijo (también usado para subsanar rechazos)
   const handleOpenModify = (espacio) => {
     setSelectedEspacio(espacio);
     setShowEditModal(true);
   };
 
-  // Abrir Modal de Vista Previa del Espacio
   const handleOpenPreview = (espacio) => {
     setSelectedEspacio(espacio);
     setPreviewSlideIndex(0);
     setShowPreviewModal(true);
   };
 
-  // Abrir Modal de Revisión Editorial
-  const handleOpenReview = (espacio) => {
-    setSelectedEspacio(espacio);
-    setReviewAction("approve");
-    setReviewRejectionText("");
-    setShowReviewModal(true);
-  };
-
-  // Guardar las imágenes y metadatos modificados dentro del espacio fijo
-  const handleSaveEspacioModified = async (updatedEspacio) => {
-    setEspacios((prev) =>
-      prev.map((item) => (item.id === updatedEspacio.id ? updatedEspacio : item))
-    );
+  const handleSaveEspacioModified = async (espacioKey, formData) => {
+    setIsSaving(true);
+    const toastId = toast.loading("Actualizando contenido gráfico...");
 
     try {
-      await updateContenidoGrafico(updatedEspacio.id, updatedEspacio);
-    } catch {
-      // Guardado local ya aplicado
-    }
+      const response = await updateContenidoGrafico(espacioKey, formData);
+      const espacioActualizado = response?.espacio;
 
-    if (selectedEspacio?.estado === "RECHAZADO" && updatedEspacio.estado === "PENDIENTE_APROBACION") {
-      toast.success("Espacio corregido y reenviado a revisión editorial.");
-    } else if (updatedEspacio.estado === "BORRADOR") {
-      toast.success("Cambios del espacio guardados como borrador.");
-    } else {
-      toast.success(`Espacio "${updatedEspacio.nombre}" actualizado correctamente.`);
-    }
+      if (espacioActualizado) {
+        setEspacios((prev) =>
+          prev.map((item) =>
+            item.id === espacioActualizado.id ? espacioActualizado : item
+          )
+        );
 
-    setShowEditModal(false);
-    setSelectedEspacio(null);
-  };
+        if (espacioActualizado.id === "espacio-banner-inicio") {
+          try {
+            sessionStorage.setItem(
+              "hie_public_carrusel_inicio_cache",
+              JSON.stringify(espacioActualizado)
+            );
+          } catch {
+            // Ignorar si sessionStorage no está disponible
+          }
+        } else if (espacioActualizado.id === "espacio-seccion-pacientes") {
+          try {
+            sessionStorage.setItem(
+              "hie_public_pacientes_inicio_cache",
+              JSON.stringify(espacioActualizado)
+            );
+          } catch {
+            // Ignorar si sessionStorage no está disponible
+          }
+        } else if (espacioActualizado.id === "espacio-aprende-inicio") {
+          try {
+            sessionStorage.setItem(
+              "hie_public_aprende_inicio_cache",
+              JSON.stringify(espacioActualizado)
+            );
+          } catch {
+            // Ignorar si sessionStorage no está disponible
+          }
+        } else if (
+          espacioActualizado.id === "espacio-residencias-destacado" ||
+          espacioActualizado.id === "espacio-banner-capacitacion"
+        ) {
+          try {
+            sessionStorage.setItem(
+              "hie_public_residencias_destacado_cache",
+              JSON.stringify(espacioActualizado)
+            );
+          } catch {
+            // Ignorar si sessionStorage no está disponible
+          }
+        }
 
-  // Dictamen de Revisión Editorial (Aprobar / Rechazar con motivo)
-  const handleProcessReview = () => {
-    if (!selectedEspacio) return;
-
-    if (reviewAction === "reject") {
-      if (!reviewRejectionText.trim()) {
-        toast.error("Debe especificar obligatoriamente el motivo del rechazo.");
-        return;
+        recordCmsActivity({
+          titulo: `Actualizó "${espacioActualizado.nombre}"`,
+          categoria: "Contenido Gráfico",
+          editor:
+            keycloak?.tokenParsed?.name ||
+            keycloak?.tokenParsed?.preferred_username ||
+            "Editor CMS",
+          estado: espacioActualizado.estado || "PUBLICADO",
+        });
+      } else {
+        await cargarEspacios();
       }
 
-      setEspacios((prev) =>
-        prev.map((item) =>
-          item.id === selectedEspacio.id
-            ? {
-                ...item,
-                estado: "RECHAZADO",
-                activo: false,
-                rejectionReason: reviewRejectionText.trim(),
-                updatedAt: new Date().toISOString(),
-              }
-            : item
-        )
+      toast.success(
+        response?.message || "Espacio gráfico actualizado correctamente.",
+        { id: toastId }
       );
-      toast.error(`Espacio "${selectedEspacio.nombre}" observado para corrección.`);
-    } else {
-      setEspacios((prev) =>
-        prev.map((item) =>
-          item.id === selectedEspacio.id
-            ? {
-                ...item,
-                estado: "APROBADO",
-                activo: true,
-                rejectionReason: null,
-                updatedAt: new Date().toISOString(),
-              }
-            : item
-        )
-      );
-      toast.success(`Espacio "${selectedEspacio.nombre}" aprobado y publicado.`);
+      setShowEditModal(false);
+      setSelectedEspacio(null);
+    } catch (error) {
+      const apiErr = error?.response?.data?.error;
+      const msg =
+        (typeof apiErr === "string" ? apiErr : apiErr?.message) ||
+        error?.response?.data?.message ||
+        "No se pudo guardar el espacio gráfico.";
+      toast.error(msg, { id: toastId });
+    } finally {
+      setIsSaving(false);
     }
-
-    setShowReviewModal(false);
   };
 
   const previewImages = selectedEspacio?.imagenes || [];
   const activePreviewImg =
-    previewImages[Math.min(previewSlideIndex, Math.max(0, previewImages.length - 1))] || null;
+    previewImages[
+      Math.min(previewSlideIndex, Math.max(0, previewImages.length - 1))
+    ] || null;
+  const activePreviewUrl = resolveGraphicImageUrl(activePreviewImg);
 
   return (
     <div className="cms-dashboard-card cg-main-card">
-      {/* Encabezado Interno: Modelo de Edición de Espacios Fijos (Sin botón de Crear Nuevo) */}
+      {/* Encabezado Interno: Modelo de Edición de Espacios Fijos */}
       <div className="cg-inner-header">
         <div>
           <h2 className="cg-title">Espacios Gráficos del Portal</h2>
           <p className="cg-subtitle">
-            Seleccione un contenedor predefinido y haga clic en <strong>Modificar</strong> para gestionar las imágenes de su carrusel.
+            Seleccione una sección predefinida del portal y haga clic en{" "}
+            <strong>Modificar</strong> para editar sus imágenes y textos asociados.
           </p>
         </div>
         <div className="cg-fixed-model-badge">
@@ -484,79 +226,71 @@ const CmsContenidoGraficoView = () => {
         </div>
       </div>
 
-      {/* Fila de Controles: Tabs de Estado & Filtro por Página */}
-      <div className="cg-controls-row">
-        <div className="cg-tabs-container" id="tab-group">
-          <button
-            type="button"
-            className={`filter-tab ${viewTab === "todos" ? "active" : ""}`}
-            onClick={() => {
-              setViewTab("todos");
-              setCurrentPage(1);
-            }}
-          >
-            Todos ({espacios.length})
-          </button>
-          <button
-            type="button"
-            className={`filter-tab ${viewTab === "publicados" ? "active" : ""}`}
-            onClick={() => {
-              setViewTab("publicados");
-              setCurrentPage(1);
-            }}
-          >
-            Publicados
-          </button>
-          <button
-            type="button"
-            className={`filter-tab ${viewTab === "borradores" ? "active" : ""}`}
-            onClick={() => {
-              setViewTab("borradores");
-              setCurrentPage(1);
-            }}
-          >
-            Borradores
-          </button>
-          <button
-            type="button"
-            className={`filter-tab ${viewTab === "pendientes" ? "active" : ""}`}
-            onClick={() => {
-              setViewTab("pendientes");
-              setCurrentPage(1);
-            }}
-          >
-            Pendientes
-          </button>
-          <button
-            type="button"
-            className={`filter-tab ${viewTab === "rechazados" ? "active" : ""}`}
-            onClick={() => {
-              setViewTab("rechazados");
-              setCurrentPage(1);
-            }}
-          >
-            Rechazados
-          </button>
-        </div>
-
-        <div className="cg-filter-dropdown-wrapper">
-          <div className="cg-filter-dropdown-box">
-            <span className="cg-filter-prefix">FILTRAR POR PÁGINA:</span>
-            <select
-              className="cg-filter-select"
-              value={filtroPagina}
-              onChange={(e) => {
-                setFiltroPagina(e.target.value);
-                setCurrentPage(1);
-              }}
+      {/* Fila de Controles: Filtro por Página */}
+      <div className="cg-controls-row cg-controls-start">
+        <div className="cg-custom-dropdown-container">
+          <span className="cg-filter-prefix">FILTRAR POR PÁGINA:</span>
+          <div className="cg-dropdown-anchor" ref={filterDropdownRef}>
+            <button
+              type="button"
+              className={`cg-custom-dropdown-trigger ${isFilterOpen ? "is-open" : ""}`}
+              onClick={() => setIsFilterOpen((prev) => !prev)}
+              aria-expanded={isFilterOpen}
+              aria-haspopup="listbox"
             >
-              <option value="">Todas las páginas</option>
-              <option value="Inicio">Inicio</option>
-              <option value="Especialidades">Especialidades</option>
-              <option value="Capacitación">Capacitación</option>
-              <option value="Institucional">Institucional</option>
-            </select>
-            <span className="material-symbols-outlined cg-filter-chevron">expand_more</span>
+              <span className="cg-dropdown-selected-text">
+                {filtroPagina || "Todas las páginas"}
+              </span>
+              <span
+                className={`material-symbols-outlined cg-dropdown-chevron ${
+                  isFilterOpen ? "rotate-180" : ""
+                }`}
+              >
+                expand_more
+              </span>
+            </button>
+
+            {isFilterOpen && (
+              <div className="cg-custom-dropdown-menu" role="listbox">
+                <button
+                  type="button"
+                  className={`cg-dropdown-item ${!filtroPagina ? "is-active" : ""}`}
+                  onClick={() => {
+                    setFiltroPagina("");
+                    setCurrentPage(1);
+                    setIsFilterOpen(false);
+                  }}
+                >
+                  <span>Todas las páginas</span>
+                  {!filtroPagina && (
+                    <span className="material-symbols-outlined cg-dropdown-check">
+                      check
+                    </span>
+                  )}
+                </button>
+                {paginasDisponibles.map((pag) => (
+                  <button
+                    key={pag}
+                    type="button"
+                    className={`cg-dropdown-item ${
+                      filtroPagina === pag ? "is-active" : ""
+                    }`}
+                    onClick={() => {
+                      setFiltroPagina(pag);
+                      setCurrentPage(1);
+                      setIsFilterOpen(false);
+                    }}
+                  >
+                    <span>{pag}</span>
+                    {filtroPagina === pag && (
+                      <span className="material-symbols-outlined cg-dropdown-check">
+                        check
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -570,7 +304,7 @@ const CmsContenidoGraficoView = () => {
                 #
               </th>
               <th className="cg-th-recurso" scope="col">
-                ESPACIO FIJO Y CARRUSEL ACTUAL
+                SECCIÓN FIJA DEL PORTAL
               </th>
               <th className="cg-th-ubicacion" scope="col">
                 PÁGINA Y TIPO DE BLOQUE
@@ -584,7 +318,21 @@ const CmsContenidoGraficoView = () => {
             </tr>
           </thead>
           <tbody className="cg-table-body">
-            {currentEspacios.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="cg-empty-cell">
+                  <div className="cg-empty-content">
+                    <div
+                      className="cms-spinner"
+                      style={{ margin: "0 auto 8px auto" }}
+                    />
+                    <p className="cg-empty-desc">
+                      Cargando espacios gráficos del portal...
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : currentEspacios.length === 0 ? (
               <tr>
                 <td colSpan={5} className="cg-empty-cell">
                   <div className="cg-empty-content">
@@ -592,49 +340,50 @@ const CmsContenidoGraficoView = () => {
                       photo_library
                     </span>
                     <p className="cg-empty-title">
-                      No hay espacios fijos que coincidan con el filtro seleccionado
+                      No hay espacios fijos que coincidan con la página seleccionada
                     </p>
                     <p className="cg-empty-desc">
-                      Pruebe seleccionando la pestaña "Todos" o limpiando el filtro por página.
+                      Seleccione "Todas las páginas" para listar todas las secciones.
                     </p>
                   </div>
                 </td>
               </tr>
             ) : (
               currentEspacios.map((item, index) => {
-                const isApproved = item.estado === "APROBADO" || item.estado === "PUBLICADO";
-                const isRejected = item.estado === "RECHAZADO";
+                const est = (item.estado || "PUBLICADO").toUpperCase();
+                const isApproved = est === "APROBADO" || est === "PUBLICADO";
+                const isRejected = est === "RECHAZADO";
                 const isPending =
-                  item.estado === "PENDIENTE_APROBACION" || item.estado === "PENDIENTE";
-                const isDraft = item.estado === "BORRADOR";
+                  est === "PENDIENTE_APROBACION" || est === "PENDIENTE";
+                const isDraft = est === "BORRADOR";
 
                 const imgs = Array.isArray(item.imagenes) ? item.imagenes : [];
-                const coverImg = imgs[0]?.url || item.imageUrl;
+                const coverImg = resolveGraphicImageUrl(imgs[0]);
 
                 return (
                   <tr key={item.id} className="cg-table-row">
-                    {/* ORDEN */}
                     <td className="cg-td-orden">
                       {item.orden || startIndex + index + 1}
                     </td>
 
-                    {/* ESPACIO FIJO Y VISTA PREVIA */}
                     <td className="cg-td-recurso">
                       <div className="cg-recurso-box">
                         <div
                           className="cg-thumb-container"
                           onClick={() => handleOpenPreview(item)}
-                          title="Clic para previsualizar carrusel"
+                          title="Clic para previsualizar cómo se ve en el portal"
                         >
                           {coverImg ? (
                             <img
                               src={coverImg}
-                              alt={imgs[0]?.altText || item.nombre}
+                              alt={item.altText || item.nombre}
                               className="cg-thumb-img"
                             />
                           ) : (
                             <div className="cg-thumb-empty">
-                              <span className="material-symbols-outlined">broken_image</span>
+                              <span className="material-symbols-outlined">
+                                broken_image
+                              </span>
                             </div>
                           )}
                           <span className="cg-thumb-count-badge">
@@ -652,7 +401,7 @@ const CmsContenidoGraficoView = () => {
                               {item.nombre}
                             </span>
                             <span className="cg-info-dim-pill">
-                              {item.dimensiones || "1920x1080px"}
+                              {item.dimensiones || "1920x820px"}
                             </span>
                           </div>
                           <span className="cg-info-desc" title={item.descripcion}>
@@ -679,7 +428,6 @@ const CmsContenidoGraficoView = () => {
                       </div>
                     </td>
 
-                    {/* PÁGINA Y TIPO DE BLOQUE */}
                     <td className="cg-td-ubicacion">
                       <div className="cg-location-stack">
                         <span className="cg-location-page">{item.page}</span>
@@ -689,7 +437,6 @@ const CmsContenidoGraficoView = () => {
                       </div>
                     </td>
 
-                    {/* ESTADO */}
                     <td className="cg-td-estado">
                       {isApproved && (
                         <span className="cg-status-badge status-aprobado">
@@ -722,13 +469,12 @@ const CmsContenidoGraficoView = () => {
                       )}
                     </td>
 
-                    {/* ACCIONES */}
                     <td className="cg-td-acciones">
                       <div className="cg-actions-group">
                         <button
                           type="button"
                           className="cg-action-btn"
-                          title="Previsualizar carrusel"
+                          title="Previsualizar cómo se ve en el portal"
                           onClick={() => handleOpenPreview(item)}
                         >
                           <span
@@ -738,22 +484,6 @@ const CmsContenidoGraficoView = () => {
                             visibility
                           </span>
                         </button>
-
-                        {isPending && (
-                          <button
-                            type="button"
-                            className="cg-action-btn action-review"
-                            title="Revisar / Dictaminar"
-                            onClick={() => handleOpenReview(item)}
-                          >
-                            <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: "18px" }}
-                            >
-                              fact_check
-                            </span>
-                          </button>
-                        )}
 
                         <button
                           type="button"
@@ -780,63 +510,61 @@ const CmsContenidoGraficoView = () => {
         </table>
       </div>
 
-      {/* Paginación */}
-      <div className="cg-footer-row">
-        <span className="cg-footer-info">
-          Mostrando {espaciosFiltrados.length === 0 ? 0 : startIndex + 1} a {endIndex} de{" "}
-          {espaciosFiltrados.length} espacios fijos del portal
-        </span>
-        <div className="cg-pagination-nav">
-          <button
-            type="button"
-            className="cg-page-arrow"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            aria-label="Página anterior"
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              chevron_left
-            </span>
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+      {/* Paginación (solo si hay más de 1 página) */}
+      {totalPages > 1 && (
+        <div className="cg-footer-row" style={{ justifyContent: "flex-end" }}>
+          <div className="cg-pagination-nav">
             <button
-              key={num}
               type="button"
-              className={`cg-page-number ${currentPage === num ? "active" : ""}`}
-              onClick={() => setCurrentPage(num)}
+              className="cg-page-arrow"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              aria-label="Página anterior"
             >
-              {num}
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                chevron_left
+              </span>
             </button>
-          ))}
-          <button
-            type="button"
-            className="cg-page-arrow"
-            disabled={currentPage >= totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            aria-label="Página siguiente"
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              chevron_right
-            </span>
-          </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+              <button
+                key={num}
+                type="button"
+                className={`cg-page-number ${currentPage === num ? "active" : ""}`}
+                onClick={() => setCurrentPage(num)}
+              >
+                {num}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="cg-page-arrow"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              aria-label="Página siguiente"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                chevron_right
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* ==========================================================================
-          MODAL UNIFICADO DE EDICIÓN DE ESPACIO FIJO Y SUBSANACIÓN DE RECHAZOS
-          ========================================================================== */}
+      {/* MODAL DE EDICIÓN DE ESPACIO FIJO */}
       <CmsContenidoGraficoEditModal
         isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
+        onClose={() => !isSaving && setShowEditModal(false)}
         espacio={selectedEspacio}
         onSaveEspacio={handleSaveEspacioModified}
+        isSaving={isSaving}
       />
 
-      {/* ==========================================================================
-          MODAL DE VISTA PREVIA RÁPIDA DEL CARRUSEL
-          ========================================================================== */}
+      {/* MODAL DE VISTA PREVIA EN EL PORTAL */}
       {showPreviewModal && selectedEspacio && (
-        <div className="cg-modal-overlay" onClick={() => setShowPreviewModal(false)}>
+        <div
+          className="cg-modal-overlay"
+          onClick={() => setShowPreviewModal(false)}
+        >
           <div
             className="cg-modal-container preview-modal"
             onClick={(e) => e.stopPropagation()}
@@ -849,7 +577,8 @@ const CmsContenidoGraficoView = () => {
                 <div>
                   <h2 className="cg-modal-title">{selectedEspacio.nombre}</h2>
                   <p className="cg-modal-subtitle">
-                    {selectedEspacio.page} • {selectedEspacio.tipo} ({selectedEspacio.dimensiones})
+                    {selectedEspacio.page} • {selectedEspacio.tipo} (
+                    {selectedEspacio.dimensiones})
                   </p>
                 </div>
               </div>
@@ -865,83 +594,157 @@ const CmsContenidoGraficoView = () => {
             </div>
 
             <div className="cg-modal-body">
-              <div className="cg-preview-banner-box">
-                {activePreviewImg ? (
-                  <img
-                    src={activePreviewImg.url}
-                    alt={activePreviewImg.altText || selectedEspacio.nombre}
-                    className="cg-preview-banner-img"
-                  />
-                ) : (
-                  <div className="cg-preview-banner-empty">
-                    <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "#94a3b8" }}>
-                      broken_image
-                    </span>
-                  </div>
-                )}
-
-                {previewImages.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      className="cg-mockup-nav-arrow prev"
-                      onClick={() =>
-                        setPreviewSlideIndex(
-                          (prev) => (prev - 1 + previewImages.length) % previewImages.length
-                        )
-                      }
-                    >
-                      <span className="material-symbols-outlined">arrow_back</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="cg-mockup-nav-arrow next"
-                      onClick={() =>
-                        setPreviewSlideIndex((prev) => (prev + 1) % previewImages.length)
-                      }
-                    >
-                      <span className="material-symbols-outlined">arrow_forward</span>
-                    </button>
-                  </>
-                )}
-
-                <div className="cg-preview-overlay">
-                  <span className="cg-preview-tag">
-                    Imagen {previewSlideIndex + 1} de {previewImages.length} •{" "}
-                    {selectedEspacio.dimensiones}
-                  </span>
-                  {selectedEspacio.tipo === "Banner Principal" && activePreviewImg?.titulo && (
-                    <h3 className="cg-preview-title">{activePreviewImg.titulo}</h3>
-                  )}
-                  {(activePreviewImg?.enlaceTexto || activePreviewImg?.enlaceUrl) && (
-                    <p className="cg-preview-desc">
-                      Enlace: {activePreviewImg.enlaceTexto || "Ver más"} (
-                      {activePreviewImg.enlaceUrl || "Sin URL"})
-                    </p>
+              {selectedEspacio.id === "espacio-banner-inicio" ? (
+                <PortalCarouselPreview
+                  imagenes={previewImages}
+                  activeIndex={previewSlideIndex}
+                  onChangeSlide={setPreviewSlideIndex}
+                  textoSuperpuesto={selectedEspacio.textoSuperpuesto}
+                  textoBoton={selectedEspacio.textoBoton}
+                  altText={selectedEspacio.altText}
+                />
+              ) : selectedEspacio.id === "espacio-seccion-pacientes" ? (
+                <PortalPatientInfoPreview
+                  items={previewImages}
+                  activeIndex={previewSlideIndex}
+                  onSelectItem={setPreviewSlideIndex}
+                />
+              ) : selectedEspacio.id === "espacio-aprende-inicio" ? (
+                <PortalAprendePreview
+                  items={previewImages}
+                  activeIndex={previewSlideIndex}
+                  onSelectItem={setPreviewSlideIndex}
+                />
+              ) : selectedEspacio.id === "espacio-residencias-destacado" ||
+                selectedEspacio.id === "espacio-banner-capacitacion" ||
+                selectedEspacio.esTarjetaResidencias ? (
+                <PortalResidenciasHeroPreview
+                  titulo={
+                    selectedEspacio.titulo ||
+                    selectedEspacio.textoSuperpuesto ||
+                    DEFAULT_RESIDENCIAS_HERO.titulo
+                  }
+                  parrafoDescripcion={
+                    selectedEspacio.parrafoDescripcion ||
+                    DEFAULT_RESIDENCIAS_HERO.parrafoDescripcion
+                  }
+                  textoBoton={
+                    selectedEspacio.textoBoton ||
+                    DEFAULT_RESIDENCIAS_HERO.textoBoton
+                  }
+                  enlaceUrl={
+                    selectedEspacio.enlaceUrl ||
+                    DEFAULT_RESIDENCIAS_HERO.enlaceUrl
+                  }
+                  imagen={previewImages[0]}
+                  altText={selectedEspacio.altText}
+                />
+              ) : (
+                <div className="cg-preview-banner-box">
+                  {activePreviewUrl ? (
+                    <img
+                      src={activePreviewUrl}
+                      alt={selectedEspacio.altText || selectedEspacio.nombre}
+                      className="cg-preview-banner-img"
+                    />
+                  ) : (
+                    <div className="cg-preview-banner-empty">
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "48px", color: "#94a3b8" }}
+                      >
+                        broken_image
+                      </span>
+                    </div>
                   )}
                 </div>
-              </div>
+              )}
 
               <div className="cg-preview-details-grid">
                 <div className="cg-detail-card">
-                  <span className="cg-detail-label">Texto Alternativo (ALT)</span>
+                  <span className="cg-detail-label">
+                    {selectedEspacio.id === "espacio-seccion-pacientes"
+                      ? `Texto Alternativo (ALT) • Desplegable #${
+                          previewSlideIndex + 1
+                        }`
+                      : selectedEspacio.id === "espacio-aprende-inicio"
+                      ? previewSlideIndex === 0
+                        ? "Texto Alternativo (ALT) • Imagen Principal"
+                        : `Texto Alternativo (ALT) • Tarjeta #${previewSlideIndex}`
+                      : "Texto Alternativo de la Sección (ALT)"}
+                  </span>
                   <p className="cg-detail-value">
-                    {activePreviewImg?.altText || "Sin texto alternativo definido"}
+                    {selectedEspacio.id === "espacio-seccion-pacientes" ||
+                    selectedEspacio.id === "espacio-aprende-inicio"
+                      ? activePreviewImg?.altText ||
+                        selectedEspacio.altText ||
+                        "Sin texto alternativo definido"
+                      : selectedEspacio.altText ||
+                        "Sin texto alternativo definido"}
                   </p>
                 </div>
+
+                {(selectedEspacio.id === "espacio-banner-inicio" ||
+                  selectedEspacio.id === "espacio-residencias-destacado" ||
+                  selectedEspacio.id === "espacio-banner-capacitacion" ||
+                  selectedEspacio.esTarjetaResidencias) && (
+                  <div className="cg-detail-card">
+                    <span className="cg-detail-label">Botón y Redirección</span>
+                    <p className="cg-detail-value">
+                      {selectedEspacio.textoBoton
+                        ? `"${selectedEspacio.textoBoton}" → ${getPortalRouteLabel(
+                            selectedEspacio.enlaceUrl
+                          )}`
+                        : "Sin botón activo"}
+                    </p>
+                  </div>
+                )}
+
+                {selectedEspacio.id === "espacio-seccion-pacientes" && (
+                  <div className="cg-detail-card">
+                    <span className="cg-detail-label">
+                      Desplegable Seleccionado
+                    </span>
+                    <p className="cg-detail-value">
+                      #{previewSlideIndex + 1} •{" "}
+                      {activePreviewImg?.titulo || "Sin título"}
+                    </p>
+                  </div>
+                )}
+
+                {selectedEspacio.id === "espacio-aprende-inicio" && (
+                  <div className="cg-detail-card">
+                    <span className="cg-detail-label">
+                      {previewSlideIndex === 0
+                        ? "Elemento Seleccionado"
+                        : `Redirección • Tarjeta #${previewSlideIndex}`}
+                    </span>
+                    <p className="cg-detail-value">
+                      {previewSlideIndex === 0
+                        ? "Encabezado, Párrafo e Imagen Principal"
+                        : getPortalRouteLabel(activePreviewImg?.enlaceUrl) ||
+                          "Sin redirección"}
+                    </p>
+                  </div>
+                )}
+
                 <div className="cg-detail-card">
-                  <span className="cg-detail-label">Enlace Configurado</span>
+                  <span className="cg-detail-label">
+                    {selectedEspacio.id === "espacio-seccion-pacientes" ||
+                    selectedEspacio.id === "espacio-aprende-inicio"
+                      ? "Estructura de la Sección"
+                      : "Total en Carrusel"}
+                  </span>
                   <p className="cg-detail-value">
-                    {activePreviewImg?.enlaceUrl
-                      ? `${activePreviewImg.enlaceTexto || "Enlace"} → ${activePreviewImg.enlaceUrl}`
-                      : "Sin enlace configurado"}
-                  </p>
-                </div>
-                <div className="cg-detail-card">
-                  <span className="cg-detail-label">Total en Carrusel</span>
-                  <p className="cg-detail-value">
-                    {previewImages.length}{" "}
-                    {previewImages.length === 1 ? "imagen activa" : "imágenes activas"}
+                    {selectedEspacio.id === "espacio-seccion-pacientes"
+                      ? "5 desplegables fijos con imagen propia"
+                      : selectedEspacio.id === "espacio-aprende-inicio"
+                      ? "1 imagen principal + 3 tarjetas con redirección"
+                      : `${previewImages.length} ${
+                          previewImages.length === 1
+                            ? "imagen activa"
+                            : "imágenes activas"
+                        }`}
                   </p>
                 </div>
               </div>
@@ -967,126 +770,6 @@ const CmsContenidoGraficoView = () => {
                   edit_square
                 </span>
                 <span>Modificar este Espacio</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ==========================================================================
-          MODAL DE REVISIÓN EDITORIAL (APROBAR O RECHAZAR CON MOTIVO)
-          ========================================================================== */}
-      {showReviewModal && selectedEspacio && (
-        <div className="cg-modal-overlay" onClick={() => setShowReviewModal(false)}>
-          <div className="cg-modal-container" onClick={(e) => e.stopPropagation()}>
-            <div className="cg-modal-header">
-              <div className="cg-modal-header-left">
-                <span className="material-symbols-outlined cg-modal-header-icon">
-                  fact_check
-                </span>
-                <div>
-                  <h2 className="cg-modal-title">Revisión Editorial del Espacio</h2>
-                  <p className="cg-modal-subtitle">
-                    Dictamen para "{selectedEspacio.nombre}"
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="cg-modal-close"
-                onClick={() => setShowReviewModal(false)}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
-                  close
-                </span>
-              </button>
-            </div>
-
-            <div className="cg-modal-body">
-              <div className="cg-review-options">
-                <label
-                  className={`cg-review-option ${
-                    reviewAction === "approve" ? "selected-approve" : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="reviewAction"
-                    value="approve"
-                    checked={reviewAction === "approve"}
-                    onChange={() => setReviewAction("approve")}
-                  />
-                  <div>
-                    <span className="cg-review-title" style={{ color: "#15803d" }}>
-                      Aprobar y Publicar
-                    </span>
-                    <p className="cg-review-desc">
-                      El carrusel de este espacio fijo se actualizará en el portal.
-                    </p>
-                  </div>
-                </label>
-
-                <label
-                  className={`cg-review-option ${
-                    reviewAction === "reject" ? "selected-reject" : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="reviewAction"
-                    value="reject"
-                    checked={reviewAction === "reject"}
-                    onChange={() => setReviewAction("reject")}
-                  />
-                  <div>
-                    <span className="cg-review-title" style={{ color: "#b91c1c" }}>
-                      Rechazar con Observaciones
-                    </span>
-                    <p className="cg-review-desc">
-                      Solicita ajustes en las imágenes o metadatos del espacio.
-                    </p>
-                  </div>
-                </label>
-              </div>
-
-              {reviewAction === "reject" && (
-                <div className="cg-form-group" style={{ marginTop: "0.75rem" }}>
-                  <label className="cg-form-label">
-                    Motivo Obligatorio del Rechazo <span style={{ color: "#dc2626" }}>*</span>
-                  </label>
-                  <textarea
-                    className="cg-form-textarea"
-                    rows="3"
-                    placeholder="Detalle las correcciones necesarias..."
-                    value={reviewRejectionText}
-                    onChange={(e) => setReviewRejectionText(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="cg-modal-footer">
-              <button
-                type="button"
-                className="cg-btn-cancel"
-                onClick={() => setShowReviewModal(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className={
-                  reviewAction === "reject" ? "cg-btn-danger" : "cg-btn-primary-blue"
-                }
-                onClick={handleProcessReview}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                  {reviewAction === "reject" ? "cancel" : "check_circle"}
-                </span>
-                <span>
-                  {reviewAction === "reject" ? "Confirmar Rechazo" : "Aprobar Espacio"}
-                </span>
               </button>
             </div>
           </div>

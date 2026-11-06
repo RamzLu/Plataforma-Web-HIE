@@ -1,6 +1,11 @@
 import { Router } from 'express';
 
 import { obtenerBanners, crearBanner, actualizarBanner, eliminarBanner } from "../controllers/cms/cms.banners.controller.js";
+import {
+  obtenerContenidosGraficos,
+  obtenerEspacioPublico,
+  actualizarEspacioGrafico,
+} from "../controllers/cms/cms.contenidoGrafico.controller.js";
 import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia, evaluarNoticia } from "../controllers/cms/cms.noticia.controller.js";
 import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento } from "../controllers/cms/cms.doc.controller.js";
 import { obtenerProfesionales, crearProfesional, eliminarProfesional, actualizarProfesional } from "../controllers/cms/cms.profesional.controller.js";
@@ -11,7 +16,8 @@ import {
   actualizarAutoridad, 
   eliminarAutoridad, 
   reordenarAutoridades,
-  actualizarRedesSociales 
+  actualizarRedesSociales,
+  actualizarSedeCentral
 } from "../controllers/cms/cms.institucional.controller.js";
 import {
   obtenerResidencias,
@@ -72,14 +78,24 @@ router.delete('/documentacion/:id', requireCmsAccess, eliminarDocumento);
 // MÓDULO: BANNERS Y CONTENIDO GRÁFICO
 // ==========================================
 router.get("/banners", adminViewAccess, obtenerBanners);
-router.post("/banners", requireCmsAccess, uploadImagenSingle("imagen"), crearBanner);
-router.put("/banners/:id", requireCmsAccess, uploadImagenSingle("imagen"), actualizarBanner); 
-router.delete("/banners/:id", requireCmsAccess, eliminarBanner); 
+router.post("/banners", requireCmsAccess, crearBanner);
+router.put("/banners/:espacioKey", requireCmsAccess, uploadImagenesArray("imagenes", 15), actualizarBanner);
+router.delete("/banners/:espacioKey", requireCmsAccess, eliminarBanner);
 
-router.get("/contenido-grafico", adminViewAccess, obtenerBanners);
-router.post("/contenido-grafico", requireCmsAccess, uploadImagenSingle("imagen"), crearBanner);
-router.put("/contenido-grafico/:id", requireCmsAccess, uploadImagenSingle("imagen"), actualizarBanner); 
-router.delete("/contenido-grafico/:id", requireCmsAccess, eliminarBanner); 
+router.get("/contenido-grafico", adminViewAccess, obtenerContenidosGraficos);
+router.get("/contenido-grafico/publico/:espacioKey", obtenerEspacioPublico);
+router.put(
+  "/contenido-grafico/espacio/:espacioKey",
+  requireCmsAccess,
+  uploadImagenesArray("imagenes", 15),
+  actualizarEspacioGrafico
+);
+router.put(
+  "/contenido-grafico/:espacioKey",
+  requireCmsAccess,
+  uploadImagenesArray("imagenes", 15),
+  actualizarEspacioGrafico
+);
 
 // ==========================================
 // MÓDULO: PROFESIONALES
@@ -98,9 +114,10 @@ router.put('/especialidades/:id', requireCmsAccess, especialidadCtrl.actualizarE
 router.delete('/especialidades/:id', requireCmsAccess, especialidadCtrl.eliminarEspecialidad);
 
 // ==========================================
-// MÓDULO: INSTITUCIONAL (AUTORIDADES Y REDES)
+// MÓDULO: INSTITUCIONAL (AUTORIDADES, REDES Y SEDE)
 // ==========================================
 router.get('/institucional', obtenerInstitucional);
+router.put('/institucional/sede', requireCmsAccess, uploadImagenSingle('archivo'), actualizarSedeCentral);
 router.put('/institucional/autoridades/reordenar', requireCmsAccess, reordenarAutoridades);
 router.post('/institucional/autoridades', requireCmsAccess, uploadImagenSingle('archivo'), crearAutoridad);
 router.put('/institucional/autoridades/:id', requireCmsAccess, uploadImagenSingle('archivo'), actualizarAutoridad);

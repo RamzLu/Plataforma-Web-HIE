@@ -2,8 +2,26 @@ import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
+import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 
 const BUCKET_NAME = "autoridades-imagenes";
+
+const UBICACION_SEDE_CENTRAL = "seccion-sede-central";
+const TIPO_SEDE_CENTRAL = "Tarjeta Institucional";
+
+export const DEFAULT_SEDE_CENTRAL = {
+  id: null,
+  titulo: "Edificio Principal - Hospital Evita",
+  tagSuperior: "SEDE CENTRAL",
+  direccion: "Av. José de Luca Barberis N° 250, Formosa, Argentina",
+  parrafoDescripcion:
+    "Infraestructura médica de vanguardia con 19.000 m² cubiertos diseñados bajo normas internacionales de arquitectura hospitalaria. Alberga la Guardia Central de Urgencias (24 hs), bloques quirúrgicos inteligentes, unidades de cuidados intensivos y el centro de diagnóstico por imágenes.",
+  badgeAtencion: "Guardia Activa 24 Hs.",
+  altText: "Edificio Principal Hospital Evita",
+  presetKey: "foto-sede",
+  imagenUrl: null,
+  nombreArchivo: null,
+};
 
 // Serializa una autoridad de BD a formato JSON seguro (BigInt → string)
 const serializarAutoridad = (autoridad) => {
@@ -116,13 +134,78 @@ class CmsAutoridadesService {
       include: { archivo: true },
     });
 
+    const sedeCentral = await this.obtenerSedeCentral();
+
     return {
       autoridades: autoridades.map(serializarAutoridad),
       redesSociales: {
         facebook: sanitizarUrlLectura(facebookContacto?.enlace, ""),
         instagram: sanitizarUrlLectura(instagramContacto?.enlace, ""),
       },
+      sedeCentral,
     };
+  }
+
+  // ─── OBTENER SEDE CENTRAL (Tarjeta Institucional de Acerca de) ───────────
+
+  async obtenerSedeCentral() {
+    try {
+      const ubicacion = await prisma.ubicacion_contenido_grafico.findUnique({
+        where: { nombre: UBICACION_SEDE_CENTRAL },
+      });
+
+      if (!ubicacion) {
+        return { ...DEFAULT_SEDE_CENTRAL };
+      }
+
+      const fila = await prisma.contenido_grafico.findFirst({
+        where: { ubicacionId: ubicacion.id, activo: true },
+        include: { archivo: true },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      if (!fila) {
+        return { ...DEFAULT_SEDE_CENTRAL };
+      }
+
+      let meta = {};
+      try {
+        if (fila.descripcion) {
+          meta = JSON.parse(fila.descripcion);
+        }
+      } catch {
+        // En caso de texto simple heredado
+      }
+
+      let imagenUrl = null;
+      if (fila.archivo) {
+        let bucket = BUCKET_NAME;
+        if (typeof fila.archivo.ruta === "string" && fila.archivo.ruta.includes("/")) {
+          bucket = fila.archivo.ruta.split("/")[0] || BUCKET_NAME;
+        }
+        const { data } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(fila.archivo.nombreArchivo);
+        imagenUrl = data?.publicUrl || null;
+      }
+
+      return {
+        id: fila.id.toString(),
+        titulo: fila.titulo || DEFAULT_SEDE_CENTRAL.titulo,
+        tagSuperior: meta.tagSuperior || DEFAULT_SEDE_CENTRAL.tagSuperior,
+        direccion: meta.direccion || DEFAULT_SEDE_CENTRAL.direccion,
+        parrafoDescripcion:
+          meta.parrafoDescripcion || DEFAULT_SEDE_CENTRAL.parrafoDescripcion,
+        badgeAtencion: meta.badgeAtencion !== undefined ? meta.badgeAtencion : DEFAULT_SEDE_CENTRAL.badgeAtencion,
+        altText: fila.altText || DEFAULT_SEDE_CENTRAL.altText,
+        presetKey: meta.presetKey || (fila.archivo ? null : DEFAULT_SEDE_CENTRAL.presetKey),
+        imagenUrl,
+        nombreArchivo: fila.archivo?.nombreOriginal || null,
+      };
+    } catch (err) {
+      console.error("[CmsAutoridadesService] Error al obtener sede central:", err);
+      return { ...DEFAULT_SEDE_CENTRAL };
+    }
   }
 
   // ─── CREAR AUTORIDAD ──────────────────────────────────────────────────────
@@ -320,6 +403,117 @@ class CmsAutoridadesService {
     ]);
 
     return { facebook: fbEnlace, instagram: igEnlace };
+  }
+
+  // ─── ACTUALIZAR SEDE CENTRAL (Tarjeta Institucional de Acerca de) ─────────
+
+  async actualizarSedeCentral(data, file, user) {
+    const titulo = (data.titulo || "").trim() || DEFAULT_SEDE_CENTRAL.titulo;
+    const tagSuperior = (data.tagSuperior || "SEDE CENTRAL").trim();
+    const direccion = (data.direccion || "").trim() || DEFAULT_SEDE_CENTRAL.direccion;
+    const parrafoDescripcion = (data.parrafoDescripcion || "").trim() || DEFAULT_SEDE_CENTRAL.parrafoDescripcion;
+    const badgeAtencion = data.badgeAtencion !== undefined ? (data.badgeAtencion || "").trim() : DEFAULT_SEDE_CENTRAL.badgeAtencion;
+    const altText = (data.altText || "").trim() || DEFAULT_SEDE_CENTRAL.altText;
+    const presetKey = (data.presetKey || "").trim() || (file ? null : DEFAULT_SEDE_CENTRAL.presetKey);
+
+    const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
+
+    // Asegurar registros de catálogo tipo y ubicación
+    const tipoDb = await prisma.tipo_contenido_grafico.upsert({
+      where: { nombre: TIPO_SEDE_CENTRAL },
+      update: { activo: true },
+      create: {
+        nombre: TIPO_SEDE_CENTRAL,
+        descripcion: "Tarjeta Institucional del Portal",
+        activo: true,
+      },
+    });
+
+    const ubicacionDb = await prisma.ubicacion_contenido_grafico.upsert({
+      where: { nombre: UBICACION_SEDE_CENTRAL },
+      update: { descripcion: "Sección Sede Central (Acerca de)", activo: true },
+      create: {
+        nombre: UBICACION_SEDE_CENTRAL,
+        descripcion: "Sección Sede Central (Acerca de)",
+        activo: true,
+      },
+    });
+
+    const filaExistente = await prisma.contenido_grafico.findFirst({
+      where: { ubicacionId: ubicacionDb.id },
+      include: { archivo: true },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    let archivoId = filaExistente?.archivoId || null;
+    if (file) {
+      const archivoNuevo = await subirImagenYRegistrar(file);
+      archivoId = archivoNuevo.id;
+      if (filaExistente?.archivo) {
+        await limpiarImagenAnterior(filaExistente.archivo);
+      }
+    }
+
+    const metaJson = JSON.stringify({
+      tagSuperior,
+      direccion,
+      parrafoDescripcion,
+      badgeAtencion,
+      presetKey: archivoId ? null : presetKey,
+    });
+
+    if (filaExistente) {
+      await prisma.contenido_grafico.update({
+        where: { id: filaExistente.id },
+        data: {
+          titulo,
+          descripcion: metaJson,
+          altText,
+          archivoId,
+          updatedBy: usuarioLocal.id,
+          updatedAt: new Date(),
+          activo: true,
+          estado: "PUBLICADO",
+        },
+      });
+    } else {
+      await prisma.contenido_grafico.create({
+        data: {
+          titulo,
+          descripcion: metaJson,
+          altText,
+          archivoId,
+          orden: 1,
+          activo: true,
+          pagina: "Acerca de",
+          tipoId: tipoDb.id,
+          ubicacionId: ubicacionDb.id,
+          estado: "PUBLICADO",
+          createdBy: usuarioLocal.id,
+          updatedBy: usuarioLocal.id,
+          updatedAt: new Date(),
+        },
+      });
+    }
+
+    await prisma.auditoria
+      .create({
+        data: {
+          usuarioId: usuarioLocal.id,
+          accion: "ACTUALIZAR",
+          entidad: "informacion_institucional",
+          entidadId: UBICACION_SEDE_CENTRAL,
+          descripcion: "Actualizó los datos y fotografía de la Sede Central en Acerca de",
+        },
+      })
+      .catch(() => {});
+
+    const sedeCentralActualizada = await this.obtenerSedeCentral();
+
+    return {
+      message: "¡Sede Central actualizada correctamente!",
+      sedeCentral: sedeCentralActualizada,
+    };
   }
 }
 

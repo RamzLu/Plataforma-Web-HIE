@@ -194,8 +194,29 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  align-items: center;
   gap: 8px;
   z-index: 10;
+}
+
+.carousel-indicator {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.48);
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.carousel-indicator.active {
+  background-color: #ffffff;
+  transform: scale(1.25);
+}
+
+.carousel-indicator:hover {
+  background-color: #ffffff;
 }
 
 /* Estilos de los puntos indicadores inferiores */
@@ -296,6 +317,7 @@
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 1px;
+  text-transform: uppercase;
   text-decoration: none;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
