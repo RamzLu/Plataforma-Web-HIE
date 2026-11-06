@@ -57,3 +57,14 @@ export const updateRedesSociales = async (data, token) => {
   });
   return response.data;
 };
+
+// ─── SEDE CENTRAL ─────────────────────────────────────────────────────────────
+
+export const updateSedeCentral = async (formData, token) => {
+  const response = await api.put("/cms/institucional/sede", formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};

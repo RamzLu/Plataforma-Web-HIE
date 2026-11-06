@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn, ZoomOut, Check } from "lucide-react";
+import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn, ZoomOut, Check, Building2 } from "lucide-react";
 import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import "../../styles/pages/cms/CmsInstitucionView.css";
+import fotoHeroHeader from "../../assets/foto-sede.jpg";
+import { DEFAULT_SEDE_CENTRAL } from "../../utils/contenidoGraficoPresets.js";
 import {
   CmsDeleteModal,
   CmsUnsavedChangesModal,
@@ -17,10 +19,14 @@ import {
   deleteAutoridad,
   reordenarAutoridades,
   updateRedesSociales,
+  updateSedeCentral,
 } from "../../api/autoridades.api.js";
 
-// Proporción exacta de la tarjeta en el portal público (331.73 x 260)
+// Proporción exacta de la tarjeta de autoridad en el portal público (331.73 x 260)
 const ASPECT_RATIO_AUTORIDAD = 332 / 260;
+
+// Proporción exacta del contenedor de imagen de Sede Central (500 x 280 ≈ 16:9)
+const ASPECT_RATIO_SEDE = 500 / 280;
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -105,6 +111,32 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   const [isEditingSocial, setIsEditingSocial] = useState(false);
   const [tempSocial, setTempSocial] = useState({ facebook: "", instagram: "" });
 
+  // --- Estado de Sede Central (Acerca de) ---
+  const [sedeCentralData, setSedeCentralData] = useState(() => {
+    try {
+      const cached = sessionStorage.getItem("hie_public_sede_central_cache");
+      return cached ? JSON.parse(cached) : DEFAULT_SEDE_CENTRAL;
+    } catch {
+      return DEFAULT_SEDE_CENTRAL;
+    }
+  });
+  const [showSedeModal, setShowSedeModal] = useState(false);
+  const [sedeForm, setSedeForm] = useState({
+    titulo: "",
+    tagSuperior: "SEDE CENTRAL",
+    direccion: "",
+    parrafoDescripcion: "",
+    badgeAtencion: "",
+    altText: "",
+    archivo: null,
+    previewUrl: null,
+  });
+  const [sedeImageSrc, setSedeImageSrc] = useState(null);
+  const [sedeCrop, setSedeCrop] = useState({ x: 0, y: 0 });
+  const [sedeZoom, setSedeZoom] = useState(1);
+  const [sedeCroppedPixels, setSedeCroppedPixels] = useState(null);
+  const [isSedeCropping, setIsSedeCropping] = useState(false);
+
   const fetchInstitucional = async () => {
     setLoading(true);
     try {
@@ -112,6 +144,12 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
       setAutoridades(data.autoridades || []);
       setSocialData(data.redesSociales || { facebook: "", instagram: "" });
       setTempSocial(data.redesSociales || { facebook: "", instagram: "" });
+      if (data.sedeCentral) {
+        setSedeCentralData(data.sedeCentral);
+        try {
+          sessionStorage.setItem("hie_public_sede_central_cache", JSON.stringify(data.sedeCentral));
+        } catch {}
+      }
     } catch (error) {
       toast.error("Error al cargar la información institucional.");
     } finally {
@@ -122,6 +160,137 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   useEffect(() => {
     fetchInstitucional();
   }, []);
+
+  // --- HANDLERS DE SEDE CENTRAL ---
+  const handleOpenEditSede = () => {
+    setSedeForm({
+      titulo: sedeCentralData?.titulo || DEFAULT_SEDE_CENTRAL.titulo,
+      tagSuperior: sedeCentralData?.tagSuperior || DEFAULT_SEDE_CENTRAL.tagSuperior,
+      direccion: sedeCentralData?.direccion || DEFAULT_SEDE_CENTRAL.direccion,
+      parrafoDescripcion: sedeCentralData?.parrafoDescripcion || DEFAULT_SEDE_CENTRAL.parrafoDescripcion,
+      badgeAtencion: sedeCentralData?.badgeAtencion !== undefined ? sedeCentralData.badgeAtencion : DEFAULT_SEDE_CENTRAL.badgeAtencion,
+      altText: sedeCentralData?.altText || DEFAULT_SEDE_CENTRAL.altText,
+      archivo: null,
+      previewUrl: sedeCentralData?.imagenUrl || null,
+    });
+    setSedeImageSrc(null);
+    setIsSedeCropping(false);
+    setShowSedeModal(true);
+  };
+
+  const handleCloseSedeModal = () => {
+    if (isSaving) return;
+    setShowSedeModal(false);
+    setIsSedeCropping(false);
+    setSedeImageSrc(null);
+  };
+
+  const handleSedeFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor seleccioná un archivo de imagen válido (JPG, PNG o WEBP).");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("La imagen no debe superar los 10MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setSedeImageSrc(reader.result);
+      setIsSedeCropping(true);
+      setSedeZoom(1);
+      setSedeCrop({ x: 0, y: 0 });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleApplySedeCrop = async () => {
+    if (!sedeImageSrc || !sedeCroppedPixels) {
+      setIsSedeCropping(false);
+      return;
+    }
+    try {
+      const cropped = await getCroppedImg(sedeImageSrc, sedeCroppedPixels, "foto-sede-central.jpg");
+      if (cropped) {
+        setSedeForm((prev) => ({
+          ...prev,
+          archivo: cropped.file,
+          previewUrl: cropped.url,
+        }));
+        toast.success("Encuadre aplicado a la previsualización.");
+      }
+    } catch {
+      toast.error("Error al procesar el encuadre de la imagen.");
+    } finally {
+      setIsSedeCropping(false);
+    }
+  };
+
+  const handleSaveSede = async (e) => {
+    e.preventDefault();
+
+    if (!sedeForm.titulo?.trim()) {
+      toast.error("El título del edificio principal es obligatorio.");
+      return;
+    }
+    if (!sedeForm.direccion?.trim()) {
+      toast.error("La ubicación / dirección es obligatoria.");
+      return;
+    }
+    if (!sedeForm.parrafoDescripcion?.trim()) {
+      toast.error("El párrafo descriptivo es obligatorio.");
+      return;
+    }
+
+    setIsSaving(true);
+    const toastId = toast.loading("Actualizando Sede Central...");
+
+    try {
+      const formData = new FormData();
+      formData.append("titulo", sedeForm.titulo.trim());
+      formData.append("tagSuperior", (sedeForm.tagSuperior || "SEDE CENTRAL").trim());
+      formData.append("direccion", sedeForm.direccion.trim());
+      formData.append("parrafoDescripcion", sedeForm.parrafoDescripcion.trim());
+      formData.append("badgeAtencion", (sedeForm.badgeAtencion || "").trim());
+      formData.append("altText", (sedeForm.altText || DEFAULT_SEDE_CENTRAL.altText).trim());
+      if (sedeForm.archivo) {
+        formData.append("archivo", sedeForm.archivo);
+      }
+
+      const res = await updateSedeCentral(formData, keycloak?.token);
+      const updated = res.sedeCentral;
+
+      if (updated) {
+        setSedeCentralData(updated);
+        try {
+          sessionStorage.setItem("hie_public_sede_central_cache", JSON.stringify(updated));
+        } catch {}
+      }
+
+      recordCmsActivity(
+        keycloak,
+        "MODIFICAR_SEDE_CENTRAL",
+        "Actualizó los datos y fotografía de la Sede Central en Gestión Institucional"
+      );
+
+      toast.success(res.message || "¡Sede Central actualizada correctamente!", { id: toastId });
+      setShowSedeModal(false);
+    } catch (error) {
+      const apiErr = error?.response?.data?.error;
+      const msg =
+        (typeof apiErr === "string" ? apiErr : apiErr?.message) ||
+        error?.response?.data?.message ||
+        "Error al guardar los datos de la Sede Central.";
+      toast.error(msg, { id: toastId });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // --- COMPROBAR CAMBIOS PENDIENTES ---
   const checkHasChanges = () => {
@@ -429,7 +598,67 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
   return (
     <div className="inst-container">
-      {/* ===== 1. AUTORIDADES ===== */}
+      {/* ===== 1. SEDE CENTRAL (Edificio Principal - Acerca de) ===== */}
+      <section className="cms-dashboard-card inst-card">
+        <div className="inst-card-header">
+          <div className="inst-header-left">
+            <div className="inst-header-icon-wrap" style={{ background: "#e0f2fe", color: "#0284c7" }}>
+              <Building2 size={22} strokeWidth={2.2} />
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <h3 className="inst-card-title">Sede Central (Edificio Principal)</h3>
+                <span className="inst-page-badge">Acerca de</span>
+              </div>
+              <p className="inst-card-subtitle">
+                Información institucional, dirección y fotografía del edificio central en el portal público
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn-inst-primary"
+            onClick={handleOpenEditSede}
+            disabled={isSaving}
+          >
+            <Edit3 size={15} strokeWidth={2.5} /> Modificar
+          </button>
+        </div>
+
+        {/* Previsualización 1:1 idéntica a la sección del portal (sin número de teléfono) */}
+        <div className="inst-sede-preview-box">
+          <div className="single-sede-card inst-sede-card-display">
+            <div className="sede-img-box">
+              <img
+                src={sedeCentralData?.imagenUrl || fotoHeroHeader}
+                alt={sedeCentralData?.altText || "Edificio Principal Hospital Evita"}
+              />
+            </div>
+            <div className="sede-description-box">
+              <span className="sede-tag">{sedeCentralData?.tagSuperior || "SEDE CENTRAL"}</span>
+              <h3 className="sede-title">{sedeCentralData?.titulo || "Edificio Principal - Hospital Evita"}</h3>
+              <p className="sede-address">
+                <strong>Ubicación:</strong> {sedeCentralData?.direccion || "Av. José de Luca Barberis N° 250, Formosa, Argentina"}
+              </p>
+              <p className="sede-desc-text">
+                {sedeCentralData?.parrafoDescripcion ||
+                  "Infraestructura médica de vanguardia con 19.000 m² cubiertos diseñados bajo normas internacionales de arquitectura hospitalaria. Alberga la Guardia Central de Urgencias (24 hs), bloques quirúrgicos inteligentes, unidades de cuidados intensivos y el centro de diagnóstico por imágenes."}
+              </p>
+              <div className="sede-badge-list">
+                <span className="badge-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  {sedeCentralData?.badgeAtencion || "Guardia Activa 24 Hs."}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 2. AUTORIDADES ===== */}
       <section className="cms-dashboard-card inst-card">
         <div className="inst-card-header">
           <div className="inst-header-left">
@@ -926,6 +1155,373 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
                 type="button"
                 className="btn-crop-confirm"
                 onClick={handleSaveCrop}
+              >
+                <Check size={16} strokeWidth={2.5} /> APLICAR RECORTE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ===== MODAL DE MODIFICACIÓN DE SEDE CENTRAL ===== */}
+      {showSedeModal && (
+        <div className="modal-overlay" onClick={handleCloseSedeModal}>
+          <div
+            className="modal-content-esp esp-modal-wrapper"
+            style={{ maxWidth: "980px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header-esp">
+              <h2>MODIFICAR: SEDE CENTRAL</h2>
+              <button
+                type="button"
+                className="btn-close-modal"
+                onClick={handleCloseSedeModal}
+                aria-label="Cerrar modal"
+              >
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSede} style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <div className="esp-modal-body" style={{ maxHeight: "calc(90vh - 140px)", overflowY: "auto" }}>
+                {/* PREVISUALIZACIÓN EN LA PÁGINA */}
+                <div className="inst-modal-preview-wrapper">
+                  <div className="inst-modal-preview-header">
+                    <span className="inst-modal-preview-title">
+                      PREVISUALIZACIÓN EN LA PÁGINA{" "}
+                      <span className="inst-modal-preview-dim">(Medida recomendada: 1200x675px aprox.)</span>
+                    </span>
+                  </div>
+                  <div className="single-sede-card inst-sede-card-display">
+                    <div className="sede-img-box">
+                      <img
+                        src={sedeForm.previewUrl || fotoHeroHeader}
+                        alt={sedeForm.altText || "Edificio Principal Hospital Evita"}
+                      />
+                    </div>
+                    <div className="sede-description-box">
+                      <span className="sede-tag">{sedeForm.tagSuperior || "SEDE CENTRAL"}</span>
+                      <h3 className="sede-title">
+                        {sedeForm.titulo && sedeForm.titulo.trim() ? (
+                          sedeForm.titulo
+                        ) : (
+                          <em style={{ color: "#94a3b8" }}>Título del edificio principal...</em>
+                        )}
+                      </h3>
+                      <p className="sede-address">
+                        <strong>Ubicación:</strong>{" "}
+                        {sedeForm.direccion && sedeForm.direccion.trim() ? (
+                          sedeForm.direccion
+                        ) : (
+                          <em style={{ color: "#94a3b8" }}>Dirección del hospital...</em>
+                        )}
+                      </p>
+                      <p className="sede-desc-text">
+                        {sedeForm.parrafoDescripcion && sedeForm.parrafoDescripcion.trim() ? (
+                          sedeForm.parrafoDescripcion
+                        ) : (
+                          <em style={{ color: "#94a3b8" }}>
+                            Descripción de infraestructura y servicios de la sede central...
+                          </em>
+                        )}
+                      </p>
+                      <div className="sede-badge-list">
+                        {sedeForm.badgeAtencion && sedeForm.badgeAtencion.trim() ? (
+                          <span className="badge-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            {sedeForm.badgeAtencion}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* FORMULARIO DE ENTRADAS */}
+                <div className="esp-form-grid" style={{ marginTop: "16px" }}>
+                  <div>
+                    <label className="esp-form-label">
+                      Texto Alternativo (ALT) <span className="esp-asterisk">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="esp-form-input"
+                      placeholder="Descripción accesible de la imagen..."
+                      required
+                      value={sedeForm.altText}
+                      onChange={(e) => setSedeForm({ ...sedeForm, altText: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">
+                      Título <span className="esp-asterisk">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="esp-form-input"
+                      placeholder="Ej: Edificio Principal - Hospital Evita"
+                      required
+                      value={sedeForm.titulo}
+                      onChange={(e) => setSedeForm({ ...sedeForm, titulo: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">
+                      Ubicación / Dirección <span className="esp-asterisk">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="esp-form-input"
+                      placeholder="Ej: Av. José de Luca Barberis N° 250, Formosa, Argentina"
+                      required
+                      value={sedeForm.direccion}
+                      onChange={(e) => setSedeForm({ ...sedeForm, direccion: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="esp-form-label">
+                      Texto del Distintivo / Guardia (Opcional)
+                    </label>
+                    <input
+                      type="text"
+                      className="esp-form-input"
+                      placeholder="Ej: Guardia Activa 24 Hs."
+                      value={sedeForm.badgeAtencion}
+                      onChange={(e) => setSedeForm({ ...sedeForm, badgeAtencion: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Párrafo Descriptivo <span className="esp-asterisk">*</span>
+                    </label>
+                    <textarea
+                      className="esp-form-input"
+                      rows="3"
+                      placeholder="Descripción de la infraestructura, guardia y servicios del edificio principal..."
+                      required
+                      value={sedeForm.parrafoDescripcion}
+                      onChange={(e) => setSedeForm({ ...sedeForm, parrafoDescripcion: e.target.value })}
+                      style={{ resize: "vertical" }}
+                    />
+                  </div>
+
+                  <div className="esp-full-width">
+                    <label className="esp-form-label">
+                      Fotografía de la Sede Central{" "}
+                      <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "normal" }}>
+                        (Medida recomendada: 1200 × 675 px aprox. / 16:9)
+                      </span>
+                    </label>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "16px",
+                        background: "#ffffff",
+                        padding: "14px 16px",
+                        borderRadius: "10px",
+                        border: "1px solid #cbd5e1",
+                      }}
+                    >
+                      <div style={{ position: "relative" }}>
+                        <img
+                          src={sedeForm.previewUrl || fotoHeroHeader}
+                          alt="Previsualización Sede"
+                          style={{
+                            width: "100px",
+                            height: "56px",
+                            borderRadius: "6px",
+                            objectFit: "cover",
+                            border: "2px solid #0284c7",
+                            display: "block",
+                            flexShrink: 0,
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px" }}>
+                          <label
+                            htmlFor="sede-modal-file"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              padding: "7px 14px",
+                              background: "#0c2340",
+                              color: "#ffffff",
+                              borderRadius: "6px",
+                              fontWeight: "600",
+                              fontSize: "0.82rem",
+                              cursor: "pointer",
+                              transition: "background 0.2s",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#1a365d")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "#0c2340")}
+                          >
+                            <Upload size={14} />
+                            {sedeForm.previewUrl ? "Cambiar imagen" : "Seleccionar imagen"}
+                          </label>
+
+                          {sedeImageSrc && (
+                            <button
+                              type="button"
+                              onClick={() => setIsSedeCropping(true)}
+                              className="btn-inst-recrop"
+                            >
+                              <Crop size={14} /> Reajustar encuadre
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          id="sede-modal-file"
+                          type="file"
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={handleSedeFileChange}
+                        />
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" }}>
+                          <span className="inst-crop-badge">Medida portal: 1200 × 675 px</span>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "#64748b",
+                              textOverflow: "ellipsis",
+                              overflow: "hidden",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {sedeForm.archivo ? sedeForm.archivo.name : "JPG, PNG o WEBP"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer-esp">
+                <button
+                  type="button"
+                  className="btn-cancelar-gris"
+                  onClick={handleCloseSedeModal}
+                  disabled={isSaving}
+                >
+                  CANCELAR
+                </button>
+                <button
+                  type="submit"
+                  className="btn-cerrar-rojo"
+                  style={{ backgroundColor: "#2b5b94" }}
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <div
+                        className="cms-spinner"
+                        style={{
+                          width: "16px",
+                          height: "16px",
+                          borderWidth: "2px",
+                          borderTopColor: "white",
+                          borderColor: "rgba(255,255,255,0.3)",
+                        }}
+                      />
+                      ACTUALIZANDO...
+                    </span>
+                  ) : (
+                    "ACTUALIZAR"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL DE RECORTE / ENCUADRE DE SEDE CENTRAL ===== */}
+      {isSedeCropping && sedeImageSrc && (
+        <div className="crop-modal-overlay">
+          <div className="crop-modal-card">
+            <div className="crop-modal-header">
+              <div className="crop-header-left">
+                <div className="crop-header-icon">
+                  <Crop size={20} />
+                </div>
+                <div>
+                  <h3 className="crop-modal-title">Encuadrar Fotografía de Sede Central</h3>
+                  <p className="crop-modal-subtitle">
+                    Ajustá el encuadre y zoom para la tarjeta de Sede Central del portal (1200 × 675 px aprox. / 16:9)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="crop-modal-close"
+                onClick={() => setIsSedeCropping(false)}
+                title="Cerrar recorte"
+                aria-label="Cerrar ventana de recorte"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="crop-area-wrapper">
+              <Cropper
+                image={sedeImageSrc}
+                crop={sedeCrop}
+                zoom={sedeZoom}
+                aspect={ASPECT_RATIO_SEDE}
+                cropShape="rect"
+                showGrid={true}
+                onCropChange={setSedeCrop}
+                onZoomChange={setSedeZoom}
+                onCropComplete={(_croppedArea, croppedAreaPixels) => setSedeCroppedPixels(croppedAreaPixels)}
+              />
+            </div>
+
+            <div className="crop-controls-panel">
+              <div className="crop-zoom-row">
+                <ZoomOut size={16} className="crop-zoom-icon" />
+                <input
+                  type="range"
+                  value={sedeZoom}
+                  min={1}
+                  max={3}
+                  step={0.05}
+                  aria-label="Zoom de recorte"
+                  onChange={(e) => setSedeZoom(Number(e.target.value))}
+                  className="crop-zoom-slider"
+                />
+                <ZoomIn size={16} className="crop-zoom-icon" />
+                <span className="crop-zoom-label">{Math.round(sedeZoom * 100)}%</span>
+              </div>
+              <span className="crop-hint">
+                Arrastrá la imagen para centrar el edificio y usá el deslizador para regular el zoom.
+              </span>
+            </div>
+
+            <div className="crop-modal-footer">
+              <button
+                type="button"
+                className="btn-cancelar-gris"
+                onClick={() => setIsSedeCropping(false)}
+              >
+                CANCELAR
+              </button>
+              <button
+                type="button"
+                className="btn-crop-confirm"
+                onClick={handleApplySedeCrop}
               >
                 <Check size={16} strokeWidth={2.5} /> APLICAR RECORTE
               </button>

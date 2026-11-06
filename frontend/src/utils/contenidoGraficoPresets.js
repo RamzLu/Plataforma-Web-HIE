@@ -17,6 +17,7 @@ import bannerNoticias from "../assets/banner_noticias.png";
 import bannerDocumentacion from "../assets/banner_documentacion.png";
 import bannerResidencias from "../assets/banner_residencias.png";
 import medicosResidencias from "../assets/medicos-residencias.jpg";
+import fotoSede from "../assets/foto-sede.jpg";
 
 /**
  * Mapa de imágenes institucionales predeterminadas por clave estable.
@@ -41,6 +42,7 @@ export const PRESET_IMAGES_MAP = {
   "banner-documentacion": bannerDocumentacion,
   "banner-residencias": bannerResidencias,
   "residencias-hero": medicosResidencias,
+  "foto-sede": fotoSede,
 };
 
 /**
@@ -263,7 +265,7 @@ export const DEFAULT_PACIENTES_INICIO = {
 export const DEFAULT_APRENDE_INICIO = {
   id: "espacio-aprende-inicio",
   orden: 3,
-  nombre: "Sección Educación para la Salud",
+  nombre: "Sección E ducación para la Salud",
   descripcion:
     "Bloque de educación médica y preventiva con imagen editorial y 3 tarjetas con redirección en Inicio",
   tipo: "Bloque Educativo + 3 Tarjetas",
@@ -383,4 +385,19 @@ export const DEFAULT_RESIDENCIAS_HERO = {
       altText: "Equipo médico y residentes del Hospital Interdistrital Evita",
     },
   ],
+};
+
+/**
+ * Configuración predeterminada de la Sede Central (Edificio Principal) en Acerca de.
+ */
+export const DEFAULT_SEDE_CENTRAL = {
+  titulo: "Edificio Principal - Hospital Evita",
+  tagSuperior: "SEDE CENTRAL",
+  direccion: "Av. José de Luca Barberis N° 250, Formosa, Argentina",
+  parrafoDescripcion:
+    "Infraestructura médica de vanguardia con 19.000 m² cubiertos diseñados bajo normas internacionales de arquitectura hospitalaria. Alberga la Guardia Central de Urgencias (24 hs), bloques quirúrgicos inteligentes, unidades de cuidados intensivos y el centro de diagnóstico por imágenes.",
+  badgeAtencion: "Guardia Activa 24 Hs.",
+  altText: "Edificio Principal Hospital Evita",
+  presetKey: "foto-sede",
+  imagenUrl: null,
 };

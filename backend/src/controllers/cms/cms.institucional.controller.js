@@ -62,3 +62,14 @@ export const actualizarRedesSociales = async (req, res, next) => {
     next(error);
   }
 };
+
+// ─── SEDE CENTRAL ─────────────────────────────────────────────────────────────
+
+export const actualizarSedeCentral = async (req, res, next) => {
+  try {
+    const result = await CmsAutoridadesService.actualizarSedeCentral(req.body, req.file, req.user);
+    return res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};

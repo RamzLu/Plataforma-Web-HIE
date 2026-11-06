@@ -16,7 +16,8 @@ import {
   actualizarAutoridad, 
   eliminarAutoridad, 
   reordenarAutoridades,
-  actualizarRedesSociales 
+  actualizarRedesSociales,
+  actualizarSedeCentral
 } from "../controllers/cms/cms.institucional.controller.js";
 import {
   obtenerResidencias,
@@ -112,9 +113,10 @@ router.put('/especialidades/:id', requireCmsAccess, especialidadCtrl.actualizarE
 router.delete('/especialidades/:id', requireCmsAccess, especialidadCtrl.eliminarEspecialidad);
 
 // ==========================================
-// MÓDULO: INSTITUCIONAL (AUTORIDADES Y REDES)
+// MÓDULO: INSTITUCIONAL (AUTORIDADES, REDES Y SEDE)
 // ==========================================
 router.get('/institucional', obtenerInstitucional);
+router.put('/institucional/sede', requireCmsAccess, uploadImagenSingle('archivo'), actualizarSedeCentral);
 router.put('/institucional/autoridades/reordenar', requireCmsAccess, reordenarAutoridades);
 router.post('/institucional/autoridades', requireCmsAccess, uploadImagenSingle('archivo'), crearAutoridad);
 router.put('/institucional/autoridades/:id', requireCmsAccess, uploadImagenSingle('archivo'), actualizarAutoridad);

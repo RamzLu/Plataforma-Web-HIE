@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
@@ -34,8 +34,23 @@ const CmsContenidoGraficoView = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   const [filtroPagina, setFiltroPagina] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterDropdownRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target)
+      ) {
+        setIsFilterOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -212,28 +227,70 @@ const CmsContenidoGraficoView = () => {
       </div>
 
       {/* Fila de Controles: Filtro por Página */}
-      <div className="cg-controls-row" style={{ justifyContent: "flex-end" }}>
-        <div className="cg-filter-dropdown-wrapper">
-          <div className="cg-filter-dropdown-box">
-            <span className="cg-filter-prefix">FILTRAR POR PÁGINA:</span>
-            <select
-              className="cg-filter-select"
-              value={filtroPagina}
-              onChange={(e) => {
-                setFiltroPagina(e.target.value);
-                setCurrentPage(1);
-              }}
+      <div className="cg-controls-row cg-controls-start">
+        <div className="cg-custom-dropdown-container">
+          <span className="cg-filter-prefix">FILTRAR POR PÁGINA:</span>
+          <div className="cg-dropdown-anchor" ref={filterDropdownRef}>
+            <button
+              type="button"
+              className={`cg-custom-dropdown-trigger ${isFilterOpen ? "is-open" : ""}`}
+              onClick={() => setIsFilterOpen((prev) => !prev)}
+              aria-expanded={isFilterOpen}
+              aria-haspopup="listbox"
             >
-              <option value="">Todas las páginas</option>
-              {paginasDisponibles.map((pag) => (
-                <option key={pag} value={pag}>
-                  {pag}
-                </option>
-              ))}
-            </select>
-            <span className="material-symbols-outlined cg-filter-chevron">
-              expand_more
-            </span>
+              <span className="cg-dropdown-selected-text">
+                {filtroPagina || "Todas las páginas"}
+              </span>
+              <span
+                className={`material-symbols-outlined cg-dropdown-chevron ${
+                  isFilterOpen ? "rotate-180" : ""
+                }`}
+              >
+                expand_more
+              </span>
+            </button>
+
+            {isFilterOpen && (
+              <div className="cg-custom-dropdown-menu" role="listbox">
+                <button
+                  type="button"
+                  className={`cg-dropdown-item ${!filtroPagina ? "is-active" : ""}`}
+                  onClick={() => {
+                    setFiltroPagina("");
+                    setCurrentPage(1);
+                    setIsFilterOpen(false);
+                  }}
+                >
+                  <span>Todas las páginas</span>
+                  {!filtroPagina && (
+                    <span className="material-symbols-outlined cg-dropdown-check">
+                      check
+                    </span>
+                  )}
+                </button>
+                {paginasDisponibles.map((pag) => (
+                  <button
+                    key={pag}
+                    type="button"
+                    className={`cg-dropdown-item ${
+                      filtroPagina === pag ? "is-active" : ""
+                    }`}
+                    onClick={() => {
+                      setFiltroPagina(pag);
+                      setCurrentPage(1);
+                      setIsFilterOpen(false);
+                    }}
+                  >
+                    <span>{pag}</span>
+                    {filtroPagina === pag && (
+                      <span className="material-symbols-outlined cg-dropdown-check">
+                        check
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -453,47 +510,45 @@ const CmsContenidoGraficoView = () => {
         </table>
       </div>
 
-      {/* Paginación */}
-      <div className="cg-footer-row">
-        <span className="cg-footer-info">
-          Mostrando {espaciosFiltrados.length === 0 ? 0 : startIndex + 1} a{" "}
-          {endIndex} de {espaciosFiltrados.length} espacios fijos del portal
-        </span>
-        <div className="cg-pagination-nav">
-          <button
-            type="button"
-            className="cg-page-arrow"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            aria-label="Página anterior"
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              chevron_left
-            </span>
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+      {/* Paginación (solo si hay más de 1 página) */}
+      {totalPages > 1 && (
+        <div className="cg-footer-row" style={{ justifyContent: "flex-end" }}>
+          <div className="cg-pagination-nav">
             <button
-              key={num}
               type="button"
-              className={`cg-page-number ${currentPage === num ? "active" : ""}`}
-              onClick={() => setCurrentPage(num)}
+              className="cg-page-arrow"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              aria-label="Página anterior"
             >
-              {num}
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                chevron_left
+              </span>
             </button>
-          ))}
-          <button
-            type="button"
-            className="cg-page-arrow"
-            disabled={currentPage >= totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            aria-label="Página siguiente"
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              chevron_right
-            </span>
-          </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+              <button
+                key={num}
+                type="button"
+                className={`cg-page-number ${currentPage === num ? "active" : ""}`}
+                onClick={() => setCurrentPage(num)}
+              >
+                {num}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="cg-page-arrow"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              aria-label="Página siguiente"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                chevron_right
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* MODAL DE EDICIÓN DE ESPACIO FIJO */}
       <CmsContenidoGraficoEditModal
