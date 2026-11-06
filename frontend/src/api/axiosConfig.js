@@ -15,13 +15,25 @@ const esLecturaAdmin = (config) =>
 
 api.interceptors.request.use(
   async (config) => {
-    if (esLecturaAdmin(config) && keycloak.token && !config.headers?.Authorization) {
-      try {
-        await keycloak.updateToken(10);
-      } catch {
-        // Si no se pudo renovar se usa el token actual; si vencio, el backend responde 401.
+    if (esLecturaAdmin(config) && keycloak.token) {
+      const hasAuth =
+        Boolean(config.headers?.Authorization) ||
+        Boolean(config.headers?.authorization) ||
+        (typeof config.headers?.has === "function" && config.headers.has("Authorization"));
+
+      if (!hasAuth) {
+        try {
+          await keycloak.updateToken(10);
+        } catch {
+          // Si no se pudo renovar se usa el token actual; si vencio, el backend responde 401.
+        }
+        if (typeof config.headers?.set === "function") {
+          config.headers.set("Authorization", `Bearer ${keycloak.token}`);
+        } else {
+          config.headers = config.headers || {};
+          config.headers.Authorization = `Bearer ${keycloak.token}`;
+        }
       }
-      config.headers.Authorization = `Bearer ${keycloak.token}`;
     }
     return config;
   },

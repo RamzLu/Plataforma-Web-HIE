@@ -54,12 +54,20 @@ export const verifyToken = async (req, res, next) => {
       return res.status(401).json({ error: 'Token inválido.' });
     }
 
+    const realmRoles = Array.isArray(payload.realm_access?.roles)
+      ? payload.realm_access.roles
+      : [];
+    const clientRoles = Object.values(payload.resource_access || {}).flatMap(
+      (resObj) => (Array.isArray(resObj?.roles) ? resObj.roles : [])
+    );
+    const combinedRoles = [...new Set([...realmRoles, ...clientRoles])];
+
     req.user = {
       keycloakId: payload.sub,
       username: payload.preferred_username,
       name: payload.name || payload.preferred_username,
       email: payload.email,
-      roles: payload.realm_access?.roles || [],
+      roles: combinedRoles,
     };
 
     return next();
@@ -85,11 +93,13 @@ export const verifyToken = async (req, res, next) => {
 export const checkJwt = verifyToken;
 
 export const requireRole = (...allowedRoles) => {
+  const allowedLower = allowedRoles.map((r) => String(r).toLowerCase().trim());
   return (req, res, next) => {
-    if (!req.user || !req.user.roles) {
+    if (!req.user || !req.user.roles || !Array.isArray(req.user.roles)) {
       return res.status(403).json({ error: 'No se encontraron roles para este usuario.' });
     }
-    const hasRole = allowedRoles.some((role) => req.user.roles.includes(role));
+    const userRolesLower = req.user.roles.map((r) => String(r).toLowerCase().trim());
+    const hasRole = allowedLower.some((role) => userRolesLower.includes(role));
     if (!hasRole) {
       return res.status(403).json({ error: 'No tenés permisos para realizar esta acción.' });
     }
@@ -97,11 +107,11 @@ export const requireRole = (...allowedRoles) => {
   };
 };
 
-// Roles de Keycloak (realm):
+// Roles de Keycloak (realm y client):
 //  - cm: gestor de contenidos (crea y edita borradores/contenido en el CMS)
 //  - admin-hief / admin-hie / admin: administradores (panel de supervisión y aprobación de noticias)
-export const ROLES_CMS = ['cm'];
-export const ROLES_ADMIN = ['admin-hief', 'admin-hie', 'admin'];
+export const ROLES_CMS = ['cm', 'editor-cms', 'cms'];
+export const ROLES_ADMIN = ['admin-hief', 'admin-hie', 'admin', 'administrator', 'administrador'];
 export const ROLES_VISTA_ADMIN = [...ROLES_CMS, ...ROLES_ADMIN];
 
 export const requireCmsAccess = [verifyToken, requireRole(...ROLES_CMS)];
@@ -111,8 +121,10 @@ export const adminViewAccess = (req, res, next) => {
   req.adminView = false;
   if (req.query.admin !== 'true') return next();
 
-  verifyToken(req, res, () => {
-    requireRole(...ROLES_VISTA_ADMIN)(req, res, () => {
+  verifyToken(req, res, (err) => {
+    if (err) return next(err);
+    requireRole(...ROLES_VISTA_ADMIN)(req, res, (roleErr) => {
+      if (roleErr) return next(roleErr);
       req.adminView = true;
       next();
     });

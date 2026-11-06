@@ -49,10 +49,22 @@ const AdminPage = () => {
   }, [authenticated, isAdmin]);
 
   useEffect(() => {
-    const checkAdminRole = () =>
-      keycloak.hasRealmRole("admin-hief") ||
-      keycloak.hasRealmRole("admin-hie") ||
-      keycloak.hasRealmRole("admin");
+    const checkAdminRole = () => {
+      const realmRoles = (keycloak?.tokenParsed?.realm_access?.roles || []).map((r) =>
+        r.toLowerCase()
+      );
+      const clientRoles = Object.values(keycloak?.tokenParsed?.resource_access || {})
+        .flatMap((r) => r?.roles || [])
+        .map((r) => r.toLowerCase());
+      const allRoles = [...new Set([...realmRoles, ...clientRoles])];
+      const targetAdminRoles = ["admin-hief", "admin-hie", "admin", "administrator", "administrador"];
+      return targetAdminRoles.some(
+        (role) =>
+          keycloak?.hasRealmRole?.(role) ||
+          keycloak?.hasResourceRole?.(role) ||
+          allRoles.includes(role.toLowerCase())
+      );
+    };
 
     if (isKeycloakInitialized.current || keycloak.authenticated) {
       if (keycloak.authenticated) {
