@@ -14,6 +14,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
+import logoCompletoBlanco from "../../assets/logo-completo-blanco.png";
 
 const AdminSidebar = ({
   activeTab,
@@ -36,9 +37,9 @@ const AdminSidebar = ({
       title: "Aprobación de Contenidos",
       items: [
         { id: "noticias", label: "Noticias", icon: <FileText />, pendingCount: pendingNoticiasCount },
+        { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: 0 },
         { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope />, pendingCount: pendingEspecialidadesCount },
         { id: "profesionales", label: "Profesionales", icon: <Contact />, pendingCount: 2 }, 
-        { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: 0 },
         { id: "capacitaciones", label: "Capacitaciones Públicas", icon: <GraduationCap /> },
         { id: "residencias", label: "Residencias", icon: <Building2 /> },
         { id: "graficos", label: "Contenido Gráfico", icon: <ImageIcon /> },
@@ -71,17 +72,24 @@ const AdminSidebar = ({
       {/* Área del Logo / Distintivo */}
       <div className="admin-sidebar-header">
         <div className="admin-logo-container-inner">
-          <div className="admin-logo">
-            <img
-              src={avatarHospital}
-              alt="Logo Hospital Evita"
-              className="admin-logo-img"
-            />
-            {!isCollapsed && (
-              <div className="admin-logo-text-box">
-                <span className="logo-title">HOSPITAL INTERDISTRITAL</span>
-                <span className="logo-subtitle">EVITA FORMOSA</span>
-              </div>
+          <div 
+            className="admin-logo"
+            onClick={() => setActiveTab && setActiveTab("dashboard")}
+            style={{ cursor: "pointer" }}
+            title="Hospital Interdistrital Evita Formosa"
+          >
+            {isCollapsed ? (
+              <img
+                src={avatarHospital}
+                alt="Logo Hospital Evita"
+                className="admin-logo-img"
+              />
+            ) : (
+              <img
+                src={logoCompletoBlanco}
+                alt="Hospital Interdistrital Evita Formosa"
+                className="admin-logo-completo"
+              />
             )}
           </div>
         </div>

@@ -694,8 +694,8 @@
 
 .admin-page-header-admin h1 {
   font-size: clamp(2rem, 3.2vw, 2.8rem);
-  font-weight: 650;
-  letter-spacing: -0.045em;
+  font-weight: 200;
+  letter-spacing: normal;
 }
 
 .dashboard-card-admin {

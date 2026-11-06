@@ -50,10 +50,30 @@
   gap: 16px; 
 }
 
+.admin-logo-container-inner {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
 .admin-logo {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+.admin-logo-completo {
+  height: 67px;
+  max-width: 185px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.admin-logo:hover .admin-logo-completo {
+  opacity: 0.92;
 }
 
 .admin-logo-img {
@@ -426,10 +446,16 @@ margin-left: revert;
   letter-spacing: 1px;
 }
 
-.admin-page-title h1 {
+.admin-page-title h1,
+.admin-view-heading h1,
+.admin-page-header-admin h1,
+.admin-es-page-header h1,
+.admin-prof-header h1,
+.admin-doc-header h1 {
   color: #0c2340;
   font-size: 3.2rem;
   font-weight: 200;
+  letter-spacing: normal;
   margin: 5px 0;
 }
 
@@ -439,23 +465,27 @@ margin-left: revert;
   margin: 0;
 }
 
-/* Rounded UI shell for the administration workspace */
+/* Shell de administracion inspirado en mockup: base oscura + tarjeta de contenido */
 .admin-layout {
-  gap: 16px;
-  padding: 16px;
-  background:
-    radial-gradient(ellipse at 82% 0%, rgb(219 234 254 / 55%), transparent 34%),
-    #f3f6fb;
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  gap: 0;
+  padding: 16px 16px 0 0;
+  background: linear-gradient(165deg, #102747 0%, #0a162e 58%, #081329 100%);
 }
 
 .admin-sidebar {
   width: 286px;
-  height: calc(100dvh - 32px);
+  height: 100vh;
   overflow: hidden auto;
-  border: 1px solid rgb(255 255 255 / 8%);
-  border-radius: 24px;
-  background: linear-gradient(165deg, #102747 0%, #0a162e 58%, #081329 100%);
-  box-shadow: 0 18px 42px rgb(10 22 46 / 18%);
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
 }
 
 .admin-sidebar.collapsed {
@@ -465,40 +495,40 @@ margin-left: revert;
 .admin-sidebar-header {
   min-height: 88px;
   padding: 18px 14px 18px 20px;
-  border-bottom-color: rgb(255 255 255 / 9%);
+  border-bottom: 1px solid #132342;
 }
 
 .admin-logo-img {
-  width: 44px;
-  height: 44px;
-  padding: 4px;
-  border: 1px solid rgb(255 255 255 / 14%);
-  background: rgb(255 255 255 / 8%);
-}
-
-.admin-logo .logo-title {
-  color: #bfdbfe;
-  letter-spacing: 0.08em;
-}
-
-.admin-logo .logo-subtitle {
-  font-size: 0.88rem;
-  letter-spacing: 0.08em;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 50%;
+  padding: 2px;
+  border: none;
+  background: transparent;
+  display: block;
 }
 
 .admin-collapse-btn {
-  width: 34px;
-  height: 34px;
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: 11px;
-  color: #bfccdc;
+  background: transparent;
+  border: none;
+  color: #8a99af;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
 }
 
 .admin-collapse-btn:hover,
 .admin-collapse-btn:focus-visible {
-  border-color: rgb(147 197 253 / 30%);
-  background: rgb(59 130 246 / 18%);
-  color: #fff;
+  border: none;
+  background: #082f4e;
+  color: #ffffff;
 }
 
 .admin-nav {
@@ -593,24 +623,38 @@ margin-left: revert;
 }
 
 .admin-main-wrapper {
+  flex: 1;
   min-width: 0;
   min-height: 0;
-  height: calc(100dvh - 32px);
+  height: calc(100vh - 16px);
   overflow: hidden;
-  border-radius: 24px;
-  background: #f3f6fb;
+  margin: 0;
+  margin-bottom: 0;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background: #ffffff;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-header {
-  min-height: 76px;
-  height: auto;
-  margin: 0 0 2px;
-  padding: 0 28px;
-  border: 1px solid #e6ebf2;
-  border-radius: 19px;
-  background: rgb(255 255 255 / 94%);
-  box-shadow: 0 8px 24px rgb(15 23 42 / 4%);
-  backdrop-filter: blur(14px);
+  min-height: 74px;
+  height: 74px;
+  margin: 0;
+  padding: 0 32px;
+  border: none;
+  border-bottom: 1px solid #eef2f6;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  backdrop-filter: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .admin-header-left {
@@ -733,14 +777,14 @@ margin-left: revert;
 
 @media (max-width: 900px) {
   .admin-layout {
-    gap: 11px;
-    padding: 11px;
+    gap: 0;
+    padding: 12px 12px 0 0;
   }
 
   .admin-sidebar {
     width: 250px;
-    height: calc(100dvh - 22px);
-    border-radius: 20px;
+    height: 100vh;
+    border-radius: 0;
   }
 
   .admin-sidebar.collapsed {
@@ -748,8 +792,19 @@ margin-left: revert;
   }
 
   .admin-main-wrapper {
-    height: calc(100dvh - 22px);
-    border-radius: 20px;
+    height: calc(100vh - 12px);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .admin-header {
+    min-height: 70px;
+    height: 70px;
+    padding: 0 20px;
+    border-radius: 0;
+    margin: 0;
   }
 
   .admin-content-area {
@@ -759,15 +814,15 @@ margin-left: revert;
 
 @media (max-width: 680px) {
   .admin-layout {
-    gap: 8px;
-    padding: 8px;
+    gap: 0;
+    padding: 8px 8px 0 0;
   }
 
   .admin-sidebar,
   .admin-sidebar.collapsed {
     width: 62px;
-    height: calc(100dvh - 16px);
-    border-radius: 17px;
+    height: 100vh;
+    border-radius: 0;
   }
 
   .admin-sidebar .admin-sidebar-header,
@@ -832,8 +887,10 @@ margin-left: revert;
 
   .admin-header {
     min-height: 64px;
+    height: 64px;
     padding: 0 12px;
-    border-radius: 15px;
+    border-radius: 0;
+    margin: 0;
   }
 
   .admin-header-left {
@@ -895,14 +952,23 @@ margin-left: revert;
 
 @media (max-width: 390px) {
   .admin-layout {
-    gap: 6px;
-    padding: 6px;
+    gap: 0;
+    padding: 6px 6px 0 0;
   }
 
   .admin-sidebar,
   .admin-sidebar.collapsed {
     width: 54px;
-    height: calc(100dvh - 12px);
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .admin-main-wrapper {
+    height: calc(100vh - 6px);
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   .admin-nav li,
@@ -913,6 +979,8 @@ margin-left: revert;
 
   .admin-header {
     padding: 0 8px;
+    border-radius: 0;
+    margin: 0;
   }
 
   .admin-content-area {

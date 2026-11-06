@@ -208,7 +208,7 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="admin-layout bg-slate-50">
+    <div className="admin-layout">
       <AdminSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -220,6 +220,7 @@ const AdminPage = () => {
         <AdminHeader 
           userName={userName} 
           onLogout={handleLogout} 
+          activeTab={activeTab}
         />
         
         <main className="admin-content-area">
