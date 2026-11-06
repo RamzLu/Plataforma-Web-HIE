@@ -21,7 +21,17 @@ export const crearDocumento = async (req, res, next) => {
 export const actualizarDocumento = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await CmsDocService.actualizarDocumento(id, req.body, req.file);
+    const result = await CmsDocService.actualizarDocumento(id, req.body, req.file, req.user);
+    return res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const evaluarDocumento = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await CmsDocService.evaluarDocumento(id, req.body, req.user);
     return res.status(200).json(result);
   } catch (error) {
     next(error);

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CalendarDays } from "lucide-react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
@@ -604,8 +605,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
       <div className="cms-news-table-container">
         <div className="news-table-head">
           <div className="col-content">CONTENIDO</div>
-          <div className="col-fecha">FECHA</div>
-          <div className="col-editor">EDITOR</div>
+          <div className="col-editor">EDITOR / FECHA</div>
           <div className="col-categoria">CLASIFICACIÓN</div>
           <div className="col-estado">ESTADO</div>
           <div className="col-acciones" style={{ textAlign: "center" }}>
@@ -703,25 +703,27 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
 
                   </div>
 
-                  <div className="col-fecha">
-                    {news.date || "Ahora"}
-                    {news.updatedAt &&
-                      news.createdAt &&
-                      new Date(news.updatedAt) - new Date(news.createdAt) > 5000 && (
-                        <span
-                          style={{
-                            fontSize: "0.7rem",
-                            color: "#64748b",
-                            fontStyle: "italic",
-                            display: "block",
-                          }}
-                        >
-                          (Editado)
-                        </span>
-                      )}
+                  <div className="col-editor" style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+                    <span style={{ fontWeight: 600, color: "#1e293b" }}>{news.editor || "Editor CMS"}</span>
+                    <small style={{ color: "#64748b", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem" }}>
+                      <CalendarDays size={12} />
+                      {news.date || "Ahora"}
+                      {news.updatedAt &&
+                        news.createdAt &&
+                        new Date(news.updatedAt) - new Date(news.createdAt) > 5000 && (
+                          <span
+                            style={{
+                              fontSize: "0.7rem",
+                              color: "#64748b",
+                              fontStyle: "italic",
+                              marginLeft: "3px",
+                            }}
+                          >
+                            (Editado)
+                          </span>
+                        )}
+                    </small>
                   </div>
-
-                  <div className="col-editor">{news.editor || "Editor CMS"}</div>
 
                   <div className="col-categoria">
                     <span

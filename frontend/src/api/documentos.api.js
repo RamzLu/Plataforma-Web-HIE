@@ -19,6 +19,13 @@ export const updateDocumento = async (id, formData, token) => {
   return response.data;
 };
 
+export const evaluarDocumentoEstado = async (id, payload, token) => {
+  const response = await api.patch(`/cms/documentacion/${id}/estado`, payload, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
+};
+
 export const deleteDocumento = async (id, token) => {
   const response = await api.delete(`/cms/documentacion/${id}`, {
     headers: { Authorization: `Bearer ${token}` }

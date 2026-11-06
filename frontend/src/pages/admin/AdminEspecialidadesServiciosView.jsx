@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BadgeCheck,
+  CalendarDays,
   CheckCircle,
   Clock3,
   Globe2,
@@ -121,19 +122,23 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
     cargarDatos(false);
 
     const intervalId = setInterval(() => {
-      cargarDatos(true);
-    }, 10000);
+      if (document.visibilityState === 'visible') {
+        cargarDatos(true);
+      }
+    }, 60000);
 
-    const handleVisibility = () => {
+    const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
         cargarDatos(true);
       }
     };
-    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
     return () => {
       clearInterval(intervalId);
-      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
   }, [cargarDatos]);
 
@@ -365,9 +370,14 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                     </td>
                     <td>{item.type}</td>
                     <td>{item.location}</td>
-                    <td>
-                      <span>{item.editor}</span>
-                      <small>{item.updatedAt}</small>
+                    <td data-label="Editor / fecha">
+                      <div className="admin-es-editor-cell" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span style={{ fontWeight: 600, color: '#0c2340' }}>{item.editor}</span>
+                        <small style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
+                          <CalendarDays size={13} />
+                          {item.updatedAt}
+                        </small>
+                      </div>
                     </td>
                     <td>
                       <span className={`admin-es-status ${statusClass(item.status)}`}>

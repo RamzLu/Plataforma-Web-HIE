@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
+import { CalendarDays } from "lucide-react";
 import { createDocumento, updateDocumento, deleteDocumento } from "../../api/documentos.api.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
@@ -26,6 +27,7 @@ const CmsDocsView = ({
   onAddNewDoc,
   onDeleteDoc,
   onUpdateDoc,
+  onRefreshDocs,
   loading,
   userName,
   initialCreateModal = false,
@@ -33,6 +35,10 @@ const CmsDocsView = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  
+  // Pestañas y búsqueda unificadas con Especialidades y Noticias
+  const [activeTab, setActiveTab] = useState("PUBLICADOS");
+  const [searchTerm, setSearchTerm] = useState("");
   
   // Estados para control de cambios sin guardar y borradores
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -47,6 +53,7 @@ const CmsDocsView = ({
   const [titulo, setTitulo] = useState("");
   const [categoria, setCategoria] = useState("Información institucional");
   const [estado, setEstado] = useState("Borrador");
+  const [rejectionReasonActual, setRejectionReasonActual] = useState("");
   const [archivo, setArchivo] = useState(null);
   const [nombreArchivoActual, setNombreArchivoActual] = useState("");
   const [previewUrl, setPreviewUrl] = useState("");
@@ -59,6 +66,7 @@ const CmsDocsView = ({
     setTitulo("");
     setCategoria("Información institucional");
     setEstado("Borrador"); 
+    setRejectionReasonActual("");
     setArchivo(null);
     setNombreArchivoActual("");
     setPreviewUrl("");
@@ -73,16 +81,38 @@ const CmsDocsView = ({
     }
   }, [initialCreateModal]);
 
+  React.useEffect(() => {
+    if (typeof onRefreshDocs === "function") {
+      onRefreshDocs();
+    }
+  }, [onRefreshDocs]);
+
+  React.useEffect(() => {
+    const handleFocus = () => {
+      if (document.visibilityState === "visible" && typeof onRefreshDocs === "function") {
+        onRefreshDocs();
+      }
+    };
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
+    };
+  }, [onRefreshDocs]);
+
   const handleOpenEdit = (doc) => {
     setEditingId(doc.id);
-    setTitulo(doc.title || "");
-    setCategoria(doc.category || "Información institucional");
+    setTitulo(doc.title || doc.titulo || "");
+    setCategoria(doc.category || doc.categoria || "Información institucional");
     
     let estadoFormateado = "Borrador";
-    if (doc.status?.toLowerCase() === "publicado") estadoFormateado = "Publicado";
-    if (doc.status?.toLowerCase() === "en revisión" || doc.status?.toLowerCase() === "programado") estadoFormateado = "En revisión";
+    const e = (doc.estado || doc.status || "").toLowerCase();
+    if (e === "publicado" || e === "aprobado") estadoFormateado = "Publicado";
+    if (e === "en revisión" || e === "pendiente" || e === "pendiente_aprobacion" || e === "programado") estadoFormateado = "En revisión";
     
     setEstado(estadoFormateado);
+    setRejectionReasonActual(doc.rejectionReason || "");
     setArchivo(null);
     setNombreArchivoActual(doc.fileName || doc.title || "");
     setPreviewUrl(doc.fileUrl || "");
@@ -135,13 +165,14 @@ const CmsDocsView = ({
       });
 
       if (onDeleteDoc) onDeleteDoc(id);
+      if (typeof onRefreshDocs === "function") onRefreshDocs();
       toast.success("Documento eliminado correctamente.");
       
       setShowDeleteModal(false);
       setDocAEliminar(null);
     } catch (error) {
       console.error("Error al eliminar:", error);
-      const backendError = error.response?.data?.error?.message || "Ocurrió un error al intentar eliminar el documento.";
+      const backendError = error.response?.data?.error?.message || error.response?.data?.error || "Ocurrió un error al intentar eliminar el documento.";
       toast.error(backendError);
     } finally {
       setDeletingId(null);
@@ -239,7 +270,7 @@ const CmsDocsView = ({
       
       let estadoPrisma = "BORRADOR";
       if (estadoFinal === "Publicado") estadoPrisma = "PUBLICADO";
-      if (estadoFinal === "En revisión") estadoPrisma = "PROGRAMADO"; 
+      if (estadoFinal === "En revisión") estadoPrisma = "PROGRAMADO";
       
       formData.append("estado", estadoPrisma);
       if (archivo) formData.append("archivo", archivo);
@@ -251,28 +282,45 @@ const CmsDocsView = ({
         data = await createDocumento(formData, token);
       }
 
+      const docBackend = data.documento;
       const docFormateado = {
-        id: data.documento?.id || editingId,
+        id: docBackend?.id || editingId,
         title: titulo,
+        description: docBackend?.description || "",
         category: categoria,
-        status: estadoFinal.toLowerCase(),
-        editor: data.documento?.editor || (editingId ? docsList.find(d => d.id === editingId)?.editor : userName),
-        editedBy: data.documento?.editedBy || (editingId ? userName : null), 
+        status: estadoFinal === "Borrador" ? "borrador" : "pendiente",
+        estado: estadoFinal === "Borrador" ? "BORRADOR" : "PENDIENTE_APROBACION",
+        editor: docBackend?.editor || userName || "Editor CMS",
+        editedBy: editingId ? (docBackend?.editedBy || userName) : null,
         fileName: archivo?.name || nombreArchivoActual,
         fileType: (archivo?.name || nombreArchivoActual || "").split(".").pop().toUpperCase(),
-        fileSize: archivo ? formatearTamano(archivo.size) : data.documento?.fileSize || "",
-        fileUrl: data.documento?.fileUrl || "",
+        fileSize: archivo ? formatearTamano(archivo.size) : (docBackend?.fileSize || ""),
+        fileUrl: docBackend?.fileUrl || previewUrl,
         updatedAt: new Date().toLocaleDateString("es-AR"),
+        rejectionReason: null,
       };
 
       if (editingId) {
         if (onUpdateDoc) onUpdateDoc(docFormateado);
-        toast.success(estadoFinal === "Borrador" ? "Borrador actualizado con éxito." : "Documento actualizado con éxito.");
+        toast.success(
+          estadoFinal === "Borrador"
+            ? "Borrador actualizado con éxito."
+            : "Modificaciones enviadas a revisión del administrador."
+        );
       } else {
         if (onAddNewDoc) onAddNewDoc(docFormateado);
-        toast.success(estadoFinal === "Borrador" ? "Borrador guardado con éxito." : "Documento subido con éxito.");
+        toast.success(
+          estadoFinal === "Borrador"
+            ? "Borrador guardado con éxito."
+            : "Documento enviado a revisión del administrador para su aprobación."
+        );
       }
 
+      if (typeof onRefreshDocs === "function") {
+        onRefreshDocs();
+      }
+
+      setActiveTab(estadoFinal === "Borrador" ? "BORRADORES" : "PENDIENTES");
       setHasUnsavedChanges(false);
       setShowUnsavedModal(false);
       setShowConfirmDraftModal(false);
@@ -286,28 +334,129 @@ const CmsDocsView = ({
     }
   };
 
-  const textoEstado = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
+  const getTextoEstado = (doc) => {
+    const e = (doc.estado || doc.status || "borrador").toUpperCase();
+    if (e === "PUBLICADO" || e === "APROBADO") return "Publicado";
+    if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") return "Pendiente de aprobación";
+    if (e === "RECHAZADO") return "Rechazado";
+    return "Borrador";
+  };
+
+  const getBadgeClass = (doc) => {
+    const e = (doc.estado || doc.status || "borrador").toUpperCase();
+    if (e === "PUBLICADO" || e === "APROBADO") return "publicado";
+    if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") return "pendiente";
+    if (e === "RECHAZADO") return "rechazado";
+    return "borrador";
+  };
 
   const isPdf = archivo 
     ? archivo.name.toLowerCase().endsWith('.pdf') 
     : nombreArchivoActual.toLowerCase().endsWith('.pdf');
 
+  // Conteo dinámico por pestañas
+  const counts = useMemo(() => {
+    const res = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, BORRADORES: 0 };
+    (docsList || []).forEach((doc) => {
+      const e = (doc.estado || doc.status || "").toUpperCase();
+      if (e === "PUBLICADO" || e === "APROBADO") res.PUBLICADOS++;
+      else if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") res.PENDIENTES++;
+      else if (e === "RECHAZADO") res.RECHAZADOS++;
+      else res.BORRADORES++;
+    });
+    return res;
+  }, [docsList]);
+
+  // Filtrado según pestaña y término de búsqueda
+  const docsFiltrados = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return (docsList || []).filter((doc) => {
+      const e = (doc.estado || doc.status || "").toUpperCase();
+      let matchTab = false;
+      if (activeTab === "PUBLICADOS") matchTab = e === "PUBLICADO" || e === "APROBADO";
+      else if (activeTab === "PENDIENTES") matchTab = e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO";
+      else if (activeTab === "RECHAZADOS") matchTab = e === "RECHAZADO";
+      else if (activeTab === "BORRADORES") matchTab = e === "BORRADOR" || e === "ARCHIVADO" || !e;
+
+      const searchable = [
+        doc.title || doc.titulo || "",
+        doc.category || doc.categoria || "",
+        doc.fileName || "",
+        doc.editor || "",
+      ].join(" ").toLowerCase();
+
+      return matchTab && (!term || searchable.includes(term));
+    });
+  }, [docsList, activeTab, searchTerm]);
+
   return (
     <div className="cms-dashboard-card">
       <div className="docs-view-header">
         <div>
-          <h3 className="cms-card-title docs-view-title">Documentos publicados</h3>
-          <p className="docs-view-subtitle">Protocolos y formularios disponibles en el portal.</p>
+          <h3 className="cms-card-title docs-view-title">Documentación institucional</h3>
+          <p className="docs-view-subtitle">Subí formularios y protocolos. Los documentos aprobados por el Administrador se publicarán en el portal.</p>
         </div>
         <button type="button" className="btn-subir-doc-header" onClick={handleOpenCreate}>
           + CARGAR DOCUMENTO
         </button>
       </div>
 
+      {/* Pestañas de estado idénticas a Especialidades y Noticias */}
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "16px", marginBottom: "16px" }}>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
+          onClick={() => setActiveTab("PUBLICADOS")}
+        >
+          Publicados ({counts.PUBLICADOS})
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
+          onClick={() => setActiveTab("PENDIENTES")}
+        >
+          Pendientes de aprobación ({counts.PENDIENTES})
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
+          onClick={() => setActiveTab("RECHAZADOS")}
+        >
+          Rechazados ({counts.RECHAZADOS})
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "BORRADORES" ? "active" : ""}`}
+          onClick={() => setActiveTab("BORRADORES")}
+        >
+          Borradores ({counts.BORRADORES})
+        </button>
+      </div>
+
+      {/* Barra de búsqueda */}
+      <div style={{ marginBottom: "16px" }}>
+        <input
+          type="search"
+          placeholder="Buscar documento por título, archivo o categoría..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: "100%",
+            maxWidth: "420px",
+            padding: "9px 14px",
+            borderRadius: "8px",
+            border: "1px solid #cbd5e1",
+            fontSize: "0.9rem",
+            color: "#0c2340",
+            backgroundColor: "#fff"
+          }}
+        />
+      </div>
+
       <div className="cms-docs-table-container">
         <div className="activity-table-head docs-table-head">
           <div className="col-content">CONTENIDO</div>
-          <div className="col-editor">EDITOR</div>
+          <div className="col-editor">EDITOR / FECHA</div>
           <div className="col-categoria">CATEGORÍA</div>
           <div className="col-estado">ESTADO</div>
           <div className="col-acciones" style={{ textAlign: "center" }}>ACCIONES</div>
@@ -319,10 +468,12 @@ const CmsDocsView = ({
               <div className="cms-spinner" style={{ margin: "0 auto 10px auto" }}></div>
               <span style={{ color: "#64748b", fontSize: "0.9rem" }}>Cargando listado...</span>
             </div>
-          ) : docsList.length === 0 ? (
-            <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>No hay documentos registrados.</div>
+          ) : docsFiltrados.length === 0 ? (
+            <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
+              No hay documentos en esta sección.
+            </div>
           ) : (
-            docsList.map((doc) => (
+            docsFiltrados.map((doc) => (
               <div className="activity-row docs-table-row" key={doc.id}>
                 <div className="col-content doc-content-cell">
                   <div className="doc-thumb-box">
@@ -335,7 +486,7 @@ const CmsDocsView = ({
                     <div className="doc-title-row">
                       <span className="doc-title">{doc.title}</span>
                       {sanitizeUrl(doc.fileUrl) && (
-                        <a className="doc-preview-link" href={sanitizeUrl(doc.fileUrl)} target="_blank" rel="noopener noreferrer" title="Ver documento">
+                        <a className="doc-preview-link" href={sanitizeUrl(doc.fileUrl)} target="_blank" rel="noopener noreferrer" title="Ver documento original">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
@@ -351,22 +502,47 @@ const CmsDocsView = ({
                     )}
 
                     <span className="doc-meta">
-                      {(doc.fileType || "PDF")} · {(doc.fileSize || "—")} · {(doc.updatedAt || "Actualizado hoy")}
+                      {(doc.fileType || "PDF")} · {(doc.fileSize || "—")}
                     </span>
+
+                    {/* Alerta del motivo de rechazo del Administrador */}
+                    {doc.rejectionReason && (
+                      <div style={{
+                        marginTop: "8px",
+                        padding: "7px 11px",
+                        background: "#fef2f2",
+                        border: "1px solid #fecaca",
+                        borderRadius: "6px",
+                        color: "#b91c1c",
+                        fontSize: "0.8rem",
+                        lineHeight: "1.4"
+                      }}>
+                        <strong>Motivo de rechazo del Administrador:</strong> {doc.rejectionReason}
+                      </div>
+                    )}
                   </div>
                 </div>
                 
-                <div className="col-editor">{doc.editor || userName || "Usuario CMS"}</div>
+                <div className="col-editor" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <span style={{ fontWeight: 600, color: '#0c2340' }}>{doc.editor || userName || "Usuario CMS"}</span>
+                  <small style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
+                    <CalendarDays size={12} />
+                    {doc.updatedAt || "Actualizado hoy"}
+                  </small>
+                </div>
 
                 <div className="col-categoria">{doc.category || "Información institucional"}</div>
+                
                 <div className="col-estado">
-                  <span className={`status-badge ${doc.status || "borrador"}`}>{textoEstado(doc.status || "Borrador")}</span>
+                  <span className={`status-badge ${getBadgeClass(doc)}`}>
+                    {getTextoEstado(doc)}
+                  </span>
                 </div>
 
                 <div className="doc-actions-cell">
                   <button title="Editar" onClick={() => handleOpenEdit(doc)} className="doc-action-btn-edit">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg>
                   </button>
@@ -394,13 +570,18 @@ const CmsDocsView = ({
         </div>
       </div>
 
-      {/* MODAL PRINCIPAL DE DOCUMENTOS */}
+      {/* MODAL PRINCIPAL DE DOCUMENTOS (RESTAURADO A COMO ESTABA ANTES) */}
       {showModal && (
         <div className="modal-overlay-docs" onClick={handleCloseAttempt}>
           <div className="modal-container-wide" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <header className="modal-header-docs">
               <div className="header-content-docs">
                 <h1 className="modal-title-docs">{editingId ? "EDITAR DOCUMENTO" : "CARGA DE DOCUMENTACIÓN"}</h1>
+                <p className="modal-subtitle-docs">
+                  {editingId 
+                    ? "Modificá la información o el archivo del documento." 
+                    : "Completá los campos y seleccioná el archivo a publicar."}
+                </p>
               </div>
               <button type="button" className="close-button-docs" onClick={handleCloseAttempt} aria-label="Cerrar modal">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -409,6 +590,21 @@ const CmsDocsView = ({
                 </svg>
               </button>
             </header>
+
+            {/* Aviso si el documento fue previamente rechazado */}
+            {rejectionReasonActual && (
+              <div style={{
+                margin: "16px 32px 0 32px",
+                padding: "10px 14px",
+                background: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: "8px",
+                color: "#b91c1c",
+                fontSize: "0.85rem"
+              }}>
+                <strong>Correcciones solicitadas por el Administrador:</strong> {rejectionReasonActual}
+              </div>
+            )}
 
             <form className="modal-body-split" onSubmit={handleSave}>
               <div className="form-column">
@@ -584,50 +780,19 @@ const CmsDocsView = ({
               </div>
             </form>
 
-            {/* Footer del Modal */}
-            <div className="modal-footer-esp">
-              <button
-                type="button"
-                className="btn-cancelar-gris"
-                onClick={handleCloseAttempt}
+            <footer className="modal-footer-docs">
+              <button type="button" className="btn-secondary-docs" onClick={handleCloseAttempt} disabled={saving}>CANCELAR</button>
+              <button 
+                type="submit" 
+                className="btn-primary-docs" 
+                onClick={handleSave} 
                 disabled={saving}
               >
-                CANCELAR
+                {saving 
+                  ? (editingId ? "ACTUALIZANDO..." : "GUARDANDO...") 
+                  : (editingId ? "ACTUALIZAR DOCUMENTO" : "GUARDAR DOCUMENTO")}
               </button>
-              <button
-                type="submit"
-                className="btn-cerrar-rojo"
-                style={{ backgroundColor: "#2b5b94" }}
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? (
-                  <span
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <div
-                      className="cms-spinner"
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        borderWidth: "2px",
-                        borderTopColor: "white",
-                        borderColor: "rgba(255,255,255,0.3)",
-                      }}
-                    ></div>
-                    GUARDANDO...
-                  </span>
-                ) : editingId ? (
-                  "ACTUALIZAR"
-                ) : (
-                  "GUARDAR"
-                )}
-              </button>
-            </div>
+            </footer>
           </div>
         </div>
       )}

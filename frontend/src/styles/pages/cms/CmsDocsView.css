@@ -45,7 +45,7 @@
 .docs-table-head,
 .docs-table-row {
   display: grid;
-  grid-template-columns: minmax(260px, 3fr) 1fr 1fr 1fr 1.2fr;
+  grid-template-columns: minmax(260px, 3fr) 1.2fr 1fr 1fr 1fr;
   align-items: center;
   gap: 12px;
 }
@@ -99,6 +99,16 @@
 .status-badge.programado, .status-badge.en.revisión {
   background: #e0edff;
   color: #1d4ed8;
+}
+
+.status-badge.pendiente {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge.rechazado {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 /* Acciones */

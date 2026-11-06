@@ -119,7 +119,12 @@ export const requireAdminAccess = [verifyToken, requireRole(...ROLES_ADMIN)];
 
 export const adminViewAccess = (req, res, next) => {
   req.adminView = false;
-  if (req.query.admin !== 'true') return next();
+  const adminParam = req.query.admin;
+  const isAdminRequested =
+    adminParam === 'true' ||
+    (Array.isArray(adminParam) && adminParam.includes('true'));
+
+  if (!isAdminRequested) return next();
 
   verifyToken(req, res, (err) => {
     if (err) return next(err);

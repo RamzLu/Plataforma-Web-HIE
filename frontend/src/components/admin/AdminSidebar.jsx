@@ -21,6 +21,7 @@ const AdminSidebar = ({
   setActiveTab,
   pendingNoticiasCount = 0,
   pendingEspecialidadesCount = 0,
+  pendingDocumentosCount = 0,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
@@ -37,7 +38,7 @@ const AdminSidebar = ({
       title: "Aprobación de Contenidos",
       items: [
         { id: "noticias", label: "Noticias", icon: <FileText />, pendingCount: pendingNoticiasCount },
-        { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: 0 },
+        { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: pendingDocumentosCount },
         { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope />, pendingCount: pendingEspecialidadesCount },
         { id: "profesionales", label: "Profesionales", icon: <Contact />, pendingCount: 2 }, 
         { id: "capacitaciones", label: "Capacitaciones Públicas", icon: <GraduationCap /> },

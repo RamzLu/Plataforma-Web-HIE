@@ -29,7 +29,7 @@
 .news-table-head,
 .news-table-row {
   display: grid;
-  grid-template-columns: minmax(260px, 2.5fr) minmax(110px, 0.9fr) minmax(140px, 1.3fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, 0.7fr);
+  grid-template-columns: minmax(260px, 2.8fr) minmax(160px, 1.5fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, 0.7fr);
   align-items: center;
   padding: 14px 16px;
   gap: 12px;

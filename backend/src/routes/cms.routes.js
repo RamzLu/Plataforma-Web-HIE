@@ -7,7 +7,7 @@ import {
   actualizarEspacioGrafico,
 } from "../controllers/cms/cms.contenidoGrafico.controller.js";
 import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia, evaluarNoticia } from "../controllers/cms/cms.noticia.controller.js";
-import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento } from "../controllers/cms/cms.doc.controller.js";
+import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento, evaluarDocumento } from "../controllers/cms/cms.doc.controller.js";
 import { obtenerProfesionales, crearProfesional, eliminarProfesional, actualizarProfesional } from "../controllers/cms/cms.profesional.controller.js";
 import * as especialidadCtrl from '../controllers/cms/cms.especialidad.controller.js';
 import { 
@@ -72,6 +72,7 @@ router.delete('/noticias/:id', requireCmsAccess, eliminarNoticia);
 router.get('/documentacion', adminViewAccess, obtenerDocumentos);
 router.post('/documentacion', requireCmsAccess, uploadDocumentoSingle('archivo'), crearDocumento);
 router.put('/documentacion/:id', requireCmsAccess, uploadDocumentoSingle('archivo'), actualizarDocumento);
+router.patch('/documentacion/:id/estado', requireAdminAccess, evaluarDocumento);
 router.delete('/documentacion/:id', requireCmsAccess, eliminarDocumento);
 
 // ==========================================

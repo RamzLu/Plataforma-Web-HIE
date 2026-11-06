@@ -15,8 +15,11 @@ export const adminFetch = async (path, options = {}) => {
     // Si no se pudo renovar se usa el token actual; si vencio, el backend responde 401.
   }
 
-  const separator = path.includes("?") ? "&" : "?";
-  return fetch(`${API_URL}${path}${separator}admin=true`, {
+  const url = path.includes("admin=")
+    ? `${API_URL}${path}`
+    : `${API_URL}${path}${path.includes("?") ? "&" : "?"}admin=true`;
+
+  return fetch(url, {
     ...options,
     headers: {
       ...(options.headers || {}),

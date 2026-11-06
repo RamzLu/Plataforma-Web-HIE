@@ -6,6 +6,7 @@ import "../../styles/components/admin/AdminLayout.css";
 import keycloak from '../../config/keycloak';
 import { getNoticias } from '../../api/noticias.api';
 import { getEspecialidades } from '../../api/especialidades.api';
+import { getDocumentos } from '../../api/documentos.api';
 
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminHeader from '../../components/admin/AdminHeader';
@@ -32,6 +33,7 @@ const AdminPage = () => {
   const [userName, setUserName] = useState("Cargando...");
   const [pendingNoticiasCount, setPendingNoticiasCount] = useState(0);
   const [pendingEspecialidadesCount, setPendingEspecialidadesCount] = useState(0);
+  const [pendingDocumentosCount, setPendingDocumentosCount] = useState(0);
   
   const isKeycloakInitialized = useRef(false);
 
@@ -59,6 +61,17 @@ const AdminPage = () => {
             (e) => (e.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
           ).length;
           setPendingEspecialidadesCount(pending);
+        }
+      })
+      .catch(() => {});
+
+    getDocumentos(true)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const pending = data.filter(
+            (d) => (d.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+          ).length;
+          setPendingDocumentosCount(pending);
         }
       })
       .catch(() => {});
@@ -214,6 +227,7 @@ const AdminPage = () => {
         setActiveTab={setActiveTab}
         pendingNoticiasCount={pendingNoticiasCount}
         pendingEspecialidadesCount={pendingEspecialidadesCount}
+        pendingDocumentosCount={pendingDocumentosCount}
       />
       
       <div className="admin-main-wrapper">
@@ -235,7 +249,11 @@ const AdminPage = () => {
             />
           )}
           {activeTab === "profesionales" && <AdminProfesionalesView />}
-          {activeTab === "documentacion" && <AdminDocumentacionView />}
+          {activeTab === "documentacion" && (
+            <AdminDocumentacionView
+              onPendingCountChange={setPendingDocumentosCount}
+            />
+          )}
           {activeTab === "capacitaciones" && <AdminCapacitacionesView />}
           {activeTab === "usuarios" && <AdminUsuariosView />}
           {activeTab === "roles" && <AdminRolesView />}

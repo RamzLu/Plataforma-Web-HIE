@@ -72,7 +72,7 @@ const CmsPage = () => {
 const fetchNoticias = async () => {
   try {
     setLoading(true);
-    const response = await adminFetch("/cms/noticias");
+    const response = await adminFetch("/cms/noticias?admin=true");
     if (!response.ok) throw new Error("Error al obtener noticias del servidor");
     const data = await response.json();
 
@@ -126,7 +126,7 @@ const fetchNoticias = async () => {
       if (!response.ok) throw new Error("Error al obtener documentos");
       const data = await response.json();
       
-      if (data && data.length > 0) {
+      if (Array.isArray(data)) {
         setDocsList(data);
         localStorage.setItem("portal_docs_data", JSON.stringify(data));
       } else {
@@ -177,6 +177,36 @@ const handleDeleteDoc = (id) => {
     fetchNoticias();
     fetchDocs();
     fetchProfesionales();
+  }, [authenticated, isCms]);
+
+  // Sincronizar automáticamente al cambiar de sección activa en el CMS
+  useEffect(() => {
+    if (!authenticated || !isCms) return;
+    if (activeTab === "documentacion") {
+      fetchDocs();
+    } else if (activeTab === "noticias") {
+      fetchNoticias();
+    } else if (activeTab === "profesionales") {
+      fetchProfesionales();
+    }
+  }, [activeTab, authenticated, isCms]);
+
+  // Refrescar datos al retomar el foco en la pestaña (ej. al volver del panel de administración)
+  useEffect(() => {
+    if (!authenticated || !isCms) return;
+    const handleFocusOrVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchNoticias();
+        fetchDocs();
+        fetchProfesionales();
+      }
+    };
+    window.addEventListener("focus", handleFocusOrVisibility);
+    document.addEventListener("visibilitychange", handleFocusOrVisibility);
+    return () => {
+      window.removeEventListener("focus", handleFocusOrVisibility);
+      document.removeEventListener("visibilitychange", handleFocusOrVisibility);
+    };
   }, [authenticated, isCms]);
 
   useEffect(() => {
@@ -464,6 +494,7 @@ if (!authenticated) {
               onAddNewDoc={handleAddNewDoc}
               onDeleteDoc={handleDeleteDoc}
               onUpdateDoc={handleUpdateDoc}
+              onRefreshDocs={fetchDocs}
               loading={loading}
               userName={userName}
               initialCreateModal={openCreateOnTab}

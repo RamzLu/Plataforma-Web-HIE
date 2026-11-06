@@ -73,7 +73,7 @@
   color: #0c2340;
   padding: 14px 16px;
   display: grid;
-  grid-template-columns: 2.5fr 1fr 1fr 1fr 1.2fr;
+  grid-template-columns: 2.8fr 1.5fr 1fr 1.2fr;
   font-size: 0.8rem;
   letter-spacing: 0.5px;
   position: sticky;
@@ -95,7 +95,7 @@
   border-bottom: 1px solid #09274d43;
   transition: background-color 0.15s ease;
   display: grid;
-  grid-template-columns: 2.5fr 1fr 1fr 1fr 1.2fr;
+  grid-template-columns: 2.8fr 1.5fr 1fr 1.2fr;
   align-items: center;
   gap: 10px;
 }

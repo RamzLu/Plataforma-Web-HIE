@@ -60,9 +60,11 @@ if (process.env.TRUST_PROXY !== undefined) {
   app.set('trust proxy', 1);
 }
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
+  max: isDev ? 10000 : 300,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -72,7 +74,7 @@ const apiLimiter = rateLimit({
 
 const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 60,
+  max: isDev ? 2000 : 60,
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => ['GET', 'HEAD', 'OPTIONS'].includes(req.method),

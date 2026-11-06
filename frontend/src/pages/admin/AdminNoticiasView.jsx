@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, CalendarClock, AlertTriangle, Globe2, Clock3 } from 'lucide-react';
+import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import keycloak from '../../config/keycloak';
@@ -160,8 +160,10 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     cargarNoticias(false);
 
     const intervalId = setInterval(() => {
-      cargarNoticias(true);
-    }, 8000);
+      if (document.visibilityState === 'visible') {
+        cargarNoticias(true);
+      }
+    }, 60000);
 
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
@@ -436,8 +438,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         <div className="data-table-container-admin">
           <div className="data-table-header-admin">
             <div className="data-table-col-admin">CONTENIDO</div>
-            <div className="data-table-col-admin">FECHA</div>
-            <div className="data-table-col-admin">EDITOR</div>
+            <div className="data-table-col-admin">EDITOR / FECHA</div>
             <div className="data-table-col-admin">CATEGORÍA</div>
             <div className="data-table-col-admin">ESTADO</div>
           </div>
@@ -508,23 +509,26 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
 
                                         <div
                       className="col-text-admin"
-                      style={{ display: 'flex', flexDirection: 'column' }}
+                      style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}
                     >
-                      <span>{item.date}</span>
-                      {wasEdited && (
-                        <span
-                          style={{
-                            fontSize: '0.75rem',
-                            color: '#64748b',
-                            fontStyle: 'italic',
-                          }}
-                        >
-                          (Editado)
-                        </span>
-                      )}
+                      <span style={{ fontWeight: 600, color: '#0c2340' }}>{item.editor}</span>
+                      <small style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
+                        <CalendarDays size={13} />
+                        {item.date}
+                        {wasEdited && (
+                          <span
+                            style={{
+                              fontSize: '0.72rem',
+                              color: '#64748b',
+                              fontStyle: 'italic',
+                              marginLeft: '3px',
+                            }}
+                          >
+                            (Editado)
+                          </span>
+                        )}
+                      </small>
                     </div>
-
-                                        <div className="col-text-admin">{item.editor}</div>
 
                                         <div className="col-categoria-data-admin col-text-admin">
                       <span className="category-pill-admin">
