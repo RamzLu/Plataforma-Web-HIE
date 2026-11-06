@@ -17,6 +17,7 @@ import {
 import keycloak from '../../config/keycloak';
 import api from '../../api/axiosConfig';
 import { getCapacitaciones } from '../../api/capacitaciones.api';
+import capacitacionesBanner from '../../assets/banner_capacitaciones.png';
 import { sanitizeUrl } from '../../utils/sanitizeUrl';
 import '../../styles/pages/admin/AdminCapacitacionesView.css';
 
@@ -28,6 +29,97 @@ const STATUS_LABELS = {
   RECHAZADO: 'Rechazado',
   ARCHIVADO: 'Archivado',
 };
+
+const SIMULATED_CAPACITACIONES = [
+  {
+    id: 'sim-cap-001',
+    titulo: 'Primeros auxilios y RCP para la comunidad',
+    descripcion: 'Capacitación abierta para conocer las maniobras iniciales de RCP y cómo actuar ante una emergencia.',
+    contenido: 'Módulo 1: Reconocimiento de una emergencia.\nMódulo 2: Activación del sistema de emergencias.\nMódulo 3: Maniobras iniciales de RCP y uso del DEA.',
+    modalidad: 'Presencial',
+    fechaInicio: '2026-12-10',
+    fechaFin: '2026-12-10',
+    horario: '09:00',
+    ubicacion: 'Auditorio del Hospital Interdistrital Evita',
+    disertantes: 'Equipo de Emergencias HIE',
+    estado: 'PENDIENTE_APROBACION',
+    activo: true,
+    bannerUrl: capacitacionesBanner,
+    bannerNombre: 'banner_capacitaciones.png',
+    archivoTipo: 'documento',
+    archivoNombre: 'programa-primeros-auxilios.pdf',
+    archivoUrl: 'https://example.com/programa-primeros-auxilios.pdf',
+    archivoTamano: '1.2 MB',
+    videoUrl: '',
+    enlaceUrl: '',
+  },
+  {
+    id: 'sim-cap-002',
+    titulo: 'Prevención del dengue: acciones en el hogar',
+    descripcion: 'Material educativo para reconocer criaderos y prevenir la reproducción del mosquito.',
+    contenido: 'Identificación de recipientes con agua.\nMedidas de prevención en patios y viviendas.\nSignos de alarma y cuándo consultar.',
+    modalidad: 'Virtual',
+    fechaInicio: '2026-12-15',
+    fechaFin: '2026-12-15',
+    horario: '18:00',
+    ubicacion: 'Encuentro virtual',
+    disertantes: 'Programa Provincial de Vectores',
+    estado: 'PENDIENTE_APROBACION',
+    activo: true,
+    bannerUrl: capacitacionesBanner,
+    bannerNombre: 'banner_capacitaciones.png',
+    archivoTipo: 'video',
+    archivoNombre: 'prevencion-dengue.mp4',
+    archivoUrl: '',
+    archivoTamano: '',
+    videoUrl: 'https://example.com/prevencion-dengue',
+    enlaceUrl: 'https://example.com/prevencion',
+  },
+  {
+    id: 'sim-cap-003',
+    titulo: 'Guía de preparación para estudios de laboratorio',
+    descripcion: 'Recomendaciones generales para prepararse antes de realizarse análisis clínicos.',
+    contenido: 'Consultá las indicaciones específicas del equipo de salud.\nLlevá la documentación solicitada.\nRespetá las pautas de ayuno cuando corresponda.',
+    modalidad: 'Virtual',
+    fechaInicio: '2026-12-02',
+    fechaFin: '2026-12-02',
+    horario: '10:00',
+    ubicacion: 'Portal institucional',
+    disertantes: 'Servicio de Laboratorio',
+    estado: 'APROBADO',
+    activo: true,
+    bannerUrl: capacitacionesBanner,
+    bannerNombre: 'banner_capacitaciones.png',
+    archivoTipo: 'documento',
+    archivoNombre: 'guia-preparacion-laboratorio.pdf',
+    archivoUrl: 'https://example.com/guia-laboratorio.pdf',
+    archivoTamano: '850 KB',
+    videoUrl: '',
+    enlaceUrl: '',
+  },
+  {
+    id: 'sim-cap-004',
+    titulo: 'Jornada de promoción de hábitos saludables',
+    descripcion: 'Encuentro comunitario sobre alimentación, actividad física y cuidado integral.',
+    contenido: 'Alimentación saludable.\nMovimiento y actividad física.\nRecursos locales de promoción de la salud.',
+    modalidad: 'Presencial',
+    fechaInicio: '2026-07-14',
+    fechaFin: '2026-07-14',
+    horario: '09:30',
+    ubicacion: 'Centro de salud barrial',
+    disertantes: 'Equipo de Promoción de la Salud',
+    estado: 'PUBLICADO',
+    activo: true,
+    bannerUrl: capacitacionesBanner,
+    bannerNombre: 'banner_capacitaciones.png',
+    archivoTipo: 'imagen',
+    archivoNombre: 'afiche-habitos-saludables.png',
+    archivoUrl: capacitacionesBanner,
+    archivoTamano: '',
+    videoUrl: '',
+    enlaceUrl: '',
+  },
+];
 
 const parseEndDate = (value) => {
   if (!value) return null;
@@ -66,8 +158,8 @@ const formatPeriod = (training) => {
 
 const AdminCapacitacionesView = () => {
   const [capacitaciones, setCapacitaciones] = useState([]);
+  const [isSimulation, setIsSimulation] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [feedback, setFeedback] = useState('');
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [vigenciaFilter, setVigenciaFilter] = useState('TODAS');
@@ -86,13 +178,15 @@ const AdminCapacitacionesView = () => {
         if (!Array.isArray(data)) {
           throw new Error('La respuesta de capacitaciones no tiene un formato válido.');
         }
-        if (isMounted) setCapacitaciones(data);
+        if (isMounted) {
+          setCapacitaciones(data.length > 0 ? data : SIMULATED_CAPACITACIONES);
+          setIsSimulation(data.length === 0);
+        }
       } catch (loadError) {
         console.error('Error al cargar capacitaciones para revisión:', loadError);
         if (isMounted) {
-          setError(
-            'No se pudieron cargar las capacitaciones. La API actual limita el listado completo al Editor CMS; se requiere acceso de lectura para Administración.',
-          );
+          setCapacitaciones(SIMULATED_CAPACITACIONES);
+          setIsSimulation(true);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -106,10 +200,14 @@ const AdminCapacitacionesView = () => {
   }, []);
 
   const selectedTraining = capacitaciones.find((training) => training.id === selectedId);
+  const capacitacionesVisibles = useMemo(
+    () => capacitaciones.filter((training) => training.estado !== 'BORRADOR'),
+    [capacitaciones],
+  );
 
   const filteredCapacitaciones = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('es');
-    return capacitaciones.filter((training) => {
+    return capacitacionesVisibles.filter((training) => {
       const matchesStatus = statusFilter === 'TODOS' || training.estado === statusFilter;
       const matchesVigencia =
         vigenciaFilter === 'TODAS' || getVigencia(training) === vigenciaFilter;
@@ -129,16 +227,17 @@ const AdminCapacitacionesView = () => {
 
       return matchesStatus && matchesVigencia && (!query || searchableContent.includes(query));
     });
-  }, [capacitaciones, search, statusFilter, vigenciaFilter]);
+  }, [capacitacionesVisibles, search, statusFilter, vigenciaFilter]);
 
   const counts = useMemo(
     () => ({
-      pending: capacitaciones.filter((training) => training.estado === 'PENDIENTE_APROBACION').length,
-      approved: capacitaciones.filter((training) => training.estado === 'APROBADO').length,
-      published: capacitaciones.filter((training) => training.estado === 'PUBLICADO').length,
-      rejected: capacitaciones.filter((training) => training.estado === 'RECHAZADO').length,
+      pending: capacitacionesVisibles.filter((training) => training.estado === 'PENDIENTE_APROBACION').length,
+      approved: capacitacionesVisibles.filter((training) => training.estado === 'APROBADO').length,
+      published: capacitacionesVisibles.filter((training) => training.estado === 'PUBLICADO').length,
+      rejected: capacitacionesVisibles.filter((training) => training.estado === 'RECHAZADO').length,
+      archived: capacitacionesVisibles.filter((training) => training.estado === 'ARCHIVADO').length,
     }),
-    [capacitaciones],
+    [capacitacionesVisibles],
   );
 
   const closeDetails = () => {
@@ -159,6 +258,28 @@ const AdminCapacitacionesView = () => {
     setIsSaving(true);
     setActionError('');
     try {
+      if (isSimulation) {
+        setCapacitaciones((current) =>
+          current.map((training) =>
+            training.id === selectedTraining.id
+              ? {
+                  ...training,
+                  estado: pendingAction,
+                  activo: pendingAction === 'ARCHIVADO' || pendingAction === 'RECHAZADO'
+                    ? false
+                    : training.activo,
+                  motivoRechazo: pendingAction === 'RECHAZADO' ? reason : '',
+                }
+              : training,
+          ),
+        );
+        setFeedback(
+          `Simulación: “${selectedTraining.titulo}” quedó ${STATUS_LABELS[pendingAction].toLocaleLowerCase('es')}.`,
+        );
+        closeDetails();
+        return;
+      }
+
       const token = keycloak?.token || localStorage.getItem('token') || '';
       const response = await api.patch(
         `/cms/capacitaciones/${selectedTraining.id}/revision`,
@@ -202,6 +323,12 @@ const AdminCapacitacionesView = () => {
         <h1>Gestión de Capacitaciones Públicas</h1>
         <p>Revisá los contenidos, recursos y vigencia antes de aprobarlos para publicación.</p>
       </header>
+
+      {isSimulation && (
+        <div className="admin-training-simulation-note" role="status">
+          <strong>Modo simulación.</strong> Se muestran capacitaciones de ejemplo porque el listado del CMS no está habilitado para Administración. Las decisiones se actualizan solo en esta pantalla y no se guardan en el servidor.
+        </div>
+      )}
 
       {feedback && (
         <div className="admin-training-feedback" role="status">
@@ -260,6 +387,15 @@ const AdminCapacitacionesView = () => {
           <span><XCircle size={19} /></span>
           <div><small>Rechazadas</small><strong>{counts.rejected}</strong></div>
         </button>
+        <button
+          type="button"
+          className={`admin-training-summary-card is-archived ${statusFilter === 'ARCHIVADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'ARCHIVADO'}
+          onClick={() => setStatusFilter('ARCHIVADO')}
+        >
+          <span><Archive size={19} /></span>
+          <div><small>Archivadas</small><strong>{counts.archived}</strong></div>
+        </button>
       </section>
 
       <section className="dashboard-card-admin admin-training-card" aria-labelledby="admin-training-list-title">
@@ -289,18 +425,6 @@ const AdminCapacitacionesView = () => {
             />
           </label>
           <label className="admin-training-filter">
-            <span>Estado</span>
-            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-              <option value="TODOS">Todos los estados</option>
-              <option value="PENDIENTE_APROBACION">Pendiente de revisión</option>
-              <option value="BORRADOR">Borrador</option>
-              <option value="APROBADO">Aprobado</option>
-              <option value="PUBLICADO">Publicado</option>
-              <option value="RECHAZADO">Rechazado</option>
-              <option value="ARCHIVADO">Archivado</option>
-            </select>
-          </label>
-          <label className="admin-training-filter">
             <span>Vigencia</span>
             <select value={vigenciaFilter} onChange={(event) => setVigenciaFilter(event.target.value)}>
               <option value="TODAS">Todas</option>
@@ -309,8 +433,6 @@ const AdminCapacitacionesView = () => {
             </select>
           </label>
         </div>
-
-        {error && <p className="admin-training-error" role="alert">{error}</p>}
 
         <div className="admin-training-table-wrap">
           <table className="admin-training-table">
