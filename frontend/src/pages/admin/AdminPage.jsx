@@ -14,6 +14,9 @@ import AccessDeniedScreen from '../../components/ui/AccessDeniedScreen';
 import AdminDashboardView from '../admin/AdminDashboardView';
 import AdminNoticiasView from '../admin/AdminNoticiasView';
 import AdminEspecialidadesServiciosView from '../admin/AdminEspecialidadesServiciosView';
+import AdminProfesionalesView from '../admin/AdminProfesionalesView';
+import AdminDocumentacionView from '../admin/AdminDocumentacionView';
+import AdminCapacitacionesView from '../admin/AdminCapacitacionesView';
 // import AdminUsuariosView from './admin/AdminUsuariosView';
 // import AdminRolesView from './admin/AdminRolesView';
 // import AdminAuditoriaView from './admin/AdminAuditoriaView';
@@ -230,6 +233,9 @@ const AdminPage = () => {
               onPendingCountChange={setPendingEspecialidadesCount}
             />
           )}
+          {activeTab === "profesionales" && <AdminProfesionalesView />}
+          {activeTab === "documentacion" && <AdminDocumentacionView />}
+          {activeTab === "capacitaciones" && <AdminCapacitacionesView />}
           {activeTab === "usuarios" && <AdminUsuariosView />}
           {activeTab === "roles" && <AdminRolesView />}
           {activeTab === "auditoria" && <AdminAuditoriaView />}

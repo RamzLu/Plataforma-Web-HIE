@@ -82,7 +82,7 @@ const AdminDashboardView = ({ setActiveTab }) => {
     <div className="admin-dashboard-container">
       
       {/* TÍTULO DE LA SECCIÓN + ALERTA SUPERIOR DE REVISIONES */}
-      <div className="admin-page-title">
+      <div className="admin-page-title admin-view-heading">
         <div className="admin-title-content">
           <div className="admin-title-badge">PANEL DE CONTROL</div>
           <h1>Resumen del Portal</h1>

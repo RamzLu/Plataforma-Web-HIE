@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Eye, CheckCircle, XCircle, CalendarClock, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, CalendarClock, AlertTriangle, Globe2, Clock3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import keycloak from '../../config/keycloak';
@@ -14,7 +14,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selectedNews, setSelectedNews] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('PENDIENTE');
+  const [statusFilter, setStatusFilter] = useState('TODOS');
 
   const [isRejecting, setIsRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -87,7 +87,9 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
             .map((noticia) => {
               const estadoUpper = (noticia.estado || 'PENDIENTE_APROBACION').toUpperCase();
               let statusLabel = 'Pendiente de aprobación';
-              if (estadoUpper === 'PUBLICADO' || estadoUpper === 'APROBADO') {
+              if (estadoUpper === 'PUBLICADO') {
+                statusLabel = 'Publicado';
+              } else if (estadoUpper === 'APROBADO') {
                 statusLabel = 'Aprobado';
               } else if (estadoUpper === 'RECHAZADO') {
                 statusLabel = 'Rechazado';
@@ -205,7 +207,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         keycloak.token
       );
 
-      const estadoFinal = (response?.noticia?.estado || 'PUBLICADO').toUpperCase();
+      const estadoFinal = (response?.noticia?.estado || 'APROBADO').toUpperCase();
 
       if (estadoFinal === 'BORRADOR') {
         const updatedList = noticias.filter((item) => item.id !== selectedNews.id);
@@ -218,7 +220,12 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         return;
       }
 
-      const nuevoStatusLabel = estadoFinal === 'PROGRAMADO' ? 'Programado' : 'Aprobado';
+      const nuevoStatusLabel =
+        estadoFinal === 'PUBLICADO'
+          ? 'Publicado'
+          : estadoFinal === 'PROGRAMADO'
+          ? 'Programado'
+          : 'Aprobado';
 
       const updatedList = noticias.map((item) =>
         item.id === selectedNews.id
@@ -238,8 +245,12 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
 
       if (estadoFinal === 'PROGRAMADO') {
         toast.success(`Noticia "${selectedNews.title}" APROBADA y programada exitosamente.`);
+      } else if (estadoFinal === 'PUBLICADO') {
+        toast.success(`Noticia "${selectedNews.title}" fue publicada por el CMS.`);
       } else {
-        toast.success(`Noticia "${selectedNews.title}" APROBADA y publicada exitosamente.`);
+        toast.success(
+          `Noticia "${selectedNews.title}" APROBADA. El CMS ya puede gestionar su publicación.`
+        );
       }
 
       handleCloseModal();
@@ -309,7 +320,9 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   };
 
   const getBadgeClass = (status) => {
-    if (status === 'Aprobado' || status === 'Programado') return 'status-aprobado-admin';
+    if (status === 'Aprobado' || status === 'Programado' || status === 'Publicado') {
+      return 'status-aprobado-admin';
+    }
     if (status === 'Rechazado') return 'status-rechazado-admin';
     return 'status-pendiente-admin';
   };
@@ -324,10 +337,10 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   const pendingCount = noticias.filter((n) => n.estado === 'PENDIENTE_APROBACION').length;
   const approvedCount = noticias.filter(
     (n) =>
-      n.estado === 'PUBLICADO' ||
       n.estado === 'APROBADO' ||
       n.estado === 'PROGRAMADO'
   ).length;
+  const publishedCount = noticias.filter((n) => n.estado === 'PUBLICADO').length;
   const rejectedCount = noticias.filter((n) => n.estado === 'RECHAZADO').length;
 
   const filteredNoticias = noticias.filter((item) => {
@@ -335,11 +348,10 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       return item.estado === 'PENDIENTE_APROBACION';
     }
     if (statusFilter === 'APROBADO') {
-      return (
-        item.estado === 'PUBLICADO' ||
-        item.estado === 'APROBADO' ||
-        item.estado === 'PROGRAMADO'
-      );
+      return item.estado === 'APROBADO' || item.estado === 'PROGRAMADO';
+    }
+    if (statusFilter === 'PUBLICADO') {
+      return item.estado === 'PUBLICADO';
     }
     if (statusFilter === 'RECHAZADO') {
       return item.estado === 'RECHAZADO';
@@ -349,10 +361,71 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
 
   return (
     <div className="admin-review-container-admin">
-      <div className="admin-page-header-admin">
+      <div className="admin-page-header-admin admin-view-heading">
         <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
         <h1>Revisión Editorial</h1>
         <p>Evalúa las solicitudes de publicación enviadas por el equipo de redactores del CMS.</p>
+      </div>
+
+      <div className="admin-news-summary-toolbar">
+        <button
+          type="button"
+          className={`admin-news-reset-filter ${statusFilter === 'TODOS' ? 'is-active' : ''}`}
+          aria-pressed={statusFilter === 'TODOS'}
+          onClick={() => setStatusFilter('TODOS')}
+        >
+          Todos
+        </button>
+      </div>
+      <div className="admin-news-summary" role="group" aria-label="Filtrar noticias por estado">
+        <button
+          type="button"
+          className={`admin-news-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'PENDIENTE'}
+          onClick={() => setStatusFilter('PENDIENTE')}
+        >
+          <span className="admin-news-summary-icon"><Clock3 size={19} /></span>
+          <span className="admin-news-summary-copy">
+            <span>Pendientes de aprobación</span>
+            <strong>{pendingCount}</strong>
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`admin-news-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'APROBADO'}
+          onClick={() => setStatusFilter('APROBADO')}
+        >
+          <span className="admin-news-summary-icon"><CheckCircle size={19} /></span>
+          <span className="admin-news-summary-copy">
+            <span>Aprobados para CMS</span>
+            <strong>{approvedCount}</strong>
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`admin-news-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'PUBLICADO'}
+          onClick={() => setStatusFilter('PUBLICADO')}
+        >
+          <span className="admin-news-summary-icon"><Globe2 size={19} /></span>
+          <span className="admin-news-summary-copy">
+            <span>Visibles al público</span>
+            <strong>{publishedCount}</strong>
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`admin-news-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'RECHAZADO'}
+          onClick={() => setStatusFilter('RECHAZADO')}
+        >
+          <span className="admin-news-summary-icon"><XCircle size={19} /></span>
+          <span className="admin-news-summary-copy">
+            <span>Rechazados</span>
+            <strong>{rejectedCount}</strong>
+          </span>
+        </button>
       </div>
 
       <div className="dashboard-card-admin">
@@ -360,61 +433,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         <p className="news-view-subtitle-admin">
           Área de Revisión: Aprobación y rechazo de notificaciones recibidas desde el CMS
         </p>
-
-        <div className="admin-news-filter-bar">
-          <div className="admin-news-tabs-group" role="tablist" aria-label="Filtrar noticias por estado">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === 'PENDIENTE'}
-              className={`admin-news-tab-item ${statusFilter === 'PENDIENTE' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('PENDIENTE')}
-            >
-              Pendientes
-              {pendingCount > 0 && (
-                <span
-                  className="admin-news-tab-dot"
-                  title="Tienes solicitudes pendientes de aprobación"
-                />
-              )}
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === 'APROBADO'}
-              className={`admin-news-tab-item ${statusFilter === 'APROBADO' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('APROBADO')}
-            >
-              Aprobados
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={statusFilter === 'RECHAZADO'}
-              className={`admin-news-tab-item ${statusFilter === 'RECHAZADO' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('RECHAZADO')}
-            >
-              Rechazados
-            </button>
-          </div>
-
-          <span
-            className={`admin-news-active-count-badge ${
-              statusFilter === 'PENDIENTE'
-                ? 'count-pending'
-                : statusFilter === 'APROBADO'
-                ? 'count-approved'
-                : 'count-rejected'
-            }`}
-          >
-            {statusFilter === 'PENDIENTE'
-              ? `${pendingCount} ${pendingCount === 1 ? 'pendiente' : 'pendientes'}`
-              : statusFilter === 'APROBADO'
-              ? `${approvedCount} ${approvedCount === 1 ? 'aprobada' : 'aprobadas'}`
-              : `${rejectedCount} ${rejectedCount === 1 ? 'rechazada' : 'rechazadas'}`}
-          </span>
-        </div>
-
         <div className="data-table-container-admin">
           <div className="data-table-header-admin">
             <div className="data-table-col-admin">CONTENIDO</div>
@@ -422,9 +440,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
             <div className="data-table-col-admin">EDITOR</div>
             <div className="data-table-col-admin">CATEGORÍA</div>
             <div className="data-table-col-admin">ESTADO</div>
-            <div className="data-table-col-admin" style={{ textAlign: 'center' }}>
-              ACCIONES
-            </div>
           </div>
 
           <div className="data-table-body-admin">
@@ -438,7 +453,11 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                   ? 'No hay noticias pendientes de aprobación en este momento.'
                   : statusFilter === 'APROBADO'
                   ? 'No hay noticias aprobadas registradas.'
-                  : 'No hay noticias rechazadas registradas.'}
+                  : statusFilter === 'PUBLICADO'
+                  ? 'No hay noticias publicadas registradas.'
+                  : statusFilter === 'RECHAZADO'
+                  ? 'No hay noticias rechazadas registradas.'
+                  : 'No hay noticias registradas.'}
               </div>
             ) : (
               filteredNoticias.map((item) => {
@@ -465,7 +484,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                           <DefaultNewsImage alt="Miniatura" compact />
                         )}
                       </div>
-                      <div
+                      <button
+                        type="button"
                         className="news-title-interactive-admin"
                         onClick={() => handleOpenModal(item)}
                       >
@@ -483,7 +503,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                             Editado por {item.editedBy || item.editor} Sistema
                           </span>
                         )}
-                      </div>
+                      </button>
                     </div>
 
                                         <div
@@ -530,19 +550,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                         )}
                     </div>
 
-                                        <div className="col-acciones-admin">
-                      <button
-                        className="icon-btn-admin"
-                        title={
-                          item.estado === 'PENDIENTE_APROBACION'
-                            ? 'Revisar y evaluar solicitud'
-                            : 'Ver vista previa'
-                        }
-                        onClick={() => handleOpenModal(item)}
-                      >
-                        <Eye size={18} />
-                      </button>
-                    </div>
                   </div>
                 );
               })
