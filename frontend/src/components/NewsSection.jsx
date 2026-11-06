@@ -8,7 +8,7 @@ import { FiMapPin, FiInfo, FiNavigation } from "react-icons/fi";
 
 const NewsSection = () => {
   return (
-    <section className="news-section">
+    <section className="news-section" id="como-sacar-turno">
       <div className="news-container">
         {/* ENCABEZADO */}
         <AnimatedContent distance={40} direction="vertical" delay={0.1}>

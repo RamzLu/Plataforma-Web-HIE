@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "../../styles/pages/EspecialidadesPage.css";
 import PageBanner from "../../components/PageBanner";
 import fondoBannerEsp from "../../assets/banner_especialidades.png";
@@ -42,64 +43,128 @@ const EspecialidadesPage = () => {
 
       <div className="especialidades-container">
         {currentView === "menu" && (
-          <div className="esp-main-menu">
+          <div className="esp-menu-wrapper">
+            {/* Banner alargado horizontal sobre derivaciones médicas */}
             <AnimatedContent
-              distance={40}
+              distance={30}
               direction="vertical"
-              delay={0.1}
+              delay={0.05}
               threshold={0.1}
             >
-              <div
-                className="menu-card"
-                onClick={() => setCurrentView("grilla-esp")}
-              >
-                <div className="menu-card-icon">
-                  <svg
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
+              <section className="esp-referral-card" aria-labelledby="referral-notice-title">
+                <div className="esp-referral-left">
+                  <div className="esp-referral-icon-box" aria-hidden="true">
+                    <svg
+                      width="26"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                    ></path>
-                  </svg>
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="12" y1="18" x2="12" y2="12" />
+                      <line x1="9" y1="15" x2="15" y2="15" />
+                    </svg>
+                  </div>
+
+                  <div className="esp-referral-text-group">
+                    <h4 id="referral-notice-title" className="esp-referral-title">
+                      Atención Médica mediante Derivación Previa
+                    </h4>
+                    <p className="esp-referral-desc">
+                      ¿Cómo acceder a una consulta o estudio? Al ser un hospital de alta complejidad, la atención en especialidades y servicios requiere una <strong>derivación médica previa</strong> emitida por el Centro de Salud u hospital de referencia.
+                    </p>
+                  </div>
                 </div>
-                <h2>Especialidades</h2>
-              </div>
-            </AnimatedContent>
-            
-            <AnimatedContent
-              distance={40}
-              direction="vertical"
-              delay={0.2}
-              threshold={0.1}
-            >
-              <div
-                className="menu-card"
-                onClick={() => setCurrentView("grilla-serv")}
-              >
-                <div className="menu-card-icon">
-                  <svg
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
+
+                <div className="esp-referral-right">
+                  <Link
+                    to="/#como-sacar-turno"
+                    className="esp-referral-btn"
                   >
-                    <path
+                    <span>CÓMO SACAR TURNO</span>
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                    ></path>
-                  </svg>
+                      aria-hidden="true"
+                    >
+                      <line x1="7" y1="17" x2="17" y2="7" />
+                      <polyline points="7 7 17 7 17 17" />
+                    </svg>
+                  </Link>
                 </div>
-                <h2>Servicios Clave</h2>
-              </div>
+              </section>
             </AnimatedContent>
+
+            <div className="esp-main-menu">
+              <AnimatedContent
+                distance={40}
+                direction="vertical"
+                delay={0.1}
+                threshold={0.1}
+              >
+                <div
+                  className="menu-card"
+                  onClick={() => setCurrentView("grilla-esp")}
+                >
+                  <div className="menu-card-icon">
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      ></path>
+                    </svg>
+                  </div>
+                  <h2>Especialidades</h2>
+                </div>
+              </AnimatedContent>
+              
+              <AnimatedContent
+                distance={40}
+                direction="vertical"
+                delay={0.2}
+                threshold={0.1}
+              >
+                <div
+                  className="menu-card"
+                  onClick={() => setCurrentView("grilla-serv")}
+                >
+                  <div className="menu-card-icon">
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <h2>Servicios Clave</h2>
+                </div>
+              </AnimatedContent>
+            </div>
           </div>
         )}
 
@@ -119,11 +184,16 @@ const EspecialidadesPage = () => {
                 </svg>
                 Volver
               </button>
-              <h3 className="esp-instruction">
-                Seleccione{" "}
-                {currentView === "grilla-esp" ? "la especialidad" : "el servicio"}{" "}
-                para ver horarios y requisitos:
-              </h3>
+              <div className="esp-grid-header-info">
+                <h3 className="esp-instruction">
+                  Seleccione{" "}
+                  {currentView === "grilla-esp" ? "la especialidad" : "el servicio"}{" "}
+                  para ver horarios y requisitos:
+                </h3>
+                <span className="esp-grid-reminder">
+                  Recuerde que para solicitar turno es requisito contar con orden de derivación médica previa.
+                </span>
+              </div>
             </div>
 
             {loading ? (
@@ -255,6 +325,26 @@ const EspecialidadesPage = () => {
                       </li>
                     ))}
                   </ul>
+                </section>
+              )}
+
+              {/* Información sobre Derivación Médica */}
+              {selectedItem.informacionDerivacion && (
+                <section className="section-scope" aria-labelledby="deriv-title">
+                  <div className="section-heading-row">
+                    <svg className="section-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    <h2 id="deriv-title" className="section-heading-title">
+                      Información de Derivación:
+                    </h2>
+                  </div>
+                  <p className="scope-description-text">
+                    {selectedItem.informacionDerivacion}
+                  </p>
                 </section>
               )}
             </div>

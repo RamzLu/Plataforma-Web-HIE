@@ -64,14 +64,154 @@
 }
 
 /* =========================================
-   VISTA 1: MENÚ PRINCIPAL
+   VISTA 1: MENÚ PRINCIPAL Y AVISO DE DERIVACIONES
 ========================================= */
+.esp-menu-wrapper {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* Banner alargado horizontal (estilo tarjeta docencia/revista científica) */
+.esp-referral-card {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+  text-align: left;
+  transition: all 0.25s ease;
+}
+
+.esp-referral-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+@media (min-width: 768px) {
+  .esp-referral-card {
+    flex-direction: row;
+  }
+}
+
+.esp-referral-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.15rem;
+  flex: 1;
+}
+
+.esp-referral-icon-box {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  background-color: #005a87;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 90, 135, 0.25);
+}
+
+.esp-referral-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.esp-referral-title {
+  font-size: 1.2rem;
+  line-height: 1.4;
+  font-weight: 700;
+  color: #0c2340;
+  margin: 0;
+}
+
+.esp-referral-desc {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: #475569;
+  max-width: 38rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.esp-referral-desc strong {
+  color: #0f172a;
+  font-weight: 650;
+}
+
+.esp-referral-right {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .esp-referral-right {
+    width: auto;
+  }
+}
+
+.esp-referral-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  width: 100%;
+  padding: 0.75rem 1.4rem;
+  border-radius: 0.5rem;
+  background-color: #f0f7ff;
+  color: #005a87;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #bae6fd;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.esp-referral-btn:hover {
+  background-color: #e0f2fe;
+  color: #00446a;
+  border-color: #7dd3fc;
+  box-shadow: 0 2px 6px rgba(0, 90, 135, 0.15);
+  transform: translateY(-1px);
+}
+
+.esp-grid-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.esp-grid-reminder {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+  margin: 0;
+}
+
 .esp-main-menu {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 40px;
   width: 100%;
-  max-width: 900px;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 .menu-card {
@@ -515,6 +655,23 @@
   }
   .esp-main-menu {
     grid-template-columns: 1fr;
+  }
+  .esp-menu-wrapper {
+    gap: 24px;
+  }
+  .esp-referral-card {
+    padding: 1.25rem 1.25rem;
+    gap: 1.25rem;
+  }
+  .esp-referral-icon-box {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .esp-referral-title {
+    font-size: 1.1rem;
+  }
+  .esp-referral-desc {
+    font-size: 0.85rem;
   }
   .esp-grid-header {
     gap: 14px;
