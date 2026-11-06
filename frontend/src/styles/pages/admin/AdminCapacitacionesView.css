@@ -1,0 +1,871 @@
+.admin-training-page {
+  gap: 22px;
+}
+
+.admin-training-page > .admin-page-header-admin {
+  margin-bottom: 0;
+}
+
+.admin-training-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 0.84rem;
+}
+
+.admin-training-feedback button,
+.admin-training-modal-header button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.admin-training-feedback button:hover,
+.admin-training-modal-header button:hover {
+  background: rgb(15 23 42 / 7%);
+}
+
+.admin-training-summary-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: -14px;
+}
+
+.admin-training-reset-filter {
+  min-height: 32px;
+  padding: 5px 12px;
+  border: 1px solid #dbe3ec;
+  border-radius: 9px;
+  background: #fff;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.admin-training-reset-filter.is-active,
+.admin-training-reset-filter:hover {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.admin-training-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-training-summary-card {
+  display: flex;
+  min-width: 0;
+  min-height: 92px;
+  align-items: center;
+  gap: 13px;
+  padding: 17px;
+  border: 1px solid #e7edf5;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgb(15 23 42 / 4%);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
+}
+
+.admin-training-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgb(15 23 42 / 7%);
+}
+
+.admin-training-summary-card.is-selected {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 12%), 0 8px 20px rgb(15 23 42 / 5%);
+}
+
+.admin-training-summary-card:focus-visible,
+.admin-training-title-button:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+}
+
+.admin-training-summary-card > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 14px;
+}
+
+.admin-training-summary-card > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-training-summary-card small {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.admin-training-summary-card strong {
+  color: #0f172a;
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.admin-training-summary-card.is-pending > span {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.admin-training-summary-card.is-approved > span {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.admin-training-summary-card.is-published > span {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.admin-training-summary-card.is-rejected > span {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-training-card {
+  min-width: 0;
+}
+
+.admin-training-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.admin-training-card-heading p {
+  margin: 0;
+}
+
+.admin-training-result-count {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.77rem;
+  font-weight: 700;
+}
+
+.admin-training-toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 17px;
+}
+
+.admin-training-search {
+  display: flex;
+  min-width: 220px;
+  min-height: 44px;
+  flex: 1;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
+  color: #64748b;
+}
+
+.admin-training-search:focus-within,
+.admin-training-filter select:focus {
+  border-color: #93c5fd;
+  outline: 0;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
+}
+
+.admin-training-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.admin-training-search input::placeholder {
+  color: #94a3b8;
+}
+
+.admin-training-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #475569;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.admin-training-filter select {
+  min-width: 150px;
+  min-height: 44px;
+  padding: 0 30px 0 10px;
+  border: 1px solid #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
+  color: #0f172a;
+  font: inherit;
+}
+
+.admin-training-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5eaf1;
+  border-radius: 16px;
+  box-shadow: 0 5px 16px rgb(15 23 42 / 3%);
+}
+
+.admin-training-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-training-table th {
+  padding: 15px 13px;
+  border-bottom: 1px solid #e5eaf1;
+  background: #f8fafd;
+  color: #64748b;
+  font-size: 0.68rem;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-training-table td {
+  min-width: 125px;
+  padding: 15px 13px;
+  border-bottom: 1px solid #edf1f6;
+  color: #475569;
+  font-size: 0.82rem;
+  vertical-align: middle;
+}
+
+.admin-training-table td:first-child {
+  min-width: 290px;
+}
+
+.admin-training-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-training-table tbody tr {
+  transition: background-color 150ms ease;
+}
+
+.admin-training-table tbody tr:hover {
+  background: #f8faff;
+}
+
+.admin-training-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-training-title-cell > img,
+.admin-training-placeholder {
+  display: grid;
+  width: 54px;
+  height: 46px;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #e1e8f0;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #0369a1;
+  object-fit: cover;
+}
+
+.admin-training-title-cell > span:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-training-title-button {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #0c2340;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-training-title-button:hover {
+  color: #0369a1;
+  text-decoration: underline;
+}
+
+.admin-training-title-cell small,
+.admin-training-meta-cell small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 0.74rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.admin-training-meta-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-training-meta-cell > span {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.admin-training-meta-cell svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #64748b;
+}
+
+.admin-training-status,
+.admin-training-vigencia {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.admin-training-status.is-pendiente_aprobacion {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.admin-training-status.is-borrador {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.admin-training-status.is-aprobado {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.admin-training-status.is-publicado {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+  color: #0369a1;
+}
+
+.admin-training-status.is-rechazado {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.admin-training-status.is-archivado {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.admin-training-vigencia.is-vigente {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.admin-training-vigencia.is-finalizada {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.admin-training-empty {
+  padding: 36px !important;
+  color: #64748b !important;
+  text-align: center;
+}
+
+.admin-training-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.84rem;
+}
+
+.admin-training-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.admin-training-overlay {
+  position: fixed;
+  z-index: 3000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgb(15 23 42 / 56%);
+  backdrop-filter: blur(4px);
+}
+
+.admin-training-modal {
+  display: flex;
+  width: min(940px, 100%);
+  max-height: min(92vh, 960px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e4eaf2;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 28px 80px rgb(15 23 42 / 28%);
+}
+
+.admin-training-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 21px 25px;
+  border-bottom: 1px solid #e8edf4;
+  background: #fbfcfe;
+}
+
+.admin-training-modal-header > div > span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-training-modal-header h2 {
+  margin: 5px 0 0;
+  color: #0c2340;
+  font-size: 1.35rem;
+  line-height: 1.35;
+}
+
+.admin-training-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 23px 25px;
+  overflow-y: auto;
+}
+
+.admin-training-state-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.admin-training-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-training-info-grid article {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #e7edf5;
+  border-radius: 13px;
+  background: #fbfcfe;
+}
+
+.admin-training-info-grid article.is-wide {
+  grid-column: 1 / -1;
+}
+
+.admin-training-info-grid h3,
+.admin-training-resources h3 {
+  margin: 0 0 7px;
+  color: #0c2340;
+  font-size: 0.84rem;
+}
+
+.admin-training-info-grid p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.admin-training-content {
+  white-space: pre-line;
+}
+
+.admin-training-resources {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.admin-training-resources h3 {
+  margin-bottom: 0;
+}
+
+.admin-training-resource-image {
+  display: flex;
+  width: min(100%, 400px);
+  flex-direction: column;
+  gap: 7px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #f8fafc;
+  color: #0369a1;
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.admin-training-resource-image img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.admin-training-resource-image span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px 10px;
+}
+
+.admin-training-resource-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #0369a1;
+  font-size: 0.84rem;
+}
+
+.admin-training-resource-link > svg {
+  flex: 0 0 auto;
+}
+
+.admin-training-resource-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.admin-training-resource-link small,
+.admin-training-no-resources {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.admin-training-rejection-note {
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.82rem;
+}
+
+.admin-training-rejection-note p {
+  margin: 5px 0 0;
+  line-height: 1.5;
+}
+
+.admin-training-review-actions,
+.admin-training-confirmation > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.admin-training-action,
+.admin-training-confirm,
+.admin-training-cancel {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.admin-training-action:hover:not(:disabled),
+.admin-training-confirm:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.admin-training-action.is-approve,
+.admin-training-confirm.is-aprobado {
+  border-color: #15803d;
+  background: #15803d;
+  color: #fff;
+}
+
+.admin-training-action.is-reject,
+.admin-training-confirm.is-rechazado {
+  border-color: #b91c1c;
+  background: #b91c1c;
+  color: #fff;
+}
+
+.admin-training-action.is-archive,
+.admin-training-confirm.is-archivado {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.admin-training-cancel {
+  border-color: #dbe3ec;
+  background: #fff;
+  color: #475569;
+}
+
+.admin-training-confirmation {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid #dbeafe;
+  border-radius: 13px;
+  background: #f8fbff;
+  color: #334155;
+  font-size: 0.83rem;
+}
+
+.admin-training-confirmation p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.admin-training-confirmation label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #475569;
+  font-weight: 650;
+}
+
+.admin-training-confirmation label b {
+  color: #b91c1c;
+}
+
+.admin-training-confirmation textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 400;
+}
+
+.admin-training-confirmation textarea:focus {
+  border-color: #93c5fd;
+  outline: 0;
+  box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
+}
+
+.admin-training-action:disabled,
+.admin-training-confirm:disabled,
+.admin-training-cancel:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .admin-training-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-training-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-training-search,
+  .admin-training-filter,
+  .admin-training-filter select {
+    width: 100%;
+  }
+
+  .admin-training-card {
+    padding: 20px;
+  }
+
+  .admin-training-card-heading {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .admin-training-table thead {
+    display: none;
+  }
+
+  .admin-training-table,
+  .admin-training-table tbody,
+  .admin-training-table tr,
+  .admin-training-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-training-table tbody tr {
+    padding: 13px 15px;
+    border-bottom: 1px solid #edf1f6;
+  }
+
+  .admin-training-table td,
+  .admin-training-table td:first-child {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border: 0;
+    text-align: right;
+  }
+
+  .admin-training-table td:first-child {
+    display: block;
+    text-align: left;
+  }
+
+  .admin-training-table td:not(:first-child)::before {
+    flex: 0 0 110px;
+    color: #64748b;
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-training-page {
+    gap: 18px;
+  }
+
+  .admin-training-summary {
+    gap: 9px;
+  }
+
+  .admin-training-summary-card {
+    min-height: 78px;
+    gap: 8px;
+    padding: 11px;
+  }
+
+  .admin-training-summary-card > span {
+    width: 34px;
+    height: 34px;
+  }
+
+  .admin-training-summary-card small {
+    font-size: 0.68rem;
+  }
+
+  .admin-training-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .admin-training-modal {
+    max-height: 94dvh;
+    border-radius: 21px 21px 0 0;
+  }
+
+  .admin-training-modal-header,
+  .admin-training-modal-body {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .admin-training-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-training-info-grid article.is-wide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .admin-training-summary {
+    grid-template-columns: 1fr;
+  }
+}

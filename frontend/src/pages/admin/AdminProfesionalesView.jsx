@@ -264,11 +264,6 @@ const AdminProfesionalesView = () => {
         </div>
       </header>
 
-      <div className="admin-prof-demo-note" role="note">
-        <span className="admin-prof-demo-dot" />
-        Vista de diseño con datos ilustrativos. Las acciones aún no se conectan al backend.
-      </div>
-
       {feedback && (
         <div className="admin-prof-feedback" role="status">
           <span>{feedback}</span>

@@ -767,7 +767,7 @@
 .admin-news-summary-toolbar {
   display: flex;
   justify-content: flex-end;
-  margin: 18px 0 0;
+  margin-bottom: -14px;
 }
 
 .admin-news-reset-filter {

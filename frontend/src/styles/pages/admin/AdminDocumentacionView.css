@@ -28,7 +28,6 @@
   font-size: 1rem;
 }
 
-.admin-doc-demo-note,
 .admin-doc-feedback {
   display: flex;
   align-items: center;
@@ -39,14 +38,6 @@
   background: #eff6ff;
   color: #1e3a8a;
   font-size: 0.84rem;
-}
-
-.admin-doc-demo-note > span {
-  width: 8px;
-  height: 8px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: #3b82f6;
 }
 
 .admin-doc-feedback {

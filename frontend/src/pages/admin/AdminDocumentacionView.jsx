@@ -12,13 +12,19 @@ import {
 } from 'lucide-react';
 import '../../styles/pages/admin/AdminDocumentacionView.css';
 
+const DOCUMENTATION_CATEGORIES = [
+  'Guía y Orientación',
+  'Información Institucional',
+  'Prevención y Salud',
+];
+
 const initialDocuments = [
   {
     id: 'doc-001',
     title: 'Guía de preparación para estudios de laboratorio',
     description:
       'Indicaciones generales para la preparación previa a los análisis de laboratorio, incluyendo recomendaciones sobre ayuno y documentación necesaria.',
-    category: 'Guías y orientación',
+    category: 'Guía y Orientación',
     fileName: 'guia-preparacion-laboratorio.pdf',
     fileType: 'PDF',
     fileSize: '1.8 MB',
@@ -35,7 +41,7 @@ const initialDocuments = [
     title: 'Protocolo institucional de higiene de manos',
     description:
       'Material institucional para la prevención y el control de infecciones en los espacios de atención.',
-    category: 'Protocolos',
+    category: 'Prevención y Salud',
     fileName: 'protocolo-higiene-manos.pdf',
     fileType: 'PDF',
     fileSize: '2.4 MB',
@@ -52,7 +58,7 @@ const initialDocuments = [
     title: 'Directorio de servicios hospitalarios',
     description:
       'Información de referencia sobre los servicios disponibles en el Hospital Interdistrital Evita.',
-    category: 'Información institucional',
+    category: 'Información Institucional',
     fileName: 'directorio-servicios.docx',
     fileType: 'DOCX',
     fileSize: '680 KB',
@@ -69,7 +75,7 @@ const initialDocuments = [
     title: 'Recomendaciones para prevenir el dengue',
     description:
       'Consejos comunitarios para reducir criaderos de mosquitos y reconocer cuándo consultar al equipo de salud.',
-    category: 'Prevención',
+    category: 'Prevención y Salud',
     fileName: 'prevencion-dengue.pdf',
     fileType: 'PDF',
     fileSize: '1.2 MB',
@@ -94,22 +100,20 @@ const AdminDocumentacionView = () => {
   const [documents, setDocuments] = useState(initialDocuments);
   const [selectedId, setSelectedId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('TODOS');
-  const [categoryFilter, setCategoryFilter] = useState('TODAS');
+  const [categoryFilter, setCategoryFilter] = useState('TODOS');
   const [search, setSearch] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [isRejecting, setIsRejecting] = useState(false);
   const [feedback, setFeedback] = useState('');
 
   const selectedDocument = documents.find((document) => document.id === selectedId);
-  const categories = [...new Set(documents.map((document) => document.category))];
-
   const filteredDocuments = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
     return documents.filter((document) => {
       const matchesStatus = statusFilter === 'TODOS' || document.status === statusFilter;
       const matchesCategory =
-        categoryFilter === 'TODAS' || document.category === categoryFilter;
+        categoryFilter === 'TODOS' || document.category === categoryFilter;
       const searchableText = [
         document.title,
         document.description,
@@ -176,11 +180,6 @@ const AdminDocumentacionView = () => {
         <h1>Revisión de Documentación</h1>
         <p>Consultá y evaluá los documentos públicos enviados por el CMS.</p>
       </header>
-
-      <div className="admin-doc-demo-note" role="note">
-        <span />
-        Vista de diseño con datos ilustrativos. Las acciones aún no se conectan al backend.
-      </div>
 
       {feedback && (
         <div className="admin-doc-feedback" role="status">
@@ -265,8 +264,8 @@ const AdminDocumentacionView = () => {
           <label className="admin-doc-filter">
             <span>Categoría</span>
             <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
-              <option value="TODAS">Todas las categorías</option>
-              {categories.map((category) => <option key={category}>{category}</option>)}
+              <option value="TODOS">Todos</option>
+              {DOCUMENTATION_CATEGORIES.map((category) => <option key={category}>{category}</option>)}
             </select>
           </label>
         </div>

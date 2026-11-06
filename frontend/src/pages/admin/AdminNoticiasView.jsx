@@ -366,73 +366,72 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         <p>Evalúa las solicitudes de publicación enviadas por el equipo de redactores del CMS.</p>
       </div>
 
+      <div className="admin-news-summary-toolbar">
+        <button
+          type="button"
+          className={`admin-news-reset-filter ${statusFilter === 'TODOS' ? 'is-active' : ''}`}
+          aria-pressed={statusFilter === 'TODOS'}
+          onClick={() => setStatusFilter('TODOS')}
+        >
+          Todos
+        </button>
+      </div>
+      <div className="admin-news-summary" role="group" aria-label="Filtrar noticias por estado">
+        <button
+          type="button"
+          className={`admin-news-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'PENDIENTE'}
+          onClick={() => setStatusFilter('PENDIENTE')}
+        >
+          <span className="admin-news-summary-icon"><Clock3 size={19} /></span>
+          <span className="admin-news-summary-copy">
+            <span>Pendientes de aprobación</span>
+            <strong>{pendingCount}</strong>
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`admin-news-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'APROBADO'}
+          onClick={() => setStatusFilter('APROBADO')}
+        >
+          <span className="admin-news-summary-icon"><CheckCircle size={19} /></span>
+          <span className="admin-news-summary-copy">
+            <span>Aprobados para CMS</span>
+            <strong>{approvedCount}</strong>
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`admin-news-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'PUBLICADO'}
+          onClick={() => setStatusFilter('PUBLICADO')}
+        >
+          <span className="admin-news-summary-icon"><Globe2 size={19} /></span>
+          <span className="admin-news-summary-copy">
+            <span>Visibles al público</span>
+            <strong>{publishedCount}</strong>
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`admin-news-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'RECHAZADO'}
+          onClick={() => setStatusFilter('RECHAZADO')}
+        >
+          <span className="admin-news-summary-icon"><XCircle size={19} /></span>
+          <span className="admin-news-summary-copy">
+            <span>Rechazados</span>
+            <strong>{rejectedCount}</strong>
+          </span>
+        </button>
+      </div>
+
       <div className="dashboard-card-admin">
         <h2 className="dashboard-card-title-admin">Listado de las Noticias</h2>
         <p className="news-view-subtitle-admin">
           Área de Revisión: Aprobación y rechazo de notificaciones recibidas desde el CMS
         </p>
-
-        <div className="admin-news-summary-toolbar">
-          <button
-            type="button"
-            className={`admin-news-reset-filter ${statusFilter === 'TODOS' ? 'is-active' : ''}`}
-            aria-pressed={statusFilter === 'TODOS'}
-            onClick={() => setStatusFilter('TODOS')}
-          >
-            Todos
-          </button>
-        </div>
-        <div className="admin-news-summary" role="group" aria-label="Filtrar noticias por estado">
-          <button
-            type="button"
-            className={`admin-news-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
-            aria-pressed={statusFilter === 'PENDIENTE'}
-            onClick={() => setStatusFilter('PENDIENTE')}
-          >
-            <span className="admin-news-summary-icon"><Clock3 size={19} /></span>
-            <span className="admin-news-summary-copy">
-              <span>Pendientes de aprobación</span>
-              <strong>{pendingCount}</strong>
-            </span>
-          </button>
-          <button
-            type="button"
-            className={`admin-news-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
-            aria-pressed={statusFilter === 'APROBADO'}
-            onClick={() => setStatusFilter('APROBADO')}
-          >
-            <span className="admin-news-summary-icon"><CheckCircle size={19} /></span>
-            <span className="admin-news-summary-copy">
-              <span>Aprobados para CMS</span>
-              <strong>{approvedCount}</strong>
-            </span>
-          </button>
-          <button
-            type="button"
-            className={`admin-news-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-            aria-pressed={statusFilter === 'PUBLICADO'}
-            onClick={() => setStatusFilter('PUBLICADO')}
-          >
-            <span className="admin-news-summary-icon"><Globe2 size={19} /></span>
-            <span className="admin-news-summary-copy">
-              <span>Visibles al público</span>
-              <strong>{publishedCount}</strong>
-            </span>
-          </button>
-          <button
-            type="button"
-            className={`admin-news-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-            aria-pressed={statusFilter === 'RECHAZADO'}
-            onClick={() => setStatusFilter('RECHAZADO')}
-          >
-            <span className="admin-news-summary-icon"><XCircle size={19} /></span>
-            <span className="admin-news-summary-copy">
-              <span>Rechazados</span>
-              <strong>{rejectedCount}</strong>
-            </span>
-          </button>
-        </div>
-
         <div className="data-table-container-admin">
           <div className="data-table-header-admin">
             <div className="data-table-col-admin">CONTENIDO</div>
