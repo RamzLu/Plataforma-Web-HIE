@@ -5,6 +5,7 @@ import "../../styles/components/admin/AdminLayout.css";
 
 import keycloak from '../../config/keycloak';
 import { getNoticias } from '../../api/noticias.api';
+import { getEspecialidades } from '../../api/especialidades.api';
 
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminHeader from '../../components/admin/AdminHeader';
@@ -27,6 +28,7 @@ const AdminPage = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("Cargando...");
   const [pendingNoticiasCount, setPendingNoticiasCount] = useState(0);
+  const [pendingEspecialidadesCount, setPendingEspecialidadesCount] = useState(0);
   
   const isKeycloakInitialized = useRef(false);
 
@@ -43,6 +45,17 @@ const AdminPage = () => {
             (n) => (n.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
           ).length;
           setPendingNoticiasCount(pending);
+        }
+      })
+      .catch(() => {});
+
+    getEspecialidades(true)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const pending = data.filter(
+            (e) => (e.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+          ).length;
+          setPendingEspecialidadesCount(pending);
         }
       })
       .catch(() => {});
@@ -197,6 +210,7 @@ const AdminPage = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         pendingNoticiasCount={pendingNoticiasCount}
+        pendingEspecialidadesCount={pendingEspecialidadesCount}
       />
       
       <div className="admin-main-wrapper">
@@ -211,7 +225,11 @@ const AdminPage = () => {
           {activeTab === "noticias" && (
             <AdminNoticiasView onPendingCountChange={setPendingNoticiasCount} />
           )}
-          {activeTab === "servicios" && <AdminEspecialidadesServiciosView />}
+          {activeTab === "servicios" && (
+            <AdminEspecialidadesServiciosView
+              onPendingCountChange={setPendingEspecialidadesCount}
+            />
+          )}
           {activeTab === "usuarios" && <AdminUsuariosView />}
           {activeTab === "roles" && <AdminRolesView />}
           {activeTab === "auditoria" && <AdminAuditoriaView />}

@@ -15,7 +15,12 @@ import {
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 
-const AdminSidebar = ({ activeTab, setActiveTab, pendingNoticiasCount = 0 }) => {
+const AdminSidebar = ({
+  activeTab,
+  setActiveTab,
+  pendingNoticiasCount = 0,
+  pendingEspecialidadesCount = 0,
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
   const [expandedSection, setExpandedSection] = useState("Aprobación de Contenidos");
@@ -31,7 +36,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, pendingNoticiasCount = 0 }) => 
       title: "Aprobación de Contenidos",
       items: [
         { id: "noticias", label: "Noticias", icon: <FileText />, pendingCount: pendingNoticiasCount },
-        { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope />, pendingCount: 1 },
+        { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope />, pendingCount: pendingEspecialidadesCount },
         { id: "profesionales", label: "Profesionales", icon: <Contact />, pendingCount: 2 }, 
         { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: 0 },
         { id: "capacitaciones", label: "Capacitaciones Públicas", icon: <GraduationCap /> },

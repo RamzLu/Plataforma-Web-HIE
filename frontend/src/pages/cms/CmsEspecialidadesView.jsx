@@ -105,19 +105,38 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
     setIsSaving(true);
     try {
-      const token = keycloak.token;
-      if (editingId) {
-        await updateEspecialidad(editingId, payload, token); 
-        toast.success("Actualizado con éxito.");
-      } else {
-        await createEspecialidad(payload, token);
-        toast.success("Creado con éxito.");
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
       }
+      const token = keycloak.token;
+      let resp;
+      if (editingId) {
+        resp = await updateEspecialidad(editingId, payload, token);
+      } else {
+        resp = await createEspecialidad(payload, token);
+      }
+
+      const estadoResultante = (resp?.data?.estado || payload.estado || "PENDIENTE_APROBACION").toUpperCase();
+      if (estadoResultante === "PENDIENTE_APROBACION") {
+        toast.success(
+          editingId
+            ? "Modificaciones enviadas a revisión del administrador."
+            : "Especialidad/Servicio enviado a revisión del administrador para su aprobación."
+        );
+        setActiveTab("PENDIENTES");
+      } else {
+        toast.success(editingId ? "Actualizado con éxito." : "Creado con éxito.");
+        setActiveTab(estadoResultante === "ARCHIVADO" ? "ARCHIVADOS" : "PUBLICADOS");
+      }
+
       setShowModal(false);
       setHasUnsavedChanges(false);
       cargarDatos();
-    } catch (error) { toast.error("Error al guardar."); }
-    finally { setIsSaving(false); }
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Error al guardar.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const confirmDelete = (esp) => { setItemAEliminar(esp); setShowDeleteModal(true); };
@@ -145,17 +164,26 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     }
   };
 
-  const datosFiltrados = especialidades.filter(esp => {
-    const matchEstado = activeTab === "PUBLICADOS" 
-      ? esp.estado === "PUBLICADO" 
-      : (esp.estado === "ARCHIVADO" || esp.estado === "BORRADOR");
+  const datosFiltrados = especialidades.filter((esp) => {
+    const estadoItem = (esp.estado || "PUBLICADO").toUpperCase();
+    let matchEstado = false;
+    if (activeTab === "PUBLICADOS") {
+      matchEstado = estadoItem === "PUBLICADO" || estadoItem === "APROBADO";
+    } else if (activeTab === "PENDIENTES") {
+      matchEstado = estadoItem === "PENDIENTE_APROBACION";
+    } else if (activeTab === "RECHAZADOS") {
+      matchEstado = estadoItem === "RECHAZADO";
+    } else if (activeTab === "ARCHIVADOS") {
+      matchEstado = estadoItem === "ARCHIVADO" || estadoItem === "BORRADOR";
+    }
 
     let matchTipo = true;
     if (filtroTipo === "ESPECIALIDADES") matchTipo = esp.esServicio === false;
     if (filtroTipo === "SERVICIOS") matchTipo = esp.esServicio === true;
 
     const query = searchTerm.toLowerCase();
-    const matchSearch = !searchTerm ||
+    const matchSearch =
+      !searchTerm ||
       (esp.nombre && esp.nombre.toLowerCase().includes(query)) ||
       (esp.ubicacion && esp.ubicacion.toLowerCase().includes(query)) ||
       (esp.descripcion && esp.descripcion.toLowerCase().includes(query));
@@ -184,13 +212,27 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
         
         {/* Pestañas de estado idénticas a Noticias */}
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <button 
             type="button"
             className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
             onClick={() => setActiveTab("PUBLICADOS")}
           >
             Publicados
+          </button>
+          <button 
+            type="button"
+            className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
+            onClick={() => setActiveTab("PENDIENTES")}
+          >
+            Pendientes de aprobación
+          </button>
+          <button 
+            type="button"
+            className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
+            onClick={() => setActiveTab("RECHAZADOS")}
+          >
+            Rechazados
           </button>
           <button 
             type="button"
@@ -276,6 +318,23 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                         ? `${esp.descripcion.substring(0, 55)}...` 
                         : esp.descripcion || "Área asistencial del hospital"}
                     </span>
+                    {esp.rejectionReason && (
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "#b91c1c",
+                          fontWeight: "600",
+                          backgroundColor: "#fef2f2",
+                          padding: "3px 8px",
+                          borderRadius: "4px",
+                          display: "inline-block",
+                          marginTop: "6px",
+                          border: "1px solid #fecaca",
+                        }}
+                      >
+                        Motivo de rechazo: {esp.rejectionReason}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -304,9 +363,21 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                 </div>
 
                 {/* Columna ESTADO */}
-                <div style={{ width: "120px", textAlign: "center" }}>
-                  <span className={`status-badge ${esp.estado === "PUBLICADO" ? "publicado" : "archivado"}`}>
-                    {esp.estado}
+                <div style={{ width: "130px", textAlign: "center" }}>
+                  <span
+                    className={`status-badge ${
+                      esp.estado === "PUBLICADO"
+                        ? "publicado"
+                        : esp.estado === "PENDIENTE_APROBACION"
+                        ? "pendiente"
+                        : esp.estado === "RECHAZADO"
+                        ? "rechazado"
+                        : "archivado"
+                    }`}
+                  >
+                    {esp.estado === "PENDIENTE_APROBACION"
+                      ? "PENDIENTE"
+                      : esp.estado}
                   </span>
                 </div>
 
@@ -379,12 +450,12 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                   <div>
                     <label className="esp-form-label">Estado de Publicación</label>
                     <select 
-                      value={formData.estado} 
+                      value={formData.estado === "ARCHIVADO" ? "ARCHIVADO" : "PUBLICADO"} 
                       onChange={(e) => { setFormData({...formData, estado: e.target.value}); setHasUnsavedChanges(true); }} 
                       className="esp-form-input"
                     >
-                      <option value="PUBLICADO">Publicados</option>
-                      <option value="ARCHIVADO">Archivados</option>
+                      <option value="PUBLICADO">Publicar (Revisión del Administrador)</option>
+                      <option value="ARCHIVADO">Archivar (Oculto)</option>
                     </select>
                   </div>
 

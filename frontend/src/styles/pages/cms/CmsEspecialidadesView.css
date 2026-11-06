@@ -232,6 +232,18 @@ input:checked + .esp-slider:before {
   border: 1px solid #cbd5e1;
 }
 
+.status-badge.pendiente {
+  background-color: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.status-badge.rechazado {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
 
 
 /* =========================================

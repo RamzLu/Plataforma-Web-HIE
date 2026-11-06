@@ -111,6 +111,7 @@ router.delete("/profesionales/:id", requireCmsAccess, eliminarProfesional);
 router.get('/especialidades', adminViewAccess, especialidadCtrl.obtenerEspecialidades);
 router.post('/especialidades', requireCmsAccess, especialidadCtrl.crearEspecialidad);
 router.put('/especialidades/:id', requireCmsAccess, especialidadCtrl.actualizarEspecialidad);
+router.patch('/especialidades/:id/estado', requireAdminAccess, especialidadCtrl.evaluarEspecialidad);
 router.delete('/especialidades/:id', requireCmsAccess, especialidadCtrl.eliminarEspecialidad);
 
 // ==========================================

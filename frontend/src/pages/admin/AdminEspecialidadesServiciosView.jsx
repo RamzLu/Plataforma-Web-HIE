@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CheckCircle,
   Eye,
@@ -7,62 +7,13 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import keycloak from '../../config/keycloak';
+import {
+  getEspecialidades,
+  evaluarEspecialidadEstado,
+} from '../../api/especialidades.api.js';
 import '../../styles/pages/admin/AdminEspecialidadesServiciosView.css';
-
-const initialItems = [
-  {
-    id: 1,
-    name: 'Cardiología',
-    type: 'Especialidad',
-    association: 'Consultorios externos',
-    description: 'Atención y seguimiento de enfermedades cardiovasculares.',
-    hours: 'Lunes a viernes, de 8:00 a 12:00',
-    location: 'Consultorios externos - Planta baja',
-    requirements: 'Presentar documento de identidad y orden médica.',
-    documentation: 'Orden médica y estudios previos, si los hubiera.',
-    referral: 'Derivación desde clínica médica u otra especialidad.',
-    editor: 'Ana López',
-    updatedAt: '12/10/2026',
-    status: 'Pendiente de aprobación',
-    published: false,
-    active: true,
-  },
-  {
-    id: 2,
-    name: 'Diagnóstico por imágenes',
-    type: 'Servicio',
-    association: 'Diagnóstico y tratamiento',
-    description: 'Realización de estudios de diagnóstico por imágenes.',
-    hours: 'Lunes a viernes, de 7:00 a 18:00',
-    location: 'Edificio central - Planta baja',
-    requirements: 'Consultar indicaciones específicas al solicitar el turno.',
-    documentation: 'Orden médica y documento de identidad.',
-    referral: 'Se requiere orden del profesional tratante.',
-    editor: 'Carlos Ruiz',
-    updatedAt: '10/10/2026',
-    status: 'Rechazado',
-    rejectionReason: 'Falta indicar las instrucciones para solicitar un turno.',
-    published: false,
-    active: true,
-  },
-  {
-    id: 3,
-    name: 'Clínica médica',
-    type: 'Especialidad',
-    association: 'Consultorios externos',
-    description: 'Atención integral para la prevención, diagnóstico y tratamiento.',
-    hours: 'Lunes a viernes, de 8:00 a 16:00',
-    location: 'Consultorios externos - Planta baja',
-    requirements: 'Presentar documento de identidad.',
-    documentation: 'Documento de identidad y estudios previos.',
-    referral: 'Acceso directo o derivación según disponibilidad.',
-    editor: 'Ana López',
-    updatedAt: '08/10/2026',
-    status: 'Aprobado',
-    published: true,
-    active: true,
-  },
-];
 
 const statusClass = (status) => {
   if (status === 'Aprobado') return 'admin-es-status-approved';
@@ -70,8 +21,41 @@ const statusClass = (status) => {
   return 'admin-es-status-pending';
 };
 
-const AdminEspecialidadesServiciosView = () => {
-  const [items, setItems] = useState(initialItems);
+const mapItemFromBackend = (item) => {
+  const estadoUpper = (item.estado || 'PENDIENTE_APROBACION').toUpperCase();
+  let statusLabel = 'Pendiente de aprobación';
+  if (estadoUpper === 'PUBLICADO' || estadoUpper === 'APROBADO') {
+    statusLabel = 'Aprobado';
+  } else if (estadoUpper === 'RECHAZADO') {
+    statusLabel = 'Rechazado';
+  }
+
+  const reqText = Array.isArray(item.requisitos)
+    ? item.requisitos.join('\n')
+    : item.requisitos || '';
+
+  return {
+    id: item.id,
+    name: item.nombre || '',
+    type: item.esServicio ? 'Servicio' : 'Especialidad',
+    esServicio: Boolean(item.esServicio),
+    location: item.ubicacion || 'Sin ubicación asignada',
+    description: item.descripcion || '',
+    hours: item.horarios || '',
+    requirements: reqText,
+    documentation: item.documentacionNecesaria || '',
+    referral: item.informacionDerivacion || '',
+    editor: item.editor || 'Editor CMS',
+    updatedAt: item.updatedAtFormatted || 'Reciente',
+    status: statusLabel,
+    estado: estadoUpper,
+    rejectionReason: item.rejectionReason || null,
+  };
+};
+
+const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState(null);
   const [typeFilter, setTypeFilter] = useState('Todos');
   const [statusFilter, setStatusFilter] = useState('Todos');
@@ -79,14 +63,84 @@ const AdminEspecialidadesServiciosView = () => {
   const [isRejecting, setIsRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [feedback, setFeedback] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const syncPendingCount = useCallback(
+    (list) => {
+      if (typeof onPendingCountChange === 'function') {
+        const count = list.filter(
+          (item) => item.status === 'Pendiente de aprobación'
+        ).length;
+        onPendingCountChange(count);
+      }
+    },
+    [onPendingCountChange]
+  );
+
+  const cargarDatos = useCallback(
+    async (silent = false) => {
+      try {
+        if (!silent) setLoading(true);
+        const data = await getEspecialidades(true);
+        if (Array.isArray(data)) {
+          // Excluimos registros archivados internamente por CMS (el Admin solo aprueba/rechaza revisiones)
+          const filtradas = data
+            .filter((item) => (item.estado || '').toUpperCase() !== 'ARCHIVADO')
+            .map(mapItemFromBackend)
+            .sort((a, b) => {
+              const aPending = a.status === 'Pendiente de aprobación' ? 0 : 1;
+              const bPending = b.status === 'Pendiente de aprobación' ? 0 : 1;
+              if (aPending !== bPending) return aPending - bPending;
+              return a.name.localeCompare(b.name);
+            });
+          setItems(filtradas);
+          syncPendingCount(filtradas);
+        } else {
+          setItems([]);
+          syncPendingCount([]);
+        }
+      } catch (error) {
+        if (!silent) {
+          console.error('Error al cargar especialidades y servicios:', error);
+          toast.error('No se pudieron cargar los servicios y especialidades.');
+        }
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [syncPendingCount]
+  );
+
+  useEffect(() => {
+    cargarDatos(false);
+
+    const intervalId = setInterval(() => {
+      cargarDatos(true);
+    }, 10000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        cargarDatos(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [cargarDatos]);
 
   const filteredItems = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
     return items.filter((item) => {
       const matchesType = typeFilter === 'Todos' || item.type === typeFilter;
       const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
-      const matchesSearch = !normalizedSearch
-        || `${item.name} ${item.association} ${item.editor}`.toLocaleLowerCase('es').includes(normalizedSearch);
+      const matchesSearch =
+        !normalizedSearch ||
+        `${item.name} ${item.location} ${item.editor}`
+          .toLocaleLowerCase('es')
+          .includes(normalizedSearch);
       return matchesType && matchesStatus && matchesSearch;
     });
   }, [items, search, statusFilter, typeFilter]);
@@ -97,39 +151,60 @@ const AdminEspecialidadesServiciosView = () => {
     setRejectReason('');
   };
 
-  const updateItem = (id, changes) => {
-    setItems((currentItems) => currentItems.map((item) => (
-      item.id === id ? { ...item, ...changes } : item
-    )));
-    setSelectedItem((currentItem) => (
-      currentItem?.id === id ? { ...currentItem, ...changes } : currentItem
-    ));
+  const handleApprove = async () => {
+    if (!selectedItem || submitting) return;
+    try {
+      setSubmitting(true);
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
+      }
+      await evaluarEspecialidadEstado(
+        selectedItem.id,
+        { estado: 'APROBADO', isServicio: selectedItem.esServicio },
+        keycloak.token
+      );
+      toast.success(`"${selectedItem.name}" fue aprobado y publicado.`);
+      setFeedback(`"${selectedItem.name}" fue aprobado con éxito.`);
+      closeDetails();
+      await cargarDatos(true);
+    } catch (error) {
+      console.error('Error al aprobar:', error);
+      toast.error(error.response?.data?.error || 'Error al aprobar la información.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleApprove = () => {
-    updateItem(selectedItem.id, { status: 'Aprobado', published: false });
-    setFeedback(`${selectedItem.name} fue aprobado. El CMS ya puede publicarlo.`);
-    closeDetails();
-  };
-
-  const handleReject = () => {
+  const handleReject = async () => {
+    if (!selectedItem || submitting) return;
     if (!rejectReason.trim()) {
-      setFeedback('Ingresá un motivo para que el Editor CMS pueda corregir la información.');
+      toast.error('Ingresá un motivo para que el Editor CMS pueda corregir la información.');
       return;
     }
-    updateItem(selectedItem.id, {
-      status: 'Rechazado',
-      rejectionReason: rejectReason.trim(),
-      published: false,
-    });
-    setFeedback(`${selectedItem.name} fue rechazado y se registró el motivo para el CMS.`);
-    closeDetails();
-  };
-
-  const handleToggleActive = () => {
-    const nextActive = !selectedItem.active;
-    updateItem(selectedItem.id, { active: nextActive, published: nextActive && selectedItem.published });
-    setFeedback(`${selectedItem.name} ${nextActive ? 'fue activado' : 'fue desactivado'}.`);
+    try {
+      setSubmitting(true);
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
+      }
+      await evaluarEspecialidadEstado(
+        selectedItem.id,
+        {
+          estado: 'RECHAZADO',
+          rejectionReason: rejectReason.trim(),
+          isServicio: selectedItem.esServicio,
+        },
+        keycloak.token
+      );
+      toast.success(`"${selectedItem.name}" fue rechazado. Se notificó al Editor CMS.`);
+      setFeedback(`"${selectedItem.name}" fue rechazado.`);
+      closeDetails();
+      await cargarDatos(true);
+    } catch (error) {
+      console.error('Error al rechazar:', error);
+      toast.error(error.response?.data?.error || 'Error al rechazar la información.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const pendingCount = items.filter((item) => item.status === 'Pendiente de aprobación').length;
@@ -138,8 +213,8 @@ const AdminEspecialidadesServiciosView = () => {
     <div className="admin-es-page">
       <header className="admin-es-page-header">
         <span className="admin-es-overtitle">PANEL DE CONTROL DIRECTIVO</span>
-        <h1>Servicios y Especialidades</h1>
-        <p>Revisá la información enviada por el CMS y gestioná su aprobación y vigencia pública.</p>
+        <h1>Revisión de Servicios y Especialidades</h1>
+        <p>Evalúa las solicitudes enviadas por el equipo de redacción del CMS para decidir su aprobación o rechazo.</p>
       </header>
 
       {feedback && (
@@ -154,8 +229,8 @@ const AdminEspecialidadesServiciosView = () => {
       <section className="admin-es-card" aria-labelledby="admin-es-list-title">
         <div className="admin-es-card-heading">
           <div>
-            <h2 id="admin-es-list-title">Información cargada</h2>
-            <p>Revisá descripciones, requisitos, horarios, ubicación y asociaciones antes de aprobar.</p>
+            <h2 id="admin-es-list-title">Información para evaluación</h2>
+            <p>Revisá descripciones, requisitos, horarios, ubicación y documentación médica antes de aprobar o rechazar.</p>
           </div>
           <span className="admin-es-pending-count">
             {pendingCount} {pendingCount === 1 ? 'pendiente' : 'pendientes'}
@@ -165,7 +240,7 @@ const AdminEspecialidadesServiciosView = () => {
         <div className="admin-es-toolbar">
           <label className="admin-es-search">
             <Search size={18} aria-hidden="true" />
-            <span className="admin-es-visually-hidden">Buscar por nombre, asociación o editor</span>
+            <span className="admin-es-visually-hidden">Buscar por nombre, ubicación o editor</span>
             <input
               type="search"
               placeholder="Buscar servicios o especialidades..."
@@ -193,68 +268,82 @@ const AdminEspecialidadesServiciosView = () => {
         </div>
 
         <div className="admin-es-table-wrap">
-          <table className="admin-es-table">
-            <thead>
-              <tr>
-                <th scope="col">Servicio / Especialidad</th>
-                <th scope="col">Tipo</th>
-                <th scope="col">Asociación</th>
-                <th scope="col">Editor / fecha</th>
-                <th scope="col">Revisión</th>
-                <th scope="col">Publicación</th>
-                <th scope="col"><span className="admin-es-visually-hidden">Acciones</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredItems.map((item) => (
-                <tr key={item.id}>
-                  <td>
-                    <button
-                      type="button"
-                      className="admin-es-name-button"
-                      onClick={() => setSelectedItem(item)}
-                    >
-                      <span className="admin-es-item-icon"><Stethoscope size={18} /></span>
-                      <span>{item.name}</span>
-                    </button>
-                  </td>
-                  <td>{item.type}</td>
-                  <td>{item.association}</td>
-                  <td>
-                    <span>{item.editor}</span>
-                    <small>{item.updatedAt}</small>
-                  </td>
-                  <td><span className={`admin-es-status ${statusClass(item.status)}`}>{item.status}</span></td>
-                  <td>
-                    <span className={`admin-es-publication ${item.published ? 'is-published' : ''}`}>
-                      {!item.active
-                        ? 'Desactivado'
-                        : item.published
-                          ? 'Publicado'
-                          : item.status === 'Aprobado'
-                            ? 'Disponible para CMS'
-                            : 'No disponible'}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="admin-es-view-button"
-                      aria-label={`Ver detalle de ${item.name}`}
-                      onClick={() => setSelectedItem(item)}
-                    >
-                      <Eye size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredItems.length === 0 && (
+          {loading ? (
+            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
+              <div
+                className="cms-spinner"
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  margin: '0 auto 16px auto',
+                  borderWidth: '3px',
+                  borderTopColor: '#0c2340',
+                }}
+              ></div>
+              <p style={{ fontSize: '0.95rem' }}>Cargando información médica y asistencial...</p>
+            </div>
+          ) : (
+            <table className="admin-es-table">
+              <thead>
                 <tr>
-                  <td className="admin-es-empty" colSpan="7">No se encontraron servicios o especialidades.</td>
+                  <th scope="col">Servicio / Especialidad</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Ubicación</th>
+                  <th scope="col">Editor / fecha</th>
+                  <th scope="col">Revisión</th>
+                  <th scope="col">
+                    <span className="admin-es-visually-hidden">Acciones</span>
+                  </th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredItems.map((item) => (
+                  <tr key={`${item.esServicio ? 'srv' : 'esp'}-${item.id}`}>
+                    <td>
+                      <button
+                        type="button"
+                        className="admin-es-name-button"
+                        onClick={() => setSelectedItem(item)}
+                      >
+                        <span className="admin-es-item-icon">
+                          <Stethoscope size={18} />
+                        </span>
+                        <span>{item.name}</span>
+                      </button>
+                    </td>
+                    <td>{item.type}</td>
+                    <td>{item.location}</td>
+                    <td>
+                      <span>{item.editor}</span>
+                      <small>{item.updatedAt}</small>
+                    </td>
+                    <td>
+                      <span className={`admin-es-status ${statusClass(item.status)}`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="admin-es-view-button"
+                        aria-label={`Ver detalle de ${item.name}`}
+                        onClick={() => setSelectedItem(item)}
+                      >
+                        <Eye size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {filteredItems.length === 0 && (
+                  <tr>
+                    <td className="admin-es-empty" colSpan="6">
+                      No se encontraron servicios o especialidades.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </section>
 
@@ -269,10 +358,17 @@ const AdminEspecialidadesServiciosView = () => {
           >
             <header className="admin-es-modal-header">
               <div>
-                <span>{selectedItem.type} · {selectedItem.association}</span>
+                <span>
+                  {selectedItem.type} · {selectedItem.location}
+                </span>
                 <h2 id="admin-es-modal-title">{selectedItem.name}</h2>
               </div>
-              <button type="button" className="admin-es-close-button" aria-label="Cerrar detalle" onClick={closeDetails}>
+              <button
+                type="button"
+                className="admin-es-close-button"
+                aria-label="Cerrar detalle"
+                onClick={closeDetails}
+              >
                 <X size={20} />
               </button>
             </header>
@@ -293,7 +389,9 @@ const AdminEspecialidadesServiciosView = () => {
                 </article>
                 <article className="admin-es-detail">
                   <h3>Requisitos</h3>
-                  <p>{selectedItem.requirements || 'Sin información cargada.'}</p>
+                  <p style={{ whiteSpace: 'pre-line' }}>
+                    {selectedItem.requirements || 'Sin información cargada.'}
+                  </p>
                 </article>
                 <article className="admin-es-detail">
                   <h3>Documentación necesaria</h3>
@@ -306,12 +404,19 @@ const AdminEspecialidadesServiciosView = () => {
               </div>
 
               <div className="admin-es-review-meta">
-                <span>Enviado por <strong>{selectedItem.editor}</strong></span>
-                <span>Última modificación: <strong>{selectedItem.updatedAt}</strong></span>
-                <span>Estado: <strong>{selectedItem.status}</strong></span>
-                <span>Vigencia: <strong>{selectedItem.active ? 'Activa' : 'Desactivada'}</strong></span>
+                <span>
+                  Enviado por <strong>{selectedItem.editor}</strong>
+                </span>
+                <span>
+                  Última modificación: <strong>{selectedItem.updatedAt}</strong>
+                </span>
+                <span>
+                  Estado: <strong>{selectedItem.status}</strong>
+                </span>
                 {selectedItem.rejectionReason && (
-                  <span>Motivo del rechazo: <strong>{selectedItem.rejectionReason}</strong></span>
+                  <span style={{ color: '#b91c1c' }}>
+                    Motivo del rechazo: <strong>{selectedItem.rejectionReason}</strong>
+                  </span>
                 )}
               </div>
 
@@ -332,31 +437,51 @@ const AdminEspecialidadesServiciosView = () => {
             <footer className="admin-es-modal-footer">
               {selectedItem.status === 'Pendiente de aprobación' && !isRejecting && (
                 <>
-                  <button type="button" className="admin-es-button admin-es-button-danger" onClick={() => setIsRejecting(true)}>
+                  <button
+                    type="button"
+                    className="admin-es-button admin-es-button-danger"
+                    onClick={() => setIsRejecting(true)}
+                    disabled={submitting}
+                  >
                     <XCircle size={17} /> Rechazar
                   </button>
-                  <button type="button" className="admin-es-button admin-es-button-primary" onClick={handleApprove}>
+                  <button
+                    type="button"
+                    className="admin-es-button admin-es-button-primary"
+                    onClick={handleApprove}
+                    disabled={submitting}
+                  >
                     <CheckCircle size={17} /> Aprobar
                   </button>
                 </>
               )}
               {isRejecting && (
                 <>
-                  <button type="button" className="admin-es-button admin-es-button-secondary" onClick={() => setIsRejecting(false)}>
+                  <button
+                    type="button"
+                    className="admin-es-button admin-es-button-secondary"
+                    onClick={() => setIsRejecting(false)}
+                    disabled={submitting}
+                  >
                     Cancelar
                   </button>
-                  <button type="button" className="admin-es-button admin-es-button-danger" onClick={handleReject}>
+                  <button
+                    type="button"
+                    className="admin-es-button admin-es-button-danger"
+                    onClick={handleReject}
+                    disabled={submitting}
+                  >
                     Confirmar rechazo
                   </button>
                 </>
               )}
-              {selectedItem.status === 'Aprobado' && !isRejecting && (
+              {selectedItem.status !== 'Pendiente de aprobación' && !isRejecting && (
                 <button
                   type="button"
-                  className={`admin-es-button ${selectedItem.active ? 'admin-es-button-danger' : 'admin-es-button-primary'}`}
-                  onClick={handleToggleActive}
+                  className="admin-es-button admin-es-button-secondary"
+                  onClick={closeDetails}
                 >
-                  {selectedItem.active ? 'Desactivar información' : 'Activar información'}
+                  Cerrar
                 </button>
               )}
             </footer>
