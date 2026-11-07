@@ -18,6 +18,7 @@ import AdminEspecialidadesServiciosView from '../admin/AdminEspecialidadesServic
 import AdminProfesionalesView from '../admin/AdminProfesionalesView';
 import AdminDocumentacionView from '../admin/AdminDocumentacionView';
 import AdminCapacitacionesView from '../admin/AdminCapacitacionesView';
+import AdminResidenciasView from '../admin/AdminResidenciasView';
 // import AdminUsuariosView from './admin/AdminUsuariosView';
 // import AdminRolesView from './admin/AdminRolesView';
 // import AdminAuditoriaView from './admin/AdminAuditoriaView';
@@ -255,6 +256,7 @@ const AdminPage = () => {
             />
           )}
           {activeTab === "capacitaciones" && <AdminCapacitacionesView />}
+          {activeTab === "residencias" && <AdminResidenciasView />}
           {activeTab === "usuarios" && <AdminUsuariosView />}
           {activeTab === "roles" && <AdminRolesView />}
           {activeTab === "auditoria" && <AdminAuditoriaView />}
