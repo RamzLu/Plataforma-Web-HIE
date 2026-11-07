@@ -90,7 +90,6 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         if (!silent) setLoading(true);
         const data = await getDocumentos(true);
         if (Array.isArray(data)) {
-          // El Admin solo aprueba/rechaza revisiones, filtramos borradores puros si no son de revisión
           const mapeados = data
             .filter((doc) => (doc.estado || '').toUpperCase() !== 'BORRADOR')
             .map(mapDocumentFromBackend)
@@ -346,11 +345,11 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
       <section className="admin-doc-card" aria-labelledby="admin-doc-list-title">
         <div className="admin-doc-card-heading">
           <div>
-            <h2 id="admin-doc-list-title">Documentos recibidos</h2>
-            <p>Hacé clic en el título para revisar descripción, archivo adjunto y decidir su aprobación.</p>
+            <h2 id="admin-doc-list-title">Listado de Documentos</h2>
+            <p>Área de Revisión: Aprobación y rechazo de documentos recibidos desde el CMS</p>
           </div>
           <span className="admin-doc-result-count">
-            {filteredDocuments.length} {filteredDocuments.length === 1 ? 'documento' : 'documentos'}
+            {filteredDocuments.length} {filteredDocuments.length === 1 ? 'resultado' : 'resultados'}
           </span>
         </div>
 
@@ -387,8 +386,8 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
               <thead>
                 <tr>
                   <th scope="col">Documento / archivo</th>
-                  <th scope="col">Categoría / tipo</th>
                   <th scope="col">Editor / fecha</th>
+                  <th scope="col">Categoría / tipo</th>
                   <th scope="col">Estado</th>
                 </tr>
               </thead>
@@ -412,16 +411,16 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                         </span>
                       </div>
                     </td>
+                    <td data-label="Editor / fecha">
+                      <div className="admin-doc-creator-cell" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{doc.editor || doc.creator}</span>
+                        <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}><CalendarDays size={13} />{doc.updatedAt}</small>
+                      </div>
+                    </td>
                     <td data-label="Categoría / tipo">
                       <div className="admin-doc-category-cell">
                         <strong>{doc.category}</strong>
                         <small>{doc.fileType} {doc.fileSize ? `· ${doc.fileSize}` : ''}</small>
-                      </div>
-                    </td>
-                    <td data-label="Editor / fecha">
-                      <div className="admin-doc-creator-cell">
-                        <span>{doc.editor || doc.creator}</span>
-                        <small><CalendarDays size={13} />{doc.updatedAt}</small>
                       </div>
                     </td>
                     <td data-label="Estado">
@@ -447,7 +446,6 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         </div>
       </section>
 
-      {/* Modal de revisión y aprobación */}
       {selectedDocument && (
         <div className="admin-doc-overlay" onClick={closeDetails}>
           <section
@@ -493,7 +491,6 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                 </article>
               </div>
 
-              {/* Vista previa real del documento */}
               <section className="admin-doc-preview-card" aria-label="Vista previa del documento">
                 <div className="admin-doc-preview-header">
                   <div className="admin-doc-preview-heading">
@@ -627,7 +624,6 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
               )}
             </div>
 
-            {/* El administrador únicamente aprueba o rechaza solicitudes pendientes */}
             {selectedDocument.status === 'PENDIENTE' && (
               <footer className="admin-doc-modal-footer">
                 {!isRejecting ? (

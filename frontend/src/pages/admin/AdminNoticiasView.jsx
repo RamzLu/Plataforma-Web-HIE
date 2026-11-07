@@ -431,10 +431,17 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       </div>
 
       <div className="dashboard-card-admin">
-        <h2 className="dashboard-card-title-admin">Listado de las Noticias</h2>
-        <p className="news-view-subtitle-admin">
-          Área de Revisión: Aprobación y rechazo de notificaciones recibidas desde el CMS
-        </p>
+        <div className="admin-news-card-heading">
+          <div>
+            <h2 className="dashboard-card-title-admin">Listado de Noticias</h2>
+            <p className="news-view-subtitle-admin">
+              Área de Revisión: Aprobación y rechazo de noticias recibidas desde el CMS
+            </p>
+          </div>
+          <span className="admin-news-result-count">
+            {filteredNoticias.length} {filteredNoticias.length === 1 ? 'resultado' : 'resultados'}
+          </span>
+        </div>
         <div className="data-table-container-admin">
           <div className="data-table-header-admin">
             <div className="data-table-col-admin">CONTENIDO</div>
@@ -501,7 +508,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                               marginTop: '4px',
                             }}
                           >
-                            Editado por {item.editedBy || item.editor} Sistema
+                            Editado por {item.editedBy || item.editor}
                           </span>
                         )}
                       </button>
@@ -511,8 +518,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       className="col-text-admin"
                       style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}
                     >
-                      <span style={{ fontWeight: 600, color: '#0c2340' }}>{item.editor}</span>
-                      <small style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
+                      <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{item.editor}</span>
+                      <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}>
                         <CalendarDays size={13} />
                         {item.date}
                         {wasEdited && (
@@ -531,8 +538,15 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                     </div>
 
                                         <div className="col-categoria-data-admin col-text-admin">
-                      <span className="category-pill-admin">
-                        {item.category || 'Noticias'}
+                      <span
+                        className={`category-pill-admin ${item.category === 'General' ? 'general' : ''}`}
+                        style={{
+                          backgroundColor:
+                            item.category === 'General' ? '#f1f5f9' : '#e0f2fe',
+                          color: item.category === 'General' ? '#475569' : '#0284c7',
+                        }}
+                      >
+                        {item.category || 'General'}
                       </span>
                     </div>
 

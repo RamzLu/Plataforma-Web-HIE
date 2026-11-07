@@ -50,7 +50,7 @@ const mapItemFromBackend = (item) => {
     requirements: reqText,
     documentation: item.documentacionNecesaria || '',
     referral: item.informacionDerivacion || '',
-    editor: item.editor || 'Editor CMS',
+    editor: item.editor || item.editedBy || item.creator || item.usuario || 'Editor CMS',
     updatedAt: item.updatedAtFormatted || 'Reciente',
     status: statusLabel,
     estado: estadoUpper,
@@ -90,7 +90,6 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         if (!silent) setLoading(true);
         const data = await getEspecialidades(true);
         if (Array.isArray(data)) {
-          // Excluimos registros archivados internamente por CMS (el Admin solo aprueba/rechaza revisiones)
           const filtradas = data
             .filter((item) => (item.estado || '').toUpperCase() !== 'ARCHIVADO')
             .map(mapItemFromBackend)
@@ -297,8 +296,8 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       <section className="admin-es-card" aria-labelledby="admin-es-list-title">
         <div className="admin-es-card-heading">
           <div>
-            <h2 id="admin-es-list-title">Información para evaluación</h2>
-            <p>Revisá descripciones, requisitos, horarios, ubicación y documentación médica antes de aprobar o rechazar.</p>
+            <h2 id="admin-es-list-title">Listado de Servicios y Especialidades</h2>
+            <p>Área de Revisión: Aprobación y rechazo de servicios y especialidades recibidos desde el CMS</p>
           </div>
           <span className="admin-es-result-count">
             {filteredItems.length} {filteredItems.length === 1 ? 'resultado' : 'resultados'}
@@ -346,17 +345,16 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
               <thead>
                 <tr>
                   <th scope="col">Servicio / Especialidad</th>
+                  <th scope="col">Editor / fecha</th>
                   <th scope="col">Tipo</th>
                   <th scope="col">Ubicación</th>
-                  <th scope="col">Editor / fecha</th>
-                  <th scope="col">Revisión</th>
-                  <th scope="col">Publicación</th>
+                  <th scope="col">Estado</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredItems.map((item) => (
                   <tr key={`${item.esServicio ? 'srv' : 'esp'}-${item.id}`}>
-                    <td>
+                    <td data-label="Servicio / Especialidad">
                       <button
                         type="button"
                         className="admin-es-name-button"
@@ -368,36 +366,27 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                         <span>{item.name}</span>
                       </button>
                     </td>
-                    <td>{item.type}</td>
-                    <td>{item.location}</td>
                     <td data-label="Editor / fecha">
-                      <div className="admin-es-editor-cell" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        <span style={{ fontWeight: 600, color: '#0c2340' }}>{item.editor}</span>
-                        <small style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
+                      <div className="admin-es-editor-cell" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{item.editor}</span>
+                        <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}>
                           <CalendarDays size={13} />
                           {item.updatedAt}
                         </small>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Tipo">{item.type}</td>
+                    <td data-label="Ubicación">{item.location}</td>
+                    <td data-label="Estado">
                       <span className={`admin-es-status ${statusClass(item.status)}`}>
                         {item.status}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`admin-es-publication ${item.status === 'Publicado' || item.status === 'Aprobado' ? 'is-published' : ''}`}>
-                        {item.status === 'Publicado'
-                          ? 'Publicado'
-                          : item.status === 'Aprobado'
-                          ? 'Disponible para CMS'
-                          : 'No disponible'}
                       </span>
                     </td>
                   </tr>
                 ))}
                 {filteredItems.length === 0 && (
                   <tr>
-                    <td className="admin-es-empty" colSpan="6">
+                    <td className="admin-es-empty" colSpan="5">
                       No se encontraron servicios o especialidades.
                     </td>
                   </tr>

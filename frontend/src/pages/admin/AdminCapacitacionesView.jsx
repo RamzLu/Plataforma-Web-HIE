@@ -384,10 +384,10 @@ const AdminCapacitacionesView = () => {
         <div className="admin-training-card-heading">
           <div>
             <h2 className="dashboard-card-title-admin" id="admin-training-list-title">
-              Capacitaciones recibidas
+              Listado de Capacitaciones
             </h2>
             <p className="news-view-subtitle-admin">
-              Abrí un contenido para revisar su información y recursos asociados.
+              Área de Revisión: Aprobación y rechazo de capacitaciones recibidas desde el CMS
             </p>
           </div>
           <span className="admin-training-result-count">

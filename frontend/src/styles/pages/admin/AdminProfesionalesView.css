@@ -111,9 +111,10 @@
 }
 
 .admin-prof-summary-card strong {
-  color: #0f172a;
-  font-size: 1.45rem;
+  color: #0c2340;
+  font-size: 1.9rem;
   line-height: 1.1;
+  font-weight: 600;
 }
 
 .admin-prof-summary-card.is-pending .admin-prof-summary-icon {
@@ -182,16 +183,17 @@
 }
 
 .admin-prof-card-heading h2 {
-  margin: 0 0 5px;
+  margin: 0 0 6px;
   color: #0c2340;
-  font-size: 1.35rem;
+  font-size: 1.4rem;
   font-weight: 600;
 }
 
 .admin-prof-card-heading p {
   margin: 0;
-  color: #64748b;
-  font-size: 0.88rem;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .admin-prof-results-count {
@@ -277,12 +279,13 @@
 }
 
 .admin-prof-table th {
-  padding: 13px 12px;
-  border-bottom: 2px solid #cbd5e1;
-  background: #f1f5f9;
-  color: #64748b;
-  font-size: 0.68rem;
-  letter-spacing: 0.55px;
+  padding: 14px 16px;
+  border-bottom: 2px solid #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  color: #0c2340 !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -435,7 +438,8 @@
   color: #b45309;
 }
 
-.admin-prof-status.is-aprobado {
+.admin-prof-status.is-aprobado,
+.admin-prof-status.is-publicado {
   border-color: #bbf7d0;
   background: #dcfce7;
   color: #15803d;
@@ -1009,17 +1013,19 @@
 }
 
 .admin-prof-table-wrap {
-  border-color: #e5eaf1;
-  border-radius: 16px;
-  box-shadow: 0 5px 16px rgb(15 23 42 / 3%);
+  border-color: #cbd5e1 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
 }
 
 .admin-prof-table th {
-  padding-top: 15px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #e5eaf1;
-  background: #f8fafd;
-  letter-spacing: 0.075em;
+  padding: 14px 16px;
+  border-bottom: 2px solid #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  color: #0c2340 !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
 }
 
 .admin-prof-table td {
