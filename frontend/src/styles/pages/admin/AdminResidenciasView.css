@@ -840,7 +840,7 @@
 .admin-res-footer-pending-admin {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px;
 }
@@ -851,26 +851,8 @@
   gap: 10px;
 }
 
-.admin-res-footer-readonly-admin {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.admin-res-readonly-hint-admin {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: #64748b;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
 .admin-res-action-btn-admin,
-.admin-res-cancel-btn-admin,
-.admin-res-close-btn-admin {
+.admin-res-cancel-btn-admin {
   display: inline-flex;
   min-height: 40px;
   align-items: center;
@@ -910,23 +892,20 @@
   background: #991b1b;
 }
 
-.admin-res-cancel-btn-admin,
-.admin-res-close-btn-admin {
+.admin-res-cancel-btn-admin {
   border-color: #dbe3ec;
   background: #fff;
   color: #475569;
 }
 
-.admin-res-cancel-btn-admin:hover:not(:disabled),
-.admin-res-close-btn-admin:hover:not(:disabled) {
+.admin-res-cancel-btn-admin:hover:not(:disabled) {
   border-color: #cbd5e1;
   background: #f1f5f9;
   color: #0f172a;
 }
 
 .admin-res-action-btn-admin:disabled,
-.admin-res-cancel-btn-admin:disabled,
-.admin-res-close-btn-admin:disabled {
+.admin-res-cancel-btn-admin:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }

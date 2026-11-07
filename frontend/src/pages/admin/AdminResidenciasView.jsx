@@ -7,7 +7,6 @@ import {
   ExternalLink,
   FileText,
   Globe2,
-  GraduationCap,
   Image as ImageIcon,
   Search,
   Stethoscope,
@@ -35,6 +34,7 @@ const INITIAL_MOCK_RESIDENCIAS = [
     id: 'sim-res-001',
     nombre: 'Residencia en Clínica Médica',
     categoria: 'Formación Médica de Posgrado - Ministerio de Desarrollo Humano',
+    fechaInicio: '2026-08-01',
     fechaInicioVigencia: '2026-08-01',
     fechaConvocatoria: '2026-12-15',
     convocatoria: 'Abierta',
@@ -61,6 +61,7 @@ const INITIAL_MOCK_RESIDENCIAS = [
     id: 'sim-res-002',
     nombre: 'Residencia en Tocoginecología',
     categoria: 'Formación Médica de Posgrado - Ministerio de Desarrollo Humano',
+    fechaInicio: '2026-09-10',
     fechaInicioVigencia: '2026-09-10',
     fechaConvocatoria: '2027-02-28',
     convocatoria: 'Proximamente',
@@ -87,6 +88,7 @@ const INITIAL_MOCK_RESIDENCIAS = [
     id: 'sim-res-003',
     nombre: 'Residencia en Terapia Intensiva Adultos',
     categoria: 'Cuidados Críticos de Alta Complejidad - HIE',
+    fechaInicio: '2026-07-15',
     fechaInicioVigencia: '2026-07-15',
     fechaConvocatoria: '2026-12-20',
     convocatoria: 'Abierta',
@@ -113,6 +115,7 @@ const INITIAL_MOCK_RESIDENCIAS = [
     id: 'sim-res-004',
     nombre: 'Residencia en Pediatría',
     categoria: 'Formación Médica de Posgrado - Ministerio de Desarrollo Humano',
+    fechaInicio: '2026-08-15',
     fechaInicioVigencia: '2026-08-15',
     fechaConvocatoria: '2027-03-31',
     convocatoria: 'Abierta',
@@ -139,6 +142,7 @@ const INITIAL_MOCK_RESIDENCIAS = [
     id: 'sim-res-005',
     nombre: 'Residencia en Cardiología Clínica',
     categoria: 'Especialidades Clínicas y Diagnóstico Cardiovascular',
+    fechaInicio: '2026-08-01',
     fechaInicioVigencia: '2026-08-01',
     fechaConvocatoria: '2026-11-30',
     convocatoria: 'Abierta',
@@ -165,6 +169,7 @@ const INITIAL_MOCK_RESIDENCIAS = [
     id: 'sim-res-006',
     nombre: 'Residencia en Medicina Familiar y Comunitaria',
     categoria: 'Atención Primaria y Salud Comunitaria',
+    fechaInicio: '2026-06-01',
     fechaInicioVigencia: '2026-06-01',
     fechaConvocatoria: '2026-10-15',
     convocatoria: 'Abierta',
@@ -192,6 +197,7 @@ const INITIAL_MOCK_RESIDENCIAS = [
     id: 'sim-res-007',
     nombre: 'Residencia en Cirugía General',
     categoria: 'Formación Médica Quirúrgica de Posgrado',
+    fechaInicio: '2026-02-01',
     fechaInicioVigencia: '2026-02-01',
     fechaConvocatoria: '2026-05-30',
     convocatoria: 'Cerrada',
@@ -235,6 +241,12 @@ const formatDate = (value) => {
   });
 };
 
+const getStartDateValue = (residencia) =>
+  residencia?.fechaInicio ||
+  residencia?.fechaInicioVigencia ||
+  residencia?.createdAt ||
+  '';
+
 const normalizeConvocatoria = (value) => {
   const raw = String(value || '').trim();
   if (!raw) return 'Abierta';
@@ -260,16 +272,15 @@ const isConvocatoriaVigente = (residencia, hoy = new Date()) => {
 
 const formatVigencia = (residencia) => {
   if (!residencia) return 'Fechas a confirmar';
-  const inicio = residencia?.fechaInicioVigencia
-    ? formatDate(residencia.fechaInicioVigencia)
-    : '';
+  const startRaw = getStartDateValue(residencia);
+  const inicio = startRaw ? formatDate(startRaw) : '';
   const fin = residencia?.fechaConvocatoria
     ? formatDate(residencia.fechaConvocatoria)
     : '';
 
-  if (inicio && fin) return `${inicio} – ${fin}`;
+  if (inicio && fin) return `Inicio: ${inicio} – Cierre: ${fin}`;
+  if (inicio) return `Inicio: ${inicio}`;
   if (fin) return `Cierre / Examen: ${fin}`;
-  if (inicio) return `Desde ${inicio}`;
   return 'Fechas a confirmar';
 };
 
@@ -278,6 +289,10 @@ const normalizeResidenciaRecord = (raw) => {
   const estadoUpper = String(raw.estado || 'PENDIENTE_APROBACION')
     .trim()
     .toUpperCase();
+  const startDate =
+    raw.fechaInicio ||
+    raw.fechaInicioVigencia ||
+    (raw.createdAt ? String(raw.createdAt).slice(0, 10) : '2026-08-01');
 
   return {
     ...raw,
@@ -286,7 +301,8 @@ const normalizeResidenciaRecord = (raw) => {
     categoria:
       raw.categoria ||
       'Formación Médica de Posgrado - Ministerio de Desarrollo Humano',
-    fechaInicioVigencia: raw.fechaInicioVigencia || '',
+    fechaInicio: startDate,
+    fechaInicioVigencia: startDate,
     fechaConvocatoria: raw.fechaConvocatoria || '',
     convocatoria: normalizeConvocatoria(raw.convocatoria),
     descripcion: raw.descripcion || '',
@@ -407,6 +423,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
         item?.duracion,
         item?.cupos,
         item?.documentoNombre,
+        item?.fechaInicio,
+        item?.fechaConvocatoria,
       ]
         .filter(Boolean)
         .join(' ')
@@ -717,7 +735,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               <tr>
                 <th scope="col">Residencia / Especialidad</th>
                 <th scope="col">Convocatoria</th>
-                <th scope="col">Fechas / Vigencia</th>
+                <th scope="col">Fecha de Inicio / Vigencia</th>
                 <th scope="col">Estado</th>
               </tr>
             </thead>
@@ -795,7 +813,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                         </div>
                       </td>
 
-                      <td data-label="Fechas / Vigencia">
+                      <td data-label="Fecha de Inicio / Vigencia">
                         <div className="admin-res-meta-cell-admin">
                           <span>
                             <CalendarDays size={14} aria-hidden="true" />
@@ -876,9 +894,14 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                   <p>{selectedResidencia?.nombre || 'No especificado'}</p>
                 </article>
 
-                <article>
+                <article className="is-wide">
                   <h3>Categoría Institucional</h3>
                   <p>{selectedResidencia?.categoria || 'No especificada'}</p>
+                </article>
+
+                <article>
+                  <h3>Fecha de Inicio / Apertura</h3>
+                  <p>{formatDate(getStartDateValue(selectedResidencia))}</p>
                 </article>
 
                 <article>
@@ -1083,8 +1106,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               )}
             </div>
 
-            <footer className="admin-res-modal-footer-admin">
-              {isSelectedPending ? (
+            {isSelectedPending && (
+              <footer className="admin-res-modal-footer-admin">
                 <div className="admin-res-footer-pending-admin">
                   <div className="admin-res-review-actions-admin">
                     <button
@@ -1112,32 +1135,9 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                       Rechazar
                     </button>
                   </div>
-
-                  <button
-                    type="button"
-                    className="admin-res-close-btn-admin"
-                    onClick={closeDetails}
-                    disabled={isSaving}
-                  >
-                    Cerrar
-                  </button>
                 </div>
-              ) : (
-                <div className="admin-res-footer-readonly-admin">
-                  <span className="admin-res-readonly-hint-admin">
-                    <GraduationCap size={16} aria-hidden="true" />
-                    Vista en modo de solo lectura ({STATUS_LABELS[selectedResidencia?.estado] || selectedResidencia?.estado})
-                  </span>
-                  <button
-                    type="button"
-                    className="admin-res-close-btn-admin"
-                    onClick={closeDetails}
-                  >
-                    Cerrar
-                  </button>
-                </div>
-              )}
-            </footer>
+              </footer>
+            )}
           </section>
         </div>
       )}
