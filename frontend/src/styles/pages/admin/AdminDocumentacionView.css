@@ -116,14 +116,16 @@
 }
 
 .admin-doc-summary-card small {
-  color: #64748b;
-  font-size: 0.76rem;
+  color: #475569;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .admin-doc-summary-card strong {
-  color: #0f172a;
-  font-size: 1.45rem;
+  color: #0c2340;
+  font-size: 1.9rem;
   line-height: 1.1;
+  font-weight: 600;
 }
 
 .admin-doc-summary-card.is-pending > span {
@@ -282,9 +284,10 @@
 .admin-doc-table-wrap {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid #e5eaf1;
-  border-radius: 16px;
-  box-shadow: 0 5px 16px rgb(15 23 42 / 3%);
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+  background-color: #ffffff !important;
 }
 
 .admin-doc-table {
@@ -294,12 +297,13 @@
 }
 
 .admin-doc-table th {
-  padding: 15px 13px;
-  border-bottom: 1px solid #e5eaf1;
-  background: #f8fafd;
-  color: #64748b;
-  font-size: 0.68rem;
-  letter-spacing: 0.075em;
+  padding: 14px 16px;
+  border-bottom: 2px solid #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  color: #0c2340 !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -576,7 +580,6 @@
   color: #64748b;
 }
 
-/* Card de vista previa real del documento */
 .admin-doc-preview-card {
   margin-top: 16px;
   background-color: #ffffff;

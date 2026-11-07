@@ -1,12 +1,15 @@
-/* =========================================
-   1. LAYOUT PRINCIPAL (SHELL ADMIN)
-========================================= */
 .admin-layout {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 .admin-main-wrapper {
@@ -20,14 +23,14 @@
 .admin-content-area {
   flex: 1;
   overflow-y: auto;
-  background-color: #f8fafc; 
-  padding: 40px; 
+  background-color: #f8fafc;
+  padding: 40px;
 }
 
 .admin-content-area .admin-view-heading h1 {
   margin: 5px 0;
   color: #0c2340;
-  font-size: clamp(2rem, 3.2vw, 2.8rem);
+  font-size: clamp(3.5rem, 3.2vw, 2.8rem);
   font-weight: 200;
   letter-spacing: normal;
   line-height: 1.15;
@@ -41,9 +44,6 @@
   line-height: 1.55;
 }
 
-/* =========================================
-   3. HEADER (CABECERA SUPERIOR - ESTILO CMS)
-========================================= */
 .admin-header {
   height: 80px;
   background-color: #ffffff;
@@ -62,9 +62,12 @@
   align-items: center;
 }
 
-
 @keyframes adminPing {
-  75%, 100% { transform: scale(2.2); opacity: 0; }
+  75%,
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 
 .status-text {

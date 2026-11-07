@@ -1,10 +1,4 @@
-/* ==========================================================================
-   ADMIN DASHBOARD VIEW - CSS COMPLETO Y ADAPTADO
-   ========================================================================== */
 
-/* -----------------------------------------
-   1. CONTENEDOR PRINCIPAL
------------------------------------------ */
 .admin-dashboard-container {
   display: flex;
   flex-direction: column;
@@ -14,9 +8,6 @@
   box-sizing: border-box;
 }
 
-/* =========================================
-   ESTILOS DEL GRÁFICO RECHARTS
-========================================= */
 .stat-card-chart {
   background-color: #ffffff;
   border-radius: 16px;
@@ -120,9 +111,6 @@
   border-radius: 50%;
 }
 
-/* -----------------------------------------
-   2. ENCABEZADO Y TÍTULO DE PÁGINA (MODIFICADO)
------------------------------------------ */
 .admin-page-title {
   display: flex;
   justify-content: space-between;
@@ -162,7 +150,6 @@
   margin-bottom: 0;
 }
 
-/* NUEVA NOTIFICACIÓN TIPO BADGE EN LA CABECERA */
 .admin-header-alert-box {
   display: flex;
   align-items: center;
@@ -236,9 +223,6 @@
   font-size: 0.72rem;
 }
 
-/* -----------------------------------------
-   3. SECCIÓN SUPERIOR: GRID DE KPIS
------------------------------------------ */
 .dashboard-kpis-section {
   width: 100%;
 }
@@ -301,7 +285,6 @@
   line-height: 1;
 }
 
-/* Pastillas de tendencia / Estado KPI */
 .kpi-footer-trend {
   display: flex;
   align-items: center;
@@ -333,9 +316,6 @@
   font-size: 0.8rem;
 }
 
-/* -----------------------------------------
-   4. FILA INTERMEDIA: ESTADÍSTICAS Y ACCESOS RÁPIDOS
------------------------------------------ */
 .dashboard-analytics-row {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -384,7 +364,6 @@
   white-space: nowrap;
 }
 
-/* Lista de Accesos Directos */
 .quick-nav-grid {
   display: flex;
   flex-direction: column;
@@ -450,9 +429,6 @@
   color: #0ea5e9;
 }
 
-/* -----------------------------------------
-   5. SECCIÓN INFERIOR: SOLICITUDES Y FILTROS
------------------------------------------ */
 .dashboard-bottom-section {
   background-color: #ffffff;
   border-radius: 20px;
@@ -507,7 +483,6 @@
   margin: 0;
 }
 
-/* Lista / Tabla de solicitudes */
 .admin-pending-card {
   width: 100%;
 }
@@ -553,21 +528,21 @@
 }
 
 .pending-title {
-  font-size: 0.93rem;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0c2340;
 }
 
 .pending-secondary-row {
-  font-size: 0.8rem;
-  color: #64748b;
+  font-size: 0.82rem;
+  color: #475569;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .meta-author strong {
-  color: #334155;
+  color: #1e293b;
 }
 
 .meta-separator {
@@ -603,9 +578,6 @@
   box-shadow: 0 2px 6px rgba(2, 132, 199, 0.2);
 }
 
-/* -----------------------------------------
-   6. RESPONSIVIDAD Y BREAKPOINTS
------------------------------------------ */
 @media (max-width: 1080px) {
   .dashboard-analytics-row {
     grid-template-columns: 1fr;
@@ -648,7 +620,6 @@
   }
 }
 
-/* Rounded UI refinements; stat-card-chart is intentionally left unchanged. */
 .admin-dashboard-container {
   gap: 22px;
   background: transparent;
