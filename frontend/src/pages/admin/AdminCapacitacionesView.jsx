@@ -121,21 +121,6 @@ const SIMULATED_CAPACITACIONES = [
   },
 ];
 
-const parseEndDate = (value) => {
-  if (!value) return null;
-  const dateKey = String(value).slice(0, 10);
-  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(dateKey)
-    ? new Date(`${dateKey}T23:59:59`)
-    : new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-};
-
-const getVigencia = (training) => {
-  if (training.estado === 'ARCHIVADO' || training.activo === false) return 'FINALIZADA';
-  const endDate = parseEndDate(training.fechaFin || training.fechaInicio);
-  return endDate && endDate < new Date() ? 'FINALIZADA' : 'VIGENTE';
-};
-
 const formatDate = (value) => {
   if (!value) return 'A confirmar';
   const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
@@ -162,7 +147,6 @@ const AdminCapacitacionesView = () => {
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState('');
   const [statusFilter, setStatusFilter] = useState('TODOS');
-  const [vigenciaFilter, setVigenciaFilter] = useState('TODAS');
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [pendingAction, setPendingAction] = useState('');
@@ -209,8 +193,6 @@ const AdminCapacitacionesView = () => {
     const query = search.trim().toLocaleLowerCase('es');
     return capacitacionesVisibles.filter((training) => {
       const matchesStatus = statusFilter === 'TODOS' || training.estado === statusFilter;
-      const matchesVigencia =
-        vigenciaFilter === 'TODAS' || getVigencia(training) === vigenciaFilter;
       const searchableContent = [
         training.titulo,
         training.descripcion,
@@ -225,9 +207,9 @@ const AdminCapacitacionesView = () => {
         .join(' ')
         .toLocaleLowerCase('es');
 
-      return matchesStatus && matchesVigencia && (!query || searchableContent.includes(query));
+      return matchesStatus && (!query || searchableContent.includes(query));
     });
-  }, [capacitacionesVisibles, search, statusFilter, vigenciaFilter]);
+  }, [capacitacionesVisibles, search, statusFilter]);
 
   const counts = useMemo(
     () => ({
@@ -247,8 +229,18 @@ const AdminCapacitacionesView = () => {
     setActionError('');
   };
 
+  const startReviewAction = (action) => {
+    setPendingAction(action);
+    setRejectReason('');
+    setActionError('');
+  };
+
   const runReviewAction = async () => {
-    if (!selectedTraining || !pendingAction || isSaving) return;
+    if (
+      !selectedTraining ||
+      !['APROBADO', 'RECHAZADO'].includes(pendingAction) ||
+      isSaving
+    ) return;
     const reason = rejectReason.trim();
     if (pendingAction === 'RECHAZADO' && !reason) {
       setActionError('Ingresá el motivo del rechazo para continuar.');
@@ -265,16 +257,13 @@ const AdminCapacitacionesView = () => {
               ? {
                   ...training,
                   estado: pendingAction,
-                  activo: pendingAction === 'ARCHIVADO' || pendingAction === 'RECHAZADO'
-                    ? false
-                    : training.activo,
                   motivoRechazo: pendingAction === 'RECHAZADO' ? reason : '',
                 }
               : training,
           ),
         );
         setFeedback(
-          `Simulación: “${selectedTraining.titulo}” quedó ${STATUS_LABELS[pendingAction].toLocaleLowerCase('es')}.`,
+          `“${selectedTraining.titulo}” quedó ${STATUS_LABELS[pendingAction].toLocaleLowerCase('es')}.`,
         );
         closeDetails();
         return;
@@ -312,7 +301,6 @@ const AdminCapacitacionesView = () => {
 
   const resetFilters = () => {
     setStatusFilter('TODOS');
-    setVigenciaFilter('TODAS');
     setSearch('');
   };
 
@@ -321,14 +309,8 @@ const AdminCapacitacionesView = () => {
       <header className="admin-page-header-admin admin-view-heading">
         <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
         <h1>Gestión de Capacitaciones Públicas</h1>
-        <p>Revisá los contenidos, recursos y vigencia antes de aprobarlos para publicación.</p>
+        <p>Revisá los contenidos y recursos antes de aprobarlos para publicación.</p>
       </header>
-
-      {isSimulation && (
-        <div className="admin-training-simulation-note" role="status">
-          <strong>Modo simulación.</strong> Se muestran capacitaciones de ejemplo porque el listado del CMS no está habilitado para Administración. Las decisiones se actualizan solo en esta pantalla y no se guardan en el servidor.
-        </div>
-      )}
 
       {feedback && (
         <div className="admin-training-feedback" role="status">
@@ -342,8 +324,8 @@ const AdminCapacitacionesView = () => {
       <div className="admin-training-summary-toolbar">
         <button
           type="button"
-          className={`admin-training-reset-filter ${statusFilter === 'TODOS' && vigenciaFilter === 'TODAS' && !search ? 'is-active' : ''}`}
-          aria-pressed={statusFilter === 'TODOS' && vigenciaFilter === 'TODAS' && !search}
+          className={`admin-training-reset-filter ${statusFilter === 'TODOS' && !search ? 'is-active' : ''}`}
+          aria-pressed={statusFilter === 'TODOS' && !search}
           onClick={resetFilters}
         >
           Todos
@@ -405,7 +387,7 @@ const AdminCapacitacionesView = () => {
               Capacitaciones recibidas
             </h2>
             <p className="news-view-subtitle-admin">
-              Abrí un contenido para revisar descripción, temario, vigencia y recursos asociados.
+              Abrí un contenido para revisar su información y recursos asociados.
             </p>
           </div>
           <span className="admin-training-result-count">
@@ -424,14 +406,6 @@ const AdminCapacitacionesView = () => {
               onChange={(event) => setSearch(event.target.value)}
             />
           </label>
-          <label className="admin-training-filter">
-            <span>Vigencia</span>
-            <select value={vigenciaFilter} onChange={(event) => setVigenciaFilter(event.target.value)}>
-              <option value="TODAS">Todas</option>
-              <option value="VIGENTE">Vigentes</option>
-              <option value="FINALIZADA">Finalizadas</option>
-            </select>
-          </label>
         </div>
 
         <div className="admin-training-table-wrap">
@@ -440,23 +414,20 @@ const AdminCapacitacionesView = () => {
               <tr>
                 <th scope="col">Capacitación</th>
                 <th scope="col">Fechas / modalidad</th>
-                <th scope="col">Vigencia</th>
                 <th scope="col">Estado</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td className="admin-training-empty" colSpan="4">Cargando capacitaciones...</td></tr>
+                <tr><td className="admin-training-empty" colSpan="3">Cargando capacitaciones...</td></tr>
               ) : filteredCapacitaciones.length === 0 ? (
                 <tr>
-                  <td className="admin-training-empty" colSpan="4">
+                  <td className="admin-training-empty" colSpan="3">
                     No se encontraron capacitaciones con esos filtros.
                   </td>
                 </tr>
               ) : (
-                filteredCapacitaciones.map((training) => {
-                  const vigencia = getVigencia(training);
-                  return (
+                filteredCapacitaciones.map((training) => (
                     <tr key={training.id}>
                       <td data-label="Capacitación">
                         <div className="admin-training-title-cell">
@@ -483,19 +454,13 @@ const AdminCapacitacionesView = () => {
                           <small>{training.modalidad || 'Modalidad a confirmar'}</small>
                         </div>
                       </td>
-                      <td data-label="Vigencia">
-                        <span className={`admin-training-vigencia is-${vigencia.toLowerCase()}`}>
-                          {vigencia}
-                        </span>
-                      </td>
                       <td data-label="Estado">
                         <span className={`admin-training-status is-${training.estado?.toLowerCase() || 'borrador'}`}>
                           {STATUS_LABELS[training.estado] || training.estado || 'Sin estado'}
                         </span>
                       </td>
                     </tr>
-                  );
-                })
+                  ))
               )}
             </tbody>
           </table>
@@ -512,9 +477,14 @@ const AdminCapacitacionesView = () => {
             onClick={(event) => event.stopPropagation()}
           >
             <header className="admin-training-modal-header">
-              <div>
+              <div className="admin-training-modal-heading">
                 <span>Revisión de contenido público</span>
-                <h2 id="admin-training-modal-title">{selectedTraining.titulo}</h2>
+                <div className="admin-training-title-row">
+                  <h2 id="admin-training-modal-title">{selectedTraining.titulo}</h2>
+                  <span className={`admin-training-status is-${selectedTraining.estado?.toLowerCase() || 'borrador'}`}>
+                    {STATUS_LABELS[selectedTraining.estado] || selectedTraining.estado || 'Sin estado'}
+                  </span>
+                </div>
               </div>
               <button type="button" aria-label="Cerrar detalle" onClick={closeDetails}>
                 <X size={20} />
@@ -522,41 +492,56 @@ const AdminCapacitacionesView = () => {
             </header>
 
             <div className="admin-training-modal-body">
-              <div className="admin-training-state-row">
-                <span className={`admin-training-status is-${selectedTraining.estado?.toLowerCase() || 'borrador'}`}>
-                  {STATUS_LABELS[selectedTraining.estado] || selectedTraining.estado || 'Sin estado'}
-                </span>
-                <span className={`admin-training-vigencia is-${getVigencia(selectedTraining).toLowerCase()}`}>
-                  {getVigencia(selectedTraining)}
-                </span>
-                <span>Vigencia: {formatPeriod(selectedTraining)}</span>
-              </div>
-
               <div className="admin-training-info-grid">
                 <article className="is-wide">
-                  <h3>Descripción</h3>
-                  <p>{selectedTraining.descripcion || 'Sin descripción cargada.'}</p>
-                </article>
-                <article className="is-wide">
-                  <h3>Contenido / temario</h3>
-                  <p className="admin-training-content">{selectedTraining.contenido || 'Sin contenido detallado.'}</p>
-                </article>
-                <article>
-                  <h3>Modalidad</h3>
+                  <h3>Modalidad de la capacitación</h3>
                   <p>{selectedTraining.modalidad || 'A confirmar'}</p>
                 </article>
                 <article>
-                  <h3>Horario y ubicación</h3>
-                  <p>{[selectedTraining.horario, selectedTraining.ubicacion].filter(Boolean).join(' · ') || 'A confirmar'}</p>
+                  <h3>Fecha de inicio / encuentro</h3>
+                  <p>{formatDate(selectedTraining.fechaInicio)}</p>
+                </article>
+                <article>
+                  <h3>Fecha de finalización</h3>
+                  <p>{selectedTraining.fechaFin ? formatDate(selectedTraining.fechaFin) : 'No especificada'}</p>
+                </article>
+                <article>
+                  <h3>Horario</h3>
+                  <p>{selectedTraining.horario || 'A confirmar'}</p>
+                </article>
+                <article>
+                  <h3>Lugar / plataforma</h3>
+                  <p>{selectedTraining.ubicacion || 'A confirmar'}</p>
                 </article>
                 <article className="is-wide">
-                  <h3>Disertantes</h3>
+                  <h3>Disertantes / docentes a cargo</h3>
                   <p>{selectedTraining.disertantes || 'No informados'}</p>
+                </article>
+                <article className="is-wide">
+                  <h3>Enlace a video / clase virtual</h3>
+                  {selectedTraining.videoUrl ? (
+                    <p className="admin-training-inline-resource">
+                      <Video size={17} />
+                      <a href={sanitizeUrl(selectedTraining.videoUrl)} target="_blank" rel="noopener noreferrer">
+                        Revisar video externo <ExternalLink size={14} />
+                      </a>
+                    </p>
+                  ) : (
+                    <p>No se adjuntó un enlace de video.</p>
+                  )}
+                </article>
+                <article className="is-wide">
+                  <h3>Descripción breve</h3>
+                  <p>{selectedTraining.descripcion || 'Sin descripción cargada.'}</p>
+                </article>
+                <article className="is-wide">
+                  <h3>Temarios y contenidos académicos</h3>
+                  <p className="admin-training-content">{selectedTraining.contenido || 'Sin contenido detallado.'}</p>
                 </article>
               </div>
 
-              <section className="admin-training-resources" aria-label="Imágenes, videos y enlaces asociados">
-                <h3>Archivos y recursos asociados</h3>
+              <section className="admin-training-resources" aria-label="Banner o portada de la capacitación">
+                <h3>Banner / Portada de la tarjeta</h3>
                 {selectedTraining.bannerUrl && (
                   <a
                     className="admin-training-resource-image"
@@ -565,9 +550,16 @@ const AdminCapacitacionesView = () => {
                     rel="noopener noreferrer"
                   >
                     <img src={sanitizeUrl(selectedTraining.bannerUrl)} alt={selectedTraining.bannerNombre || 'Imagen de la capacitación'} />
-                    <span><ImageIcon size={16} /> Imagen de portada <ExternalLink size={14} /></span>
+                    <span><ImageIcon size={16} /> {selectedTraining.bannerNombre || 'Imagen de portada'} <ExternalLink size={14} /></span>
                   </a>
                 )}
+                {!selectedTraining.bannerUrl && (
+                  <p className="admin-training-no-resources">No se adjuntó un banner o portada.</p>
+                )}
+              </section>
+
+              <section className="admin-training-resources" aria-label="Material didáctico adjunto">
+                <h3>Material didáctico adjunto (contenido)</h3>
                 {selectedTraining.archivoTipo === 'imagen' && selectedTraining.archivoUrl && (
                   <a
                     className="admin-training-resource-image"
@@ -584,14 +576,6 @@ const AdminCapacitacionesView = () => {
                     <Video size={18} />
                     <a href={sanitizeUrl(selectedTraining.archivoUrl)} target="_blank" rel="noopener noreferrer">
                       {selectedTraining.archivoNombre || 'Abrir video asociado'} <ExternalLink size={14} />
-                    </a>
-                  </div>
-                )}
-                {selectedTraining.videoUrl && selectedTraining.archivoTipo !== 'video' && (
-                  <div className="admin-training-resource-link">
-                    <Video size={18} />
-                    <a href={sanitizeUrl(selectedTraining.videoUrl)} target="_blank" rel="noopener noreferrer">
-                      Revisar video externo <ExternalLink size={14} />
                     </a>
                   </div>
                 )}
@@ -621,11 +605,9 @@ const AdminCapacitacionesView = () => {
                     </a>
                   </div>
                 )}
-                {!selectedTraining.bannerUrl &&
-                  !selectedTraining.archivoUrl &&
-                  !selectedTraining.videoUrl &&
+                {!selectedTraining.archivoUrl &&
                   !selectedTraining.enlaceUrl && (
-                    <p className="admin-training-no-resources">No hay recursos o enlaces asociados.</p>
+                    <p className="admin-training-no-resources">No se adjuntó material didáctico.</p>
                   )}
               </section>
 
@@ -645,26 +627,17 @@ const AdminCapacitacionesView = () => {
 
               {selectedTraining.estado === 'PENDIENTE_APROBACION' && (
                 <div className="admin-training-review-actions">
-                  <button type="button" className="admin-training-action is-approve" onClick={() => setPendingAction('APROBADO')}>
+                  <button type="button" className="admin-training-action is-approve" onClick={() => startReviewAction('APROBADO')}>
                     <CheckCircle size={17} /> Aprobar
                   </button>
                   <button
                     type="button"
                     className="admin-training-action is-reject"
                     onClick={() => {
-                      setPendingAction('RECHAZADO');
-                      setActionError('');
+                      startReviewAction('RECHAZADO');
                     }}
                   >
                     <XCircle size={17} /> Rechazar
-                  </button>
-                </div>
-              )}
-
-              {getVigencia(selectedTraining) === 'FINALIZADA' && selectedTraining.estado !== 'ARCHIVADO' && (
-                <div className="admin-training-review-actions">
-                  <button type="button" className="admin-training-action is-archive" onClick={() => setPendingAction('ARCHIVADO')}>
-                    <Archive size={17} /> Archivar y desactivar
                   </button>
                 </div>
               )}
@@ -680,21 +653,27 @@ const AdminCapacitacionesView = () => {
                           onChange={(event) => setRejectReason(event.target.value)}
                           rows="3"
                           maxLength="1000"
+                          required
                           placeholder="Indicá qué debe corregirse antes de volver a enviar el contenido."
                         />
                       </label>
                       <p>El contenido quedará rechazado y no estará disponible para publicación.</p>
                     </>
                   ) : (
-                    <p>
-                      {pendingAction === 'APROBADO'
-                        ? '¿Confirmás aprobar este contenido? Quedará habilitado para continuar con su publicación desde el CMS.'
-                        : '¿Confirmás archivar y desactivar esta capacitación finalizada?'}
-                    </p>
+                    <p>¿Confirmás aprobar este contenido? Quedará habilitado para continuar con su publicación desde el CMS.</p>
                   )}
                   {actionError && <p className="admin-training-error" role="alert">{actionError}</p>}
                   <div>
-                    <button type="button" className="admin-training-cancel" onClick={() => setPendingAction('')} disabled={isSaving}>
+                    <button
+                      type="button"
+                      className="admin-training-cancel"
+                      onClick={() => {
+                        setPendingAction('');
+                        setRejectReason('');
+                        setActionError('');
+                      }}
+                      disabled={isSaving}
+                    >
                       Cancelar
                     </button>
                     <button

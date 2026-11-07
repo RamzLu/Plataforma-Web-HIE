@@ -6,20 +6,6 @@
   margin-bottom: 0;
 }
 
-.admin-training-simulation-note {
-  padding: 12px 15px;
-  border: 1px solid #bfdbfe;
-  border-radius: 12px;
-  background: #eff6ff;
-  color: #1e3a8a;
-  font-size: 0.84rem;
-  line-height: 1.55;
-}
-
-.admin-training-simulation-note strong {
-  font-weight: 750;
-}
-
 .admin-training-feedback {
   display: flex;
   align-items: center;
@@ -217,8 +203,7 @@
   color: #64748b;
 }
 
-.admin-training-search:focus-within,
-.admin-training-filter select:focus {
+.admin-training-search:focus-within {
   border-color: #93c5fd;
   outline: 0;
   background: #fff;
@@ -239,26 +224,6 @@
   color: #94a3b8;
 }
 
-.admin-training-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  color: #475569;
-  font-size: 0.74rem;
-  font-weight: 600;
-}
-
-.admin-training-filter select {
-  min-width: 150px;
-  min-height: 44px;
-  padding: 0 30px 0 10px;
-  border: 1px solid #e1e8f0;
-  border-radius: 12px;
-  background: #fbfcfe;
-  color: #0f172a;
-  font: inherit;
-}
-
 .admin-training-table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -270,7 +235,23 @@
 .admin-training-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   text-align: left;
+}
+
+.admin-training-table th:nth-child(1),
+.admin-training-table td:nth-child(1) {
+  width: 48%;
+}
+
+.admin-training-table th:nth-child(2),
+.admin-training-table td:nth-child(2) {
+  width: 32%;
+}
+
+.admin-training-table th:nth-child(3),
+.admin-training-table td:nth-child(3) {
+  width: 20%;
 }
 
 .admin-training-table th {
@@ -382,8 +363,7 @@
   color: #64748b;
 }
 
-.admin-training-status,
-.admin-training-vigencia {
+.admin-training-status {
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -427,18 +407,6 @@
 }
 
 .admin-training-status.is-archivado {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.admin-training-vigencia.is-vigente {
-  border-color: #bbf7d0;
-  background: #f0fdf4;
-  color: #15803d;
-}
-
-.admin-training-vigencia.is-finalizada {
   border-color: #cbd5e1;
   background: #f1f5f9;
   color: #475569;
@@ -493,12 +461,17 @@
 
 .admin-training-modal-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
   padding: 21px 25px;
   border-bottom: 1px solid #e8edf4;
   background: #fbfcfe;
+}
+
+.admin-training-modal-heading {
+  min-width: 0;
+  flex: 1;
 }
 
 .admin-training-modal-header > div > span {
@@ -509,11 +482,25 @@
   text-transform: uppercase;
 }
 
+.admin-training-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 5px;
+}
+
 .admin-training-modal-header h2 {
-  margin: 5px 0 0;
+  min-width: 0;
+  margin: 0;
   color: #0c2340;
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.admin-training-title-row .admin-training-status {
+  flex: 0 0 auto;
 }
 
 .admin-training-modal-body {
@@ -524,19 +511,10 @@
   overflow-y: auto;
 }
 
-.admin-training-state-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 9px;
-  color: #64748b;
-  font-size: 0.8rem;
-}
-
 .admin-training-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .admin-training-info-grid article {
@@ -569,12 +547,37 @@
   white-space: pre-line;
 }
 
+.admin-training-inline-resource {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-training-inline-resource > svg {
+  flex: 0 0 auto;
+  color: #0369a1;
+}
+
+.admin-training-inline-resource a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #0369a1;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
 .admin-training-resources {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-  padding-top: 2px;
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #e7edf5;
+  border-radius: 13px;
+  background: #fbfcfe;
+  box-sizing: border-box;
 }
 
 .admin-training-resources h3 {
@@ -773,9 +776,7 @@
     flex-direction: column;
   }
 
-  .admin-training-search,
-  .admin-training-filter,
-  .admin-training-filter select {
+  .admin-training-search {
     width: 100%;
   }
 
@@ -800,6 +801,10 @@
     width: 100%;
   }
 
+  .admin-training-table td:nth-child(n) {
+    width: 100%;
+  }
+
   .admin-training-table tbody tr {
     padding: 13px 15px;
     border-bottom: 1px solid #edf1f6;
@@ -819,6 +824,7 @@
 
   .admin-training-table td:first-child {
     display: block;
+    min-width: 0;
     text-align: left;
   }
 
