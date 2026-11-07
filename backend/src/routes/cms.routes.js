@@ -32,11 +32,19 @@ import {
   crearCapacitacion,
   actualizarCapacitacion,
   cambiarEstadoCapacitacion,
+  evaluarCapacitacion,
   eliminarCapacitacion
 } from "../controllers/cms/cms.capacitacion.controller.js";
 
 
-import { requireCmsAccess, requireAdminAccess, adminViewAccess } from '../middlewares/auth.middleware.js'; 
+import {
+  requireCmsAccess,
+  requireAdminAccess,
+  adminViewAccess,
+  verifyToken,
+  requireRole,
+  ROLES_VISTA_ADMIN,
+} from '../middlewares/auth.middleware.js'; 
 import { parsearIdBigInt } from '../utils/sanitize.utils.js';
 import {
   uploadImagenSingle,
@@ -138,12 +146,13 @@ router.delete('/residencias/:id', requireCmsAccess, eliminarResidencia);
 // ==========================================
 // MÓDULO: CAPACITACIONES
 // ==========================================
-// Listado completo (borradores/archivadas): solo CMS. El portal publico usa /capacitaciones/publicas.
-router.get('/capacitaciones', requireCmsAccess, obtenerCapacitaciones);
+// Listado completo (borradores/archivadas/pendientes): CMS y Admin (?admin=true). El portal publico usa /capacitaciones/publicas.
+router.get('/capacitaciones', adminViewAccess, obtenerCapacitaciones);
 router.get('/capacitaciones/publicas', obtenerCapacitacionesPublicas);
 router.post('/capacitaciones', requireCmsAccess, uploadCapacitacionFiles, crearCapacitacion);
 router.put('/capacitaciones/:id', requireCmsAccess, uploadCapacitacionFiles, actualizarCapacitacion);
-router.patch('/capacitaciones/:id/estado', requireCmsAccess, cambiarEstadoCapacitacion);
+router.patch('/capacitaciones/:id/estado', [verifyToken, requireRole(...ROLES_VISTA_ADMIN)], cambiarEstadoCapacitacion);
+router.patch('/capacitaciones/:id/revision', requireAdminAccess, evaluarCapacitacion);
 router.delete('/capacitaciones/:id', requireCmsAccess, eliminarCapacitacion);
 
 export default router;

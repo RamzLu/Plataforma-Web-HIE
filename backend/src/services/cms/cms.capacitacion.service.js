@@ -348,11 +348,13 @@ class CmsCapacitacionService {
       if (!isNaN(parsed.getTime())) fechaFinDate = parsed;
     }
 
-    let estadoNormalizado = "PUBLICADO";
+    let estadoNormalizado = "PENDIENTE_APROBACION";
     if (data.estado) {
       const upper = data.estado.toUpperCase();
-      if (["PUBLICADO", "BORRADOR", "ARCHIVADO"].includes(upper)) {
-        estadoNormalizado = upper;
+      if (upper === "BORRADOR") {
+        estadoNormalizado = "BORRADOR";
+      } else {
+        estadoNormalizado = "PENDIENTE_APROBACION";
       }
     }
 
@@ -373,6 +375,8 @@ class CmsCapacitacionService {
       imagenUrl: bannerUrl,
       bannerUrl: bannerUrl,
       bannerNombre,
+      motivoRechazo: "",
+      rejectionReason: "",
     };
 
     const nueva = await prisma.capacitacion.create({
@@ -593,10 +597,18 @@ class CmsCapacitacionService {
     }
 
     let estadoNormalizado = existing.estado;
+    let motivoRechazoLimpio = extra.motivoRechazo || "";
     if (data.estado) {
       const upper = data.estado.toUpperCase();
-      if (["PUBLICADO", "BORRADOR", "ARCHIVADO"].includes(upper)) {
-        estadoNormalizado = upper;
+      if (existing.estado === "APROBADO" && upper === "PUBLICADO") {
+        estadoNormalizado = "PUBLICADO";
+      } else if (upper === "BORRADOR") {
+        estadoNormalizado = "BORRADOR";
+      } else if (upper === "ARCHIVADO") {
+        estadoNormalizado = "ARCHIVADO";
+      } else if (upper === "PENDIENTE_APROBACION" || upper === "PUBLICADO") {
+        estadoNormalizado = "PENDIENTE_APROBACION";
+        motivoRechazoLimpio = "";
       }
     }
 
@@ -619,6 +631,8 @@ class CmsCapacitacionService {
       imagenUrl: bannerUrl,
       bannerUrl: bannerUrl,
       bannerNombre,
+      motivoRechazo: motivoRechazoLimpio,
+      rejectionReason: motivoRechazoLimpio,
     };
 
     const updated = await prisma.capacitacion.update({
@@ -647,19 +661,106 @@ class CmsCapacitacionService {
     };
   }
 
+  async evaluarCapacitacion(id, payload, user) {
+    const idBigInt = parsearIdBigInt(id, "ID de capacitación");
+    const { estado, motivoRechazo, rejectionReason } = payload;
+    const reason = (motivoRechazo || rejectionReason || "").trim();
+
+    if (!estado) {
+      const error = new Error("Debe indicar el estado de evaluación (APROBADO o RECHAZADO).");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const existing = await prisma.capacitacion.findUnique({
+      where: { id: idBigInt },
+      include: { archivo: true },
+    });
+
+    if (!existing) {
+      const error = new Error("Capacitación no encontrada.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const estadoUpper = estado.toUpperCase();
+    if (!["APROBADO", "RECHAZADO", "PUBLICADO", "ARCHIVADO"].includes(estadoUpper)) {
+      const error = new Error("Estado de evaluación no válido.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (estadoUpper === "RECHAZADO" && !reason) {
+      const error = new Error("Debe ingresar un motivo de rechazo.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    let extra = {};
+    if (existing.contenido) {
+      try {
+        extra = JSON.parse(existing.contenido);
+      } catch {}
+    }
+
+    extra.motivoRechazo = estadoUpper === "RECHAZADO" ? reason : "";
+    extra.rejectionReason = estadoUpper === "RECHAZADO" ? reason : "";
+    extra.evaluadoPor = user?.name || user?.preferred_username || "Administrador";
+    extra.evaluadoEn = new Date().toISOString();
+
+    const updated = await prisma.capacitacion.update({
+      where: { id: idBigInt },
+      data: {
+        estado: estadoUpper,
+        contenido: JSON.stringify(extra),
+        updatedAt: new Date(),
+      },
+      include: { archivo: true },
+    });
+
+    return {
+      message: `Capacitación evaluada con éxito: ${estadoUpper}.`,
+      capacitacion: this._formatCapacitacion(updated),
+    };
+  }
+
   async cambiarEstado(id, nuevoEstado) {
     const idBigInt = parsearIdBigInt(id, "ID de capacitación");
     const upper = (nuevoEstado || "").toUpperCase();
-    if (!["PUBLICADO", "BORRADOR", "ARCHIVADO"].includes(upper)) {
+    if (!["PUBLICADO", "BORRADOR", "ARCHIVADO", "PENDIENTE_APROBACION", "APROBADO", "RECHAZADO"].includes(upper)) {
       const error = new Error("Estado no válido.");
       error.statusCode = 400;
       throw error;
+    }
+
+    const existing = await prisma.capacitacion.findUnique({
+      where: { id: idBigInt },
+      include: { archivo: true },
+    });
+
+    if (!existing) {
+      const error = new Error("Capacitación no encontrada.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    let extra = {};
+    if (existing.contenido) {
+      try {
+        extra = JSON.parse(existing.contenido);
+      } catch {}
+    }
+
+    if (upper === "PENDIENTE_APROBACION") {
+      extra.motivoRechazo = "";
+      extra.rejectionReason = "";
     }
 
     const updated = await prisma.capacitacion.update({
       where: { id: idBigInt },
       data: {
         estado: upper,
+        contenido: JSON.stringify(extra),
         updatedAt: new Date(),
       },
       include: { archivo: true },
@@ -809,6 +910,10 @@ class CmsCapacitacionService {
       imagenUrl: safeBannerUrl,
       estado: c.estado,
       activo: c.activo,
+      motivoRechazo: extra.motivoRechazo || extra.rejectionReason || "",
+      rejectionReason: extra.rejectionReason || extra.motivoRechazo || "",
+      evaluadoPor: extra.evaluadoPor || null,
+      evaluadoEn: extra.evaluadoEn || null,
       createdAt: c.createdAt ? c.createdAt.toISOString() : "",
       updatedAt: c.updatedAt ? c.updatedAt.toISOString() : "",
     };

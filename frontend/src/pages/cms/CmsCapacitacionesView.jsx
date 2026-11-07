@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import {
@@ -17,6 +17,10 @@ import {
   Globe,
   PlayCircle,
   Image as ImageIcon,
+  CheckCircle,
+  AlertTriangle,
+  Send,
+  Check,
 } from "lucide-react";
 
 import "../../styles/components/cms/CmsDashboard.css";
@@ -36,6 +40,7 @@ import {
   updateCapacitacion,
   deleteCapacitacion,
   cambiarEstadoCapacitacion,
+  publicarCapacitacion,
 } from "../../api/capacitaciones.api";
 
 // Datos iniciales armonizados con el portal público (CapacitacionPage) y schema.prisma
@@ -197,6 +202,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   // Modales
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -219,7 +225,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   // Formulario según los campos de schema.prisma y el portal público
   const initialForm = {
     titulo: "",
-    estado: "PUBLICADO", // BORRADOR, PUBLICADO, ARCHIVADO
+    estado: "PENDIENTE_APROBACION", // PENDIENTE_APROBACION, BORRADOR, APROBADO, PUBLICADO, RECHAZADO, ARCHIVADO
     modalidad: "Presencial",
     tipoRecurso: "presencial",
     fechaInicio: "",
@@ -237,6 +243,8 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
     bannerNombre: "",
     descripcion: "",
     contenido: "",
+    motivoRechazo: "",
+    rejectionReason: "",
     activo: true,
   };
 
@@ -376,6 +384,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
 
   const handleOpenCreate = () => {
     setEditingId(null);
+    setEditingItem(null);
     setBannerSeleccionado(null);
     setBannerPreview("");
     setEliminarBannerFlag(false);
@@ -397,6 +406,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
 
   const handleOpenEdit = (item) => {
     setEditingId(item.id);
+    setEditingItem(item);
     setBannerSeleccionado(null);
     const existingBanner = item.bannerUrl || item.imagenUrl || "";
     setBannerPreview(existingBanner);
@@ -421,7 +431,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
 
     setFormData({
       titulo: item.titulo || "",
-      estado: item.estado || "PUBLICADO",
+      estado: item.estado || "PENDIENTE_APROBACION",
       modalidad: item.modalidad || "Presencial",
       tipoRecurso: (() => {
         if (tipoArch === "documento") return "pdf";
@@ -444,6 +454,8 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       bannerNombre: item.bannerNombre || (existingBanner ? "banner_portada.jpg" : ""),
       descripcion: item.descripcion || "",
       contenido: item.contenido || "",
+      motivoRechazo: item.motivoRechazo || item.rejectionReason || "",
+      rejectionReason: item.rejectionReason || item.motivoRechazo || "",
       activo: item.activo !== false,
     });
     setHasUnsavedChanges(false);
@@ -471,7 +483,25 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       return toast.error("El título de la capacitación es obligatorio.");
     }
 
-    const estadoFinal = forcedEstado || formData.estado || "PUBLICADO";
+    // Flujo de aprobación editorial:
+    // 1. Si viene forzado (ej: desde modal de cambios sin guardar), se respeta.
+    // 2. Si la capacitación ya estaba APROBADA por el Admin y el CM confirma publicar: va "PUBLICADO".
+    // 3. Si el usuario seleccionó "BORRADOR": va "BORRADOR".
+    // 4. Si el usuario seleccionó "ARCHIVADO": va "ARCHIVADO".
+    // 5. En cualquier otro caso (nueva, rechazada corregida o presentada): pasa a "PENDIENTE_APROBACION".
+    let estadoFinal = forcedEstado || formData.estado || "PENDIENTE_APROBACION";
+    if (!forcedEstado) {
+      if (editingItem?.estado === "APROBADO" && (formData.estado === "PUBLICADO" || formData.estado === "APROBADO")) {
+        estadoFinal = "PUBLICADO";
+      } else if (formData.estado === "BORRADOR") {
+        estadoFinal = "BORRADOR";
+      } else if (formData.estado === "ARCHIVADO") {
+        estadoFinal = "ARCHIVADO";
+      } else {
+        estadoFinal = "PENDIENTE_APROBACION";
+      }
+    }
+
     setIsSaving(true);
 
     try {
@@ -520,18 +550,28 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
 
       if (editingId) {
         await updateCapacitacion(editingId, dataToSend, token);
-        toast.success(
-          estadoFinal === "BORRADOR"
-            ? "Borrador actualizado con éxito."
-            : "Capacitación actualizada con éxito."
-        );
+        if (estadoFinal === "PUBLICADO") {
+          toast.success("¡Capacitación publicada en el portal con éxito!");
+          setActiveTab("PUBLICADOS");
+        } else if (estadoFinal === "BORRADOR") {
+          toast.success("Borrador actualizado con éxito.");
+          setActiveTab("BORRADORES");
+        } else if (estadoFinal === "ARCHIVADO") {
+          toast.success("Capacitación archivada con éxito.");
+          setActiveTab("ARCHIVADOS");
+        } else {
+          toast.success("Capacitación presentada a revisión del administrador.");
+          setActiveTab("PENDIENTES");
+        }
       } else {
         await createCapacitacion(dataToSend, token);
-        toast.success(
-          estadoFinal === "BORRADOR"
-            ? "Borrador guardado con éxito."
-            : "Capacitación publicada con éxito."
-        );
+        if (estadoFinal === "BORRADOR") {
+          toast.success("Borrador guardado con éxito.");
+          setActiveTab("BORRADORES");
+        } else {
+          toast.success("Capacitación presentada a revisión del administrador para su aprobación.");
+          setActiveTab("PENDIENTES");
+        }
       }
 
       await cargarCapacitaciones();
@@ -548,7 +588,21 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
     }
   };
 
-  // Cambio de estado interactivo (Publicado, Borrador, Archivado)
+  // Publicación directa de una capacitación ya aprobada por el Admin
+  const handlePublicarAprobada = async (item) => {
+    try {
+      const token = keycloak?.token || localStorage.getItem("token") || "";
+      await publicarCapacitacion(item.id, token);
+      toast.success(`¡"${item.titulo}" publicada en el portal público!`);
+      await cargarCapacitaciones();
+      setActiveTab("PUBLICADOS");
+    } catch (error) {
+      console.error("Error al publicar capacitación:", error);
+      toast.error(error.response?.data?.message || "No se pudo publicar la capacitación.");
+    }
+  };
+
+  // Cambio de estado interactivo
   const handleCambiarEstado = async (id, nuevoEstado) => {
     try {
       const token = keycloak?.token || localStorage.getItem("token") || "";
@@ -558,6 +612,10 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
           ? "Publicado"
           : nuevoEstado === "BORRADOR"
           ? "Borrador"
+          : nuevoEstado === "PENDIENTE_APROBACION"
+          ? "Pendiente de aprobación"
+          : nuevoEstado === "APROBADO"
+          ? "Aprobado"
           : "Archivado";
       toast.success(`Estado actualizado a ${estadoLegible}.`);
       await cargarCapacitaciones();
@@ -595,11 +653,29 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
     }
   };
 
+  // Conteo de elementos según estado
+  const counts = useMemo(() => {
+    return {
+      PUBLICADOS: capacitaciones.filter((c) => c.estado === "PUBLICADO").length,
+      PENDIENTES: capacitaciones.filter((c) => c.estado === "PENDIENTE_APROBACION").length,
+      APROBADOS: capacitaciones.filter((c) => c.estado === "APROBADO").length,
+      RECHAZADOS: capacitaciones.filter((c) => c.estado === "RECHAZADO").length,
+      BORRADORES: capacitaciones.filter((c) => c.estado === "BORRADOR").length,
+      ARCHIVADOS: capacitaciones.filter((c) => c.estado === "ARCHIVADO").length,
+    };
+  }, [capacitaciones]);
+
   // Filtrado de datos
   const datosFiltrados = capacitaciones.filter((item) => {
     const matchEstado =
       activeTab === "PUBLICADOS"
         ? item.estado === "PUBLICADO"
+        : activeTab === "PENDIENTES"
+        ? item.estado === "PENDIENTE_APROBACION"
+        : activeTab === "APROBADOS"
+        ? item.estado === "APROBADO"
+        : activeTab === "RECHAZADOS"
+        ? item.estado === "RECHAZADO"
         : activeTab === "BORRADORES"
         ? item.estado === "BORRADOR"
         : item.estado === "ARCHIVADO";
@@ -639,28 +715,95 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
         </button>
       </div>
 
-      {/* Pestañas de estado unificadas solo con texto */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+      {/* Notificación en CMS: Capacitaciones Aprobadas listas para publicar */}
+      {counts.APROBADOS > 0 && activeTab !== "APROBADOS" && (
+        <div className="cms-cap-notification-banner">
+          <div className="cms-cap-notification-content">
+            <span style={{ fontSize: "1.4rem" }}>🎉</span>
+            <div>
+              <strong>¡Tenés capacitaciones aprobadas por el Administrador!</strong>
+              <p style={{ margin: "2px 0 0 0", fontSize: "0.86rem" }}>
+                Hay {counts.APROBADOS} capacitación(es) aprobada(s) lista(s) para publicarse en el portal público.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="cms-cap-notification-btn"
+            onClick={() => setActiveTab("APROBADOS")}
+          >
+            VER APROBADOS ({counts.APROBADOS})
+          </button>
+        </div>
+      )}
+
+      {/* Notificación en CMS: Capacitaciones Rechazadas con observaciones */}
+      {counts.RECHAZADOS > 0 && activeTab !== "RECHAZADOS" && (
+        <div className="cms-cap-notification-banner is-reject">
+          <div className="cms-cap-notification-content">
+            <span style={{ fontSize: "1.4rem" }}>⚠️</span>
+            <div>
+              <strong>Capacitaciones con observaciones del Administrador:</strong>
+              <p style={{ margin: "2px 0 0 0", fontSize: "0.86rem" }}>
+                Hay {counts.RECHAZADOS} capacitación(es) rechazada(s) que requiere(n) ajustes para volver a presentarse.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="cms-cap-notification-btn is-reject"
+            onClick={() => setActiveTab("RECHAZADOS")}
+          >
+            VER OBSERVACIONES ({counts.RECHAZADOS})
+          </button>
+        </div>
+      )}
+
+      {/* Pestañas de estado unificadas con contadores */}
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "16px" }}>
         <button
           type="button"
           className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
           onClick={() => setActiveTab("PUBLICADOS")}
         >
-          Publicados
+          Publicados ({counts.PUBLICADOS})
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
+          onClick={() => setActiveTab("PENDIENTES")}
+        >
+          Pendientes ({counts.PENDIENTES})
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "APROBADOS" ? "active" : ""}`}
+          style={counts.APROBADOS > 0 ? { borderColor: "#10b981", color: activeTab === "APROBADOS" ? "#fff" : "#059669", backgroundColor: activeTab === "APROBADOS" ? "#10b981" : "transparent" } : {}}
+          onClick={() => setActiveTab("APROBADOS")}
+        >
+          Aprobados ({counts.APROBADOS})
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
+          style={counts.RECHAZADOS > 0 ? { borderColor: "#ef4444", color: activeTab === "RECHAZADOS" ? "#fff" : "#dc2626", backgroundColor: activeTab === "RECHAZADOS" ? "#ef4444" : "transparent" } : {}}
+          onClick={() => setActiveTab("RECHAZADOS")}
+        >
+          Rechazados ({counts.RECHAZADOS})
         </button>
         <button
           type="button"
           className={`res-tab-btn-unificado ${activeTab === "BORRADORES" ? "active" : ""}`}
           onClick={() => setActiveTab("BORRADORES")}
         >
-          Borradores
+          Borradores ({counts.BORRADORES})
         </button>
         <button
           type="button"
           className={`res-tab-btn-unificado ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
           onClick={() => setActiveTab("ARCHIVADOS")}
         >
-          Archivados
+          Archivados ({counts.ARCHIVADOS})
         </button>
       </div>
 
@@ -793,6 +936,16 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     >
                       {item.titulo}
                     </span>
+                    {item.estado === "RECHAZADO" && (
+                      <span className="cms-cap-row-obs" title={item.motivoRechazo}>
+                        <AlertTriangle size={12} /> Motivo rechazo: {item.motivoRechazo || "Requiere revisión"}
+                      </span>
+                    )}
+                    {item.estado === "APROBADO" && (
+                      <span className="cms-cap-row-approved">
+                        <CheckCircle size={12} /> ¡Aprobado por Admin! Listo para publicar
+                      </span>
+                    )}
                     {item.disertantes && (
                       <span
                         style={{
@@ -906,16 +1059,65 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     alignItems: "center",
                   }}
                 >
-                  <select
-                    value={item.estado}
-                    onChange={(e) => handleCambiarEstado(item.id, e.target.value)}
-                    className={`status-badge-select ${item.estado?.toLowerCase()}`}
-                    title="Cambiar estado: Publicado / Borrador / Archivado"
-                  >
-                    <option value="PUBLICADO">Publicado</option>
-                    <option value="BORRADOR">Borrador</option>
-                    <option value="ARCHIVADO">Archivado</option>
-                  </select>
+                  {item.estado === "APROBADO" ? (
+                    <button
+                      type="button"
+                      className="btn-quick-publish"
+                      onClick={() => handlePublicarAprobada(item)}
+                      title="Publicar en el portal público ahora"
+                    >
+                      <Check size={14} /> PUBLICAR
+                    </button>
+                  ) : item.estado === "PENDIENTE_APROBACION" ? (
+                    <span
+                      className="status-badge pendiente_aprobacion"
+                      style={{
+                        padding: "5px 10px",
+                        fontSize: "0.78rem",
+                        fontWeight: "700",
+                        borderRadius: "6px",
+                      }}
+                      title="Enviada a revisión del Administrador"
+                    >
+                      ⏳ En revisión
+                    </span>
+                  ) : item.estado === "RECHAZADO" ? (
+                    <span
+                      className="status-badge rechazado"
+                      style={{
+                        padding: "5px 10px",
+                        fontSize: "0.78rem",
+                        fontWeight: "700",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleOpenEdit(item)}
+                      title="Rechazada con observaciones. Hacé clic para corregir y presentar."
+                    >
+                      ✕ Rechazado
+                    </span>
+                  ) : (
+                    <select
+                      value={item.estado}
+                      onChange={(e) => handleCambiarEstado(item.id, e.target.value)}
+                      className={`status-badge-select ${item.estado?.toLowerCase()}`}
+                      title="Cambiar estado"
+                    >
+                      {item.estado === "PUBLICADO" ? (
+                        <>
+                          <option value="PUBLICADO">Publicado</option>
+                          <option value="ARCHIVADO">Archivado</option>
+                          <option value="BORRADOR">Borrador</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="BORRADOR">Borrador</option>
+                          <option value="PENDIENTE_APROBACION">Presentar</option>
+                          <option value="ARCHIVADO">Archivado</option>
+                        </>
+                      )}
+                    </select>
+                  )}
                 </div>
 
                 {/* Columna ACCIONES */}
@@ -1000,6 +1202,47 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
             {/* Formulario */}
             <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
               <div className="esp-modal-body">
+                {/* Banner de estado editorial para CMS */}
+                {editingItem?.estado === "APROBADO" && (
+                  <div className="cms-cap-alert is-approved">
+                    <CheckCircle size={22} style={{ flexShrink: 0, marginTop: "2px" }} />
+                    <div>
+                      <strong>¡Capacitación aprobada por Administración!</strong>
+                      <p>
+                        Esta capacitación ha sido aceptada por el Administrador. Podés hacer clic en <strong>PUBLICAR EN EL PORTAL</strong> para hacerla pública inmediatamente.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {editingItem?.estado === "RECHAZADO" && (
+                  <div className="cms-cap-alert is-rejected">
+                    <AlertTriangle size={22} style={{ flexShrink: 0, marginTop: "2px" }} />
+                    <div>
+                      <strong>Capacitación rechazada por Administración</strong>
+                      <p>
+                        <strong>Motivo de rechazo:</strong>{" "}
+                        {formData.motivoRechazo || "Requiere correcciones en los datos presentados."}
+                      </p>
+                      <p style={{ marginTop: "4px" }}>
+                        Corregí los datos observados y hacé clic en <strong>PRESENTAR PARA APROBACIÓN</strong> para enviarla nuevamente a revisión.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {editingItem?.estado === "PENDIENTE_APROBACION" && (
+                  <div className="cms-cap-alert is-pending">
+                    <Send size={20} style={{ flexShrink: 0, marginTop: "2px" }} />
+                    <div>
+                      <strong>Capacitación en revisión</strong>
+                      <p>
+                        Esta capacitación se encuentra en espera de la evaluación del Administrador. Si realizás modificaciones, continuará en revisión.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="esp-form-grid">
                   {/* Título de la Capacitación */}
                   <div className="esp-full-width">
@@ -1031,11 +1274,36 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                         setHasUnsavedChanges(true);
                       }}
                       className="esp-form-input"
-                      style={{ fontWeight: "600" }}
+                      style={{
+                        fontWeight: "600",
+                        borderColor:
+                          editingItem?.estado === "APROBADO"
+                            ? "#10b981"
+                            : editingItem?.estado === "RECHAZADO"
+                            ? "#ef4444"
+                            : undefined,
+                      }}
                     >
-                      <option value="BORRADOR">Borrador</option>
-                      <option value="PUBLICADO">Publicado</option>
-                      <option value="ARCHIVADO">Archivado</option>
+                      {editingItem?.estado === "APROBADO" ? (
+                        <>
+                          <option value="PUBLICADO">Publicar en Portal (Aprobado)</option>
+                          <option value="APROBADO">Mantener Aprobado (Sin publicar)</option>
+                          <option value="BORRADOR">Guardar como Borrador</option>
+                          <option value="ARCHIVADO">Archivar</option>
+                        </>
+                      ) : editingItem?.estado === "PUBLICADO" ? (
+                        <>
+                          <option value="PUBLICADO">Publicado en Portal</option>
+                          <option value="BORRADOR">Mover a Borrador</option>
+                          <option value="ARCHIVADO">Archivar</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="PENDIENTE_APROBACION">Presentar para Aprobación</option>
+                          <option value="BORRADOR">Guardar como Borrador</option>
+                          <option value="ARCHIVADO">Archivar</option>
+                        </>
+                      )}
                     </select>
                   </div>
 
@@ -1407,38 +1675,60 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                 >
                   CANCELAR
                 </button>
-                <button
-                  type="submit"
-                  className="btn-cerrar-rojo"
-                  style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving}
-                >
-                  {isSaving ? (
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
+                {(() => {
+                  const isApproved = editingItem?.estado === "APROBADO";
+                  const isPublishing =
+                    (isApproved && (formData.estado === "PUBLICADO" || formData.estado === "APROBADO")) ||
+                    (editingItem?.estado === "PUBLICADO" && formData.estado === "PUBLICADO");
+                  const isDraft = formData.estado === "BORRADOR";
+                  const isArchived = formData.estado === "ARCHIVADO";
+
+                  const btnClass = isPublishing
+                    ? "btn-submit-action is-publicar"
+                    : isDraft
+                    ? "btn-submit-action is-borrador"
+                    : isArchived
+                    ? "btn-submit-action is-archivar"
+                    : "btn-submit-action is-presentar";
+
+                  return (
+                    <button
+                      type="submit"
+                      className={btnClass}
+                      disabled={isSaving}
                     >
-                      <div
-                        className="cms-spinner"
-                        style={{
-                          width: "16px",
-                          height: "16px",
-                          borderWidth: "2px",
-                          borderTopColor: "white",
-                          borderColor: "rgba(255,255,255,0.3)",
-                        }}
-                      ></div>
-                      GUARDANDO...
-                    </span>
-                  ) : editingId ? (
-                    "ACTUALIZAR"
-                  ) : (
-                    "GUARDAR"
-                  )}
-                </button>
+                      {isSaving ? (
+                        <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <div
+                            className="cms-spinner"
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              borderWidth: "2px",
+                              borderTopColor: "white",
+                              borderColor: "rgba(255,255,255,0.3)",
+                            }}
+                          ></div>
+                          PROCESANDO...
+                        </span>
+                      ) : isPublishing ? (
+                        <>
+                          <Check size={18} />
+                          PUBLICAR EN EL PORTAL
+                        </>
+                      ) : isDraft ? (
+                        <>GUARDAR BORRADOR</>
+                      ) : isArchived ? (
+                        <>ARCHIVAR</>
+                      ) : (
+                        <>
+                          <Send size={16} />
+                          {editingId ? "PRESENTAR CORRECCIÓN" : "PRESENTAR"}
+                        </>
+                      )}
+                    </button>
+                  );
+                })()}
               </div>
             </form>
           </div>

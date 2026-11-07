@@ -38,3 +38,14 @@ export const cambiarEstadoCapacitacion = async (id, estado, token) => {
   const response = await api.patch(`/cms/capacitaciones/${id}/estado`, { estado }, { headers });
   return response.data;
 };
+
+export const evaluarCapacitacion = async (id, payload, token) => {
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await api.patch(`/cms/capacitaciones/${id}/revision`, payload, { headers });
+  return response.data;
+};
+
+export const publicarCapacitacion = async (id, token) => {
+  return cambiarEstadoCapacitacion(id, "PUBLICADO", token);
+};
