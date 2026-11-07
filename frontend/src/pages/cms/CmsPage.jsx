@@ -404,12 +404,7 @@ if (!authenticated) {
   }
 
   if (!isCms) {
-    return (
-      <AccessDeniedScreen
-        userName={userName}
-        requiredPanel="el Panel CMS (Redacción)"
-      />
-    );
+    return <AccessDeniedScreen userName={userName} />;
   }
 
  const latestNews = newsList

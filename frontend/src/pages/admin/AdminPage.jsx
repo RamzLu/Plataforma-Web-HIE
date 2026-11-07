@@ -212,12 +212,7 @@ const AdminPage = () => {
   }
 
   if (!isAdmin) {
-    return (
-      <AccessDeniedScreen
-        userName={userName}
-        requiredPanel="el Panel de Administración (TI)"
-      />
-    );
+    return <AccessDeniedScreen userName={userName} />;
   }
 
   return (

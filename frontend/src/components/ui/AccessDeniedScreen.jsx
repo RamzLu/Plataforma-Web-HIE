@@ -3,38 +3,16 @@ import { useNavigate } from "react-router-dom";
 import keycloak from "../../config/keycloak";
 import "../../styles/ui/AccessDeniedScreen.css";
 
-const hasKeycloakRole = (rolesToCheck) => {
-  const realmRoles = (keycloak?.tokenParsed?.realm_access?.roles || []).map((r) =>
-    r.toLowerCase()
-  );
-  const clientRoles = Object.values(keycloak?.tokenParsed?.resource_access || {})
-    .flatMap((r) => r?.roles || [])
-    .map((r) => r.toLowerCase());
-  const allRoles = [...new Set([...realmRoles, ...clientRoles])];
-
-  return rolesToCheck.some(
-    (role) =>
-      keycloak?.hasRealmRole?.(role) ||
-      keycloak?.hasResourceRole?.(role) ||
-      allRoles.includes(role.toLowerCase())
-  );
-};
-
-const AccessDeniedScreen = ({ userName, requiredPanel = "este panel" }) => {
+const AccessDeniedScreen = ({ userName }) => {
   const navigate = useNavigate();
 
   const tokenName = keycloak?.tokenParsed?.name;
   const preferredUsername = keycloak?.tokenParsed?.preferred_username;
   const email = keycloak?.tokenParsed?.email;
 
-  const sessionDisplayName = tokenName
-    ? preferredUsername && preferredUsername !== tokenName
-      ? `${tokenName} (${preferredUsername})`
-      : tokenName
-    : preferredUsername || email || userName || "Usuario autenticado";
-
-  const hasCmRole = hasKeycloakRole(["cm"]);
-  const hasAdminRole = hasKeycloakRole(["admin-hief"]);
+  // Solo mostramos el nombre público legible, sin roles ni identificadores técnicos de Keycloak
+  const sessionDisplayName =
+    tokenName || preferredUsername || email || userName || "Usuario autenticado";
 
   const handleLogoutToKeycloak = () => {
     localStorage.removeItem("admin_active_tab");
@@ -50,7 +28,7 @@ const AccessDeniedScreen = ({ userName, requiredPanel = "este panel" }) => {
   return (
     <div className="access-denied-container">
       <div className="access-denied-card">
-        <div className="access-denied-icon-badge">
+        <div className="access-denied-icon-badge" aria-hidden="true">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -64,74 +42,25 @@ const AccessDeniedScreen = ({ userName, requiredPanel = "este panel" }) => {
           </svg>
         </div>
 
-        <h2 className="access-denied-title">Acceso Denegado</h2>
+        <h2 className="access-denied-title">Acceso Restringido</h2>
 
         <p className="access-denied-description">
-          Tu cuenta actual no cuenta con los permisos necesarios para acceder a{" "}
-          <strong>{requiredPanel}</strong>.
+          Tu cuenta no dispone de las autorizaciones requeridas para acceder a este sector. Si consideras que se trata de un error, por favor comunícate con el área de soporte del hospital.
         </p>
 
-        {/* 1ro: Nombre de la sesión actual */}
+        {/* Sesión actual (neutral y segura, sin filtración de roles ni identificadores técnicos) */}
         <div className="access-denied-session-box">
-          <span className="access-denied-session-label">Sesión actual</span>
+          <span className="access-denied-session-label">Sesión iniciada</span>
           <div className="access-denied-session-user">
             <span className="access-denied-status-dot"></span>
             <span className="access-denied-session-name">
               {sessionDisplayName}
             </span>
-            {hasCmRole && <span className="access-denied-role-tag">Rol: CM</span>}
-            {hasAdminRole && (
-              <span className="access-denied-role-tag">Rol: Admin</span>
-            )}
           </div>
         </div>
 
         <div className="access-denied-actions">
-          {/* 3ro: Botón que redirige según el rol de la sesión actual */}
-          {hasCmRole && (
-            <button
-              type="button"
-              onClick={() => navigate("/cms")}
-              className="access-denied-btn access-denied-btn-primary"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-              </svg>
-              Ir a la página de CM
-            </button>
-          )}
-
-          {hasAdminRole && (
-            <button
-              type="button"
-              onClick={() => navigate("/admin")}
-              className="access-denied-btn access-denied-btn-primary"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-              Ir a la página de Admin
-            </button>
-          )}
-
-          {/* 2do: Botón que cierra la sesión y envía de nuevo al login de Keycloak */}
+          {/* Botón 1: Cerrar sesión para cambiar de cuenta o reingresar con el usuario correspondiente */}
           <button
             type="button"
             onClick={handleLogoutToKeycloak}
@@ -144,12 +73,34 @@ const AccessDeniedScreen = ({ userName, requiredPanel = "este panel" }) => {
               strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
             >
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
-            Cerrar sesión e ir al Login
+            Cerrar sesión / Cambiar de cuenta
+          </button>
+
+          {/* Botón 2: Volver al portal público del hospital */}
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="access-denied-btn access-denied-btn-secondary"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Volver al Portal Público
           </button>
         </div>
       </div>
@@ -158,4 +109,3 @@ const AccessDeniedScreen = ({ userName, requiredPanel = "este panel" }) => {
 };
 
 export default AccessDeniedScreen;
-
