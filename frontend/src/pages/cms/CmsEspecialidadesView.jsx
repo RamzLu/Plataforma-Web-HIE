@@ -100,7 +100,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
     const payload = {
       ...formData,
-      requisitos: formData.requisitos.split("\n").map(r => r.trim()).filter(r => r)
+      requisitos: formData.requisitos.split("\n").map(r => r.trim()).filter(r => r),
+      editor: keycloak?.tokenParsed?.name || keycloak?.idTokenParsed?.name || keycloak?.tokenParsed?.preferred_username || ""
     };
 
     setIsSaving(true);
@@ -193,7 +194,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
   return (
     <div className="cms-dashboard-card">
-      {/* Cabecera idéntica a Noticias y Profesionales */}
       <div className="news-view-header">
         <div>
           <h3 className="cms-card-title news-view-title">
@@ -208,10 +208,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         </button>
       </div>
 
-      {/* Barra de herramientas: Pestañas a la izquierda, buscador y filtros a la derecha */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
         
-        {/* Pestañas de estado idénticas a Noticias */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <button 
             type="button"
@@ -243,7 +241,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
           </button>
         </div>
 
-        {/* Buscador y Selector alineados */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
           <div className="res-search-wrapper">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -276,7 +273,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         </div>
       </div>
 
-      {/* Contenedor de la tabla idéntico al estilo de Noticias y Profesionales */}
       <div className="cms-news-table-container">
         <div className="activity-table-head news-table-head" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <div style={{ flex: 1.8 }}>CONTENIDO</div>
@@ -302,7 +298,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
             datosFiltrados.map((esp) => (
               <div className="activity-row news-table-row" key={esp.id + (esp.esServicio ? 'srv' : 'esp')} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                 
-                {/* Columna CONTENIDO con miniatura e información */}
                 <div className="col-content" style={{ flex: 1.8, display: "flex", flexDirection: "row", alignItems: "center", gap: "15px" }}>
                   <div className="news-thumb-box" style={{ display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f1f5f9" }}>
                     <div className="news-thumb-mock" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
@@ -338,17 +333,14 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                   </div>
                 </div>
 
-                {/* Columna UBICACIÓN */}
                 <div style={{ flex: 1.2, color: "#475569", fontSize: "0.9rem", fontWeight: "500" }}>
                   {esp.ubicacion || "Sin ubicación asignada"}
                 </div>
 
-                {/* Columna HORARIOS */}
                 <div style={{ flex: 1, color: "#475569", fontSize: "0.9rem", fontWeight: "500" }}>
                   {esp.horarios || "Consultar horarios"}
                 </div>
 
-                {/* Columna CLASIFICACIÓN (estilo idéntico a Noticias y Profesionales) */}
                 <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
                   <span style={{ 
                     backgroundColor: esp.esServicio ? "#e0f2fe" : "#ede9fe", 
@@ -362,7 +354,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                   </span>
                 </div>
 
-                {/* Columna ESTADO */}
                 <div style={{ width: "130px", textAlign: "center" }}>
                   <span
                     className={`status-badge ${
@@ -381,7 +372,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                   </span>
                 </div>
 
-                {/* Columna ACCIONES */}
                 <div style={{ width: "100px", display: "flex", justifyContent: "center", gap: "10px" }}>
                   <button type="button" onClick={() => handleOpenEdit(esp)} className="news-action-btn-edit" title="Editar">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -507,7 +497,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         </div>
       )}
 
-      {/* MODAL DE CAMBIOS SIN GUARDAR */}
       <CmsUnsavedChangesModal
         isOpen={showUnsavedModal}
         onKeepEditing={() => setShowUnsavedModal(false)}
@@ -520,7 +509,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         message="¿Qué deseas hacer con el registro actual?"
       />
 
-      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
       <CmsDeleteModal
         isOpen={showDeleteModal && !!itemAEliminar}
         onClose={() => setShowDeleteModal(false)}

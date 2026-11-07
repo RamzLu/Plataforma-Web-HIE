@@ -339,9 +339,9 @@ const AdminProfesionalesView = () => {
         <div className="admin-prof-card-heading">
           <div>
             <h2 id="admin-prof-list-title">
-              {statusFilter === 'PUBLICADO' ? 'Profesionales visibles al público' : 'Solicitudes editoriales'}
+              Listado de Profesionales
             </h2>
-            <p>Revisá los perfiles pendientes, aprobados o rechazados enviados por el CMS.</p>
+            <p>Área de Revisión: Aprobación y rechazo de profesionales recibidos desde el CMS</p>
           </div>
           <span className="admin-prof-results-count">
             {filteredProfesionales.length} {filteredProfesionales.length === 1 ? 'resultado' : 'resultados'}
@@ -374,9 +374,9 @@ const AdminProfesionalesView = () => {
             <thead>
               <tr>
                 <th scope="col">Profesional</th>
-                <th scope="col">Especialidad / área</th>
                 <th scope="col">Editor / fecha</th>
-                <th scope="col">Estado editorial</th>
+                <th scope="col">Especialidad / área</th>
+                <th scope="col">Estado</th>
               </tr>
             </thead>
             <tbody>
@@ -403,19 +403,19 @@ const AdminProfesionalesView = () => {
                       </div>
                     </div>
                   </td>
+                  <td data-label="Editor / fecha">
+                    <div className="admin-prof-editor-cell" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{item.editor}</span>
+                      <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}><CalendarDays size={13} />{item.fechaActualizacion}</small>
+                    </div>
+                  </td>
                   <td data-label="Especialidad / área">
                     <div className="admin-prof-association-cell">
                       <strong><Stethoscope size={14} />{item.especialidad}</strong>
                       <span><Building2 size={14} />{item.area}</span>
                     </div>
                   </td>
-                  <td data-label="Editor / fecha">
-                    <div className="admin-prof-editor-cell">
-                      <span>{item.editor}</span>
-                      <small><CalendarDays size={13} />{item.fechaActualizacion}</small>
-                    </div>
-                  </td>
-                  <td data-label="Estado editorial">
+                  <td data-label="Estado">
                     <span
                       className={`admin-prof-status is-${item.publicado ? 'aprobado' : item.estado.toLowerCase()}`}
                     >

@@ -431,10 +431,17 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       </div>
 
       <div className="dashboard-card-admin">
-        <h2 className="dashboard-card-title-admin">Listado de las Noticias</h2>
-        <p className="news-view-subtitle-admin">
-          Área de Revisión: Aprobación y rechazo de notificaciones recibidas desde el CMS
-        </p>
+        <div className="admin-news-card-heading">
+          <div>
+            <h2 className="dashboard-card-title-admin">Listado de Noticias</h2>
+            <p className="news-view-subtitle-admin">
+              Área de Revisión: Aprobación y rechazo de noticias recibidas desde el CMS
+            </p>
+          </div>
+          <span className="admin-news-result-count">
+            {filteredNoticias.length} {filteredNoticias.length === 1 ? 'resultado' : 'resultados'}
+          </span>
+        </div>
         <div className="data-table-container-admin">
           <div className="data-table-header-admin">
             <div className="data-table-col-admin">CONTENIDO</div>

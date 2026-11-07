@@ -182,8 +182,18 @@
   margin-bottom: 20px;
 }
 
+.admin-training-card-heading h2 {
+  margin: 0 0 6px;
+  color: #0c2340;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
 .admin-training-card-heading p {
   margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .admin-training-result-count {

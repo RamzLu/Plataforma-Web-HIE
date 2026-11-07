@@ -38,17 +38,38 @@
   border: 1px solid #e2e8f0;
 }
 
+.admin-news-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
 .dashboard-card-title-admin {
   color: #0c2340;
   font-size: 1.4rem;
   font-weight: 600;
-  margin: 0 0 5px 0;
+  margin: 0 0 6px 0;
 }
 
 .news-view-subtitle-admin {
-  padding: 10px;
+  margin: 0;
+  padding: 0;
   color: #475569;
   font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.admin-news-result-count {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  color: #475569;
+  font-size: 0.77rem;
+  font-weight: 600;
+  background: #f8fafc;
 }
 
 .data-table-container-admin {
