@@ -20,13 +20,13 @@ import AdminDocumentacionView from '../admin/AdminDocumentacionView';
 import AdminCapacitacionesView from '../admin/AdminCapacitacionesView';
 import AdminResidenciasView from '../admin/AdminResidenciasView';
 import AdminContenidoGraficoView from '../admin/AdminContenidoGraficoView';
-// import AdminUsuariosView from './admin/AdminUsuariosView';
-// import AdminRolesView from './admin/AdminRolesView';
-// import AdminAuditoriaView from './admin/AdminAuditoriaView';
+import AdminInstitucionalView from '../admin/AdminInstitucionalView';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem("admin_active_tab") || "dashboard";
+    const saved = localStorage.getItem("admin_active_tab");
+    const obsoleteTabs = ["usuarios", "roles", "auditoria"];
+    return obsoleteTabs.includes(saved) ? "dashboard" : (saved || "dashboard");
   });
 
   const [initialized, setInitialized] = useState(false);
@@ -259,9 +259,7 @@ const AdminPage = () => {
           {activeTab === "capacitaciones" && <AdminCapacitacionesView />}
           {activeTab === "residencias" && <AdminResidenciasView />}
           {activeTab === "graficos" && <AdminContenidoGraficoView />}
-          {activeTab === "usuarios" && <AdminUsuariosView />}
-          {activeTab === "roles" && <AdminRolesView />}
-          {activeTab === "auditoria" && <AdminAuditoriaView />}
+          {activeTab === "institucional" && <AdminInstitucionalView />}
         </main>
       </div>
     </div>
