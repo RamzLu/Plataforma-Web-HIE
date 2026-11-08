@@ -600,13 +600,12 @@ class CmsCapacitacionService {
     let motivoRechazoLimpio = extra.motivoRechazo || "";
     if (data.estado) {
       const upper = data.estado.toUpperCase();
-      if (existing.estado === "APROBADO" && upper === "PUBLICADO") {
-        estadoNormalizado = "PUBLICADO";
-      } else if (upper === "BORRADOR") {
+      if (upper === "BORRADOR") {
         estadoNormalizado = "BORRADOR";
       } else if (upper === "ARCHIVADO") {
         estadoNormalizado = "ARCHIVADO";
-      } else if (upper === "PENDIENTE_APROBACION" || upper === "PUBLICADO") {
+      } else {
+        // Al presentar o modificar, pasa a PENDIENTE_APROBACION para que el Admin lo apruebe y se suba automáticamente
         estadoNormalizado = "PENDIENTE_APROBACION";
         motivoRechazoLimpio = "";
       }
@@ -696,6 +695,9 @@ class CmsCapacitacionService {
       throw error;
     }
 
+    // Regla de negocio: al aceptar/aprobar el administrador, se publica automáticamente en el portal
+    const estadoFinal = (estadoUpper === "APROBADO" || estadoUpper === "PUBLICADO") ? "PUBLICADO" : estadoUpper;
+
     let extra = {};
     if (existing.contenido) {
       try {
@@ -703,15 +705,16 @@ class CmsCapacitacionService {
       } catch {}
     }
 
-    extra.motivoRechazo = estadoUpper === "RECHAZADO" ? reason : "";
-    extra.rejectionReason = estadoUpper === "RECHAZADO" ? reason : "";
+    extra.motivoRechazo = estadoFinal === "RECHAZADO" ? reason : "";
+    extra.rejectionReason = estadoFinal === "RECHAZADO" ? reason : "";
     extra.evaluadoPor = user?.name || user?.preferred_username || "Administrador";
     extra.evaluadoEn = new Date().toISOString();
 
     const updated = await prisma.capacitacion.update({
       where: { id: idBigInt },
       data: {
-        estado: estadoUpper,
+        estado: estadoFinal,
+        activo: estadoFinal === "PUBLICADO" ? true : estadoFinal === "ARCHIVADO" ? false : existing.activo,
         contenido: JSON.stringify(extra),
         updatedAt: new Date(),
       },
@@ -719,7 +722,7 @@ class CmsCapacitacionService {
     });
 
     return {
-      message: `Capacitación evaluada con éxito: ${estadoUpper}.`,
+      message: `Capacitación evaluada con éxito: ${estadoFinal}.`,
       capacitacion: this._formatCapacitacion(updated),
     };
   }

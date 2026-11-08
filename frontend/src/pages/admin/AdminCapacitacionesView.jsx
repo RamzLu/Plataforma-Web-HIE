@@ -264,8 +264,10 @@ const AdminCapacitacionesView = () => {
             training.id === selectedTraining.id
               ? {
                   ...training,
-                  estado: pendingAction,
-                  activo: pendingAction === 'ARCHIVADO' || pendingAction === 'RECHAZADO'
+                  estado: pendingAction === 'APROBADO' ? 'PUBLICADO' : pendingAction,
+                  activo: pendingAction === 'APROBADO' || pendingAction === 'PUBLICADO'
+                    ? true
+                    : pendingAction === 'ARCHIVADO' || pendingAction === 'RECHAZADO'
                     ? false
                     : training.activo,
                   motivoRechazo: pendingAction === 'RECHAZADO' ? reason : '',
@@ -273,8 +275,9 @@ const AdminCapacitacionesView = () => {
               : training,
           ),
         );
+        const simLabel = pendingAction === 'APROBADO' ? 'aprobada y publicada automáticamente en el portal' : STATUS_LABELS[pendingAction].toLocaleLowerCase('es');
         setFeedback(
-          `Simulación: “${selectedTraining.titulo}” quedó ${STATUS_LABELS[pendingAction].toLocaleLowerCase('es')}.`,
+          `Simulación: “${selectedTraining.titulo}” quedó ${simLabel}.`,
         );
         closeDetails();
         return;
@@ -295,7 +298,8 @@ const AdminCapacitacionesView = () => {
           training.id === result.capacitacion.id ? result.capacitacion : training,
         ),
       );
-      setFeedback(`“${selectedTraining.titulo}” quedó ${STATUS_LABELS[pendingAction].toLocaleLowerCase('es')}.`);
+      const finalLabel = pendingAction === 'APROBADO' ? 'aprobada y publicada automáticamente en el portal' : STATUS_LABELS[pendingAction]?.toLocaleLowerCase('es') || pendingAction;
+      setFeedback(`“${selectedTraining.titulo}” quedó ${finalLabel}.`);
       closeDetails();
     } catch (saveError) {
       console.error('Error al actualizar el estado de la capacitación:', saveError);
@@ -646,7 +650,7 @@ const AdminCapacitacionesView = () => {
               {selectedTraining.estado === 'PENDIENTE_APROBACION' && (
                 <div className="admin-training-review-actions">
                   <button type="button" className="admin-training-action is-approve" onClick={() => setPendingAction('APROBADO')}>
-                    <CheckCircle size={17} /> Aprobar
+                    <CheckCircle size={17} /> Aprobar y Publicar
                   </button>
                   <button
                     type="button"
@@ -688,7 +692,7 @@ const AdminCapacitacionesView = () => {
                   ) : (
                     <p>
                       {pendingAction === 'APROBADO'
-                        ? '¿Confirmás aprobar este contenido? Quedará habilitado para continuar con su publicación desde el CMS.'
+                        ? '¿Confirmás aprobar este contenido? Al aceptarlo, se publicará automáticamente en el portal público.'
                         : '¿Confirmás archivar y desactivar esta capacitación finalizada?'}
                     </p>
                   )}
