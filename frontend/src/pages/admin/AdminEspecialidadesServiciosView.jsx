@@ -27,10 +27,8 @@ const statusClass = (status) => {
 const mapItemFromBackend = (item) => {
   const estadoUpper = (item.estado || 'PENDIENTE_APROBACION').toUpperCase();
   let statusLabel = 'Pendiente de aprobación';
-  if (estadoUpper === 'PUBLICADO') {
+  if (estadoUpper === 'PUBLICADO' || estadoUpper === 'APROBADO') {
     statusLabel = 'Publicado';
-  } else if (estadoUpper === 'APROBADO') {
-    statusLabel = 'Aprobado';
   } else if (estadoUpper === 'RECHAZADO') {
     statusLabel = 'Rechazado';
   }
@@ -148,7 +146,6 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       const matchesStatus =
         statusFilter === 'Todos' ||
         (statusFilter === 'PENDIENTE' && item.status === 'Pendiente de aprobación') ||
-        (statusFilter === 'APROBADO' && item.status === 'Aprobado') ||
         (statusFilter === 'PUBLICADO' && item.status === 'Publicado') ||
         (statusFilter === 'RECHAZADO' && item.status === 'Rechazado');
       const matchesSearch =
@@ -223,7 +220,6 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
   };
 
   const pendingCount = items.filter((item) => item.status === 'Pendiente de aprobación').length;
-  const approvedCount = items.filter((item) => item.status === 'Aprobado').length;
   const publishedCount = items.filter((item) => item.status === 'Publicado').length;
   const rejectedCount = items.filter((item) => item.status === 'Rechazado').length;
 
@@ -263,15 +259,6 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         >
           <span><Clock3 size={19} /></span>
           <div><small>Pendientes de aprobación</small><strong>{pendingCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-es-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'APROBADO'}
-          onClick={() => setStatusFilter('APROBADO')}
-        >
-          <span><BadgeCheck size={19} /></span>
-          <div><small>Aprobados para CMS</small><strong>{approvedCount}</strong></div>
         </button>
         <button
           type="button"

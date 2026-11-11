@@ -308,7 +308,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           aria-pressed={statusFilter === 'TODOS'}
           onClick={() => setStatusFilter('TODOS')}
         >
-          Todos ({documents.length})
+          Todos
         </button>
       </div>
 

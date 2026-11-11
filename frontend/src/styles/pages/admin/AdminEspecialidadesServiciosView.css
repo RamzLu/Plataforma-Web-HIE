@@ -80,7 +80,7 @@
 
 .admin-es-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -174,25 +174,22 @@
 
 .admin-es-reset-filter {
   min-height: 32px;
-  padding: 5px 12px;
-  border: 1px solid #dbe3ec;
-  border-radius: 9px;
-  background: #fff;
-  color: #475569;
-  font-size: 0.78rem;
-  font-weight: 650;
+  padding: 6px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0c2340;
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.admin-es-reset-filter.is-active {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
+.admin-es-reset-filter.is-active,
 .admin-es-reset-filter:hover {
-  border-color: #93c5fd;
-  background: #eff6ff;
+  border-color: #0c2340;
+  background: #0c2340;
+  color: #ffffff;
 }
 
 .admin-es-search {

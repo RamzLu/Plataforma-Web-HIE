@@ -90,22 +90,22 @@
 
 .admin-cg-reset-filter-admin {
   min-height: 32px;
-  padding: 5px 12px;
-  border: 1px solid #dbe3ec;
-  border-radius: 9px;
-  background: #fff;
-  color: #475569;
-  font-size: 0.78rem;
-  font-weight: 650;
+  padding: 6px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0c2340;
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 0.2s ease;
 }
 
 .admin-cg-reset-filter-admin.is-active,
 .admin-cg-reset-filter-admin:hover {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
+  border-color: #0c2340;
+  background: #0c2340;
+  color: #ffffff;
 }
 
 .admin-cg-summary-admin {

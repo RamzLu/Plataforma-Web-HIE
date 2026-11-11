@@ -239,7 +239,7 @@ const AdminInstitucionalView = () => {
           aria-pressed={statusFilter === 'ALL'}
           onClick={resetFilters}
         >
-          Todos los estados
+          Todos
         </button>
       </div>
 

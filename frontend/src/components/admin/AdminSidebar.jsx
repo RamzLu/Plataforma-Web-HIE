@@ -36,9 +36,9 @@ const AdminSidebar = ({
       title: "Aprobación de Contenidos",
       items: [
         { id: "noticias", label: "Noticias", icon: <FileText />, pendingCount: pendingNoticiasCount },
+        { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: pendingDocumentosCount },
         { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope />, pendingCount: pendingEspecialidadesCount },
         { id: "profesionales", label: "Profesionales", icon: <Contact />, pendingCount: 2 }, 
-        { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: pendingDocumentosCount },
         { id: "capacitaciones", label: "Capacitaciones Públicas", icon: <GraduationCap /> },
         { id: "residencias", label: "Residencias", icon: <Building2 /> },
         { id: "graficos", label: "Contenido Gráfico", icon: <ImageIcon /> },
