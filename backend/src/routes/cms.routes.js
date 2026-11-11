@@ -8,7 +8,7 @@ import {
 } from "../controllers/cms/cms.contenidoGrafico.controller.js";
 import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia, evaluarNoticia } from "../controllers/cms/cms.noticia.controller.js";
 import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento, evaluarDocumento } from "../controllers/cms/cms.doc.controller.js";
-import { obtenerProfesionales, crearProfesional, eliminarProfesional, actualizarProfesional } from "../controllers/cms/cms.profesional.controller.js";
+import { obtenerProfesionales, crearProfesional, eliminarProfesional, actualizarProfesional, evaluarProfesional } from "../controllers/cms/cms.profesional.controller.js";
 import * as especialidadCtrl from '../controllers/cms/cms.especialidad.controller.js';
 import { 
   obtenerInstitucional, 
@@ -104,6 +104,7 @@ router.put(
 router.get("/profesionales", adminViewAccess, obtenerProfesionales);
 router.post("/profesionales", requireCmsAccess, uploadImagenSingle("archivo"), crearProfesional);
 router.put("/profesionales/:id", requireCmsAccess, uploadImagenSingle("archivo"), actualizarProfesional);
+router.patch("/profesionales/:id/estado", requireAdminAccess, evaluarProfesional);
 router.delete("/profesionales/:id", requireCmsAccess, eliminarProfesional);
 
 // ==========================================

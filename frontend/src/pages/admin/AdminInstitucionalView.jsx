@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   Building,
@@ -11,6 +11,7 @@ import {
   Info,
   Lock,
   MapPin,
+  RefreshCw,
   Share2,
   ShieldCheck,
   Users,
@@ -105,36 +106,32 @@ const AdminInstitucionalView = () => {
   const [rejectReason, setRejectReason] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  const fetchInstitucionalData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await getInstitucional();
+      if (response) {
+        setData((prev) => ({
+          ...prev,
+          autoridades: response.autoridades || prev.autoridades,
+          redesSociales: response.redesSociales || prev.redesSociales,
+          sedeCentral: {
+            ...prev.sedeCentral,
+            ...(response.sedeCentral || {}),
+          },
+        }));
+      }
+    } catch (err) {
+      console.info('Conexión pasiva a getInstitucional(): utilizando datos de auditoría de respaldo.', err?.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Carga pasiva de información institucional
   useEffect(() => {
-    let isMounted = true;
-    const fetchInstitucionalData = async () => {
-      setLoading(true);
-      try {
-        const response = await getInstitucional();
-        if (isMounted && response) {
-          setData((prev) => ({
-            ...prev,
-            autoridades: response.autoridades || prev.autoridades,
-            redesSociales: response.redesSociales || prev.redesSociales,
-            sedeCentral: {
-              ...prev.sedeCentral,
-              ...(response.sedeCentral || {}),
-            },
-          }));
-        }
-      } catch (err) {
-        console.info('Conexión pasiva a getInstitucional(): utilizando datos de auditoría de respaldo.', err?.message);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
     fetchInstitucionalData();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  }, [fetchInstitucionalData]);
 
   // Conteos de estado editorial para las tarjetas superiores
   const counts = useMemo(() => {
@@ -211,6 +208,15 @@ const AdminInstitucionalView = () => {
             Evaluá las actualizaciones de la información institucional pública del Hospital Interdistrital Evita enviadas desde el CMS antes de autorizar su publicación.
           </p>
         </div>
+        <button
+          type="button"
+          className="admin-refresh-btn"
+          onClick={fetchInstitucionalData}
+          disabled={loading}
+        >
+          <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+          Actualizar
+        </button>
       </header>
 
       {/* Banner de Feedback superior dismissible */}

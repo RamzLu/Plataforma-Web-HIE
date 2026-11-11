@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3 } from 'lucide-react';
+import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import keycloak from '../../config/keycloak';
@@ -366,9 +366,22 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   return (
     <div className="admin-review-container-admin">
       <div className="admin-page-header-admin admin-view-heading">
-        <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
-        <h1>Revisión Editorial</h1>
-        <p>Evalúa las solicitudes de publicación enviadas por el equipo de redactores del CMS.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+          <div>
+            <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
+            <h1>Revisión Editorial</h1>
+            <p>Evalúa las solicitudes de publicación enviadas por el equipo de redactores del CMS.</p>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={() => cargarNoticias(false)}
+            disabled={loading}
+          >
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            Actualizar
+          </button>
+        </div>
       </div>
 
       <div className="admin-news-summary-toolbar">

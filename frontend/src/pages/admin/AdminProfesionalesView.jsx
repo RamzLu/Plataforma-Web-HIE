@@ -1,157 +1,144 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  BadgeCheck,
   Building2,
   CalendarDays,
   CheckCircle,
+  Clock3,
   Globe2,
+  RefreshCw,
   Search,
   Stethoscope,
-  UserRound,
   X,
   XCircle,
 } from 'lucide-react';
-import fotoDoctor from '../../assets/foto-doctor-ejemplo.jpg';
-import fotoDoctora from '../../assets/foto-doctora-ejemplo.jpg';
+import toast from 'react-hot-toast';
+import keycloak from '../../config/keycloak';
+import {
+  getProfesionales,
+  evaluarProfesionalEstado,
+} from '../../api/profesionales.api.js';
 import '../../styles/pages/admin/AdminProfesionalesView.css';
-
-const initialProfesionales = [
-  {
-    id: 'prof-001',
-    nombre: 'Lucía Fernández',
-    cargo: 'Médica especialista',
-    matricula: 'MP 2841',
-    especialidad: 'Cardiología',
-    area: 'Consultorios externos',
-    tipo: 'Especialidad médica',
-    descripcion:
-      'Atención integral de personas adultas, seguimiento cardiovascular y orientación para la prevención.',
-    imagen: fotoDoctora,
-    editor: 'María Gómez',
-    fechaCarga: '04/11/2026',
-    fechaActualizacion: '04/11/2026',
-    estado: 'PENDIENTE',
-    activo: true,
-    publicado: false,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-002',
-    nombre: 'Martín Ríos',
-    cargo: 'Médico de planta',
-    matricula: 'MP 1936',
-    especialidad: 'Clínica médica',
-    area: 'Atención ambulatoria',
-    tipo: 'Especialidad médica',
-    descripcion:
-      'Abordaje clínico integral, evaluación inicial y acompañamiento de pacientes adultos.',
-    imagen: fotoDoctor,
-    editor: 'Carlos Benítez',
-    fechaCarga: '02/11/2026',
-    fechaActualizacion: '03/11/2026',
-    estado: 'APROBADO',
-    activo: true,
-    publicado: false,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-003',
-    nombre: 'Sofía Acosta',
-    cargo: 'Licenciada en diagnóstico por imágenes',
-    matricula: 'MP 3472',
-    especialidad: 'Diagnóstico por imágenes',
-    area: 'Diagnóstico y tratamiento',
-    tipo: 'Servicio de apoyo',
-    descripcion:
-      'Profesional del equipo de diagnóstico por imágenes. La información pública se encuentra aprobada.',
-    imagen: null,
-    editor: 'María Gómez',
-    fechaCarga: '29/10/2026',
-    fechaActualizacion: '01/11/2026',
-    fechaPublicacion: '2026-11-03T10:30:00',
-    estado: 'APROBADO',
-    activo: true,
-    publicado: true,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-005',
-    nombre: 'Gabriel Benítez',
-    cargo: 'Médico especialista',
-    matricula: 'MP 2204',
-    especialidad: 'Traumatología',
-    area: 'Consultorios externos',
-    tipo: 'Especialidad médica',
-    descripcion:
-      'Atención y seguimiento de afecciones del sistema musculoesquelético.',
-    imagen: fotoDoctor,
-    editor: 'María Gómez',
-    fechaCarga: '25/10/2026',
-    fechaActualizacion: '28/10/2026',
-    fechaPublicacion: '2026-11-01T09:15:00',
-    estado: 'APROBADO',
-    activo: true,
-    publicado: true,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-006',
-    nombre: 'Elena Sosa',
-    cargo: 'Licenciada en Kinesiología',
-    matricula: 'MP 4160',
-    especialidad: 'Kinesiología y rehabilitación',
-    area: 'Rehabilitación',
-    tipo: 'Servicio de apoyo',
-    descripcion:
-      'Acompañamiento terapéutico y rehabilitación funcional.',
-    imagen: fotoDoctora,
-    editor: 'Carlos Benítez',
-    fechaCarga: '22/10/2026',
-    fechaActualizacion: '26/10/2026',
-    fechaPublicacion: '2026-10-30T14:00:00',
-    estado: 'APROBADO',
-    activo: true,
-    publicado: true,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-004',
-    nombre: 'Valentina López',
-    cargo: 'Licenciada en Nutrición',
-    matricula: 'MP 5108',
-    especialidad: 'Nutrición',
-    area: 'Atención ambulatoria',
-    tipo: 'Servicio de apoyo',
-    descripcion:
-      'Orientación nutricional y acompañamiento para el cuidado integral de la salud.',
-    imagen: fotoDoctora,
-    editor: 'Carlos Benítez',
-    fechaCarga: '27/10/2026',
-    fechaActualizacion: '30/10/2026',
-    estado: 'RECHAZADO',
-    activo: false,
-    publicado: false,
-    motivoRechazo: 'Revisar la descripción y completar la información del área de atención.',
-  },
-];
 
 const estadoLabels = {
   PENDIENTE: 'Pendiente de aprobación',
-  APROBADO: 'Aprobado',
+  PUBLICADO: 'Publicado',
+  APROBADO: 'Publicado',
   RECHAZADO: 'Rechazado',
 };
 
-const AdminProfesionalesView = () => {
-  const [profesionales, setProfesionales] = useState(initialProfesionales);
+const mapProfesionalFromBackend = (item) => {
+  const estadoUpper = (
+    item.estado || (item.publicado ? 'PUBLICADO' : 'PENDIENTE_APROBACION')
+  ).toUpperCase();
+
+  let estado = 'PENDIENTE';
+  if (estadoUpper === 'PUBLICADO' || estadoUpper === 'APROBADO') {
+    estado = 'PUBLICADO';
+  } else if (estadoUpper === 'RECHAZADO') {
+    estado = 'RECHAZADO';
+  }
+
+  const nombreCompleto = `${item.nombre || ''} ${item.apellido || ''}`.trim() || 'Profesional';
+  const esServicio = Boolean(item.esServicioClave);
+
+  return {
+    id: item.id,
+    nombre: nombreCompleto,
+    cargo: item.cargo || 'Profesional de planta',
+    matricula: item.matricula || '',
+    especialidad: item.especialidadNombre || 'Sin asignar',
+    area: esServicio ? 'Servicio clave' : 'Especialidad médica',
+    tipo: esServicio ? 'Servicio de apoyo' : 'Especialidad médica',
+    descripcion: item.descripcion || '',
+    imagen: item.imagenUrl || null,
+    editor: item.editor || 'Editor CMS',
+    fechaCarga: item.fechaCarga || 'Reciente',
+    fechaActualizacion: item.fechaActualizacion || item.fechaCarga || 'Reciente',
+    estado,
+    activo: item.activo !== false,
+    publicado: estado === 'PUBLICADO',
+    motivoRechazo: item.rejectionReason || '',
+  };
+};
+
+const AdminProfesionalesView = ({ onPendingCountChange }) => {
+  const [profesionales, setProfesionales] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [typeFilter, setTypeFilter] = useState('TODOS');
-  const [publishedTypeFilter, setPublishedTypeFilter] = useState('TODOS');
-  const [publishedSearch, setPublishedSearch] = useState('');
   const [search, setSearch] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [isRejecting, setIsRejecting] = useState(false);
   const [feedback, setFeedback] = useState('');
+
+  const syncPendingCount = useCallback(
+    (list) => {
+      if (typeof onPendingCountChange === 'function') {
+        const count = list.filter((item) => item.estado === 'PENDIENTE').length;
+        onPendingCountChange(count);
+      }
+    },
+    [onPendingCountChange]
+  );
+
+  const cargarDatos = useCallback(
+    async (silent = false) => {
+      try {
+        if (!silent) setLoading(true);
+        const data = await getProfesionales(true);
+        if (Array.isArray(data)) {
+          const filtrados = data
+            .filter((item) => (item.estado || '').toUpperCase() !== 'ARCHIVADO')
+            .map(mapProfesionalFromBackend)
+            .sort((a, b) => {
+              const aPending = a.estado === 'PENDIENTE' ? 0 : 1;
+              const bPending = b.estado === 'PENDIENTE' ? 0 : 1;
+              if (aPending !== bPending) return aPending - bPending;
+              return a.nombre.localeCompare(b.nombre);
+            });
+          setProfesionales(filtrados);
+          syncPendingCount(filtrados);
+        } else {
+          setProfesionales([]);
+          syncPendingCount([]);
+        }
+      } catch (error) {
+        if (!silent) {
+          console.error('Error al cargar profesionales:', error);
+          toast.error('No se pudieron cargar los profesionales.');
+        }
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [syncPendingCount]
+  );
+
+  useEffect(() => {
+    cargarDatos(false);
+
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        cargarDatos(true);
+      }
+    }, 60000);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        cargarDatos(true);
+      }
+    };
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
+  }, [cargarDatos]);
 
   const selectedProfessional = profesionales.find((item) => item.id === selectedId);
 
@@ -165,11 +152,10 @@ const AdminProfesionalesView = () => {
           ? item.publicado
           : item.estado === statusFilter);
       const matchesType = typeFilter === 'TODOS' || item.tipo === typeFilter;
-      const matchesPublication =
-        statusFilter === 'PUBLICADO' ? item.publicado : !item.publicado;
       const searchableText = [
         item.nombre,
         item.cargo,
+        item.matricula,
         item.especialidad,
         item.area,
         item.editor,
@@ -178,7 +164,6 @@ const AdminProfesionalesView = () => {
         .toLocaleLowerCase('es');
 
       return (
-        matchesPublication &&
         matchesStatus &&
         matchesType &&
         (!normalizedSearch || searchableText.includes(normalizedSearch))
@@ -187,25 +172,7 @@ const AdminProfesionalesView = () => {
   }, [profesionales, search, statusFilter, typeFilter]);
 
   const pendingCount = profesionales.filter((item) => item.estado === 'PENDIENTE').length;
-  const approvedCount = profesionales.filter(
-    (item) => item.estado === 'APROBADO' && !item.publicado
-  ).length;
   const rejectedCount = profesionales.filter((item) => item.estado === 'RECHAZADO').length;
-  const publishedProfesionales = useMemo(() => {
-    const normalizedSearch = publishedSearch.trim().toLocaleLowerCase('es');
-
-    return profesionales
-      .filter((item) => {
-        const searchableText = `${item.nombre} ${item.cargo} ${item.especialidad} ${item.area}`
-          .toLocaleLowerCase('es');
-        return (
-          item.publicado &&
-          (publishedTypeFilter === 'TODOS' || item.tipo === publishedTypeFilter) &&
-          (!normalizedSearch || searchableText.includes(normalizedSearch))
-        );
-      })
-      .sort((a, b) => new Date(b.fechaPublicacion || 0) - new Date(a.fechaPublicacion || 0));
-  }, [profesionales, publishedSearch, publishedTypeFilter]);
   const publishedCount = profesionales.filter((item) => item.publicado).length;
 
   const closeDetails = () => {
@@ -214,41 +181,65 @@ const AdminProfesionalesView = () => {
     setRejectReason('');
   };
 
-  const updateProfessional = (id, changes) => {
-    setProfesionales((items) =>
-      items.map((item) => (item.id === id ? { ...item, ...changes } : item))
-    );
+  const handleApprove = async () => {
+    if (!selectedProfessional || submitting) return;
+    try {
+      setSubmitting(true);
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
+      }
+      await evaluarProfesionalEstado(
+        selectedProfessional.id,
+        { estado: 'APROBADO' },
+        keycloak.token
+      );
+      toast.success(`"${selectedProfessional.nombre}" fue aprobado y publicado.`);
+      setFeedback(`"${selectedProfessional.nombre}" fue aprobado y publicado con éxito.`);
+      closeDetails();
+      await cargarDatos(true);
+    } catch (error) {
+      console.error('Error al aprobar profesional:', error);
+      toast.error(error.response?.data?.error || 'Error al aprobar al profesional.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleApprove = () => {
-    if (!selectedProfessional) return;
-
-    updateProfessional(selectedProfessional.id, {
-      estado: 'APROBADO',
-      motivoRechazo: '',
-      fechaActualizacion: 'Hoy',
-    });
-    setFeedback(
-      `${selectedProfessional.nombre} fue aprobado. La publicación se administra por separado.`
-    );
-  };
-
-  const handleReject = () => {
-    if (!selectedProfessional || !rejectReason.trim()) return;
-
-    updateProfessional(selectedProfessional.id, {
-      estado: 'RECHAZADO',
-      publicado: false,
-      motivoRechazo: rejectReason.trim(),
-      fechaActualizacion: 'Hoy',
-    });
-    setFeedback(`Se registró el rechazo de ${selectedProfessional.nombre} con su motivo.`);
-    closeDetails();
+  const handleReject = async () => {
+    if (!selectedProfessional || submitting) return;
+    if (!rejectReason.trim()) {
+      toast.error('Ingresá un motivo para que el Editor CMS pueda corregir la ficha.');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
+      }
+      await evaluarProfesionalEstado(
+        selectedProfessional.id,
+        {
+          estado: 'RECHAZADO',
+          rejectionReason: rejectReason.trim(),
+        },
+        keycloak.token
+      );
+      toast.success(`"${selectedProfessional.nombre}" fue rechazado. Se notificó al Editor CMS.`);
+      setFeedback(`Se registró el rechazo de "${selectedProfessional.nombre}" con su motivo.`);
+      closeDetails();
+      await cargarDatos(true);
+    } catch (error) {
+      console.error('Error al rechazar profesional:', error);
+      toast.error(error.response?.data?.error || 'Error al rechazar al profesional.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getInitials = (name) =>
-    name
+    (name || '')
       .split(' ')
+      .filter(Boolean)
       .slice(0, 2)
       .map((part) => part[0])
       .join('')
@@ -257,10 +248,21 @@ const AdminProfesionalesView = () => {
   return (
     <div className="admin-prof-page">
       <header className="admin-prof-header admin-view-heading">
-        <div>
-          <span className="admin-prof-overtitle">PANEL DE CONTROL DIRECTIVO</span>
-          <h1>Revisión de Profesionales</h1>
-          <p>Revisá y respondé las solicitudes de profesionales enviadas por el CMS.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', width: '100%' }}>
+          <div>
+            <span className="admin-prof-overtitle">PANEL DE CONTROL DIRECTIVO</span>
+            <h1>Revisión de Profesionales</h1>
+            <p>Revisá y respondé las solicitudes de profesionales enviadas por el CMS.</p>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={() => cargarDatos(false)}
+            disabled={loading}
+          >
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            Actualizar
+          </button>
         </div>
       </header>
 
@@ -290,22 +292,10 @@ const AdminProfesionalesView = () => {
           aria-pressed={statusFilter === 'PENDIENTE'}
           onClick={() => setStatusFilter('PENDIENTE')}
         >
-          <span className="admin-prof-summary-icon"><UserRound size={19} /></span>
+          <span className="admin-prof-summary-icon"><Clock3 size={19} /></span>
           <div>
             <span>Pendientes de aprobación</span>
             <strong>{pendingCount}</strong>
-          </div>
-        </button>
-        <button
-          type="button"
-          className={`admin-prof-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'APROBADO'}
-          onClick={() => setStatusFilter('APROBADO')}
-        >
-          <span className="admin-prof-summary-icon"><BadgeCheck size={19} /></span>
-          <div>
-            <span>Aprobados para CMS</span>
-            <strong>{approvedCount}</strong>
           </div>
         </button>
         <button
@@ -334,7 +324,6 @@ const AdminProfesionalesView = () => {
         </button>
       </section>
 
-      <div className={`admin-prof-content-grid ${statusFilter === 'PUBLICADO' ? 'is-published-filter' : ''}`}>
       <section className="admin-prof-card" aria-labelledby="admin-prof-list-title">
         <div className="admin-prof-card-heading">
           <div>
@@ -370,164 +359,90 @@ const AdminProfesionalesView = () => {
         </div>
 
         <div className="admin-prof-table-wrap">
-          <table className="admin-prof-table">
-            <thead>
-              <tr>
-                <th scope="col">Profesional</th>
-                <th scope="col">Editor / fecha</th>
-                <th scope="col">Especialidad / área</th>
-                <th scope="col">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProfesionales.map((item) => (
-                <tr key={item.id}>
-                  <td data-label="Profesional">
-                    <div className="admin-prof-person-cell">
-                      <div className="admin-prof-avatar">
-                        {item.imagen ? (
-                          <img src={item.imagen} alt={`Fotografía de ${item.nombre}`} />
-                        ) : (
-                          <span aria-label="Sin fotografía">{getInitials(item.nombre)}</span>
-                        )}
-                      </div>
-                      <div className="admin-prof-person-copy">
-                        <button
-                          type="button"
-                          className="admin-prof-name-button"
-                          onClick={() => setSelectedId(item.id)}
-                        >
-                          {item.nombre}
-                        </button>
-                        <span>{item.cargo}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td data-label="Editor / fecha">
-                    <div className="admin-prof-editor-cell" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{item.editor}</span>
-                      <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}><CalendarDays size={13} />{item.fechaActualizacion}</small>
-                    </div>
-                  </td>
-                  <td data-label="Especialidad / área">
-                    <div className="admin-prof-association-cell">
-                      <strong><Stethoscope size={14} />{item.especialidad}</strong>
-                      <span><Building2 size={14} />{item.area}</span>
-                    </div>
-                  </td>
-                  <td data-label="Estado">
-                    <span
-                      className={`admin-prof-status is-${item.publicado ? 'aprobado' : item.estado.toLowerCase()}`}
-                    >
-                      {item.publicado ? 'Publicado' : estadoLabels[item.estado]}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {filteredProfesionales.length === 0 && (
+          {loading ? (
+            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
+              <div
+                className="cms-spinner"
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  margin: '0 auto 16px auto',
+                  borderWidth: '3px',
+                  borderTopColor: '#0c2340',
+                }}
+              ></div>
+              <p style={{ fontSize: '0.95rem' }}>Cargando fichas de profesionales...</p>
+            </div>
+          ) : (
+            <table className="admin-prof-table">
+              <thead>
                 <tr>
-                  <td className="admin-prof-empty" colSpan="4">
-                    No se encontraron profesionales con esos filtros.
-                  </td>
+                  <th scope="col">Profesional</th>
+                  <th scope="col">Editor / fecha</th>
+                  <th scope="col">Especialidad / área</th>
+                  <th scope="col">Estado</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredProfesionales.map((item) => (
+                  <tr key={item.id}>
+                    <td data-label="Profesional">
+                      <div className="admin-prof-person-cell">
+                        <div className="admin-prof-avatar">
+                          {item.imagen ? (
+                            <img src={item.imagen} alt={`Fotografía de ${item.nombre}`} />
+                          ) : (
+                            <span aria-label="Sin fotografía">{getInitials(item.nombre)}</span>
+                          )}
+                        </div>
+                        <div className="admin-prof-person-copy">
+                          <button
+                            type="button"
+                            className="admin-prof-name-button"
+                            onClick={() => setSelectedId(item.id)}
+                          >
+                            {item.nombre}
+                          </button>
+                          <span>{item.cargo}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td data-label="Editor / fecha">
+                      <div className="admin-prof-editor-cell" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{item.editor}</span>
+                        <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}><CalendarDays size={13} />{item.fechaActualizacion}</small>
+                      </div>
+                    </td>
+                    <td data-label="Especialidad / área">
+                      <div className="admin-prof-association-cell">
+                        <strong><Stethoscope size={14} />{item.especialidad}</strong>
+                        <span><Building2 size={14} />{item.area}</span>
+                      </div>
+                    </td>
+                    <td data-label="Estado">
+                      <span
+                        className={`admin-prof-status is-${item.publicado ? 'aprobado' : item.estado.toLowerCase()}`}
+                      >
+                        {item.publicado ? 'Publicado' : estadoLabels[item.estado]}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {filteredProfesionales.length === 0 && (
+                  <tr>
+                    <td className="admin-prof-empty" colSpan="4">
+                      No se encontraron profesionales con esos filtros.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
         <p className="admin-prof-grouping-note">
           La agrupación por tipo es referencial y queda sujeta a validación institucional; no reemplaza las asociaciones registradas.
         </p>
       </section>
-
-      {statusFilter !== 'PUBLICADO' && (
-      <aside className="admin-prof-published-panel" aria-labelledby="admin-prof-published-title">
-        <div className="admin-prof-published-heading">
-          <div className="admin-prof-published-heading-icon"><Globe2 size={18} /></div>
-          <div>
-            <h2 id="admin-prof-published-title">Publicados</h2>
-            <p>Perfiles visibles al público</p>
-          </div>
-          <span className="admin-prof-published-count">{publishedCount}</span>
-        </div>
-
-        <label className="admin-prof-published-search">
-          <Search size={16} aria-hidden="true" />
-          <span className="admin-prof-visually-hidden">Buscar en profesionales publicados</span>
-          <input
-            type="search"
-            placeholder="Buscar publicados..."
-            value={publishedSearch}
-            onChange={(event) => setPublishedSearch(event.target.value)}
-          />
-        </label>
-
-        <div className="admin-prof-published-filters" role="group" aria-label="Filtrar publicados por tipo">
-          {[
-            { value: 'TODOS', label: 'Todos' },
-            { value: 'Especialidad médica', label: 'Especialidades' },
-            { value: 'Servicio de apoyo', label: 'Servicios' },
-          ].map((filter) => (
-            <button
-              key={filter.value}
-              type="button"
-              className={publishedTypeFilter === filter.value ? 'is-active' : ''}
-              aria-pressed={publishedTypeFilter === filter.value}
-              onClick={() => setPublishedTypeFilter(filter.value)}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-
-        <p className="admin-prof-published-sort">
-          Ordenados por fecha de publicación, más recientes primero
-        </p>
-
-        <div className="admin-prof-published-list">
-          {publishedProfesionales.map((item, index) => (
-            <button
-              className="admin-prof-published-item"
-              type="button"
-              key={item.id}
-              onClick={() => setSelectedId(item.id)}
-              aria-label={`Ver profesional publicado ${item.nombre}`}
-            >
-              <span className="admin-prof-published-order">{String(index + 1).padStart(2, '0')}</span>
-              <span className="admin-prof-published-avatar">
-                {item.imagen ? (
-                  <img src={item.imagen} alt="" />
-                ) : (
-                  getInitials(item.nombre)
-                )}
-              </span>
-              <span className="admin-prof-published-copy">
-                <strong>{item.nombre}</strong>
-                <span>{item.especialidad}</span>
-                <small>
-                  {item.fechaPublicacion
-                    ? new Date(item.fechaPublicacion).toLocaleDateString('es-AR', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                      })
-                    : 'Fecha no disponible'}
-                </small>
-              </span>
-              <span
-                className={`admin-prof-published-indicator ${item.activo ? 'is-active' : 'is-inactive'}`}
-                title={item.activo ? 'Activo' : 'Desactivado'}
-              />
-            </button>
-          ))}
-          {publishedProfesionales.length === 0 && (
-            <p className="admin-prof-published-empty">
-              No hay profesionales publicados para este filtro.
-            </p>
-          )}
-        </div>
-      </aside>
-      )}
-      </div>
 
       {selectedProfessional && (
         <div className="admin-prof-overlay" onClick={closeDetails}>
@@ -564,19 +479,19 @@ const AdminProfesionalesView = () => {
                   <span className="admin-prof-role">{selectedProfessional.cargo}</span>
                   <h3>{selectedProfessional.nombre}</h3>
                   <span>{selectedProfessional.matricula || 'Matrícula no informada'}</span>
-                  <span className={`admin-prof-status is-${selectedProfessional.estado.toLowerCase()}`}>
-                    {estadoLabels[selectedProfessional.estado]}
+                  <span className={`admin-prof-status is-${selectedProfessional.publicado ? 'aprobado' : selectedProfessional.estado.toLowerCase()}`}>
+                    {selectedProfessional.publicado ? 'Publicado' : estadoLabels[selectedProfessional.estado]}
                   </span>
                 </div>
               </div>
 
               <div className="admin-prof-detail-grid">
                 <article className="admin-prof-detail">
-                  <h4>Especialidad asociada</h4>
+                  <h4>Especialidad / Servicio asociado</h4>
                   <p>{selectedProfessional.especialidad}</p>
                 </article>
                 <article className="admin-prof-detail">
-                  <h4>Área correspondiente</h4>
+                  <h4>Clasificación</h4>
                   <p>{selectedProfessional.area}</p>
                 </article>
                 <article className="admin-prof-detail admin-prof-detail-wide">
@@ -601,13 +516,9 @@ const AdminProfesionalesView = () => {
                 <div>
                   <span>Presencia pública</span>
                   <strong>
-                    {!selectedProfessional.activo
-                      ? 'Desactivado'
-                      : selectedProfessional.publicado
-                        ? 'Publicado y activo'
-                        : selectedProfessional.estado === 'APROBADO'
-                          ? 'Aprobado, pendiente de publicación'
-                          : 'No publicado'}
+                    {selectedProfessional.publicado
+                      ? 'Publicado y visible en el portal'
+                      : 'No publicado'}
                   </strong>
                 </div>
               </div>
@@ -641,6 +552,7 @@ const AdminProfesionalesView = () => {
                       type="button"
                       className="admin-prof-button is-danger"
                       onClick={() => setIsRejecting(true)}
+                      disabled={submitting}
                     >
                       <XCircle size={17} /> Rechazar
                     </button>
@@ -648,8 +560,9 @@ const AdminProfesionalesView = () => {
                       type="button"
                       className="admin-prof-button is-primary"
                       onClick={handleApprove}
+                      disabled={submitting}
                     >
-                      <CheckCircle size={17} /> Aprobar solicitud
+                      <CheckCircle size={17} /> {submitting ? 'Aprobando...' : 'Aprobar solicitud'}
                     </button>
                   </>
                 ) : (
@@ -661,6 +574,7 @@ const AdminProfesionalesView = () => {
                         setIsRejecting(false);
                         setRejectReason('');
                       }}
+                      disabled={submitting}
                     >
                       Cancelar
                     </button>
@@ -668,9 +582,9 @@ const AdminProfesionalesView = () => {
                       type="button"
                       className="admin-prof-button is-danger"
                       onClick={handleReject}
-                      disabled={!rejectReason.trim()}
+                      disabled={!rejectReason.trim() || submitting}
                     >
-                      Confirmar rechazo
+                      {submitting ? 'Rechazando...' : 'Confirmar rechazo'}
                     </button>
                   </>
                 )}

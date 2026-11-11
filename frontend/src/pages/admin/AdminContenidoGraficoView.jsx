@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Clock3,
   CheckCircle,
@@ -11,6 +11,7 @@ import {
   Layers,
   ArrowRight,
   FileClock,
+  RefreshCw,
 } from 'lucide-react';
 import { getContenidosGraficos } from '../../api/contenidoGrafico.api';
 import {
@@ -62,28 +63,26 @@ const AdminContenidoGraficoView = ({ onPendingCountChange } = {}) => {
   const [actionError, setActionError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-    const cargarEspacios = async () => {
-      try {
-        const data = await getContenidosGraficos();
-        if (Array.isArray(data) && data.length > 0 && isMounted) {
-          // Si vienen del backend, se fusionan asegurando estructura
-          const map = new Map(data.map((item) => [item.id, item]));
-          const merged = INITIAL_ESPACIOS.map((init) => map.get(init.id) || init);
-          setEspacios(merged);
-        }
-      } catch (err) {
-        console.warn('Aviso: usando espacios fijos iniciales para auditoría de Admin.', err);
-      } finally {
-        if (isMounted) setLoading(false);
+  const cargarEspacios = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getContenidosGraficos();
+      if (Array.isArray(data) && data.length > 0) {
+        // Si vienen del backend, se fusionan asegurando estructura
+        const map = new Map(data.map((item) => [item.id, item]));
+        const merged = INITIAL_ESPACIOS.map((init) => map.get(init.id) || init);
+        setEspacios(merged);
       }
-    };
-    cargarEspacios();
-    return () => {
-      isMounted = false;
-    };
+    } catch (err) {
+      console.warn('Aviso: usando espacios fijos iniciales para auditoría de Admin.', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    cargarEspacios();
+  }, [cargarEspacios]);
 
   const counts = useMemo(
     () => ({
@@ -221,12 +220,25 @@ const AdminContenidoGraficoView = ({ onPendingCountChange } = {}) => {
     <div className="admin-cg-page-admin admin-review-container-admin">
       {/* 1. Header de la página */}
       <header className="admin-page-header-admin admin-view-heading">
-        <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
-        <h1>Gestión de Contenidos Gráficos</h1>
-        <p>
-          Revisá y auditá los elementos visuales, su ubicación y orden de presentación en las páginas
-          del Portal HIEF antes de su aprobación.
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+          <div>
+            <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
+            <h1>Gestión de Contenidos Gráficos</h1>
+            <p>
+              Revisá y auditá los elementos visuales, su ubicación y orden de presentación en las páginas
+              del Portal HIEF antes de su aprobación.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={cargarEspacios}
+            disabled={loading}
+          >
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            Actualizar
+          </button>
+        </div>
       </header>
 
       {/* Banner de Feedback */}

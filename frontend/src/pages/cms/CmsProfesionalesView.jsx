@@ -5,12 +5,16 @@ import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import { getEspecialidades } from "../../api/especialidades.api.js";
 import {
+  getProfesionales,
   createProfesional,
   updateProfesional,
   deleteProfesional,
 } from "../../api/profesionales.api.js";
 import Cropper from "react-easy-crop";
+import "../../styles/components/cms/CmsDashboard.css";
+import "../../styles/pages/cms/CmsNoticiasView.css";
 import "../../styles/pages/cms/CmsProfesionalesView.css";
+import "../../styles/pages/cms/CmsResidenciasView.css";
 import {
   CmsDeleteModal,
   CmsUnsavedChangesModal,
@@ -59,6 +63,7 @@ async function getCroppedImg(imageSrc, pixelCrop, fileName = "foto-perfil.jpg") 
 const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => {
   const [profesionales, setProfesionales] = useState([]);
   const [areasDisponibles, setAreasDisponibles] = useState([]); 
+  const [activeTab, setActiveTab] = useState("PUBLICADOS");
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("Todos"); 
   const [loading, setLoading] = useState(true);
@@ -93,13 +98,14 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
   const fetchDatos = async () => {
     setLoading(true);
     try {
-      const resProf = await adminFetch("/cms/profesionales");
-      if (resProf.ok) {
-        const dataProf = await resProf.json();
+      const [dataProf, dataAreas] = await Promise.all([
+        getProfesionales(true),
+        getEspecialidades(true),
+      ]);
+      if (Array.isArray(dataProf)) {
         setProfesionales(dataProf);
       }
-      const dataAreas = await getEspecialidades(true);
-      setAreasDisponibles(dataAreas);
+      setAreasDisponibles(Array.isArray(dataAreas) ? dataAreas : []);
     } catch (error) {
       toast.error("Error al cargar los datos.");
     } finally {
@@ -112,11 +118,30 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
   }, []);
 
   const profesionalesFiltrados = profesionales.filter(prof => {
-    const coincideBusqueda = `${prof.nombre} ${prof.apellido}`.toLowerCase().includes(searchTerm.toLowerCase());
+    const estadoItem = (
+      prof.estado || (prof.publicado ? "PUBLICADO" : "PENDIENTE_APROBACION")
+    ).toUpperCase();
+    let matchEstado = false;
+    if (activeTab === "PUBLICADOS") {
+      matchEstado = estadoItem === "PUBLICADO" || estadoItem === "APROBADO";
+    } else if (activeTab === "PENDIENTES") {
+      matchEstado = estadoItem === "PENDIENTE_APROBACION";
+    } else if (activeTab === "RECHAZADOS") {
+      matchEstado = estadoItem === "RECHAZADO";
+    } else if (activeTab === "ARCHIVADOS") {
+      matchEstado = estadoItem === "ARCHIVADO" || estadoItem === "BORRADOR";
+    }
+
+    const query = searchTerm.toLowerCase();
+    const coincideBusqueda =
+      !searchTerm ||
+      `${prof.nombre} ${prof.apellido}`.toLowerCase().includes(query) ||
+      (prof.matricula && prof.matricula.toLowerCase().includes(query)) ||
+      (prof.especialidadNombre && prof.especialidadNombre.toLowerCase().includes(query));
     let coincideTipo = true;
     if (filtroTipo === "ESPECIALIDAD") coincideTipo = prof.esServicioClave === false;
     if (filtroTipo === "SERVICIO") coincideTipo = prof.esServicioClave === true;
-    return coincideBusqueda && coincideTipo;
+    return matchEstado && coincideBusqueda && coincideTipo;
   });
 
   const handleCloseAttempt = () => {
@@ -241,7 +266,16 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     const toastId = toast.loading(editingId ? "Actualizando profesional..." : "Creando profesional...");
 
     try {
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
+      }
       const token = keycloak?.token;
+      const editorNombre =
+        keycloak?.tokenParsed?.name ||
+        keycloak?.idTokenParsed?.name ||
+        keycloak?.tokenParsed?.preferred_username ||
+        "Editor CMS";
+
       const dataForm = new FormData();
       dataForm.append("nombre", formData.nombre);
       dataForm.append("apellido", formData.apellido);
@@ -250,6 +284,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
       dataForm.append("descripcion", formData.descripcion);
       dataForm.append("especialidadId", formData.especialidadId);
       dataForm.append("esServicio", formData.tipoFiltroModal === "SERVICIO"); 
+      dataForm.append("editor", editorNombre);
 
       if (archivoFoto) {
         dataForm.append("archivo", archivoFoto);
@@ -259,18 +294,35 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
         ? await updateProfesional(editingId, dataForm, token)
         : await createProfesional(dataForm, token);
       
-      if (editingId) {
-        setProfesionales(profesionales.map(p => p.id === editingId ? resultado.profesional : p));
-        toast.success("¡Profesional actualizado con éxito!", { id: toastId });
+      const profGuardado = resultado?.profesional;
+      const estadoResultante = (profGuardado?.estado || "PENDIENTE_APROBACION").toUpperCase();
+
+      if (estadoResultante === "PENDIENTE_APROBACION") {
+        toast.success(
+          editingId
+            ? "Modificaciones enviadas a revisión del administrador."
+            : "Profesional enviado a revisión del administrador para su aprobación.",
+          { id: toastId }
+        );
+        setActiveTab("PENDIENTES");
       } else {
-        setProfesionales([resultado.profesional, ...profesionales]);
-        toast.success("¡Profesional creado con éxito!", { id: toastId });
+        toast.success(
+          editingId ? "¡Profesional actualizado con éxito!" : "¡Profesional creado con éxito!",
+          { id: toastId }
+        );
+        setActiveTab("PUBLICADOS");
       }
-      
+
       setHasUnsavedChanges(false);
       setIsModalOpen(false);
+      await fetchDatos();
     } catch (error) {
-      toast.error("Ocurrió un error al guardar el profesional.", { id: toastId });
+      toast.error(
+        error.response?.data?.error?.message ||
+          error.response?.data?.error ||
+          "Ocurrió un error al guardar el profesional.",
+        { id: toastId }
+      );
     } finally {
       setIsSaving(false);
     }
@@ -297,6 +349,30 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
         </div>
         <button type="button" className="btn-crear-noticia-header news-btn-submit" onClick={handleOpenCreate}>
           + AÑADIR PROFESIONAL
+        </button>
+      </div>
+
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "18px" }}>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
+          onClick={() => setActiveTab("PUBLICADOS")}
+        >
+          Publicados
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
+          onClick={() => setActiveTab("PENDIENTES")}
+        >
+          Pendientes de aprobación
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
+          onClick={() => setActiveTab("RECHAZADOS")}
+        >
+          Rechazados
         </button>
       </div>
 
@@ -327,11 +403,12 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
       </div>
 
       <div className="cms-news-table-container">
-        <div className="activity-table-head news-table-head" style={{ display: "flex", gap: "10px" }}>
+        <div className="activity-table-head news-table-head" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <div style={{ flex: 1.5 }}>PROFESIONAL</div>
           <div style={{ flex: 1 }}>CARGO O FUNCIÓN</div>
           <div style={{ flex: 1.2 }}>ÁREA ASIGNADA</div>
           <div style={{ flex: 1 }}>CLASIFICACIÓN</div>
+          <div style={{ width: "130px", textAlign: "center" }}>ESTADO</div>
           <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
@@ -343,11 +420,15 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
             </div>
           ) : profesionalesFiltrados.length === 0 ? (
             <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
-              No se encontraron profesionales registrados.
+              No se encontraron profesionales registrados en esta sección.
             </div>
           ) : (
-            profesionalesFiltrados.map((prof) => (
-              <div className="activity-row news-table-row" key={prof.id} style={{ display: "flex", gap: "10px" }}>
+            profesionalesFiltrados.map((prof) => {
+              const estadoProf = (
+                prof.estado || (prof.publicado ? "PUBLICADO" : "PENDIENTE_APROBACION")
+              ).toUpperCase();
+              return (
+              <div className="activity-row news-table-row" key={prof.id} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                 
                 <div className="col-content" style={{ flex: 1.5, flexDirection: "row", alignItems: "center", gap: "15px" }}>
                   <div className="news-thumb-box">
@@ -364,6 +445,23 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                     <span style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "4px", display: "block" }}>
                       {prof.matricula || "Sin matrícula"}
                     </span>
+                    {prof.rejectionReason && (
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "#b91c1c",
+                          fontWeight: "600",
+                          backgroundColor: "#fef2f2",
+                          padding: "3px 8px",
+                          borderRadius: "4px",
+                          display: "inline-block",
+                          marginTop: "6px",
+                          border: "1px solid #fecaca",
+                        }}
+                      >
+                        Motivo de rechazo: {prof.rejectionReason}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -397,6 +495,22 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                   </span>
                 </div>
 
+                <div style={{ width: "130px", textAlign: "center" }}>
+                  <span
+                    className={`status-badge ${
+                      estadoProf === "PUBLICADO"
+                        ? "publicado"
+                        : estadoProf === "PENDIENTE_APROBACION"
+                        ? "pendiente"
+                        : estadoProf === "RECHAZADO"
+                        ? "rechazado"
+                        : "archivado"
+                    }`}
+                  >
+                    {estadoProf === "PENDIENTE_APROBACION" ? "PENDIENTE" : estadoProf}
+                  </span>
+                </div>
+
                 <div className="news-actions-cell" style={{ width: "100px", justifyContent: "center", gap: "8px" }}>
                   <button type="button" title="Editar" onClick={() => handleOpenEdit(prof)} className="news-action-btn-edit">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -414,7 +528,8 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                   </button>
                 </div>
               </div>
-            ))
+            );
+            })
           )}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Archive,
   CalendarDays,
@@ -8,6 +8,7 @@ import {
   FileText,
   Globe2,
   Image as ImageIcon,
+  RefreshCw,
   Search,
   Stethoscope,
   Users,
@@ -337,53 +338,43 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
   const [actionError, setActionError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadResidencias = async () => {
-      try {
-        const data = await getResidencias(true);
-        if (!Array.isArray(data) || data.length === 0) {
-          if (isMounted) {
-            setResidencias(INITIAL_MOCK_RESIDENCIAS);
-            setIsSimulation(true);
-          }
-          return;
-        }
-
-        const normalizadas = data
-          .map(normalizeResidenciaRecord)
-          .filter(Boolean);
-
-        // Integrar registros reales de la BD manteniendo los mocks de estados que no existan aún en BD
-        // para permitir probar todos los filtros y flujos condicionales del modal.
-        const nombresExistentes = new Set(
-          normalizadas.map((item) => item.nombre.toLocaleLowerCase('es').trim()),
-        );
-        const mocksComplementarios = INITIAL_MOCK_RESIDENCIAS.filter(
-          (mock) => !nombresExistentes.has(mock.nombre.toLocaleLowerCase('es').trim()),
-        );
-
-        if (isMounted) {
-          setResidencias([...normalizadas, ...mocksComplementarios]);
-          setIsSimulation(false);
-        }
-      } catch (loadError) {
-        console.error('Aviso al cargar residencias (usando datos iniciales):', loadError);
-        if (isMounted) {
-          setResidencias(INITIAL_MOCK_RESIDENCIAS);
-          setIsSimulation(true);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
+  const cargarResidencias = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getResidencias(true);
+      if (!Array.isArray(data) || data.length === 0) {
+        setResidencias(INITIAL_MOCK_RESIDENCIAS);
+        setIsSimulation(true);
+        return;
       }
-    };
 
-    loadResidencias();
-    return () => {
-      isMounted = false;
-    };
+      const normalizadas = data
+        .map(normalizeResidenciaRecord)
+        .filter(Boolean);
+
+      // Integrar registros reales de la BD manteniendo los mocks de estados que no existan aún en BD
+      // para permitir probar todos los filtros y flujos condicionales del modal.
+      const nombresExistentes = new Set(
+        normalizadas.map((item) => item.nombre.toLocaleLowerCase('es').trim()),
+      );
+      const mocksComplementarios = INITIAL_MOCK_RESIDENCIAS.filter(
+        (mock) => !nombresExistentes.has(mock.nombre.toLocaleLowerCase('es').trim()),
+      );
+
+      setResidencias([...normalizadas, ...mocksComplementarios]);
+      setIsSimulation(false);
+    } catch (loadError) {
+      console.error('Aviso al cargar residencias (usando datos iniciales):', loadError);
+      setResidencias(INITIAL_MOCK_RESIDENCIAS);
+      setIsSimulation(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    cargarResidencias();
+  }, [cargarResidencias]);
 
   const residenciasVisibles = useMemo(
     () =>
@@ -586,11 +577,24 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
   return (
     <div className="admin-res-page-admin admin-review-container-admin">
       <header className="admin-page-header-admin admin-view-heading">
-        <span className="admin-overtitle-admin">GESTIÓN ACADÉMICA Y FORMATIVA</span>
-        <h1>Gestión de Residencias Públicas</h1>
-        <p>
-          Revisá las convocatorias, programas formativos y documentación antes de aprobarlos para su publicación en el portal.
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+          <div>
+            <span className="admin-overtitle-admin">GESTIÓN ACADÉMICA Y FORMATIVA</span>
+            <h1>Gestión de Residencias Públicas</h1>
+            <p>
+              Revisá las convocatorias, programas formativos y documentación antes de aprobarlos para su publicación en el portal.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={cargarResidencias}
+            disabled={loading}
+          >
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            Actualizar
+          </button>
+        </div>
       </header>
 
       {feedback && (

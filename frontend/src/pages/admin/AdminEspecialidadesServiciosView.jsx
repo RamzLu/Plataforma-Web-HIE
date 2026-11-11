@@ -5,6 +5,7 @@ import {
   CheckCircle,
   Clock3,
   Globe2,
+  RefreshCw,
   Search,
   Stethoscope,
   X,
@@ -226,9 +227,22 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
   return (
     <div className="admin-es-page">
       <header className="admin-es-page-header admin-view-heading">
-        <span className="admin-es-overtitle">PANEL DE CONTROL DIRECTIVO</span>
-        <h1>Revisión de Servicios y Especialidades</h1>
-        <p>Evalúa las solicitudes enviadas por el equipo de redacción del CMS para decidir su aprobación o rechazo.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+          <div>
+            <span className="admin-es-overtitle">PANEL DE CONTROL DIRECTIVO</span>
+            <h1>Revisión de Servicios y Especialidades</h1>
+            <p>Evalúa las solicitudes enviadas por el equipo de redacción del CMS para decidir su aprobación o rechazo.</p>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={() => cargarDatos(false)}
+            disabled={loading}
+          >
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            Actualizar
+          </button>
+        </div>
       </header>
 
       {feedback && (

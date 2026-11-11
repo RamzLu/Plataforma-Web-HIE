@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Archive,
   CalendarDays,
@@ -9,6 +9,7 @@ import {
   Globe2,
   GraduationCap,
   Image as ImageIcon,
+  RefreshCw,
   Search,
   Video,
   X,
@@ -154,34 +155,27 @@ const AdminCapacitacionesView = () => {
   const [actionError, setActionError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-    const loadCapacitaciones = async () => {
-      try {
-        const data = await getCapacitaciones();
-        if (!Array.isArray(data)) {
-          throw new Error('La respuesta de capacitaciones no tiene un formato válido.');
-        }
-        if (isMounted) {
-          setCapacitaciones(data.length > 0 ? data : SIMULATED_CAPACITACIONES);
-          setIsSimulation(data.length === 0);
-        }
-      } catch (loadError) {
-        console.error('Error al cargar capacitaciones para revisión:', loadError);
-        if (isMounted) {
-          setCapacitaciones(SIMULATED_CAPACITACIONES);
-          setIsSimulation(true);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
+  const cargarCapacitaciones = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getCapacitaciones();
+      if (!Array.isArray(data)) {
+        throw new Error('La respuesta de capacitaciones no tiene un formato válido.');
       }
-    };
-
-    loadCapacitaciones();
-    return () => {
-      isMounted = false;
-    };
+      setCapacitaciones(data.length > 0 ? data : SIMULATED_CAPACITACIONES);
+      setIsSimulation(data.length === 0);
+    } catch (loadError) {
+      console.error('Error al cargar capacitaciones para revisión:', loadError);
+      setCapacitaciones(SIMULATED_CAPACITACIONES);
+      setIsSimulation(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    cargarCapacitaciones();
+  }, [cargarCapacitaciones]);
 
   const selectedTraining = capacitaciones.find((training) => training.id === selectedId);
   const capacitacionesVisibles = useMemo(
@@ -307,9 +301,22 @@ const AdminCapacitacionesView = () => {
   return (
     <div className="admin-training-page admin-review-container-admin">
       <header className="admin-page-header-admin admin-view-heading">
-        <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
-        <h1>Gestión de Capacitaciones Públicas</h1>
-        <p>Revisá los contenidos y recursos antes de aprobarlos para publicación.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+          <div>
+            <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
+            <h1>Gestión de Capacitaciones Públicas</h1>
+            <p>Revisá los contenidos y recursos antes de aprobarlos para publicación.</p>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={cargarCapacitaciones}
+            disabled={loading}
+          >
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            Actualizar
+          </button>
+        </div>
       </header>
 
       {feedback && (
