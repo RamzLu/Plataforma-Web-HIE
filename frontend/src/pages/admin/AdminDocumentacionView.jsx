@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import keycloak from '../../config/keycloak';
 import { getDocumentos, evaluarDocumentoEstado } from '../../api/documentos.api.js';
 import { sanitizeUrl } from '../../utils/sanitizeUrl.js';
+import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminDocumentacionView.css';
 
 const statusLabels = {
@@ -59,6 +60,8 @@ const mapDocumentFromBackend = (doc) => {
     estado: estadoUpper,
     rejectionReason: doc.rejectionReason || '',
     previewText: doc.description || 'Documento institucional para revisión y evaluación.',
+    cambios: Array.isArray(doc.cambios) ? doc.cambios : [],
+    esActualizacion: Boolean(doc.esActualizacion),
   };
 };
 
@@ -407,7 +410,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                           >
                             {doc.title}
                           </button>
-                          <small>{doc.fileName}</small>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
+                            <small>{doc.fileName}</small>
+                            <AdminCambiosPill count={doc.cambios?.length} esActualizacion={doc.esActualizacion} />
+                          </div>
                         </span>
                       </div>
                     </td>
@@ -466,6 +472,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
             </header>
 
             <div className="admin-doc-modal-body">
+              <AdminCambiosResaltados
+                cambios={selectedDocument.cambios}
+                esActualizacion={selectedDocument.esActualizacion}
+              />
               <div className="admin-doc-info-grid">
                 <article>
                   <h3>Descripción</h3>

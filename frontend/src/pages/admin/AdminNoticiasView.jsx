@@ -7,6 +7,7 @@ import { getNoticias, evaluarNoticiaEstado } from '../../api/noticias.api';
 import avatarHospital from '../../assets/logoHospitalEvita.png';
 import DefaultNewsImage from '../../components/ui/DefaultNewsImage';
 import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
+import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminNoticiasView.css';
 
 const AdminNoticiasView = ({ onPendingCountChange }) => {
@@ -129,6 +130,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 rejectionReason: noticia.rejectionReason || null,
                 requestedEstado: noticia.requestedEstado || null,
                 previousEstado: noticia.previousEstado || null,
+                cambios: Array.isArray(noticia.cambios) ? noticia.cambios : [],
+                esActualizacion: Boolean(noticia.esActualizacion),
               };
             })
             .sort((a, b) => {
@@ -515,17 +518,19 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                         <span className="news-title-clamped-admin" title={item.title}>
                           {item.title}
                         </span>
-                        {item.editor && (
-                          <span
-                            style={{
-                              fontSize: '0.75rem',
-                              color: '#64748b',
-                              marginTop: '4px',
-                            }}
-                          >
-                            Editado por {item.editedBy || item.editor}
-                          </span>
-                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                          {item.editor && (
+                            <span
+                              style={{
+                                fontSize: '0.75rem',
+                                color: '#64748b',
+                              }}
+                            >
+                              Editado por {item.editedBy || item.editor}
+                            </span>
+                          )}
+                          <AdminCambiosPill count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+                        </div>
                       </button>
                     </div>
 
@@ -644,6 +649,14 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
             </div>
 
 <div className="modal-body-esp-admin">
+              {selectedNews.esActualizacion && selectedNews.cambios?.length > 0 && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <AdminCambiosResaltados
+                    cambios={selectedNews.cambios}
+                    esActualizacion={selectedNews.esActualizacion}
+                  />
+                </div>
+              )}
               <div className="preview-mock-left-admin">
                 <div className="modal-author-row-admin">
                   <div className="hospital-avatar-admin">

@@ -17,6 +17,7 @@ import {
   getProfesionales,
   evaluarProfesionalEstado,
 } from '../../api/profesionales.api.js';
+import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminProfesionalesView.css';
 
 const estadoLabels = {
@@ -58,6 +59,8 @@ const mapProfesionalFromBackend = (item) => {
     activo: item.activo !== false,
     publicado: estado === 'PUBLICADO',
     motivoRechazo: item.rejectionReason || '',
+    cambios: Array.isArray(item.cambios) ? item.cambios : [],
+    esActualizacion: Boolean(item.esActualizacion),
   };
 };
 
@@ -403,7 +406,10 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                           >
                             {item.nombre}
                           </button>
-                          <span>{item.cargo}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <span>{item.cargo}</span>
+                            <AdminCambiosPill count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -464,6 +470,10 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
             </header>
 
             <div className="admin-prof-modal-body">
+              <AdminCambiosResaltados
+                cambios={selectedProfessional.cambios}
+                esActualizacion={selectedProfessional.esActualizacion}
+              />
               <div className="admin-prof-profile">
                 <div className="admin-prof-profile-photo">
                   {selectedProfessional.imagen ? (

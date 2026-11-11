@@ -3,6 +3,7 @@ import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { sanitizarHtmlNoticia, parsearIdBigInt, parsearArregloJson } from "../../utils/sanitize.utils.js";
+import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
 const REJECTION_KEY_PREFIX = "noticia_rejection_";
 const PENDING_META_KEY_PREFIX = "noticia_pending_meta_";
@@ -353,6 +354,10 @@ class CmsNoticiaService {
         editor: editorNombre,
         editedBy: editadoPorNombre,
         rejectionReason: motivosMap.get(idStr) || null,
+        cambios:
+          estadoUpper === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
+        esActualizacion:
+          estadoUpper === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
       });
     }
 
@@ -600,7 +605,56 @@ class CmsNoticiaService {
     }
 
     const motivoActual = await this.obtenerMotivoRechazo(idStr);
-    const metaActual = await this.obtenerPendingMeta(idStr);
+    let metaActual = await this.obtenerPendingMeta(idStr);
+
+    // Detección automática de cambios para que el Admin vea qué se modificó
+    if (noticiaActualizada.estado === "PENDIENTE_APROBACION" && metaActual) {
+      const imgsPreviasCambio = noticiaExistente.noticia_archivo.map(
+        (na) =>
+          supabase.storage.from("noticias-imagenes").getPublicUrl(na.archivo.nombreArchivo).data
+            .publicUrl
+      );
+      let catPreviaCambio = noticiaExistente.categoria_noticia
+        ? noticiaExistente.categoria_noticia.nombre
+        : "General";
+      if (["noticias", "noticia"].includes(catPreviaCambio.toLowerCase())) {
+        catPreviaCambio = "General";
+      }
+      const camposNoticia = [
+        { key: "titulo", label: "Título" },
+        { key: "category", label: "Categoría" },
+        { key: "contenido", label: "Contenido", tipo: "html" },
+        { key: "fechaPublicacion", label: "Fecha de publicación programada", tipo: "datetime" },
+        { key: "images", label: "Imágenes", tipo: "images" },
+      ];
+      const nuevosCambios = calcularCambios(
+        {
+          titulo: noticiaExistente.titulo,
+          category: catPreviaCambio,
+          contenido: noticiaExistente.contenido,
+          fechaPublicacion: noticiaExistente.fechaPublicacion,
+          images: imgsPreviasCambio,
+        },
+        {
+          titulo: noticiaActualizada.titulo,
+          category: catFinal,
+          contenido: noticiaActualizada.contenido,
+          fechaPublicacion: noticiaActualizada.fechaPublicacion,
+          images: imgs,
+        },
+        camposNoticia
+      );
+      const cambiosPrevios =
+        metaExistente && noticiaExistente.estado === "PENDIENTE_APROBACION"
+          ? metaExistente.cambios || []
+          : [];
+      metaActual = {
+        ...metaActual,
+        cambios: combinarCambios(cambiosPrevios, nuevosCambios),
+        esActualizacion: true,
+      };
+      await this.guardarPendingMeta(idStr, metaActual);
+    }
 
     return {
       message: "Exito",

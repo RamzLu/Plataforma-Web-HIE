@@ -3,6 +3,7 @@ import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
 const REJECTION_KEY_PREFIX = "profesional_rejection_";
 const PENDING_META_KEY_PREFIX = "profesional_pending_meta_";
@@ -210,6 +211,8 @@ class CmsProfesionalService {
       fechaCarga,
       fechaActualizacion,
       imagenUrl: pubUrl,
+      cambios: options.cambios || [],
+      esActualizacion: Boolean(options.esActualizacion),
       createdAt: prof.createdAt,
       updatedAt: prof.updatedAt,
     };
@@ -306,6 +309,8 @@ class CmsProfesionalService {
           rejectionReason,
           editor: pendingMeta?.editor || editorMeta?.editor || "Editor CMS",
           updatedAt: pendingMeta?.updatedAt || editorMeta?.updatedAt || prof.updatedAt,
+          cambios: estado === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
+          esActualizacion: estado === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
         })
       );
     }
@@ -620,12 +625,47 @@ class CmsProfesionalService {
       await this.limpiarPendingMeta(idStr);
       await this.limpiarMotivoRechazo(idStr);
     } else {
+      // Detección automática de cambios para la revisión del Admin
+      const versionAnterior = this._construirItemProfesional(profesionalExistente, servicios, {});
+      let urlNueva = versionAnterior.imagenUrl;
+      if (profActualizado.archivo) {
+        urlNueva = supabase.storage
+          .from("noticias-imagenes")
+          .getPublicUrl(profActualizado.archivo.nombreArchivo).data.publicUrl;
+      }
+      const nuevosCambios = calcularCambios(
+        versionAnterior,
+        {
+          nombre: profActualizado.nombre,
+          apellido: profActualizado.apellido,
+          matricula: profActualizado.matricula,
+          cargo: profActualizado.cargo,
+          descripcion: profActualizado.descripcion,
+          especialidadNombre: finalAreaNombre || profActualizado.especialidad?.nombre,
+          esServicioClave: esServicio === "true" || esServicio === true,
+          imagenUrl: urlNueva,
+        },
+        [
+          { key: "nombre", label: "Nombre" },
+          { key: "apellido", label: "Apellido" },
+          { key: "matricula", label: "Matrícula" },
+          { key: "cargo", label: "Cargo o función" },
+          { key: "especialidadNombre", label: "Área asignada" },
+          { key: "esServicioClave", label: "Es servicio clave", tipo: "boolean" },
+          { key: "descripcion", label: "Descripción / perfil" },
+          { key: "imagenUrl", label: "Fotografía", tipo: "image" },
+        ]
+      );
+      const cambiosPrevios = existingPending?.cambios || [];
+
       await this.guardarPendingMeta(idStr, {
         previousEstado: provieneDePublicado ? "PUBLICADO" : existingRejection ? "RECHAZADO" : null,
         targetEstado: estadoSolicitado === "ARCHIVADO" ? "ARCHIVADO" : "PUBLICADO",
         editor: editorNombre,
         updatedAt: nowIso,
         snapshotPublico,
+        cambios: combinarCambios(cambiosPrevios, nuevosCambios),
+        esActualizacion: true,
       });
       await this.limpiarMotivoRechazo(idStr);
     }

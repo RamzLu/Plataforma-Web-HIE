@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
 const REJECTION_KEY_PREFIX = "especialidad_rejection_";
 const PENDING_META_KEY_PREFIX = "especialidad_pending_meta_";
@@ -322,6 +323,29 @@ class CmsEspecialidadService {
       actualizada = await prisma.especialidad.update({ where: { id: idBigInt }, data: payload });
     }
 
+    // Detección automática de cambios para la revisión del Admin
+    if (estadoFinal === "PENDIENTE_APROBACION") {
+      const camposEsp = [
+        { key: "nombre", label: "Nombre" },
+        { key: "descripcion", label: "Descripción" },
+        { key: "ubicacion", label: "Ubicación" },
+        { key: "horarios", label: "Horarios" },
+        { key: "requisitos", label: "Requisitos", tipo: "list" },
+        { key: "documentacionNecesaria", label: "Documentación necesaria" },
+        { key: "informacionDerivacion", label: "Información de derivación" },
+      ];
+      const nuevosCambios = calcularCambios(existente, actualizada, camposEsp);
+      const cambiosPrevios =
+        estadoAnterior === "PENDIENTE_APROBACION" ? metaExistente?.cambios || [] : [];
+      const metaGuardada =
+        (await this.obtenerMapaPendingMeta()).get(this._metaKey(idStr, esServicio)) || {};
+      await this.guardarPendingMeta(idStr, esServicio, {
+        ...metaGuardada,
+        cambios: combinarCambios(cambiosPrevios, nuevosCambios),
+        esActualizacion: true,
+      });
+    }
+
     try {
       if (user) {
         const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
@@ -621,6 +645,7 @@ class CmsEspecialidadService {
         }
       } catch (_) {}
     }
+    const esPendiente = (registro.estado || "").toUpperCase() === "PENDIENTE_APROBACION";
     return {
       ...registro,
       id: registro.id.toString(),
@@ -629,6 +654,8 @@ class CmsEspecialidadService {
       rejectionReason: rejectionReason || null,
       editor: finalEditor,
       updatedAtFormatted: finalDateFormat,
+      cambios: esPendiente ? cambiosParaCliente(meta?.cambios) : [],
+      esActualizacion: esPendiente && Boolean(meta?.esActualizacion),
     };
   }
 }

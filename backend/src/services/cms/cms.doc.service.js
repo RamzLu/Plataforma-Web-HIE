@@ -3,6 +3,7 @@ import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
+import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
 const REJECTION_KEY_PREFIX = "documento_rejection_";
 const PENDING_META_KEY_PREFIX = "documento_pending_meta_";
@@ -122,6 +123,8 @@ class CmsDocService {
       rejectionReason: motivoRechazo,
       requestedEstado: pendingMeta?.targetEstado || null,
       previousEstado: pendingMeta?.previousEstado || null,
+      cambios: estadoUpper === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
+      esActualizacion: estadoUpper === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt || doc.createdAt,
     };
@@ -448,6 +451,40 @@ class CmsDocService {
       try {
         await prisma.archivo.delete({ where: { id: oldArchivoIdAEliminar } });
       } catch (_) {}
+    }
+
+    // Detección automática de cambios para la revisión del Admin
+    if (estadoFinal === "PENDIENTE_APROBACION") {
+      const nuevosCambios = calcularCambios(
+        {
+          titulo: docExistente.titulo,
+          descripcion: docExistente.descripcion,
+          categoria: docExistente.categoria_documento?.nombre || "Información institucional",
+          archivo: docExistente.archivo?.nombreOriginal || "",
+        },
+        {
+          titulo: documentoActualizado.titulo,
+          descripcion: documentoActualizado.descripcion,
+          categoria: documentoActualizado.categoria_documento?.nombre || "Información institucional",
+          archivo: archivoSubido
+            ? `${documentoActualizado.archivo?.nombreOriginal || "Archivo"} (nuevo archivo)`
+            : documentoActualizado.archivo?.nombreOriginal || "",
+        },
+        [
+          { key: "titulo", label: "Título" },
+          { key: "descripcion", label: "Descripción" },
+          { key: "categoria", label: "Categoría" },
+          { key: "archivo", label: "Archivo adjunto" },
+        ]
+      );
+      const cambiosPrevios =
+        estadoAnterior === "PENDIENTE_APROBACION" ? metaExistente?.cambios || [] : [];
+      const metaGuardada = (await this.obtenerMapaPendingMeta()).get(idStr) || {};
+      await this.guardarPendingMeta(idStr, {
+        ...metaGuardada,
+        cambios: combinarCambios(cambiosPrevios, nuevosCambios),
+        esActualizacion: true,
+      });
     }
 
     return {

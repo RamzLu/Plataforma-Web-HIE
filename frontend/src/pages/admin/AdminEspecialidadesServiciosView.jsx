@@ -17,6 +17,7 @@ import {
   getEspecialidades,
   evaluarEspecialidadEstado,
 } from '../../api/especialidades.api.js';
+import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminEspecialidadesServiciosView.css';
 
 const statusClass = (status) => {
@@ -56,6 +57,8 @@ const mapItemFromBackend = (item) => {
     published: estadoUpper === 'PUBLICADO',
     active: item.activo !== false,
     rejectionReason: item.rejectionReason || null,
+    cambios: Array.isArray(item.cambios) ? item.cambios : [],
+    esActualizacion: Boolean(item.esActualizacion),
   };
 };
 
@@ -364,7 +367,10 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                         <span className="admin-es-item-icon">
                           <Stethoscope size={18} />
                         </span>
-                        <span>{item.name}</span>
+                        <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '3px' }}>
+                          <span>{item.name}</span>
+                          <AdminCambiosPill count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+                        </span>
                       </button>
                     </td>
                     <td data-label="Editor / fecha">
@@ -425,6 +431,10 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
             </header>
 
             <div className="admin-es-modal-body">
+              <AdminCambiosResaltados
+                cambios={selectedItem.cambios}
+                esActualizacion={selectedItem.esActualizacion}
+              />
               <div className="admin-es-detail-grid">
                 <article className="admin-es-detail admin-es-detail-wide">
                   <h3>Descripción</h3>
