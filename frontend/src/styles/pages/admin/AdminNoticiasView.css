@@ -264,6 +264,12 @@
   border: 1px solid #fecaca;
 }
 
+.status-programmed-date-admin {
+  font-size: 0.75rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
 .modal-overlay-admin {
   position: fixed;
   top: 0;

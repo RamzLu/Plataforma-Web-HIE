@@ -237,6 +237,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               status: nuevoStatusLabel,
               requestedEstado: null,
               rejectionReason: null,
+              fechaPublicacion:
+                response?.noticia?.fechaPublicacion ?? item.fechaPublicacion,
               updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
             }
           : item
@@ -564,6 +566,19 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                             }}
                           >
                             Solicita pasar a Borrador
+                          </span>
+                        )}
+                      {(item.estado === 'PROGRAMADO' || item.estado === 'APROBADO') &&
+                        item.fechaPublicacion && (
+                          <span className="status-programmed-date-admin">
+                            Para:{' '}
+                            {new Date(item.fechaPublicacion).toLocaleDateString('es-AR')} -{' '}
+                            {new Date(item.fechaPublicacion).toLocaleTimeString('es-AR', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: false,
+                            })}{' '}
+                            hs
                           </span>
                         )}
                     </div>
