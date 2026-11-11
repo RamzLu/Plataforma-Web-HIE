@@ -26,10 +26,14 @@ export const deleteResidencia = async (id, token) => {
   return response.data;
 };
 
-export const cambiarEstadoResidencia = async (id, estado, token) => {
+export const cambiarEstadoResidencia = async (id, estado, token, rejectionReason = '') => {
   const headers = {};
   if (token) headers.Authorization = `Bearer ${token}`;
-  const response = await api.patch(`/cms/residencias/${id}/estado`, { estado }, { headers });
+  const response = await api.patch(
+    `/cms/residencias/${id}/estado`,
+    { estado, rejectionReason, motivoRechazo: rejectionReason },
+    { headers }
+  );
   return response.data;
 };
 

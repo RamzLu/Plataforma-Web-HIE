@@ -80,7 +80,7 @@
 
 .admin-es-summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -164,6 +164,11 @@
 .admin-es-summary-card.is-rejected > span {
   background: #fee2e2;
   color: #b91c1c;
+}
+
+.admin-es-summary-card.is-archived > span {
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .admin-es-summary-toolbar {
@@ -355,6 +360,12 @@
   border-color: #fecaca;
   background: #fee2e2;
   color: #b91c1c;
+}
+
+.admin-es-status-archived {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .admin-es-publication {

@@ -43,8 +43,13 @@ export const eliminarResidencia = async (req, res, next) => {
 export const cambiarEstadoResidencia = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { estado } = req.body;
-    const result = await CmsResidenciaService.cambiarEstado(id, estado);
+    const { estado, rejectionReason, motivoRechazo } = req.body;
+    const result = await CmsResidenciaService.cambiarEstado(
+      id,
+      estado,
+      req.user,
+      rejectionReason || motivoRechazo
+    );
     return res.status(200).json(result);
   } catch (error) {
     next(error);

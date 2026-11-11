@@ -321,6 +321,7 @@ const normalizeResidenciaRecord = (raw) => {
     documentoTamano: raw.documentoTamano || '',
     documentoTipo: raw.documentoTipo || 'PDF',
     documentoUrl: raw.documentoUrl || '',
+    requestedEstado: raw.requestedEstado || null,
     motivoRechazo: raw.motivoRechazo || raw.rejectionReason || '',
   };
 };
@@ -467,6 +468,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
     setActionError('');
 
     try {
+      const isArchiving = selectedResidencia?.requestedEstado === 'ARCHIVADO';
+      const finalEstado = isArchiving ? 'ARCHIVADO' : 'APROBADO';
       const isMockItem =
         isSimulation || String(selectedResidencia?.id || '').startsWith('sim-res');
 
@@ -484,7 +487,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
           item?.id === selectedResidencia.id
             ? {
                 ...item,
-                estado: 'APROBADO',
+                estado: finalEstado,
                 motivoRechazo: '',
                 rejectionReason: '',
               }
@@ -493,7 +496,9 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
       );
 
       setFeedback(
-        `La solicitud de “${selectedResidencia?.nombre || 'Residencia'}” fue aprobada correctamente.`,
+        isArchiving
+          ? `La residencia “${selectedResidencia?.nombre || 'Residencia'}” fue archivada con éxito.`
+          : `La solicitud de “${selectedResidencia?.nombre || 'Residencia'}” fue aprobada correctamente.`
       );
       closeDetails();
     } catch (err) {
@@ -526,7 +531,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
       if (!isMockItem) {
         try {
           const token = keycloak?.token || localStorage.getItem('token') || '';
-          await cambiarEstadoResidencia(selectedResidencia.id, 'RECHAZADO', token);
+          await cambiarEstadoResidencia(selectedResidencia.id, 'RECHAZADO', token, reason);
         } catch (apiErr) {
           console.warn('Actualización optimista local para rechazo de residencia:', apiErr);
         }
@@ -892,6 +897,25 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             </header>
 
             <div className="admin-res-modal-body-admin">
+              {isSelectedPending && selectedResidencia?.requestedEstado === 'ARCHIVADO' && (
+                <div style={{
+                  margin: '0 0 16px 0',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  backgroundColor: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  color: '#92400e',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  <Archive size={18} style={{ color: '#d97706', flexShrink: 0 }} />
+                  <div>
+                    <strong>Solicitud de archivado:</strong> El editor del CMS solicita archivar esta residencia y retirarla del portal público.
+                  </div>
+                </div>
+              )}
               <div className="admin-res-info-grid-admin">
                 <article className="is-wide">
                   <h3>Nombre de la Residencia</h3>
@@ -1120,10 +1144,19 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                       onClick={handleApprove}
                       disabled={isSaving}
                     >
-                      <CheckCircle size={17} />
-                      {isSaving && !showRejectForm
-                        ? 'Aprobando...'
-                        : 'Aprobar solicitud'}
+                      {selectedResidencia?.requestedEstado === 'ARCHIVADO' ? (
+                        <>
+                          <Archive size={17} />
+                          {isSaving && !showRejectForm ? 'Archivando...' : 'Aprobar archivado'}
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle size={17} />
+                          {isSaving && !showRejectForm
+                            ? 'Aprobando...'
+                            : 'Aprobar solicitud'}
+                        </>
+                      )}
                     </button>
                     <button
                       type="button"

@@ -519,9 +519,14 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       }
 
       if (editingId) {
-        await updateCapacitacion(editingId, dataToSend, token);
+        const resp = await updateCapacitacion(editingId, dataToSend, token);
+        const esPendienteArchivado =
+          resp?.capacitacion?.estado === "PENDIENTE_APROBACION" &&
+          resp?.capacitacion?.requestedEstado === "ARCHIVADO";
         toast.success(
-          estadoFinal === "BORRADOR"
+          esPendienteArchivado
+            ? "Solicitud de archivado enviada a revisión del administrador."
+            : estadoFinal === "BORRADOR"
             ? "Borrador actualizado con éxito."
             : "Capacitación actualizada con éxito."
         );
@@ -530,7 +535,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
         toast.success(
           estadoFinal === "BORRADOR"
             ? "Borrador guardado con éxito."
-            : "Capacitación publicada con éxito."
+            : "Capacitación creada con éxito."
         );
       }
 
@@ -552,14 +557,19 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   const handleCambiarEstado = async (id, nuevoEstado) => {
     try {
       const token = keycloak?.token || localStorage.getItem("token") || "";
-      await cambiarEstadoCapacitacion(id, nuevoEstado, token);
+      const resp = await cambiarEstadoCapacitacion(id, nuevoEstado, token);
       const estadoLegible =
         nuevoEstado === "PUBLICADO"
           ? "Publicado"
           : nuevoEstado === "BORRADOR"
           ? "Borrador"
           : "Archivado";
-      toast.success(`Estado actualizado a ${estadoLegible}.`);
+      const msg =
+        resp?.message ||
+        (nuevoEstado === "ARCHIVADO"
+          ? "Solicitud de archivado enviada a revisión del administrador."
+          : `Estado actualizado a ${estadoLegible}.`);
+      toast.success(msg);
       await cargarCapacitaciones();
     } catch (error) {
       console.error("Error al cambiar estado:", error);

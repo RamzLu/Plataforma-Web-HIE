@@ -244,20 +244,27 @@ const AdminCapacitacionesView = () => {
     setIsSaving(true);
     setActionError('');
     try {
+      const isArchiving = selectedTraining.requestedEstado === 'ARCHIVADO';
+      const finalEstado = pendingAction === 'APROBADO'
+        ? (isArchiving ? 'ARCHIVADO' : 'PUBLICADO')
+        : 'RECHAZADO';
+
       if (isSimulation) {
         setCapacitaciones((current) =>
           current.map((training) =>
             training.id === selectedTraining.id
               ? {
                   ...training,
-                  estado: pendingAction,
+                  estado: finalEstado,
                   motivoRechazo: pendingAction === 'RECHAZADO' ? reason : '',
                 }
               : training,
           ),
         );
         setFeedback(
-          `“${selectedTraining.titulo}” quedó ${STATUS_LABELS[pendingAction].toLocaleLowerCase('es')}.`,
+          isArchiving && pendingAction === 'APROBADO'
+            ? `“${selectedTraining.titulo}” fue archivada con éxito.`
+            : `“${selectedTraining.titulo}” quedó ${STATUS_LABELS[finalEstado]?.toLocaleLowerCase('es') || finalEstado}.`
         );
         closeDetails();
         return;
@@ -278,7 +285,11 @@ const AdminCapacitacionesView = () => {
           training.id === result.capacitacion.id ? result.capacitacion : training,
         ),
       );
-      setFeedback(`“${selectedTraining.titulo}” quedó ${STATUS_LABELS[pendingAction].toLocaleLowerCase('es')}.`);
+      setFeedback(
+        isArchiving && pendingAction === 'APROBADO'
+          ? `“${selectedTraining.titulo}” fue archivada con éxito.`
+          : `“${selectedTraining.titulo}” quedó ${STATUS_LABELS[result.capacitacion.estado]?.toLocaleLowerCase('es') || result.capacitacion.estado}.`
+      );
       closeDetails();
     } catch (saveError) {
       console.error('Error al actualizar el estado de la capacitación:', saveError);
@@ -499,6 +510,25 @@ const AdminCapacitacionesView = () => {
             </header>
 
             <div className="admin-training-modal-body">
+              {selectedTraining.estado === 'PENDIENTE_APROBACION' && selectedTraining.requestedEstado === 'ARCHIVADO' && (
+                <div style={{
+                  margin: '0 0 16px 0',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  backgroundColor: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  color: '#92400e',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  <Archive size={18} style={{ color: '#d97706', flexShrink: 0 }} />
+                  <div>
+                    <strong>Solicitud de archivado:</strong> El editor del CMS solicita archivar esta capacitación y retirarla del portal público.
+                  </div>
+                </div>
+              )}
               <div className="admin-training-info-grid">
                 <article className="is-wide">
                   <h3>Modalidad de la capacitación</h3>
@@ -635,7 +665,15 @@ const AdminCapacitacionesView = () => {
               {selectedTraining.estado === 'PENDIENTE_APROBACION' && (
                 <div className="admin-training-review-actions">
                   <button type="button" className="admin-training-action is-approve" onClick={() => startReviewAction('APROBADO')}>
-                    <CheckCircle size={17} /> Aprobar
+                    {selectedTraining.requestedEstado === 'ARCHIVADO' ? (
+                      <>
+                        <Archive size={17} /> Aprobar archivado
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={17} /> Aprobar
+                      </>
+                    )}
                   </button>
                   <button
                     type="button"
@@ -666,6 +704,8 @@ const AdminCapacitacionesView = () => {
                       </label>
                       <p>El contenido quedará rechazado y no estará disponible para publicación.</p>
                     </>
+                  ) : selectedTraining.requestedEstado === 'ARCHIVADO' ? (
+                    <p>¿Confirmás archivar esta capacitación? Se retirará de la visualización pública.</p>
                   ) : (
                     <p>¿Confirmás aprobar este contenido? Quedará habilitado para continuar con su publicación desde el CMS.</p>
                   )}

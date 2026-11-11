@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Archive,
   BadgeCheck,
   CalendarDays,
   CheckCircle,
@@ -23,6 +24,7 @@ import '../../styles/pages/admin/AdminEspecialidadesServiciosView.css';
 const statusClass = (status) => {
   if (status === 'Aprobado' || status === 'Publicado') return 'admin-es-status-approved';
   if (status === 'Rechazado') return 'admin-es-status-rejected';
+  if (status === 'Archivado') return 'admin-es-status-archived';
   return 'admin-es-status-pending';
 };
 
@@ -33,6 +35,8 @@ const mapItemFromBackend = (item) => {
     statusLabel = 'Publicado';
   } else if (estadoUpper === 'RECHAZADO') {
     statusLabel = 'Rechazado';
+  } else if (estadoUpper === 'ARCHIVADO') {
+    statusLabel = 'Archivado';
   }
 
   const reqText = Array.isArray(item.requisitos)
@@ -54,6 +58,7 @@ const mapItemFromBackend = (item) => {
     updatedAt: item.updatedAtFormatted || 'Reciente',
     status: statusLabel,
     estado: estadoUpper,
+    requestedEstado: item.requestedEstado || null,
     published: estadoUpper === 'PUBLICADO',
     active: item.activo !== false,
     rejectionReason: item.rejectionReason || null,
@@ -93,7 +98,6 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         const data = await getEspecialidades(true);
         if (Array.isArray(data)) {
           const filtradas = data
-            .filter((item) => (item.estado || '').toUpperCase() !== 'ARCHIVADO')
             .map(mapItemFromBackend)
             .sort((a, b) => {
               const aPending = a.status === 'Pendiente de aprobación' ? 0 : 1;
@@ -151,7 +155,8 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         statusFilter === 'Todos' ||
         (statusFilter === 'PENDIENTE' && item.status === 'Pendiente de aprobación') ||
         (statusFilter === 'PUBLICADO' && item.status === 'Publicado') ||
-        (statusFilter === 'RECHAZADO' && item.status === 'Rechazado');
+        (statusFilter === 'RECHAZADO' && item.status === 'Rechazado') ||
+        (statusFilter === 'ARCHIVADO' && item.status === 'Archivado');
       const matchesSearch =
         !normalizedSearch ||
         `${item.name} ${item.location || ''} ${item.editor || ''}`
@@ -179,8 +184,17 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         { estado: 'APROBADO', isServicio: selectedItem.esServicio },
         keycloak.token
       );
-      toast.success(`"${selectedItem.name}" fue aprobado y publicado.`);
-      setFeedback(`"${selectedItem.name}" fue aprobado con éxito.`);
+      const fueArchivado = selectedItem.requestedEstado === 'ARCHIVADO';
+      toast.success(
+        fueArchivado
+          ? `"${selectedItem.name}" fue archivado con éxito.`
+          : `"${selectedItem.name}" fue aprobado y publicado.`
+      );
+      setFeedback(
+        fueArchivado
+          ? `"${selectedItem.name}" fue archivado con éxito.`
+          : `"${selectedItem.name}" fue aprobado con éxito.`
+      );
       closeDetails();
       await cargarDatos(true);
     } catch (error) {
@@ -226,6 +240,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
   const pendingCount = items.filter((item) => item.status === 'Pendiente de aprobación').length;
   const publishedCount = items.filter((item) => item.status === 'Publicado').length;
   const rejectedCount = items.filter((item) => item.status === 'Rechazado').length;
+  const archivedCount = items.filter((item) => item.status === 'Archivado').length;
 
   return (
     <div className="admin-es-page">
@@ -294,6 +309,15 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         >
           <span><XCircle size={19} /></span>
           <div><small>Rechazados</small><strong>{rejectedCount}</strong></div>
+        </button>
+        <button
+          type="button"
+          className={`admin-es-summary-card is-archived ${statusFilter === 'ARCHIVADO' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'ARCHIVADO'}
+          onClick={() => setStatusFilter('ARCHIVADO')}
+        >
+          <span><Archive size={19} /></span>
+          <div><small>Archivadas</small><strong>{archivedCount}</strong></div>
         </button>
       </section>
 
@@ -431,6 +455,25 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
             </header>
 
             <div className="admin-es-modal-body">
+              {selectedItem.status === 'Pendiente de aprobación' && selectedItem.requestedEstado === 'ARCHIVADO' && (
+                <div style={{
+                  margin: '0 0 16px 0',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  backgroundColor: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  color: '#92400e',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  <Archive size={18} style={{ color: '#d97706', flexShrink: 0 }} />
+                  <div>
+                    <strong>Solicitud de archivado:</strong> El editor del CMS solicita archivar este contenido y retirarlo del portal público.
+                  </div>
+                </div>
+              )}
               <AdminCambiosResaltados
                 cambios={selectedItem.cambios}
                 esActualizacion={selectedItem.esActualizacion}
@@ -512,7 +555,15 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                     onClick={handleApprove}
                     disabled={submitting}
                   >
-                    <CheckCircle size={17} /> Aprobar
+                    {selectedItem.requestedEstado === 'ARCHIVADO' ? (
+                      <>
+                        <Archive size={17} /> Aprobar archivado
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={17} /> Aprobar
+                      </>
+                    )}
                   </button>
                 </>
               )}

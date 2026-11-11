@@ -32,6 +32,7 @@ import {
   crearCapacitacion,
   actualizarCapacitacion,
   cambiarEstadoCapacitacion,
+  revisarCapacitacion,
   eliminarCapacitacion
 } from "../controllers/cms/cms.capacitacion.controller.js";
 
@@ -145,6 +146,7 @@ router.get('/capacitaciones/publicas', obtenerCapacitacionesPublicas);
 router.post('/capacitaciones', requireCmsAccess, uploadCapacitacionFiles, crearCapacitacion);
 router.put('/capacitaciones/:id', requireCmsAccess, uploadCapacitacionFiles, actualizarCapacitacion);
 router.patch('/capacitaciones/:id/estado', requireCmsAccess, cambiarEstadoCapacitacion);
+router.patch('/capacitaciones/:id/revision', requireCmsAccess, revisarCapacitacion);
 router.delete('/capacitaciones/:id', requireCmsAccess, eliminarCapacitacion);
 
 export default router;

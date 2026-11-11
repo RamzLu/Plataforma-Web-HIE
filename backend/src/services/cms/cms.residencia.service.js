@@ -3,6 +3,9 @@ import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 
+const RESIDENCIA_PENDING_META_PREFIX = "residencia_pending_meta_";
+const RESIDENCIA_REJECTION_KEY_PREFIX = "residencia_rejection_reason_";
+
 const formatBytes = (bytes) => {
   const n = Number(bytes || 0);
   if (n > 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
@@ -11,16 +14,113 @@ const formatBytes = (bytes) => {
 };
 
 class CmsResidenciaService {
-  async obtenerResidencias(esVistaAdmin = false) {
-    const residencias = await prisma.residencia.findMany({
-      where: esVistaAdmin === true ? {} : { estado: "PUBLICADO", activo: true },
-      orderBy: { createdAt: "desc" },
-      include: {
-        archivo: true,
+  async obtenerMapaMotivosRechazo() {
+    try {
+      const configs = await prisma.configuracion.findMany({
+        where: { clave: { startsWith: RESIDENCIA_REJECTION_KEY_PREFIX } },
+      });
+      const map = new Map();
+      for (const item of configs) {
+        const itemKey = item.clave.replace(RESIDENCIA_REJECTION_KEY_PREFIX, "");
+        map.set(itemKey, item.valor);
+      }
+      return map;
+    } catch (_) {
+      return new Map();
+    }
+  }
+
+  async guardarMotivoRechazo(id, motivo) {
+    const clave = `${RESIDENCIA_REJECTION_KEY_PREFIX}${id}`;
+    await prisma.configuracion.upsert({
+      where: { clave },
+      update: { valor: motivo, updatedAt: new Date() },
+      create: {
+        clave,
+        valor: motivo,
+        descripcion: `Motivo de rechazo de residencia ID ${id}`,
+        updatedAt: new Date(),
       },
     });
+  }
 
-    return residencias.map((res) => this._formatResidencia(res));
+  async limpiarMotivoRechazo(id) {
+    const clave = `${RESIDENCIA_REJECTION_KEY_PREFIX}${id}`;
+    await prisma.configuracion.deleteMany({ where: { clave } });
+  }
+
+  async obtenerMapaPendingMeta() {
+    try {
+      const configs = await prisma.configuracion.findMany({
+        where: { clave: { startsWith: RESIDENCIA_PENDING_META_PREFIX } },
+      });
+      const map = new Map();
+      for (const item of configs) {
+        const itemKey = item.clave.replace(RESIDENCIA_PENDING_META_PREFIX, "");
+        try {
+          map.set(itemKey, JSON.parse(item.valor));
+        } catch (_) {}
+      }
+      return map;
+    } catch (_) {
+      return new Map();
+    }
+  }
+
+  async guardarPendingMeta(id, meta) {
+    const clave = `${RESIDENCIA_PENDING_META_PREFIX}${id}`;
+    await prisma.configuracion.upsert({
+      where: { clave },
+      update: { valor: JSON.stringify(meta), updatedAt: new Date() },
+      create: {
+        clave,
+        valor: JSON.stringify(meta),
+        descripcion: `Metadatos de solicitud pendiente para residencia ID ${id}`,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async limpiarPendingMeta(id) {
+    const clave = `${RESIDENCIA_PENDING_META_PREFIX}${id}`;
+    await prisma.configuracion.deleteMany({ where: { clave } });
+  }
+
+  async obtenerResidencias(esVistaAdmin = false) {
+    const [residencias, motivosMap, pendingMetaMap] = await Promise.all([
+      prisma.residencia.findMany({
+        where: esVistaAdmin === true ? {} : { estado: { in: ["PUBLICADO", "PENDIENTE_APROBACION"] }, activo: true },
+        orderBy: { createdAt: "desc" },
+        include: {
+          archivo: true,
+        },
+      }),
+      this.obtenerMapaMotivosRechazo(),
+      this.obtenerMapaPendingMeta(),
+    ]);
+
+    const resultado = [];
+    for (const res of residencias) {
+      const idStr = res.id.toString();
+      const pendingMeta = pendingMetaMap.get(idStr) || null;
+      const motivoRechazo = motivosMap.get(idStr) || null;
+      const estadoUpper = (res.estado || "").toUpperCase();
+
+      if (!esVistaAdmin) {
+        const esPublicadaDirecta = estadoUpper === "PUBLICADO";
+        const mantienePublicacionPrevia =
+          estadoUpper === "PENDIENTE_APROBACION" &&
+          pendingMeta?.previousEstado === "PUBLICADO";
+
+        if (!esPublicadaDirecta && !mantienePublicacionPrevia) {
+          continue;
+        }
+      }
+
+      resultado.push(this._formatResidencia(res, motivoRechazo, pendingMeta));
+    }
+
+    return resultado;
   }
 
   async crearResidencia(data, files) {
@@ -330,10 +430,26 @@ class CmsResidenciaService {
     }
 
     let estadoNormalizado = residenciaExistente.estado;
+    let activoFinal = data.activo !== undefined ? (data.activo === true || data.activo === "true") : residenciaExistente.activo;
+    const estadoAnterior = (residenciaExistente.estado || "").toUpperCase();
+    const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
+    const idStr = idBigInt.toString();
+
     if (data.estado) {
       const estadoUpper = data.estado.toUpperCase();
-      if (["PUBLICADO", "BORRADOR", "ARCHIVADO", "PENDIENTE_APROBACION", "PROGRAMADO"].includes(estadoUpper)) {
+      if (estadoUpper === "ARCHIVADO" && provieneDePublicada) {
+        estadoNormalizado = "PENDIENTE_APROBACION";
+        await this.guardarPendingMeta(idStr, {
+          previousEstado: "PUBLICADO",
+          targetEstado: "ARCHIVADO",
+          updatedAt: new Date().toISOString(),
+        });
+        await this.limpiarMotivoRechazo(idStr);
+      } else if (["PUBLICADO", "BORRADOR", "ARCHIVADO", "PENDIENTE_APROBACION", "PROGRAMADO"].includes(estadoUpper)) {
         estadoNormalizado = estadoUpper;
+        if (estadoUpper === "ARCHIVADO") {
+          activoFinal = false;
+        }
       }
     }
 
@@ -347,7 +463,7 @@ class CmsResidenciaService {
         convocatoria: data.convocatoria !== undefined ? (data.convocatoria ? data.convocatoria.trim() : null) : residenciaExistente.convocatoria,
         fechaConvocatoria: fechaConvocatoriaDate,
         estado: estadoNormalizado,
-        activo: data.activo !== undefined ? (data.activo === true || data.activo === "true") : residenciaExistente.activo,
+        activo: activoFinal,
         updatedAt: new Date(),
       },
       include: {
@@ -355,13 +471,19 @@ class CmsResidenciaService {
       },
     });
 
+    const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
+    const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
+
     return {
-      message: "Residencia actualizada con éxito.",
-      residencia: this._formatResidencia(actualizada),
+      message:
+        data.estado && data.estado.toUpperCase() === "ARCHIVADO" && estadoNormalizado === "PENDIENTE_APROBACION"
+          ? "Solicitud de archivado enviada a revisión del administrador."
+          : "Residencia actualizada con éxito.",
+      residencia: this._formatResidencia(actualizada, motivoActual, pendingMetaActual),
     };
   }
 
-  async cambiarEstado(id, nuevoEstado) {
+  async cambiarEstado(id, nuevoEstado, user = null, rejectionReason = null) {
     if (!nuevoEstado) {
       const error = new Error("El nuevo estado es obligatorio.");
       error.statusCode = 400;
@@ -369,7 +491,7 @@ class CmsResidenciaService {
     }
 
     const estadoUpper = nuevoEstado.trim().toUpperCase();
-    const estadosValidos = ["PUBLICADO", "BORRADOR", "ARCHIVADO"];
+    const estadosValidos = ["PUBLICADO", "BORRADOR", "ARCHIVADO", "APROBADO", "RECHAZADO", "PENDIENTE_APROBACION"];
 
     if (!estadosValidos.includes(estadoUpper)) {
       const error = new Error(
@@ -380,9 +502,11 @@ class CmsResidenciaService {
     }
 
     const idBigInt = parsearIdBigInt(id, "ID de residencia");
+    const idStr = id.toString();
 
     const residenciaExistente = await prisma.residencia.findUnique({
       where: { id: idBigInt },
+      include: { archivo: true },
     });
 
     if (!residenciaExistente) {
@@ -391,10 +515,65 @@ class CmsResidenciaService {
       throw error;
     }
 
+    const estadoAnterior = (residenciaExistente.estado || "").toUpperCase();
+    const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
+
+    const pendingMap = await this.obtenerMapaPendingMeta();
+    const metaExistente = pendingMap.get(idStr) || null;
+
+    let finalEstado = estadoUpper;
+    let motivoGuardado = null;
+    let finalActivo = residenciaExistente.activo;
+
+    // 1. Si el CM solicita ARCHIVAR una residencia que ya estaba publicada:
+    // Requiere aprobación del administrador -> PENDIENTE_APROBACION
+    if (estadoUpper === "ARCHIVADO" && provieneDePublicada) {
+      finalEstado = "PENDIENTE_APROBACION";
+      await this.guardarPendingMeta(idStr, {
+        previousEstado: "PUBLICADO",
+        targetEstado: "ARCHIVADO",
+        updatedAt: new Date().toISOString(),
+      });
+      await this.limpiarMotivoRechazo(idStr);
+    }
+    // 2. Si el Admin aprueba la residencia (APROBADO o PUBLICADO):
+    else if (estadoUpper === "APROBADO" || estadoUpper === "PUBLICADO") {
+      if (metaExistente?.targetEstado === "ARCHIVADO") {
+        finalEstado = "ARCHIVADO";
+        finalActivo = false;
+      } else {
+        finalEstado = "PUBLICADO";
+        finalActivo = true;
+      }
+      await this.limpiarPendingMeta(idStr);
+      await this.limpiarMotivoRechazo(idStr);
+    }
+    // 3. Si el Admin rechaza la residencia:
+    else if (estadoUpper === "RECHAZADO") {
+      finalEstado = "RECHAZADO";
+      motivoGuardado = (rejectionReason || "").trim() || "Solicitud rechazada por el administrador.";
+      await this.guardarMotivoRechazo(idStr, motivoGuardado);
+      await this.limpiarPendingMeta(idStr);
+    }
+    // 4. Si se archiva un borrador directamente:
+    else if (estadoUpper === "ARCHIVADO") {
+      finalEstado = "ARCHIVADO";
+      finalActivo = false;
+      await this.limpiarPendingMeta(idStr);
+      await this.limpiarMotivoRechazo(idStr);
+    }
+    // 5. Otras transiciones (BORRADOR, etc.)
+    else {
+      finalEstado = estadoUpper;
+      await this.limpiarPendingMeta(idStr);
+      await this.limpiarMotivoRechazo(idStr);
+    }
+
     const residenciaActualizada = await prisma.residencia.update({
       where: { id: idBigInt },
       data: {
-        estado: estadoUpper,
+        estado: finalEstado,
+        activo: finalActivo,
         updatedAt: new Date(),
       },
       include: {
@@ -402,9 +581,17 @@ class CmsResidenciaService {
       },
     });
 
+    const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
+    const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
+
+    let mensaje = `Estado actualizado a ${finalEstado} con éxito.`;
+    if (estadoUpper === "ARCHIVADO" && finalEstado === "PENDIENTE_APROBACION") {
+      mensaje = "Solicitud de archivado enviada a revisión del administrador.";
+    }
+
     return {
-      message: `Estado actualizado a ${estadoUpper} con éxito.`,
-      residencia: this._formatResidencia(residenciaActualizada),
+      message: mensaje,
+      residencia: this._formatResidencia(residenciaActualizada, motivoActual, pendingMetaActual),
     };
   }
 
@@ -468,7 +655,7 @@ class CmsResidenciaService {
     };
   }
 
-  _formatResidencia(res) {
+  _formatResidencia(res, motivoRechazo = null, pendingMeta = null) {
     let extra = {
       categoria: "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
       descripcionPrograma: "",
@@ -538,6 +725,10 @@ class CmsResidenciaService {
       archivoUrl: documentoUrl,
       archivoTamano: documentoTamano,
       archivoTipo: documentoTipo,
+
+      requestedEstado: (res.estado || "").toUpperCase() === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
+      motivoRechazo: motivoRechazo || null,
+      rejectionReason: motivoRechazo || null,
     };
   }
 }

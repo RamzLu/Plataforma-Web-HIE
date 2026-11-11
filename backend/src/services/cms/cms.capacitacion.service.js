@@ -5,6 +5,8 @@ import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../util
 
 const DOCS_BUCKET = "capacitaciones-documentos";
 const MEDIA_BUCKET = "capacitaciones-imagenes-videos";
+const CAPACITACION_PENDING_META_PREFIX = "capacitacion_pending_meta_";
+const CAPACITACION_REJECTION_KEY_PREFIX = "capacitacion_rejection_reason_";
 
 const normalizarUrlOpcional = (rawUrl, nombreCampo) => {
   if (rawUrl === null || rawUrl === undefined) return "";
@@ -185,32 +187,125 @@ class CmsCapacitacionService {
     }
   }
 
-  async obtenerCapacitaciones() {
-    await this._asegurarDatosIniciales();
-    const capacitaciones = await prisma.capacitacion.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        archivo: true,
+  async obtenerMapaMotivosRechazo() {
+    try {
+      const configs = await prisma.configuracion.findMany({
+        where: { clave: { startsWith: CAPACITACION_REJECTION_KEY_PREFIX } },
+      });
+      const map = new Map();
+      for (const item of configs) {
+        const itemKey = item.clave.replace(CAPACITACION_REJECTION_KEY_PREFIX, "");
+        map.set(itemKey, item.valor);
+      }
+      return map;
+    } catch (_) {
+      return new Map();
+    }
+  }
+
+  async guardarMotivoRechazo(id, motivo) {
+    const clave = `${CAPACITACION_REJECTION_KEY_PREFIX}${id}`;
+    await prisma.configuracion.upsert({
+      where: { clave },
+      update: { valor: motivo, updatedAt: new Date() },
+      create: {
+        clave,
+        valor: motivo,
+        descripcion: `Motivo de rechazo de capacitación ID ${id}`,
+        updatedAt: new Date(),
       },
     });
+  }
 
-    return capacitaciones.map((c) => this._formatCapacitacion(c));
+  async limpiarMotivoRechazo(id) {
+    const clave = `${CAPACITACION_REJECTION_KEY_PREFIX}${id}`;
+    await prisma.configuracion.deleteMany({ where: { clave } });
+  }
+
+  async obtenerMapaPendingMeta() {
+    try {
+      const configs = await prisma.configuracion.findMany({
+        where: { clave: { startsWith: CAPACITACION_PENDING_META_PREFIX } },
+      });
+      const map = new Map();
+      for (const item of configs) {
+        const itemKey = item.clave.replace(CAPACITACION_PENDING_META_PREFIX, "");
+        try {
+          map.set(itemKey, JSON.parse(item.valor));
+        } catch (_) {}
+      }
+      return map;
+    } catch (_) {
+      return new Map();
+    }
+  }
+
+  async guardarPendingMeta(id, meta) {
+    const clave = `${CAPACITACION_PENDING_META_PREFIX}${id}`;
+    await prisma.configuracion.upsert({
+      where: { clave },
+      update: { valor: JSON.stringify(meta), updatedAt: new Date() },
+      create: {
+        clave,
+        valor: JSON.stringify(meta),
+        descripcion: `Metadatos de solicitud pendiente para capacitación ID ${id}`,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async limpiarPendingMeta(id) {
+    const clave = `${CAPACITACION_PENDING_META_PREFIX}${id}`;
+    await prisma.configuracion.deleteMany({ where: { clave } });
+  }
+
+  async obtenerCapacitaciones() {
+    await this._asegurarDatosIniciales();
+    const [capacitaciones, motivosMap, pendingMetaMap] = await Promise.all([
+      prisma.capacitacion.findMany({
+        orderBy: { createdAt: "desc" },
+        include: {
+          archivo: true,
+        },
+      }),
+      this.obtenerMapaMotivosRechazo(),
+      this.obtenerMapaPendingMeta(),
+    ]);
+
+    return capacitaciones.map((c) => {
+      const idStr = c.id.toString();
+      return this._formatCapacitacion(c, motivosMap.get(idStr), pendingMetaMap.get(idStr));
+    });
   }
 
   async obtenerCapacitacionesPublicas() {
     await this._asegurarDatosIniciales();
-    const capacitaciones = await prisma.capacitacion.findMany({
-      where: {
-        estado: "PUBLICADO",
-        activo: true,
-      },
-      orderBy: { createdAt: "desc" },
-      include: {
-        archivo: true,
-      },
-    });
+    const [capacitaciones, pendingMetaMap] = await Promise.all([
+      prisma.capacitacion.findMany({
+        where: {
+          OR: [
+            { estado: "PUBLICADO", activo: true },
+            { estado: "PENDIENTE_APROBACION", activo: true },
+          ],
+        },
+        orderBy: { createdAt: "desc" },
+        include: {
+          archivo: true,
+        },
+      }),
+      this.obtenerMapaPendingMeta(),
+    ]);
 
-    return capacitaciones.map((c) => this._formatCapacitacion(c));
+    const resultado = [];
+    for (const c of capacitaciones) {
+      const idStr = c.id.toString();
+      const pMeta = pendingMetaMap.get(idStr);
+      if (c.estado === "PENDIENTE_APROBACION" && pMeta?.previousEstado !== "PUBLICADO") {
+        continue;
+      }
+      resultado.push(this._formatCapacitacion(c, null, pMeta));
+    }
+    return resultado;
   }
 
   async crearCapacitacion(data, files) {
@@ -592,14 +687,6 @@ class CmsCapacitacionService {
       }
     }
 
-    let estadoNormalizado = existing.estado;
-    if (data.estado) {
-      const upper = data.estado.toUpperCase();
-      if (["PUBLICADO", "BORRADOR", "ARCHIVADO"].includes(upper)) {
-        estadoNormalizado = upper;
-      }
-    }
-
     const finalVideoUrl = videoUrl || (archivoTipoDetectado === "video" ? archivoUrl : null);
 
     const contenidoPayload = {
@@ -621,6 +708,31 @@ class CmsCapacitacionService {
       bannerNombre,
     };
 
+    const idStr = id.toString();
+    const estadoAnterior = (existing.estado || "").toUpperCase();
+    const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
+
+    let estadoNormalizado = existing.estado;
+    let activoFinal = data.activo !== undefined ? (data.activo === true || data.activo === "true") : existing.activo;
+
+    if (data.estado) {
+      const estadoUpper = data.estado.toUpperCase();
+      if (estadoUpper === "ARCHIVADO" && provieneDePublicada) {
+        estadoNormalizado = "PENDIENTE_APROBACION";
+        await this.guardarPendingMeta(idStr, {
+          previousEstado: "PUBLICADO",
+          targetEstado: "ARCHIVADO",
+          updatedAt: new Date().toISOString(),
+        });
+        await this.limpiarMotivoRechazo(idStr);
+      } else if (["PUBLICADO", "BORRADOR", "ARCHIVADO", "PENDIENTE_APROBACION", "PROGRAMADO"].includes(estadoUpper)) {
+        estadoNormalizado = estadoUpper;
+        if (estadoUpper === "ARCHIVADO") {
+          activoFinal = false;
+        }
+      }
+    }
+
     const updated = await prisma.capacitacion.update({
       where: { id: idBigInt },
       data: {
@@ -633,7 +745,7 @@ class CmsCapacitacionService {
         fechaInicio: fechaInicioDate,
         fechaFin: fechaFinDate,
         estado: estadoNormalizado,
-        activo: data.activo !== undefined ? (data.activo === true || data.activo === "true") : existing.activo,
+        activo: activoFinal,
         updatedAt: new Date(),
       },
       include: {
@@ -641,33 +753,113 @@ class CmsCapacitacionService {
       },
     });
 
+    const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
+    const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
+
     return {
-      message: "Capacitación actualizada con éxito.",
-      capacitacion: this._formatCapacitacion(updated),
+      message:
+        data.estado && data.estado.toUpperCase() === "ARCHIVADO" && estadoNormalizado === "PENDIENTE_APROBACION"
+          ? "Solicitud de archivado enviada a revisión del administrador."
+          : "Capacitación actualizada con éxito.",
+      capacitacion: this._formatCapacitacion(updated, motivoActual, pendingMetaActual),
     };
   }
 
-  async cambiarEstado(id, nuevoEstado) {
+  async cambiarEstado(id, nuevoEstado, user = null, rejectionReason = null) {
     const idBigInt = parsearIdBigInt(id, "ID de capacitación");
+    const idStr = id.toString();
     const upper = (nuevoEstado || "").toUpperCase();
-    if (!["PUBLICADO", "BORRADOR", "ARCHIVADO"].includes(upper)) {
-      const error = new Error("Estado no válido.");
+    const estadosValidos = ["PUBLICADO", "BORRADOR", "ARCHIVADO", "APROBADO", "RECHAZADO", "PENDIENTE_APROBACION"];
+    if (!estadosValidos.includes(upper)) {
+      const error = new Error(`Estado no válido: ${nuevoEstado}`);
       error.statusCode = 400;
       throw error;
+    }
+
+    const existing = await prisma.capacitacion.findUnique({
+      where: { id: idBigInt },
+      include: { archivo: true },
+    });
+
+    if (!existing) {
+      const error = new Error("Capacitación no encontrada.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const estadoAnterior = (existing.estado || "").toUpperCase();
+    const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
+
+    const pendingMap = await this.obtenerMapaPendingMeta();
+    const metaExistente = pendingMap.get(idStr) || null;
+
+    let finalEstado = upper;
+    let finalActivo = existing.activo;
+
+    // 1. Solicitud de archivado de algo publicado -> requiere aprobación Admin
+    if (upper === "ARCHIVADO" && provieneDePublicada) {
+      finalEstado = "PENDIENTE_APROBACION";
+      await this.guardarPendingMeta(idStr, {
+        previousEstado: "PUBLICADO",
+        targetEstado: "ARCHIVADO",
+        updatedAt: new Date().toISOString(),
+      });
+      await this.limpiarMotivoRechazo(idStr);
+    }
+    // 2. Aprobación por parte de Admin (APROBADO o PUBLICADO):
+    else if (upper === "APROBADO" || upper === "PUBLICADO") {
+      if (metaExistente?.targetEstado === "ARCHIVADO") {
+        finalEstado = "ARCHIVADO";
+        finalActivo = false;
+      } else {
+        finalEstado = "PUBLICADO";
+        finalActivo = true;
+      }
+      await this.limpiarPendingMeta(idStr);
+      await this.limpiarMotivoRechazo(idStr);
+    }
+    // 3. Rechazo por parte de Admin:
+    else if (upper === "RECHAZADO") {
+      finalEstado = "RECHAZADO";
+      const motivo = (rejectionReason || "").trim() || "Solicitud rechazada por el administrador.";
+      await this.guardarMotivoRechazo(idStr, motivo);
+      await this.limpiarPendingMeta(idStr);
+    }
+    // 4. Archivado de un borrador directamente:
+    else if (upper === "ARCHIVADO") {
+      finalEstado = "ARCHIVADO";
+      finalActivo = false;
+      await this.limpiarPendingMeta(idStr);
+      await this.limpiarMotivoRechazo(idStr);
+    }
+    // 5. Otros:
+    else {
+      finalEstado = upper;
+      await this.limpiarPendingMeta(idStr);
+      await this.limpiarMotivoRechazo(idStr);
     }
 
     const updated = await prisma.capacitacion.update({
       where: { id: idBigInt },
       data: {
-        estado: upper,
+        estado: finalEstado,
+        activo: finalActivo,
         updatedAt: new Date(),
       },
       include: { archivo: true },
     });
 
+    const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
+    const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
+
+    let mensaje = `Estado actualizado a ${finalEstado}.`;
+    if (upper === "ARCHIVADO" && finalEstado === "PENDIENTE_APROBACION") {
+      mensaje = "Solicitud de archivado enviada a revisión del administrador.";
+    }
+
     return {
-      message: `Estado actualizado a ${upper}.`,
-      capacitacion: this._formatCapacitacion(updated),
+      message: mensaje,
+      capacitacion: this._formatCapacitacion(updated, motivoActual, pendingMetaActual),
     };
   }
 
@@ -709,7 +901,7 @@ class CmsCapacitacionService {
     };
   }
 
-  _formatCapacitacion(c) {
+  _formatCapacitacion(c, motivoRechazo = null, pendingMeta = null) {
     let extra = {
       temario: "",
       modalidad: "Presencial",
@@ -811,6 +1003,10 @@ class CmsCapacitacionService {
       activo: c.activo,
       createdAt: c.createdAt ? c.createdAt.toISOString() : "",
       updatedAt: c.updatedAt ? c.updatedAt.toISOString() : "",
+
+      requestedEstado: (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
+      motivoRechazo: motivoRechazo || null,
+      rejectionReason: motivoRechazo || null,
     };
   }
 }

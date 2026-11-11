@@ -42,8 +42,29 @@ export const actualizarCapacitacion = async (req, res, next) => {
 export const cambiarEstadoCapacitacion = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { estado } = req.body;
-    const result = await CmsCapacitacionService.cambiarEstado(id, estado);
+    const { estado, motivoRechazo, rejectionReason } = req.body;
+    const result = await CmsCapacitacionService.cambiarEstado(
+      id,
+      estado,
+      req.user,
+      motivoRechazo || rejectionReason
+    );
+    return res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const revisarCapacitacion = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { estado, motivoRechazo, rejectionReason } = req.body;
+    const result = await CmsCapacitacionService.cambiarEstado(
+      id,
+      estado,
+      req.user,
+      motivoRechazo || rejectionReason
+    );
     return res.status(200).json(result);
   } catch (error) {
     next(error);

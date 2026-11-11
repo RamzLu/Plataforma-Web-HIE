@@ -426,12 +426,11 @@ class CmsEspecialidadService {
       motivoGuardado = rejectionReason.trim();
       await this.guardarMotivoRechazo(idStr, esServicio, motivoGuardado);
     } else {
-      nuevoEstado = "PUBLICADO";
-      await this.limpiarMotivoRechazo(idStr, esServicio);
-
+      let targetEst = null;
       try {
         const pendingMap = await this.obtenerMapaPendingMeta();
         const pMeta = pendingMap.get(this._metaKey(idStr, esServicio));
+        targetEst = pMeta?.targetEstado;
         if (pMeta?.editor && pMeta.editor !== "Editor CMS") {
           await this.guardarEditorMeta(idStr, esServicio, {
             editor: pMeta.editor,
@@ -440,6 +439,12 @@ class CmsEspecialidadService {
         }
       } catch (_) {}
 
+      if (targetEst === "ARCHIVADO") {
+        nuevoEstado = "ARCHIVADO";
+      } else {
+        nuevoEstado = "PUBLICADO";
+      }
+      await this.limpiarMotivoRechazo(idStr, esServicio);
       await this.limpiarPendingMeta(idStr, esServicio);
     }
 
@@ -656,6 +661,7 @@ class CmsEspecialidadService {
       updatedAtFormatted: finalDateFormat,
       cambios: esPendiente ? cambiosParaCliente(meta?.cambios) : [],
       esActualizacion: esPendiente && Boolean(meta?.esActualizacion),
+      requestedEstado: esPendiente ? meta?.targetEstado || null : null,
     };
   }
 }

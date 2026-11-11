@@ -322,9 +322,14 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       }
 
       if (editingId) {
-        await updateResidencia(editingId, dataForm, token);
+        const resp = await updateResidencia(editingId, dataForm, token);
+        const esPendienteArchivado =
+          resp?.residencia?.estado === "PENDIENTE_APROBACION" &&
+          resp?.residencia?.requestedEstado === "ARCHIVADO";
         toast.success(
-          estadoFinal === "BORRADOR"
+          esPendienteArchivado
+            ? "Solicitud de archivado enviada a revisión del administrador."
+            : estadoFinal === "BORRADOR"
             ? "Borrador actualizado con éxito."
             : "Residencia actualizada con éxito.",
           { id: toastId },
@@ -334,7 +339,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         toast.success(
           estadoFinal === "BORRADOR"
             ? "Borrador guardado con éxito."
-            : "Residencia publicada con éxito.",
+            : "Residencia creada con éxito.",
           { id: toastId },
         );
       }
@@ -368,11 +373,13 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     const toastId = toast.loading(`Cambiando estado a ${estadoLegible}...`);
     try {
       const token = keycloak?.token;
-      await cambiarEstadoResidencia(id, nuevoEstado, token);
-      toast.success(
-        `Estado actualizado a ${estadoLegible} con éxito.`,
-        { id: toastId },
-      );
+      const resp = await cambiarEstadoResidencia(id, nuevoEstado, token);
+      const msg =
+        resp?.message ||
+        (nuevoEstado === "ARCHIVADO"
+          ? "Solicitud de archivado enviada a revisión del administrador."
+          : `Estado actualizado a ${estadoLegible} con éxito.`);
+      toast.success(msg, { id: toastId });
       await cargarResidencias();
     } catch (error) {
       console.error("Error al cambiar estado:", error);

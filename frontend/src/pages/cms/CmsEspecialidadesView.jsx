@@ -119,8 +119,11 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
       const estadoResultante = (resp?.data?.estado || payload.estado || "PENDIENTE_APROBACION").toUpperCase();
       if (estadoResultante === "PENDIENTE_APROBACION") {
+        const esArchivado = payload.estado === "ARCHIVADO" || resp?.data?.requestedEstado === "ARCHIVADO";
         toast.success(
-          editingId
+          esArchivado
+            ? "Solicitud de archivado enviada a revisión del administrador."
+            : editingId
             ? "Modificaciones enviadas a revisión del administrador."
             : "Especialidad/Servicio enviado a revisión del administrador para su aprobación."
         );
