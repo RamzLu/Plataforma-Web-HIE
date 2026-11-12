@@ -108,6 +108,19 @@ const DocumentacionPage = () => {
     }
   };
 
+  const handleOpenDoc = (url) => {
+    const cleanUrl = sanitizeUrl(url);
+    if (cleanUrl) {
+      window.open(cleanUrl, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleRowClick = (url) => {
+    if (typeof window !== "undefined" && window.innerWidth <= 992) {
+      handleOpenDoc(url);
+    }
+  };
+
   const getCategoryColorClass = (categoria) => {
     if (!categoria) return "cat-default";
     const catLower = categoria.toLowerCase();
@@ -180,29 +193,35 @@ const DocumentacionPage = () => {
                   </div>
                 ) : currentDocs.length > 0 ? (
                   currentDocs.map((doc) => (
-                    <div className="doc-row" key={doc.id}>
+                    <div 
+                      className="doc-row" 
+                      key={doc.id}
+                      onClick={() => handleRowClick(doc.fileUrl)}
+                    >
                       <div className="col-titulo">
-                        <svg className="doc-file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                        </svg>
+                        <div className="doc-file-icon-box" aria-hidden="true">
+                          <svg className="doc-file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                          </svg>
+                        </div>
                         <div className="titulo-wrapper">
-                          <span className="titulo-text">
+                          <span 
+                            className="titulo-text"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDoc(doc.fileUrl);
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            title="Abrir y leer documento en nueva pestaña"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                handleOpenDoc(doc.fileUrl);
+                              }
+                            }}
+                          >
                             {doc.title}
-                            {sanitizeUrl(doc.fileUrl) && (
-                              <a 
-                                href={sanitizeUrl(doc.fileUrl)} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="doc-preview-eye" 
-                                title="Visualizar documento"
-                                style={{ marginLeft: "8px", verticalAlign: "middle" }}
-                              >
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                              </a>
-                            )}
                           </span>
                         </div>
                       </div>
@@ -225,7 +244,10 @@ const DocumentacionPage = () => {
                       <div className="col-acciones">
                         <button
                           className="btn-descargar-pill"
-                          onClick={() => handleDownloadDirect(sanitizeUrl(doc.fileUrl), doc.title)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadDirect(sanitizeUrl(doc.fileUrl), doc.title);
+                          }}
                         >
                           <svg fill="currentColor" viewBox="0 0 24 24">
                             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />

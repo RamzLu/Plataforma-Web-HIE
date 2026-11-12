@@ -25,15 +25,48 @@
 .capacitacion-page,
 .capacitacion-page-root {
   width: 100%;
-  background-color: #e9ebee;
-  /* Fondo institucional unificado */
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: var(--cap-on-surface);
-  min-height: calc(100vh - 80px);
-  padding: 0 0 80px 0;
+  padding: 0 0 72px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: calc(100vh - 80px);
+  box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+
+  /* Fondo degradado suave que nace del Footer y sube fundiéndose con la página (Estilo Home/Especialidades/Noticias/Documentación) */
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f8fafc 24%,
+    #e9ebee calc(100% - 700px),
+    #a4c2d6 calc(100% - 420px),
+    #2b5b94 calc(100% - 170px),
+    #0d4077 100%
+  );
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--cap-on-surface);
+}
+
+/* Marca de agua decorativa en fondo continuo (estrellas del hospital Evita, cero cortes) */
+.capacitacion-page-root::before {
+  content: "";
+  position: absolute;
+  bottom: 90px;
+  left: 2%;
+  width: clamp(280px, 34vw, 480px);
+  max-width: 85vw;
+  aspect-ratio: 1 / 1;
+  background: url("../../assets/logoHospitalEvita-blanco.png") center / contain no-repeat;
+  opacity: 0.08;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  filter: blur(0.5px);
+  transform: rotate(8deg);
+  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
+  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
 }
 
 .capacitacion-container {
@@ -43,6 +76,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 1;
   box-sizing: border-box;
 }
 
@@ -77,8 +112,8 @@
 }
 
 .doc-search-bar:focus-within {
-  box-shadow: 0 6px 15px rgba(0, 97, 148, 0.12);
-  border-color: #94a3b8;
+  box-shadow: 0 6px 15px rgba(43, 91, 148, 0.08);
+  border-color: #cbd5e1;
 }
 
 .doc-search-icon {
@@ -181,17 +216,17 @@
   justify-content: center;
   gap: 6px;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  padding: 8px 18px;
+  border: none;
+  padding: 10px 20px;
   border-radius: 50px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .filter-chip-icon {
@@ -201,16 +236,15 @@
 
 .filter-chip:hover {
   background-color: #f1f5f9;
-  color: var(--cap-primary);
-  border-color: #cbd5e1;
+  color: #2b5b94;
   transform: translateY(-1px);
 }
 
 .filter-chip.active {
-  background-color: var(--cap-primary) !important;
+  background-color: #2b5b94 !important;
   color: #ffffff !important;
-  border-color: var(--cap-primary) !important;
-  box-shadow: 0 4px 10px rgba(0, 97, 148, 0.25);
+  border-color: transparent !important;
+  box-shadow: 0 4px 10px rgba(43, 91, 148, 0.22);
 }
 
 .filter-chip.active .filter-chip-icon {
@@ -284,21 +318,22 @@
 }
 
 .cap-section-overline {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   line-height: 1rem;
-  font-weight: 600;
-  color: var(--cap-primary-container);
+  font-weight: 700;
+  color: #2b5b94;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
+  letter-spacing: 1px;
+  margin-bottom: 0.35rem;
 }
 
 .cap-section-title {
-  font-size: 1.5rem;
-  line-height: 1.3;
-  font-weight: 700;
-  color: var(--cap-on-surface);
-  letter-spacing: -0.01em;
+  font-size: 1.85rem;
+  line-height: 1.25;
+  font-weight: 300;
+  color: #2b5b94;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   margin: 0;
 }
 
@@ -374,19 +409,18 @@
   flex-direction: column;
   justify-content: space-between;
   background-color: #ffffff !important;
-  border-radius: 0.75rem;
-  /* 12px */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-  border: 1px solid var(--cap-border-subtle);
+  border-radius: 24px;
+  box-shadow: 0 14px 35px -5px rgba(12, 35, 64, 0.08), 0 4px 15px -3px rgba(12, 35, 64, 0.04);
+  border: none;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   height: 100%;
 }
 
 .training-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -6px rgba(11, 28, 48, 0.12), 0 4px 8px -2px rgba(11, 28, 48, 0.04);
+  transform: translateY(-5px);
+  box-shadow: 0 24px 48px -8px rgba(43, 91, 148, 0.18), 0 8px 20px -4px rgba(12, 35, 64, 0.07);
 }
 
 .training-card-top {
@@ -625,30 +659,31 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.375rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  background-color: var(--cap-primary-container) !important;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%) !important;
   color: #ffffff !important;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   line-height: 1rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 123, 185, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 0 6px 16px -2px rgba(43, 91, 148, 0.28);
 }
 
 .training-action-btn:hover {
-  background-color: var(--cap-primary) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(0, 97, 148, 0.3);
+  background: linear-gradient(135deg, #0d4077 0%, #0c2340 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -3px rgba(12, 35, 64, 0.35);
 }
 
 /* ==========================================================================
    BANNER DE CONTACTO: COMITÉ DE DOCENCIA E INVESTIGACIÓN / REVISTA CIENTÍFICA
+   (Estilo idéntico a .esp-referral-card de Especialidades)
    ========================================================================== */
 .cap-docencia-section {
   width: 100%;
@@ -660,16 +695,25 @@
 }
 
 .cap-docencia-card {
-  background-color: #ffffff;
-  border-radius: 0.75rem;
-  padding: 1.75rem 2rem;
+  width: 100%;
+  background: #ffffff;
+  border: none;
+  border-radius: 24px;
+  padding: 22px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
-  border: 1px solid var(--cap-border-subtle);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  gap: 20px;
+  box-shadow: 0 14px 35px -5px rgba(12, 35, 64, 0.08), 0 4px 15px -3px rgba(12, 35, 64, 0.04);
+  box-sizing: border-box;
+  text-align: left;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.cap-docencia-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px -8px rgba(43, 91, 148, 0.18), 0 8px 20px -4px rgba(12, 35, 64, 0.07);
 }
 
 @media (min-width: 768px) {
@@ -680,41 +724,48 @@
 
 .cap-docencia-left {
   display: flex;
-  align-items: flex-start;
-  gap: 1rem;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
 }
 
 .cap-docencia-icon-box {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 0.5rem;
-  background-color: var(--cap-primary);
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0, 97, 148, 0.25);
+  box-shadow: 0 8px 18px -4px rgba(43, 91, 148, 0.35);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cap-docencia-card:hover .cap-docencia-icon-box {
+  transform: scale(1.12);
 }
 
 .cap-docencia-title {
-  font-size: 1.25rem;
-  line-height: 1.4;
+  font-size: 1.15rem;
+  line-height: 1.35;
   font-weight: 700;
-  color: var(--cap-on-surface);
+  color: #0c2340;
   margin: 0;
 }
 
 .cap-docencia-desc {
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: var(--cap-secondary);
-  max-width: 38rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #475569;
+  max-width: 44rem;
   margin: 0.25rem 0 0 0;
 }
 
 .cap-docencia-right {
   width: 100%;
+  flex-shrink: 0;
 }
 
 @media (min-width: 768px) {
@@ -724,29 +775,37 @@
 }
 
 .cap-docencia-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   text-align: center;
   width: 100%;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  background-color: var(--cap-surface-low);
-  color: var(--cap-primary);
-  font-size: 0.75rem;
+  padding: 13px 26px;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
+  color: #ffffff;
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.06em;
   text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--cap-border-subtle);
-  white-space: nowrap;
+  box-shadow: 0 8px 20px -4px rgba(13, 64, 119, 0.35);
+  border: none;
   box-sizing: border-box;
+  white-space: nowrap;
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-@media (min-width: 768px) {
-  .cap-docencia-btn {
-    width: auto;
-  }
+.cap-docencia-btn:hover {
+  background: linear-gradient(135deg, #0d4077 0%, #0c2340 100%);
+  box-shadow: 0 14px 28px -4px rgba(12, 35, 64, 0.42);
+  transform: translateY(-3px);
+  color: #ffffff;
+}
+
+.cap-docencia-btn:active {
+  transform: scale(0.98);
 }
 
 .cap-docencia-btn:hover {
@@ -760,7 +819,8 @@
    ========================================================================== */
 .cap-modal-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
   height: 100dvh;
@@ -770,8 +830,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 3000;
-  padding: 20px;
+  z-index: 99999 !important;
+  padding: 24px;
+  box-sizing: border-box;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -780,16 +841,17 @@
   background-color: #ffffff;
   width: 100%;
   max-width: 760px;
-  max-height: calc(100vh - 40px);
-  max-height: calc(100dvh - 40px);
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
   overflow-y: auto;
+  margin: auto;
   overscroll-behavior: contain;
-  border-radius: 16px;
+  border-radius: 24px;
   padding: 34px 38px 28px 38px;
   position: relative;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8);
+  box-shadow: 0 25px 50px -12px rgba(12, 35, 64, 0.35);
   text-align: left;
-  border: 1px solid #e2e8f0;
+  border: none;
   animation: modalFadeIn 0.25s ease-out;
 }
 
@@ -1390,7 +1452,55 @@
   cursor: default;
 }
 
+@media (max-width: 992px) {
+  .cap-grid-section {
+    padding: 1rem 1rem 3rem 1rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .capacitacion-container {
+    padding: 0 16px;
+  }
+
+  .doc-search-wrapper {
+    padding: 0 10px;
+    margin-top: 24px;
+    margin-bottom: 20px;
+  }
+
+  .cap-section-title {
+    font-size: 1.5rem;
+  }
+
+  .cap-docencia-section {
+    padding: 0 1rem 2.5rem 1rem;
+  }
+
+  .cap-docencia-card {
+    padding: 20px 20px;
+    border-radius: 20px;
+    gap: 18px;
+  }
+
+  .cap-docencia-left {
+    gap: 14px;
+  }
+
+  .cap-docencia-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+
+  .cap-docencia-title {
+    font-size: 1.05rem;
+  }
+
+  .cap-docencia-desc {
+    font-size: 0.85rem;
+  }
+
   .cap-image-back-btn {
     top: 16px;
     left: 16px;
@@ -1411,5 +1521,24 @@
   .cap-modal-banner-wrap {
     width: calc(100% + 40px);
     margin: -24px -20px 20px -20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .cap-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .training-card {
+    border-radius: 20px;
+  }
+
+  .training-card-body {
+    padding: 1.25rem;
+  }
+
+  .training-card-action {
+    padding: 0 1.25rem 1.25rem 1.25rem;
   }
 }

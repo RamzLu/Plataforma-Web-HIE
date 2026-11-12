@@ -106,7 +106,9 @@ const NoticiasPage = () => {
 
   const scrollNews = (direction) => {
     if (sliderRef.current) {
-      const scrollAmount = 360;
+      const card = sliderRef.current.querySelector('.full-news-card');
+      const cardWidth = card ? card.offsetWidth + 20 : 320;
+      const scrollAmount = cardWidth * (window.innerWidth < 900 ? 1 : 2);
       sliderRef.current.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
     }
   };

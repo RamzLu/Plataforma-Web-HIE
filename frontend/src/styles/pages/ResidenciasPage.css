@@ -1,17 +1,64 @@
-/* =========================================================
-   ESTRUCTURA BASE DE LA PÁGINA PÚBLICA RESIDENCIAS
-   ========================================================= */
+/* ==========================================================================
+   PORTAL PÚBLICO - VISTA RESIDENCIAS MÉDICAS
+   Hospital Interdistrital Evita Formosa
+   Lenguaje Visual Soft UI Estandarizado (Home / Especialidades / Capacitaciones)
+   ========================================================================== */
+
 .residencias-page {
+  --res-shadow-rest:
+    0 14px 35px -5px rgba(12, 35, 64, 0.08),
+    0 4px 15px -3px rgba(12, 35, 64, 0.04);
+  --res-shadow-hover:
+    0 24px 48px -8px rgba(43, 91, 148, 0.18),
+    0 8px 20px -4px rgba(12, 35, 64, 0.07);
+
   width: 100%;
-  background-color: #e9ebee;
-  padding: 0 0 80px 0;
+  padding: 0 0 72px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: calc(100vh - 80px);
+  box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+
+  /* Fondo degradado suave que nace del Footer y sube fundiéndose con la página */
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f8fafc 24%,
+    #e9ebee calc(100% - 700px),
+    #a4c2d6 calc(100% - 420px),
+    #2b5b94 calc(100% - 170px),
+    #0d4077 100%
+  );
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* Marca de agua decorativa en fondo continuo (estrellas del hospital Evita, cero cortes) */
+.residencias-page::before {
+  content: "";
+  position: absolute;
+  bottom: 90px;
+  left: 2%;
+  width: clamp(280px, 34vw, 480px);
+  max-width: 85vw;
+  aspect-ratio: 1 / 1;
+  background: url("../../assets/logoHospitalEvita-blanco.png") center / contain no-repeat;
+  opacity: 0.08;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  filter: blur(0.5px);
+  transform: rotate(8deg);
+  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
+  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
+}
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+   ========================================================= */
 .residencias-container {
   width: 100%;
   padding: 0 90px;
@@ -20,10 +67,11 @@
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  z-index: 1;
 }
 
 /* =========================================================
-   HERO / BANNER INFORMATIVO RESIDENCIAS
+   HERO / BANNER INFORMATIVO RESIDENCIAS (SOFT UI)
    ========================================================= */
 .res-hero-animation-wrapper {
   width: 100%;
@@ -31,20 +79,22 @@
 
 .res-hero-card {
   width: 100%;
-  background-color: #ffffff;
-  border-radius: 20px;
+  background: #ffffff;
+  border-radius: 26px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(12, 35, 64, 0.06);
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: var(--res-shadow-rest);
+  border: none;
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
   align-items: stretch;
   margin-bottom: 55px;
-  transition: box-shadow 0.3s ease;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
 .res-hero-card:hover {
-  box-shadow: 0 14px 38px rgba(12, 35, 64, 0.09);
+  transform: translateY(-4px);
+  box-shadow: var(--res-shadow-hover);
 }
 
 .res-hero-content {
@@ -53,15 +103,18 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .res-hero-title {
-  color: #1b3b6f;
+  color: #2b5b94;
   font-size: 2.35rem;
-  font-weight: 400;
+  font-weight: 300;
   line-height: 1.25;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   margin: 0 0 20px 0;
+  text-transform: uppercase;
 }
 
 .res-hero-amp {
@@ -75,29 +128,30 @@
   font-weight: 400;
   line-height: 1.7;
   margin: 0 0 32px 0;
-  max-width: 580px;
+  max-width: 680px;
 }
 
 .res-hero-btn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 13px 26px;
-  background: #003666;
+  gap: 12px;
+  padding: 13px 30px;
+  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
   color: #ffffff;
-  border-radius: 10px;
-  font-size: 0.96rem;
+  border-radius: 50px;
+  font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
-  box-shadow: 0 4px 14px rgba(0, 54, 102, 0.22);
-  transition: all 0.25s ease;
+  box-shadow: 0 8px 22px -4px rgba(43, 91, 148, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  border: none;
 }
 
 .res-hero-btn:hover {
-  background: #002244;
+  background: linear-gradient(135deg, #1d4677 0%, #092a50 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(0, 54, 102, 0.32);
+  box-shadow: 0 12px 28px -4px rgba(43, 91, 148, 0.45);
   color: #ffffff;
 }
 
@@ -123,11 +177,11 @@
   object-fit: cover;
   object-position: center;
   display: block;
-  transition: transform 0.5s ease;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .res-hero-card:hover .res-hero-img {
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 /* =========================================================
@@ -143,12 +197,12 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .res-section-eyebrow {
-  color: #0088b7;
-  font-size: 0.85rem;
+  color: #2b5b94;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -156,12 +210,12 @@
 }
 
 .res-section-title {
-  color: #1b3b6f;
+  color: #2b5b94;
   font-size: 2.2rem;
   font-weight: 300;
   letter-spacing: 1px;
   text-transform: uppercase;
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
   line-height: 1.2;
 }
 
@@ -171,38 +225,45 @@
   font-weight: 400;
   margin: 0;
   max-width: 860px;
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 /* =========================================================
-   TARJETA ACORDEÓN DE RESIDENCIA (res-card)
+   TARJETA ACORDEÓN DE RESIDENCIA (res-card SOFT UI)
    ========================================================= */
+.res-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
 .res-card {
   width: 100%;
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 24px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 16px rgba(12, 35, 64, 0.05);
-  margin-bottom: 24px;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  border: none;
+  box-shadow: var(--res-shadow-rest);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
 .res-card:hover {
-  box-shadow: 0 8px 24px rgba(12, 35, 64, 0.08);
-  border-color: #cbd5e1;
+  transform: translateY(-4px);
+  box-shadow: var(--res-shadow-hover);
 }
 
-/* Encabezado Azul Océano / Turquesa de la Tarjeta */
+/* Encabezado Azul Institucional de la Tarjeta */
 .res-card-header {
-  background: #0088b7;
-  padding: 16px 26px;
+  background: linear-gradient(135deg, #2b5b94 0%, #1b3b6f 100%);
+  padding: 20px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
   user-select: none;
+  box-sizing: border-box;
 }
 
 .res-card-header-left {
@@ -212,85 +273,93 @@
   flex: 1;
 }
 
-.res-card-resolucion {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-}
-
 .res-card-title {
   color: #ffffff;
-  font-size: 1.90rem;
+  font-size: 1.55rem;
   font-weight: 600;
   margin: 0;
-  line-height: 1.25;
+  line-height: 1.3;
+  letter-spacing: 0.3px;
 }
 
-/* Botón 'Ver programa / Ocultar detalles' en la cabecera */
+/* Botón 'Ver programa / Ocultar detalles' en la cabecera (Píldora Translúcida) */
 .res-header-toggle-btn {
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   color: #ffffff;
   font-size: 0.88rem;
   font-weight: 600;
-  padding: 7px 18px;
-  border-radius: 20px;
+  padding: 8px 22px;
+  border-radius: 50px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  backdrop-filter: blur(4px);
 }
 
 .res-header-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.32);
   border-color: #ffffff;
+  transform: translateY(-1px);
 }
 
 /* Cuerpo de la Tarjeta */
 .res-card-body {
-  padding: 24px 26px;
+  padding: 28px 32px;
   box-sizing: border-box;
 }
 
 /* Línea de Metadatos */
 .res-meta-line {
-  font-size: 0.92rem;
+  font-size: 0.94rem;
   color: #475569;
-  line-height: 1.5;
-  margin-bottom: 12px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .res-meta-category-label {
   font-weight: 700;
-  color: #0f172a;
+  color: #0c2340;
 }
 
 .res-meta-dot {
-  margin: 0 6px;
+  margin: 0 4px;
   color: #94a3b8;
 }
 
 .res-meta-date {
-  color: #0088b7;
+  color: #2b5b94;
   font-weight: 600;
 }
 
+/* Badge de Estado en Cápsula Suave */
 .res-meta-status {
-  color: #0088b7;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 50px;
+  background: #e0f2fe;
+  color: #0284c7;
   font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.3px;
+  margin-left: 4px;
 }
 
 /* Copete / Resumen breve */
 .res-copete {
   color: #334155;
-  font-size: 0.98rem;
-  line-height: 1.6;
-  margin: 0 0 20px 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0 0 24px 0;
 }
 
 /* Barra de Acciones */
@@ -298,67 +367,55 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
 }
 
-/* Botón Rosa / Carmín 'Descargar' */
+/* Botón 'Descargar' (Píldora Azul Institucional) */
 .res-btn-download {
-  background: #d91a5b;
+  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
   color: #ffffff !important;
   border: none;
-  border-radius: 8px;
-  padding: 9px 20px;
-  font-size: 0.9rem;
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-size: 0.92rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   text-decoration: none;
-  box-shadow: 0 2px 8px rgba(217, 26, 91, 0.25);
+  box-shadow: 0 6px 18px -3px rgba(43, 91, 148, 0.28);
 }
 
 .res-btn-download:hover {
-  background: #b8144b;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(217, 26, 91, 0.35);
+  background: linear-gradient(135deg, #1d4677 0%, #092a50 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -3px rgba(43, 91, 148, 0.38);
+  color: #ffffff !important;
 }
 
-/* Botón Celeste 'Ver requisitos y rotación' */
+/* Botón 'Ver requisitos y rotación' (Píldora Suave) */
 .res-btn-toggle-req {
-  background: #f0f9ff;
-  color: #0284c7;
-  border: 1px solid #bae6fd;
-  border-radius: 8px;
-  padding: 9px 18px;
-  font-size: 0.9rem;
+  background: #f0f7ff;
+  color: #2b5b94;
+  border: 1px solid rgba(43, 91, 148, 0.2);
+  border-radius: 50px;
+  padding: 10px 22px;
+  font-size: 0.92rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .res-btn-toggle-req:hover {
   background: #e0f2fe;
-  border-color: #7dd3fc;
-  color: #0369a1;
-}
-
-/* Badge de Duración / Sede */
-.res-badge-duration {
-  background: #f8fafc;
-  color: #0284c7;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 9px 16px;
-  font-size: 0.88rem;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  border-color: #2b5b94;
+  color: #0d4077;
+  transform: translateY(-2px);
 }
 
 /* Ícono de flecha rotatoria */
@@ -371,12 +428,12 @@
 }
 
 /* =========================================================
-   CONTENIDO EXPANDIDO (ACORDEÓN ABIERTO)
+   CONTENIDO EXPANDIDO (ACORDEÓN ABIERTO - SOFT UI)
    ========================================================= */
 .res-expanded-content {
-  border-top: 1px dashed #cbd5e1;
-  margin-top: 24px;
-  padding-top: 24px;
+  border-top: 1px solid #eef2f6;
+  margin-top: 28px;
+  padding-top: 28px;
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
   gap: 36px;
@@ -397,43 +454,50 @@
 
 /* Títulos con íconos de subsección */
 .res-subheading {
-  color: #0c2340;
+  color: #2b5b94;
   font-size: 1.05rem;
   font-weight: 700;
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .res-program-description {
   color: #475569;
-  font-size: 0.95rem;
+  font-size: 0.96rem;
   line-height: 1.65;
-  margin: 0 0 20px 0;
+  margin: 0 0 24px 0;
 }
 
-/* Cajas de Estadísticas (Cupos y Duración) */
+/* Cajas de Estadísticas (Cupos y Duración - Soft UI) */
 .res-stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 24px;
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
 .res-stat-box {
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 12px 16px;
+  border: 1px solid #eef2f6;
+  border-radius: 18px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  box-shadow: 0 2px 8px rgba(12, 35, 64, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.res-stat-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(12, 35, 64, 0.06);
 }
 
 .res-stat-label {
   color: #64748b;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.6px;
   text-transform: uppercase;
@@ -441,9 +505,9 @@
 
 .res-stat-value {
   color: #0c2340;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 /* Lista de Requisitos */
@@ -453,20 +517,20 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 12px;
 }
 
 .res-requisito-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  font-size: 0.92rem;
+  gap: 12px;
+  font-size: 0.94rem;
   color: #334155;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .res-check-icon {
-  color: #0088b7;
+  color: #2b5b94;
   flex-shrink: 0;
   margin-top: 3px;
 }
@@ -474,12 +538,13 @@
 /* Columna Derecha del Acordeón */
 .res-right-media {
   width: 100%;
-  height: 190px;
-  border-radius: 12px;
+  height: 200px;
+  border-radius: 18px;
   overflow: hidden;
   background: #f1f5f9;
-  margin-bottom: 16px;
-  border: 1px solid #e2e8f0;
+  margin-bottom: 18px;
+  border: none;
+  box-shadow: 0 6px 18px rgba(12, 35, 64, 0.06);
 }
 
 .res-right-img {
@@ -488,76 +553,95 @@
   object-fit: cover;
   object-position: center;
   display: block;
+  transition: transform 0.5s ease;
+}
+
+.res-card:hover .res-right-img {
+  transform: scale(1.02);
 }
 
 .res-rotation-title {
-  color: #0c2340;
-  font-size: 1rem;
+  color: #2b5b94;
+  font-size: 1.05rem;
   font-weight: 700;
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
 }
 
 .res-rotation-desc {
   color: #64748b;
-  font-size: 0.88rem;
-  line-height: 1.55;
-  margin: 0 0 18px 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
 }
 
-/* Botón Descargar Programa (PDF) */
+/* Botón Descargar Programa PDF (Píldora) */
 .res-btn-program-pdf {
-  background: #e0f2fe;
-  color: #006eb3 !important;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-size: 0.92rem;
+  background: #f0f7ff;
+  color: #2b5b94 !important;
+  border: 1px solid rgba(43, 91, 148, 0.25);
+  border-radius: 50px;
+  padding: 12px 24px;
+  font-size: 0.94rem;
   font-weight: 600;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
 .res-btn-program-pdf:hover {
-  background: #bae6fd;
-  color: #004d80 !important;
-  transform: translateY(-1px);
+  background: #2b5b94;
+  color: #ffffff !important;
+  border-color: #2b5b94;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(43, 91, 148, 0.25);
 }
 
 /* =========================================================
-   ESTADO VACÍO Y CARGA
+   ESTADO VACÍO Y CARGA (SOFT UI)
    ========================================================= */
 .res-loading-state,
 .res-empty-state {
   width: 100%;
-  padding: 60px 20px;
+  padding: 64px 24px;
   text-align: center;
   background: #ffffff;
-  border-radius: 14px;
-  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  border: none;
   color: #64748b;
-  font-size: 1rem;
-  box-shadow: 0 4px 14px rgba(12, 35, 64, 0.04);
+  font-size: 1.05rem;
+  box-shadow: var(--res-shadow-rest);
+  box-sizing: border-box;
 }
 
 /* =========================================================
    RESPONSIVIDAD
    ========================================================= */
+@media (max-width: 1200px) {
+  .residencias-container {
+    padding: 0 48px;
+  }
+}
+
 @media (max-width: 992px) {
+  .residencias-container {
+    padding: 0 28px;
+  }
+
   .res-hero-card {
     grid-template-columns: 1fr;
     margin-bottom: 40px;
+    border-radius: 22px;
   }
 
   .res-hero-media {
-    min-height: 300px;
-    max-height: 380px;
+    min-height: 280px;
+    max-height: 360px;
     order: -1;
   }
 
@@ -574,6 +658,14 @@
     margin-bottom: 26px;
   }
 
+  .res-card-header {
+    padding: 18px 26px;
+  }
+
+  .res-card-body {
+    padding: 24px 26px;
+  }
+
   .res-expanded-content {
     grid-template-columns: 1fr;
     gap: 28px;
@@ -584,28 +676,50 @@
   }
 }
 
-@media (max-width: 640px) {
-  .res-hero-card {
-    border-radius: 16px;
+@media (max-width: 768px) {
+  .residencias-container {
+    padding: 0 16px;
   }
 
-  .res-hero-media {
-    min-height: 240px;
-  }
-
-  .res-hero-content {
-    padding: 28px 20px;
+  .res-section-title {
+    font-size: 1.95rem;
   }
 
   .res-hero-title {
-    font-size: 1.7rem;
-    margin-bottom: 16px;
+    font-size: 1.75rem;
+  }
+
+  .res-hero-content {
+    padding: 30px 22px;
+  }
+}
+
+@media (max-width: 600px) {
+  .residencias-container {
+    padding: 0 12px;
+  }
+
+  .res-hero-card {
+    border-radius: 18px;
+  }
+
+  .res-hero-media {
+    min-height: 220px;
+  }
+
+  .res-hero-content {
+    padding: 26px 18px;
+  }
+
+  .res-hero-title {
+    font-size: 1.55rem;
+    margin-bottom: 14px;
   }
 
   .res-hero-description {
-    font-size: 0.94rem;
+    font-size: 0.92rem;
     line-height: 1.6;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
 
   .res-hero-btn {
@@ -615,13 +729,22 @@
   }
 
   .res-section-title {
-    font-size: 1.7rem;
+    font-size: 1.65rem;
+  }
+
+  .res-card {
+    border-radius: 18px;
   }
 
   .res-card-header {
     flex-direction: column;
     align-items: flex-start;
     padding: 18px 20px;
+    gap: 12px;
+  }
+
+  .res-card-title {
+    font-size: 1.35rem;
   }
 
   .res-header-toggle-btn {
@@ -630,7 +753,7 @@
   }
 
   .res-card-body {
-    padding: 20px;
+    padding: 20px 18px;
   }
 
   .res-stats-grid {
@@ -640,11 +763,11 @@
   .res-actions-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
 
   .res-btn-download,
-  .res-btn-toggle-req,
-  .res-badge-duration {
+  .res-btn-toggle-req {
     width: 100%;
     justify-content: center;
     box-sizing: border-box;

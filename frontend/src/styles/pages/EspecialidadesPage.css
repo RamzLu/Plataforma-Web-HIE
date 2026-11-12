@@ -745,6 +745,21 @@
    RESPONSIVIDAD
 ========================================= */
 @media (max-width: 992px) {
+  .especialidades-page .public-page-banner,
+  .esp-header-fluid {
+    padding: 110px 20px 45px 20px !important;
+    border-radius: 0 0 24px 24px !important;
+    margin-bottom: 28px !important;
+  }
+  .especialidades-page .public-page-banner-inner,
+  .esp-header-inner {
+    border-left-width: 5px !important;
+    padding-left: 28px !important;
+  }
+  .especialidades-page .public-page-banner-title,
+  .esp-main-title {
+    font-size: 2.45rem !important;
+  }
   .specialties-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
@@ -752,6 +767,27 @@
 }
 
 @media (max-width: 768px) {
+  .especialidades-page .public-page-banner,
+  .esp-header-fluid {
+    padding: 95px 16px 36px 16px !important;
+    margin-bottom: 24px !important;
+    border-radius: 0 0 20px 20px !important;
+  }
+  .especialidades-page .public-page-banner-inner,
+  .esp-header-inner {
+    border-left-width: 5px !important;
+    padding-left: 20px !important;
+  }
+  .especialidades-page .public-page-banner-title,
+  .esp-main-title {
+    font-size: 1.95rem !important;
+    margin: 6px 0 10px 0 !important;
+  }
+  .especialidades-page .public-page-banner-subtitle,
+  .esp-subtitle {
+    font-size: 0.95rem !important;
+  }
+
   .especialidades-container {
     padding: 0 16px;
   }
@@ -841,6 +877,27 @@
 
   .modal-body {
     padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .especialidades-page .public-page-banner,
+  .esp-header-fluid {
+    padding: 85px 14px 30px 14px !important;
+  }
+  .especialidades-page .public-page-banner-inner,
+  .esp-header-inner {
+    border-left-width: 4px !important;
+    padding-left: 16px !important;
+  }
+  .especialidades-page .public-page-banner-title,
+  .esp-main-title {
+    font-size: 1.65rem !important;
+    letter-spacing: 0.5px !important;
+  }
+  .especialidades-page .public-page-banner-subtitle,
+  .esp-subtitle {
+    font-size: 0.88rem !important;
   }
 }
 
