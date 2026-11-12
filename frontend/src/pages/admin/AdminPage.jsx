@@ -8,6 +8,7 @@ import { getNoticias } from '../../api/noticias.api';
 import { getEspecialidades } from '../../api/especialidades.api';
 import { getDocumentos } from '../../api/documentos.api';
 import { getProfesionales } from '../../api/profesionales.api';
+import { getResidencias } from '../../api/residencias.api';
 
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminHeader from '../../components/admin/AdminHeader';
@@ -38,6 +39,7 @@ const AdminPage = () => {
   const [pendingEspecialidadesCount, setPendingEspecialidadesCount] = useState(0);
   const [pendingDocumentosCount, setPendingDocumentosCount] = useState(0);
   const [pendingProfesionalesCount, setPendingProfesionalesCount] = useState(0);
+  const [pendingResidenciasCount, setPendingResidenciasCount] = useState(0);
   
   const isKeycloakInitialized = useRef(false);
 
@@ -87,6 +89,17 @@ const AdminPage = () => {
             (p) => (p.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
           ).length;
           setPendingProfesionalesCount(pending);
+        }
+      })
+      .catch(() => {});
+
+    getResidencias(true)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const pending = data.filter(
+            (r) => (r.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+          ).length;
+          setPendingResidenciasCount(pending);
         }
       })
       .catch(() => {});
@@ -244,6 +257,7 @@ const AdminPage = () => {
         pendingEspecialidadesCount={pendingEspecialidadesCount}
         pendingDocumentosCount={pendingDocumentosCount}
         pendingProfesionalesCount={pendingProfesionalesCount}
+        pendingResidenciasCount={pendingResidenciasCount}
       />
       
       <div className="admin-main-wrapper">
@@ -275,7 +289,11 @@ const AdminPage = () => {
             />
           )}
           {activeTab === "capacitaciones" && <AdminCapacitacionesView />}
-          {activeTab === "residencias" && <AdminResidenciasView />}
+          {activeTab === "residencias" && (
+            <AdminResidenciasView
+              onPendingCountChange={setPendingResidenciasCount}
+            />
+          )}
           {activeTab === "graficos" && <AdminContenidoGraficoView />}
           {activeTab === "institucional" && <AdminInstitucionalView />}
         </main>

@@ -37,7 +37,7 @@ import {
 } from "../controllers/cms/cms.capacitacion.controller.js";
 
 
-import { requireCmsAccess, requireAdminAccess, adminViewAccess } from '../middlewares/auth.middleware.js'; 
+import { requireCmsAccess, requireAdminAccess, adminViewAccess, requireCmsOrAdminAccess } from '../middlewares/auth.middleware.js'; 
 import { parsearIdBigInt } from '../utils/sanitize.utils.js';
 import {
   uploadImagenSingle,
@@ -134,19 +134,19 @@ router.put('/institucional/redes', requireCmsAccess, actualizarRedesSociales);
 router.get('/residencias', adminViewAccess, obtenerResidencias);
 router.post('/residencias', requireCmsAccess, uploadResidenciaFiles, crearResidencia);
 router.put('/residencias/:id', requireCmsAccess, uploadResidenciaFiles, actualizarResidencia);
-router.patch('/residencias/:id/estado', requireCmsAccess, cambiarEstadoResidencia);
+router.patch('/residencias/:id/estado', requireCmsOrAdminAccess, cambiarEstadoResidencia);
 router.delete('/residencias/:id', requireCmsAccess, eliminarResidencia);
 
 // ==========================================
 // MÓDULO: CAPACITACIONES
 // ==========================================
-// Listado completo (borradores/archivadas): solo CMS. El portal publico usa /capacitaciones/publicas.
-router.get('/capacitaciones', requireCmsAccess, obtenerCapacitaciones);
+// Listado completo (borradores/archivadas): CMS y Administrador. El portal publico usa /capacitaciones/publicas.
+router.get('/capacitaciones', requireCmsOrAdminAccess, obtenerCapacitaciones);
 router.get('/capacitaciones/publicas', obtenerCapacitacionesPublicas);
 router.post('/capacitaciones', requireCmsAccess, uploadCapacitacionFiles, crearCapacitacion);
 router.put('/capacitaciones/:id', requireCmsAccess, uploadCapacitacionFiles, actualizarCapacitacion);
-router.patch('/capacitaciones/:id/estado', requireCmsAccess, cambiarEstadoCapacitacion);
-router.patch('/capacitaciones/:id/revision', requireCmsAccess, revisarCapacitacion);
+router.patch('/capacitaciones/:id/estado', requireCmsOrAdminAccess, cambiarEstadoCapacitacion);
+router.patch('/capacitaciones/:id/revision', requireCmsOrAdminAccess, revisarCapacitacion);
 router.delete('/capacitaciones/:id', requireCmsAccess, eliminarCapacitacion);
 
 export default router;

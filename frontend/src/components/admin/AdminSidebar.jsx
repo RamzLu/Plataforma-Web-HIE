@@ -21,6 +21,7 @@ const AdminSidebar = ({
   pendingEspecialidadesCount = 0,
   pendingDocumentosCount = 0,
   pendingProfesionalesCount = 0,
+  pendingResidenciasCount = 0,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
@@ -40,7 +41,7 @@ const AdminSidebar = ({
         { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: pendingDocumentosCount },
         { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope />, pendingCount: pendingEspecialidadesCount },
         { id: "profesionales", label: "Profesionales", icon: <Contact />, pendingCount: pendingProfesionalesCount }, 
-        { id: "residencias", label: "Residencias", icon: <Building2 /> },
+        { id: "residencias", label: "Residencias", icon: <Building2 />, pendingCount: pendingResidenciasCount },
         { id: "capacitaciones", label: "Capacitaciones Públicas", icon: <GraduationCap /> },
         { id: "graficos", label: "Contenido Gráfico", icon: <ImageIcon /> },
         { id: "institucional", label: "Datos Institucionales", icon: <Building /> },

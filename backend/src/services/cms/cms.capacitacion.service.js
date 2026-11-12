@@ -2,6 +2,7 @@ import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
+import { calcularCambios } from "../../utils/cambios.utils.js";
 
 const DOCS_BUCKET = "capacitaciones-documentos";
 const MEDIA_BUCKET = "capacitaciones-imagenes-videos";
@@ -711,6 +712,61 @@ class CmsCapacitacionService {
     const idStr = id.toString();
     const estadoAnterior = (existing.estado || "").toUpperCase();
     const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
+
+    // Validación: verificar si hubo cambios reales antes de actualizar la capacitación
+    const camposCapCheck = [
+      { key: "titulo", label: "Título de la capacitación" },
+      { key: "descripcion", label: "Descripción" },
+      { key: "modalidad", label: "Modalidad" },
+      { key: "horario", label: "Horario" },
+      { key: "ubicacion", label: "Ubicación" },
+      { key: "disertantes", label: "Disertantes" },
+      { key: "temario", label: "Temario" },
+      { key: "fechaInicio", label: "Fecha de inicio", tipo: "date" },
+      { key: "fechaFin", label: "Fecha de fin", tipo: "date" },
+      { key: "videoUrl", label: "URL de video" },
+      { key: "enlaceUrl", label: "URL de enlace" },
+    ];
+
+    const cambiosCap = calcularCambios(
+      {
+        titulo: existing.titulo || "",
+        descripcion: existing.descripcion || "",
+        modalidad: extra.modalidad || "Presencial",
+        horario: extra.horario || "10:00",
+        ubicacion: extra.ubicacion || "Hospital Interdistrital Evita",
+        disertantes: extra.disertantes || "",
+        temario: extra.temario || "",
+        fechaInicio: existing.fechaInicio,
+        fechaFin: existing.fechaFin,
+        videoUrl: existing.videoUrl || "",
+        enlaceUrl: existing.enlaceUrl || "",
+      },
+      {
+        titulo: data.titulo !== undefined ? data.titulo.trim() : (existing.titulo || ""),
+        descripcion: data.descripcion !== undefined ? (data.descripcion ? data.descripcion.trim() : "") : (existing.descripcion || ""),
+        modalidad: contenidoPayload.modalidad,
+        horario: contenidoPayload.horario,
+        ubicacion: contenidoPayload.ubicacion,
+        disertantes: contenidoPayload.disertantes,
+        temario: contenidoPayload.temario,
+        fechaInicio: fechaInicioDate,
+        fechaFin: fechaFinDate,
+        videoUrl: finalVideoUrl || "",
+        enlaceUrl: enlaceUrlActualizado || "",
+      },
+      camposCapCheck
+    );
+
+    const bannerModificado = Boolean(bannerFile || data.eliminarBanner === "true" || data.eliminarBanner === true);
+    const archivoModificado = Boolean(contenidoFile || data.eliminarArchivo === "true" || data.eliminarArchivo === true);
+    const estadoModificado = Boolean(data.estado && data.estado.toUpperCase() !== estadoAnterior);
+
+    if (cambiosCap.length === 0 && !bannerModificado && !archivoModificado && !estadoModificado) {
+      const error = new Error("No se detectaron cambios para actualizar.");
+      error.statusCode = 400;
+      throw error;
+    }
 
     let estadoNormalizado = existing.estado;
     let activoFinal = data.activo !== undefined ? (data.activo === true || data.activo === "true") : existing.activo;

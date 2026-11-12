@@ -354,6 +354,36 @@ class CmsDocService {
       };
     }
 
+    // Validación: verificar si hubo cambios antes de procesar archivos o base de datos
+    const catAnteriorNombre = docExistente.categoria_documento?.nombre || "Información institucional";
+    const catNuevaNombre = categoria ? categoria.trim() : catAnteriorNombre;
+
+    const camposDocCheck = [
+      { key: "titulo", label: "Título del documento" },
+      { key: "descripcion", label: "Descripción" },
+      { key: "categoria", label: "Categoría" },
+    ];
+    const cambiosDoc = calcularCambios(
+      {
+        titulo: docExistente.titulo,
+        descripcion: docExistente.descripcion || "",
+        categoria: catAnteriorNombre,
+      },
+      {
+        titulo: titulo !== undefined ? titulo.trim() : docExistente.titulo,
+        descripcion: descripcion !== undefined ? (descripcion ? descripcion.trim() : "") : (docExistente.descripcion || ""),
+        categoria: catNuevaNombre,
+      },
+      camposDocCheck
+    );
+    const estadoCambioDoc = Boolean(estado && estado.toUpperCase() !== estadoAnterior);
+
+    if (cambiosDoc.length === 0 && !archivoSubido && !estadoCambioDoc) {
+      const error = new Error("No se detectaron cambios para actualizar.");
+      error.statusCode = 400;
+      throw error;
+    }
+
     let estadoFinal = "PENDIENTE_APROBACION";
     if (estadoSolicitado === "BORRADOR" && !provieneDePublicada) {
       estadoFinal = "BORRADOR";

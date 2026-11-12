@@ -19,6 +19,45 @@ import {
   cambiarEstadoResidencia,
 } from "../../api/residencias.api";
 
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { isToday } from "date-fns";
+import es from "date-fns/locale/es";
+
+registerLocale("es", es);
+
+const CustomScheduleInput = React.forwardRef(
+  ({ value, onClick, icon, placeholder, isDate }, ref) => {
+    let displayValue = value || placeholder;
+
+    if (isDate && value) {
+      const [dia, mes, anio] = value.split("/");
+      const dateObj = new Date(parseInt(anio), parseInt(mes) - 1, parseInt(dia));
+      if (!isNaN(dateObj) && isToday(dateObj)) {
+        displayValue = "Hoy";
+      }
+    }
+
+    return (
+      <button className="schedule-custom-btn" onClick={onClick} ref={ref} type="button">
+        <span className="schedule-icon">{icon}</span>
+        <span className="schedule-text">{displayValue}</span>
+        <svg
+          className="schedule-chevron"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    );
+  }
+);
+
 import "../../styles/components/cms/CmsDashboard.css";
 import "../../styles/components/cms/CmsModals.css";
 import "../../styles/pages/cms/CmsNoticiasView.css";
@@ -60,11 +99,13 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   const [eliminarBannerFlag, setEliminarBannerFlag] = useState(false);
   const [documentoSeleccionado, setDocumentoSeleccionado] = useState(null);
   const [eliminarDocumentoFlag, setEliminarDocumentoFlag] = useState(false);
+  const [fechaProgramada, setFechaProgramada] = useState(null);
 
   // Formulario según los campos solicitados para la vista del portal
   const initialForm = {
     nombre: "", // Nombre de la residencia
     categoria: "Formación Médica de Posgrado", // Categoría
+    fechaInicio: "", // Fecha de Inicio / Apertura
     fechaConvocatoria: "", // Fecha Límite / Fecha de Examen
     convocatoria: "Abierta",
     descripcion: "", // Resumen breve / copete
@@ -196,6 +237,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     setEliminarBannerFlag(false);
     setDocumentoSeleccionado(null);
     setEliminarDocumentoFlag(false);
+    setFechaProgramada(null);
     setFormData(initialForm);
     if (bannerInputRef.current) bannerInputRef.current.value = "";
     if (docInputRef.current) docInputRef.current.value = "";
@@ -218,6 +260,12 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     setDocumentoSeleccionado(null);
     setEliminarDocumentoFlag(false);
 
+    if (res.fechaPublicacion) {
+      setFechaProgramada(new Date(res.fechaPublicacion));
+    } else {
+      setFechaProgramada(null);
+    }
+
     let convVal = "Abierta";
     if (res.convocatoria) {
       const norm = res.convocatoria.toLowerCase().trim();
@@ -227,11 +275,19 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       else convVal = res.convocatoria;
     }
 
+    const estadoInicial =
+      res.estado === "PROGRAMADO"
+        ? "PROGRAMADO"
+        : res.fechaPublicacion
+        ? "PROGRAMADO"
+        : res.estado || "BORRADOR";
+
     setFormData({
       nombre: res.nombre || "",
       categoria:
         res.categoria ||
         "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
+      fechaInicio: res.fechaInicio || res.fechaInicioVigencia || "",
       fechaConvocatoria: res.fechaConvocatoria || "",
       convocatoria: convVal,
       descripcion: res.descripcion || "",
@@ -242,7 +298,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       reglamentoRotacion:
         res.reglamentoRotacion ||
         "Descargue el cronograma de actividades, régimen de guardias docentes y plan de evaluación de Residencia.",
-      estado: res.estado || "BORRADOR",
+      estado: estadoInicial,
 
       bannerNombre: res.bannerNombre || "",
       bannerUrl: res.bannerUrl || "",
@@ -274,11 +330,18 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Guardar en la BD (Crear o Actualizar)
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
+    if (editingId && !hasUnsavedChanges) {
+      return toast.error("No se han detectado cambios para actualizar.");
+    }
     if (!formData.nombre.trim()) {
       return toast.error("El nombre de la residencia es obligatorio.");
     }
 
     const estadoFinal = forcedEstado || formData.estado || "BORRADOR";
+
+    if (estadoFinal === "PROGRAMADO" && !fechaProgramada) {
+      return toast.error("Por favor, selecciona una fecha y hora para programar la publicación.");
+    }
 
     if (estadoFinal === "BORRADOR" && !bypassDraftWarning) {
       setShowConfirmDraftModal(true);
@@ -297,7 +360,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       const dataForm = new FormData();
       dataForm.append("nombre", formData.nombre.trim());
       dataForm.append("categoria", formData.categoria.trim());
-      dataForm.append("fechaConvocatoria", formData.fechaConvocatoria);
+      dataForm.append("fechaInicio", formData.fechaInicio || "");
+      dataForm.append("fechaConvocatoria", formData.fechaConvocatoria || "");
       dataForm.append("convocatoria", formData.convocatoria.trim());
       dataForm.append("descripcion", formData.descripcion.trim());
       dataForm.append("descripcionPrograma", formData.descripcionPrograma.trim());
@@ -306,6 +370,18 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       dataForm.append("requisitos", formData.requisitos.trim());
       dataForm.append("reglamentoRotacion", formData.reglamentoRotacion.trim());
       dataForm.append("estado", estadoFinal);
+
+      if (estadoFinal === "PROGRAMADO" && fechaProgramada) {
+        dataForm.append("fechaPublicacion", fechaProgramada.toISOString());
+      }
+
+      dataForm.append(
+        "editor",
+        keycloak?.tokenParsed?.name ||
+          keycloak?.idTokenParsed?.name ||
+          keycloak?.tokenParsed?.preferred_username ||
+          "Editor CMS"
+      );
 
       // Archivo de Banner (imagen)
       if (bannerSeleccionado) {
@@ -321,27 +397,56 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         dataForm.append("eliminarDocumento", "true");
       }
 
+      let resp;
       if (editingId) {
-        const resp = await updateResidencia(editingId, dataForm, token);
-        const esPendienteArchivado =
-          resp?.residencia?.estado === "PENDIENTE_APROBACION" &&
-          resp?.residencia?.requestedEstado === "ARCHIVADO";
+        resp = await updateResidencia(editingId, dataForm, token);
+      } else {
+        resp = await createResidencia(dataForm, token);
+      }
+
+      const resObj = resp?.residencia || resp;
+      const estadoResultante = (resObj?.estado || estadoFinal).toUpperCase();
+
+      if (estadoResultante === "PENDIENTE_APROBACION") {
+        const esArchivado =
+          estadoFinal === "ARCHIVADO" || resObj?.requestedEstado === "ARCHIVADO";
+        const esProgramado =
+          estadoFinal === "PROGRAMADO" || resObj?.requestedEstado === "PROGRAMADO";
         toast.success(
-          esPendienteArchivado
+          esArchivado
             ? "Solicitud de archivado enviada a revisión del administrador."
-            : estadoFinal === "BORRADOR"
-            ? "Borrador actualizado con éxito."
-            : "Residencia actualizada con éxito.",
+            : esProgramado
+            ? "Residencia programada enviada a revisión del administrador."
+            : editingId
+            ? "Modificaciones enviadas a revisión del administrador."
+            : "Residencia enviada a revisión del administrador para su aprobación.",
           { id: toastId },
         );
-      } else {
-        await createResidencia(dataForm, token);
+        setActiveTab("PENDIENTES");
+      } else if (estadoFinal === "PROGRAMADO") {
         toast.success(
-          estadoFinal === "BORRADOR"
-            ? "Borrador guardado con éxito."
+          editingId
+            ? "Residencia programada actualizada con éxito."
+            : "Residencia programada con éxito.",
+          { id: toastId },
+        );
+        setActiveTab("PROGRAMADOS");
+      } else if (estadoFinal === "BORRADOR") {
+        toast.success(
+          editingId
+            ? "Borrador actualizado con éxito."
+            : "Borrador guardado con éxito.",
+          { id: toastId },
+        );
+        setActiveTab("BORRADORES");
+      } else {
+        toast.success(
+          editingId
+            ? "Residencia actualizada con éxito."
             : "Residencia creada con éxito.",
           { id: toastId },
         );
+        setActiveTab(estadoFinal === "ARCHIVADO" ? "ARCHIVADOS" : "PUBLICADOS");
       }
 
       await cargarResidencias();
@@ -429,12 +534,21 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Filtrado de datos
   const datosFiltrados = (Array.isArray(residencias) ? residencias : []).filter((res) => {
     if (!res) return false;
-    const matchEstado =
-      activeTab === "PUBLICADOS"
-        ? res.estado === "PUBLICADO"
-        : activeTab === "BORRADORES"
-          ? res.estado === "BORRADOR"
-          : res.estado === "ARCHIVADO";
+    const estadoItem = (res.estado || "PUBLICADO").toUpperCase();
+    let matchEstado = false;
+    if (activeTab === "PUBLICADOS") {
+      matchEstado = estadoItem === "PUBLICADO" || estadoItem === "APROBADO";
+    } else if (activeTab === "PROGRAMADOS") {
+      matchEstado = estadoItem === "PROGRAMADO";
+    } else if (activeTab === "PENDIENTES") {
+      matchEstado = estadoItem === "PENDIENTE_APROBACION";
+    } else if (activeTab === "BORRADORES") {
+      matchEstado = estadoItem === "BORRADOR";
+    } else if (activeTab === "RECHAZADOS") {
+      matchEstado = estadoItem === "RECHAZADO";
+    } else if (activeTab === "ARCHIVADOS") {
+      matchEstado = estadoItem === "ARCHIVADO";
+    }
 
     const matchCategoria =
       filtroCategoria === "TODOS" ? true : res.categoria === filtroCategoria;
@@ -492,7 +606,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         }}
       >
         {/* Pestañas de estado */}
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <button
             type="button"
             className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
@@ -502,10 +616,31 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
           </button>
           <button
             type="button"
+            className={`res-tab-btn-unificado ${activeTab === "PROGRAMADOS" ? "active" : ""}`}
+            onClick={() => setActiveTab("PROGRAMADOS")}
+          >
+            Programados
+          </button>
+          <button
+            type="button"
+            className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
+            onClick={() => setActiveTab("PENDIENTES")}
+          >
+            Pendientes de aprobación
+          </button>
+          <button
+            type="button"
             className={`res-tab-btn-unificado ${activeTab === "BORRADORES" ? "active" : ""}`}
             onClick={() => setActiveTab("BORRADORES")}
           >
             Borradores
+          </button>
+          <button
+            type="button"
+            className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
+            onClick={() => setActiveTab("RECHAZADOS")}
+          >
+            Rechazados
           </button>
           <button
             type="button"
@@ -664,6 +799,22 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                         </span>
                       )}
                     </span>
+                    {res.motivoRechazo && res.estado === "RECHAZADO" && (
+                      <div
+                        style={{
+                          marginTop: "6px",
+                          padding: "6px 10px",
+                          background: "#fef2f2",
+                          border: "1px solid #fecaca",
+                          borderRadius: "6px",
+                          fontSize: "0.78rem",
+                          color: "#991b1b",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        <strong>Motivo de rechazo:</strong> {res.motivoRechazo}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -692,9 +843,22 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     alignItems: "flex-start",
                   }}
                 >
-                  <span style={{ color: "#0c2340", fontWeight: "600", fontSize: "0.88rem" }}>
-                    {res.fechaConvocatoria || "Sin fecha fija"}
-                  </span>
+                  {res.estado === "PROGRAMADO" && res.fechaPublicacion ? (
+                    <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.82rem" }}>
+                      Publicación: {new Date(res.fechaPublicacion).toLocaleDateString("es-AR")} {new Date(res.fechaPublicacion).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  ) : (
+                    <>
+                      {res.fechaInicio && (
+                        <span style={{ color: "#0c2340", fontWeight: "600", fontSize: "0.80rem" }}>
+                          Inicio: {res.fechaInicio}
+                        </span>
+                      )}
+                      <span style={{ color: "#475569", fontWeight: "500", fontSize: "0.80rem" }}>
+                        Cierre: {res.fechaConvocatoria || "Sin fecha fija"}
+                      </span>
+                    </>
+                  )}
                   <span
                     style={{
                       fontSize: "0.75rem",
@@ -718,22 +882,77 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                 {/* Columna ESTADO */}
                 <div
                   style={{
-                    width: "135px",
+                    width: "145px",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                   }}
                 >
-                  <select
-                    value={res.estado}
-                    onChange={(e) => handleCambiarEstado(res.id, e.target.value)}
-                    className={`status-badge-select ${res.estado?.toLowerCase()}`}
-                    title="Cambiar estado: Publicado / Borrador / Archivado"
-                  >
-                    <option value="PUBLICADO">Publicado</option>
-                    <option value="BORRADOR">Borrador</option>
-                    <option value="ARCHIVADO">Archivado</option>
-                  </select>
+                  {res.estado === "PENDIENTE_APROBACION" ? (
+                    <span
+                      style={{
+                        backgroundColor: "#fffbeb",
+                        color: "#b45309",
+                        border: "1px solid #fde68a",
+                        padding: "4px 8px",
+                        borderRadius: "999px",
+                        fontSize: "0.78rem",
+                        fontWeight: "600",
+                        display: "inline-block",
+                        textAlign: "center",
+                      }}
+                    >
+                      {res.requestedEstado === "ARCHIVADO"
+                        ? "Archivado solicitado"
+                        : res.requestedEstado === "PROGRAMADO"
+                        ? "Programación en revisión"
+                        : "En revisión"}
+                    </span>
+                  ) : res.estado === "PROGRAMADO" ? (
+                    <span
+                      style={{
+                        backgroundColor: "#eff6ff",
+                        color: "#2563eb",
+                        border: "1px solid #bfdbfe",
+                        padding: "4px 8px",
+                        borderRadius: "999px",
+                        fontSize: "0.78rem",
+                        fontWeight: "600",
+                        display: "inline-block",
+                        textAlign: "center",
+                      }}
+                      title={res.fechaPublicacion ? `Programado para: ${new Date(res.fechaPublicacion).toLocaleString('es-AR')}` : "Programado"}
+                    >
+                      Programado
+                    </span>
+                  ) : res.estado === "RECHAZADO" ? (
+                    <span
+                      style={{
+                        backgroundColor: "#fef2f2",
+                        color: "#b91c1c",
+                        border: "1px solid #fecaca",
+                        padding: "4px 8px",
+                        borderRadius: "999px",
+                        fontSize: "0.78rem",
+                        fontWeight: "600",
+                        display: "inline-block",
+                        textAlign: "center",
+                      }}
+                    >
+                      Rechazado
+                    </span>
+                  ) : (
+                    <select
+                      value={res.estado}
+                      onChange={(e) => handleCambiarEstado(res.id, e.target.value)}
+                      className={`status-badge-select ${res.estado?.toLowerCase()}`}
+                      title="Cambiar estado: Publicado / Borrador / Archivado"
+                    >
+                      <option value="PUBLICADO">Publicado</option>
+                      <option value="BORRADOR">Borrador</option>
+                      <option value="ARCHIVADO">Archivado</option>
+                    </select>
+                  )}
                 </div>
 
                 {/* Columna ACCIONES */}
@@ -867,7 +1086,26 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     />
                   </div>
 
-                  {/* 3. Fecha Límite / Fecha de Examen */}
+                  {/* Fecha de Inicio / Apertura */}
+                  <div>
+                    <label className="esp-form-label">
+                      Fecha de Inicio / Apertura
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.fechaInicio}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          fechaInicio: e.target.value,
+                        });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
+                    />
+                  </div>
+
+                  {/* Fecha Límite / Fecha de Examen */}
                   <div>
                     <label className="esp-form-label">
                       Fecha Límite / Fecha de Examen
@@ -924,14 +1162,104 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                       onChange={(e) => {
                         setFormData({ ...formData, estado: e.target.value });
                         setHasUnsavedChanges(true);
+                        if (e.target.value !== "PROGRAMADO") setFechaProgramada(null);
                       }}
                       className="esp-form-input"
                     >
-                      <option value="PUBLICADO">Publicado</option>
+                      <option value="PUBLICADO">Publicar (Enviar a aprobación)</option>
                       <option value="BORRADOR">Borrador</option>
-                      <option value="ARCHIVADO">Archivado</option>
+                      <option value="PROGRAMADO">Programado (Enviar a aprobación)</option>
+                      {editingId && <option value="ARCHIVADO">Archivado</option>}
                     </select>
                   </div>
+
+                  {formData.estado === "PROGRAMADO" && (
+                    <div className="esp-full-width" style={{ marginBottom: "15px" }}>
+                      <label
+                        className="esp-form-label"
+                        style={{ display: "block", marginBottom: "8px" }}
+                      >
+                        Publicar el:
+                      </label>
+                      <div className="schedule-picker-container">
+                        <DatePicker
+                          selected={fechaProgramada}
+                          onChange={(date) => {
+                            if (fechaProgramada && date) {
+                              date.setHours(fechaProgramada.getHours());
+                              date.setMinutes(fechaProgramada.getMinutes());
+                            }
+                            setFechaProgramada(date);
+                            setHasUnsavedChanges(true);
+                          }}
+                          minDate={new Date()}
+                          locale="es"
+                          dateFormat="dd/MM/yyyy"
+                          portalId="root-portal"
+                          customInput={
+                            <CustomScheduleInput
+                              isDate={true}
+                              placeholder="Elegir fecha"
+                              icon={
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <rect
+                                    x="3"
+                                    y="4"
+                                    width="18"
+                                    height="18"
+                                    rx="2"
+                                    ry="2"
+                                  ></rect>
+                                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                              }
+                            />
+                          }
+                        />
+
+                        <DatePicker
+                          selected={fechaProgramada}
+                          onChange={(date) => {
+                            setFechaProgramada(date);
+                            setHasUnsavedChanges(true);
+                          }}
+                          showTimeSelect
+                          showTimeSelectOnly
+                          timeIntervals={5}
+                          timeCaption="Hora"
+                          dateFormat="HH:mm"
+                          portalId="root-portal"
+                          customInput={
+                            <CustomScheduleInput
+                              placeholder="Elegir hora"
+                              icon={
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <circle cx="12" cy="12" r="10"></circle>
+                                  <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                              }
+                            />
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Resumen breve introductorio */}
                   <div className="esp-full-width">
@@ -1278,7 +1606,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving}
+                  disabled={isSaving || (Boolean(editingId) && !hasUnsavedChanges)}
+                  title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span

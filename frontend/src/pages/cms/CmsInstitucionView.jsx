@@ -231,8 +231,25 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     }
   };
 
+  const checkSedeHasChanges = () => {
+    return (
+      (sedeForm.titulo || "").trim() !== (sedeCentralData.titulo || DEFAULT_SEDE_CENTRAL.titulo || "").trim() ||
+      (sedeForm.tagSuperior || "").trim() !== (sedeCentralData.tagSuperior || DEFAULT_SEDE_CENTRAL.tagSuperior || "").trim() ||
+      (sedeForm.direccion || "").trim() !== (sedeCentralData.direccion || DEFAULT_SEDE_CENTRAL.direccion || "").trim() ||
+      (sedeForm.parrafoDescripcion || "").trim() !== (sedeCentralData.parrafoDescripcion || DEFAULT_SEDE_CENTRAL.parrafoDescripcion || "").trim() ||
+      (sedeForm.badgeAtencion || "").trim() !== (sedeCentralData.badgeAtencion || DEFAULT_SEDE_CENTRAL.badgeAtencion || "").trim() ||
+      (sedeForm.altText || "").trim() !== (sedeCentralData.altText || DEFAULT_SEDE_CENTRAL.altText || "").trim() ||
+      sedeForm.archivo !== null
+    );
+  };
+
   const handleSaveSede = async (e) => {
     e.preventDefault();
+
+    if (!checkSedeHasChanges()) {
+      toast.error("No se detectaron cambios para actualizar.");
+      return;
+    }
 
     if (!sedeForm.titulo?.trim()) {
       toast.error("El título del edificio principal es obligatorio.");
@@ -420,6 +437,10 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   // --- GUARDAR AUTORIDAD (CREAR O ACTUALIZAR) ---
   const handleSaveAutoridadModal = async (e) => {
     e.preventDefault();
+    if (editingAutoridad && !hasUnsavedChanges && !checkHasChanges()) {
+      toast.error("No se detectaron cambios para actualizar.");
+      return;
+    }
     if (!autoridadForm.nombre.trim() || !autoridadForm.cargo.trim()) {
       toast.error("Complete al menos el nombre y el cargo de la autoridad.");
       return;
@@ -1037,7 +1058,8 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving}
+                  disabled={isSaving || (Boolean(editingAutoridad) && !hasUnsavedChanges && !checkHasChanges())}
+                  title={editingAutoridad && !hasUnsavedChanges && !checkHasChanges() ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -1422,7 +1444,8 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving}
+                  disabled={isSaving || !checkSedeHasChanges()}
+                  title={!checkSedeHasChanges() ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>

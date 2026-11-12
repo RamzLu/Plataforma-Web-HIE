@@ -116,6 +116,7 @@ export const ROLES_VISTA_ADMIN = [...ROLES_CMS, ...ROLES_ADMIN];
 
 export const requireCmsAccess = [verifyToken, requireRole(...ROLES_CMS)];
 export const requireAdminAccess = [verifyToken, requireRole(...ROLES_ADMIN)];
+export const requireCmsOrAdminAccess = [verifyToken, requireRole(...ROLES_VISTA_ADMIN)];
 
 export const adminViewAccess = (req, res, next) => {
   req.adminView = false;

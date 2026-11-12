@@ -2,9 +2,12 @@ import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
+import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
+import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 
 const RESIDENCIA_PENDING_META_PREFIX = "residencia_pending_meta_";
 const RESIDENCIA_REJECTION_KEY_PREFIX = "residencia_rejection_reason_";
+const RESIDENCIA_EDITOR_META_PREFIX = "residencia_editor_meta_";
 
 const formatBytes = (bytes) => {
   const n = Number(bytes || 0);
@@ -86,10 +89,75 @@ class CmsResidenciaService {
     await prisma.configuracion.deleteMany({ where: { clave } });
   }
 
+  async obtenerMapaEditorMeta() {
+    try {
+      const configs = await prisma.configuracion.findMany({
+        where: { clave: { startsWith: RESIDENCIA_EDITOR_META_PREFIX } },
+      });
+      const map = new Map();
+      for (const item of configs) {
+        const itemKey = item.clave.replace(RESIDENCIA_EDITOR_META_PREFIX, "");
+        try {
+          map.set(itemKey, JSON.parse(item.valor));
+        } catch (_) {
+          map.set(itemKey, { editor: item.valor, updatedAt: item.updatedAt });
+        }
+      }
+      return map;
+    } catch (_) {
+      return new Map();
+    }
+  }
+
+  async guardarEditorMeta(id, meta) {
+    const clave = `${RESIDENCIA_EDITOR_META_PREFIX}${id}`;
+    await prisma.configuracion.upsert({
+      where: { clave },
+      update: { valor: JSON.stringify(meta), updatedAt: new Date() },
+      create: {
+        clave,
+        valor: JSON.stringify(meta),
+        descripcion: `Editor y fecha de residencia ID ${id}`,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async limpiarEditorMeta(id) {
+    const clave = `${RESIDENCIA_EDITOR_META_PREFIX}${id}`;
+    await prisma.configuracion.deleteMany({ where: { clave } });
+  }
+
+  async _resolverNombreEditor(user, payloadEditor = null) {
+    if (
+      payloadEditor &&
+      typeof payloadEditor === "string" &&
+      payloadEditor.trim() &&
+      payloadEditor !== "Editor CMS"
+    ) {
+      return payloadEditor.trim();
+    }
+    if (user) {
+      try {
+        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
+        if (usuarioLocal?.nombre) {
+          if (usuarioLocal.apellido && usuarioLocal.apellido !== "Sistema") {
+            return `${usuarioLocal.nombre} ${usuarioLocal.apellido}`.trim();
+          }
+          return usuarioLocal.nombre.trim();
+        }
+      } catch (_) {}
+      if (user.name && user.name.trim()) return user.name.trim();
+      if (user.preferred_username && user.preferred_username.trim()) return user.preferred_username.trim();
+      if (user.username && user.username.trim()) return user.username.trim();
+    }
+    return "Editor CMS";
+  }
+
   async obtenerResidencias(esVistaAdmin = false) {
-    const [residencias, motivosMap, pendingMetaMap] = await Promise.all([
+    const [residencias, motivosMap, pendingMetaMap, editorMetaMap, auditorias] = await Promise.all([
       prisma.residencia.findMany({
-        where: esVistaAdmin === true ? {} : { estado: { in: ["PUBLICADO", "PENDIENTE_APROBACION"] }, activo: true },
+        where: esVistaAdmin === true ? {} : { estado: { in: ["PUBLICADO", "PENDIENTE_APROBACION"] } },
         orderBy: { createdAt: "desc" },
         include: {
           archivo: true,
@@ -97,38 +165,96 @@ class CmsResidenciaService {
       }),
       this.obtenerMapaMotivosRechazo(),
       this.obtenerMapaPendingMeta(),
+      this.obtenerMapaEditorMeta(),
+      prisma.auditoria.findMany({
+        where: { entidad: "residencia" },
+        include: { usuario: true },
+        orderBy: { fechaHora: "desc" },
+      }).catch(() => []),
     ]);
+
+    const auditMap = new Map();
+    for (const aud of auditorias) {
+      if (!auditMap.has(aud.entidadId)) {
+        auditMap.set(aud.entidadId, aud);
+      }
+    }
 
     const resultado = [];
     for (const res of residencias) {
       const idStr = res.id.toString();
       const pendingMeta = pendingMetaMap.get(idStr) || null;
+      const editorMeta = editorMetaMap.get(idStr) || null;
       const motivoRechazo = motivosMap.get(idStr) || null;
+      const auditItem = auditMap.get(idStr) || null;
       const estadoUpper = (res.estado || "").toUpperCase();
 
+      let resolvedEditor = null;
+      let resolvedUpdatedAt = null;
+
+      if (pendingMeta?.editor && pendingMeta.editor !== "Editor CMS") {
+        resolvedEditor = pendingMeta.editor;
+        resolvedUpdatedAt = pendingMeta.updatedAt || null;
+      } else if (editorMeta?.editor && editorMeta.editor !== "Editor CMS") {
+        resolvedEditor = editorMeta.editor;
+        resolvedUpdatedAt = editorMeta.updatedAt || null;
+      } else if (auditItem?.usuario) {
+        const u = auditItem.usuario;
+        resolvedEditor = u.apellido && u.apellido !== "Sistema" ? `${u.nombre} ${u.apellido}`.trim() : u.nombre.trim();
+        resolvedUpdatedAt = auditItem.fechaHora;
+      } else if (pendingMeta?.editor) {
+        resolvedEditor = pendingMeta.editor;
+        resolvedUpdatedAt = pendingMeta.updatedAt || null;
+      } else if (editorMeta?.editor) {
+        resolvedEditor = editorMeta.editor;
+        resolvedUpdatedAt = editorMeta.updatedAt || null;
+      } else {
+        resolvedEditor = "Editor CMS";
+      }
+
       if (!esVistaAdmin) {
-        const esPublicadaDirecta = estadoUpper === "PUBLICADO";
+        const esPublicadaDirecta = (estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO") && res.activo !== false;
         const mantienePublicacionPrevia =
           estadoUpper === "PENDIENTE_APROBACION" &&
-          pendingMeta?.previousEstado === "PUBLICADO";
+          pendingMeta?.previousEstado === "PUBLICADO" &&
+          Boolean(pendingMeta?.snapshotPublico);
 
         if (!esPublicadaDirecta && !mantienePublicacionPrevia) {
           continue;
         }
+
+        if (mantienePublicacionPrevia) {
+          const snap = pendingMeta.snapshotPublico;
+          resultado.push(
+            this._formatResidencia(
+              { ...res, ...snap },
+              null,
+              null,
+              resolvedEditor,
+              resolvedUpdatedAt
+            )
+          );
+          continue;
+        }
       }
 
-      resultado.push(this._formatResidencia(res, motivoRechazo, pendingMeta));
+      resultado.push(
+        this._formatResidencia(res, motivoRechazo, pendingMeta, resolvedEditor, resolvedUpdatedAt)
+      );
     }
 
     return resultado;
   }
 
-  async crearResidencia(data, files) {
+  async crearResidencia(data, files, user = null) {
     if (!data.nombre || !data.nombre.trim()) {
       const error = new Error("El nombre de la residencia es obligatorio.");
       error.statusCode = 400;
       throw error;
     }
+
+    const editorNombre = await this._resolverNombreEditor(user, data.editor);
+    const nowIso = new Date().toISOString();
 
     const filesArray = Array.isArray(files) ? files : (files ? [files] : []);
     const bannerFile = filesArray.find((f) => f.fieldname === "banner" || f.fieldname === "imagen");
@@ -206,6 +332,10 @@ class CmsResidenciaService {
       };
     }
 
+    const tieneFechaProgramada =
+      (data.estado?.toUpperCase() === "PROGRAMADO" || data.estado?.toUpperCase() === "PENDIENTE_APROBACION") &&
+      Boolean(data.fechaPublicacion);
+
     const contenidoPayload = {
       categoria: data.categoria || "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
       descripcionPrograma: data.descripcionPrograma || "",
@@ -213,6 +343,8 @@ class CmsResidenciaService {
       duracion: data.duracion || "",
       requisitos: data.requisitos || "",
       reglamentoRotacion: data.reglamentoRotacion || "",
+      fechaInicio: data.fechaInicio || "",
+      fechaPublicacion: tieneFechaProgramada ? data.fechaPublicacion : null,
       documento: documentoMeta,
     };
 
@@ -224,11 +356,22 @@ class CmsResidenciaService {
       }
     }
 
-    let estadoNormalizado = "PUBLICADO";
+    let estadoNormalizado = "PENDIENTE_APROBACION";
+    let targetEstado = "PUBLICADO";
     if (data.estado) {
       const estadoUpper = data.estado.toUpperCase();
-      if (["PUBLICADO", "BORRADOR", "ARCHIVADO", "PENDIENTE_APROBACION", "PROGRAMADO"].includes(estadoUpper)) {
-        estadoNormalizado = estadoUpper;
+      if (estadoUpper === "BORRADOR") {
+        estadoNormalizado = "BORRADOR";
+        targetEstado = "BORRADOR";
+      } else if (estadoUpper === "ARCHIVADO") {
+        estadoNormalizado = "ARCHIVADO";
+        targetEstado = "ARCHIVADO";
+      } else if (estadoUpper === "PROGRAMADO") {
+        estadoNormalizado = "PENDIENTE_APROBACION";
+        targetEstado = "PROGRAMADO";
+      } else {
+        estadoNormalizado = "PENDIENTE_APROBACION";
+        targetEstado = tieneFechaProgramada ? "PROGRAMADO" : "PUBLICADO";
       }
     }
 
@@ -249,14 +392,55 @@ class CmsResidenciaService {
       },
     });
 
+    const idStr = nueva.id.toString();
+
+    // Guardar editor meta
+    await this.guardarEditorMeta(idStr, {
+      editor: editorNombre,
+      updatedAt: nowIso,
+    });
+
+    // Si entra como PENDIENTE_APROBACION, guardar pending meta
+    let pendingMeta = null;
+    if (estadoNormalizado === "PENDIENTE_APROBACION") {
+      pendingMeta = {
+        previousEstado: null,
+        targetEstado: targetEstado,
+        editor: editorNombre,
+        updatedAt: nowIso,
+        cambios: null,
+        esActualizacion: false,
+      };
+      await this.guardarPendingMeta(idStr, pendingMeta);
+    }
+
+    try {
+      if (user) {
+        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
+        await prisma.auditoria.create({
+          data: {
+            usuarioId: usuarioLocal.id,
+            entidad: "residencia",
+            entidadId: idStr,
+            accion: "CREAR",
+            descripcion: `Creación de residencia "${nueva.nombre}".`,
+          },
+        });
+      }
+    } catch (_) {}
+
     return {
-      message: "Residencia creada con éxito.",
-      residencia: this._formatResidencia(nueva),
+      message:
+        estadoNormalizado === "PENDIENTE_APROBACION"
+          ? "Residencia enviada a revisión del administrador para su aprobación."
+          : "Residencia creada con éxito.",
+      residencia: this._formatResidencia(nueva, null, pendingMeta, editorNombre, nowIso),
     };
   }
 
-  async actualizarResidencia(id, data, files) {
+  async actualizarResidencia(id, data, files, user = null) {
     const idBigInt = parsearIdBigInt(id, "ID de residencia");
+    const idStr = idBigInt.toString();
 
     const residenciaExistente = await prisma.residencia.findUnique({
       where: { id: idBigInt },
@@ -268,6 +452,9 @@ class CmsResidenciaService {
       error.statusCode = 404;
       throw error;
     }
+
+    const editorNombre = await this._resolverNombreEditor(user, data.editor);
+    const nowIso = new Date().toISOString();
 
     const filesArray = Array.isArray(files) ? files : (files ? [files] : []);
     const bannerFile = filesArray.find((f) => f.fieldname === "banner" || f.fieldname === "imagen");
@@ -409,6 +596,10 @@ class CmsResidenciaService {
       };
     }
 
+    const tieneFechaProgramada =
+      (data.estado?.toUpperCase() === "PROGRAMADO" || data.estado?.toUpperCase() === "PENDIENTE_APROBACION") &&
+      Boolean(data.fechaPublicacion);
+
     const contenidoPayload = {
       categoria: data.categoria !== undefined ? data.categoria : (contenidoPrevio.categoria || ""),
       descripcionPrograma: data.descripcionPrograma !== undefined ? data.descripcionPrograma : (contenidoPrevio.descripcionPrograma || ""),
@@ -416,6 +607,8 @@ class CmsResidenciaService {
       duracion: data.duracion !== undefined ? data.duracion : (contenidoPrevio.duracion || ""),
       requisitos: data.requisitos !== undefined ? data.requisitos : (contenidoPrevio.requisitos || ""),
       reglamentoRotacion: data.reglamentoRotacion !== undefined ? data.reglamentoRotacion : (contenidoPrevio.reglamentoRotacion || ""),
+      fechaInicio: data.fechaInicio !== undefined ? data.fechaInicio : (contenidoPrevio.fechaInicio || ""),
+      fechaPublicacion: data.fechaPublicacion !== undefined ? (data.fechaPublicacion || null) : (contenidoPrevio.fechaPublicacion || null),
       documento: documentoMeta,
     };
 
@@ -429,29 +622,141 @@ class CmsResidenciaService {
       }
     }
 
-    let estadoNormalizado = residenciaExistente.estado;
-    let activoFinal = data.activo !== undefined ? (data.activo === true || data.activo === "true") : residenciaExistente.activo;
     const estadoAnterior = (residenciaExistente.estado || "").toUpperCase();
     const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
-    const idStr = idBigInt.toString();
 
-    if (data.estado) {
+    const pendingMap = await this.obtenerMapaPendingMeta();
+    const metaExistente = pendingMap.get(idStr) || null;
+
+    let estadoNormalizado = residenciaExistente.estado;
+    let activoFinal = data.activo !== undefined ? (data.activo === true || data.activo === "true") : residenciaExistente.activo;
+    let targetEstado = metaExistente?.targetEstado || "PUBLICADO";
+
+    // Si la residencia ya estaba publicada y se modifica o se solicita archivar:
+    if (provieneDePublicada) {
+      estadoNormalizado = "PENDIENTE_APROBACION";
+      if (data.estado && data.estado.toUpperCase() === "ARCHIVADO") {
+        targetEstado = "ARCHIVADO";
+      } else if (data.estado && data.estado.toUpperCase() === "PROGRAMADO") {
+        targetEstado = "PROGRAMADO";
+      } else {
+        targetEstado = "PUBLICADO";
+      }
+    } else if (data.estado) {
       const estadoUpper = data.estado.toUpperCase();
-      if (estadoUpper === "ARCHIVADO" && provieneDePublicada) {
+      if (estadoUpper === "ARCHIVADO") {
+        estadoNormalizado = "ARCHIVADO";
+        activoFinal = false;
+        targetEstado = "ARCHIVADO";
+      } else if (estadoUpper === "PROGRAMADO") {
         estadoNormalizado = "PENDIENTE_APROBACION";
-        await this.guardarPendingMeta(idStr, {
-          previousEstado: "PUBLICADO",
-          targetEstado: "ARCHIVADO",
-          updatedAt: new Date().toISOString(),
-        });
-        await this.limpiarMotivoRechazo(idStr);
-      } else if (["PUBLICADO", "BORRADOR", "ARCHIVADO", "PENDIENTE_APROBACION", "PROGRAMADO"].includes(estadoUpper)) {
+        targetEstado = "PROGRAMADO";
+      } else if (["PUBLICADO", "BORRADOR", "ARCHIVADO", "PENDIENTE_APROBACION"].includes(estadoUpper)) {
         estadoNormalizado = estadoUpper;
-        if (estadoUpper === "ARCHIVADO") {
-          activoFinal = false;
-        }
+        targetEstado = estadoUpper === "PENDIENTE_APROBACION" && tieneFechaProgramada ? "PROGRAMADO" : estadoUpper;
       }
     }
+
+    // Preparar datos para comparación de cambios
+    const antesData = {
+      nombre: residenciaExistente.nombre || "",
+      categoria: contenidoPrevio.categoria || "",
+      convocatoria: residenciaExistente.convocatoria || "",
+      fechaInicio: contenidoPrevio.fechaInicio || "",
+      fechaConvocatoria: residenciaExistente.fechaConvocatoria
+        ? residenciaExistente.fechaConvocatoria.toISOString().split("T")[0]
+        : "",
+      descripcion: residenciaExistente.descripcion || "",
+      descripcionPrograma: contenidoPrevio.descripcionPrograma || "",
+      duracion: contenidoPrevio.duracion || "",
+      cupos: contenidoPrevio.cupos || "",
+      requisitos: contenidoPrevio.requisitos || "",
+      reglamentoRotacion: contenidoPrevio.reglamentoRotacion || "",
+      bannerNombre: residenciaExistente.archivo?.nombreOriginal || "",
+      documentoNombre: contenidoPrevio.documento?.documentoNombre || "",
+    };
+
+    const despuesData = {
+      nombre: data.nombre !== undefined ? data.nombre.trim() : antesData.nombre,
+      categoria: data.categoria !== undefined ? data.categoria.trim() : antesData.categoria,
+      convocatoria: data.convocatoria !== undefined ? data.convocatoria.trim() : antesData.convocatoria,
+      fechaInicio: data.fechaInicio !== undefined ? (data.fechaInicio || "") : antesData.fechaInicio,
+      fechaConvocatoria: data.fechaConvocatoria !== undefined ? (data.fechaConvocatoria || "") : antesData.fechaConvocatoria,
+      descripcion: data.descripcion !== undefined ? data.descripcion.trim() : antesData.descripcion,
+      descripcionPrograma: data.descripcionPrograma !== undefined ? data.descripcionPrograma.trim() : antesData.descripcionPrograma,
+      duracion: data.duracion !== undefined ? data.duracion.trim() : antesData.duracion,
+      cupos: data.cupos !== undefined ? (data.cupos || "").trim() : antesData.cupos,
+      requisitos: data.requisitos !== undefined ? data.requisitos.trim() : antesData.requisitos,
+      reglamentoRotacion: data.reglamentoRotacion !== undefined ? data.reglamentoRotacion.trim() : antesData.reglamentoRotacion,
+      bannerNombre: bannerFile ? bannerFile.originalname : (data.eliminarBanner ? "" : antesData.bannerNombre),
+      documentoNombre: docFile ? docFile.originalname : (data.eliminarDocumento ? "" : antesData.documentoNombre),
+    };
+
+    const camposRes = [
+      { key: "nombre", label: "Nombre de la residencia" },
+      { key: "categoria", label: "Categoría institucional" },
+      { key: "convocatoria", label: "Estado de convocatoria" },
+      { key: "fechaInicio", label: "Fecha de inicio / apertura" },
+      { key: "fechaConvocatoria", label: "Fecha límite / examen" },
+      { key: "duracion", label: "Duración" },
+      { key: "cupos", label: "Cupos" },
+      { key: "descripcion", label: "Resumen breve" },
+      { key: "descripcionPrograma", label: "Programa académico" },
+      { key: "requisitos", label: "Requisitos de postulación", tipo: "list" },
+      { key: "reglamentoRotacion", label: "Leyenda de reglamento" },
+      { key: "bannerNombre", label: "Imagen de banner" },
+      { key: "documentoNombre", label: "Documento adjunto" },
+    ];
+
+    const todosCambios = calcularCambios(antesData, despuesData, camposRes);
+    const estadoCambio = Boolean(data.estado && data.estado.toUpperCase() !== estadoAnterior);
+    const bannerModificado = Boolean(bannerFile || data.eliminarBanner === "true" || data.eliminarBanner === true);
+    const docModificado = Boolean(docFile || data.eliminarDocumento === "true" || data.eliminarDocumento === true);
+    const fechaPubAnterior = contenidoPrevio.fechaPublicacion || null;
+    const fechaPubNueva = data.fechaPublicacion !== undefined ? (data.fechaPublicacion || null) : fechaPubAnterior;
+    const fechaPubCambio = fechaPubAnterior !== fechaPubNueva;
+
+    if (todosCambios.length === 0 && !estadoCambio && !bannerModificado && !docModificado && !fechaPubCambio) {
+      const error = new Error("No se detectaron cambios para actualizar.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (estadoNormalizado === "PENDIENTE_APROBACION") {
+      const nuevosCambios = todosCambios;
+      const cambiosPrevios = (metaExistente?.cambios) || [];
+      const cambiosCombinados = combinarCambios(cambiosPrevios, nuevosCambios);
+      const esActualizacion = provieneDePublicada || Boolean(metaExistente?.esActualizacion);
+
+      let snapshotPublico = metaExistente?.snapshotPublico || null;
+      if (provieneDePublicada && !snapshotPublico) {
+        snapshotPublico = {
+          nombre: residenciaExistente.nombre,
+          descripcion: residenciaExistente.descripcion,
+          contenido: residenciaExistente.contenido,
+          imagenId: residenciaExistente.imagenId,
+          convocatoria: residenciaExistente.convocatoria,
+          fechaConvocatoria: residenciaExistente.fechaConvocatoria,
+          archivo: residenciaExistente.archivo,
+        };
+      }
+
+      await this.guardarPendingMeta(idStr, {
+        previousEstado: provieneDePublicada ? "PUBLICADO" : (metaExistente?.previousEstado || null),
+        targetEstado,
+        snapshotPublico,
+        editor: editorNombre,
+        updatedAt: nowIso,
+        cambios: cambiosCombinados,
+        esActualizacion,
+      });
+      await this.limpiarMotivoRechazo(idStr);
+    }
+
+    await this.guardarEditorMeta(idStr, {
+      editor: editorNombre,
+      updatedAt: nowIso,
+    });
 
     const actualizada = await prisma.residencia.update({
       where: { id: idBigInt },
@@ -471,15 +776,34 @@ class CmsResidenciaService {
       },
     });
 
+    try {
+      if (user) {
+        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
+        await prisma.auditoria.create({
+          data: {
+            usuarioId: usuarioLocal.id,
+            entidad: "residencia",
+            entidadId: idStr,
+            accion: "MODIFICAR",
+            descripcion: `Actualización de residencia "${actualizada.nombre}".`,
+          },
+        });
+      }
+    } catch (_) {}
+
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
 
+    let mensaje = "Residencia actualizada con éxito.";
+    if (targetEstado === "ARCHIVADO" && estadoNormalizado === "PENDIENTE_APROBACION") {
+      mensaje = "Solicitud de archivado enviada a revisión del administrador.";
+    } else if (estadoNormalizado === "PENDIENTE_APROBACION" && provieneDePublicada) {
+      mensaje = "Modificaciones enviadas a revisión del administrador.";
+    }
+
     return {
-      message:
-        data.estado && data.estado.toUpperCase() === "ARCHIVADO" && estadoNormalizado === "PENDIENTE_APROBACION"
-          ? "Solicitud de archivado enviada a revisión del administrador."
-          : "Residencia actualizada con éxito.",
-      residencia: this._formatResidencia(actualizada, motivoActual, pendingMetaActual),
+      message: mensaje,
+      residencia: this._formatResidencia(actualizada, motivoActual, pendingMetaActual, editorNombre, nowIso),
     };
   }
 
@@ -491,7 +815,7 @@ class CmsResidenciaService {
     }
 
     const estadoUpper = nuevoEstado.trim().toUpperCase();
-    const estadosValidos = ["PUBLICADO", "BORRADOR", "ARCHIVADO", "APROBADO", "RECHAZADO", "PENDIENTE_APROBACION"];
+    const estadosValidos = ["PUBLICADO", "BORRADOR", "ARCHIVADO", "APROBADO", "RECHAZADO", "PENDIENTE_APROBACION", "PROGRAMADO"];
 
     if (!estadosValidos.includes(estadoUpper)) {
       const error = new Error(
@@ -536,14 +860,33 @@ class CmsResidenciaService {
       });
       await this.limpiarMotivoRechazo(idStr);
     }
-    // 2. Si el Admin aprueba la residencia (APROBADO o PUBLICADO):
-    else if (estadoUpper === "APROBADO" || estadoUpper === "PUBLICADO") {
+    // 2. Si el Admin aprueba la residencia (APROBADO, PUBLICADO o PROGRAMADO):
+    else if (estadoUpper === "APROBADO" || estadoUpper === "PUBLICADO" || estadoUpper === "PROGRAMADO") {
       if (metaExistente?.targetEstado === "ARCHIVADO") {
         finalEstado = "ARCHIVADO";
         finalActivo = false;
       } else {
-        finalEstado = "PUBLICADO";
+        let contenidoParsed = {};
+        if (residenciaExistente.contenido) {
+          try {
+            contenidoParsed = JSON.parse(residenciaExistente.contenido);
+          } catch (_) {}
+        }
+        const ahora = new Date();
+        const fechaPub = contenidoParsed.fechaPublicacion ? new Date(contenidoParsed.fechaPublicacion) : null;
+        const tieneProgramacionFutura =
+          (metaExistente?.targetEstado === "PROGRAMADO" || estadoUpper === "PROGRAMADO") &&
+          fechaPub &&
+          fechaPub > ahora;
+
+        finalEstado = tieneProgramacionFutura ? "PROGRAMADO" : "PUBLICADO";
         finalActivo = true;
+      }
+      if (metaExistente?.editor && metaExistente.editor !== "Editor CMS") {
+        await this.guardarEditorMeta(idStr, {
+          editor: metaExistente.editor,
+          updatedAt: metaExistente.updatedAt || new Date().toISOString(),
+        });
       }
       await this.limpiarPendingMeta(idStr);
       await this.limpiarMotivoRechazo(idStr);
@@ -580,6 +923,29 @@ class CmsResidenciaService {
         archivo: true,
       },
     });
+
+    try {
+      if (user) {
+        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
+        await prisma.auditoria.create({
+          data: {
+            usuarioId: usuarioLocal.id,
+            entidad: "residencia",
+            entidadId: idStr,
+            accion:
+              finalEstado === "RECHAZADO"
+                ? "RECHAZAR"
+                : finalEstado === "ARCHIVADO"
+                ? "DESACTIVAR"
+                : "APROBAR",
+            descripcion:
+              finalEstado === "RECHAZADO"
+                ? `Residencia "${residenciaExistente.nombre}" rechazada. Motivo: ${motivoGuardado}`
+                : `Residencia "${residenciaExistente.nombre}" evaluada como ${finalEstado}.`,
+          },
+        });
+      }
+    } catch (_) {}
 
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
@@ -655,7 +1021,41 @@ class CmsResidenciaService {
     };
   }
 
-  _formatResidencia(res, motivoRechazo = null, pendingMeta = null) {
+  async publicarResidenciasProgramadas() {
+    try {
+      const ahora = new Date();
+      const programadas = await prisma.residencia.findMany({
+        where: { estado: "PROGRAMADO" },
+      });
+
+      for (const res of programadas) {
+        let fechaPub = null;
+        if (res.contenido) {
+          try {
+            const parsed = JSON.parse(res.contenido);
+            if (parsed.fechaPublicacion) {
+              fechaPub = new Date(parsed.fechaPublicacion);
+            }
+          } catch (_) {}
+        }
+
+        if (fechaPub && fechaPub <= ahora) {
+          await prisma.residencia.update({
+            where: { id: res.id },
+            data: {
+              estado: "PUBLICADO",
+              activo: true,
+              updatedAt: new Date(),
+            },
+          });
+        }
+      }
+    } catch (_) {
+      // Ignorar errores en cron
+    }
+  }
+
+  _formatResidencia(res, motivoRechazo = null, pendingMeta = null, editor = null, updatedAtCustom = null) {
     let extra = {
       categoria: "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
       descripcionPrograma: "",
@@ -663,6 +1063,8 @@ class CmsResidenciaService {
       duracion: "",
       requisitos: "",
       reglamentoRotacion: "",
+      fechaInicio: "",
+      fechaPublicacion: null,
       documento: null,
     };
 
@@ -691,14 +1093,51 @@ class CmsResidenciaService {
     const documentoTamano = doc.documentoTamano || "";
     const documentoTipo = doc.documentoTipo || (documentoNombre ? documentoNombre.split(".").pop().toUpperCase() : "PDF");
 
+    const editorResolved = editor || pendingMeta?.editor || "Editor CMS";
+    const rawUpdatedAt = updatedAtCustom || pendingMeta?.updatedAt || res.updatedAt || res.createdAt;
+    let fechaActualizacion = "Reciente";
+    if (rawUpdatedAt) {
+      try {
+        const d = new Date(rawUpdatedAt);
+        if (!isNaN(d.getTime())) {
+          fechaActualizacion = d.toLocaleDateString("es-AR", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          });
+        }
+      } catch (_) {}
+    }
+
+    let fechaCarga = "Reciente";
+    if (res.createdAt) {
+      try {
+        const d = new Date(res.createdAt);
+        if (!isNaN(d.getTime())) {
+          fechaCarga = d.toLocaleDateString("es-AR", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          });
+        }
+      } catch (_) {}
+    }
+
+    const cambios = pendingMeta?.cambios ? cambiosParaCliente(pendingMeta.cambios) : [];
+    const esActualizacion = Boolean(pendingMeta?.esActualizacion);
+
     return {
       id: res.id.toString(),
       nombre: res.nombre,
       descripcion: res.descripcion || "",
       convocatoria: res.convocatoria || "Convocatoria Abierta",
+      fechaInicio: extra.fechaInicio || "",
+      fechaInicioVigencia: extra.fechaInicio || "",
       fechaConvocatoria: res.fechaConvocatoria
         ? res.fechaConvocatoria.toISOString().split("T")[0]
         : "",
+      fechaPublicacion: extra.fechaPublicacion || null,
+      fechaProgramada: extra.fechaPublicacion || null,
       estado: res.estado,
       activo: res.activo,
       createdAt: res.createdAt ? res.createdAt.toISOString() : "",
@@ -725,6 +1164,12 @@ class CmsResidenciaService {
       archivoUrl: documentoUrl,
       archivoTamano: documentoTamano,
       archivoTipo: documentoTipo,
+
+      editor: editorResolved,
+      fechaActualizacion,
+      fechaCarga,
+      cambios,
+      esActualizacion,
 
       requestedEstado: (res.estado || "").toUpperCase() === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
       motivoRechazo: motivoRechazo || null,

@@ -274,6 +274,39 @@ class CmsEspecialidadService {
 
     const nowIso = new Date().toISOString();
 
+    // Validación: verificar si hubo cambios antes de modificar la base de datos
+    const camposEsp = [
+      { key: "nombre", label: "Nombre" },
+      { key: "descripcion", label: "Descripción" },
+      { key: "ubicacion", label: "Ubicación" },
+      { key: "horarios", label: "Horarios" },
+      { key: "requisitos", label: "Requisitos", tipo: "list" },
+      { key: "documentacionNecesaria", label: "Documentación necesaria" },
+      { key: "informacionDerivacion", label: "Información de derivación" },
+    ];
+    const cambiosEsp = calcularCambios(
+      existente,
+      {
+        nombre: data.nombre !== undefined ? data.nombre : existente.nombre,
+        descripcion: data.descripcion !== undefined ? data.descripcion : existente.descripcion,
+        ubicacion: data.ubicacion !== undefined ? data.ubicacion : existente.ubicacion,
+        horarios: data.horarios !== undefined ? data.horarios : existente.horarios,
+        requisitos: data.requisitos !== undefined
+          ? (typeof data.requisitos === "string" ? data.requisitos : JSON.stringify(data.requisitos))
+          : existente.requisitos,
+        documentacionNecesaria: data.documentacionNecesaria !== undefined ? data.documentacionNecesaria : existente.documentacionNecesaria,
+        informacionDerivacion: data.informacionDerivacion !== undefined ? data.informacionDerivacion : existente.informacionDerivacion,
+      },
+      camposEsp
+    );
+    const estadoCambioEsp = Boolean(data.estado && data.estado.toUpperCase() !== estadoAnterior);
+
+    if (cambiosEsp.length === 0 && !estadoCambioEsp) {
+      const error = new Error("No se detectaron cambios para actualizar.");
+      error.statusCode = 400;
+      throw error;
+    }
+
     await this.guardarEditorMeta(idStr, esServicio, {
       editor: editorNombre,
       updatedAt: nowIso,

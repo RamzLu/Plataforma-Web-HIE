@@ -237,6 +237,12 @@ const CmsDocsView = ({
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
 
+    if (editingId && !hasUnsavedChanges) {
+      toast.error("No se han detectado cambios para actualizar.");
+      setShowUnsavedModal(false);
+      return;
+    }
+
     if (!titulo.trim()) {
       toast.error("Por favor ingresá un título para el documento.");
       setShowUnsavedModal(false);
@@ -786,7 +792,8 @@ const CmsDocsView = ({
                 type="submit" 
                 className="btn-primary-docs" 
                 onClick={handleSave} 
-                disabled={saving}
+                disabled={saving || (Boolean(editingId) && !hasUnsavedChanges)}
+                title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
               >
                 {saving 
                   ? (editingId ? "ACTUALIZANDO..." : "GUARDANDO...") 

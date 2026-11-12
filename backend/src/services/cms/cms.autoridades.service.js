@@ -266,6 +266,18 @@ class CmsAutoridadesService {
       throw err;
     }
 
+    // Validación: verificar si hubo cambios antes de procesar archivos o base de datos
+    const nombreIgual = nombre === undefined || nombre.trim() === (existente.nombre || "").trim();
+    const cargoIgual = cargo === undefined || cargo.trim() === (existente.cargo || "").trim();
+    const descIgual = descripcion === undefined || (descripcion ? descripcion.trim() : "") === (existente.descripcion || "").trim();
+    const ordenIgual = orden === undefined || Number(orden) === Number(existente.orden);
+
+    if (!file && nombreIgual && cargoIgual && descIgual && ordenIgual) {
+      const err = new Error("No se detectaron cambios para actualizar.");
+      err.statusCode = 400;
+      throw err;
+    }
+
     // Si llega nueva imagen: subir la nueva y limpiar la anterior
     let nuevoArchivoId = existente.imagenId;
     if (file) {
@@ -415,6 +427,21 @@ class CmsAutoridadesService {
     const badgeAtencion = data.badgeAtencion !== undefined ? (data.badgeAtencion || "").trim() : DEFAULT_SEDE_CENTRAL.badgeAtencion;
     const altText = (data.altText || "").trim() || DEFAULT_SEDE_CENTRAL.altText;
     const presetKey = (data.presetKey || "").trim() || (file ? null : DEFAULT_SEDE_CENTRAL.presetKey);
+
+    // Validación: verificar si hubo cambios en los datos o fotografía
+    const sedeExistente = await this.obtenerSedeCentral();
+    const tituloIgual = titulo === (sedeExistente.titulo || DEFAULT_SEDE_CENTRAL.titulo);
+    const tagIgual = tagSuperior === (sedeExistente.tagSuperior || DEFAULT_SEDE_CENTRAL.tagSuperior);
+    const dirIgual = direccion === (sedeExistente.direccion || DEFAULT_SEDE_CENTRAL.direccion);
+    const descIgual = parrafoDescripcion === (sedeExistente.parrafoDescripcion || DEFAULT_SEDE_CENTRAL.parrafoDescripcion);
+    const badgeIgual = badgeAtencion === (sedeExistente.badgeAtencion || DEFAULT_SEDE_CENTRAL.badgeAtencion);
+    const altIgual = altText === (sedeExistente.altText || DEFAULT_SEDE_CENTRAL.altText);
+
+    if (!file && tituloIgual && tagIgual && dirIgual && descIgual && badgeIgual && altIgual) {
+      const err = new Error("No se detectaron cambios para actualizar.");
+      err.statusCode = 400;
+      throw err;
+    }
 
     const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
 

@@ -667,10 +667,19 @@
   transition: all 0.2s ease;
 }
 
-.btn-cerrar-rojo:hover {
+.btn-cerrar-rojo:hover:not(:disabled) {
   background-color: #be123c;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);
+}
+
+.btn-cerrar-rojo:disabled,
+.btn-cerrar-rojo[disabled] {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  pointer-events: auto !important;
 }
 
 /* Lightbox Extras */

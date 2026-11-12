@@ -428,25 +428,67 @@ class CmsNoticiaService {
 
     // Construimos o preservamos el snapshot público si la noticia estaba PUBLICADO/APROBADO en el portal
     let snapshotPublico = metaExistente?.snapshotPublico || null;
+    const imgsPrevias = noticiaExistente.noticia_archivo.map((na) => {
+      const { data: pubData } = supabase.storage
+        .from("noticias-imagenes")
+        .getPublicUrl(na.archivo.nombreArchivo);
+      return pubData.publicUrl;
+    });
+    let catPrevia = noticiaExistente.categoria_noticia
+      ? noticiaExistente.categoria_noticia.nombre
+      : "General";
+    if (catPrevia.toLowerCase() === "noticias" || catPrevia.toLowerCase() === "noticia") {
+      catPrevia = "General";
+    }
+
     if (estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO") {
-      const imgsPrevias = noticiaExistente.noticia_archivo.map((na) => {
-        const { data: pubData } = supabase.storage
-          .from("noticias-imagenes")
-          .getPublicUrl(na.archivo.nombreArchivo);
-        return pubData.publicUrl;
-      });
-      let catPrevia = noticiaExistente.categoria_noticia
-        ? noticiaExistente.categoria_noticia.nombre
-        : "General";
-      if (catPrevia.toLowerCase() === "noticias" || catPrevia.toLowerCase() === "noticia") {
-        catPrevia = "General";
-      }
       snapshotPublico = {
         titulo: noticiaExistente.titulo,
         contenido: noticiaExistente.contenido,
         category: catPrevia,
         images: imgsPrevias,
       };
+    }
+
+    // Validación: verificar si hubo cambios reales antes de modificar la noticia
+    const camposNoticiaPre = [
+      { key: "titulo", label: "Título" },
+      { key: "category", label: "Categoría" },
+      { key: "contenido", label: "Contenido", tipo: "html" },
+      { key: "fechaPublicacion", label: "Fecha de publicación programada", tipo: "datetime" },
+    ];
+    let catNuevaCheck = (categoriaNombre ? categoriaNombre.trim() : catPrevia);
+    if (["noticias", "noticia"].includes(catNuevaCheck.toLowerCase())) catNuevaCheck = "General";
+
+    const cambiosTexto = calcularCambios(
+      {
+        titulo: noticiaExistente.titulo,
+        category: catPrevia,
+        contenido: noticiaExistente.contenido,
+        fechaPublicacion: noticiaExistente.fechaPublicacion,
+      },
+      {
+        titulo: titulo !== undefined ? titulo : noticiaExistente.titulo,
+        category: catNuevaCheck,
+        contenido: contenido !== undefined ? contenido : noticiaExistente.contenido,
+        fechaPublicacion: fechaPublicacion !== undefined ? (fechaPublicacion ? new Date(fechaPublicacion) : null) : noticiaExistente.fechaPublicacion,
+      },
+      camposNoticiaPre
+    );
+
+    const hayNuevasImagenes = Array.isArray(archivosSubidos) && archivosSubidos.length > 0;
+    const imagenesCambiaron = hayNuevasImagenes || (
+      Array.isArray(urlsConservadas) && (
+        urlsConservadas.length !== imgsPrevias.length ||
+        urlsConservadas.some((url, i) => url !== imgsPrevias[i])
+      )
+    );
+    const estadoCambio = Boolean(estado && estado.toUpperCase() !== estadoAnterior);
+
+    if (cambiosTexto.length === 0 && !imagenesCambiaron && !estadoCambio) {
+      const error = new Error("No se detectaron cambios para actualizar.");
+      error.statusCode = 400;
+      throw error;
     }
 
     const dataUpdate = {

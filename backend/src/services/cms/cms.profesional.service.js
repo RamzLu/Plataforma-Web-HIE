@@ -545,6 +545,39 @@ class CmsProfesionalService {
         throw error;
       }
       finalEspecialidadId = esp.id;
+      finalAreaNombre = esp.nombre;
+    }
+
+    // Validación: verificar si hubo cambios antes de procesar archivos o base de datos
+    const versionAnteriorCheck = this._construirItemProfesional(profesionalExistente, servicios, {});
+    const camposProfCheck = [
+      { key: "nombre", label: "Nombre" },
+      { key: "apellido", label: "Apellido" },
+      { key: "matricula", label: "Matrícula" },
+      { key: "cargo", label: "Cargo o función" },
+      { key: "especialidadNombre", label: "Área asignada" },
+      { key: "esServicioClave", label: "Es servicio clave", tipo: "boolean" },
+      { key: "descripcion", label: "Descripción / perfil" },
+    ];
+    const cambiosProf = calcularCambios(
+      versionAnteriorCheck,
+      {
+        nombre: nombre !== undefined ? nombre.trim() : versionAnteriorCheck.nombre,
+        apellido: apellido !== undefined ? apellido.trim() : versionAnteriorCheck.apellido,
+        matricula: matricula !== undefined ? matricula.trim() : versionAnteriorCheck.matricula,
+        cargo: cargo !== undefined ? cargo.trim() : versionAnteriorCheck.cargo,
+        descripcion: descripcion !== undefined ? (descripcion || "").trim() : versionAnteriorCheck.descripcion,
+        especialidadNombre: finalAreaNombre || versionAnteriorCheck.especialidadNombre,
+        esServicioClave: esServicio === "true" || esServicio === true,
+      },
+      camposProfCheck
+    );
+    const estadoCambioProf = Boolean(data.estado && data.estado.toUpperCase() !== (profesionalExistente.estado || "").toUpperCase());
+
+    if (cambiosProf.length === 0 && !file && !estadoCambioProf) {
+      const error = new Error("No se detectaron cambios para actualizar.");
+      error.statusCode = 400;
+      throw error;
     }
 
     let archivoId = profesionalExistente.archivoId;

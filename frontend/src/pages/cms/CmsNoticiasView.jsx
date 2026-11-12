@@ -291,6 +291,12 @@ const CmsNoticiasView = ({
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
 
+    if ((editingId || correctionNews) && !hasUnsavedChanges) {
+      toast.error("No se han detectado cambios para actualizar.");
+      setShowUnsavedModal(false);
+      return;
+    }
+
     const textoContenido =
       typeof cuerpoHtml === "string"
         ? cuerpoHtml
@@ -1381,7 +1387,8 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                         color: "#0c2340",
                       }}
                       onClick={(e) => handleSave(e, "BORRADOR", true)}
-                      disabled={saving}
+                      disabled={saving || !hasUnsavedChanges}
+                      title={!hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
                     >
                       GUARDAR BORRADOR
                     </button>
@@ -1394,7 +1401,8 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                         alignItems: "center",
                         gap: "8px",
                       }}
-                      disabled={saving}
+                      disabled={saving || !hasUnsavedChanges}
+                      title={!hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
                     >
                       {saving ? (
                         <span
@@ -1441,7 +1449,8 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                     type="submit"
                     className="btn-cerrar-rojo"
                     style={{ backgroundColor: "#2b5b94" }}
-                    disabled={saving}
+                    disabled={saving || (Boolean(editingId) && !hasUnsavedChanges)}
+                    title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
                   >
                     {saving ? (
                       <span

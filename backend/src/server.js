@@ -9,6 +9,7 @@ import errorHandler from './middlewares/error.middleware.js';
 
 import cron from 'node-cron';
 import CmsNoticiaService from './services/cms/cms.noticia.service.js';
+import CmsResidenciaService from './services/cms/cms.residencia.service.js';
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -102,6 +103,7 @@ app.use(errorHandler);
 
 cron.schedule('* * * * *', async () => {
   await CmsNoticiaService.publicarNoticiasProgramadas();
+  await CmsResidenciaService.publicarResidenciasProgramadas();
 });
 
 app.listen(PORT, () => {

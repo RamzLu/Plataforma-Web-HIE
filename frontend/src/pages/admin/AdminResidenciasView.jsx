@@ -1,24 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Archive,
+  BookOpen,
+  Building2,
   CalendarDays,
+  Check,
   CheckCircle,
   Clock3,
   ExternalLink,
+  File,
   FileText,
   Globe2,
+  GraduationCap,
   Image as ImageIcon,
+  ListChecks,
   RefreshCw,
   Search,
-  Stethoscope,
   Users,
   X,
   XCircle,
 } from 'lucide-react';
 import keycloak from '../../config/keycloak';
 import { cambiarEstadoResidencia, getResidencias } from '../../api/residencias.api';
-import bannerResidencias from '../../assets/medicos-residencias.jpg';
 import { sanitizeUrl } from '../../utils/sanitizeUrl';
+import {
+  AdminCambiosPill,
+  AdminCambiosResaltados,
+} from '../../components/admin/AdminCambiosResaltados';
 import '../../styles/pages/admin/AdminResidenciasView.css';
 
 const STATUS_LABELS = {
@@ -28,200 +36,8 @@ const STATUS_LABELS = {
   RECHAZADO: 'Rechazada',
   ARCHIVADO: 'Archivada',
   BORRADOR: 'Borrador',
+  PROGRAMADO: 'Programada',
 };
-
-const INITIAL_MOCK_RESIDENCIAS = [
-  {
-    id: 'sim-res-001',
-    nombre: 'Residencia en Clínica Médica',
-    categoria: 'Formación Médica de Posgrado - Ministerio de Desarrollo Humano',
-    fechaInicio: '2026-08-01',
-    fechaInicioVigencia: '2026-08-01',
-    fechaConvocatoria: '2026-12-15',
-    convocatoria: 'Abierta',
-    descripcion:
-      'Entrenamiento clínico intensivo en salas de internación general, cuidados intermedios y consultorios de orientación diagnóstica del Hospital Interdistrital Evita.',
-    descripcionPrograma:
-      'El programa formativo del Servicio de Clínica Médica del Hospital Interdistrital Evita prepara a los médicos residentes para abordar patologías clínicas complejas de alta prevalencia y cuadros atípicos, con enfoque en medicina humanizada, pases de sala interdisciplinarios y ateneos bibliográficos semanales.',
-    cupos: '8 vacantes',
-    duracion: '4 Años • Sede Hospital Interdistrital Evita',
-    requisitos:
-      'Título de Médico habilitado nacional o convalidado.\nInscripción formal en el Sistema Único de Residencias de Formosa.\nMatrícula profesional de la provincia de Formosa (o en trámite oficial).\nAprobación de la entrevista con el Comité de Docencia e Investigación.',
-    reglamentoRotacion:
-      'Descargue el cronograma de actividades, régimen de guardias docentes y plan de evaluación de Residencia.',
-    estado: 'PENDIENTE_APROBACION',
-    bannerNombre: 'residencia-clinica-medica-banner.jpg',
-    bannerUrl: bannerResidencias,
-    documentoNombre: 'Programa_Formativo_Clinica_Medica_2026.pdf',
-    documentoTamano: '1.4 MB',
-    documentoTipo: 'PDF',
-    documentoUrl: 'https://example.com/residencias/programa-clinica-medica.pdf',
-    motivoRechazo: '',
-  },
-  {
-    id: 'sim-res-002',
-    nombre: 'Residencia en Tocoginecología',
-    categoria: 'Formación Médica de Posgrado - Ministerio de Desarrollo Humano',
-    fechaInicio: '2026-09-10',
-    fechaInicioVigencia: '2026-09-10',
-    fechaConvocatoria: '2027-02-28',
-    convocatoria: 'Proximamente',
-    descripcion:
-      'Formación médico-quirúrgica integral en obstetricia de alto riesgo, centro obstétrico, control prenatal y cirugía ginecológica.',
-    descripcionPrograma:
-      'El programa contempla rotaciones estructuradas en sala de partos, internación obstétrica, consultorios especializados de patología cervical, ecografía tocoginecológica y cirugías programadas de baja, mediana y alta complejidad.',
-    cupos: '4 vacantes',
-    duracion: '4 Años • Sede Hospital Interdistrital Evita',
-    requisitos:
-      'Título de Médico otorgado por universidad reconocida.\nInscripción en el Examen Único de Residencias Médicas.\nCertificado de aptitud psicofísica vigente.\nEntrevista presencial con el Comité de Docencia e Investigación.',
-    reglamentoRotacion:
-      'Bases curriculares, esquema de rotaciones por centro obstétrico y cronograma del próximo llamado.',
-    estado: 'PENDIENTE_APROBACION',
-    bannerNombre: 'banner-tocoginecologia-hie.jpg',
-    bannerUrl: bannerResidencias,
-    documentoNombre: 'Bases_Residencia_Tocoginecologia_HIE.pdf',
-    documentoTamano: '920 KB',
-    documentoTipo: 'PDF',
-    documentoUrl: 'https://example.com/residencias/bases-tocoginecologia.pdf',
-    motivoRechazo: '',
-  },
-  {
-    id: 'sim-res-003',
-    nombre: 'Residencia en Terapia Intensiva Adultos',
-    categoria: 'Cuidados Críticos de Alta Complejidad - HIE',
-    fechaInicio: '2026-07-15',
-    fechaInicioVigencia: '2026-07-15',
-    fechaConvocatoria: '2026-12-20',
-    convocatoria: 'Abierta',
-    descripcion:
-      'Capacitación intensiva en soporte vital avanzado, monitoreo hemodinámico invasivo, asistencia respiratoria mecánica y neurointensivismo.',
-    descripcionPrograma:
-      'Orientada al manejo integral del paciente crítico en la Unidad de Terapia Intensiva del hospital, incorporando simulación clínica avanzada, ecografía multisistémica crítica (POCUS) y protocolos de procuración.',
-    cupos: '5 vacantes',
-    duracion: '4 Años • Sede Hospital Interdistrital Evita',
-    requisitos:
-      'Título de Médico habilitado.\nInscripción en el concurso provincial de residencias de salud.\nCurso de RCP básico/avanzado actualizado.\nDisponibilidad de dedicación exclusiva.',
-    reglamentoRotacion:
-      'Programa académico oficial, competencias por año formativo y régimen de guardias activas.',
-    estado: 'APROBADO',
-    bannerNombre: 'uti-adultos-portada.jpg',
-    bannerUrl: bannerResidencias,
-    documentoNombre: 'Plan_Estudios_UTI_Adultos_2026.pdf',
-    documentoTamano: '1.8 MB',
-    documentoTipo: 'PDF',
-    documentoUrl: 'https://example.com/residencias/plan-uti-adultos.pdf',
-    motivoRechazo: '',
-  },
-  {
-    id: 'sim-res-004',
-    nombre: 'Residencia en Pediatría',
-    categoria: 'Formación Médica de Posgrado - Ministerio de Desarrollo Humano',
-    fechaInicio: '2026-08-15',
-    fechaInicioVigencia: '2026-08-15',
-    fechaConvocatoria: '2027-03-31',
-    convocatoria: 'Abierta',
-    descripcion:
-      'Formación en internación pediátrica, emergencias infantiles, recepción del recién nacido y consultorios de seguimiento del niño sano.',
-    descripcionPrograma:
-      'Rotaciones por salas de internación conjunta, guardia de emergencias pediátricas, neonatología y atención ambulatoria con tutoría permanente del plantel médico de planta.',
-    cupos: '6 vacantes',
-    duracion: '3 Años • Sede Hospital Interdistrital Evita',
-    requisitos:
-      'Título de Médico nacional o convalidado.\nInscripción provincial vigente.\nEsquema de vacunación completo para personal de salud.\nAprobación de evaluación escrita y entrevista docente.',
-    reglamentoRotacion:
-      'Programa de rotaciones hospitalarias y régimen de guardias del Servicio de Pediatría.',
-    estado: 'PUBLICADO',
-    bannerNombre: 'banner-pediatria.jpg',
-    bannerUrl: bannerResidencias,
-    documentoNombre: 'Programa_Residencia_Pediatria_HIE.pdf',
-    documentoTamano: '1.1 MB',
-    documentoTipo: 'PDF',
-    documentoUrl: 'https://example.com/residencias/programa-pediatria.pdf',
-    motivoRechazo: '',
-  },
-  {
-    id: 'sim-res-005',
-    nombre: 'Residencia en Cardiología Clínica',
-    categoria: 'Especialidades Clínicas y Diagnóstico Cardiovascular',
-    fechaInicio: '2026-08-01',
-    fechaInicioVigencia: '2026-08-01',
-    fechaConvocatoria: '2026-11-30',
-    convocatoria: 'Abierta',
-    descripcion:
-      'Especialización en unidad coronaria, ergometría, ecocardiografía Doppler, electrofisiología básica y rehabilitación cardiovascular.',
-    descripcionPrograma:
-      'Desarrollo de competencias diagnósticas y terapéuticas en patología cardiovascular aguda y crónica, con participación activa en hemodinamia e interconsultas de alta complejidad.',
-    cupos: '4 vacantes',
-    duracion: '4 Años • Sede Hospital Interdistrital Evita',
-    requisitos:
-      'Título de Médico.\nCertificado de antecedentes ético-profesionales.\nInscripción en el Sistema Provincial de Residencias.\nAprobación de examen único.',
-    reglamentoRotacion:
-      'Cronograma anual de rotaciones por Unidad Coronaria, Consultorios Externos y Hemodinamia.',
-    estado: 'PUBLICADO',
-    bannerNombre: 'cardiologia-clinica-banner.jpg',
-    bannerUrl: bannerResidencias,
-    documentoNombre: 'Programa_Cardiologia_HIE_2026.pdf',
-    documentoTamano: '1.5 MB',
-    documentoTipo: 'PDF',
-    documentoUrl: 'https://example.com/residencias/programa-cardiologia.pdf',
-    motivoRechazo: '',
-  },
-  {
-    id: 'sim-res-006',
-    nombre: 'Residencia en Medicina Familiar y Comunitaria',
-    categoria: 'Atención Primaria y Salud Comunitaria',
-    fechaInicio: '2026-06-01',
-    fechaInicioVigencia: '2026-06-01',
-    fechaConvocatoria: '2026-10-15',
-    convocatoria: 'Abierta',
-    descripcion:
-      'Formación integral en centros de salud y primer nivel de atención con articulación directa en el hospital interdistrital.',
-    descripcionPrograma:
-      'El trayecto formativo abarca consultorio de demanda espontánea, seguimiento de enfermedades crónicas no transmisibles, visitas domiciliarias y redes integradas de servicios de salud.',
-    cupos: '10 vacantes',
-    duracion: '3 Años • Red Provincial y Sede HIE',
-    requisitos:
-      'Título de Médico.\nDisponibilidad para rotaciones programadas en centros de salud.\nInscripción provincial.',
-    reglamentoRotacion:
-      'Programa de rotaciones comunitarias y pautas de evaluación anual.',
-    estado: 'RECHAZADO',
-    motivoRechazo:
-      'Falta adjuntar el archivo PDF oficial con las bases provinciales actualizadas y la fecha límite de inscripción debe adecuarse al cronograma del Ministerio de Desarrollo Humano.',
-    bannerNombre: '',
-    bannerUrl: '',
-    documentoNombre: '',
-    documentoTamano: '',
-    documentoTipo: 'PDF',
-    documentoUrl: '',
-  },
-  {
-    id: 'sim-res-007',
-    nombre: 'Residencia en Cirugía General',
-    categoria: 'Formación Médica Quirúrgica de Posgrado',
-    fechaInicio: '2026-02-01',
-    fechaInicioVigencia: '2026-02-01',
-    fechaConvocatoria: '2026-05-30',
-    convocatoria: 'Cerrada',
-    descripcion:
-      'Convocatoria correspondiente al ciclo lectivo anterior con totalidad de plazas cubiertas en bloque quirúrgico y guardia.',
-    descripcionPrograma:
-      'Entrenamiento progresivo en cirugía laparoscópica, trauma, guardia quirúrgica de urgencias, bloque quirúrgico central y seguimiento postoperatorio.',
-    cupos: '5 vacantes',
-    duracion: '4 Años • Sede Hospital Interdistrital Evita',
-    requisitos:
-      'Título de Médico.\nMatrícula profesional provincial.\nExamen único aprobado y orden de mérito.',
-    reglamentoRotacion:
-      'Reglamento histórico de guardias quirúrgicas y programa de rotaciones 2026.',
-    estado: 'ARCHIVADO',
-    bannerNombre: 'cirugia-general-hie.jpg',
-    bannerUrl: bannerResidencias,
-    documentoNombre: 'Reglamento_Cirugia_General_2026.pdf',
-    documentoTamano: '1.1 MB',
-    documentoTipo: 'PDF',
-    documentoUrl: 'https://example.com/residencias/reglamento-cirugia.pdf',
-    motivoRechazo: '',
-  },
-];
 
 const parseDate = (value) => {
   if (!value) return null;
@@ -293,11 +109,11 @@ const normalizeResidenciaRecord = (raw) => {
   const startDate =
     raw.fechaInicio ||
     raw.fechaInicioVigencia ||
-    (raw.createdAt ? String(raw.createdAt).slice(0, 10) : '2026-08-01');
+    (raw.createdAt ? String(raw.createdAt).slice(0, 10) : '');
 
   return {
     ...raw,
-    id: raw.id ?? `res-${Math.random().toString(36).slice(2, 9)}`,
+    id: raw.id ? String(raw.id) : `res-${Math.random().toString(36).slice(2, 9)}`,
     nombre: raw.nombre || 'Residencia sin título',
     categoria:
       raw.categoria ||
@@ -321,14 +137,20 @@ const normalizeResidenciaRecord = (raw) => {
     documentoTamano: raw.documentoTamano || '',
     documentoTipo: raw.documentoTipo || 'PDF',
     documentoUrl: raw.documentoUrl || '',
+    fechaPublicacion: raw.fechaPublicacion || raw.fechaProgramada || null,
     requestedEstado: raw.requestedEstado || null,
     motivoRechazo: raw.motivoRechazo || raw.rejectionReason || '',
+    rejectionReason: raw.rejectionReason || raw.motivoRechazo || '',
+    editor: raw.editor || 'Editor CMS',
+    fechaCarga: raw.fechaCarga || 'Reciente',
+    fechaActualizacion: raw.fechaActualizacion || raw.fechaCarga || 'Reciente',
+    cambios: Array.isArray(raw.cambios) ? raw.cambios : [],
+    esActualizacion: Boolean(raw.esActualizacion),
   };
 };
 
 const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
-  const [residencias, setResidencias] = useState(INITIAL_MOCK_RESIDENCIAS);
-  const [isSimulation, setIsSimulation] = useState(true);
+  const [residencias, setResidencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState('');
   const [statusFilter, setStatusFilter] = useState('TODOS');
@@ -343,9 +165,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
     setLoading(true);
     try {
       const data = await getResidencias(true);
-      if (!Array.isArray(data) || data.length === 0) {
-        setResidencias(INITIAL_MOCK_RESIDENCIAS);
-        setIsSimulation(true);
+      if (!Array.isArray(data)) {
+        setResidencias([]);
         return;
       }
 
@@ -353,21 +174,10 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
         .map(normalizeResidenciaRecord)
         .filter(Boolean);
 
-      // Integrar registros reales de la BD manteniendo los mocks de estados que no existan aún en BD
-      // para permitir probar todos los filtros y flujos condicionales del modal.
-      const nombresExistentes = new Set(
-        normalizadas.map((item) => item.nombre.toLocaleLowerCase('es').trim()),
-      );
-      const mocksComplementarios = INITIAL_MOCK_RESIDENCIAS.filter(
-        (mock) => !nombresExistentes.has(mock.nombre.toLocaleLowerCase('es').trim()),
-      );
-
-      setResidencias([...normalizadas, ...mocksComplementarios]);
-      setIsSimulation(false);
+      setResidencias(normalizadas);
     } catch (loadError) {
-      console.error('Aviso al cargar residencias (usando datos iniciales):', loadError);
-      setResidencias(INITIAL_MOCK_RESIDENCIAS);
-      setIsSimulation(true);
+      console.error('Error al cargar residencias:', loadError);
+      setResidencias([]);
     } finally {
       setLoading(false);
     }
@@ -390,6 +200,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
       pending: residenciasVisibles.filter((r) => r?.estado === 'PENDIENTE_APROBACION').length,
       approved: residenciasVisibles.filter((r) => r?.estado === 'APROBADO').length,
       published: residenciasVisibles.filter((r) => r?.estado === 'PUBLICADO').length,
+      scheduled: residenciasVisibles.filter((r) => r?.estado === 'PROGRAMADO').length,
       rejected: residenciasVisibles.filter((r) => r?.estado === 'RECHAZADO').length,
       archived: residenciasVisibles.filter((r) => r?.estado === 'ARCHIVADO').length,
     }),
@@ -417,6 +228,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
         item?.documentoNombre,
         item?.fechaInicio,
         item?.fechaConvocatoria,
+        item?.editor,
       ]
         .filter(Boolean)
         .join(' ')
@@ -469,18 +281,13 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
 
     try {
       const isArchiving = selectedResidencia?.requestedEstado === 'ARCHIVADO';
-      const finalEstado = isArchiving ? 'ARCHIVADO' : 'APROBADO';
-      const isMockItem =
-        isSimulation || String(selectedResidencia?.id || '').startsWith('sim-res');
+      const isScheduling =
+        selectedResidencia?.requestedEstado === 'PROGRAMADO' ||
+        Boolean(selectedResidencia?.fechaPublicacion && new Date(selectedResidencia.fechaPublicacion) > new Date());
+      const finalEstado = isArchiving ? 'ARCHIVADO' : isScheduling ? 'PROGRAMADO' : 'PUBLICADO';
+      const token = keycloak?.token || localStorage.getItem('token') || '';
 
-      if (!isMockItem) {
-        try {
-          const token = keycloak?.token || localStorage.getItem('token') || '';
-          await cambiarEstadoResidencia(selectedResidencia.id, 'APROBADO', token);
-        } catch (apiErr) {
-          console.warn('Actualización optimista local para aprobación de residencia:', apiErr);
-        }
-      }
+      await cambiarEstadoResidencia(selectedResidencia.id, 'APROBADO', token);
 
       setResidencias((current) =>
         current.map((item) =>
@@ -490,6 +297,9 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                 estado: finalEstado,
                 motivoRechazo: '',
                 rejectionReason: '',
+                requestedEstado: null,
+                cambios: [],
+                esActualizacion: false,
               }
             : item,
         ),
@@ -498,6 +308,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
       setFeedback(
         isArchiving
           ? `La residencia “${selectedResidencia?.nombre || 'Residencia'}” fue archivada con éxito.`
+          : isScheduling
+          ? `La residencia “${selectedResidencia?.nombre || 'Residencia'}” fue aprobada y programada correctamente.`
           : `La solicitud de “${selectedResidencia?.nombre || 'Residencia'}” fue aprobada correctamente.`
       );
       closeDetails();
@@ -525,17 +337,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
     setActionError('');
 
     try {
-      const isMockItem =
-        isSimulation || String(selectedResidencia?.id || '').startsWith('sim-res');
-
-      if (!isMockItem) {
-        try {
-          const token = keycloak?.token || localStorage.getItem('token') || '';
-          await cambiarEstadoResidencia(selectedResidencia.id, 'RECHAZADO', token, reason);
-        } catch (apiErr) {
-          console.warn('Actualización optimista local para rechazo de residencia:', apiErr);
-        }
-      }
+      const token = keycloak?.token || localStorage.getItem('token') || '';
+      await cambiarEstadoResidencia(selectedResidencia.id, 'RECHAZADO', token, reason);
 
       setResidencias((current) =>
         current.map((item) =>
@@ -545,6 +348,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                 estado: 'RECHAZADO',
                 motivoRechazo: reason,
                 rejectionReason: reason,
+                requestedEstado: null,
               }
             : item,
         ),
@@ -578,6 +382,12 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
   const documentoUrlSafe = sanitizeUrl(selectedResidencia?.documentoUrl);
   const isSelectedPending = selectedResidencia?.estado === 'PENDIENTE_APROBACION';
   const isSelectedVigente = selectedResidencia ? isConvocatoriaVigente(selectedResidencia) : false;
+
+  const convLabelSelected = selectedResidencia ? normalizeConvocatoria(selectedResidencia?.convocatoria) : 'Abierta';
+  const convSlugSelected = convLabelSelected
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
   return (
     <div className="admin-res-page-admin admin-review-container-admin">
@@ -731,7 +541,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             <span className="admin-res-visually-hidden-admin">Buscar residencias</span>
             <input
               type="search"
-              placeholder="Buscar por residencia, especialidad, categoría o estado de convocatoria..."
+              placeholder="Buscar por residencia, especialidad, categoría, editor o convocatoria..."
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
@@ -743,6 +553,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             <thead>
               <tr>
                 <th scope="col">Residencia / Especialidad</th>
+                <th scope="col">Editor / Fecha</th>
                 <th scope="col">Convocatoria</th>
                 <th scope="col">Fecha de Inicio / Vigencia</th>
                 <th scope="col">Estado</th>
@@ -751,13 +562,13 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="admin-res-empty-admin" colSpan="4">
+                  <td className="admin-res-empty-admin" colSpan="5">
                     Cargando residencias...
                   </td>
                 </tr>
               ) : filteredResidencias.length === 0 ? (
                 <tr>
-                  <td className="admin-res-empty-admin" colSpan="4">
+                  <td className="admin-res-empty-admin" colSpan="5">
                     No se encontraron residencias con los filtros seleccionados.
                   </td>
                 </tr>
@@ -786,7 +597,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                               className="admin-res-placeholder-admin"
                               aria-hidden="true"
                             >
-                              <Stethoscope size={19} />
+                              <GraduationCap size={19} />
                             </span>
                           )}
                           <span>
@@ -804,7 +615,23 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                               {item?.categoria || 'Formación Médica de Posgrado'}
                               {item?.duracion ? ` • ${item.duracion}` : ''}
                             </small>
+                            <AdminCambiosPill
+                              count={item?.cambios?.length}
+                              esActualizacion={item?.esActualizacion}
+                            />
                           </span>
+                        </div>
+                      </td>
+
+                      <td data-label="Editor / Fecha">
+                        <div className="admin-res-editor-cell" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                          <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.88rem' }}>
+                            {item?.editor || 'Editor CMS'}
+                          </span>
+                          <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.78rem', fontWeight: 500 }}>
+                            <CalendarDays size={13} />
+                            {item?.fechaActualizacion || item?.fechaCarga || 'Reciente'}
+                          </small>
                         </div>
                       </td>
 
@@ -856,6 +683,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
         </div>
       </section>
 
+      {/* MODAL DE REVISIÓN REDISEÑADO • ELEGANTE, CLARO Y ARMONIOSO */}
       {selectedResidencia && (
         <div className="admin-res-overlay-admin" onClick={closeDetails}>
           <section
@@ -865,9 +693,12 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             aria-labelledby="admin-res-modal-title"
             onClick={(event) => event.stopPropagation()}
           >
+            {/* Header del Modal */}
             <header className="admin-res-modal-header-admin">
               <div className="admin-res-modal-heading-admin">
-                <span>Revisión de solicitud • Solo lectura</span>
+                <span className="admin-res-modal-kicker-admin">
+                  REVISIÓN EDITORIAL • PROGRAMA FORMATIVO DE POSGRADO
+                </span>
                 <div className="admin-res-title-row-admin">
                   <h2 id="admin-res-modal-title">
                     {selectedResidencia?.nombre || 'Residencia'}
@@ -879,16 +710,20 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                       selectedResidencia?.estado ||
                       'Sin estado'}
                   </span>
+                  <span className={`admin-res-call-badge-admin is-${convSlugSelected}`}>
+                    {convLabelSelected}
+                  </span>
                   {isSelectedVigente && (
                     <span className="admin-res-vigente-badge-admin">
                       <span className="admin-res-pulse-admin" aria-hidden="true" />
-                      Vigente
+                      Convocatoria vigente
                     </span>
                   )}
                 </div>
               </div>
               <button
                 type="button"
+                className="admin-res-modal-close-btn"
                 aria-label="Cerrar detalle"
                 onClick={closeDetails}
               >
@@ -896,182 +731,288 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               </button>
             </header>
 
+            {/* Cuerpo del Modal */}
             <div className="admin-res-modal-body-admin">
+              {/* Alerta de Solicitud de Archivado */}
               {isSelectedPending && selectedResidencia?.requestedEstado === 'ARCHIVADO' && (
-                <div style={{
-                  margin: '0 0 16px 0',
-                  padding: '12px 16px',
-                  borderRadius: '10px',
-                  backgroundColor: '#fffbeb',
-                  border: '1px solid #fde68a',
-                  color: '#92400e',
-                  fontSize: '0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px'
-                }}>
-                  <Archive size={18} style={{ color: '#d97706', flexShrink: 0 }} />
+                <div className="admin-res-archive-alert">
+                  <Archive size={18} className="admin-res-archive-alert-icon" />
                   <div>
                     <strong>Solicitud de archivado:</strong> El editor del CMS solicita archivar esta residencia y retirarla del portal público.
                   </div>
                 </div>
               )}
-              <div className="admin-res-info-grid-admin">
-                <article className="is-wide">
-                  <h3>Nombre de la Residencia</h3>
-                  <p>{selectedResidencia?.nombre || 'No especificado'}</p>
-                </article>
 
-                <article className="is-wide">
-                  <h3>Categoría Institucional</h3>
-                  <p>{selectedResidencia?.categoria || 'No especificada'}</p>
-                </article>
-
-                <article>
-                  <h3>Fecha de Inicio / Apertura</h3>
-                  <p>{formatDate(getStartDateValue(selectedResidencia))}</p>
-                </article>
-
-                <article>
-                  <h3>Fecha Límite / Fecha de Examen</h3>
-                  <p>{formatDate(selectedResidencia?.fechaConvocatoria)}</p>
-                </article>
-
-                <article>
-                  <h3>Estado de la Convocatoria</h3>
-                  <p>{normalizeConvocatoria(selectedResidencia?.convocatoria)}</p>
-                </article>
-
-                <article>
-                  <h3>Duración Oficial y Cupos</h3>
-                  <p>
-                    {selectedResidencia?.duracion || 'Duración a confirmar'}
-                    {selectedResidencia?.cupos ? ` • ${selectedResidencia.cupos}` : ''}
-                  </p>
-                </article>
-
-                <article className="is-wide">
-                  <h3>Resumen Breve del Encabezado</h3>
-                  <p>
-                    {selectedResidencia?.descripcion ||
-                      'Sin resumen breve cargado por el editor.'}
-                  </p>
-                </article>
-
-                <article className="is-wide">
-                  <h3>Descripción del Programa Académico</h3>
-                  <p className="admin-res-preline-admin">
-                    {selectedResidencia?.descripcionPrograma ||
-                      'Sin descripción detallada del programa académico.'}
-                  </p>
-                </article>
-
-                <article className="is-wide">
-                  <h3>Requisitos para la Postulación Provincial</h3>
-                  {requisitosList.length > 0 ? (
-                    <ul className="admin-res-requisitos-list-admin">
-                      {requisitosList.map((reqItem, index) => (
-                        <li key={`${index}-${reqItem.slice(0, 20)}`}>{reqItem}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>No se registraron requisitos de postulación.</p>
-                  )}
-                </article>
-              </div>
-
-              <section
-                className="admin-res-resources-admin"
-                aria-label="Imagen de banner o portada"
-              >
-                <h3>Imagen de Banner / Portada</h3>
-                {bannerUrlSafe ? (
-                  <a
-                    className="admin-res-resource-image-admin"
-                    href={bannerUrlSafe}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <img
-                      src={bannerUrlSafe}
-                      alt={
-                        selectedResidencia?.bannerNombre ||
-                        'Imagen de portada de la residencia'
-                      }
-                    />
-                    <span>
-                      <ImageIcon size={16} />
-                      {selectedResidencia?.bannerNombre || 'Imagen de portada'}
-                      <ExternalLink size={14} />
-                    </span>
-                  </a>
-                ) : (
-                  <p className="admin-res-no-resources-admin">
-                    No se adjuntó imagen de banner para la tarjeta.
-                  </p>
-                )}
-              </section>
-
-              <section
-                className="admin-res-resources-admin"
-                aria-label="Reglamento y documento adjunto"
-              >
-                <h3>Reglamento, Programa de Rotación y Documentos Asociados</h3>
-                <p className="admin-res-legend-text-admin">
-                  <strong>Leyenda configurada en CMS: </strong>
-                  {selectedResidencia?.reglamentoRotacion ||
-                    'Sin leyenda de reglamento especificada.'}
-                </p>
-
-                {documentoUrlSafe || selectedResidencia?.documentoNombre ? (
-                  <div className="admin-res-resource-link-admin">
-                    <FileText size={18} />
-                    {documentoUrlSafe ? (
-                      <a
-                        href={documentoUrlSafe}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {selectedResidencia?.documentoNombre ||
-                          'Abrir programa o reglamento adjunto'}{' '}
-                        <ExternalLink size={14} />
-                      </a>
-                    ) : (
-                      <span>
-                        {selectedResidencia?.documentoNombre ||
-                          'Documento adjunto'}
-                      </span>
-                    )}
-                    {(selectedResidencia?.documentoTipo ||
-                      selectedResidencia?.documentoTamano) && (
-                      <small>
-                        {[
-                          selectedResidencia?.documentoTipo,
-                          selectedResidencia?.documentoTamano,
-                        ]
-                          .filter(Boolean)
-                          .join(' • ')}
-                      </small>
-                    )}
+              {/* Alerta de Publicación Programada */}
+              {selectedResidencia?.fechaPublicacion && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '12px 16px',
+                    borderRadius: '10px',
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    color: '#1e40af',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  <Clock3 size={18} style={{ color: '#2563eb', flexShrink: 0 }} />
+                  <div>
+                    <strong>Publicación programada:</strong> Esta residencia se publicará automáticamente en el portal el{' '}
+                    <strong>{new Date(selectedResidencia.fechaPublicacion).toLocaleString('es-AR', { dateStyle: 'long', timeStyle: 'short' })}</strong>.
                   </div>
-                ) : (
-                  <p className="admin-res-no-resources-admin">
-                    No se adjuntó ningún documento PDF o Word del programa formativo.
-                  </p>
-                )}
-              </section>
-
-              {(selectedResidencia?.motivoRechazo ||
-                selectedResidencia?.rejectionReason) && (
-                <div className="admin-res-rejection-note-admin">
-                  <strong>Motivo del rechazo informado al CMS</strong>
-                  <p>
-                    {selectedResidencia?.motivoRechazo ||
-                      selectedResidencia?.rejectionReason}
-                  </p>
                 </div>
               )}
 
+              {/* Cambios resaltados de edición */}
+              <AdminCambiosResaltados
+                cambios={selectedResidencia.cambios}
+                esActualizacion={selectedResidencia.esActualizacion}
+              />
+
+              {/* Alerta de Rechazo Previo */}
+              {(selectedResidencia?.motivoRechazo || selectedResidencia?.rejectionReason) && (
+                <div className="admin-res-rejection-note-admin">
+                  <strong>Motivo de rechazo registrado</strong>
+                  <p>{selectedResidencia?.motivoRechazo || selectedResidencia?.rejectionReason}</p>
+                </div>
+              )}
+
+              {/* BLOQUE 1: Ficha Clave / Datos de Convocatoria (4 columnas limpias) */}
+              <div className="admin-res-summary-strip">
+                <div className="admin-res-summary-strip-item">
+                  <div className="admin-res-strip-icon-wrap">
+                    <Building2 size={16} />
+                  </div>
+                  <div className="admin-res-strip-info">
+                    <span className="admin-res-strip-label">Categoría Institucional</span>
+                    <strong className="admin-res-strip-value" title={selectedResidencia?.categoria}>
+                      {selectedResidencia?.categoria || 'Formación Médica de Posgrado'}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="admin-res-summary-strip-item">
+                  <div className="admin-res-strip-icon-wrap">
+                    <CalendarDays size={16} />
+                  </div>
+                  <div className="admin-res-strip-info">
+                    <span className="admin-res-strip-label">Período de Convocatoria</span>
+                    <strong className="admin-res-strip-value">
+                      {formatDate(getStartDateValue(selectedResidencia))} → {formatDate(selectedResidencia?.fechaConvocatoria)}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="admin-res-summary-strip-item">
+                  <div className="admin-res-strip-icon-wrap">
+                    <Clock3 size={16} />
+                  </div>
+                  <div className="admin-res-strip-info">
+                    <span className="admin-res-strip-label">Duración y Cupos</span>
+                    <strong className="admin-res-strip-value">
+                      {selectedResidencia?.duracion || '4 Años'}
+                      {selectedResidencia?.cupos ? ` • ${selectedResidencia.cupos}` : ''}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="admin-res-summary-strip-item">
+                  <div className="admin-res-strip-icon-wrap">
+                    <CheckCircle size={16} />
+                  </div>
+                  <div className="admin-res-strip-info">
+                    <span className="admin-res-strip-label">Estado del Llamado</span>
+                    <strong className="admin-res-strip-value">
+                      {convLabelSelected}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* BLOQUE 2: Contenido y Programa Académico */}
+              <div className="admin-res-section-card">
+                <div className="admin-res-section-card-header">
+                  <div className="admin-res-section-card-title">
+                    <BookOpen size={18} />
+                    <h3>Programa Formativo y Contenido Académico</h3>
+                  </div>
+                </div>
+                <div className="admin-res-section-card-body">
+                  {selectedResidencia?.descripcion && (
+                    <div className="admin-res-lead-callout">
+                      <span className="admin-res-lead-callout-tag">Resumen Breve del Encabezado</span>
+                      <p>{selectedResidencia.descripcion}</p>
+                    </div>
+                  )}
+
+                  <div className="admin-res-program-desc">
+                    <h4 className="admin-res-subheading">Descripción del Programa Académico</h4>
+                    <p className="admin-res-preline-admin">
+                      {selectedResidencia?.descripcionPrograma ||
+                        'Sin descripción detallada del programa académico informada por el editor.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* BLOQUE 3: Requisitos de Postulación */}
+              <div className="admin-res-section-card">
+                <div className="admin-res-section-card-header">
+                  <div className="admin-res-section-card-title">
+                    <ListChecks size={18} />
+                    <h3>Requisitos para la Postulación Provincial</h3>
+                  </div>
+                  {requisitosList.length > 0 && (
+                    <span className="admin-res-counter-badge">
+                      {requisitosList.length} {requisitosList.length === 1 ? 'requisito' : 'requisitos'}
+                    </span>
+                  )}
+                </div>
+                <div className="admin-res-section-card-body">
+                  {requisitosList.length > 0 ? (
+                    <ul className="admin-res-checklist">
+                      {requisitosList.map((reqItem, index) => (
+                        <li key={`${index}-${reqItem.slice(0, 20)}`} className="admin-res-checklist-item">
+                          <span className="admin-res-check-icon">
+                            <Check size={14} />
+                          </span>
+                          <span>{reqItem}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="admin-res-empty-hint">No se registraron requisitos específicos para esta postulación.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* BLOQUE 4: Recursos y Documentos Oficiales (2 columnas armonizadas) */}
+              <div className="admin-res-section-card">
+                <div className="admin-res-section-card-header">
+                  <div className="admin-res-section-card-title">
+                    <FileText size={18} />
+                    <h3>Recursos y Documentos Asociados</h3>
+                  </div>
+                </div>
+                <div className="admin-res-resources-split">
+                  {/* Banner / Portada */}
+                  <div className="admin-res-resource-box">
+                    <span className="admin-res-resource-box-title">Imagen de Banner / Portada</span>
+                    {bannerUrlSafe ? (
+                      <div className="admin-res-banner-preview-box">
+                        <img
+                          src={bannerUrlSafe}
+                          alt={selectedResidencia?.bannerNombre || 'Imagen de portada'}
+                          className="admin-res-banner-img"
+                        />
+                        <div className="admin-res-banner-meta">
+                          <span className="admin-res-banner-name" title={selectedResidencia?.bannerNombre}>
+                            <ImageIcon size={14} />
+                            {selectedResidencia?.bannerNombre || 'Banner de portada'}
+                          </span>
+                          <a
+                            href={bannerUrlSafe}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="admin-res-open-link"
+                          >
+                            Ver completa <ExternalLink size={13} />
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="admin-res-banner-placeholder">
+                        <ImageIcon size={28} />
+                        <span>No se adjuntó imagen de portada para esta residencia.</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Documento y Leyenda */}
+                  <div className="admin-res-resource-box">
+                    <span className="admin-res-resource-box-title">Reglamento y Documento Oficial</span>
+                    <div className="admin-res-doc-card">
+                      <div className="admin-res-doc-legend">
+                        <span className="admin-res-legend-label">Leyenda configurada en CMS:</span>
+                        <p>
+                          {selectedResidencia?.reglamentoRotacion ||
+                            'Descargue el cronograma de actividades, régimen de guardias docentes y plan de evaluación de Residencia.'}
+                        </p>
+                      </div>
+
+                      {documentoUrlSafe || selectedResidencia?.documentoNombre ? (
+                        <div className="res-file-selected-card">
+                          <div className="res-file-selected-left">
+                            <div
+                              className={`res-file-type-icon ${String(selectedResidencia?.documentoNombre || '').toLowerCase().endsWith('.doc') || String(selectedResidencia?.documentoNombre || '').toLowerCase().endsWith('.docx') ? 'doc' : 'pdf'}`}
+                            >
+                              <FileText size={18} />
+                            </div>
+                            <div className="res-file-meta">
+                              <span
+                                className="res-file-name"
+                                title={selectedResidencia?.documentoNombre || 'Documento adjunto'}
+                              >
+                                {selectedResidencia?.documentoNombre || 'Documento adjunto'}
+                              </span>
+                              <span className="res-file-size">
+                                {selectedResidencia?.documentoTamano || 'Documento disponible'} • Formato{' '}
+                                {selectedResidencia?.documentoTipo || 'PDF'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {documentoUrlSafe && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <a
+                                href={documentoUrlSafe}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="admin-res-file-btn"
+                                title="Visualizar documento"
+                              >
+                                <File size={16} />
+                              </a>
+                              <a
+                                href={documentoUrlSafe}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="admin-res-file-btn secondary"
+                                title="Abrir en pestaña nueva"
+                              >
+                                <ExternalLink size={16} />
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="admin-res-doc-empty">
+                          <FileText size={20} />
+                          <span>No se adjuntó documento PDF del programa.</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* BLOQUE 5: Metadatos Editoriales */}
+              <div className="admin-res-review-meta">
+                <span>
+                  Enviado por: <strong>{selectedResidencia.editor || 'Editor CMS'}</strong>
+                </span>
+                <span>
+                  Última modificación: <strong>{selectedResidencia.fechaActualizacion || 'Reciente'}</strong>
+                </span>
+                <span>
+                  Estado editorial: <strong>{STATUS_LABELS[selectedResidencia.estado] || selectedResidencia.estado}</strong>
+                </span>
+              </div>
+
+              {/* Formulario de Rechazo inline */}
               {isSelectedPending && showRejectForm && (
                 <div
                   className="admin-res-confirmation-admin"
@@ -1094,7 +1035,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                     />
                   </label>
                   <p>
-                    Al confirmar, la residencia pasará a estado Rechazada y el editor podrá visualizar esta justificación.
+                    Al confirmar, la residencia pasará a estado Rechazada y el editor del CMS podrá visualizar esta justificación en su panel.
                   </p>
                   {actionError && (
                     <p className="admin-res-error-admin" role="alert">
@@ -1134,6 +1075,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               )}
             </div>
 
+            {/* Footer de Acciones */}
             {isSelectedPending && (
               <footer className="admin-res-modal-footer-admin">
                 <div className="admin-res-footer-pending-admin">

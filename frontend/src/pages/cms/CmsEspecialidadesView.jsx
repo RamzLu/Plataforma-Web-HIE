@@ -96,6 +96,9 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (editingId && !hasUnsavedChanges) {
+      return toast.error("No se han detectado cambios para actualizar.");
+    }
     if (!formData.nombre.trim()) return toast.error("El nombre es obligatorio.");
 
     const payload = {
@@ -484,7 +487,13 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                 <button type="button" className="btn-cancelar-gris" onClick={handleCloseAttempt} disabled={isSaving}>
                   CANCELAR
                 </button>
-                <button type="submit" className="btn-cerrar-rojo" style={{ backgroundColor: "#2b5b94" }} disabled={isSaving}>
+                <button
+                  type="submit"
+                  className="btn-cerrar-rojo"
+                  style={{ backgroundColor: "#2b5b94" }}
+                  disabled={isSaving || (Boolean(editingId) && !hasUnsavedChanges)}
+                  title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
+                >
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px", borderTopColor: "white", borderColor: "rgba(255,255,255,0.3)" }}></div>

@@ -467,6 +467,9 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   // Guardar datos en la base de datos a través de la API
   const handleSave = async (e, forcedEstado) => {
     if (e) e.preventDefault();
+    if (editingId && !hasUnsavedChanges) {
+      return toast.error("No se han detectado cambios para actualizar.");
+    }
     if (!formData.titulo.trim()) {
       return toast.error("El título de la capacitación es obligatorio.");
     }
@@ -1421,7 +1424,8 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving}
+                  disabled={isSaving || (Boolean(editingId) && !hasUnsavedChanges)}
+                  title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span

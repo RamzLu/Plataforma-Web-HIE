@@ -992,6 +992,10 @@ export const CmsContenidoGraficoEditModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSaving) return;
+    if (!hasUnsavedChanges) {
+      toast.error("No se detectaron cambios para actualizar.");
+      return;
+    }
 
     // =========================================================================
     // ENVÍO ESPECÍFICO: RESIDENCIAS (TARJETA DESTACADA CON 1 IMAGEN Y BOTÓN)
@@ -2468,7 +2472,8 @@ export const CmsContenidoGraficoEditModal = ({
               type="submit"
               className="btn-cerrar-rojo"
               style={{ backgroundColor: "#2b5b94" }}
-              disabled={isSaving}
+              disabled={isSaving || !hasUnsavedChanges}
+              title={!hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
             >
               {isSaving ? (
                 <span
