@@ -1283,7 +1283,7 @@ z-index: 100010 !important;
   .noticias-page .public-page-banner,
   .news-header-fluid {
     padding: 110px 20px 45px 20px !important;
-    border-radius: 0 0 24px 24px !important;
+    border-radius: 0 !important;
     margin-bottom: 28px !important;
   }
   .noticias-page .public-page-banner-inner,
@@ -1313,7 +1313,7 @@ z-index: 100010 !important;
   .news-header-fluid {
     padding: 95px 16px 36px 16px !important;
     margin-bottom: 24px !important;
-    border-radius: 0 0 20px 20px !important;
+    border-radius: 0 !important;
   }
   .noticias-page .public-page-banner-inner,
   .news-header-inner {

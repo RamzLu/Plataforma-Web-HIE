@@ -5,7 +5,7 @@
   min-height: 550px;
   overflow: hidden;
   background-color: #0c2340;
-  border-radius: 0 0 32px 32px;
+  border-radius: 0 !important;
   box-shadow: 0 20px 45px -15px rgba(12, 35, 64, 0.25);
 }
 
@@ -58,7 +58,7 @@
   max-height: 650px;
   position: relative;
   background-color: #0c2340;
-  border-radius: 0 0 32px 32px;
+  border-radius: 0 !important;
   overflow: hidden;
 }
 
@@ -72,7 +72,7 @@
   aspect-ratio: 1501 / 641;
   overflow: hidden;
   background-color: #0c2340;
-  border-radius: 0 0 32px 32px;
+  border-radius: 0 !important;
   box-shadow:
     0 22px 48px -14px rgba(12, 35, 64, 0.24),
     0 6px 18px rgba(12, 35, 64, 0.08);
@@ -326,7 +326,7 @@
   .carousel-container,
   .hero-carousel,
   .carousel-section {
-    border-radius: 0 0 26px 26px;
+    border-radius: 0 !important;
   }
 
   .carousel-title {
@@ -341,7 +341,7 @@
     height: 390px;
     min-height: 390px;
     aspect-ratio: unset;
-    border-radius: 0 0 22px 22px;
+    border-radius: 0 !important;
   }
 
   .carousel-inner {

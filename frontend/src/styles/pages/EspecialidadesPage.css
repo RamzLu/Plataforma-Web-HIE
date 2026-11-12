@@ -748,7 +748,7 @@
   .especialidades-page .public-page-banner,
   .esp-header-fluid {
     padding: 110px 20px 45px 20px !important;
-    border-radius: 0 0 24px 24px !important;
+    border-radius: 0 !important;
     margin-bottom: 28px !important;
   }
   .especialidades-page .public-page-banner-inner,
@@ -771,7 +771,7 @@
   .esp-header-fluid {
     padding: 95px 16px 36px 16px !important;
     margin-bottom: 24px !important;
-    border-radius: 0 0 20px 20px !important;
+    border-radius: 0 !important;
   }
   .especialidades-page .public-page-banner-inner,
   .esp-header-inner {
