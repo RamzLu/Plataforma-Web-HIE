@@ -27,32 +27,39 @@
   display: block;
 }
 
+/* Botón flotante Hero del video (Píldora Soft UI) */
 .hero-video-btn {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  background-color: #1e5188af;
+  bottom: 25px;
+  right: 25px;
+  background: rgba(43, 91, 148, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
   border: none;
-  border-radius: 12px;
-  padding: 14px 28px;
-  font-size: 2rem;
-  font-weight: 300;
-  display: flex;
+  border-radius: 50px;
+  padding: 12px 28px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
   letter-spacing: 0.5px;
-  transition: background-color 0.2s ease;
+  box-shadow: 0 8px 24px rgba(12, 35, 64, 0.25);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hero-video-btn:hover {
-  background-color: #143a63;
+  transform: translateY(-2px);
+  background-color: #0d4077;
+  box-shadow: 0 12px 28px rgba(13, 64, 119, 0.35);
 }
 
 .play-triangle {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
+
 .about-main-wrapper {
   max-width: 1100px;
   width: 100%;
@@ -61,7 +68,9 @@
   display: flex;
   flex-direction: column;
   gap: 60px;
+  box-sizing: border-box;
 }
+
 .about-top-grid {
   display: grid;
   grid-template-columns: 1fr 280px;
@@ -102,54 +111,68 @@
   font-weight: 600;
 }
 
+/* Barra lateral interactiva con enlaces píldora Soft UI */
 .about-right-sidebar {
-  border-top: 1px solid #6188b7;
+  border: none;
+  width: 100%;
 }
 
 .sidebar-menu-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .sidebar-menu-list li {
-  border-bottom: 1px solid #6188b7;
+  border: none;
 }
 
 .sidebar-menu-list a {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
+  padding: 14px 22px;
   text-decoration: none;
-  color: #122e55;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 1px;
-  transition: color 0.2s ease;
+  color: #0d4077;
+  background-color: #f8fafc;
+  border-radius: 50px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  box-shadow: 0 4px 14px rgba(12, 35, 64, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sidebar-menu-list a:hover {
+  background-color: #eaf6fc;
   color: #2b5b94;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(43, 91, 148, 0.14);
 }
 
 .sidebar-menu-list .arrow {
-  font-size: 0.9rem;
-  transition: transform 0.2s ease;
+  font-size: 0.95rem;
+  transition: transform 0.25s ease;
+  color: #2b5b94;
 }
 
 .sidebar-menu-list a:hover .arrow {
   transform: translateX(4px);
 }
 
+/* Estadísticas institucionales con separadores suaves */
 .about-stats-clean {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   align-items: center;
   padding: 40px 0;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  border-top: 1px solid rgba(43, 91, 148, 0.1);
+  border-bottom: 1px solid rgba(43, 91, 148, 0.1);
 }
 
 .stat-clean-item {
@@ -177,6 +200,7 @@
   max-width: 200px;
   line-height: 1.35;
 }
+
 #sede-central {
   scroll-margin-top: 170px;
 }
@@ -199,23 +223,24 @@
   width: 100%;
 }
 
+/* Tarjeta Sede Central Soft UI */
 .single-sede-card {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 35px;
   align-items: center;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border: none;
+  border-radius: 24px;
   overflow: hidden;
-  padding: 24px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  padding: 28px;
+  box-shadow: 0 14px 35px -5px rgba(12, 35, 64, 0.07), 0 4px 15px -3px rgba(12, 35, 64, 0.03);
 }
 
 .single-sede-card .sede-img-box {
   width: 100%;
   height: 280px;
-  border-radius: 8px;
+  border-radius: 18px;
   overflow: hidden;
 }
 
@@ -270,8 +295,8 @@
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
-  padding-top: 10px;
-  border-top: 1px solid #f1f5f9;
+  padding-top: 14px;
+  border-top: 1px solid rgba(43, 91, 148, 0.08);
 }
 
 .badge-item {
@@ -281,10 +306,11 @@
   font-size: 0.82rem;
   font-weight: 600;
   color: #2b5b94;
-  background-color: #f1f5f9;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
+  background-color: #eaf6fc;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(43, 91, 148, 0.06);
 }
 
 .badge-item svg {
@@ -313,10 +339,11 @@
   position: relative;
   width: 100%;
   height: 480px;
-  border-radius: 6px;
+  border-radius: 22px;
   overflow: hidden;
   background-color: #000000;
   cursor: pointer;
+  box-shadow: 0 16px 40px -8px rgba(12, 35, 64, 0.16);
 }
 
 .video-cover-img {
@@ -346,18 +373,17 @@
 }
 
 .play-circle-btn {
-  width: 70px;
-  height: 70px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.92);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    background-color 0.2s ease;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .play-circle-btn .play-icon {
@@ -367,8 +393,9 @@
 }
 
 .video-frame-container:hover .play-circle-btn {
-  transform: scale(1.1);
+  transform: scale(1.08) translateY(-2px);
   background-color: #ffffff;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
 }
 
 .video-caption-text {
@@ -390,15 +417,14 @@
     gap: 30px;
   }
 
-  .about-sedes-grid {
-    grid-template-columns: 1fr;
-  }
-
   .video-frame-container {
     height: 320px;
   }
 }
 
+/* =========================================================
+   SECCIÓN AUTORIDADES (SOFT UI)
+   ========================================================= */
 .about-authorities-section {
   scroll-margin-top: 100px;
   padding-top: 20px;
@@ -410,8 +436,8 @@
 .authorities-header {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid #cbd5e1;
-  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(43, 91, 148, 0.12);
+  padding-bottom: 16px;
 }
 
 .authorities-tag {
@@ -440,19 +466,18 @@
 
 .authority-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: none;
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 14px 35px -5px rgba(12, 35, 64, 0.07), 0 4px 15px -3px rgba(12, 35, 64, 0.03);
   display: flex;
   flex-direction: column;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .authority-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 24px 48px -8px rgba(43, 91, 148, 0.16), 0 8px 18px -4px rgba(12, 35, 64, 0.05);
 }
 
 .authority-img-box {
@@ -460,6 +485,7 @@
   height: 260px;
   background-color: #f1f5f9;
   overflow: hidden;
+  border-radius: 24px 24px 0 0;
 }
 
 .authority-img-box img {
@@ -470,7 +496,7 @@
 }
 
 .authority-info {
-  padding: 22px 20px;
+  padding: 24px 22px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -479,7 +505,7 @@
 
 .authority-role {
   color: #2b5b94;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -493,13 +519,16 @@
 }
 
 .authority-spec {
-  color: #0453c3;
-  font-size: 2rem;
-  font-weight: 300;
-  line-height: 1.4;
-  margin: 2px 0 0 0;
+  color: #475569;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 4px 0 0 0;
 }
 
+/* =========================================================
+   SECCIÓN VALORES INSTITUCIONALES (SOFT UI)
+   ========================================================= */
 .about-valores-section {
   scroll-margin-top: 100px;
   display: flex;
@@ -510,8 +539,8 @@
 .valores-header {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid #cbd5e1;
-  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(43, 91, 148, 0.12);
+  padding-bottom: 16px;
 }
 
 .valores-tag {
@@ -538,25 +567,26 @@
 }
 
 .valor-clean-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 24px 20px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 6px rgba(13, 34, 63, 0.02);
-    transition: border-color 0.2s ease, transform 0.2s ease;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 24px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 14px 35px -5px rgba(12, 35, 64, 0.07), 0 4px 15px -3px rgba(12, 35, 64, 0.03);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .valor-clean-card:hover {
-   transform: translateY(-2px);
-  border-color: #0066cc;
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px -8px rgba(43, 91, 148, 0.16), 0 8px 18px -4px rgba(12, 35, 64, 0.05);
 }
 
 .valor-icon-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  background-color: #f1f5f9;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background-color: #eaf6fc;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -571,13 +601,13 @@
 
 .valor-card-title {
   color: #041a35;
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 600;
   margin: 0 0 10px 0;
 }
 
 .valor-card-desc {
-  color: #1a2944;
+  color: #334155;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.6;
@@ -589,7 +619,7 @@
   height: 100%;
   object-fit: cover;
   background-color: #000000;
-  border-radius: 6px;
+  border-radius: 22px;
 }
 
 /* RESPONSIVE VALORES */
@@ -599,7 +629,7 @@
   }
 }
 
-/* RESPONSIVE */
+/* RESPONSIVE AUTORIDADES */
 @media (max-width: 992px) {
   .authorities-grid {
     grid-template-columns: repeat(2, 1fr);

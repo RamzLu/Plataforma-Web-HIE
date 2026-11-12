@@ -11,6 +11,7 @@
     "Segoe UI",
     Roboto,
     sans-serif;
+  box-sizing: border-box;
 }
 
 .timeline-interactive-container {
@@ -25,7 +26,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  border-bottom: 1px solid #cbd5e1;
+  border-bottom: 1px solid rgba(43, 91, 148, 0.12);
   padding-bottom: 18px;
 }
 
@@ -45,7 +46,7 @@
 .timeline-header-title {
   color: #2b5b94;
   font-size: 2.2rem;
-  font-weight: 300;
+  font-weight: 300; /* Grosor delgado reglamentario */
   letter-spacing: 1.5px;
   margin: 4px 0 0 0;
   text-transform: uppercase;
@@ -61,27 +62,28 @@
   text-align: right;
 }
 
-/* BARRA DE AÑOS */
+/* BARRA DE AÑOS (BOTONES PÍLDORA SOFT UI) */
 .timeline-years-bar {
   display: flex;
-  gap: 15px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
 .year-tab-btn {
   background-color: #ffffff;
-  color: #0a2c5d;
-  border: 1px solid #cbd5e1;
-  padding: 10px 24px;
-  font-size: 1.2rem;
+  color: #0d223f;
+  border: none;
+  border-radius: 50px;
+  padding: 11px 26px;
+  font-size: 1.15rem;
   font-weight: 600;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 14px rgba(12, 35, 64, 0.06);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .year-tab-btn .btn-dot {
@@ -89,20 +91,21 @@
   height: 10px;
   border-radius: 50%;
   background-color: var(--accent-color, #2b5b94);
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease;
 }
 
 .year-tab-btn:hover {
-  border-color: var(--accent-color, #2b5b94);
   color: var(--accent-color, #2b5b94);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(43, 91, 148, 0.14);
 }
 
 .year-tab-btn.active {
-  background-color: #bfe1f7;
-  border: 2px solid var(--accent-color, #6caeff);
+  background-color: #eaf6fc;
+  border: none;
   color: #0c2340;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(43, 91, 148, 0.18);
+  transform: translateY(-2px);
 }
 
 .year-tab-btn.active .btn-dot {
@@ -129,14 +132,17 @@
   position: absolute;
   top: 15px;
   left: 15px;
-  background-color: rgba(2, 31, 66, 0.764);
-  backdrop-filter: blur(4px);
+  background-color: rgba(2, 31, 66, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
+  border-radius: 50px;
   font-size: 0.78rem;
   font-weight: 600;
-  padding: 6px 14px;
+  padding: 6px 16px;
   letter-spacing: 1px;
   z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .timeline-road-img {
@@ -152,12 +158,14 @@
   display: flex;
 }
 
+/* Tarjeta de Detalle Soft UI */
 .timeline-detail-card {
   width: 100%;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
+  border: none;
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 14px 35px -5px rgba(12, 35, 64, 0.07), 0 4px 15px -3px rgba(12, 35, 64, 0.03);
   display: flex;
   flex-direction: column;
 }
@@ -167,6 +175,8 @@
   height: 220px;
   position: relative;
   background-color: #e2e8f0;
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
 }
 
 .detail-photo {
@@ -178,19 +188,19 @@
 
 .detail-year-badge {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  bottom: 14px;
+  right: 14px;
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  padding: 4px 14px;
-  border-radius: 5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 5px 16px;
+  border-radius: 50px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
   letter-spacing: 1px;
 }
 
 .detail-body {
-  padding: 25px;
+  padding: 26px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -198,7 +208,7 @@
 }
 
 .detail-category {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -213,9 +223,9 @@
 }
 
 .detail-desc {
-  color: #092249;
-  font-size: 1.4rem;
-  font-weight: 300;
+  color: #334155;
+  font-size: 1.05rem;
+  font-weight: 400;
   line-height: 1.6;
   margin: 6px 0 0 0;
 }

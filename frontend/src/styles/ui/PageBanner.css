@@ -22,7 +22,7 @@
   align-items: center !important;
   padding: 125px 24px 55px 24px !important;
   margin: 0 0 35px 0 !important;
-  border-radius: 0 0 32px 32px !important;
+  border-radius: 0 !important;
   box-shadow: 0 14px 35px -8px rgba(12, 35, 64, 0.08) !important;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 
@@ -139,7 +139,7 @@
   .prof-header-fluid,
   .esp-header-fluid {
     padding: 110px 20px 45px 20px !important;
-    border-radius: 0 0 24px 24px !important;
+    border-radius: 0 !important;
     margin-bottom: 28px !important;
   }
   
@@ -175,7 +175,7 @@
   .esp-header-fluid {
     padding: 95px 16px 36px 16px !important;
     margin-bottom: 24px !important;
-    border-radius: 0 0 20px 20px !important;
+    border-radius: 0 !important;
   }
 
   .public-page-banner-inner,

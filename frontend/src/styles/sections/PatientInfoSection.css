@@ -186,17 +186,17 @@
   margin: 12px 0 0 0;
 }
 
-/* LADO DERECHO: IMAGEN SOFT UI CON CURVAS ORGÁNICAS */
+/* LADO DERECHO: IMAGEN SIN MARCO SOFT UI */
 .patient-image-right {
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: 28px;
-  padding: 10px;
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
   box-shadow:
-    0 24px 48px -12px rgba(43, 91, 148, 0.15),
-    0 8px 20px -6px rgba(12, 35, 64, 0.06);
+    0 20px 45px -10px rgba(43, 91, 148, 0.16),
+    0 6px 18px rgba(12, 35, 64, 0.05);
   box-sizing: border-box;
   overflow: hidden;
   transition:
@@ -207,7 +207,7 @@
 .patient-image-right:hover {
   transform: translateY(-6px);
   box-shadow:
-    0 28px 54px -10px rgba(43, 91, 148, 0.2),
+    0 28px 54px -10px rgba(43, 91, 148, 0.22),
     0 10px 24px -6px rgba(12, 35, 64, 0.08);
 }
 
@@ -217,7 +217,7 @@
   object-fit: cover;
   object-position: center;
   display: block;
-  border-radius: 20px;
+  border-radius: 24px;
 }
 
 /* =========================================
