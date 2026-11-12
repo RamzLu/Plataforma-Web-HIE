@@ -1,38 +1,48 @@
 .breadcrumb-container {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  font-size: 1.3rem;
-  font-weight: 300; /* Fuente ligera como en tu imagen */
-  text-transform: uppercase;
-  margin-bottom: 20px;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  margin: 0 0 12px 0 !important;
+  line-height: 1.2 !important;
 }
 
 .breadcrumb-link {
-  color: #006eb3; /* Azul del enlace */
-  text-decoration: none;
-  transition: color 0.2s ease;
+  color: #2b5b94 !important;
+  text-decoration: none !important;
+  font-weight: 700 !important;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .breadcrumb-link:hover {
-  text-decoration: underline;
-  color: #004d80;
+  color: #0c2340 !important;
+  text-decoration: underline !important;
 }
 
 .breadcrumb-separator {
-  margin: 0 12px;
-  color: #1c1e21; /* Negro para la barra */
-  font-weight: 300;
+  margin: 0 10px !important;
+  color: #94a3b8 !important;
+  font-weight: 400 !important;
+  user-select: none !important;
 }
 
 .breadcrumb-current {
-  color: #1c1e21; /* Negro para la página actual */
+  color: #0c2340 !important;
+  font-weight: 600 !important;
 }
 
-/* Responsividad para celulares */
+/* Responsividad para móviles */
 @media (max-width: 768px) {
   .breadcrumb-container {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
+    font-size: 0.82rem !important;
+    margin-bottom: 8px !important;
+  }
+  .breadcrumb-separator {
+    margin: 0 6px !important;
   }
 }

@@ -2,9 +2,11 @@
   position: relative;
   width: 100%;
   height: 75vh;
-  min-height: 550px; /* Un poco más de espacio para que respire la imagen */
+  min-height: 550px;
   overflow: hidden;
-  background-color: #0c2340; /* Color de fondo por si la imagen tarda en cargar */
+  background-color: #0c2340;
+  border-radius: 0 0 32px 32px;
+  box-shadow: 0 20px 45px -15px rgba(12, 35, 64, 0.25);
 }
 
 .carousel-slide {
@@ -22,22 +24,14 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(12, 35, 64, 0.85) 0%, rgba(12, 35, 64, 0.4) 50%, rgba(12, 35, 64, 0.1) 100%);
+  background: linear-gradient(
+    95deg,
+    rgba(12, 35, 64, 0.88) 0%,
+    rgba(12, 35, 64, 0.46) 52%,
+    rgba(12, 35, 64, 0.12) 100%
+  );
   pointer-events: none;
   z-index: 2;
-}
-
-.carousel-static-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding-left: 8%;
-  z-index: 5;
-  pointer-events: none;
 }
 
 .carousel-img {
@@ -45,9 +39,16 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transform: scale(1.01);
+  transition: transform 6s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
 .carousel-slide.active {
   opacity: 1;
+}
+
+.carousel-slide.active .carousel-img {
+  transform: scale(1);
 }
 
 .carousel-section {
@@ -57,6 +58,8 @@
   max-height: 650px;
   position: relative;
   background-color: #0c2340;
+  border-radius: 0 0 32px 32px;
+  overflow: hidden;
 }
 
 .carousel-container {
@@ -66,11 +69,13 @@
   margin: 0;
   left: 0;
   right: 0;
-  margin-left: 0;
-  margin-right: 0;
-  aspect-ratio: 1501 / 641; 
+  aspect-ratio: 1501 / 641;
   overflow: hidden;
   background-color: #0c2340;
+  border-radius: 0 0 32px 32px;
+  box-shadow:
+    0 22px 48px -14px rgba(12, 35, 64, 0.24),
+    0 6px 18px rgba(12, 35, 64, 0.08);
 }
 
 .carousel-track {
@@ -82,7 +87,6 @@
 .carousel-inner {
   width: 100%;
   height: 100%;
-  /* CLAVE: Alineamos también aquí por si tu JSX usa esta clase en lugar de slide */
   background-position: top center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -102,9 +106,9 @@
   padding: 0 10%;
   background: linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.75) 0%,
-    rgba(0, 0, 0, 0.3) 50%,
-    rgba(0, 0, 0, 0) 100%
+    rgba(12, 35, 64, 0.8) 0%,
+    rgba(12, 35, 64, 0.35) 50%,
+    rgba(12, 35, 64, 0) 100%
   );
   z-index: 5;
   pointer-events: none;
@@ -114,15 +118,46 @@
   pointer-events: auto;
 }
 
+/* Capa de contenido superpuesto estático */
+.carousel-static-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 8%;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.carousel-content-box {
+  max-width: 640px;
+  pointer-events: auto;
+  animation: heroContentFadeIn 0.85s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes heroContentFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .carousel-title {
   color: #ffffff;
-  font-size: 3.8rem; /* Un poco más grande para impacto visual */
-  font-weight: 300; /* Letra fina y elegante */
-  line-height: 1.1;
-  letter-spacing: 2px; /* Separación de letras estilo premium */
-  margin: 0 0 30px 0;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  font-size: clamp(1.8rem, 3.5vw, 3.2rem);
+  font-weight: 300;
+  line-height: 1.15;
+  margin: 0 0 28px 0;
   text-transform: uppercase;
+  text-shadow: 0 4px 16px rgba(12, 35, 64, 0.45);
+  letter-spacing: 0.5px;
   font-family:
     system-ui,
     -apple-system,
@@ -132,97 +167,140 @@
     sans-serif;
 }
 
-.carousel-btn {
-  display: inline-block;
-  padding: 12px 35px;
-  border: 1px solid #ffffff;
-  border-radius: 30px;
-  background-color: transparent;
+.carousel-btn,
+.carousel-btn-conocenos {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: #ffffff;
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 1px;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  padding: 13px 34px;
+  border-radius: 50px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 1.1px;
   text-transform: uppercase;
   text-decoration: none;
-  transition: all 0.3s ease;
+  overflow: hidden;
+  transition:
+    transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    background-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  box-shadow:
+    0 8px 24px rgba(12, 35, 64, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   pointer-events: auto;
 }
 
-.carousel-btn:hover {
+.carousel-btn:hover,
+.carousel-btn-conocenos:hover {
   background-color: #ffffff;
-  color: #006eb3;
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+  color: #0c2340;
+  border-color: #ffffff;
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(12, 35, 64, 0.35);
 }
 
-/* Estilos de las flechas de navegación */
+.carousel-btn:active,
+.carousel-btn-conocenos:active {
+  transform: scale(0.98);
+}
+
+/* Estilos de las flechas de navegación Soft UI */
 .carousel-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(12, 35, 64, 0.6);
-  color: white;
-  border: none;
-  width: 45px;
-  height: 45px;
+  background-color: rgba(12, 35, 64, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   z-index: 10;
-  transition: background-color 0.2s ease;
+  box-shadow: 0 8px 20px rgba(12, 35, 64, 0.28);
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .carousel-arrow:hover {
-  background-color: rgba(12, 35, 64, 0.9);
+  background-color: #2b5b94;
+  border-color: rgba(255, 255, 255, 0.55);
+  transform: translateY(-50%) scale(1.12);
+  box-shadow: 0 12px 26px rgba(12, 35, 64, 0.4);
+}
+
+.carousel-arrow:active {
+  transform: translateY(-50%) scale(0.96);
 }
 
 .carousel-arrow-left {
-  left: 20px;
+  left: 24px;
 }
+
 .carousel-arrow-right {
-  right: 20px; 
+  right: 24px;
 }
+
 .right-arrow {
   right: 30px;
 }
 
 .carousel-indicators {
   position: absolute;
-  bottom: 15px;
+  bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 50px;
+  background: rgba(12, 35, 64, 0.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   z-index: 10;
 }
 
 .carousel-indicator {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   padding: 0;
   border: none;
-  border-radius: 50%;
+  border-radius: 50px;
   background-color: rgba(255, 255, 255, 0.48);
   cursor: pointer;
-  transition: background-color 0.25s ease, transform 0.25s ease;
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .carousel-indicator.active {
+  width: 26px;
   background-color: #ffffff;
-  transform: scale(1.25);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.55);
 }
 
 .carousel-indicator:hover {
   background-color: #ffffff;
+  transform: scale(1.18);
 }
 
 /* Estilos de los puntos indicadores inferiores */
 .carousel-dots-container {
   position: absolute;
-  bottom: 20px;
+  bottom: 22px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -238,119 +316,45 @@
   transition: color 0.3s ease;
 }
 
-.carousel-dot.active {
-  color: #ffffff;
-}
-
+.carousel-dot.active,
 .carousel-dot:hover {
   color: #ffffff;
 }
 
 /* Responsividad */
 @media (max-width: 992px) {
-  .carousel-title {
-    font-size: 2.8rem;
-  }
-}
-
-@media (max-width: 768px) {
+  .carousel-container,
   .hero-carousel,
   .carousel-section {
-    height: 65vh;
-  }
-
-  .carousel-overlay {
-    padding: 0 5%;
-    /* En móviles, oscurecemos un poco más el fondo parejo para legibilidad */
-    background: rgba(0, 0, 0, 0.5);
-    align-items: center;
-    text-align: center;
+    border-radius: 0 0 26px 26px;
   }
 
   .carousel-title {
-    font-size: 2.2rem;
-    text-align: center;
-  }
-
-  .carousel-arrow {
-    display: none;
+    font-size: 2.4rem;
   }
 }
 
-/* Capa de contenido superpuesto estático */
-.carousel-static-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding-left: 8%; /* Ajusta el margen izquierdo según el diseño general */
-  z-index: 5;
-  pointer-events: none; /* Permite hacer clic en las flechas y fondo si es necesario */
-}
-
-.carousel-content-box {
-  max-width: 600px;
-  pointer-events: auto; /* Reactiva los clics solo para el texto y el botón */
-}
-
-.carousel-title {
-  color: #ffffff;
-  font-size: clamp(1.8rem, 3.5vw, 3.2rem);
-  font-weight: 200;
-  line-height: 1.15;
-  margin: 0 0 24px 0;
-  text-transform: uppercase;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-  letter-spacing: 0.5px;
-}
-
-.carousel-btn-conocenos {
-  display: inline-block;
-  background: transparent;
-  color: #ffffff;
-  border: 2px solid #ffffff;
-  padding: 12px 32px;
-  border-radius: 30px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.carousel-btn-conocenos:hover {
-  background-color: #ffffff;
-  color: #0c2340;
-}
-/* Adaptación para dispositivos móviles y pantallas pequeñas */
-/* Adaptación para dispositivos móviles y pantallas pequeñas */
 @media screen and (max-width: 768px) {
   .carousel-container,
   .hero-carousel,
   .carousel-section {
-    height: 380px; /* Damos un poco de altura base */
-    min-height: 380px;
+    height: 390px;
+    min-height: 390px;
     aspect-ratio: unset;
+    border-radius: 0 0 22px 22px;
   }
 
-  /* === SOLUCIÓN 1: DESPLAZAR LA FOTO EN MÓVILES === */
   .carousel-inner {
-    /* Forzamos a que la imagen se alinee a la derecha. 
-       Esto "empujará" el logo del Ministerio (que está a la izquierda) 
-       fuera de la pantalla en los celulares. */
-    background-position: right center !important; 
+    background-position: right center !important;
   }
 
+  .carousel-overlay,
   .carousel-static-overlay {
-    padding: 0 15px;
+    padding: 0 20px;
     text-align: center;
     justify-content: center;
-    background: rgba(12, 35, 64, 0.45); /* Un poco más oscuro para máxima legibilidad */
+    align-items: center;
+    background: rgba(12, 35, 64, 0.48);
   }
 
   .carousel-content-box {
@@ -361,37 +365,41 @@
   }
 
   .carousel-title {
-    font-size: 1.4rem; /* Un tamaño ideal y muy legible para celulares */
+    font-size: 1.45rem;
     line-height: 1.35;
     margin-bottom: 20px;
     margin-top: 20px;
     padding: 0 10px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); 
+    text-align: center;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
   }
 
   .carousel-btn-conocenos {
-    padding: 10px 26px;
+    padding: 11px 28px;
     font-size: 0.85rem;
-    background-color: rgba(12, 35, 64, 0.7);
+    border-radius: 50px;
+    background-color: rgba(12, 35, 64, 0.72);
   }
 
-  /* === SOLUCIÓN 2: ARREGLAR LOS PUNTITOS (INDICADORES) === */
+  .carousel-arrow {
+    display: none;
+  }
+
   .carousel-dots-container,
   .carousel-indicators {
     display: flex !important;
-    flex-direction: row !important; /* Forza a que estén en línea horizontal */
+    flex-direction: row !important;
     justify-content: center;
-    gap: 12px !important;
-    bottom: 20px;
+    gap: 10px !important;
+    bottom: 16px;
   }
 
   .carousel-dot {
-    /* Los forzamos a ser puntos redondos en vez de "palitos" verticales */
     width: 10px !important;
     height: 10px !important;
     border-radius: 50% !important;
     background-color: rgba(255, 255, 255, 0.4);
-    color: transparent; /* Oculta si es texto/icono de fuente */
+    color: transparent;
     overflow: hidden;
     flex-shrink: 0;
   }

@@ -1,0 +1,554 @@
+/* =========================================================
+   HOME PAGE - Capa de fondo continua unificada,
+   alineación milimétrica estandarizada a 1240px,
+   logos estéticos con máscara radial (cero cortes)
+   y degradado ascendente suave hacia el Footer.
+   ========================================================= */
+
+.home-page {
+  --home-container-max-w: 1240px;
+  --home-container-pad: 24px;
+  --home-shadow-rest:
+    0 14px 35px -5px rgba(12, 35, 64, 0.08),
+    0 4px 15px -3px rgba(12, 35, 64, 0.04);
+  --home-shadow-hover:
+    0 24px 48px -8px rgba(43, 91, 148, 0.18),
+    0 8px 20px -4px rgba(12, 35, 64, 0.07);
+  --home-shadow-soft: 0 6px 18px -6px rgba(12, 35, 64, 0.1);
+  --home-glass: rgba(255, 255, 255, 0.92);
+  --home-glass-soft: rgba(248, 250, 252, 0.88);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  overflow-x: hidden;
+  padding-bottom: 72px;
+  isolation: isolate;
+
+  /* Fondo continuo general sin divisiones por secciones */
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f8fafc 22%,
+    #e9ebee calc(100% - 760px),
+    #a4c2d6 calc(100% - 470px),
+    #2b5b94 calc(100% - 190px),
+    #0d4077 100%
+  );
+}
+
+/* =========================================================
+   1. LOGOS TRANSLÚCIDOS ESTÉTICOS CON MÁSCARA RADIAL (CERO CORTES)
+   ========================================================= */
+.home-watermark {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  object-fit: contain;
+  /* Escala estética proporcionada */
+  width: clamp(320px, 42vw, 620px);
+  max-width: 90vw;
+  height: auto;
+  /* Máscara de desvanecimiento suave para que jamás corte en bordes */
+  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 90%);
+  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 90%);
+}
+
+.home-watermark--top {
+  top: 36%;
+  right: 4%;
+  opacity: 0.07;
+  filter: blur(0.5px);
+  transform: rotate(-6deg);
+}
+
+.home-watermark--bottom {
+  bottom: 120px;
+  left: 3%;
+  opacity: 0.12;
+  mix-blend-mode: soft-light;
+  filter: blur(0.5px);
+  transform: rotate(8deg);
+}
+
+/* El carrusel y las secciones van sobre la capa de fondo */
+.home-page > .carousel-container,
+.home-page > section,
+.home-page > div {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* =========================================================
+   2. EJE VERTICAL Y CONTENEDOR ESTANDARIZADO (1240px)
+   ========================================================= */
+.home-page .news-section,
+.home-page .home-news-preview,
+.home-page .patient-section,
+.home-page .aprende-section,
+.home-page .home-map-banner-section {
+  width: 100%;
+  background: transparent !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* Todos los contenedores de las secciones comparten exactamente el mismo ancho y padding */
+.home-page .news-container,
+.home-page .preview-container,
+.home-page .patient-container,
+.home-page .aprende-container,
+.home-page .home-map-banner-container {
+  width: 100% !important;
+  max-width: var(--home-container-max-w) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: var(--home-container-pad) !important;
+  padding-right: var(--home-container-pad) !important;
+  box-sizing: border-box !important;
+}
+
+/* Espaciados verticales armónicos y compactos */
+.home-page .news-section {
+  padding: 56px 0 28px 0 !important;
+}
+
+.home-page .home-news-preview {
+  padding: 28px 0 !important;
+}
+
+.home-page .patient-section {
+  padding: 28px 0 !important;
+}
+
+.home-page .aprende-section {
+  padding: 28px 0 !important;
+}
+
+.home-page .home-map-banner-section {
+  padding: 28px 0 0 0 !important;
+}
+
+/* Estandarización de encabezados de secciones (mismo alineamiento y espaciado) */
+.home-page .news-header,
+.home-page .preview-header,
+.home-page .patient-section-header,
+.home-page .patient-container > div:first-child .news-title,
+.home-page .aprende-header {
+  margin-bottom: 26px !important;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.home-page .preview-header {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Subtítulos y Títulos unificados con font-weight: 300 intacto */
+.home-page .news-title,
+.home-page .preview-title,
+.home-page .title-blue,
+.home-page .aprende-title,
+.home-page .banner-title {
+  color: #2b5b94;
+  font-size: 2.2rem;
+  font-weight: 300 !important;
+  letter-spacing: 1.5px;
+  margin: 4px 0 0 0;
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+
+.home-page .aprende-title {
+  font-size: 2.4rem;
+}
+
+.home-page .news-subtitle,
+.home-page .preview-subtitle,
+.home-page .subtitle-dark,
+.home-page .aprende-subtitle,
+.home-page .banner-tag {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 2px;
+}
+
+/* =========================================================
+   3. NIVELACIÓN DE GRILLAS Y TARJETAS (ALIGN-ITEMS: STRETCH)
+   ========================================================= */
+.home-page .editorial-columns-grid,
+.home-page .preview-grid,
+.home-page .aprende-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.home-page .editorial-column,
+.home-page .preview-card,
+.home-page .aprende-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* Nivelación del layout en dos columnas (Pacientes y Aprendé) */
+.home-page .patient-split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+  width: 100%;
+}
+
+.home-page .patient-content-left,
+.home-page .patient-image-right {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.home-page .aprende-container {
+  display: grid;
+  grid-template-columns: 0.95fr 1.15fr;
+  gap: 40px;
+  align-items: center;
+  width: 100%;
+}
+
+.home-page .home-map-banner-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   4. CERO BORDES - ACABADO SOFT UI PURO (SOLO SOMBRAS)
+   ========================================================= */
+.home-page .editorial-column,
+.home-page .location-banner,
+.home-page .preview-card,
+.home-page .accordion-clean-item,
+.home-page .patient-image-right,
+.home-page .image-frame,
+.home-page .aprende-card,
+.home-page .home-map-banner-card {
+  border: none !important;
+  background: var(--home-glass) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--home-shadow-rest) !important;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.home-page .editorial-column {
+  border-radius: 26px;
+}
+.home-page .location-banner,
+.home-page .home-map-banner-card,
+.home-page .patient-image-right,
+.home-page .image-frame {
+  border-radius: 28px;
+}
+.home-page .preview-card,
+.home-page .aprende-card,
+.home-page .accordion-clean-item {
+  border-radius: 22px;
+}
+
+.home-page .editorial-column:hover,
+.home-page .location-banner:hover,
+.home-page .preview-card:hover,
+.home-page .aprende-card:hover,
+.home-page .home-map-banner-card:hover,
+.home-page .patient-image-right:hover,
+.home-page .image-frame:hover,
+.home-page .accordion-clean-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--home-shadow-hover) !important;
+}
+
+.home-page .accordion-clean-item.active {
+  background: #ffffff !important;
+  box-shadow: var(--home-shadow-hover) !important;
+}
+
+/* Elementos internos Soft UI */
+.home-page .meta-card,
+.home-page .editorial-sublink,
+.home-page .category-tag,
+.home-page .preview-date,
+.home-page .preview-read-more,
+.home-page .preview-view-all,
+.home-page .card-badge,
+.home-page .card-action-link,
+.home-page .card-image-box,
+.home-page .home-map-banner-preview,
+.home-page .banner-tag,
+.home-page .btn-building-info,
+.home-page .btn-how-to-arrive,
+.home-page .banner-btn,
+.home-page .location-icon-bubble,
+.home-page .accordion-clean-arrow,
+.home-page .editorial-alert-box {
+  border: none !important;
+}
+
+.home-page .meta-card,
+.home-page .editorial-sublink,
+.home-page .preview-read-more,
+.home-page .card-action-link,
+.home-page .btn-building-info {
+  background: var(--home-glass-soft);
+  box-shadow: var(--home-shadow-soft);
+}
+
+.home-page .preview-view-all {
+  background: var(--home-glass);
+  box-shadow: var(--home-shadow-soft);
+}
+
+.home-page .accordion-clean-arrow,
+.home-page .location-icon-bubble {
+  box-shadow: var(--home-shadow-soft);
+}
+
+.home-page .editorial-alert-box {
+  background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
+  box-shadow: 0 8px 20px -8px rgba(220, 38, 38, 0.22);
+}
+
+.home-page .home-map-banner-preview {
+  box-shadow: inset 0 2px 10px rgba(12, 35, 64, 0.05);
+}
+
+.home-page .accordion-clean-content {
+  border-top: none;
+}
+
+/* Botones en píldora con elevación suave */
+.home-page .editorial-sublink,
+.home-page .preview-read-more,
+.home-page .preview-view-all,
+.home-page .card-action-link,
+.home-page .btn-building-info,
+.home-page .btn-how-to-arrive,
+.home-page .banner-btn,
+.home-page .carousel-btn-conocenos {
+  border-radius: 50px !important;
+}
+
+.home-page .editorial-sublink:hover,
+.home-page .preview-view-all:hover,
+.home-page .btn-building-info:hover,
+.home-page .btn-how-to-arrive:hover,
+.home-page .banner-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px -6px rgba(43, 91, 148, 0.28);
+}
+
+/* Hover accesible con alto contraste en botones read-more y acciones de tarjeta */
+.home-page .preview-read-more:hover,
+.home-page .card-action-link:hover {
+  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%) !important;
+  color: #ffffff !important;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px -4px rgba(13, 64, 119, 0.38) !important;
+}
+
+.home-page .preview-read-more:hover span,
+.home-page .card-action-link:hover span {
+  color: #ffffff !important;
+}
+
+.home-page .preview-read-more:hover .arrow,
+.home-page .card-action-link:hover .arrow {
+  color: #ffffff !important;
+  transform: translateX(4px) scale(1.15);
+}
+
+.home-page .editorial-sublink:active,
+.home-page .preview-view-all:active,
+.home-page .preview-read-more:active,
+.home-page .card-action-link:active,
+.home-page .btn-building-info:active,
+.home-page .btn-how-to-arrive:active,
+.home-page .banner-btn:active {
+  transform: scale(0.98);
+}
+
+/* =========================================================
+   5. RESPONSIVE DESIGN (DESKTOP, NOTEBOOK, TABLET, MOBILE)
+   ========================================================= */
+@media (max-width: 1240px) {
+  .home-page {
+    --home-container-pad: 20px;
+  }
+}
+
+@media (max-width: 992px) {
+  .home-page {
+    padding-bottom: 60px;
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #f8fafc 20%,
+      #e9ebee calc(100% - 820px),
+      #a4c2d6 calc(100% - 520px),
+      #2b5b94 calc(100% - 200px),
+      #0d4077 100%
+    );
+  }
+
+  .home-watermark {
+    width: clamp(280px, 50vw, 480px);
+  }
+
+  .home-watermark--top {
+    right: -2%;
+    top: 32%;
+    opacity: 0.05;
+  }
+
+  .home-watermark--bottom {
+    left: -2%;
+    bottom: 80px;
+    opacity: 0.1;
+  }
+
+  .home-page .editorial-columns-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .home-page .preview-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
+
+  .home-page .patient-split-layout,
+  .home-page .aprende-container,
+  .home-page .home-map-banner-card {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .home-page .news-section {
+    padding: 44px 0 22px 0 !important;
+  }
+
+  .home-page .home-news-preview,
+  .home-page .patient-section,
+  .home-page .aprende-section {
+    padding: 22px 0 !important;
+  }
+
+  .home-page .home-map-banner-section {
+    padding: 22px 0 0 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-page {
+    --home-container-pad: 16px;
+    padding-bottom: 48px;
+  }
+
+  .home-page .preview-scroll-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .home-page .preview-grid {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 18px;
+  }
+
+  .home-page .preview-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .home-page .aprende-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .home-page .news-section {
+    padding: 36px 0 18px 0 !important;
+  }
+
+  .home-page .home-news-preview,
+  .home-page .patient-section,
+  .home-page .aprende-section {
+    padding: 18px 0 !important;
+  }
+
+  .home-page .news-title,
+  .home-page .preview-title,
+  .home-page .title-blue,
+  .home-page .aprende-title,
+  .home-page .banner-title {
+    font-size: 1.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-watermark {
+    width: clamp(240px, 65vw, 340px);
+  }
+
+  .home-watermark--top {
+    right: -10px;
+    top: 30%;
+    opacity: 0.04;
+  }
+
+  .home-watermark--bottom {
+    left: -10px;
+    bottom: 60px;
+    opacity: 0.08;
+  }
+
+  .home-page .editorial-column:hover,
+  .home-page .location-banner:hover,
+  .home-page .preview-card:hover,
+  .home-page .aprende-card:hover,
+  .home-page .home-map-banner-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
