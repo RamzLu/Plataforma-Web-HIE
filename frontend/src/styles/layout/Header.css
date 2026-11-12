@@ -12,7 +12,7 @@
   --hospital-bg-white: #ffffff;
   --hospital-page-surface: #ffffff;
   --hospital-border-light: rgba(255, 255, 255, 0.09);
-  --navbar-arch-radius: 24px;
+  --navbar-arch-radius: 0px;
   --tab-arch-radius: 22px;
   --tab-wing-size: 16px;
 
@@ -33,30 +33,9 @@
     sans-serif;
 }
 
-/* Arco / redondeado invertido en los extremos inferiores del Navbar */
 .hospital-header-container::before,
 .hospital-header-container::after {
-  content: "";
-  position: absolute;
-  bottom: calc(-1 * var(--navbar-arch-radius));
-  width: var(--navbar-arch-radius);
-  height: var(--navbar-arch-radius);
-  pointer-events: none;
-  z-index: 999;
-}
-
-.hospital-header-container::before {
-  left: 0;
-  background: radial-gradient(circle at 100% 100%,
-      transparent var(--navbar-arch-radius),
-      #0a162e calc(var(--navbar-arch-radius) + 0.5px));
-}
-
-.hospital-header-container::after {
-  right: 0;
-  background: radial-gradient(circle at 0% 100%,
-      transparent var(--navbar-arch-radius),
-      #0a162e calc(var(--navbar-arch-radius) + 0.5px));
+  display: none;
 }
 
 .hospital-header-container .hospital-main-nav {
@@ -398,7 +377,7 @@
 
 @media (max-width: 1200px) {
   .hospital-header-container {
-    --navbar-arch-radius: 18px;
+    --navbar-arch-radius: 0px;
   }
 
   .hospital-header-container .hospital-main-nav {
@@ -534,7 +513,7 @@
 
 @media (max-width: 576px) {
   .hospital-header-container {
-    --navbar-arch-radius: 14px;
+    --navbar-arch-radius: 0px;
   }
 
   .hospital-header-container .hospital-main-nav {
