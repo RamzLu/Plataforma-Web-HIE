@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 import "swiper/css";
@@ -306,38 +307,40 @@ const ProfesionalesPage = () => {
         </div>
       )}
 
-      {selectedProf && (
-        <div className="prof-modal-overlay" onClick={() => setSelectedProf(null)}>
-          <div className="prof-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="prof-modal-photo">
-              {selectedProf.imagenUrl ? (
-                <img src={selectedProf.imagenUrl} alt={selectedProf.nombre} />
-              ) : (
-                <span style={{ fontSize: "3rem", fontWeight: "800", color: "#ffffff" }}>
-                  {`${selectedProf.nombre?.charAt(0) || ""}${selectedProf.apellido?.charAt(0) || ""}`.toUpperCase()}
-                </span>
+      {selectedProf &&
+        createPortal(
+          <div className="prof-modal-overlay" onClick={() => setSelectedProf(null)}>
+            <div className="prof-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="prof-modal-photo">
+                {selectedProf.imagenUrl ? (
+                  <img src={selectedProf.imagenUrl} alt={selectedProf.nombre} />
+                ) : (
+                  <span style={{ fontSize: "3rem", fontWeight: "800", color: "#ffffff" }}>
+                    {`${selectedProf.nombre?.charAt(0) || ""}${selectedProf.apellido?.charAt(0) || ""}`.toUpperCase()}
+                  </span>
+                )}
+              </div>
+              
+              <h3 className="prof-modal-name">{selectedProf.nombre} {selectedProf.apellido}</h3>
+              <h4 className="prof-modal-title">{selectedProf.cargo || "Profesional Médico"}</h4>
+              
+              {selectedProf.matricula && (
+                <span className="prof-modal-matricula-text">Matrícula: {selectedProf.matricula}</span>
               )}
+              
+              <span className="prof-modal-specialty">{selectedProf.especialidadNombre}</span>
+              
+              {selectedProf.descripcion && (
+                <p className="prof-modal-desc">{selectedProf.descripcion}</p>
+              )}
+              
+              <button className="btn-cerrar-modal" onClick={() => setSelectedProf(null)}>
+                Cerrar y volver
+              </button>
             </div>
-            
-            <h3 className="prof-modal-name">{selectedProf.nombre} {selectedProf.apellido}</h3>
-            <h4 className="prof-modal-title">{selectedProf.cargo || "Profesional Médico"}</h4>
-            
-            {selectedProf.matricula && (
-              <span className="prof-modal-matricula-text">Matrícula: {selectedProf.matricula}</span>
-            )}
-            
-            <span className="prof-modal-specialty">{selectedProf.especialidadNombre}</span>
-            
-            {selectedProf.descripcion && (
-              <p className="prof-modal-desc">{selectedProf.descripcion}</p>
-            )}
-            
-            <button className="btn-cerrar-modal" onClick={() => setSelectedProf(null)}>
-              Cerrar y volver
-            </button>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </main>
   );
 };

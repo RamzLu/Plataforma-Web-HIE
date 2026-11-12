@@ -1,9 +1,10 @@
 .home-news-preview {
   width: 100%;
-  padding: 80px 20px;
-  background-color: #f8fafc; /* Fondo gris claro suave */
+  padding: 90px 24px;
+  background-color: #f8fafc;
   display: flex;
   justify-content: center;
+  box-sizing: border-box;
   font-family:
     system-ui,
     -apple-system,
@@ -14,19 +15,21 @@
 }
 
 .preview-container {
-  max-width: 1100px;
+  max-width: 1140px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 36px;
 }
 
 .preview-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  border-bottom: 1px solid #cbd5e1;
-  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(203, 213, 225, 0.75);
+  padding-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .preview-title-group {
@@ -45,31 +48,49 @@
 .preview-title {
   color: #2b5b94;
   font-size: 2.2rem;
-  font-weight: 300; /* Letra ultraliviana */
+  font-weight: 300;
   letter-spacing: 1.5px;
-  margin: 4px 0 0 0;
+  margin: 6px 0 0 0;
   text-transform: uppercase;
 }
 
 .preview-view-all {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 11px 22px;
+  border-radius: 50px;
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
   color: #2b5b94;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
-  transition: color 0.2s ease;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.6px;
+  box-shadow: 0 6px 16px -4px rgba(12, 35, 64, 0.06);
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .preview-view-all:hover {
-  color: #1c4373;
+  background-color: #2b5b94;
+  color: #ffffff;
+  border-color: #2b5b94;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -6px rgba(43, 91, 148, 0.25);
+}
+
+.preview-view-all:active {
+  transform: scale(0.98);
 }
 
 .preview-view-all svg {
   width: 18px;
   height: 18px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.preview-view-all:hover svg {
+  transform: translateX(4px) scale(1.15);
 }
 
 /* --- GRILLA ESCRITORIO --- */
@@ -80,70 +101,92 @@
 .preview-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
+  gap: 28px;
   align-items: stretch;
 }
 
-/* --- TARJETAS BLANCAS --- */
+/* --- TARJETAS SOFT UI --- */
 .preview-card {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  box-shadow:
+    0 12px 30px -10px rgba(12, 35, 64, 0.06),
+    0 4px 12px rgba(12, 35, 64, 0.03);
   display: flex;
   flex-direction: column;
   transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+    transform 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+    border-color 0.38s ease;
 }
 
 .preview-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transform: translateY(-6px);
+  border-color: rgba(43, 91, 148, 0.35);
+  box-shadow:
+    0 22px 42px -10px rgba(43, 91, 148, 0.15),
+    0 8px 20px rgba(12, 35, 64, 0.06);
 }
 
 .preview-img-container {
   width: 100%;
-  height: 190px;
-  background-color: #f1f5f9;
+  height: 205px;
+  background-color: #e9ebee;
   overflow: hidden;
+  position: relative;
 }
 
 .preview-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.preview-card:hover .preview-img {
+  transform: scale(1.06);
 }
 
 .preview-content {
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
 .preview-date {
-  font-size: 0.8rem;
-  color: #64748b;
-  font-weight: 400;
-  margin-bottom: 8px;
+  align-self: flex-start;
+  font-size: 0.76rem;
+  color: #2b5b94;
+  background-color: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 .preview-card-title {
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 600;
   color: #0c2340;
-  line-height: 1.4;
-  margin: 0 0 10px 0;
+  line-height: 1.42;
+  margin: 0 0 12px 0;
+  transition: color 0.25s ease;
+}
+
+.preview-card:hover .preview-card-title {
+  color: #2b5b94;
 }
 
 .preview-excerpt {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 300;
   color: #334155;
-  line-height: 1.5;
-  margin: 0 0 20px 0;
+  line-height: 1.6;
+  margin: 0 0 22px 0;
   flex: 1;
 }
 
@@ -153,40 +196,61 @@
   justify-content: space-between;
   text-decoration: none;
   color: #2b5b94;
-  font-size: 0.8rem;
+  background-color: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 50px;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  padding-top: 12px;
-  border-top: 1px solid #f1f5f9;
-  transition: color 0.2s ease;
+  padding: 11px 18px;
+  margin-top: auto;
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .preview-read-more:hover {
-  color: #1c4373;
+  background-color: #2b5b94;
+  color: #ffffff;
+  border-color: #2b5b94;
+  box-shadow: 0 8px 18px -4px rgba(43, 91, 148, 0.22);
+}
+
+.preview-read-more:active {
+  transform: scale(0.98);
 }
 
 .preview-read-more .arrow {
+  display: inline-flex;
   font-size: 1.1rem;
-  transition: transform 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .preview-read-more:hover .arrow {
-  transform: translateX(3px);
+  transform: translateX(4px) scale(1.15);
+}
+
+@media (max-width: 992px) {
+  .preview-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
 }
 
 /* --- MÓVILES (CARRUSEL CON SCROLL HORIZONTAL) --- */
 @media (max-width: 768px) {
+  .home-news-preview {
+    padding: 64px 20px;
+  }
+
   .preview-scroll-wrapper {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 15px;
+    padding-bottom: 18px;
     margin: 0 -20px;
     padding-left: 20px;
     padding-right: 20px;
   }
 
-  /* Oculta la barra de desplazamiento visual */
   .preview-scroll-wrapper::-webkit-scrollbar {
     display: none;
   }
@@ -196,19 +260,20 @@
   }
 
   .preview-grid {
-    display: flex; /* Cambia a layout horizontal */
-    gap: 15px;
+    display: flex;
+    gap: 16px;
     width: max-content;
   }
 
   .preview-card {
-    width: 82vw; /* Deja ver el borde de la siguiente tarjeta */
-    max-width: 310px;
-    scroll-snap-align: start; /* Anclaje por tarjeta */
+    width: 82vw;
+    max-width: 320px;
+    scroll-snap-align: start;
     flex-shrink: 0;
+    border-radius: 22px;
   }
 
   .preview-title {
-    font-size: 1.7rem;
+    font-size: 1.75rem;
   }
 }

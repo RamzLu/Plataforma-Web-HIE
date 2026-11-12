@@ -15,20 +15,48 @@
 /* Contenedor Global del Footer */
 .hospital-footer {
   width: 100%;
-  background-color: var(--hf-navy-dark);
+  /* Degradado concentrado: nace en #0d4077 (donde termina el Home) y se intensifica */
+  background: linear-gradient(
+    180deg,
+    #0d4077 0%,
+    #0c2340 38%,
+    #0a1a33 70%,
+    var(--hf-navy-dark) 100%
+  );
   color: var(--hf-text-main);
   font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: none;
+  isolation: isolate;
 }
 
-/* Línea decorativa superior */
+/* Marca de agua institucional (estrellas) dentro del Footer */
+.hospital-footer::before {
+  content: "";
+  position: absolute;
+  top: -35%;
+  right: -12%;
+  width: min(820px, 90vw);
+  aspect-ratio: 1 / 1;
+  background: url("../../assets/logoHospitalEvita-blanco.png") center / contain no-repeat;
+  opacity: 0.07;
+  filter: blur(0.5px);
+  transform: rotate(-10deg);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.footer-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Línea decorativa superior: oculta para evitar corte recto con el Home */
 .footer-gradient-accent {
-  height: 4px;
-  width: 100%;
-  background: linear-gradient(90deg, #0284c7 0%, #0066cc 35%, #1a56db 70%, #081226 100%);
+  display: none;
 }
 
 .footer-container {
@@ -156,19 +184,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--hf-navy-border);
-  border-radius: var(--hf-radius-md);
+  padding: 12px 18px;
+  background-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 50px;
   color: #ffffff;
   text-decoration: none;
-  transition: all 0.2s ease;
+  box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.35);
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .social-card-btn:hover {
-  background-color: rgba(2, 132, 199, 0.08);
-  border-color: var(--hf-blue-accent);
-  transform: translateY(-2px);
+  background-color: rgba(255, 255, 255, 0.11);
+  transform: translateY(-5px);
+  box-shadow: 0 18px 34px -8px rgba(0, 0, 0, 0.45);
+}
+
+.social-card-btn:active {
+  transform: scale(0.98);
 }
 
 .social-card-left {
@@ -283,6 +318,12 @@
 }
 
 @media (max-width: 640px) {
+  .hospital-footer::before {
+    top: -12%;
+    right: -45%;
+    width: 140vw;
+    opacity: 0.06;
+  }
   .footer-container {
     padding: 40px 20px 30px 20px;
   }

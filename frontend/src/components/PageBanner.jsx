@@ -1,25 +1,28 @@
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
-import defaultBannerImg from "../assets/banner_especialidades.png";
+import logoEstrellas from "../assets/logoHospitalEvita.png";
 import "../styles/ui/PageBanner.css";
-
-const DEFAULT_GRADIENT =
-  "linear-gradient(rgba(46, 111, 196, 0.85), rgba(233, 235, 238, 0.85))";
 
 /**
  * Componente PageBanner unificado para páginas públicas.
- * Garantiza consistencia en medidas, márgenes, padding, alineación y tipografía.
+ * Integra la estética de la imagen de referencia:
+ * - Esquinas redondeadas superiores e integración perfecta bajo el Navbar
+ * - Barra vertical izquierda azul (#2b5b94)
+ * - Título con font-weight: 300 y subtítulo descriptivo alineados
+ * - Breadcrumb exacto (INICIO / [SECCIÓN])
+ * - Marca de agua decorativa a la derecha con estrellas del Hospital Evita
+ *   desvanecida suavemente con mask-image perimetral (cero cortes).
  *
  * @param {string} title - Título principal de la sección
  * @param {string} [subtitle] - Subtítulo descriptivo
  * @param {string} [currentPage] - Nombre de la página para el Breadcrumb (si se omite usa title)
  * @param {string} [parentLabel] - Etiqueta del nivel padre en el Breadcrumb (ej: "NOTICIAS")
  * @param {string} [parentPath] - Ruta del nivel padre (ej: "/noticias")
- * @param {string} [image] - Imagen de fondo con marca de agua (por defecto banner institucional)
- * @param {string} [gradient] - Degradado superpuesto sobre la imagen
+ * @param {string} [image] - Imagen opcional
+ * @param {string} [gradient] - Degradado personalizado opcional
  * @param {number|string} [marginBottom] - Margen inferior personalizado si la página lo requiere
  * @param {string} [className] - Clases adicionales opcionales
- * @param {React.ReactNode} [children] - Elementos adicionales dentro del banner (ej: botones de retorno)
+ * @param {React.ReactNode} [children] - Elementos adicionales dentro del banner
  */
 const PageBanner = ({
   title,
@@ -27,19 +30,28 @@ const PageBanner = ({
   currentPage,
   parentLabel,
   parentPath,
-  image = defaultBannerImg,
-  gradient = DEFAULT_GRADIENT,
+  image,
+  gradient,
   marginBottom,
   className = "",
   children,
 }) => {
   const containerStyle = {
-    backgroundImage: image ? `${gradient}, url(${image})` : gradient,
     ...(marginBottom !== undefined ? { marginBottom } : {}),
   };
 
   return (
     <div className={`public-page-banner ${className}`} style={containerStyle}>
+      {/* Marca de agua estética con estrellas a la derecha (cero cortes, máscara radial suave) */}
+      <div className="public-page-banner-watermark-wrap" aria-hidden="true">
+        <img
+          src={logoEstrellas}
+          alt=""
+          className="public-page-banner-watermark-img"
+          draggable="false"
+        />
+      </div>
+
       <div className="public-page-banner-inner">
         <Breadcrumb
           currentPage={currentPage || title}

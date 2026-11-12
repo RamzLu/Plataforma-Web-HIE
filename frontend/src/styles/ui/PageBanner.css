@@ -1,109 +1,248 @@
 /* =========================================================
    COMPONENTE MODULAR: BANNER PÚBLICO INSTITUCIONAL (PageBanner)
-   Unifica medidas, márgenes, padding y tipografía en todos los módulos
+   Estandarización 100% geométrica y tipográfica para todas las vistas públicas:
+   - Contenedor externo idéntico en medidas, padding y alineación
+   - Contenedor interno (*-inner) con max-width: 1240px exactos y margin: 0 auto
+   - Misma barra vertical izquierda: border-left: 6px solid #2b5b94; padding-left: 36px;
+   - Título principal h1 delgado: font-weight: 300 !important;
+   - Misma familia tipográfica, tamaño, márgenes y alineación en todas las vistas.
    ========================================================= */
 
-.public-page-banner {
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+.public-page-banner,
+.doc-header-fluid,
+.news-header-fluid,
+.prof-header-fluid,
+.esp-header-fluid {
+  position: relative;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 125px 24px 55px 24px !important;
+  margin: 0 0 35px 0 !important;
+  border-radius: 0 0 32px 32px !important;
+  box-shadow: 0 14px 35px -8px rgba(12, 35, 64, 0.08) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+
+  /* Degradado institucional suave continuo hacia el cuerpo de la página */
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f4f8fc 35%,
+    #e8f1fa 70%,
+    #dbe9f7 100%
+  ) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  isolation: isolate;
+}
+
+/* Marca de agua decorativa con estrellas a la derecha (proporción uniforme, cero cortes) */
+.public-page-banner-watermark-wrap {
+  position: absolute;
+  top: 50%;
+  right: -2%;
+  transform: translateY(-50%);
+  width: clamp(280px, 35vw, 460px);
+  aspect-ratio: 1 / 1;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
   display: flex;
   align-items: center;
-  padding: 120px 20px 60px 20px;
-  margin-bottom: 50px;
-  box-sizing: border-box;
+  justify-content: center;
+  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 88%);
+  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 88%);
+  opacity: 0.12;
 }
 
-.public-page-banner-inner {
+.public-page-banner-watermark-img {
   width: 100%;
-  max-width: 1200px;
-  border-left: 8px solid #2b5b94;
-  padding-left: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  box-sizing: border-box;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: blur(0.5px);
+  transform: rotate(-10deg);
 }
 
-.public-page-banner-title {
-  color: #2b5b94;
-  font-size: 3.2rem;
-  font-weight: 300;
-  text-transform: uppercase;
-  margin: 0 0 15px 0;
-  letter-spacing: 1px;
-  line-height: 1.15;
+/* =========================================================
+   1. CONTENEDOR INTERNO ESTANDARIZADO MILIMÉTRICAMENTE (1240px)
+   ========================================================= */
+.public-page-banner-inner,
+.doc-header-inner,
+.news-header-inner,
+.prof-header-inner,
+.esp-header-inner {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  max-width: 1240px !important;
+  margin: 0 auto !important;
+  border-left: 6px solid #2b5b94 !important;
+  padding-left: 36px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  box-sizing: border-box !important;
 }
 
-.public-page-banner-subtitle {
-  color: #64748b;
-  font-size: 1.15rem;
-  font-weight: 400;
-  line-height: 1.5;
-  margin: 0;
-  max-width: 900px;
+/* =========================================================
+   2. UNIFICACIÓN ESTRICTA DE TIPOGRAFÍA Y GROSOR (H1 DELGADO)
+   ========================================================= */
+.public-page-banner-title,
+.doc-title-page,
+.news-main-title,
+.prof-main-title,
+.esp-main-title {
+  color: #2b5b94 !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 3.2rem !important;
+  font-weight: 300 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  line-height: 1.15 !important;
+  margin: 8px 0 12px 0 !important;
 }
 
-/* Acciones o elementos extra dentro del banner (ej: botones) */
+/* Subtítulo descriptivo */
+.public-page-banner-subtitle,
+.news-info-text p,
+.esp-subtitle,
+.doc-header-inner p,
+.prof-header-inner p {
+  color: #64748b !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 1.12rem !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  max-width: 820px !important;
+}
+
+/* Elementos adicionales o botones dentro del banner */
 .public-page-banner-extra {
-  margin-top: 20px;
+  margin-top: 18px;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 /* =========================================================
-   RESPONSIVIDAD Y AJUSTE EN DISPOSITIVOS MÓVILES
+   3. CONSISTENCIA EN RESPONSIVE (TABLET Y MÓVIL)
    ========================================================= */
 @media (max-width: 992px) {
-  .public-page-banner {
-    padding: 110px 20px 50px 20px;
+  .public-page-banner,
+  .doc-header-fluid,
+  .news-header-fluid,
+  .prof-header-fluid,
+  .esp-header-fluid {
+    padding: 110px 20px 45px 20px !important;
+    border-radius: 0 0 24px 24px !important;
+    margin-bottom: 28px !important;
   }
-  .public-page-banner-inner {
-    border-left-width: 6px;
-    padding-left: 28px;
+  
+  .public-page-banner-inner,
+  .doc-header-inner,
+  .news-header-inner,
+  .prof-header-inner,
+  .esp-header-inner {
+    border-left-width: 5px !important;
+    padding-left: 28px !important;
   }
-  .public-page-banner-title {
-    font-size: 2.6rem;
+
+  .public-page-banner-watermark-wrap {
+    right: -10%;
+    width: clamp(240px, 45vw, 360px);
+    opacity: 0.09;
   }
-  .public-page-banner-subtitle {
-    font-size: 1.05rem;
+
+  .public-page-banner-title,
+  .doc-title-page,
+  .news-main-title,
+  .prof-main-title,
+  .esp-main-title {
+    font-size: 2.45rem !important;
   }
 }
 
 @media (max-width: 768px) {
-  .public-page-banner {
-    padding: 100px 16px 40px 16px;
-    margin-bottom: 35px;
+  .public-page-banner,
+  .doc-header-fluid,
+  .news-header-fluid,
+  .prof-header-fluid,
+  .esp-header-fluid {
+    padding: 95px 16px 36px 16px !important;
+    margin-bottom: 24px !important;
+    border-radius: 0 0 20px 20px !important;
   }
-  .public-page-banner-inner {
-    border-left-width: 5px;
-    padding-left: 20px;
+
+  .public-page-banner-inner,
+  .doc-header-inner,
+  .news-header-inner,
+  .prof-header-inner,
+  .esp-header-inner {
+    border-left-width: 5px !important;
+    padding-left: 20px !important;
   }
-  .public-page-banner-title {
-    font-size: 2.1rem;
-    margin-bottom: 12px;
+
+  .public-page-banner-title,
+  .doc-title-page,
+  .news-main-title,
+  .prof-main-title,
+  .esp-main-title {
+    font-size: 1.95rem !important;
+    margin: 6px 0 10px 0 !important;
   }
-  .public-page-banner-subtitle {
-    font-size: 0.98rem;
+
+  .public-page-banner-subtitle,
+  .news-info-text p,
+  .esp-subtitle,
+  .doc-header-inner p,
+  .prof-header-inner p {
+    font-size: 0.95rem !important;
+  }
+
+  .public-page-banner-watermark-wrap {
+    right: -18%;
+    width: clamp(200px, 55vw, 300px);
+    opacity: 0.08;
   }
 }
 
 @media (max-width: 480px) {
-  .public-page-banner {
-    padding: 95px 12px 35px 12px;
+  .public-page-banner,
+  .doc-header-fluid,
+  .news-header-fluid,
+  .prof-header-fluid,
+  .esp-header-fluid {
+    padding: 85px 14px 30px 14px !important;
   }
-  .public-page-banner-inner {
-    border-left-width: 4px;
-    padding-left: 14px;
+
+  .public-page-banner-inner,
+  .doc-header-inner,
+  .news-header-inner,
+  .prof-header-inner,
+  .esp-header-inner {
+    border-left-width: 4px !important;
+    padding-left: 16px !important;
   }
-  .public-page-banner-title {
-    font-size: 1.7rem;
-    letter-spacing: 0.5px;
+
+  .public-page-banner-title,
+  .doc-title-page,
+  .news-main-title,
+  .prof-main-title,
+  .esp-main-title {
+    font-size: 1.65rem !important;
+    letter-spacing: 0.5px !important;
   }
-  .public-page-banner-subtitle {
-    font-size: 0.9rem;
+
+  .public-page-banner-subtitle,
+  .news-info-text p,
+  .esp-subtitle,
+  .doc-header-inner p,
+  .prof-header-inner p {
+    font-size: 0.88rem !important;
   }
 }

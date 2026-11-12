@@ -1,24 +1,25 @@
 .patient-section {
   width: 100%;
   background-color: #ffffff;
-  padding: 80px 20px;
+  padding: 90px 24px;
   display: flex;
   justify-content: center;
-  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+  font-family: "Manrope", system-ui, -apple-system, sans-serif;
 }
 
 .patient-container {
-  max-width: 1100px;
+  max-width: 1140px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 50px;
+  gap: 48px;
 }
 
 .patient-section-header {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid #cbd5e1;
+  border-bottom: 1px solid rgba(203, 213, 225, 0.75);
   padding-bottom: 18px;
 }
 
@@ -26,8 +27,9 @@
   color: #64748b;
   font-size: 0.85rem;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 1.4px;
   text-transform: uppercase;
+  display: inline-block;
 }
 
 .title-blue {
@@ -35,16 +37,16 @@
   font-size: 2.2rem;
   font-weight: 300;
   letter-spacing: 1.5px;
-  margin: 4px 0 0 0;
+  margin: 6px 0 0 0;
   text-transform: uppercase;
 }
 
 /* LAYOUT DIVIDIDO */
 .patient-split-layout {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 60px;
-  align-items: start;
+  grid-template-columns: 1.05fr 1.15fr;
+  gap: 52px;
+  align-items: center;
 }
 
 .patient-content-left {
@@ -52,50 +54,70 @@
   flex-direction: column;
 }
 
-/* ACORDEÓN MINIMALISTA */
+/* ACORDEÓN EN CÁPSULAS SOFT UI */
 .accordion-clean-wrapper {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid #819ec6;
+  gap: 14px;
+  border-top: none;
 }
 
 .accordion-clean-item {
-  border-bottom: 1px solid #819ec6;
+  background-color: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 20px;
+  padding: 0 22px;
+  box-shadow: 0 4px 14px -4px rgba(12, 35, 64, 0.04);
+  transition:
+    transform 0.35s cubic-bezier(0.25, 1, 0.5, 1),
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.35s ease;
 }
 
 .accordion-clean-item:hover {
-  border-bottom-color: #0284c7;
+  background-color: #ffffff;
+  border-color: rgba(43, 91, 148, 0.35);
+  transform: translateY(-3px);
+  box-shadow:
+    0 14px 28px -8px rgba(43, 91, 148, 0.14),
+    0 4px 12px rgba(12, 35, 64, 0.04);
 }
 
-.accordion-clean-wrapper:hover {
-  border-top-color: #0284c7;
+.accordion-clean-item.active {
+  background-color: #ffffff;
+  border-color: rgba(43, 91, 148, 0.42);
+  box-shadow:
+    0 18px 34px -10px rgba(43, 91, 148, 0.16),
+    0 6px 16px rgba(12, 35, 64, 0.05);
 }
 
 .accordion-clean-header {
   width: 100%;
   background: transparent;
   border: none;
-  padding: 22px 0;
+  padding: 20px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #475569;
+  gap: 16px;
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: #334155;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
   text-align: left;
-  transition: color 0.2s ease;
+  transition: color 0.25s ease;
 }
 
 .accordion-clean-header span {
   display: inline-block;
-  transition: transform 0.3s ease;
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .accordion-clean-header:hover span {
-  transform: translateX(8px);
+  transform: translateX(6px);
 }
 
 .accordion-clean-header:hover {
@@ -103,46 +125,90 @@
 }
 
 .accordion-clean-item.active .accordion-clean-header {
-  color: #1b477f;
+  color: #2b5b94;
   font-weight: 700;
 }
 
 .accordion-clean-arrow {
-  width: 18px;
-  height: 18px;
-  color: #94a3b8;
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  color: #2b5b94;
   flex-shrink: 0;
-  transition: transform 0.3s ease, color 0.2s ease;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(12, 35, 64, 0.05);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .accordion-clean-header:hover .accordion-clean-arrow {
-  transform: translateX(8px);
+  transform: scale(1.15);
+  background-color: #2b5b94;
+  border-color: #2b5b94;
+  color: #ffffff;
 }
 
 .accordion-clean-item.active .accordion-clean-arrow {
-  transform: rotate(90deg);
-  color: #0c2340;
+  transform: rotate(90deg) scale(1.08);
+  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
+  border-color: #2b5b94;
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(43, 91, 148, 0.28);
 }
 
 .accordion-clean-item.active .accordion-clean-header:hover .accordion-clean-arrow {
-  transform: translateX(8px) rotate(90deg);
+  transform: rotate(90deg) scale(1.15);
 }
 
 .accordion-clean-content {
-  padding: 0 0 24px 0;
-  color: #64748b;
+  padding: 2px 0 22px 0;
+  border-top: 1px solid rgba(226, 232, 240, 0.75);
+  color: #334155;
   font-size: 0.95rem;
-  line-height: 1.6;
+  line-height: 1.65;
+  animation: accordionFadeSlide 0.32s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes accordionFadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .accordion-clean-content p {
-  margin: 0;
+  margin: 12px 0 0 0;
 }
 
-/* LADO DERECHO: IMAGEN CON PROPORCIÓN 4:3 ALINEADA AL ACORDEÓN */
+/* LADO DERECHO: IMAGEN SOFT UI CON CURVAS ORGÁNICAS */
 .patient-image-right {
   width: 100%;
   aspect-ratio: 4 / 3;
+  border-radius: 28px;
+  padding: 10px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow:
+    0 24px 48px -12px rgba(43, 91, 148, 0.15),
+    0 8px 20px -6px rgba(12, 35, 64, 0.06);
+  box-sizing: border-box;
+  overflow: hidden;
+  transition:
+    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.4s ease;
+}
+
+.patient-image-right:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 28px 54px -10px rgba(43, 91, 148, 0.2),
+    0 10px 24px -6px rgba(12, 35, 64, 0.08);
 }
 
 .patient-img-clean {
@@ -151,21 +217,20 @@
   object-fit: cover;
   object-position: center;
   display: block;
-  border-radius: 8px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 20px;
 }
 
 /* =========================================
    ANIMACIÓN SUAVE PARA CAMBIO DE IMAGEN
    ========================================= */
 .img-smooth-swap {
-  animation: smoothImageSwap 0.45s ease-out forwards;
+  animation: smoothImageSwap 0.48s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 @keyframes smoothImageSwap {
   0% {
-    opacity: 0.1;
-    transform: scale(0.98);
+    opacity: 0.15;
+    transform: scale(0.97);
   }
   100% {
     opacity: 1;
@@ -175,8 +240,36 @@
 
 /* RESPONSIVIDAD */
 @media (max-width: 992px) {
+  .patient-section {
+    padding: 70px 20px;
+  }
+
   .patient-split-layout {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  .patient-section {
+    padding: 60px 16px;
+  }
+
+  .title-blue {
+    font-size: 1.8rem;
+  }
+
+  .accordion-clean-item {
+    padding: 0 18px;
+    border-radius: 18px;
+  }
+
+  .patient-image-right {
+    border-radius: 22px;
+    padding: 8px;
+  }
+
+  .patient-img-clean {
+    border-radius: 16px;
   }
 }
