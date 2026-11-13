@@ -101,10 +101,31 @@ app.use('/api/cms', cmsRoutes);
 
 app.use(errorHandler);
 
+// Cada minuto se publican las noticias y residencias programadas cuya fecha ya llegó.
+// Cada tarea corre por separado: si una falla (por ejemplo, la base de Supabase está pausada)
+// la otra sigue, y el error se avisa una sola vez hasta que la tarea vuelva a funcionar.
+const tareasProgramadas = [
+  { nombre: 'noticias programadas', ejecutar: () => CmsNoticiaService.publicarNoticiasProgramadas() },
+  { nombre: 'residencias programadas', ejecutar: () => CmsResidenciaService.publicarResidenciasProgramadas() },
+];
+const tareasConError = new Set();
+
 cron.schedule('* * * * *', async () => {
-  await CmsNoticiaService.publicarNoticiasProgramadas();
-  await CmsResidenciaService.publicarResidenciasProgramadas();
-});
+  for (const tarea of tareasProgramadas) {
+    try {
+      await tarea.ejecutar();
+      if (tareasConError.delete(tarea.nombre)) {
+        console.log(`[Cron] Publicación de ${tarea.nombre}: volvió a funcionar.`);
+      }
+    } catch (error) {
+      if (!tareasConError.has(tarea.nombre)) {
+        tareasConError.add(tarea.nombre);
+        const motivo = String(error?.message || error).split('\n').filter(Boolean).pop();
+        console.error(`[Cron] Error al publicar ${tarea.nombre}: ${motivo}. Se reintenta cada minuto; no se vuelve a avisar hasta que se recupere.`);
+      }
+    }
+  }
+}, { noOverlap: true });
 
 app.listen(PORT, () => {
   console.log(` Servidor corriendo en http://localhost:${PORT}`)

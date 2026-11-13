@@ -4,6 +4,7 @@ import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { sanitizarHtmlNoticia, parsearIdBigInt, parsearArregloJson } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
+import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 
 const REJECTION_KEY_PREFIX = "noticia_rejection_";
 const PENDING_META_KEY_PREFIX = "noticia_pending_meta_";
@@ -869,19 +870,16 @@ class CmsNoticiaService {
     };
   }
 
+  // Lo ejecuta el cron de server.js cada minuto. Los errores se propagan para que el cron los informe.
   async publicarNoticiasProgramadas() {
-    try {
-      const ahora = new Date();
-      await prisma.noticia.updateMany({
-        where: {
-          estado: "PROGRAMADO",
-          fechaPublicacion: { lte: ahora },
-        },
-        data: { estado: "PUBLICADO" },
-      });
-    } catch (error) {
-      // Ignorar errores silenciosamente en el cron
-    }
+    const limite = limitePublicacionProgramada();
+    await prisma.noticia.updateMany({
+      where: {
+        estado: "PROGRAMADO",
+        fechaPublicacion: { lte: limite },
+      },
+      data: { estado: "PUBLICADO" },
+    });
   }
 }
 

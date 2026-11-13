@@ -4,6 +4,7 @@ import { generarNombreUnico } from "../../utils/file.utils.js";
 import { sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 
 const RESIDENCIA_PENDING_META_PREFIX = "residencia_pending_meta_";
 const RESIDENCIA_REJECTION_KEY_PREFIX = "residencia_rejection_reason_";
@@ -1021,37 +1022,34 @@ class CmsResidenciaService {
     };
   }
 
+  // Lo ejecuta el cron de server.js cada minuto. Los errores se propagan para que el cron los informe.
   async publicarResidenciasProgramadas() {
-    try {
-      const ahora = new Date();
-      const programadas = await prisma.residencia.findMany({
-        where: { estado: "PROGRAMADO" },
-      });
+    const limite = limitePublicacionProgramada();
+    const programadas = await prisma.residencia.findMany({
+      where: { estado: "PROGRAMADO" },
+    });
 
-      for (const res of programadas) {
-        let fechaPub = null;
-        if (res.contenido) {
-          try {
-            const parsed = JSON.parse(res.contenido);
-            if (parsed.fechaPublicacion) {
-              fechaPub = new Date(parsed.fechaPublicacion);
-            }
-          } catch (_) {}
-        }
-
-        if (fechaPub && fechaPub <= ahora) {
-          await prisma.residencia.update({
-            where: { id: res.id },
-            data: {
-              estado: "PUBLICADO",
-              activo: true,
-              updatedAt: new Date(),
-            },
-          });
-        }
+    for (const res of programadas) {
+      let fechaPub = null;
+      if (res.contenido) {
+        try {
+          const parsed = JSON.parse(res.contenido);
+          if (parsed.fechaPublicacion) {
+            fechaPub = new Date(parsed.fechaPublicacion);
+          }
+        } catch (_) {}
       }
-    } catch (_) {
-      // Ignorar errores en cron
+
+      if (fechaPub && fechaPub <= limite) {
+        await prisma.residencia.update({
+          where: { id: res.id },
+          data: {
+            estado: "PUBLICADO",
+            activo: true,
+            updatedAt: new Date(),
+          },
+        });
+      }
     }
   }
 
