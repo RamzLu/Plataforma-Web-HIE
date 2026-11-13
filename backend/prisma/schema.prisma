@@ -189,6 +189,8 @@ model profesional {
   archivoId        BigInt?
   descripcion      String?
   activo           Boolean            @default(true)
+  /// Estado editorial. Por defecto queda pendiente de aprobación: nada se publica sin revisión del admin.
+  estado           EstadoEditorial    @default(PENDIENTE_APROBACION)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime
   archivo          archivo?           @relation(fields: [archivoId], references: [id])
@@ -197,6 +199,7 @@ model profesional {
 
   @@index([archivoId])
   @@index([especialidadId])
+  @@index([estado])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

@@ -166,6 +166,14 @@ class CmsProfesionalService {
     return "Reciente";
   }
 
+  // Estado tal como lo entiende el CMS: APROBADO cuenta como publicado y BORRADOR como archivado.
+  _estadoDe(prof) {
+    const estado = (prof?.estado || "").toUpperCase();
+    if (estado === "APROBADO") return "PUBLICADO";
+    if (estado === "BORRADOR") return "ARCHIVADO";
+    return estado || "PENDIENTE_APROBACION";
+  }
+
   _construirItemProfesional(prof, servicios, options = {}) {
     let pubUrl = "";
     if (prof.archivo) {
@@ -188,7 +196,7 @@ class CmsProfesionalService {
       }
     }
 
-    const estado = options.estado || (prof.activo ? "PUBLICADO" : "ARCHIVADO");
+    const estado = options.estado || this._estadoDe(prof);
     const editor = options.editor || "Editor CMS";
     const fechaCarga = this._formatearFecha(prof.createdAt);
     const fechaActualizacion = this._formatearFecha(options.updatedAt || prof.updatedAt || prof.createdAt);
@@ -273,14 +281,7 @@ class CmsProfesionalService {
       const rejectionReason = rejectionMap.get(idStr) || null;
       const editorMeta = editorMap.get(idStr) || auditoriaMap.get(idStr) || null;
 
-      let estado = "ARCHIVADO";
-      if (pendingMeta) {
-        estado = "PENDIENTE_APROBACION";
-      } else if (rejectionReason) {
-        estado = "RECHAZADO";
-      } else if (prof.activo) {
-        estado = "PUBLICADO";
-      }
+      const estado = this._estadoDe(prof);
 
       if (!esVistaAdmin) {
         if (estado === "PUBLICADO") {
@@ -402,6 +403,7 @@ class CmsProfesionalService {
         especialidadId: finalEspecialidadId,
         archivoId,
         activo: false,
+        estado: estadoFinal,
         updatedAt: new Date(),
       },
       include: { especialidad: true, archivo: true },
@@ -512,8 +514,7 @@ class CmsProfesionalService {
 
     const existingPending = pendingMap.get(idStr) || null;
     const existingRejection = rejectionMap.get(idStr) || null;
-    const provieneDePublicado =
-      profesionalExistente.activo && !existingPending && !existingRejection;
+    const provieneDePublicado = this._estadoDe(profesionalExistente) === "PUBLICADO";
 
     let snapshotPublico = existingPending?.snapshotPublico || null;
     if (provieneDePublicado && !snapshotPublico) {
@@ -632,6 +633,7 @@ class CmsProfesionalService {
         especialidadId: finalEspecialidadId,
         archivoId,
         activo: esArchivado ? false : profesionalExistente.activo,
+        estado: estadoFinal,
         updatedAt: new Date(),
       },
       include: { especialidad: true, archivo: true },
@@ -797,7 +799,7 @@ class CmsProfesionalService {
     if (nuevoEstado === "RECHAZADO") {
       const profRechazado = await prisma.profesional.update({
         where: { id: idBigInt },
-        data: { activo: false, updatedAt: new Date() },
+        data: { activo: false, estado: "RECHAZADO", updatedAt: new Date() },
         include: {
           especialidad: true,
           archivo: true,
@@ -838,7 +840,11 @@ class CmsProfesionalService {
     const targetArchivado = pendingMeta?.targetEstado === "ARCHIVADO";
     const profAprobado = await prisma.profesional.update({
       where: { id: idBigInt },
-      data: { activo: !targetArchivado, updatedAt: new Date() },
+      data: {
+        activo: !targetArchivado,
+        estado: targetArchivado ? "ARCHIVADO" : "PUBLICADO",
+        updatedAt: new Date(),
+      },
       include: {
         especialidad: true,
         archivo: true,
