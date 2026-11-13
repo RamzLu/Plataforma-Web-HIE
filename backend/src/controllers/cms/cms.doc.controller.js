@@ -41,8 +41,8 @@ export const evaluarDocumento = async (req, res, next) => {
 export const eliminarDocumento = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await CmsDocService.eliminarDocumento(id);
-    return res.status(200).json(result);
+    const result = await CmsDocService.eliminarDocumento(id, { user: req.user });
+    return res.status(result?.solicitudEliminacion ? 202 : 200).json(result);
   } catch (error) {
     next(error);
   }

@@ -4,7 +4,7 @@ import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
-import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
@@ -571,7 +571,7 @@ class CmsDocService {
     };
   }
 
-  async eliminarDocumento(id) {
+  async eliminarDocumento(id, { user = null, forzar = false } = {}) {
     const idBigInt = parsearIdBigInt(id, "ID de documento");
     const idStr = id.toString();
 
@@ -586,7 +586,11 @@ class CmsDocService {
       throw error;
     }
 
-    asegurarQueSePuedeEliminar(doc, (await this.obtenerMapaPendingMeta()).get(idStr) || null);
+    // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
+    if (!forzar && tieneVersionPublica(doc, (await this.obtenerMapaPendingMeta()).get(idStr) || null)) {
+      return solicitarEliminacion({ entidad: "documento", id: idStr, titulo: doc.titulo, user });
+    }
+    await limpiarSolicitudEliminacion("documento", idStr);
 
     await this.limpiarPendingMeta(idStr);
     await this.limpiarMotivoRechazo(idStr);

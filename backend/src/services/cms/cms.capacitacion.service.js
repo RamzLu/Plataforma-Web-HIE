@@ -1,6 +1,6 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
-import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -885,7 +885,7 @@ class CmsCapacitacionService {
     };
   }
 
-  async eliminarCapacitacion(id) {
+  async eliminarCapacitacion(id, { user = null, forzar = false } = {}) {
     const idBigInt = parsearIdBigInt(id, "ID de capacitación");
     const existing = await prisma.capacitacion.findUnique({
       where: { id: idBigInt },
@@ -898,7 +898,11 @@ class CmsCapacitacionService {
       throw error;
     }
 
-    asegurarQueSePuedeEliminar(existing, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null);
+    // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
+    if (!forzar && tieneVersionPublica(existing, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null)) {
+      return solicitarEliminacion({ entidad: "capacitacion", id: id.toString(), titulo: existing.titulo, user });
+    }
+    await limpiarSolicitudEliminacion("capacitacion", id.toString());
 
     if (existing.archivo?.nombreArchivo) {
       try {

@@ -1,5 +1,5 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
-import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -275,7 +275,7 @@ class CmsNoticiaService {
     return resultado;
   }
 
-  async eliminarNoticia(id) {
+  async eliminarNoticia(id, { user = null, forzar = false } = {}) {
     const idBigInt = parsearIdBigInt(id, "ID de noticia");
     const noticia = await prisma.noticia.findUnique({
       where: { id: idBigInt },
@@ -288,7 +288,11 @@ class CmsNoticiaService {
       throw error;
     }
 
-    asegurarQueSePuedeEliminar(noticia, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null);
+    // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
+    if (!forzar && tieneVersionPublica(noticia, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null)) {
+      return solicitarEliminacion({ entidad: "noticia", id: id.toString(), titulo: noticia.titulo, user });
+    }
+    await limpiarSolicitudEliminacion("noticia", id.toString());
 
     for (const na of noticia.noticia_archivo) {
       await supabase.storage.from("noticias-imagenes").remove([na.archivo.nombreArchivo]);

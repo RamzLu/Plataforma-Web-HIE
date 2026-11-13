@@ -1,7 +1,7 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
-import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
@@ -535,7 +535,7 @@ class CmsEspecialidadService {
     return resultado;
   }
 
-  async eliminarEspecialidad(id, isServicio) {
+  async eliminarEspecialidad(id, isServicio, { user = null, forzar = false } = {}) {
     const idBigInt = parsearIdBigInt(id, "ID de especialidad o servicio");
     const esServicio = isServicio === "true" || isServicio === true;
     const idStr = id.toString();
@@ -548,10 +548,13 @@ class CmsEspecialidadService {
       error.statusCode = 404;
       throw error;
     }
-    asegurarQueSePuedeEliminar(
-      registro,
-      (await this.obtenerMapaPendingMeta()).get(this._metaKey(idStr, esServicio)) || null
-    );
+    // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
+    const entidad = esServicio ? "servicio" : "especialidad";
+    const pendingMeta = (await this.obtenerMapaPendingMeta()).get(this._metaKey(idStr, esServicio)) || null;
+    if (!forzar && tieneVersionPublica(registro, pendingMeta)) {
+      return solicitarEliminacion({ entidad, id: idStr, titulo: registro.nombre, user });
+    }
+    await limpiarSolicitudEliminacion(entidad, idStr);
 
     if (esServicio) {
       await prisma.servicio.delete({ where: { id: idBigInt } });

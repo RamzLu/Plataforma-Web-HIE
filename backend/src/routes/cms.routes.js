@@ -36,6 +36,7 @@ import {
 } from "../controllers/cms/cms.capacitacion.controller.js";
 
 
+import { obtenerSolicitudesEliminacion, resolverSolicitudEliminacion } from "../controllers/cms/cms.eliminaciones.controller.js";
 import { requireCmsAccess, requireAdminAccess, adminViewAccess, requireCmsOrAdminAccess } from '../middlewares/auth.middleware.js'; 
 import { parsearIdBigInt } from '../utils/sanitize.utils.js';
 import {
@@ -142,5 +143,11 @@ router.put('/capacitaciones/:id', requireCmsAccess, uploadCapacitacionFiles, act
 router.patch('/capacitaciones/:id/estado', requireCmsOrAdminAccess, cambiarEstadoCapacitacion);
 router.patch('/capacitaciones/:id/revision', requireCmsOrAdminAccess, revisarCapacitacion);
 router.delete('/capacitaciones/:id', requireCmsAccess, eliminarCapacitacion);
+
+// ==========================================
+// SOLICITUDES DE ELIMINACIÓN (contenido publicado que el CM pidió borrar)
+// ==========================================
+router.get('/solicitudes-eliminacion', requireAdminAccess, obtenerSolicitudesEliminacion);
+router.patch('/solicitudes-eliminacion/:entidad/:id', requireAdminAccess, resolverSolicitudEliminacion);
 
 export default router;

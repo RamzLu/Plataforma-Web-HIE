@@ -1,6 +1,6 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
-import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -904,7 +904,7 @@ class CmsResidenciaService {
     };
   }
 
-  async eliminarResidencia(id) {
+  async eliminarResidencia(id, { user = null, forzar = false } = {}) {
     const idBigInt = parsearIdBigInt(id, "ID de residencia");
 
     const residencia = await prisma.residencia.findUnique({
@@ -918,7 +918,11 @@ class CmsResidenciaService {
       throw error;
     }
 
-    asegurarQueSePuedeEliminar(residencia, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null);
+    // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
+    if (!forzar && tieneVersionPublica(residencia, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null)) {
+      return solicitarEliminacion({ entidad: "residencia", id: id.toString(), titulo: residencia.nombre, user });
+    }
+    await limpiarSolicitudEliminacion("residencia", id.toString());
 
     if (residencia.archivo) {
       try {

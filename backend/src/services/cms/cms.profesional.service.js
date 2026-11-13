@@ -3,7 +3,7 @@ import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
@@ -801,7 +801,7 @@ class CmsProfesionalService {
     };
   }
 
-  async eliminarProfesional(id) {
+  async eliminarProfesional(id, { user = null, forzar = false } = {}) {
     const idBigInt = parsearIdBigInt(id, "ID de profesional");
     const idStr = idBigInt.toString();
     const profesional = await prisma.profesional.findUnique({
@@ -815,7 +815,11 @@ class CmsProfesionalService {
       throw error;
     }
 
-    asegurarQueSePuedeEliminar(profesional, (await this.obtenerMapaPendingMeta()).get(idStr) || null);
+    // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
+    if (!forzar && tieneVersionPublica(profesional, (await this.obtenerMapaPendingMeta()).get(idStr) || null)) {
+      return solicitarEliminacion({ entidad: "profesional", id: idStr, titulo: `${profesional.nombre} ${profesional.apellido}`.trim(), user });
+    }
+    await limpiarSolicitudEliminacion("profesional", idStr);
 
     if (profesional.archivo) {
       await supabase.storage
