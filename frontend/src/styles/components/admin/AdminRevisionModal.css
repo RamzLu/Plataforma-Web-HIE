@@ -184,6 +184,19 @@
   white-space: pre-wrap;
 }
 
+/* Tarjeta del título o nombre del contenido: el dato principal del modal, más grande que el resto. */
+.admin-rev-modal .admin-rev-grid > .is-title {
+  padding: 18px 20px;
+}
+
+.admin-rev-modal .admin-rev-grid > .is-title p {
+  color: #0b1b33;
+  font-size: 1.3rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
 /* Fila de datos sueltos (estado, editor, fechas) */
 .admin-rev-modal .admin-rev-meta {
   display: flex;
@@ -340,6 +353,7 @@
   background: #fff;
   color: #0b1b33;
   font: inherit;
+  font-weight: 400;
   resize: vertical;
 }
 

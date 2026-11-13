@@ -476,7 +476,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                 esActualizacion={selectedItem.esActualizacion}
               />
               <div className="admin-es-detail-grid admin-rev-grid">
-                <article className="admin-es-detail admin-es-detail-wide">
+                <article className="admin-es-detail admin-es-detail-wide is-title">
                   <h3>Nombre</h3>
                   <p>{selectedItem.name}</p>
                 </article>

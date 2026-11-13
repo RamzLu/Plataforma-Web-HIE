@@ -484,7 +484,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                 esActualizacion={selectedDocument.esActualizacion}
               />
               <div className="admin-doc-info-grid admin-rev-grid">
-                <article className="is-wide">
+                <article className="is-wide is-title">
                   <h3>Título</h3>
                   <p>{selectedDocument.title}</p>
                 </article>
@@ -580,35 +580,13 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                   )}
                 </div>
 
-                <div className="admin-doc-preview-footer">
-                  {safeFileUrl ? (
-                    <>
-                      <span className="admin-doc-preview-verified">
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#059669"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <polyline points="9 12 11 14 15 10"></polyline>
-                        </svg>
-                        Archivo verificado
-                      </span>
-                      <span className="admin-doc-preview-resolution">
-                        Guardado en BD
-                      </span>
-                    </>
-                  ) : (
+                {!safeFileUrl && (
+                  <div className="admin-doc-preview-footer">
                     <span className="admin-doc-preview-resolution" style={{ marginLeft: 'auto' }}>
                       Sin archivo adjunto
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
               </section>
 
               <div className="admin-doc-state-row admin-rev-meta">
