@@ -5,7 +5,7 @@ import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
-import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
 const REJECTION_KEY_PREFIX = "profesional_rejection_";
@@ -38,10 +38,7 @@ class CmsProfesionalService {
       try {
         const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
         if (usuarioLocal?.nombre) {
-          if (usuarioLocal.apellido && usuarioLocal.apellido !== "Sistema") {
-            return `${usuarioLocal.nombre} ${usuarioLocal.apellido}`.trim();
-          }
-          return usuarioLocal.nombre.trim();
+          return nombreDeUsuario(usuarioLocal);
         }
       } catch (error) {
         registrarFalla("Usuario local", error);
@@ -165,10 +162,7 @@ class CmsProfesionalService {
         if (!aud.entidadId || auditoriaMap.has(aud.entidadId)) continue;
         let nombreUsuario = "Editor CMS";
         if (aud.usuario?.nombre) {
-          nombreUsuario =
-            aud.usuario.apellido && aud.usuario.apellido !== "Sistema"
-              ? `${aud.usuario.nombre} ${aud.usuario.apellido}`.trim()
-              : aud.usuario.nombre.trim();
+          nombreUsuario = nombreDeUsuario(aud.usuario);
         }
         auditoriaMap.set(aud.entidadId, {
           editor: nombreUsuario,

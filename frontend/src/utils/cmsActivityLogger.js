@@ -49,7 +49,7 @@ export const getCmsActivityLog = () => {
           id: "act-sample-delete-1",
           titulo: 'Eliminó noticia: "Comunicado sobre mantenimiento de guardia"',
           categoria: "Noticias",
-          editor: "Luana Abigail Ramirez Sistema",
+          editor: "Luana Abigail Ramirez",
           estado: "ELIMINADO",
           timestamp: Date.now() - 1000 * 60 * 30,
         },

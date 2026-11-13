@@ -3,7 +3,7 @@ import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
@@ -37,11 +37,11 @@ class CmsDocService {
     else if (estadoUpper === "ARCHIVADO") statusMapped = "archivado";
 
     const creatorName = doc.usuario_documento_createdByTousuario
-      ? `${doc.usuario_documento_createdByTousuario.nombre} ${doc.usuario_documento_createdByTousuario.apellido || ""}`.trim()
+      ? nombreDeUsuario(doc.usuario_documento_createdByTousuario)
       : pendingMeta?.editor || "Editor CMS";
 
     const updaterName = doc.usuario_documento_updatedByTousuario
-      ? `${doc.usuario_documento_updatedByTousuario.nombre} ${doc.usuario_documento_updatedByTousuario.apellido || ""}`.trim()
+      ? nombreDeUsuario(doc.usuario_documento_updatedByTousuario)
       : null;
 
     return {

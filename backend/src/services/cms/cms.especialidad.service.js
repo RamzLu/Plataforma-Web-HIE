@@ -3,7 +3,7 @@ import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
-import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
 const REJECTION_KEY_PREFIX = "especialidad_rejection_";
@@ -40,10 +40,7 @@ class CmsEspecialidadService {
       try {
         const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
         if (usuarioLocal?.nombre) {
-          if (usuarioLocal.apellido && usuarioLocal.apellido !== "Sistema") {
-            return `${usuarioLocal.nombre} ${usuarioLocal.apellido}`.trim();
-          }
-          return usuarioLocal.nombre.trim();
+          return nombreDeUsuario(usuarioLocal);
         }
       } catch (error) {
         registrarFalla("Usuario local", error);
@@ -481,7 +478,7 @@ class CmsEspecialidadService {
         resolvedUpdatedAt = editorMeta.updatedAt || null;
       } else if (auditItem?.usuario) {
         const u = auditItem.usuario;
-        resolvedEditor = u.apellido && u.apellido !== "Sistema" ? `${u.nombre} ${u.apellido}`.trim() : u.nombre.trim();
+        resolvedEditor = nombreDeUsuario(u);
         resolvedUpdatedAt = auditItem.fechaHora;
       } else if (pendingMeta?.editor) {
         resolvedEditor = pendingMeta.editor;

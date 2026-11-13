@@ -3,7 +3,7 @@ import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion 
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { sanitizarHtmlNoticia, parsearIdBigInt, parsearArregloJson } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
@@ -120,7 +120,7 @@ class CmsNoticiaService {
     }
 
     const editorNombre = nuevaNoticia.usuario_noticia_createdByTousuario
-      ? `${nuevaNoticia.usuario_noticia_createdByTousuario.nombre} ${nuevaNoticia.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
+      ? nombreDeUsuario(nuevaNoticia.usuario_noticia_createdByTousuario)
       : "Editor CMS";
 
     const requestedEstado =
@@ -196,7 +196,7 @@ class CmsNoticiaService {
         if (mantienePublicacionPrevia) {
           const snap = pendingMeta.snapshotPublico;
           const editorNombreSnap = noticia.usuario_noticia_createdByTousuario
-            ? `${noticia.usuario_noticia_createdByTousuario.nombre} ${noticia.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
+            ? nombreDeUsuario(noticia.usuario_noticia_createdByTousuario)
             : "Editor CMS";
 
           resultado.push({
@@ -229,11 +229,11 @@ class CmsNoticiaService {
       });
 
       const editorNombre = noticia.usuario_noticia_createdByTousuario
-        ? `${noticia.usuario_noticia_createdByTousuario.nombre} ${noticia.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
+        ? nombreDeUsuario(noticia.usuario_noticia_createdByTousuario)
         : "Editor CMS";
 
       const editadoPorNombre = noticia.usuario_noticia_updatedByTousuario
-        ? `${noticia.usuario_noticia_updatedByTousuario.nombre} ${noticia.usuario_noticia_updatedByTousuario.apellido || ""}`.trim()
+        ? nombreDeUsuario(noticia.usuario_noticia_updatedByTousuario)
         : null;
 
       let catName = noticia.categoria_noticia ? noticia.categoria_noticia.nombre : "General";
@@ -550,10 +550,10 @@ class CmsNoticiaService {
     );
 
     const editorOriginal = noticiaConArchivos.usuario_noticia_createdByTousuario
-      ? `${noticiaConArchivos.usuario_noticia_createdByTousuario.nombre} ${noticiaConArchivos.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
+      ? nombreDeUsuario(noticiaConArchivos.usuario_noticia_createdByTousuario)
       : "Editor CMS";
     const editadoPorNombre = noticiaConArchivos.usuario_noticia_updatedByTousuario
-      ? `${noticiaConArchivos.usuario_noticia_updatedByTousuario.nombre} ${noticiaConArchivos.usuario_noticia_updatedByTousuario.apellido || ""}`.trim()
+      ? nombreDeUsuario(noticiaConArchivos.usuario_noticia_updatedByTousuario)
       : null;
 
     let catFinal = noticiaConArchivos.categoria_noticia
@@ -746,10 +746,10 @@ class CmsNoticiaService {
     );
 
     const editorOriginal = noticiaActualizada.usuario_noticia_createdByTousuario
-      ? `${noticiaActualizada.usuario_noticia_createdByTousuario.nombre} ${noticiaActualizada.usuario_noticia_createdByTousuario.apellido || ""}`.trim()
+      ? nombreDeUsuario(noticiaActualizada.usuario_noticia_createdByTousuario)
       : "Editor CMS";
     const editadoPorNombre = noticiaActualizada.usuario_noticia_updatedByTousuario
-      ? `${noticiaActualizada.usuario_noticia_updatedByTousuario.nombre} ${noticiaActualizada.usuario_noticia_updatedByTousuario.apellido || ""}`.trim()
+      ? nombreDeUsuario(noticiaActualizada.usuario_noticia_updatedByTousuario)
       : null;
 
     let catFinal = noticiaActualizada.categoria_noticia

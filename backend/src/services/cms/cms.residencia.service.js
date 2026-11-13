@@ -6,7 +6,7 @@ import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
-import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 
 const RESIDENCIA_PENDING_META_PREFIX = "residencia_pending_meta_";
@@ -46,10 +46,7 @@ class CmsResidenciaService {
       try {
         const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
         if (usuarioLocal?.nombre) {
-          if (usuarioLocal.apellido && usuarioLocal.apellido !== "Sistema") {
-            return `${usuarioLocal.nombre} ${usuarioLocal.apellido}`.trim();
-          }
-          return usuarioLocal.nombre.trim();
+          return nombreDeUsuario(usuarioLocal);
         }
       } catch (error) {
         registrarFalla("Usuario local", error);
@@ -107,7 +104,7 @@ class CmsResidenciaService {
         resolvedUpdatedAt = editorMeta.updatedAt || null;
       } else if (auditItem?.usuario) {
         const u = auditItem.usuario;
-        resolvedEditor = u.apellido && u.apellido !== "Sistema" ? `${u.nombre} ${u.apellido}`.trim() : u.nombre.trim();
+        resolvedEditor = nombreDeUsuario(u);
         resolvedUpdatedAt = auditItem.fechaHora;
       } else if (pendingMeta?.editor) {
         resolvedEditor = pendingMeta.editor;
