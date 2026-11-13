@@ -14,7 +14,6 @@ import CmsHeader from "../../components/cms/CmsHeader";
 import AccessDeniedScreen from "../../components/ui/AccessDeniedScreen";
 import CmsDashboardView from "../cms/CmsDashboardView";
 import CmsNoticiasView from "../cms/CmsNoticiasView";
-import CmsBannersView from "../cms/CmsBannersView";
 import CmsContenidoGraficoView from "../cms/CmsContenidoGraficoView";
 import CmsDocsView from "../cms/CmsDocsView";
 import CmsProfesionalesView from "../cms/CmsProfesionalesView"; 

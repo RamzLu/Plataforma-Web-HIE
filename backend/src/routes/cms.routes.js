@@ -1,6 +1,5 @@
 import { Router } from 'express';
 
-import { obtenerBanners, crearBanner, actualizarBanner, eliminarBanner } from "../controllers/cms/cms.banners.controller.js";
 import {
   obtenerContenidosGraficos,
   obtenerEspacioPublico,
@@ -77,13 +76,8 @@ router.patch('/documentacion/:id/estado', requireAdminAccess, evaluarDocumento);
 router.delete('/documentacion/:id', requireCmsAccess, eliminarDocumento);
 
 // ==========================================
-// MÓDULO: BANNERS Y CONTENIDO GRÁFICO
+// MÓDULO: CONTENIDO GRÁFICO
 // ==========================================
-router.get("/banners", adminViewAccess, obtenerBanners);
-router.post("/banners", requireCmsAccess, crearBanner);
-router.put("/banners/:espacioKey", requireCmsAccess, uploadImagenesArray("imagenes", 15), actualizarBanner);
-router.delete("/banners/:espacioKey", requireCmsAccess, eliminarBanner);
-
 router.get("/contenido-grafico", adminViewAccess, obtenerContenidosGraficos);
 router.get("/contenido-grafico/publico/:espacioKey", obtenerEspacioPublico);
 router.put(
