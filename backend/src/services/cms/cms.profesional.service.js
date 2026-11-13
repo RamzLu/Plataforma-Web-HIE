@@ -241,7 +241,7 @@ class CmsProfesionalService {
                   accion: { in: ["CREAR", "ACTUALIZAR"] },
                 },
                 include: { usuario: true },
-                orderBy: { fecha: "desc" },
+                orderBy: { fechaHora: "desc" },
               })
               .catch(() => [])
           : Promise.resolve([]),
@@ -260,7 +260,7 @@ class CmsProfesionalService {
         }
         auditoriaMap.set(aud.entidadId, {
           editor: nombreUsuario,
-          updatedAt: aud.fecha,
+          updatedAt: aud.fechaHora,
         });
       }
     }
