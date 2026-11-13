@@ -6,7 +6,6 @@ import NewsSection from "../../components/NewsSection";
 import PatientInfoSection from "../../components/PatientInfoSection";
 import AprendeSection from "../../components/AprendeSection";
 import HomeMapBanner from "../../components/HomeMapBanner";
-import AboutPage from "../public/AboutPage";
 import logoEstrellas from "../../assets/logoHospitalEvita.png";
 import logoEstrellasBlanco from "../../assets/logoHospitalEvita-blanco.png";
 import "../../styles/pages/HomePage.css";
