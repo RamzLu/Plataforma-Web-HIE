@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Archive,
@@ -316,9 +317,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
     } catch (err) {
       console.error('Error al aprobar la residencia:', err);
       setActionError(
-        err?.response?.data?.error ||
-          err?.message ||
-          'No se pudo aprobar la solicitud de residencia.',
+        mensajeDeError(err, 'No se pudo aprobar la solicitud de residencia.'),
       );
     } finally {
       setIsSaving(false);
@@ -361,9 +360,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
     } catch (err) {
       console.error('Error al rechazar la residencia:', err);
       setActionError(
-        err?.response?.data?.error ||
-          err?.message ||
-          'No se pudo registrar el rechazo de la residencia.',
+        mensajeDeError(err, 'No se pudo registrar el rechazo de la residencia.'),
       );
     } finally {
       setIsSaving(false);

@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn, ZoomOut, Check, Building2 } from "lucide-react";
 import Cropper from "react-easy-crop";
@@ -298,11 +299,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
       toast.success(res.message || "¡Sede Central actualizada correctamente!", { id: toastId });
       setShowSedeModal(false);
     } catch (error) {
-      const apiErr = error?.response?.data?.error;
-      const msg =
-        (typeof apiErr === "string" ? apiErr : apiErr?.message) ||
-        error?.response?.data?.message ||
-        "Error al guardar los datos de la Sede Central.";
+      const msg = mensajeDeError(error, "Error al guardar los datos de la Sede Central.");
       toast.error(msg, { id: toastId });
     } finally {
       setIsSaving(false);
@@ -568,7 +565,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
       toast.success("Autoridad eliminada correctamente.", { id: toastId });
       setAutoridadToDelete(null);
     } catch (error) {
-      toast.error("Error al eliminar la autoridad.", { id: toastId });
+      toast.error(mensajeDeError(error, "Error al eliminar la autoridad."), { id: toastId });
     } finally {
       setIsSaving(false);
     }

@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Archive,
@@ -202,7 +203,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       await cargarDatos(true);
     } catch (error) {
       console.error('Error al aprobar:', error);
-      toast.error(error.response?.data?.error || 'Error al aprobar la información.');
+      toast.error(mensajeDeError(error, 'Error al aprobar la información.'));
     } finally {
       setSubmitting(false);
     }
@@ -234,7 +235,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       await cargarDatos(true);
     } catch (error) {
       console.error('Error al rechazar:', error);
-      toast.error(error.response?.data?.error || 'Error al rechazar la información.');
+      toast.error(mensajeDeError(error, 'Error al rechazar la información.'));
     } finally {
       setSubmitting(false);
     }

@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak.js";
@@ -189,11 +190,7 @@ const CmsContenidoGraficoView = () => {
       setShowEditModal(false);
       setSelectedEspacio(null);
     } catch (error) {
-      const apiErr = error?.response?.data?.error;
-      const msg =
-        (typeof apiErr === "string" ? apiErr : apiErr?.message) ||
-        error?.response?.data?.message ||
-        "No se pudo guardar el espacio gráfico.";
+      const msg = mensajeDeError(error, "No se pudo guardar el espacio gráfico.");
       toast.error(msg, { id: toastId });
     } finally {
       setIsSaving(false);

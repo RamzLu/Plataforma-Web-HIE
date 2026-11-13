@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
 import React, { useState, useEffect } from "react";
@@ -142,7 +143,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       setHasUnsavedChanges(false);
       cargarDatos();
     } catch (error) {
-      toast.error(error.response?.data?.error || "Error al guardar.");
+      toast.error(mensajeDeError(error, "Error al guardar."));
     } finally {
       setIsSaving(false);
     }
@@ -165,7 +166,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       setShowDeleteModal(false);
       cargarDatos();
     } catch (error) {
-      const msg = error.response?.data?.error?.message || "Error al intentar eliminar.";
+      const msg = mensajeDeError(error, "Error al intentar eliminar.");
       toast.error(msg, { duration: 5000 });
       setShowDeleteModal(false);
     } finally {

@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
@@ -550,7 +551,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       setArchivoSeleccionado(null);
     } catch (error) {
       console.error("Error al guardar capacitación:", error);
-      toast.error(error.response?.data?.message || error.message || "Error al guardar la capacitación.");
+      toast.error(mensajeDeError(error, "Error al guardar la capacitación."));
     } finally {
       setIsSaving(false);
     }
@@ -576,7 +577,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       await cargarCapacitaciones();
     } catch (error) {
       console.error("Error al cambiar estado:", error);
-      toast.error("No se pudo actualizar el estado de la capacitación.");
+      toast.error(mensajeDeError(error, "No se pudo actualizar el estado de la capacitación."));
     }
   };
 
@@ -601,7 +602,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       await cargarCapacitaciones();
     } catch (error) {
       console.error("Error al eliminar capacitación:", error);
-      toast.error("No se pudo eliminar la capacitación.");
+      toast.error(mensajeDeError(error, "No se pudo eliminar la capacitación."));
     } finally {
       setShowDeleteModal(false);
       setItemAEliminar(null);

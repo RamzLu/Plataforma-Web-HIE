@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
 import React, { useState } from "react";
@@ -260,8 +261,7 @@ const CmsNoticiasView = ({
     } catch (error) {
       console.error("Error al eliminar noticia:", error);
       toast.error(
-        error.response?.data?.error?.message ||
-          "Ocurrió un error al intentar eliminar la noticia."
+        mensajeDeError(error, "Ocurrió un error al intentar eliminar la noticia.")
       );
     } finally {
       setDeletingId(null);
@@ -486,10 +486,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
       console.error("Error al guardar noticia:", error);
       toast.error(
         `Error: ${
-          error.response?.data?.error?.message ||
-          error.response?.data?.message ||
-          error.message ||
-          "Error al guardar"
+          mensajeDeError(error, "Error al guardar")
         }`
       );
     } finally {

@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Building2,
@@ -205,7 +206,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
       await cargarDatos(true);
     } catch (error) {
       console.error('Error al aprobar profesional:', error);
-      toast.error(error.response?.data?.error || 'Error al aprobar al profesional.');
+      toast.error(mensajeDeError(error, 'Error al aprobar al profesional.'));
     } finally {
       setSubmitting(false);
     }
@@ -236,7 +237,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
       await cargarDatos(true);
     } catch (error) {
       console.error('Error al rechazar profesional:', error);
-      toast.error(error.response?.data?.error || 'Error al rechazar al profesional.');
+      toast.error(mensajeDeError(error, 'Error al rechazar al profesional.'));
     } finally {
       setSubmitting(false);
     }

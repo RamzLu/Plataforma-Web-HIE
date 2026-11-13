@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Archive,
@@ -294,10 +295,7 @@ const AdminCapacitacionesView = () => {
     } catch (saveError) {
       console.error('Error al actualizar el estado de la capacitación:', saveError);
       setActionError(
-        saveError.response?.data?.error ||
-          saveError.response?.data?.message ||
-          saveError.message ||
-          'No se pudo actualizar la capacitación.',
+        mensajeDeError(saveError, 'No se pudo actualizar la capacitación.'),
       );
     } finally {
       setIsSaving(false);

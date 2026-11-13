@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import React, { useState, useRef, useMemo } from "react";
 import { CalendarDays } from "lucide-react";
 import { createDocumento, updateDocumento, deleteDocumento } from "../../api/documentos.api.js";
@@ -172,7 +173,7 @@ const CmsDocsView = ({
       setDocAEliminar(null);
     } catch (error) {
       console.error("Error al eliminar:", error);
-      const backendError = error.response?.data?.error?.message || error.response?.data?.error || "Ocurrió un error al intentar eliminar el documento.";
+      const backendError = mensajeDeError(error, "Ocurrió un error al intentar eliminar el documento.");
       toast.error(backendError);
     } finally {
       setDeletingId(null);
@@ -333,7 +334,7 @@ const CmsDocsView = ({
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
-      const backendError = error.response?.data?.error || error.message || "Error al guardar";
+      const backendError = mensajeDeError(error, "Error al guardar");
       toast.error(`Error: ${backendError}`);
     } finally {
       setSaving(false);

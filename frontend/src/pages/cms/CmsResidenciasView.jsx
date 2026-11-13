@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
@@ -457,9 +458,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     } catch (error) {
       console.error("Error al guardar residencia:", error);
       const msg =
-        error.response?.data?.error ||
-        error.message ||
-        "Error al guardar la residencia.";
+        mensajeDeError(error, "Error al guardar la residencia.");
       toast.error(msg, { id: toastId });
     } finally {
       setIsSaving(false);
@@ -489,7 +488,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     } catch (error) {
       console.error("Error al cambiar estado:", error);
       const msg =
-        error.response?.data?.error || "Error al cambiar el estado.";
+        mensajeDeError(error, "Error al cambiar el estado.");
       toast.error(msg, { id: toastId });
     }
   };
@@ -523,8 +522,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     } catch (error) {
       console.error("Error al eliminar residencia:", error);
       const msg =
-        error.response?.data?.error ||
-        "Error al eliminar la residencia.";
+        mensajeDeError(error, "Error al eliminar la residencia.");
       toast.error(msg, { id: toastId });
     } finally {
       setIsDeleting(false);

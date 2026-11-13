@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -266,7 +267,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     } catch (error) {
       console.error('Error al aprobar la noticia:', error);
       toast.error(
-        error?.response?.data?.message || 'Ocurrió un error al aprobar la noticia.'
+        mensajeDeError(error, 'Ocurrió un error al aprobar la noticia.')
       );
     } finally {
       setSubmitting(false);
@@ -321,7 +322,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     } catch (error) {
       console.error('Error al rechazar la noticia:', error);
       toast.error(
-        error?.response?.data?.message || 'Ocurrió un error al rechazar la noticia.'
+        mensajeDeError(error, 'Ocurrió un error al rechazar la noticia.')
       );
     } finally {
       setSubmitting(false);

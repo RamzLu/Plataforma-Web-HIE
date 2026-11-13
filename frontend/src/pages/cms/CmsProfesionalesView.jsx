@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
 import React, { useState, useEffect } from "react";
@@ -224,7 +225,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
       toast.success("Profesional eliminado correctamente.", { id: toastId });
       setShowDeleteModal(false);
     } catch (error) {
-      toast.error("No se pudo eliminar el profesional.", { id: toastId });
+      toast.error(mensajeDeError(error, "No se pudo eliminar el profesional."), { id: toastId });
     } finally {
       setIsSaving(false);
       setProfesionalToDelete(null);
@@ -324,9 +325,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
       await fetchDatos();
     } catch (error) {
       toast.error(
-        error.response?.data?.error?.message ||
-          error.response?.data?.error ||
-          "Ocurrió un error al guardar el profesional.",
+        mensajeDeError(error, "Ocurrió un error al guardar el profesional."),
         { id: toastId }
       );
     } finally {

@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CalendarDays,
@@ -235,7 +236,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
       await cargarDocumentos(true);
     } catch (error) {
       console.error('Error al aprobar documento:', error);
-      toast.error(error.response?.data?.error || 'Error al aprobar el documento.');
+      toast.error(mensajeDeError(error, 'Error al aprobar el documento.'));
     } finally {
       setSubmitting(false);
     }
@@ -267,7 +268,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
       await cargarDocumentos(true);
     } catch (error) {
       console.error('Error al rechazar documento:', error);
-      toast.error(error.response?.data?.error || 'Error al rechazar el documento.');
+      toast.error(mensajeDeError(error, 'Error al rechazar el documento.'));
     } finally {
       setSubmitting(false);
     }
