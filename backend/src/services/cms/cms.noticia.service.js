@@ -1,3 +1,4 @@
+import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -377,6 +378,8 @@ class CmsNoticiaService {
       error.statusCode = 404;
       throw error;
     }
+
+    asegurarQueSePuedeEliminar(noticia, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null);
 
     for (const na of noticia.noticia_archivo) {
       await supabase.storage.from("noticias-imagenes").remove([na.archivo.nombreArchivo]);

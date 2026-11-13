@@ -2,6 +2,7 @@ import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
@@ -641,6 +642,8 @@ class CmsDocService {
       error.statusCode = 404;
       throw error;
     }
+
+    asegurarQueSePuedeEliminar(doc, (await this.obtenerMapaPendingMeta()).get(idStr) || null);
 
     await this.limpiarPendingMeta(idStr);
     await this.limpiarMotivoRechazo(idStr);

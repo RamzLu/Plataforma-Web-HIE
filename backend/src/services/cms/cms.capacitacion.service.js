@@ -1,3 +1,4 @@
+import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -957,6 +958,8 @@ class CmsCapacitacionService {
       error.statusCode = 404;
       throw error;
     }
+
+    asegurarQueSePuedeEliminar(existing, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null);
 
     if (existing.archivo?.nombreArchivo) {
       try {

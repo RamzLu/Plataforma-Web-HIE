@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma.js";
+import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
@@ -635,6 +636,19 @@ class CmsEspecialidadService {
     const idBigInt = parsearIdBigInt(id, "ID de especialidad o servicio");
     const esServicio = isServicio === "true" || isServicio === true;
     const idStr = id.toString();
+
+    const registro = esServicio
+      ? await prisma.servicio.findUnique({ where: { id: idBigInt } })
+      : await prisma.especialidad.findUnique({ where: { id: idBigInt } });
+    if (!registro) {
+      const error = new Error(esServicio ? "Servicio no encontrado." : "Especialidad no encontrada.");
+      error.statusCode = 404;
+      throw error;
+    }
+    asegurarQueSePuedeEliminar(
+      registro,
+      (await this.obtenerMapaPendingMeta()).get(this._metaKey(idStr, esServicio)) || null
+    );
 
     if (esServicio) {
       await prisma.servicio.delete({ where: { id: idBigInt } });
