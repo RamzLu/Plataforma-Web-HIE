@@ -7,10 +7,7 @@ import "../../styles/pages/ProfesionalesPage.css";
 
 import PageBanner from "../../components/PageBanner";
 import AnimatedContent from "../../components/ui/AnimatedContent";
-
-// Dirección base de la API (ya incluye /api).
-// En Render viene de la variable VITE_API_URL, en tu PC usa localhost.
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+import { getProfesionales } from "../../api/profesionales.api";
 
 const normalizeText = (text) => {
   if (!text) return "";
@@ -137,11 +134,9 @@ const ProfesionalesPage = () => {
     window.scrollTo(0, 0);
     const fetchProfesionales = async () => {
       try {
-        const response = await fetch(`${API_URL}/cms/profesionales`);
-        if (response.ok) {
-          const data = await response.json();
-          setProfesionalesDb(data.filter(p => p.publicado));
-        }
+        // Cliente compartido (api/axiosConfig.js): misma URL base y timeout que el resto del portal.
+        const data = await getProfesionales();
+        setProfesionalesDb((Array.isArray(data) ? data : []).filter((p) => p.publicado));
       } catch (error) {
         console.error("Error al cargar los profesionales:", error);
       } finally {
