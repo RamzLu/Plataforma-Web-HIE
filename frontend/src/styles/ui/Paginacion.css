@@ -1,0 +1,67 @@
+/* Controles de paginación compartidos por los listados del CMS y del panel Admin */
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 4px 4px;
+}
+
+.paginacion-resumen {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.paginacion-controles {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.paginacion-flecha,
+.paginacion-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.paginacion-flecha:hover:not(:disabled),
+.paginacion-numero:hover:not(.activa) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.paginacion-flecha:focus-visible,
+.paginacion-numero:focus-visible {
+  outline: 2px solid #006eb3;
+  outline-offset: 2px;
+}
+
+.paginacion-flecha:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.paginacion-numero.activa {
+  background: #006eb3;
+  border-color: #006eb3;
+  color: #ffffff;
+  cursor: default;
+}
+
+.paginacion-salto {
+  padding: 0 4px;
+  color: #94a3b8;
+}

@@ -1,3 +1,5 @@
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
 import React, { useState, useEffect } from "react";
 import { adminFetch } from "../../api/adminFetch.js";
 import keycloak from "../../config/keycloak";
@@ -143,6 +145,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     if (filtroTipo === "SERVICIO") coincideTipo = prof.esServicioClave === true;
     return matchEstado && coincideBusqueda && coincideTipo;
   });
+  const paginacion = usePaginacion(profesionalesFiltrados, 10, [activeTab, searchTerm, filtroTipo]);
 
   const handleCloseAttempt = () => {
     if (hasUnsavedChanges) {
@@ -426,7 +429,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
               No se encontraron profesionales registrados en esta sección.
             </div>
           ) : (
-            profesionalesFiltrados.map((prof) => {
+            paginacion.itemsPagina.map((prof) => {
               const estadoProf = (
                 prof.estado || (prof.publicado ? "PUBLICADO" : "PENDIENTE_APROBACION")
               ).toUpperCase();
@@ -534,6 +537,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
             );
             })
           )}
+          <Paginacion {...paginacion} etiqueta="profesionales" />
         </div>
       </div>
 

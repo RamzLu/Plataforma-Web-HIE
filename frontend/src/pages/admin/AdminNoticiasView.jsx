@@ -9,6 +9,8 @@ import DefaultNewsImage from '../../components/ui/DefaultNewsImage';
 import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
 import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminNoticiasView.css';
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
 
 const AdminNoticiasView = ({ onPendingCountChange }) => {
   const [noticias, setNoticias] = useState([]);
@@ -365,6 +367,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     }
     return true;
   });
+  const paginacion = usePaginacion(filteredNoticias, 10, [statusFilter]);
 
   return (
     <div className="admin-review-container-admin">
@@ -486,7 +489,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                   : 'No hay noticias registradas.'}
               </div>
             ) : (
-              filteredNoticias.map((item) => {
+              paginacion.itemsPagina.map((item) => {
                 const wasEdited =
                   item.updatedAt &&
                   item.createdAt &&
@@ -605,6 +608,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 );
               })
             )}
+            <Paginacion {...paginacion} etiqueta="noticias" />
           </div>
         </div>
       </div>

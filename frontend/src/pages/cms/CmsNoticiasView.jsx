@@ -1,3 +1,5 @@
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
 import React, { useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
@@ -124,6 +126,7 @@ const CmsNoticiasView = ({
       filtroCategoria === "Todas" || n.category === filtroCategoria;
     return matchEstado && matchCategoria;
   });
+  const paginacion = usePaginacion(filteredNews, 10, [viewTab, filtroCategoria]);
 
   const handleOpenCreate = () => {
     setEditingId(null);
@@ -632,7 +635,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
               No hay noticias registradas con estos filtros.
             </div>
           ) : (
-            filteredNews.map((news) => {
+            paginacion.itemsPagina.map((news) => {
               const estadoUpper = (
                 news.estado || (news.isDraft ? "BORRADOR" : "PUBLICADO")
               ).toUpperCase();
@@ -896,6 +899,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
               );
             })
           )}
+          <Paginacion {...paginacion} etiqueta="noticias" />
         </div>
       </div>
 

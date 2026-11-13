@@ -20,6 +20,8 @@ import {
 } from '../../api/especialidades.api.js';
 import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminEspecialidadesServiciosView.css';
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
 
 const statusClass = (status) => {
   if (status === 'Aprobado' || status === 'Publicado') return 'admin-es-status-approved';
@@ -165,6 +167,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       return matchesType && matchesStatus && matchesSearch;
     });
   }, [items, search, statusFilter, typeFilter]);
+  const paginacion = usePaginacion(filteredItems, 10, [search, statusFilter, typeFilter]);
 
   const closeDetails = () => {
     setSelectedItem(null);
@@ -369,6 +372,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
               <p style={{ fontSize: '0.95rem' }}>Cargando información médica y asistencial...</p>
             </div>
           ) : (
+            <>
             <table className="admin-es-table">
               <thead>
                 <tr>
@@ -380,7 +384,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => (
+                {paginacion.itemsPagina.map((item) => (
                   <tr key={`${item.esServicio ? 'srv' : 'esp'}-${item.id}`}>
                     <td data-label="Servicio / Especialidad">
                       <button
@@ -424,6 +428,8 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                 )}
               </tbody>
             </table>
+            <Paginacion {...paginacion} etiqueta="registros" />
+            </>
           )}
         </div>
       </section>

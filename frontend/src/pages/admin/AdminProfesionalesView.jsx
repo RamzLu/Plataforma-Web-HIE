@@ -19,6 +19,8 @@ import {
 } from '../../api/profesionales.api.js';
 import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminProfesionalesView.css';
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
 
 const estadoLabels = {
   PENDIENTE: 'Pendiente de aprobación',
@@ -173,6 +175,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
       );
     });
   }, [profesionales, search, statusFilter, typeFilter]);
+  const paginacion = usePaginacion(filteredProfesionales, 10, [search, statusFilter, typeFilter]);
 
   const pendingCount = profesionales.filter((item) => item.estado === 'PENDIENTE').length;
   const rejectedCount = profesionales.filter((item) => item.estado === 'RECHAZADO').length;
@@ -377,6 +380,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
               <p style={{ fontSize: '0.95rem' }}>Cargando fichas de profesionales...</p>
             </div>
           ) : (
+            <>
             <table className="admin-prof-table">
               <thead>
                 <tr>
@@ -387,7 +391,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredProfesionales.map((item) => (
+                {paginacion.itemsPagina.map((item) => (
                   <tr key={item.id}>
                     <td data-label="Profesional">
                       <div className="admin-prof-person-cell">
@@ -443,6 +447,8 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                 )}
               </tbody>
             </table>
+            <Paginacion {...paginacion} etiqueta="profesionales" />
+            </>
           )}
         </div>
         <p className="admin-prof-grouping-note">

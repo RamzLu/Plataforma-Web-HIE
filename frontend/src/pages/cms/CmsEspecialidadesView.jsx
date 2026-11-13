@@ -1,3 +1,5 @@
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
@@ -197,6 +199,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
     return matchEstado && matchTipo && matchSearch;
   });
+  const paginacion = usePaginacion(datosFiltrados, 10, [activeTab, filtroTipo, searchTerm]);
 
   return (
     <div className="cms-dashboard-card">
@@ -301,7 +304,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
               No se encontraron registros que coincidan con los filtros aplicados.
             </div> 
           ) : (
-            datosFiltrados.map((esp) => (
+            paginacion.itemsPagina.map((esp) => (
               <div className="activity-row news-table-row" key={esp.id + (esp.esServicio ? 'srv' : 'esp')} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                 
                 <div className="col-content" style={{ flex: 1.8, display: "flex", flexDirection: "row", alignItems: "center", gap: "15px" }}>
@@ -398,6 +401,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
               </div>
             ))
           )}
+          <Paginacion {...paginacion} etiqueta="registros" />
         </div>
       </div>
 
