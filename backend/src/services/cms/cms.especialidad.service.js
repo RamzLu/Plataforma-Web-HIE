@@ -1,3 +1,4 @@
+import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
@@ -60,7 +61,9 @@ class CmsEspecialidadService {
         const itemKey = item.clave.replace(PENDING_META_KEY_PREFIX, "");
         try {
           map.set(itemKey, JSON.parse(item.valor));
-        } catch (_) {}
+        } catch {
+          // JSON inválido: se ignora y se usa el valor por defecto.
+        }
       }
       return map;
     } catch (_) {
@@ -152,7 +155,9 @@ class CmsEspecialidadService {
           }
           return usuarioLocal.nombre.trim();
         }
-      } catch (_) {}
+      } catch (error) {
+        registrarFalla("Usuario local", error);
+      }
       if (user.name && user.name.trim()) return user.name.trim();
       if (user.preferred_username && user.preferred_username.trim()) return user.preferred_username.trim();
       if (user.username && user.username.trim()) return user.username.trim();
@@ -223,7 +228,9 @@ class CmsEspecialidadService {
           },
         });
       }
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     return {
       message: esServicio ? "Servicio creado con éxito" : "Especialidad creada con éxito",
@@ -393,7 +400,9 @@ class CmsEspecialidadService {
           },
         });
       }
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     return {
       message: esServicio ? "Servicio actualizado con éxito" : "Especialidad actualizada con éxito",
@@ -471,7 +480,9 @@ class CmsEspecialidadService {
             updatedAt: pMeta.updatedAt || new Date().toISOString(),
           });
         }
-      } catch (_) {}
+      } catch (error) {
+        registrarFalla("Cambios pendientes", error);
+      }
 
       if (targetEst === "ARCHIVADO") {
         nuevoEstado = "ARCHIVADO";
@@ -514,7 +525,9 @@ class CmsEspecialidadService {
               : `${esServicio ? "Servicio" : "Especialidad"} "${existente.nombre}" evaluado/a como ${nuevoEstado}.`,
         },
       });
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     const editorMetaMap = await this.obtenerMapaEditorMeta();
     const eMeta = editorMetaMap.get(this._metaKey(idStr, esServicio));
@@ -694,7 +707,9 @@ class CmsEspecialidadService {
         if (!isNaN(d.getTime())) {
           finalDateFormat = d.toLocaleDateString("es-AR");
         }
-      } catch (_) {}
+      } catch {
+        // Fecha inválida: se muestra el texto por defecto.
+      }
     }
     const esPendiente = (registro.estado || "").toUpperCase() === "PENDIENTE_APROBACION";
     return {

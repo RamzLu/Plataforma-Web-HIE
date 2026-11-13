@@ -1,3 +1,4 @@
+import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -55,7 +56,9 @@ class CmsDocService {
         const itemKey = item.clave.replace(PENDING_META_KEY_PREFIX, "");
         try {
           map.set(itemKey, JSON.parse(item.valor));
-        } catch (_) {}
+        } catch {
+          // JSON inválido: se ignora y se usa el valor por defecto.
+        }
       }
       return map;
     } catch (_) {
@@ -481,7 +484,9 @@ class CmsDocService {
     if (oldArchivoIdAEliminar) {
       try {
         await prisma.archivo.delete({ where: { id: oldArchivoIdAEliminar } });
-      } catch (_) {}
+      } catch (error) {
+        registrarFalla("Archivos", error);
+      }
     }
 
     // Detección automática de cambios para la revisión del Admin
@@ -617,7 +622,9 @@ class CmsDocService {
               : `Documento "${existente.titulo}" aprobado y publicado.`,
         },
       });
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     return {
       message:
@@ -657,7 +664,9 @@ class CmsDocService {
     if (doc.archivoId) {
       try {
         await prisma.archivo.delete({ where: { id: doc.archivoId } });
-      } catch (_) {}
+      } catch (error) {
+        registrarFalla("Archivos", error);
+      }
     }
 
     return { message: "Documento eliminado con éxito" };

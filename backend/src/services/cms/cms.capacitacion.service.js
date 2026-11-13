@@ -1,3 +1,4 @@
+import { registrarFalla } from "../../utils/log.utils.js";
 import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
@@ -234,7 +235,9 @@ class CmsCapacitacionService {
         const itemKey = item.clave.replace(CAPACITACION_PENDING_META_PREFIX, "");
         try {
           map.set(itemKey, JSON.parse(item.valor));
-        } catch (_) {}
+        } catch {
+          // JSON inválido: se ignora y se usa el valor por defecto.
+        }
       }
       return map;
     } catch (_) {
@@ -977,7 +980,9 @@ class CmsCapacitacionService {
     if (existing.imagenId) {
       try {
         await prisma.archivo.delete({ where: { id: existing.imagenId } });
-      } catch {}
+      } catch (error) {
+        registrarFalla("Archivos", error);
+      }
     }
 
     return {

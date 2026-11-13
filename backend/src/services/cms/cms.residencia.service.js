@@ -1,3 +1,4 @@
+import { registrarFalla } from "../../utils/log.utils.js";
 import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
@@ -64,7 +65,9 @@ class CmsResidenciaService {
         const itemKey = item.clave.replace(RESIDENCIA_PENDING_META_PREFIX, "");
         try {
           map.set(itemKey, JSON.parse(item.valor));
-        } catch (_) {}
+        } catch {
+          // JSON inválido: se ignora y se usa el valor por defecto.
+        }
       }
       return map;
     } catch (_) {
@@ -148,7 +151,9 @@ class CmsResidenciaService {
           }
           return usuarioLocal.nombre.trim();
         }
-      } catch (_) {}
+      } catch (error) {
+        registrarFalla("Usuario local", error);
+      }
       if (user.name && user.name.trim()) return user.name.trim();
       if (user.preferred_username && user.preferred_username.trim()) return user.preferred_username.trim();
       if (user.username && user.username.trim()) return user.username.trim();
@@ -429,7 +434,9 @@ class CmsResidenciaService {
           },
         });
       }
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     return {
       message:
@@ -791,7 +798,9 @@ class CmsResidenciaService {
           },
         });
       }
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
@@ -894,7 +903,9 @@ class CmsResidenciaService {
         if (residenciaExistente.contenido) {
           try {
             contenidoParsed = JSON.parse(residenciaExistente.contenido);
-          } catch (_) {}
+          } catch {
+            // JSON inválido: se ignora y se usa el valor por defecto.
+          }
         }
         const ahora = new Date();
         const fechaPub = contenidoParsed.fechaPublicacion ? new Date(contenidoParsed.fechaPublicacion) : null;
@@ -971,7 +982,9 @@ class CmsResidenciaService {
           },
         });
       }
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
@@ -1030,7 +1043,9 @@ class CmsResidenciaService {
             where: { id: parsearIdBigInt(parsed.documento.documentoId, "ID de documento") },
           }).catch(() => {});
         }
-      } catch (e) {}
+      } catch {
+        // JSON inválido: se ignora y se usa el valor por defecto.
+      }
     }
 
     await prisma.residencia.delete({
@@ -1068,7 +1083,9 @@ class CmsResidenciaService {
           if (parsed.fechaPublicacion) {
             fechaPub = new Date(parsed.fechaPublicacion);
           }
-        } catch (_) {}
+        } catch {
+          // JSON inválido: se ignora y se usa el valor por defecto.
+        }
       }
 
       if (fechaPub && fechaPub <= limite) {
@@ -1103,7 +1120,9 @@ class CmsResidenciaService {
         if (typeof parsed === "object" && parsed !== null) {
           extra = { ...extra, ...parsed };
         }
-      } catch (e) {}
+      } catch {
+        // JSON inválido: se ignora y se usa el valor por defecto.
+      }
     }
 
     let bannerUrl = "";
@@ -1135,7 +1154,9 @@ class CmsResidenciaService {
             year: "numeric",
           });
         }
-      } catch (_) {}
+      } catch {
+        // Fecha inválida: se muestra el texto por defecto.
+      }
     }
 
     let fechaCarga = "Reciente";
@@ -1149,7 +1170,9 @@ class CmsResidenciaService {
             year: "numeric",
           });
         }
-      } catch (_) {}
+      } catch {
+        // Fecha inválida: se muestra el texto por defecto.
+      }
     }
 
     const cambios = pendingMeta?.cambios ? cambiosParaCliente(pendingMeta.cambios) : [];

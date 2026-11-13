@@ -1,3 +1,4 @@
+import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -56,7 +57,9 @@ class CmsProfesionalService {
         const idStr = item.clave.replace(PENDING_META_KEY_PREFIX, "");
         try {
           map.set(idStr, JSON.parse(item.valor));
-        } catch (_) {}
+        } catch {
+          // JSON inválido: se ignora y se usa el valor por defecto.
+        }
       }
       return map;
     } catch (_) {
@@ -144,7 +147,9 @@ class CmsProfesionalService {
           }
           return usuarioLocal.nombre.trim();
         }
-      } catch (_) {}
+      } catch (error) {
+        registrarFalla("Usuario local", error);
+      }
       if (user.name && user.name.trim()) return user.name.trim();
       if (user.preferred_username && user.preferred_username.trim()) return user.preferred_username.trim();
       if (user.username && user.username.trim()) return user.username.trim();
@@ -163,7 +168,9 @@ class CmsProfesionalService {
           year: "numeric",
         });
       }
-    } catch (_) {}
+    } catch {
+      // Fecha inválida: se muestra el texto por defecto.
+    }
     return "Reciente";
   }
 
@@ -455,7 +462,9 @@ class CmsProfesionalService {
           },
         });
       }
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     let pubUrl = "";
     if (nuevoProfesional.archivo) {
@@ -723,7 +732,9 @@ class CmsProfesionalService {
           },
         });
       }
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     let pubUrl = "";
     if (profActualizado.archivo) {
@@ -828,7 +839,9 @@ class CmsProfesionalService {
             },
           });
         }
-      } catch (_) {}
+      } catch (error) {
+        registrarFalla("Auditoría", error);
+      }
 
       return {
         message: "Profesional rechazado.",
@@ -877,7 +890,9 @@ class CmsProfesionalService {
           },
         });
       }
-    } catch (_) {}
+    } catch (error) {
+      registrarFalla("Auditoría", error);
+    }
 
     return {
       message: "Profesional aprobado y publicado con éxito.",
