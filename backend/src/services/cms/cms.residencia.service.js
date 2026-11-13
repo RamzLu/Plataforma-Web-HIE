@@ -808,7 +808,7 @@ class CmsResidenciaService {
     };
   }
 
-  async cambiarEstado(id, nuevoEstado, user = null, rejectionReason = null) {
+  async cambiarEstado(id, nuevoEstado, user = null, rejectionReason = null, { esAdmin = false } = {}) {
     if (!nuevoEstado) {
       const error = new Error("El nuevo estado es obligatorio.");
       error.statusCode = 400;
@@ -846,13 +846,35 @@ class CmsResidenciaService {
     const pendingMap = await this.obtenerMapaPendingMeta();
     const metaExistente = pendingMap.get(idStr) || null;
 
+    // Solo el administrador aprueba o rechaza. Si el CM pide publicar, se envía a revisión.
+    if (!esAdmin && (estadoUpper === "APROBADO" || estadoUpper === "RECHAZADO")) {
+      const error = new Error("Solo el administrador puede aprobar o rechazar.");
+      error.statusCode = 403;
+      throw error;
+    }
+    const esSolicitudDeRevision =
+      !esAdmin && ["PUBLICADO", "PROGRAMADO", "PENDIENTE_APROBACION"].includes(estadoUpper);
+
     let finalEstado = estadoUpper;
     let motivoGuardado = null;
     let finalActivo = residenciaExistente.activo;
 
+    // 0. El CM pide publicar: queda pendiente hasta que el administrador lo apruebe.
+    if (esSolicitudDeRevision) {
+      finalEstado = provieneDePublicada && estadoUpper !== "PENDIENTE_APROBACION" ? estadoAnterior : "PENDIENTE_APROBACION";
+      if (finalEstado === "PENDIENTE_APROBACION") {
+        await this.guardarPendingMeta(idStr, {
+          ...(metaExistente || {}),
+          previousEstado: metaExistente?.previousEstado ?? (estadoAnterior || null),
+          targetEstado: estadoUpper === "PROGRAMADO" ? "PROGRAMADO" : "PUBLICADO",
+          updatedAt: new Date().toISOString(),
+        });
+        await this.limpiarMotivoRechazo(idStr);
+      }
+    }
     // 1. Si el CM solicita ARCHIVAR una residencia que ya estaba publicada:
     // Requiere aprobación del administrador -> PENDIENTE_APROBACION
-    if (estadoUpper === "ARCHIVADO" && provieneDePublicada) {
+    else if (estadoUpper === "ARCHIVADO" && provieneDePublicada) {
       finalEstado = "PENDIENTE_APROBACION";
       await this.guardarPendingMeta(idStr, {
         previousEstado: "PUBLICADO",
@@ -938,6 +960,8 @@ class CmsResidenciaService {
                 ? "RECHAZAR"
                 : finalEstado === "ARCHIVADO"
                 ? "DESACTIVAR"
+                : finalEstado === "PENDIENTE_APROBACION"
+                ? "SOLICITAR_REVISION"
                 : "APROBAR",
             descripcion:
               finalEstado === "RECHAZADO"
@@ -954,6 +978,10 @@ class CmsResidenciaService {
     let mensaje = `Estado actualizado a ${finalEstado} con éxito.`;
     if (estadoUpper === "ARCHIVADO" && finalEstado === "PENDIENTE_APROBACION") {
       mensaje = "Solicitud de archivado enviada a revisión del administrador.";
+    } else if (esSolicitudDeRevision && finalEstado === "PENDIENTE_APROBACION") {
+      mensaje = "Residencia enviada a revisión del administrador para su publicación.";
+    } else if (esSolicitudDeRevision) {
+      mensaje = "La residencia ya está publicada.";
     }
 
     return {

@@ -1,3 +1,4 @@
+import { usuarioTieneRol, ROLES_ADMIN } from "../../middlewares/auth.middleware.js";
 import CmsResidenciaService from "../../services/cms/cms.residencia.service.js";
 
 export const obtenerResidencias = async (req, res, next) => {
@@ -48,7 +49,8 @@ export const cambiarEstadoResidencia = async (req, res, next) => {
       id,
       estado,
       req.user,
-      rejectionReason || motivoRechazo
+      rejectionReason || motivoRechazo,
+      { esAdmin: usuarioTieneRol(req.user, ROLES_ADMIN) }
     );
     return res.status(200).json(result);
   } catch (error) {

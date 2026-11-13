@@ -821,7 +821,7 @@ class CmsCapacitacionService {
     };
   }
 
-  async cambiarEstado(id, nuevoEstado, user = null, rejectionReason = null) {
+  async cambiarEstado(id, nuevoEstado, user = null, rejectionReason = null, { esAdmin = false } = {}) {
     const idBigInt = parsearIdBigInt(id, "ID de capacitación");
     const idStr = id.toString();
     const upper = (nuevoEstado || "").toUpperCase();
@@ -849,11 +849,33 @@ class CmsCapacitacionService {
     const pendingMap = await this.obtenerMapaPendingMeta();
     const metaExistente = pendingMap.get(idStr) || null;
 
+    // Solo el administrador aprueba o rechaza. Si el CM pide publicar, se envía a revisión.
+    if (!esAdmin && (upper === "APROBADO" || upper === "RECHAZADO")) {
+      const error = new Error("Solo el administrador puede aprobar o rechazar.");
+      error.statusCode = 403;
+      throw error;
+    }
+    const esSolicitudDeRevision =
+      !esAdmin && ["PUBLICADO", "PROGRAMADO", "PENDIENTE_APROBACION"].includes(upper);
+
     let finalEstado = upper;
     let finalActivo = existing.activo;
 
+    // 0. El CM pide publicar: queda pendiente hasta que el administrador lo apruebe.
+    if (esSolicitudDeRevision) {
+      finalEstado = provieneDePublicada && upper !== "PENDIENTE_APROBACION" ? estadoAnterior : "PENDIENTE_APROBACION";
+      if (finalEstado === "PENDIENTE_APROBACION") {
+        await this.guardarPendingMeta(idStr, {
+          ...(metaExistente || {}),
+          previousEstado: metaExistente?.previousEstado ?? (estadoAnterior || null),
+          targetEstado: upper === "PROGRAMADO" ? "PROGRAMADO" : "PUBLICADO",
+          updatedAt: new Date().toISOString(),
+        });
+        await this.limpiarMotivoRechazo(idStr);
+      }
+    }
     // 1. Solicitud de archivado de algo publicado -> requiere aprobación Admin
-    if (upper === "ARCHIVADO" && provieneDePublicada) {
+    else if (upper === "ARCHIVADO" && provieneDePublicada) {
       finalEstado = "PENDIENTE_APROBACION";
       await this.guardarPendingMeta(idStr, {
         previousEstado: "PUBLICADO",
@@ -911,6 +933,10 @@ class CmsCapacitacionService {
     let mensaje = `Estado actualizado a ${finalEstado}.`;
     if (upper === "ARCHIVADO" && finalEstado === "PENDIENTE_APROBACION") {
       mensaje = "Solicitud de archivado enviada a revisión del administrador.";
+    } else if (esSolicitudDeRevision && finalEstado === "PENDIENTE_APROBACION") {
+      mensaje = "Capacitación enviada a revisión del administrador para su publicación.";
+    } else if (esSolicitudDeRevision) {
+      mensaje = "La capacitación ya está publicada.";
     }
 
     return {

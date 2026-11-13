@@ -92,6 +92,14 @@ export const verifyToken = async (req, res, next) => {
 
 export const checkJwt = verifyToken;
 
+// true si el usuario autenticado (req.user) tiene alguno de los roles indicados (sin distinguir mayúsculas).
+export const usuarioTieneRol = (user, roles) => {
+  const rolesUsuario = Array.isArray(user?.roles)
+    ? user.roles.map((r) => String(r).toLowerCase().trim())
+    : [];
+  return roles.some((rol) => rolesUsuario.includes(String(rol).toLowerCase().trim()));
+};
+
 export const requireRole = (...allowedRoles) => {
   const allowedLower = allowedRoles.map((r) => String(r).toLowerCase().trim());
   return (req, res, next) => {

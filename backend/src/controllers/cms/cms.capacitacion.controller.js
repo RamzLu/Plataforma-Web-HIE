@@ -1,3 +1,4 @@
+import { usuarioTieneRol, ROLES_ADMIN } from "../../middlewares/auth.middleware.js";
 import CmsCapacitacionService from "../../services/cms/cms.capacitacion.service.js";
 
 export const obtenerCapacitaciones = async (req, res, next) => {
@@ -47,7 +48,8 @@ export const cambiarEstadoCapacitacion = async (req, res, next) => {
       id,
       estado,
       req.user,
-      motivoRechazo || rejectionReason
+      motivoRechazo || rejectionReason,
+      { esAdmin: usuarioTieneRol(req.user, ROLES_ADMIN) }
     );
     return res.status(200).json(result);
   } catch (error) {
@@ -63,7 +65,8 @@ export const revisarCapacitacion = async (req, res, next) => {
       id,
       estado,
       req.user,
-      motivoRechazo || rejectionReason
+      motivoRechazo || rejectionReason,
+      { esAdmin: usuarioTieneRol(req.user, ROLES_ADMIN) }
     );
     return res.status(200).json(result);
   } catch (error) {
