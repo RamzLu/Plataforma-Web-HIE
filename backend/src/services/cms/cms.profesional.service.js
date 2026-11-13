@@ -3,7 +3,7 @@ import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
@@ -637,6 +637,7 @@ class CmsProfesionalService {
         .getPublicUrl(profActualizado.archivo.nombreArchivo).data.publicUrl;
     }
 
+    await limpiarSolicitudEliminacion("profesional", idStr); // editar después de pedir la baja anula el pedido
     return {
       message:
         estadoFinal === "PENDIENTE_APROBACION"
@@ -819,8 +820,15 @@ class CmsProfesionalService {
     }
 
     // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
-    if (!forzar && tieneVersionPublica(profesional, (await this.obtenerMapaPendingMeta()).get(idStr) || null)) {
-      return solicitarEliminacion({ entidad: "profesional", id: idStr, titulo: `${profesional.nombre} ${profesional.apellido}`.trim(), user });
+    const pendingMetaElim = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
+    if (!forzar && tieneVersionPublica(profesional, pendingMetaElim)) {
+      // Si había una edición pendiente, queda reemplazada por este pedido (gana la última acción del CM).
+      const reemplazaEdicion = tieneEdicionPendiente(profesional, pendingMetaElim);
+      if (reemplazaEdicion) {
+        await prisma.profesional.update({ where: { id: idBigInt }, data: { estado: "RECHAZADO" } });
+        await this.guardarMotivoRechazo(idStr, MOTIVO_EDICION_REEMPLAZADA);
+      }
+      return solicitarEliminacion({ entidad: "profesional", id: idStr, titulo: `${profesional.nombre} ${profesional.apellido}`.trim(), user, reemplazaEdicion });
     }
     await limpiarSolicitudEliminacion("profesional", idStr);
 

@@ -1,5 +1,5 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
-import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -289,8 +289,15 @@ class CmsNoticiaService {
     }
 
     // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
-    if (!forzar && tieneVersionPublica(noticia, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null)) {
-      return solicitarEliminacion({ entidad: "noticia", id: id.toString(), titulo: noticia.titulo, user });
+    const pendingMetaElim = (await this.obtenerMapaPendingMeta()).get(id.toString()) || null;
+    if (!forzar && tieneVersionPublica(noticia, pendingMetaElim)) {
+      // Si había una edición pendiente, queda reemplazada por este pedido (gana la última acción del CM).
+      const reemplazaEdicion = tieneEdicionPendiente(noticia, pendingMetaElim);
+      if (reemplazaEdicion) {
+        await prisma.noticia.update({ where: { id: idBigInt }, data: { estado: "RECHAZADO" } });
+        await this.guardarMotivoRechazo(id.toString(), MOTIVO_EDICION_REEMPLAZADA);
+      }
+      return solicitarEliminacion({ entidad: "noticia", id: id.toString(), titulo: noticia.titulo, user, reemplazaEdicion });
     }
     await limpiarSolicitudEliminacion("noticia", id.toString());
 
@@ -615,6 +622,7 @@ class CmsNoticiaService {
       await this.guardarPendingMeta(idStr, metaActual);
     }
 
+    await limpiarSolicitudEliminacion("noticia", id.toString()); // editar después de pedir la baja anula el pedido
     return {
       message: "Exito",
       noticia: {

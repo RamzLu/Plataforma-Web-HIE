@@ -1,6 +1,6 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
-import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -710,6 +710,7 @@ class CmsResidenciaService {
       mensaje = "Modificaciones enviadas a revisión del administrador.";
     }
 
+    await limpiarSolicitudEliminacion("residencia", idStr); // editar después de pedir la baja anula el pedido
     return {
       message: mensaje,
       residencia: this._formatResidencia(actualizada, motivoActual, pendingMetaActual, editorNombre, nowIso),
@@ -921,8 +922,15 @@ class CmsResidenciaService {
     }
 
     // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
-    if (!forzar && tieneVersionPublica(residencia, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null)) {
-      return solicitarEliminacion({ entidad: "residencia", id: id.toString(), titulo: residencia.nombre, user });
+    const pendingMetaElim = (await this.obtenerMapaPendingMeta()).get(id.toString()) || null;
+    if (!forzar && tieneVersionPublica(residencia, pendingMetaElim)) {
+      // Si había una edición pendiente, queda reemplazada por este pedido (gana la última acción del CM).
+      const reemplazaEdicion = tieneEdicionPendiente(residencia, pendingMetaElim);
+      if (reemplazaEdicion) {
+        await prisma.residencia.update({ where: { id: idBigInt }, data: { estado: "RECHAZADO" } });
+        await this.guardarMotivoRechazo(id.toString(), MOTIVO_EDICION_REEMPLAZADA);
+      }
+      return solicitarEliminacion({ entidad: "residencia", id: id.toString(), titulo: residencia.nombre, user, reemplazaEdicion });
     }
     await limpiarSolicitudEliminacion("residencia", id.toString());
 

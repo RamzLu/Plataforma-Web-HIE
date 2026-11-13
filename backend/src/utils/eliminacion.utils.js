@@ -30,6 +30,14 @@ export const conservaVersionPublica = (registro, pendingMeta = null) => {
   );
 };
 
+/** Motivo que ve el CM cuando su edición pendiente queda reemplazada por un pedido de eliminación. */
+export const MOTIVO_EDICION_REEMPLAZADA =
+  "Esta edición quedó reemplazada por tu pedido de eliminación de este contenido.";
+
+/** true si el registro es una edición pendiente de revisión sobre una versión que ya estaba publicada. */
+export const tieneEdicionPendiente = (registro, pendingMeta = null) =>
+  String(registro?.estado || "").toUpperCase() === "PENDIENTE_APROBACION" && conservaVersionPublica(registro, pendingMeta);
+
 /**
  * true si el contenido está (o va a estar) visible en el portal: publicado, aprobado, programado,
  * o con una edición pendiente sobre una versión pública.
@@ -55,7 +63,7 @@ const registrarAuditoria = async (user, entidad, id, accion, descripcion) => {
 };
 
 /** Guarda la solicitud (si no existe ya) y devuelve la respuesta para el CMS. */
-export const solicitarEliminacion = async ({ entidad, id, titulo, user }) => {
+export const solicitarEliminacion = async ({ entidad, id, titulo, user, reemplazaEdicion = false }) => {
   const clave = claveDe(entidad, id);
   const existente = await prisma.configuracion.findUnique({ where: { clave } });
   if (existente) {
@@ -82,12 +90,20 @@ export const solicitarEliminacion = async ({ entidad, id, titulo, user }) => {
       updatedAt: new Date(),
     },
   });
-  await registrarAuditoria(user, entidad, id, "SOLICITAR_ELIMINACION", `Solicitud de eliminación de "${solicitud.titulo}".`);
+  await registrarAuditoria(
+    user,
+    entidad,
+    id,
+    "SOLICITAR_ELIMINACION",
+    `Solicitud de eliminación de "${solicitud.titulo}".${reemplazaEdicion ? " Reemplaza a su edición pendiente." : ""}`
+  );
 
   return {
     solicitudEliminacion: true,
     message:
-      "El contenido está publicado: se envió una solicitud de eliminación al administrador. Seguirá visible hasta que la apruebe.",
+      "El contenido está publicado: se envió una solicitud de eliminación al administrador. " +
+      (reemplazaEdicion ? "Tu edición pendiente quedó reemplazada por este pedido. " : "") +
+      "Seguirá visible hasta que la apruebe.",
   };
 };
 

@@ -4,7 +4,7 @@ import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
-import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
@@ -463,6 +463,7 @@ class CmsDocService {
       });
     }
 
+    await limpiarSolicitudEliminacion("documento", idStr); // editar después de pedir la baja anula el pedido
     return {
       message:
         estadoFinal === "PENDIENTE_APROBACION"
@@ -591,8 +592,15 @@ class CmsDocService {
     }
 
     // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
-    if (!forzar && tieneVersionPublica(doc, (await this.obtenerMapaPendingMeta()).get(idStr) || null)) {
-      return solicitarEliminacion({ entidad: "documento", id: idStr, titulo: doc.titulo, user });
+    const pendingMetaElim = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
+    if (!forzar && tieneVersionPublica(doc, pendingMetaElim)) {
+      // Si había una edición pendiente, queda reemplazada por este pedido (gana la última acción del CM).
+      const reemplazaEdicion = tieneEdicionPendiente(doc, pendingMetaElim);
+      if (reemplazaEdicion) {
+        await prisma.documento.update({ where: { id: idBigInt }, data: { estado: "RECHAZADO" } });
+        await this.guardarMotivoRechazo(idStr, MOTIVO_EDICION_REEMPLAZADA);
+      }
+      return solicitarEliminacion({ entidad: "documento", id: idStr, titulo: doc.titulo, user, reemplazaEdicion });
     }
     await limpiarSolicitudEliminacion("documento", idStr);
 

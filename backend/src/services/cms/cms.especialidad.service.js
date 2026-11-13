@@ -1,7 +1,7 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
-import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
@@ -294,6 +294,7 @@ class CmsEspecialidadService {
       registrarFalla("Auditoría", error);
     }
 
+    await limpiarSolicitudEliminacion(esServicio ? "servicio" : "especialidad", idStr); // editar después de pedir la baja anula el pedido
     return {
       message: esServicio ? "Servicio actualizado con éxito" : "Especialidad actualizada con éxito",
       data: this._format(actualizada, esServicio, null, {
@@ -549,7 +550,14 @@ class CmsEspecialidadService {
     const entidad = esServicio ? "servicio" : "especialidad";
     const pendingMeta = (await this.obtenerMapaPendingMeta()).get(this._metaKey(idStr, esServicio)) || null;
     if (!forzar && tieneVersionPublica(registro, pendingMeta)) {
-      return solicitarEliminacion({ entidad, id: idStr, titulo: registro.nombre, user });
+      // Si había una edición pendiente, queda reemplazada por este pedido (gana la última acción del CM).
+      const reemplazaEdicion = tieneEdicionPendiente(registro, pendingMeta);
+      if (reemplazaEdicion) {
+        const modelo = esServicio ? prisma.servicio : prisma.especialidad;
+        await modelo.update({ where: { id: idBigInt }, data: { estado: "RECHAZADO" } });
+        await this.guardarMotivoRechazo(idStr, esServicio, MOTIVO_EDICION_REEMPLAZADA);
+      }
+      return solicitarEliminacion({ entidad, id: idStr, titulo: registro.nombre, user, reemplazaEdicion });
     }
     await limpiarSolicitudEliminacion(entidad, idStr);
 
