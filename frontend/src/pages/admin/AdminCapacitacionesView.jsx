@@ -2,7 +2,6 @@ import SolicitudEliminacionAcciones from "../../components/admin/SolicitudElimin
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Trash2,
   Archive,
   CalendarDays,
   CheckCircle,
@@ -186,14 +185,13 @@ const AdminCapacitacionesView = () => {
     [capacitaciones],
   );
 
-  const deletionCount = capacitacionesVisibles.filter((training) => training.solicitudEliminacion).length;
-
   const filteredCapacitaciones = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('es');
     return capacitacionesVisibles.filter((training) => {
       const matchesStatus =
         statusFilter === 'TODOS' ||
-        (statusFilter === 'ELIMINACION' ? Boolean(training.solicitudEliminacion) : training.estado === statusFilter);
+        training.estado === statusFilter ||
+        (statusFilter === 'PENDIENTE_APROBACION' && Boolean(training.solicitudEliminacion));
       const searchableContent = [
         training.titulo,
         training.descripcion,
@@ -214,7 +212,9 @@ const AdminCapacitacionesView = () => {
 
   const counts = useMemo(
     () => ({
-      pending: capacitacionesVisibles.filter((training) => training.estado === 'PENDIENTE_APROBACION').length,
+      pending: capacitacionesVisibles.filter(
+        (training) => training.estado === 'PENDIENTE_APROBACION' || Boolean(training.solicitudEliminacion)
+      ).length,
       approved: capacitacionesVisibles.filter((training) => training.estado === 'APROBADO').length,
       published: capacitacionesVisibles.filter((training) => training.estado === 'PUBLICADO').length,
       rejected: capacitacionesVisibles.filter((training) => training.estado === 'RECHAZADO').length,
@@ -390,15 +390,6 @@ const AdminCapacitacionesView = () => {
         >
           <span><XCircle size={19} /></span>
           <div><small>Rechazadas</small><strong>{counts.rejected}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-training-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'ELIMINACION'}
-          onClick={() => setStatusFilter('ELIMINACION')}
-        >
-          <span><Trash2 size={19} /></span>
-          <div><small>Solicitudes de eliminación</small><strong>{deletionCount}</strong></div>
         </button>
         <button
           type="button"

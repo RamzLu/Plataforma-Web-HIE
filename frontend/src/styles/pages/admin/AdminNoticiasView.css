@@ -830,7 +830,7 @@
 
 .admin-news-summary {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: stretch;
   gap: 14px;
   margin: 0 0 20px;
@@ -1020,10 +1020,4 @@
   .admin-news-summary {
     grid-template-columns: 1fr;
   }
-}
-
-/* Tarjeta "Solicitudes de eliminación" (contenido publicado que el CM pidió borrar) */
-.admin-news-summary-card.is-deletion .admin-news-summary-icon {
-  background: #f3e8ff;
-  color: #7e22ce;
 }

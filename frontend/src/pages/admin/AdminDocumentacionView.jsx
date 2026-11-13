@@ -2,7 +2,6 @@ import SolicitudEliminacionAcciones from "../../components/admin/SolicitudElimin
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Trash2,
   CalendarDays,
   CheckCircle,
   FileText,
@@ -101,8 +100,8 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
             .filter((doc) => (doc.estado || '').toUpperCase() !== 'BORRADOR')
             .map(mapDocumentFromBackend)
             .sort((a, b) => {
-              const aPending = a.status === 'PENDIENTE' ? 0 : 1;
-              const bPending = b.status === 'PENDIENTE' ? 0 : 1;
+              const aPending = a.status === 'PENDIENTE' || a.solicitudEliminacion ? 0 : 1;
+              const bPending = b.status === 'PENDIENTE' || b.solicitudEliminacion ? 0 : 1;
               if (aPending !== bPending) return aPending - bPending;
               return a.title.localeCompare(b.title);
             });
@@ -169,17 +168,14 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
     return sanitizeUrl(selectedDocument.fileUrl, '', { allowBlob: true });
   }, [selectedDocument]);
 
-  const deletionCount = documents.filter((doc) => doc.solicitudEliminacion).length;
-
   const filteredDocuments = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
     return documents.filter((doc) => {
       let matchesStatus = true;
-      if (statusFilter === 'PENDIENTE') matchesStatus = doc.status === 'PENDIENTE';
+      if (statusFilter === 'PENDIENTE') matchesStatus = doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion);
       else if (statusFilter === 'PUBLICADO') matchesStatus = doc.status === 'PUBLICADO' || doc.status === 'APROBADO';
       else if (statusFilter === 'RECHAZADO') matchesStatus = doc.status === 'RECHAZADO';
-      else if (statusFilter === 'ELIMINACION') matchesStatus = Boolean(doc.solicitudEliminacion);
 
       const matchesCategory =
         categoryFilter === 'TODOS' || doc.category === categoryFilter;
@@ -203,7 +199,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
   }, [categoryFilter, documents, search, statusFilter]);
 
   const pendingCount = useMemo(
-    () => documents.filter((doc) => doc.status === 'PENDIENTE').length,
+    () => documents.filter((doc) => doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion)).length,
     [documents]
   );
   const publishedCount = useMemo(
@@ -349,15 +345,6 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         >
           <span><XCircle size={19} /></span>
           <div><small>Rechazados</small><strong>{rejectedCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-doc-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'ELIMINACION'}
-          onClick={() => setStatusFilter('ELIMINACION')}
-        >
-          <span><Trash2 size={19} /></span>
-          <div><small>Solicitudes de eliminación</small><strong>{deletionCount}</strong></div>
         </button>
       </section>
 

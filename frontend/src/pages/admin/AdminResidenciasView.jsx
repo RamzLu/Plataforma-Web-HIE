@@ -2,7 +2,6 @@ import SolicitudEliminacionAcciones from "../../components/admin/SolicitudElimin
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Trash2,
   Archive,
   BookOpen,
   Building2,
@@ -200,12 +199,14 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
 
   const counts = useMemo(
     () => ({
-      pending: residenciasVisibles.filter((r) => r?.estado === 'PENDIENTE_APROBACION').length,
+      // Las solicitudes de eliminación también esperan respuesta del admin: cuentan como pendientes.
+      pending: residenciasVisibles.filter(
+        (r) => r?.estado === 'PENDIENTE_APROBACION' || Boolean(r?.solicitudEliminacion)
+      ).length,
       approved: residenciasVisibles.filter((r) => r?.estado === 'APROBADO').length,
       published: residenciasVisibles.filter((r) => r?.estado === 'PUBLICADO').length,
       scheduled: residenciasVisibles.filter((r) => r?.estado === 'PROGRAMADO').length,
       rejected: residenciasVisibles.filter((r) => r?.estado === 'RECHAZADO').length,
-      deletion: residenciasVisibles.filter((r) => r?.solicitudEliminacion).length,
       archived: residenciasVisibles.filter((r) => r?.estado === 'ARCHIVADO').length,
     }),
     [residenciasVisibles],
@@ -213,16 +214,17 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
 
   useEffect(() => {
     if (typeof onPendingCountChange === 'function') {
-      onPendingCountChange(counts.pending + counts.deletion);
+      onPendingCountChange(counts.pending);
     }
-  }, [counts.pending, counts.deletion, onPendingCountChange]);
+  }, [counts.pending, onPendingCountChange]);
 
   const filteredResidencias = useMemo(() => {
     const query = (search || '').trim().toLocaleLowerCase('es');
     return residenciasVisibles.filter((item) => {
       const matchesStatus =
         statusFilter === 'TODOS' ||
-        (statusFilter === 'ELIMINACION' ? Boolean(item?.solicitudEliminacion) : item?.estado === statusFilter);
+        item?.estado === statusFilter ||
+        (statusFilter === 'PENDIENTE_APROBACION' && Boolean(item?.solicitudEliminacion));
       const searchableContent = [
         item?.nombre,
         item?.categoria,
@@ -499,20 +501,6 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
           <div>
             <small>Rechazadas</small>
             <strong>{counts.rejected}</strong>
-          </div>
-        </button>
-        <button
-          type="button"
-          className={`admin-res-summary-card-admin is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'ELIMINACION'}
-          onClick={() => setStatusFilter('ELIMINACION')}
-        >
-          <span>
-            <Trash2 size={19} />
-          </span>
-          <div>
-            <small>Solicitudes de eliminación</small>
-            <strong>{counts.deletion}</strong>
           </div>
         </button>
 

@@ -2,7 +2,6 @@ import SolicitudEliminacionAcciones from "../../components/admin/SolicitudElimin
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Trash2,
   Building2,
   CalendarDays,
   CheckCircle,
@@ -102,8 +101,8 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
             .filter((item) => (item.estado || '').toUpperCase() !== 'ARCHIVADO')
             .map(mapProfesionalFromBackend)
             .sort((a, b) => {
-              const aPending = a.estado === 'PENDIENTE' ? 0 : 1;
-              const bPending = b.estado === 'PENDIENTE' ? 0 : 1;
+              const aPending = a.estado === 'PENDIENTE' || a.solicitudEliminacion ? 0 : 1;
+              const bPending = b.estado === 'PENDIENTE' || b.solicitudEliminacion ? 0 : 1;
               if (aPending !== bPending) return aPending - bPending;
               return a.nombre.localeCompare(b.nombre);
             });
@@ -151,15 +150,13 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
 
   const selectedProfessional = profesionales.find((item) => item.id === selectedId);
 
-  const deletionCount = profesionales.filter((item) => item.solicitudEliminacion).length;
-
   const filteredProfesionales = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
     return profesionales.filter((item) => {
       const matchesStatus =
         statusFilter === 'TODOS' ||
-        (statusFilter === 'ELIMINACION' && Boolean(item.solicitudEliminacion)) ||
+        (statusFilter === 'PENDIENTE' && Boolean(item.solicitudEliminacion)) ||
         (statusFilter === 'PUBLICADO'
           ? item.publicado
           : item.estado === statusFilter);
@@ -184,7 +181,9 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
   }, [profesionales, search, statusFilter, typeFilter]);
   const paginacion = usePaginacion(filteredProfesionales, 10, [search, statusFilter, typeFilter]);
 
-  const pendingCount = profesionales.filter((item) => item.estado === 'PENDIENTE').length;
+  const pendingCount = profesionales.filter(
+    (item) => item.estado === 'PENDIENTE' || Boolean(item.solicitudEliminacion)
+  ).length;
   const rejectedCount = profesionales.filter((item) => item.estado === 'RECHAZADO').length;
   const publishedCount = profesionales.filter((item) => item.publicado).length;
 
@@ -333,18 +332,6 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
           <div>
             <span>Rechazados</span>
             <strong>{rejectedCount}</strong>
-          </div>
-        </button>
-        <button
-          type="button"
-          className={`admin-prof-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'ELIMINACION'}
-          onClick={() => setStatusFilter('ELIMINACION')}
-        >
-          <span className="admin-prof-summary-icon"><Trash2 size={19} /></span>
-          <div>
-            <span>Solicitudes de eliminación</span>
-            <strong>{deletionCount}</strong>
           </div>
         </button>
       </section>

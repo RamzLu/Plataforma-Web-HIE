@@ -1,7 +1,7 @@
 import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useState, useEffect, useCallback } from 'react';
-import { Trash2, CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import keycloak from '../../config/keycloak';
@@ -142,8 +142,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               };
             })
             .sort((a, b) => {
-              const aPending = a.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
-              const bPending = b.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
+              const aPending = a.estado === 'PENDIENTE_APROBACION' || a.solicitudEliminacion ? 0 : 1;
+              const bPending = b.estado === 'PENDIENTE_APROBACION' || b.solicitudEliminacion ? 0 : 1;
               if (aPending !== bPending) return aPending - bPending;
               return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
             });
@@ -348,7 +348,10 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     return 'layout-1-admin';
   };
 
-  const pendingCount = noticias.filter((n) => n.estado === 'PENDIENTE_APROBACION').length;
+  // Las solicitudes de eliminación también esperan respuesta del admin: cuentan como pendientes.
+  const pendingCount = noticias.filter(
+    (n) => n.estado === 'PENDIENTE_APROBACION' || Boolean(n.solicitudEliminacion)
+  ).length;
   const approvedCount = noticias.filter(
     (n) =>
       n.estado === 'APROBADO' ||
@@ -357,14 +360,9 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   const publishedCount = noticias.filter((n) => n.estado === 'PUBLICADO').length;
   const rejectedCount = noticias.filter((n) => n.estado === 'RECHAZADO').length;
 
-  const deletionCount = noticias.filter((n) => n.solicitudEliminacion).length;
-
   const filteredNoticias = noticias.filter((item) => {
-    if (statusFilter === 'ELIMINACION') {
-      return Boolean(item.solicitudEliminacion);
-    }
     if (statusFilter === 'PENDIENTE') {
-      return item.estado === 'PENDIENTE_APROBACION';
+      return item.estado === 'PENDIENTE_APROBACION' || Boolean(item.solicitudEliminacion);
     }
     if (statusFilter === 'APROBADO') {
       return item.estado === 'APROBADO' || item.estado === 'PROGRAMADO';
@@ -457,18 +455,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           <span className="admin-news-summary-copy">
             <span>Rechazados</span>
             <strong>{rejectedCount}</strong>
-          </span>
-        </button>
-        <button
-          type="button"
-          className={`admin-news-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'ELIMINACION'}
-          onClick={() => setStatusFilter('ELIMINACION')}
-        >
-          <span className="admin-news-summary-icon"><Trash2 size={19} /></span>
-          <span className="admin-news-summary-copy">
-            <span>Solicitudes de eliminación</span>
-            <strong>{deletionCount}</strong>
           </span>
         </button>
       </div>

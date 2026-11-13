@@ -2,7 +2,6 @@ import SolicitudEliminacionAcciones from "../../components/admin/SolicitudElimin
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Trash2,
   Archive,
   CalendarDays,
   CheckCircle,
@@ -105,8 +104,8 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
           const filtradas = data
             .map(mapItemFromBackend)
             .sort((a, b) => {
-              const aPending = a.status === 'Pendiente de aprobación' ? 0 : 1;
-              const bPending = b.status === 'Pendiente de aprobación' ? 0 : 1;
+              const aPending = a.status === 'Pendiente de aprobación' || a.solicitudEliminacion ? 0 : 1;
+              const bPending = b.status === 'Pendiente de aprobación' || b.solicitudEliminacion ? 0 : 1;
               if (aPending !== bPending) return aPending - bPending;
               return a.name.localeCompare(b.name);
             });
@@ -152,16 +151,14 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
     };
   }, [cargarDatos]);
 
-  const deletionCount = items.filter((item) => item.solicitudEliminacion).length;
-
   const filteredItems = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
     return items.filter((item) => {
       const matchesType = typeFilter === 'Todos' || item.type === typeFilter;
       const matchesStatus =
         statusFilter === 'Todos' ||
-        (statusFilter === 'ELIMINACION' && Boolean(item.solicitudEliminacion)) ||
-        (statusFilter === 'PENDIENTE' && item.status === 'Pendiente de aprobación') ||
+        (statusFilter === 'PENDIENTE' &&
+          (item.status === 'Pendiente de aprobación' || Boolean(item.solicitudEliminacion))) ||
         (statusFilter === 'PUBLICADO' && item.status === 'Publicado') ||
         (statusFilter === 'RECHAZADO' && item.status === 'Rechazado') ||
         (statusFilter === 'ARCHIVADO' && item.status === 'Archivado');
@@ -246,7 +243,9 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
     }
   };
 
-  const pendingCount = items.filter((item) => item.status === 'Pendiente de aprobación').length;
+  const pendingCount = items.filter(
+    (item) => item.status === 'Pendiente de aprobación' || Boolean(item.solicitudEliminacion)
+  ).length;
   const publishedCount = items.filter((item) => item.status === 'Publicado').length;
   const rejectedCount = items.filter((item) => item.status === 'Rechazado').length;
   const archivedCount = items.filter((item) => item.status === 'Archivado').length;
@@ -318,15 +317,6 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         >
           <span><XCircle size={19} /></span>
           <div><small>Rechazados</small><strong>{rejectedCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-es-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'ELIMINACION'}
-          onClick={() => setStatusFilter('ELIMINACION')}
-        >
-          <span><Trash2 size={19} /></span>
-          <div><small>Solicitudes de eliminación</small><strong>{deletionCount}</strong></div>
         </button>
         <button
           type="button"
