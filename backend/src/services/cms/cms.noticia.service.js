@@ -363,6 +363,10 @@ class CmsNoticiaService {
       });
     }
 
+    // El portal público no necesita saber quién editó cada registro: no se envían nombres del equipo.
+    if (!esConsultaInterna) {
+      return resultado.map(({ editor, editedBy, ...publico }) => publico);
+    }
     return resultado;
   }
 
