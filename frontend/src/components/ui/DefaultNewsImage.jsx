@@ -1,4 +1,3 @@
-import React from "react";
 import defaultHospitalPhoto from "../../assets/fotoFachadaHIE.jpg";
 import defaultLogoCompleto from "../../assets/logo-completo-blanco.png";
 import defaultLogoEscudo from "../../assets/logoHospitalEvita-blanco.png";

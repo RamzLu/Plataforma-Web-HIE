@@ -1,6 +1,6 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
-import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn, ZoomOut, Check, Building2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn, ZoomOut, Check, Building2 } from "lucide-react";
 import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
@@ -149,9 +149,11 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
         setSedeCentralData(data.sedeCentral);
         try {
           sessionStorage.setItem("hie_public_sede_central_cache", JSON.stringify(data.sedeCentral));
-        } catch {}
+        } catch {
+          // Si el navegador no permite sessionStorage, solo se omite la caché.
+        }
       }
-    } catch (error) {
+    } catch {
       toast.error("Error al cargar la información institucional.");
     } finally {
       setLoading(false);
@@ -287,7 +289,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
         setSedeCentralData(updated);
         try {
           sessionStorage.setItem("hie_public_sede_central_cache", JSON.stringify(updated));
-        } catch {}
+        } catch {
+          // Si el navegador no permite sessionStorage, solo se omite la caché.
+        }
       }
 
       recordCmsActivity(
@@ -482,7 +486,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
       setHasUnsavedChanges(false);
       setShowAutoridadModal(false);
-    } catch (error) {
+    } catch {
       toast.error("No se pudo guardar la autoridad.", { id: toastId });
     } finally {
       setIsSaving(false);
@@ -495,7 +499,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     e.dataTransfer.effectAllowed = "move";
     try {
       e.dataTransfer.setData("text/plain", `${index}`);
-    } catch (err) {}
+    } catch {
+      // Algunos navegadores no permiten setData: el arrastre funciona igual.
+    }
   };
 
   const handleDragOver = (e, index) => {
@@ -537,7 +543,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
       const ordenIds = updatedList.map((a) => a.id);
       await reordenarAutoridades(ordenIds, keycloak?.token);
       toast.success("¡Orden actualizado con éxito!", { id: toastId });
-    } catch (error) {
+    } catch {
       toast.error("Error al actualizar el orden.", { id: toastId });
       fetchInstitucional(); // Restaurar orden en caso de fallo
     }

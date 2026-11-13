@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../styles/sections/InteractiveTimelineSection.css";
 
-import lineaGeneral from "../assets/aprendeCapacitacion.jpg";
 import linea2020 from "../assets/lineaTiempo_2020.png";
 import linea2022 from "../assets/lineaTiempo_2022.png";
 import linea2024 from "../assets/lineaTiempo_2024.png";

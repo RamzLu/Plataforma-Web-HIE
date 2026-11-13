@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import keycloak from "../../config/keycloak";
 import { ROLES_CMS, ROLES_ADMIN, tieneAlgunRol } from "../../utils/roles";

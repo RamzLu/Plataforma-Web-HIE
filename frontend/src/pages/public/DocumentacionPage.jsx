@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { getDocumentos } from "../../api/documentos.api.js";
 import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import "../../styles/pages/DocumentacionPage.css";

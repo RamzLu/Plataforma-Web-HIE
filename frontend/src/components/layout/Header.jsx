@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiMapPin, FiMap, FiMenu, FiX } from "react-icons/fi";
 import "../../styles/layout/Header.css";

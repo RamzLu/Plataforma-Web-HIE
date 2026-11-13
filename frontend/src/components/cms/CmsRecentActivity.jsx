@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { adminFetch } from "../../api/adminFetch.js";
 import { getCmsActivityLog } from "../../utils/cmsActivityLogger";
 
@@ -69,7 +69,7 @@ const CmsRecentActivity = ({
 }) => {
   const [extraCaps, setExtraCaps] = useState([]);
   const [extraRes, setExtraRes] = useState([]);
-  const [loadingExtras, setLoadingExtras] = useState(true);
+  const [, setLoadingExtras] = useState(true);
   const [loggedActivities, setLoggedActivities] = useState(() => getCmsActivityLog());
 
   useEffect(() => {
@@ -123,7 +123,7 @@ const CmsRecentActivity = ({
       (log) => log.newsId && String(log.newsId) === String(n.id)
     );
 
-    let activityTitle = "";
+    let activityTitle;
     if (n.actionTitle) {
       activityTitle = n.actionTitle;
     } else if (matchingLog && matchingLog.titulo) {

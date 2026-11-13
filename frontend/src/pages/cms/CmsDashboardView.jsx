@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { adminFetch } from "../../api/adminFetch.js";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
@@ -215,9 +215,9 @@ const CmsDashboardView = ({
   const profsDelta = calculateWeeklyDelta(activeProfs);
 
   // Determinamos los datos del gráfico según la selección del usuario
-  let currentChartData = [];
-  let chartTitle = "Total Profesionales";
-  let chartCenterLabel = "TOTAL PROF.";
+  let currentChartData;
+  let chartTitle;
+  let chartCenterLabel;
 
   if (chartType === "documentacion") {
     currentChartData = processDocsData(docsList);

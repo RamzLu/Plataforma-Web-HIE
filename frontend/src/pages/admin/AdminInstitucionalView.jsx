@@ -8,7 +8,6 @@ import {
   Clock,
   Clock3,
   Globe2,
-  Info,
   Lock,
   MapPin,
   RefreshCw,
@@ -21,7 +20,6 @@ import {
 import { getInstitucional } from '../../api/autoridades.api.js';
 import fotoHeroHeader from '../../assets/foto-sede.jpg';
 import fotoTemporalAutoridades from '../../assets/imagen-temporal-autoridades.jpg';
-import { DEFAULT_SEDE_CENTRAL } from '../../utils/contenidoGraficoPresets.js';
 import '../../styles/pages/admin/AdminInstitucionalView.css';
 
 // Valores institucionales fijos del proyecto (Inmutables por directiva institucional)

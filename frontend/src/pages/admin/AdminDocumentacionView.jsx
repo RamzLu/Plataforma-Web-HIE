@@ -3,8 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CalendarDays,
   CheckCircle,
-  ExternalLink,
-  FileCheck2,
   FileText,
   FolderOpen,
   Globe2,
@@ -41,7 +39,9 @@ const mapDocumentFromBackend = (doc) => {
   if (doc.createdAt) {
     try {
       fechaFormateada = new Date(doc.createdAt).toLocaleDateString('es-AR');
-    } catch (_) {}
+    } catch {
+      // Fecha inválida: se muestra el texto por defecto.
+    }
   }
 
   return {

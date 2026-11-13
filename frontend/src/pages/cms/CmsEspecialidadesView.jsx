@@ -1,7 +1,7 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import { getEspecialidades, createEspecialidad, updateEspecialidad, deleteEspecialidad } from "../../api/especialidades.api.js";
@@ -45,7 +45,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     try {
       const data = await getEspecialidades(true);
       setEspecialidades(data);
-    } catch (error) { toast.error("Error al cargar los datos."); } 
+    } catch { toast.error("Error al cargar los datos."); } 
     finally { setLoading(false); }
   };
 

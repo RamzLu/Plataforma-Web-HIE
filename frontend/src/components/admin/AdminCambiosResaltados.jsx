@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowRight, FileEdit } from 'lucide-react';
 import '../../styles/components/admin/AdminCambiosResaltados.css';
 

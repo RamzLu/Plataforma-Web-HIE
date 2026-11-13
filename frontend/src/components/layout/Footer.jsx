@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import logosGobierno from "../../assets/logosGobierno.png";
 import logoCompleto from "../../assets/logo-completo.png";
@@ -34,21 +34,6 @@ const Footer = () => {
       isMounted = false;
     };
   }, []);
-
-  const getHandle = (url, defaultHandle) => {
-    if (!url) return defaultHandle;
-    try {
-      const cleaned = url.trim().replace(/\/+$/, "");
-      const parts = cleaned.split("/");
-      const last = parts[parts.length - 1];
-      if (last && !last.includes("?") && !last.includes("&") && last.length > 1) {
-        return `@${last}`;
-      }
-      return defaultHandle;
-    } catch {
-      return defaultHandle;
-    }
-  };
 
   return (
     <footer className="hospital-footer" role="contentinfo" aria-label="Pie de página institucional">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   FileText, 
   FileArchive, 
@@ -41,15 +41,15 @@ const specialtiesData = [
 ];
 
 const AdminDashboardView = ({ setActiveTab }) => {
-  const [filterModule, setFilterModule] = useState('all');
+  const [filterModule] = useState('all');
   
   // ESTADO PARA EL GRÁFICO (Por defecto en Noticias)
   const [chartType, setChartType] = useState('noticias');
 
   // LÓGICA DE SELECCIÓN DE DATOS
-  let currentChartData = [];
-  let chartTitle = "";
-  let chartCenterLabel = "";
+  let currentChartData;
+  let chartTitle;
+  let chartCenterLabel;
 
   if (chartType === "profesionales") {
     currentChartData = specialtiesData;
@@ -357,7 +357,7 @@ const AdminDashboardView = ({ setActiveTab }) => {
         
         <div className="admin-pending-card">
           <div className="pending-list">
-            {filteredItems.map((item, idx) => (
+            {filteredItems.map((item) => (
               <div key={item.id} className="pending-list-row">
                 <div className="pending-item-details">
                   <div className="pending-primary-row">

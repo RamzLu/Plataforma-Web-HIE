@@ -76,7 +76,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("PUBLICADOS"); 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filtroCategoria, setFiltroCategoria] = useState("TODOS");
+  const [filtroCategoria] = useState("TODOS");
 
   // Modales
   const [showModal, setShowModal] = useState(false);

@@ -1,19 +1,13 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import {
   BookOpen,
-  Calendar,
-  Clock,
-  MapPin,
   Video,
   FileText,
-  ExternalLink,
   Upload,
   X,
-  File,
-  Search,
   Users,
   Globe,
   PlayCircle,
@@ -40,152 +34,6 @@ import {
 } from "../../api/capacitaciones.api";
 
 // Datos iniciales armonizados con el portal público (CapacitacionPage) y schema.prisma
-const INITIAL_CAPACITACIONES = [
-  {
-    id: 1,
-    titulo: "Abordaje Inicial del ACV Isquémico en Guardia",
-    descripcion:
-      "Capacitación intensiva sobre el diagnóstico precoz, protocolo de trombolisis y manejo inicial del paciente con ACV isquémico agudo en el servicio de urgencias.",
-    contenido:
-      "Módulo 1: Reconocimiento precoz y aplicación de Escala Cincinnati.\nMódulo 2: Criterios clínicos de inclusión/exclusión para trombolisis endovenosa.\nMódulo 3: Activación del protocolo Código ACV institucional del HIE.\nMódulo 4: Cuidados de enfermería crítica y monitoreo en shock room.",
-    modalidad: "Virtual",
-    tipoRecurso: "video",
-    fechaInicio: "2026-05-20",
-    fechaFin: "2026-05-20",
-    horario: "10:00",
-    ubicacion: "Plataforma Telesalud HIE (Video On-Demand)",
-    disertantes: "Dr. Marcelo Morales, Dra. Elena Vega",
-    videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    archivoTipo: "video",
-    archivoNombre: "Protocolo_ACV_VideoClase.mp4",
-    archivoTamano: "14.2 MB",
-    archivoUrl: "",
-    imagenUrl: "",
-    estado: "PUBLICADO",
-    activo: true,
-    createdAt: "2026-05-01T10:00:00Z",
-  },
-  {
-    id: 2,
-    titulo: "Uso de la Plataforma de Telesalud y Teleconsultas",
-    descripcion:
-      "Taller práctico para el manejo del sistema institucional de teleconsultas, carga de historias clínicas virtuales y atención remota de pacientes.",
-    contenido:
-      "Módulo 1: Acceso, roles y permisos en el sistema Telesalud Formosa.\nMódulo 2: Coordinación de turnos virtuales y sala de espera digital.\nMódulo 3: Confección de historia clínica electrónica y recetas digitales.\nMódulo 4: Aspectos médico-legales y resguardo de datos sensibles.",
-    modalidad: "Virtual",
-    tipoRecurso: "pdf",
-    fechaInicio: "2026-05-22",
-    fechaFin: "2026-05-22",
-    horario: "11:30",
-    ubicacion: "Virtual - Plataforma Telesalud HIE",
-    disertantes: "Lic. Carlos Benítez, Lic. Romina Soto",
-    videoUrl: "",
-    archivoTipo: "documento",
-    archivoNombre: "Guia_Operativa_Teleconsultas_HIE.pdf",
-    archivoTamano: "2.1 MB",
-    archivoUrl: "",
-    imagenUrl: "",
-    estado: "PUBLICADO",
-    activo: true,
-    createdAt: "2026-05-05T09:30:00Z",
-  },
-  {
-    id: 3,
-    titulo: "Gestión Basada en Datos Clínicos para Enfermería",
-    descripcion:
-      "Capacitación para jefes de enfermería en la transformación de registros administrativos en datos clínicos útiles para la toma de decisiones.",
-    contenido:
-      "Módulo 1: Indicadores clave de calidad en enfermería hospitalaria.\nMódulo 2: Registro estructurado en salas de internación general.\nMódulo 3: Auditoría concurrente y detección de eventos adversos.\nMódulo 4: Análisis de datos para asignación de dotaciones de guardia.",
-    modalidad: "Presencial",
-    tipoRecurso: "presencial",
-    fechaInicio: "2026-05-20",
-    fechaFin: "2026-05-20",
-    horario: "10:00",
-    ubicacion: "SUM Hospital Interdistrital Evita",
-    disertantes: "Lic. Patricia Romero, Enf. Esp. Claudio Ruiz",
-    videoUrl: "",
-    archivoTipo: "documento",
-    archivoNombre: "Programa_Gestion_Enfermeria.pdf",
-    archivoTamano: "980 KB",
-    archivoUrl: "",
-    imagenUrl: "",
-    estado: "PUBLICADO",
-    activo: true,
-    createdAt: "2026-05-08T14:00:00Z",
-  },
-  {
-    id: 4,
-    titulo: "Reanimación Cardiopulmonar (RCP) Avanzada",
-    descripcion:
-      "Actualización en maniobras de RCP avanzada, uso de desfibrilador externo automático (DEA) y manejo de vía aérea en emergencias médicas.",
-    contenido:
-      "Módulo 1: Algoritmos actualizados de Soporte Vital Cardiovascular Avanzado (ACLS).\nMódulo 2: Farmacología en paro cardiorrespiratorio y ritmos desfibrilables.\nMódulo 3: Práctica con simuladores de vía aérea avanzada y capnografía.\nMódulo 4: Dinámica y liderazgo de equipo en código azul.",
-    modalidad: "Presencial",
-    tipoRecurso: "presencial",
-    fechaInicio: "2026-06-05",
-    fechaFin: "2026-06-05",
-    horario: "08:30",
-    ubicacion: "Gimnasio de Rehabilitación HIE",
-    disertantes: "Dr. Martín Almada, Dra. Sofía Albornoz",
-    videoUrl: "",
-    archivoTipo: "imagen",
-    archivoNombre: "Afiche_Convocatoria_RCP_2026.png",
-    archivoTamano: "1.8 MB",
-    archivoUrl: "",
-    imagenUrl: "",
-    estado: "BORRADOR",
-    activo: true,
-    createdAt: "2026-05-10T11:00:00Z",
-  },
-  {
-    id: 5,
-    titulo: "Control y Prevención de Infecciones Intrahospitalarias",
-    descripcion:
-      "Estrategias y medidas de bioseguridad para la prevención de infecciones asociadas al cuidado de la salud (IACS) en servicios críticos.",
-    contenido:
-      "Módulo 1: Higiene de manos y paquete de medidas para bacteriemia cero.\nMódulo 2: Prevención de neumonía asociada a ventilación mecánica (NAVM).\nMódulo 3: Manejo de catéteres urinarios y prevención de ITU.\nMódulo 4: Aislamiento por cohortes y desinfección ambiental hospitalaria.",
-    modalidad: "Híbrida",
-    tipoRecurso: "presencial",
-    fechaInicio: "2026-06-12",
-    fechaFin: "2026-06-12",
-    horario: "09:00",
-    ubicacion: "Híbrida - Aula Magna y Zoom",
-    disertantes: "Dra. María Laura Giménez, Dr. Roberto Méndez",
-    videoUrl: "",
-    archivoTipo: "documento",
-    archivoNombre: "Protocolo_IACS_Hospital_Evita.pdf",
-    archivoTamano: "3.2 MB",
-    archivoUrl: "",
-    imagenUrl: "",
-    estado: "ARCHIVADO",
-    activo: true,
-    createdAt: "2026-04-15T08:00:00Z",
-  },
-  {
-    id: 6,
-    titulo: "Bioética y Derechos del Paciente en el Ámbito Público",
-    descripcion:
-      "Análisis de casos dilemáticos en la práctica médica diaria, consentimiento informado y marco legal de la atención en el hospital público.",
-    contenido:
-      "Módulo 1: Principios bioéticos aplicados a la medicina intensiva y de urgencias.\nMódulo 2: Directivas médicas anticipadas y adecuación del esfuerzo terapéutico.\nMódulo 3: Confidencialidad y secreto médico en equipos interdisciplinarios.\nMódulo 4: Dictámenes del Comité de Bioética Asistencial.",
-    modalidad: "Presencial",
-    tipoRecurso: "presencial",
-    fechaInicio: "2026-06-18",
-    fechaFin: "2026-06-18",
-    horario: "11:00",
-    ubicacion: "Auditorio Principal HIE",
-    disertantes: "Dra. Valeria Fontana, Dr. Hernán Castro",
-    videoUrl: "",
-    archivoTipo: "documento",
-    archivoNombre: "Temario_Bioetica_Hospitalaria.pdf",
-    archivoTamano: "1.1 MB",
-    archivoUrl: "",
-    imagenUrl: "",
-    estado: "PUBLICADO",
-    activo: true,
-    createdAt: "2026-05-12T16:00:00Z",
-  },
-];
 
 const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de capacitaciones obtenidas desde la base de datos

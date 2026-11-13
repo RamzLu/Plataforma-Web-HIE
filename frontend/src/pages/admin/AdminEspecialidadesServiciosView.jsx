@@ -2,7 +2,6 @@ import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Archive,
-  BadgeCheck,
   CalendarDays,
   CheckCircle,
   Clock3,

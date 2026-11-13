@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import "../../styles/pages/CapacitacionPage.css";
 import AnimatedContent from "../../components/ui/AnimatedContent";
@@ -161,7 +161,9 @@ const formatFechaEspanol = (fechaStr) => {
         year: "numeric"
       });
     }
-  } catch {}
+  } catch {
+    // Error no crítico: se ignora a propósito.
+  }
   return fechaStr;
 };
 
@@ -199,8 +201,8 @@ const formatItemData = (item) => {
 
   tipo = String(tipo).toLowerCase();
 
-  let badgeLabel = "Presencial";
-  let btnText = "VER MÁS";
+  let badgeLabel;
+  let btnText;
 
   if (tipo === "video") {
     badgeLabel = "Video";

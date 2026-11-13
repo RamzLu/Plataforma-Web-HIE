@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";

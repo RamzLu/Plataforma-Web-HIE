@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { adminFetch } from "../../api/adminFetch.js";
 

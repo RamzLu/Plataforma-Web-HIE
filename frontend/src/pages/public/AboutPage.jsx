@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../../styles/pages/AboutPage.css";
 import Breadcrumb from "../../components/Breadcrumb";
@@ -87,7 +87,9 @@ const AboutPage = () => {
               "hie_public_sede_central_cache",
               JSON.stringify(data.sedeCentral)
             );
-          } catch {}
+          } catch {
+            // Si el navegador no permite sessionStorage, solo se omite la caché.
+          }
         }
       })
       .catch(() => setAutoridades([]))

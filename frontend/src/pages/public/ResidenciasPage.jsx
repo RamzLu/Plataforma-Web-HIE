@@ -170,7 +170,7 @@ const ResidenciasPage = () => {
 
     const lines = requisitosText
       .split(/\r?\n/)
-      .map((l) => l.trim().replace(/^[•\-\*✓\s]+/, ""))
+      .map((l) => l.trim().replace(/^[•\-*✓\s]+/, ""))
       .filter(Boolean);
 
     return (

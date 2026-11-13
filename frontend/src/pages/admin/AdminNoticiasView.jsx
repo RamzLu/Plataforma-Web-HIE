@@ -1,5 +1,5 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 

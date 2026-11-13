@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Clock3,
   CheckCircle,
@@ -7,10 +7,7 @@ import {
   Archive,
   Search,
   X,
-  Eye,
   Layers,
-  ArrowRight,
-  FileClock,
   RefreshCw,
 } from 'lucide-react';
 import { getContenidosGraficos } from '../../api/contenidoGrafico.api';
@@ -19,7 +16,6 @@ import {
   DEFAULT_PACIENTES_INICIO,
   DEFAULT_APRENDE_INICIO,
   DEFAULT_RESIDENCIAS_HERO,
-  PORTAL_INTERNAL_ROUTES,
   getPortalRouteLabel,
   resolveGraphicImageUrl,
 } from '../../utils/contenidoGraficoPresets';
@@ -168,7 +164,7 @@ const AdminContenidoGraficoView = ({ onPendingCountChange } = {}) => {
       );
       setFeedback(`Se aprobó correctamente la sección “${selectedEspacio.nombre}”.`);
       closeReviewModal();
-    } catch (err) {
+    } catch {
       setActionError('No se pudo aprobar la sección.');
     } finally {
       setIsSaving(false);
@@ -194,7 +190,7 @@ const AdminContenidoGraficoView = ({ onPendingCountChange } = {}) => {
       );
       setFeedback(`Se rechazó la sección “${selectedEspacio.nombre}” con el motivo registrado.`);
       closeReviewModal();
-    } catch (err) {
+    } catch {
       setActionError('No se pudo registrar el rechazo.');
     } finally {
       setIsSaving(false);

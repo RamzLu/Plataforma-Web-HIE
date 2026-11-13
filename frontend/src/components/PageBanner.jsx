@@ -1,4 +1,3 @@
-import React from "react";
 import Breadcrumb from "./Breadcrumb";
 import logoEstrellas from "../assets/logoHospitalEvita.png";
 import "../styles/ui/PageBanner.css";
@@ -30,8 +29,6 @@ const PageBanner = ({
   currentPage,
   parentLabel,
   parentPath,
-  image,
-  gradient,
   marginBottom,
   className = "",
   children,

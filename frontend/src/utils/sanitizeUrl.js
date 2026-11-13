@@ -14,6 +14,7 @@ export const sanitizeUrl = (rawUrl, fallback = "", options = {}) => {
   if (typeof rawUrl !== "string") return fallback;
 
   // Eliminar caracteres de control que podrian ofuscar el protocolo (ej. "java\nscript:")
+  // eslint-disable-next-line no-control-regex -- se quitan a propósito los caracteres de control de la URL
   const limpia = rawUrl.replace(/[\u0000-\u001F\u007F]/g, "").trim();
   if (!limpia) return fallback;
 

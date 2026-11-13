@@ -501,7 +501,6 @@ export const PortalResidenciasHeroPreview = ({
   titulo = "Excelencia en Alta Complejidad & Vocación Pública",
   parrafoDescripcion = "",
   textoBoton = "Ver Especialidades Disponibles",
-  enlaceUrl = "/especialidades",
   imagen = null,
   altText = "",
   onSelectImage,
@@ -647,7 +646,7 @@ export const CmsContenidoGraficoEditModal = ({
 
   useEffect(() => {
     if (isOpen && espacio) {
-      let listaInicial = [];
+      let listaInicial;
 
       if (espacio.id === "espacio-seccion-pacientes") {
         const defaultsPacientes = DEFAULT_PACIENTES_INICIO.imagenes;

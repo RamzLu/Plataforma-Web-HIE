@@ -1,4 +1,3 @@
-import React from "react";
 import { LogOut, User, Bell } from "lucide-react";
 
 const AdminHeader = ({ userName, onLogout, activeTab }) => {

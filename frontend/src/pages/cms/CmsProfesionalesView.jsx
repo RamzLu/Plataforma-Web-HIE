@@ -1,8 +1,7 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
-import React, { useState, useEffect } from "react";
-import { adminFetch } from "../../api/adminFetch.js";
+import { useState, useEffect } from "react";
 import keycloak from "../../config/keycloak";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
@@ -109,7 +108,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
         setProfesionales(dataProf);
       }
       setAreasDisponibles(Array.isArray(dataAreas) ? dataAreas : []);
-    } catch (error) {
+    } catch {
       toast.error("Error al cargar los datos.");
     } finally {
       setLoading(false);
