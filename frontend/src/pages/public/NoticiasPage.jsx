@@ -5,10 +5,10 @@ import { getNoticias } from "../../api/noticias.api.js";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import "../../styles/pages/NoticiasPage.css";
 import PageBanner from "../../components/PageBanner";
-import iconMama from "../../assets/icon-mama.png";
-import iconCorazon from "../../assets/icon-corazon.png";
-import iconDonacion from "../../assets/icon-donacion-de-sangre.png";
-import iconDengue from "../../assets/icon-dengue.png";
+import iconMama from "../../assets/icon-mama.webp";
+import iconCorazon from "../../assets/icon-corazon.webp";
+import iconDonacion from "../../assets/icon-donacion-de-sangre.webp";
+import iconDengue from "../../assets/icon-dengue.webp";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 
 import iconMamaStatic from "../../assets/icon-mama-estatico.png";
