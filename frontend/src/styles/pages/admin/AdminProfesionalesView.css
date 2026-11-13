@@ -1415,56 +1415,498 @@
 }
 
 /* ===================================================
-   Modal de revisión de profesionales: solo lo propio de la tarjeta de perfil.
-   La carcasa (encabezado, cuerpo, pie, botones...) vive en components/admin/AdminRevisionModal.css
+   Modal de revisión de profesional
+   Sigue el diseño entregado (modal-pendiente-aprobacion-profesionales: code.html y screen.png).
+   Los avisos de rechazo y el bloque de eliminación vienen de components/admin/AdminRevisionModal.css.
+   Ningún font-weight por encima de 650.
    =================================================== */
-.admin-prof-modal .admin-prof-profile {
-  align-items: center;
-  gap: 16px;
+.admin-prof-overlay.admin-rev-overlay.admin-prof-rv-overlay {
+  padding: 24px;
+  background: rgb(15 23 42 / 60%);
+  backdrop-filter: blur(4px);
 }
 
-.admin-prof-modal .admin-prof-profile-photo {
-  width: 64px;
-  height: 64px;
+.admin-prof-modal.admin-rev-modal.admin-prof-rv-modal {
+  width: min(672px, 100%);
+  max-height: 92vh;
+  border: 1px solid rgb(226 232 240 / 80%);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  color: #1e293b;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+/* Encabezado: solo el título y la X */
+.admin-prof-rv-modal .admin-prof-rv-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-title {
+  margin: 2px 0 0;
+  color: #0a3871;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 32px;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-close {
+  display: grid;
+  margin-right: -4px;
+  padding: 8px;
+  place-items: center;
   border: 0;
   border-radius: 12px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
-.admin-prof-modal .admin-prof-profile-summary {
-  gap: 3px;
+.admin-prof-rv-modal .admin-prof-rv-close:hover {
+  background: #f1f5f9;
+  color: #475569;
 }
 
-.admin-prof-modal .admin-prof-role {
-  color: #64748b;
-  font-size: 0.68rem;
+.admin-prof-rv-modal .admin-prof-rv-close:focus-visible {
+  outline: 2px solid #cbd5e1;
+  outline-offset: 0;
+}
+
+/* Cuerpo */
+.admin-prof-rv-modal .admin-prof-rv-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  padding: 20px 24px;
+  background: rgb(248 250 252 / 50%);
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-body::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: #cbd5e1;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-body > * {
+  flex-shrink: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-card,
+.admin-prof-rv-modal.admin-rev-modal .admin-cambios-card {
+  margin: 0;
+  border: 1px solid rgb(226 232 240 / 80%);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+}
+
+/* Estado actual */
+.admin-prof-rv-modal .admin-prof-rv-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-status-label {
+  color: #334155;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.07em;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-status .etiqueta-estado {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-status .etiqueta-estado svg {
+  width: 14px;
+  height: 14px;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-status .etiqueta-estado.is-pendiente {
+  border-color: rgb(253 230 138 / 80%);
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-status .etiqueta-estado.is-pendiente svg {
+  color: #d97706;
+}
+
+/* Comparativa de modificaciones (componente compartido, con las medidas del diseño) */
+.admin-prof-rv-modal.admin-rev-modal .admin-cambios-card {
+  padding: 20px;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-cambios-header {
+  margin-bottom: 6px;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-cambios-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-cambios-counter {
+  padding: 2px 8px;
+  border: 1px solid rgb(191 219 254 / 60%);
+  border-radius: 9999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-cambios-desc {
+  margin: 0 0 16px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-cambios-list {
+  gap: 0;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-cambio-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: rgb(248 250 252 / 40%);
+  box-shadow: none;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-cambio-label-bar {
+  padding: 8px 14px;
+  border-bottom: 1px solid rgb(226 232 240 / 80%);
+  background: #f8fafc;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-cambio-label {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-cambio-diff-grid {
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-diff-box {
+  gap: 0;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.625;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-diff-box.before {
+  border: 1px solid rgb(254 205 211 / 80%);
+  background: rgb(255 241 242 / 60%);
+  color: #4c0519;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-diff-box.after {
+  border: 1px solid rgb(167 243 208 / 80%);
+  background: rgb(236 253 245 / 60%);
+  color: #022c22;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-diff-badge-wrap {
+  margin-bottom: 8px;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-diff-badge {
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-diff-badge.before {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-diff-badge.after {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-diff-text {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.625;
+}
+
+.admin-prof-rv-modal.admin-rev-modal .admin-diff-arrow {
+  color: #94a3b8;
+}
+
+/* Perfil */
+.admin-prof-rv-modal .admin-prof-rv-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-photo {
+  display: grid;
+  width: 80px;
+  height: 80px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f1f5f9;
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 5%);
+  color: #1d4ed8;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-summary {
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-role {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  line-height: 16px;
   text-transform: uppercase;
 }
 
-.admin-prof-modal .admin-prof-profile-summary h3 {
-  margin: 0;
-  color: #0b1b33;
-  font-size: 1.3rem;
-  letter-spacing: -0.01em;
+.admin-prof-rv-modal .admin-prof-rv-name {
+  margin: 2px 0 0;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 28px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.admin-prof-profile-meta {
+.admin-prof-rv-modal .admin-prof-rv-license {
+  margin-top: 8px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+/* Datos asociados */
+.admin-prof-rv-modal .admin-prof-rv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-field {
+  min-width: 0;
+  padding: 16px;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-field-label {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-field-value {
+  margin-top: 4px;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-field-text {
+  margin-top: 4px;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* Enviado por / Última modificación */
+.admin-prof-rv-modal .admin-prof-rv-sent {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.admin-prof-profile-license {
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px;
   color: #64748b;
-  font-size: 0.8rem;
-  font-weight: 650;
+  font-size: 12px;
+  line-height: 16px;
 }
 
-.admin-prof-profile-divider {
-  width: 1px;
-  height: 16px;
-  background: #d5dce6;
+.admin-prof-rv-modal .admin-prof-rv-sent strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Pie y botones */
+.admin-prof-rv-modal .admin-prof-rv-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn.is-danger {
+  border-color: #fecdd3;
+  background: rgb(255 241 242 / 40%);
+  color: #e11d48;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn.is-danger svg {
+  color: #f43f5e;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn.is-danger:hover:not(:disabled) {
+  border-color: #fda4af;
+  background: #fff1f2;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn.is-primary {
+  background: #0f172a;
+  color: #fff;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn.is-primary svg {
+  color: #34d399;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn.is-primary:hover:not(:disabled) {
+  background: #1e293b;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn.is-secondary {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn.is-secondary:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.admin-prof-rv-modal .admin-prof-rv-btn:focus-visible {
+  outline: 2px solid rgb(15 23 42 / 30%);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .admin-prof-overlay.admin-rev-overlay.admin-prof-rv-overlay {
+    padding: 12px;
+  }
+
+  .admin-prof-rv-modal .admin-prof-rv-body {
+    padding: 16px;
+  }
+
+  .admin-prof-rv-modal .admin-prof-rv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-prof-rv-modal .admin-prof-rv-profile {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .admin-prof-rv-modal .admin-prof-rv-photo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .admin-prof-rv-modal.admin-rev-modal .admin-cambio-diff-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-prof-rv-modal .admin-prof-rv-footer {
+    padding: 16px;
+  }
 }
