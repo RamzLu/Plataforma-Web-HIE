@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Archive,
   CalendarDays,
-  CheckCircle,
+  Check,
   Clock3,
   Globe2,
   RefreshCw,
@@ -245,6 +245,10 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
   const rejectedCount = items.filter((item) => item.status === 'Rechazado').length;
   const archivedCount = items.filter((item) => item.status === 'Archivado').length;
 
+  const requisitosLista = selectedItem
+    ? String(selectedItem.requirements || '').split('\n').map((r) => r.trim()).filter(Boolean)
+    : [];
+
   return (
     <div className="admin-es-page">
       <header className="admin-es-page-header admin-view-heading">
@@ -437,32 +441,29 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       </section>
 
       {selectedItem && (
-        <div className="admin-es-modal-overlay admin-rev-overlay" onClick={closeDetails}>
+        <div className="admin-es-modal-overlay admin-rev-overlay admin-es-rv-overlay" onClick={closeDetails}>
           <section
-            className="admin-es-modal admin-rev-modal"
+            className="admin-es-modal admin-rev-modal admin-es-rv-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-es-modal-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <header className="admin-es-modal-header admin-rev-header">
-              <div>
-                <span className="admin-rev-kicker">Información pública</span>
-                <h2 id="admin-es-modal-title" className="admin-rev-title">
-                  Revisión de {selectedItem.esServicio ? 'servicio' : 'especialidad'}
-                </h2>
-              </div>
-              <button
-                type="button"
-                className="admin-es-close-button admin-rev-close"
-                aria-label="Cerrar detalle"
-                onClick={closeDetails}
-              >
+            <header className="admin-es-rv-header">
+              <h2 id="admin-es-modal-title" className="admin-es-rv-title">
+                Revisión de {selectedItem.esServicio ? 'servicio' : 'especialidad'}
+              </h2>
+              <button type="button" className="admin-es-rv-close" aria-label="Cerrar detalle" onClick={closeDetails}>
                 <X size={20} />
               </button>
             </header>
 
-            <div className="admin-es-modal-body admin-rev-body">
+            <div className="admin-es-rv-body">
+              <section className="admin-es-rv-card admin-es-rv-status">
+                <span className="admin-es-rv-status-label">Estado actual</span>
+                <EtiquetaEstado estado={selectedItem.status} texto={selectedItem.status} />
+              </section>
+
               {selectedItem.status === 'Pendiente de aprobación' && selectedItem.requestedEstado === 'ARCHIVADO' && (
                 <div className="admin-rev-alert">
                   <Archive size={18} />
@@ -471,63 +472,76 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                   </div>
                 </div>
               )}
+
               <AdminCambiosResaltados
                 cambios={selectedItem.cambios}
                 esActualizacion={selectedItem.esActualizacion}
               />
-              <div className="admin-es-detail-grid admin-rev-grid">
-                <article className="admin-es-detail admin-es-detail-wide is-title">
-                  <h3>Nombre</h3>
-                  <p>{selectedItem.name}</p>
-                </article>
-                <article className="admin-es-detail admin-es-detail-wide">
-                  <h3>Descripción</h3>
-                  <p>{selectedItem.description || 'Sin descripción cargada.'}</p>
-                </article>
-                <article className="admin-es-detail">
-                  <h3>Horarios</h3>
-                  <p>{selectedItem.hours || 'Sin información cargada.'}</p>
-                </article>
-                <article className="admin-es-detail">
-                  <h3>Ubicación</h3>
-                  <p>{selectedItem.location || 'Sin información cargada.'}</p>
-                </article>
-                <article className="admin-es-detail">
-                  <h3>Requisitos</h3>
-                  <p style={{ whiteSpace: 'pre-line' }}>
-                    {selectedItem.requirements || 'Sin información cargada.'}
-                  </p>
-                </article>
-                <article className="admin-es-detail">
-                  <h3>Documentación necesaria</h3>
-                  <p>{selectedItem.documentation || 'Sin información cargada.'}</p>
-                </article>
-                <article className="admin-es-detail admin-es-detail-wide">
-                  <h3>Información de derivación</h3>
-                  <p>{selectedItem.referral || 'Sin información cargada.'}</p>
-                </article>
+
+              <section className="admin-es-rv-card">
+                <h3 className="admin-es-rv-name-label">Nombre</h3>
+                <p className="admin-es-rv-name">{selectedItem.name}</p>
+              </section>
+
+              <section className="admin-es-rv-card">
+                <h3 className="admin-es-rv-field-label">Descripción</h3>
+                <p className="admin-es-rv-field-text">{selectedItem.description || 'Sin descripción cargada.'}</p>
+              </section>
+
+              <div className="admin-es-rv-grid">
+                <section className="admin-es-rv-card">
+                  <h3 className="admin-es-rv-field-label">Horarios</h3>
+                  <p className="admin-es-rv-field-text">{selectedItem.hours || 'Sin información cargada.'}</p>
+                </section>
+                <section className="admin-es-rv-card">
+                  <h3 className="admin-es-rv-field-label">Ubicación</h3>
+                  <p className="admin-es-rv-field-text">{selectedItem.location || 'Sin información cargada.'}</p>
+                </section>
               </div>
 
-              <div className="admin-es-review-meta admin-rev-meta">
-                <span>
-                  Enviado por <strong>{selectedItem.editor}</strong>
-                </span>
-                <span>
-                  Última modificación: <strong>{selectedItem.updatedAt}</strong>
-                </span>
-                <span>
-                  Estado: <strong>{selectedItem.status}</strong>
-                </span>
-                {selectedItem.rejectionReason && (
-                  <span style={{ color: '#b91c1c' }}>
-                    Motivo del rechazo: <strong>{selectedItem.rejectionReason}</strong>
-                  </span>
-                )}
+              <div className="admin-es-rv-grid">
+                <section className="admin-es-rv-card">
+                  <h3 className="admin-es-rv-field-label">Requisitos</h3>
+                  {requisitosLista.length > 0 ? (
+                    <ul className="admin-es-rv-list">
+                      {requisitosLista.map((req, index) => (
+                        <li key={`${index}-${req.slice(0, 20)}`}>{req}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="admin-es-rv-field-text">Sin información cargada.</p>
+                  )}
+                </section>
+                <section className="admin-es-rv-card">
+                  <h3 className="admin-es-rv-field-label">Documentación necesaria</h3>
+                  <p className="admin-es-rv-field-text">{selectedItem.documentation || 'Sin información cargada.'}</p>
+                </section>
               </div>
+
+              <section className="admin-es-rv-card">
+                <h3 className="admin-es-rv-field-label">Información de derivación</h3>
+                <p className="admin-es-rv-field-text is-muted">{selectedItem.referral || 'Sin información cargada.'}</p>
+              </section>
+
+              <section className="admin-es-rv-audit">
+                <div>
+                  Enviado por <strong>{selectedItem.editor}</strong>
+                </div>
+                <div>
+                  Última modificación: <strong>{selectedItem.updatedAt}</strong>
+                </div>
+              </section>
+
+              {selectedItem.rejectionReason && (
+                <div className="admin-rev-note">
+                  <strong>Motivo del rechazo</strong>
+                  <p>{selectedItem.rejectionReason}</p>
+                </div>
+              )}
 
               {isRejecting && (
-                <label className="admin-es-rejection-field admin-rev-field">
-                  <span>Motivo del rechazo (requerido)</span>
+                <label className="admin-rev-field">
+                  <span>Motivo del rechazo <b>(requerido)</b></span>
                   <textarea
                     value={rejectReason}
                     onChange={(event) => setRejectReason(event.target.value)}
@@ -537,6 +551,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                   />
                 </label>
               )}
+
               {selectedItem.solicitudEliminacion && (
                 <div className="admin-rev-solicitud">
                   <SolicitudEliminacionAcciones
@@ -553,31 +568,30 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
               )}
             </div>
 
-
-            <footer className="admin-es-modal-footer admin-rev-footer">
+            <footer className="admin-es-rv-footer">
               {selectedItem.status === 'Pendiente de aprobación' && !isRejecting && (
                 <>
                   <button
                     type="button"
-                    className="admin-es-button admin-es-button-danger admin-rev-button is-danger"
+                    className="admin-es-rv-btn is-danger"
                     onClick={() => setIsRejecting(true)}
                     disabled={submitting}
                   >
-                    <XCircle size={17} /> Rechazar
+                    <XCircle size={16} /> Rechazar
                   </button>
                   <button
                     type="button"
-                    className="admin-es-button admin-es-button-primary admin-rev-button is-primary"
+                    className="admin-es-rv-btn is-primary"
                     onClick={handleApprove}
                     disabled={submitting}
                   >
                     {selectedItem.requestedEstado === 'ARCHIVADO' ? (
                       <>
-                        <Archive size={17} /> Aprobar archivado
+                        <Archive size={16} /> Aprobar archivado
                       </>
                     ) : (
                       <>
-                        <CheckCircle size={17} /> Aprobar
+                        <Check size={16} strokeWidth={2.5} /> Aprobar
                       </>
                     )}
                   </button>
@@ -587,7 +601,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                 <>
                   <button
                     type="button"
-                    className="admin-es-button admin-es-button-secondary admin-rev-button is-secondary"
+                    className="admin-es-rv-btn is-secondary"
                     onClick={() => setIsRejecting(false)}
                     disabled={submitting}
                   >
@@ -595,7 +609,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                   </button>
                   <button
                     type="button"
-                    className="admin-es-button admin-es-button-danger admin-rev-button is-danger"
+                    className="admin-es-rv-btn is-danger"
                     onClick={handleReject}
                     disabled={submitting}
                   >
@@ -606,7 +620,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
               {selectedItem.status !== 'Pendiente de aprobación' && !isRejecting && (
                 <button
                   type="button"
-                  className="admin-es-button admin-es-button-secondary admin-rev-button is-secondary"
+                  className="admin-es-rv-btn is-secondary"
                   onClick={closeDetails}
                 >
                   Cerrar

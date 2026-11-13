@@ -806,3 +806,463 @@
     border-radius: 20px 20px 0 0;
   }
 }
+
+/* ===================================================
+   Modal de revisión de especialidad / servicio
+   Sigue el diseño entregado (modal-pendiente-aprobacion-especialidad: code.html y screen.png).
+   El encabezado usa las mismas medidas que el de profesional y el de documento.
+   Los avisos de rechazo y el bloque de eliminación vienen de components/admin/AdminRevisionModal.css.
+   Ningún font-weight por encima de 650.
+   =================================================== */
+.admin-es-modal-overlay.admin-rev-overlay.admin-es-rv-overlay {
+  padding: 24px;
+  background: rgb(15 23 42 / 60%);
+  backdrop-filter: blur(4px);
+}
+
+.admin-es-modal.admin-rev-modal.admin-es-rv-modal {
+  width: min(700px, 100%);
+  max-height: 92vh;
+  border: 1px solid rgb(226 232 240 / 80%);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  color: #1e293b;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+/* Encabezado: solo el título y la X */
+.admin-es-rv-modal .admin-es-rv-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+}
+
+.admin-es-rv-modal .admin-es-rv-title {
+  margin: 2px 0 0;
+  color: #0a3871;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 32px;
+}
+
+.admin-es-rv-modal .admin-es-rv-close {
+  display: grid;
+  margin-right: -4px;
+  padding: 8px;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.admin-es-rv-modal .admin-es-rv-close:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* Cuerpo */
+.admin-es-rv-modal .admin-es-rv-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 20px 28px;
+  background: #fff;
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
+}
+
+.admin-es-rv-modal .admin-es-rv-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-es-rv-modal .admin-es-rv-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-es-rv-modal .admin-es-rv-body::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: #cbd5e1;
+}
+
+.admin-es-rv-modal .admin-es-rv-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.admin-es-rv-modal .admin-es-rv-body > * {
+  flex-shrink: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.admin-es-rv-modal .admin-es-rv-card,
+.admin-es-rv-modal.admin-rev-modal .admin-cambios-card {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid rgb(226 232 240 / 80%);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: none;
+}
+
+/* Estado actual */
+.admin-es-rv-modal .admin-es-rv-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-color: rgb(226 232 240 / 90%);
+}
+
+.admin-es-rv-modal .admin-es-rv-status-label {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.admin-es-rv-modal .admin-es-rv-status .etiqueta-estado {
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-es-rv-modal .admin-es-rv-status .etiqueta-estado svg {
+  width: 14px;
+  height: 14px;
+}
+
+.admin-es-rv-modal .admin-es-rv-status .etiqueta-estado.is-pendiente {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.admin-es-rv-modal .admin-es-rv-status .etiqueta-estado.is-pendiente svg {
+  color: #d97706;
+}
+
+/* Comparativa de modificaciones (componente compartido, con las medidas del diseño) */
+.admin-es-rv-modal.admin-rev-modal .admin-cambios-card {
+  border-color: rgb(226 232 240 / 90%);
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-cambios-header {
+  margin-bottom: 6px;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-cambios-title {
+  margin: 0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-cambios-counter {
+  padding: 2px 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-cambios-desc {
+  margin: 0 0 14px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.625;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-cambios-list {
+  gap: 12px;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-cambio-item {
+  padding: 14px;
+  border: 1px solid rgb(226 232 240 / 80%);
+  border-radius: 12px;
+  background: rgb(248 250 252 / 50%);
+  box-shadow: none;
+  overflow: visible;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-cambio-label-bar {
+  margin-bottom: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-cambio-label {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-cambio-diff-grid {
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-diff-box {
+  gap: 0;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.375;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-diff-box.before {
+  border: 1px solid rgb(254 205 211 / 80%);
+  background: rgb(255 241 242 / 70%);
+  color: #881337;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-diff-box.after {
+  border: 1px solid rgb(167 243 208 / 80%);
+  background: rgb(236 253 245 / 60%);
+  color: #022c22;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-diff-badge-wrap {
+  margin-bottom: 6px;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-diff-badge {
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-diff-badge.before {
+  background: rgb(255 228 230 / 90%);
+  color: #be123c;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-diff-badge.after {
+  background: rgb(209 250 229 / 90%);
+  color: #065f46;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-diff-text {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.375;
+}
+
+.admin-es-rv-modal.admin-rev-modal .admin-diff-arrow {
+  color: #94a3b8;
+}
+
+/* Nombre (destacado) */
+.admin-es-rv-modal .admin-es-rv-name-label {
+  margin: 0 0 4px;
+  color: #0a3871;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.admin-es-rv-modal .admin-es-rv-name {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.375;
+  overflow-wrap: anywhere;
+}
+
+/* Campos de datos */
+.admin-es-rv-modal .admin-es-rv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-es-rv-modal .admin-es-rv-grid > .admin-es-rv-card {
+  min-width: 0;
+}
+
+.admin-es-rv-modal .admin-es-rv-field-label {
+  margin: 0 0 4px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.admin-es-rv-modal .admin-es-rv-field-text {
+  margin: 0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.625;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.admin-es-rv-modal .admin-es-rv-field-text.is-muted {
+  color: #475569;
+  line-height: 1.375;
+}
+
+.admin-es-rv-modal .admin-es-rv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.625;
+  list-style: none;
+  overflow-wrap: anywhere;
+}
+
+/* Enviado por / Última modificación */
+.admin-es-rv-modal .admin-es-rv-audit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgb(226 232 240 / 80%);
+  border-radius: 12px;
+  background: rgb(248 250 252 / 70%);
+  color: #475569;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.admin-es-rv-modal .admin-es-rv-audit strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Pie y botones */
+.admin-es-rv-modal .admin-es-rv-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #fff;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn.is-danger {
+  border-color: #fecdd3;
+  background: #fff;
+  color: #e11d48;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn.is-danger svg {
+  color: #f43f5e;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn.is-danger:hover:not(:disabled) {
+  background: #fff1f2;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn.is-primary {
+  background: #0f172a;
+  color: #fff;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn.is-primary svg {
+  color: #34d399;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn.is-primary:hover:not(:disabled) {
+  background: #1e293b;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn.is-secondary {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn.is-secondary:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.admin-es-rv-modal .admin-es-rv-btn:focus-visible {
+  outline: 2px solid rgb(15 23 42 / 30%);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .admin-es-modal-overlay.admin-rev-overlay.admin-es-rv-overlay {
+    padding: 12px;
+  }
+
+  .admin-es-rv-modal .admin-es-rv-body {
+    padding: 16px;
+  }
+
+  .admin-es-rv-modal .admin-es-rv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-es-rv-modal.admin-rev-modal .admin-cambio-diff-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-es-rv-modal .admin-es-rv-footer {
+    padding: 16px;
+  }
+}
