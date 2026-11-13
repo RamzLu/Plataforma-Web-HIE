@@ -4,6 +4,7 @@ import '../../styles/pages/AdminPage.css';
 import "../../styles/components/admin/AdminLayout.css"; 
 
 import keycloak from '../../config/keycloak';
+import { ROLES_ADMIN, tieneAlgunRol } from '../../utils/roles';
 import { getNoticias } from '../../api/noticias.api';
 import { getEspecialidades } from '../../api/especialidades.api';
 import { getDocumentos } from '../../api/documentos.api';
@@ -106,22 +107,7 @@ const AdminPage = () => {
   }, [authenticated, isAdmin]);
 
   useEffect(() => {
-    const checkAdminRole = () => {
-      const realmRoles = (keycloak?.tokenParsed?.realm_access?.roles || []).map((r) =>
-        r.toLowerCase()
-      );
-      const clientRoles = Object.values(keycloak?.tokenParsed?.resource_access || {})
-        .flatMap((r) => r?.roles || [])
-        .map((r) => r.toLowerCase());
-      const allRoles = [...new Set([...realmRoles, ...clientRoles])];
-      const targetAdminRoles = ["admin-hief", "admin-hie", "admin", "administrator", "administrador"];
-      return targetAdminRoles.some(
-        (role) =>
-          keycloak?.hasRealmRole?.(role) ||
-          keycloak?.hasResourceRole?.(role) ||
-          allRoles.includes(role.toLowerCase())
-      );
-    };
+    const checkAdminRole = () => tieneAlgunRol(ROLES_ADMIN);
 
     if (isKeycloakInitialized.current || keycloak.authenticated) {
       if (keycloak.authenticated) {

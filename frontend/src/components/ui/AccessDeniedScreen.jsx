@@ -1,24 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import keycloak from "../../config/keycloak";
+import { ROLES_CMS, ROLES_ADMIN, tieneAlgunRol } from "../../utils/roles";
 import "../../styles/ui/AccessDeniedScreen.css";
-
-const hasKeycloakRole = (rolesToCheck) => {
-  const realmRoles = (keycloak?.tokenParsed?.realm_access?.roles || []).map((r) =>
-    r.toLowerCase()
-  );
-  const clientRoles = Object.values(keycloak?.tokenParsed?.resource_access || {})
-    .flatMap((r) => r?.roles || [])
-    .map((r) => r.toLowerCase());
-  const allRoles = [...new Set([...realmRoles, ...clientRoles])];
-
-  return rolesToCheck.some(
-    (role) =>
-      keycloak?.hasRealmRole?.(role) ||
-      keycloak?.hasResourceRole?.(role) ||
-      allRoles.includes(role.toLowerCase())
-  );
-};
 
 const AccessDeniedScreen = ({ userName, requiredPanel = "este panel" }) => {
   const navigate = useNavigate();
@@ -33,8 +17,8 @@ const AccessDeniedScreen = ({ userName, requiredPanel = "este panel" }) => {
       : tokenName
     : preferredUsername || email || userName || "Usuario autenticado";
 
-  const hasCmRole = hasKeycloakRole(["cm"]);
-  const hasAdminRole = hasKeycloakRole(["admin-hief"]);
+  const hasCmRole = tieneAlgunRol(ROLES_CMS);
+  const hasAdminRole = tieneAlgunRol(ROLES_ADMIN);
 
   const handleLogoutToKeycloak = () => {
     localStorage.removeItem("admin_active_tab");

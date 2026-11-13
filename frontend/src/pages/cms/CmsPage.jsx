@@ -3,6 +3,7 @@ import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { adminFetch } from "../../api/adminFetch.js";
 
 import keycloak from "../../config/keycloak";
+import { ROLES_CMS, tieneAlgunRol } from "../../utils/roles";
 
 import "../../styles/components/cms/CmsLayout.css";
 import "../../styles/components/cms/CmsDashboard.css";
@@ -210,8 +211,8 @@ const handleDeleteDoc = (id) => {
   }, [authenticated, isCms]);
 
   useEffect(() => {
-    // Solo el rol 'cm' accede al CMS (admin-hief pertenece al panel de administracion)
-    const checkCmsRole = () => keycloak.hasRealmRole("cm");
+    // Roles de gestor de contenidos (los mismos que acepta el backend). Los roles de admin van al panel /admin.
+    const checkCmsRole = () => tieneAlgunRol(ROLES_CMS);
 
     if (isKeycloakInitialized.current || keycloak.authenticated) {
       if (keycloak.authenticated) {
