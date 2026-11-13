@@ -101,6 +101,24 @@ export const listarSolicitudesEliminacion = async () => {
     .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
 };
 
+/**
+ * Marca en cada registro si tiene una solicitud de eliminación pendiente (campo "solicitudEliminacion").
+ * Se usa solo en las vistas internas del CMS y del Admin. entidadDe(item) devuelve la entidad del registro.
+ */
+export const agregarSolicitudesEliminacion = async (items, entidadDe) => {
+  if (!Array.isArray(items)) return items;
+  try {
+    const mapa = new Map((await listarSolicitudesEliminacion()).map((s) => [`${s.entidad}_${s.id}`, s]));
+    return items.map((item) => ({
+      ...item,
+      solicitudEliminacion: mapa.get(`${entidadDe(item)}_${item.id}`) || null,
+    }));
+  } catch (error) {
+    registrarFalla("Solicitudes de eliminación", error);
+    return items;
+  }
+};
+
 export const limpiarSolicitudEliminacion = (entidad, id) =>
   prisma.configuracion.deleteMany({ where: { clave: claveDe(entidad, id) } });
 

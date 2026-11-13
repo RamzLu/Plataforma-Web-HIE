@@ -1,9 +1,12 @@
+import { agregarSolicitudesEliminacion } from "../../utils/eliminacion.utils.js";
 import CmsEspecialidadService from "../../services/cms/cms.especialidad.service.js";
 
 export const obtenerEspecialidades = async (req, res, next) => {
   try {
     const result = await CmsEspecialidadService.obtenerEspecialidades(req.adminView === true);
-    return res.status(200).json(result);
+    return res.status(200).json(
+      req.adminView === true ? await agregarSolicitudesEliminacion(result, (item) => (item.esServicio ? "servicio" : "especialidad")) : result
+    );
   } catch (error) {
     next(error);
   }

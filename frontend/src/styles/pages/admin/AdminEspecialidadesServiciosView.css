@@ -80,7 +80,7 @@
 
 .admin-es-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -805,4 +805,10 @@
   .admin-es-modal {
     border-radius: 20px 20px 0 0;
   }
+}
+
+/* Tarjeta "Solicitudes de eliminación" (contenido publicado que el CM pidió borrar) */
+.admin-es-summary-card.is-deletion > span {
+  background: #f3e8ff;
+  color: #7e22ce;
 }

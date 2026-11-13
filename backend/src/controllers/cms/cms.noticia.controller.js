@@ -1,3 +1,4 @@
+import { agregarSolicitudesEliminacion } from "../../utils/eliminacion.utils.js";
 import CmsNoticiaService from "../../services/cms/cms.noticia.service.js";
 
 export const crearNoticia = async (req, res, next) => {
@@ -12,7 +13,9 @@ export const crearNoticia = async (req, res, next) => {
 export const obtenerNoticias = async (req, res, next) => {
   try {
     const noticias = await CmsNoticiaService.obtenerNoticias(req.adminView === true);
-    return res.status(200).json(noticias);
+    return res.status(200).json(
+      req.adminView === true ? await agregarSolicitudesEliminacion(noticias, () => "noticia") : noticias
+    );
   } catch (error) {
     next(error);
   }

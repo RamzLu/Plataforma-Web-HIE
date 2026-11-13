@@ -24,8 +24,6 @@ import AdminCapacitacionesView from '../admin/AdminCapacitacionesView';
 import AdminResidenciasView from '../admin/AdminResidenciasView';
 import AdminContenidoGraficoView from '../admin/AdminContenidoGraficoView';
 import AdminInstitucionalView from '../admin/AdminInstitucionalView';
-import AdminSolicitudesEliminacionView from '../admin/AdminSolicitudesEliminacionView';
-import { getSolicitudesEliminacion } from '../../api/eliminaciones.api';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -43,7 +41,6 @@ const AdminPage = () => {
   const [pendingDocumentosCount, setPendingDocumentosCount] = useState(0);
   const [pendingProfesionalesCount, setPendingProfesionalesCount] = useState(0);
   const [pendingResidenciasCount, setPendingResidenciasCount] = useState(0);
-  const [pendingEliminacionesCount, setPendingEliminacionesCount] = useState(0);
   
   const isKeycloakInitialized = useRef(false);
 
@@ -57,7 +54,7 @@ const AdminPage = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           const pending = data.filter(
-            (n) => (n.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+            (n) => (n.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(n.solicitudEliminacion)
           ).length;
           setPendingNoticiasCount(pending);
         }
@@ -68,7 +65,7 @@ const AdminPage = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           const pending = data.filter(
-            (e) => (e.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+            (e) => (e.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(e.solicitudEliminacion)
           ).length;
           setPendingEspecialidadesCount(pending);
         }
@@ -79,7 +76,7 @@ const AdminPage = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           const pending = data.filter(
-            (d) => (d.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+            (d) => (d.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(d.solicitudEliminacion)
           ).length;
           setPendingDocumentosCount(pending);
         }
@@ -90,7 +87,7 @@ const AdminPage = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           const pending = data.filter(
-            (p) => (p.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+            (p) => (p.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(p.solicitudEliminacion)
           ).length;
           setPendingProfesionalesCount(pending);
         }
@@ -101,16 +98,10 @@ const AdminPage = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           const pending = data.filter(
-            (r) => (r.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+            (r) => (r.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(r.solicitudEliminacion)
           ).length;
           setPendingResidenciasCount(pending);
         }
-      })
-      .catch(() => {});
-
-    getSolicitudesEliminacion()
-      .then((data) => {
-        if (Array.isArray(data)) setPendingEliminacionesCount(data.length);
       })
       .catch(() => {});
   }, [authenticated, isAdmin]);
@@ -253,7 +244,6 @@ const AdminPage = () => {
         pendingDocumentosCount={pendingDocumentosCount}
         pendingProfesionalesCount={pendingProfesionalesCount}
         pendingResidenciasCount={pendingResidenciasCount}
-        pendingEliminacionesCount={pendingEliminacionesCount}
       />
       
       <div className="admin-main-wrapper">
@@ -292,9 +282,6 @@ const AdminPage = () => {
           )}
           {activeTab === "graficos" && <AdminContenidoGraficoView />}
           {activeTab === "institucional" && <AdminInstitucionalView />}
-          {activeTab === "eliminaciones" && (
-            <AdminSolicitudesEliminacionView onPendingCountChange={setPendingEliminacionesCount} />
-          )}
         </main>
       </div>
     </div>

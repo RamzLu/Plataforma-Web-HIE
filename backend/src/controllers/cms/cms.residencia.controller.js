@@ -1,10 +1,13 @@
+import { agregarSolicitudesEliminacion } from "../../utils/eliminacion.utils.js";
 import { usuarioTieneRol, ROLES_ADMIN } from "../../middlewares/auth.middleware.js";
 import CmsResidenciaService from "../../services/cms/cms.residencia.service.js";
 
 export const obtenerResidencias = async (req, res, next) => {
   try {
     const residencias = await CmsResidenciaService.obtenerResidencias(req.adminView === true);
-    return res.status(200).json(residencias);
+    return res.status(200).json(
+      req.adminView === true ? await agregarSolicitudesEliminacion(residencias, () => "residencia") : residencias
+    );
   } catch (error) {
     next(error);
   }

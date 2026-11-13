@@ -1,6 +1,8 @@
+import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Trash2,
   Building2,
   CalendarDays,
   CheckCircle,
@@ -48,6 +50,7 @@ const mapProfesionalFromBackend = (item) => {
   return {
     id: item.id,
     nombre: nombreCompleto,
+    solicitudEliminacion: item.solicitudEliminacion || null,
     cargo: item.cargo || 'Profesional de planta',
     matricula: item.matricula || '',
     especialidad: item.especialidadNombre || 'Sin asignar',
@@ -82,7 +85,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
   const syncPendingCount = useCallback(
     (list) => {
       if (typeof onPendingCountChange === 'function') {
-        const count = list.filter((item) => item.estado === 'PENDIENTE').length;
+        const count = list.filter((item) => item.estado === 'PENDIENTE' || Boolean(item.solicitudEliminacion)).length;
         onPendingCountChange(count);
       }
     },
@@ -148,12 +151,15 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
 
   const selectedProfessional = profesionales.find((item) => item.id === selectedId);
 
+  const deletionCount = profesionales.filter((item) => item.solicitudEliminacion).length;
+
   const filteredProfesionales = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
     return profesionales.filter((item) => {
       const matchesStatus =
         statusFilter === 'TODOS' ||
+        (statusFilter === 'ELIMINACION' && Boolean(item.solicitudEliminacion)) ||
         (statusFilter === 'PUBLICADO'
           ? item.publicado
           : item.estado === statusFilter);
@@ -329,6 +335,18 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
             <strong>{rejectedCount}</strong>
           </div>
         </button>
+        <button
+          type="button"
+          className={`admin-prof-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'ELIMINACION'}
+          onClick={() => setStatusFilter('ELIMINACION')}
+        >
+          <span className="admin-prof-summary-icon"><Trash2 size={19} /></span>
+          <div>
+            <span>Solicitudes de eliminación</span>
+            <strong>{deletionCount}</strong>
+          </div>
+        </button>
       </section>
 
       <section className="admin-prof-card" aria-labelledby="admin-prof-list-title">
@@ -436,6 +454,15 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                       >
                         {item.publicado ? 'Publicado' : estadoLabels[item.estado]}
                       </span>
+                      {item.solicitudEliminacion && (
+                        <SolicitudEliminacionAcciones
+                          solicitud={item.solicitudEliminacion}
+                          entidad="profesional"
+                          id={item.id}
+                          titulo={item.nombre}
+                          onResuelto={() => cargarDatos(true)}
+                        />
+                      )}
                     </td>
                   </tr>
                 ))}

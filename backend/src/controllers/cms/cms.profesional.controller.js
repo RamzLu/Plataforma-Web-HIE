@@ -1,9 +1,12 @@
+import { agregarSolicitudesEliminacion } from "../../utils/eliminacion.utils.js";
 import CmsProfesionalService from "../../services/cms/cms.profesional.service.js";
 
 export const obtenerProfesionales = async (req, res, next) => {
   try {
     const result = await CmsProfesionalService.obtenerProfesionales(req.adminView === true);
-    return res.status(200).json(result);
+    return res.status(200).json(
+      req.adminView === true ? await agregarSolicitudesEliminacion(result, () => "profesional") : result
+    );
   } catch (error) {
     next(error); 
   }

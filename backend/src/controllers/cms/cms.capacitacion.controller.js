@@ -1,10 +1,11 @@
+import { agregarSolicitudesEliminacion } from "../../utils/eliminacion.utils.js";
 import { usuarioTieneRol, ROLES_ADMIN } from "../../middlewares/auth.middleware.js";
 import CmsCapacitacionService from "../../services/cms/cms.capacitacion.service.js";
 
 export const obtenerCapacitaciones = async (req, res, next) => {
   try {
     const capacitaciones = await CmsCapacitacionService.obtenerCapacitaciones();
-    return res.status(200).json(capacitaciones);
+    return res.status(200).json(await agregarSolicitudesEliminacion(capacitaciones, () => "capacitacion"));
   } catch (error) {
     next(error);
   }

@@ -1,0 +1,145 @@
+/* Solicitud de eliminación dentro de la fila de cada módulo del panel Admin */
+.solelim {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.solelim-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #f3e8ff;
+  color: #7e22ce;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.solelim-quien {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.solelim-acciones {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.solelim-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fff;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.solelim-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.solelim-btn.is-danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.solelim-btn.is-danger:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+.solelim-btn.is-primary {
+  border-color: #006eb3;
+  background: #006eb3;
+  color: #fff;
+}
+
+.solelim-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.solelim-btn:focus-visible,
+.solelim-cerrar:focus-visible {
+  outline: 2px solid #006eb3;
+  outline-offset: 2px;
+}
+
+.solelim-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgb(15 23 42 / 45%);
+}
+
+.solelim-modal {
+  position: relative;
+  width: min(460px, 100%);
+  padding: 26px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 20px 50px rgb(0 0 0 / 20%);
+  color: #0c2340;
+  text-align: left;
+}
+
+.solelim-modal h3 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+}
+
+.solelim-modal p {
+  margin: 0 0 14px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.solelim-modal label {
+  display: block;
+  margin-bottom: 6px;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.solelim-modal textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+
+.solelim-cerrar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.solelim-modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}

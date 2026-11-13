@@ -1,6 +1,8 @@
+import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Trash2,
   CalendarDays,
   CheckCircle,
   FileText,
@@ -47,6 +49,7 @@ const mapDocumentFromBackend = (doc) => {
   return {
     id: doc.id?.toString() || '',
     title: doc.title || doc.titulo || 'Sin título',
+    solicitudEliminacion: doc.solicitudEliminacion || null,
     description: doc.description || doc.descripcion || '',
     category: doc.category || doc.categoria || 'Información institucional',
     fileName: doc.fileName || doc.nombreArchivo || 'documento.pdf',
@@ -81,7 +84,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
   const syncPendingCount = useCallback(
     (list) => {
       if (typeof onPendingCountChange === 'function') {
-        const count = list.filter((doc) => doc.status === 'PENDIENTE').length;
+        const count = list.filter((doc) => doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion)).length;
         onPendingCountChange(count);
       }
     },
@@ -166,6 +169,8 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
     return sanitizeUrl(selectedDocument.fileUrl, '', { allowBlob: true });
   }, [selectedDocument]);
 
+  const deletionCount = documents.filter((doc) => doc.solicitudEliminacion).length;
+
   const filteredDocuments = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
@@ -174,6 +179,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
       if (statusFilter === 'PENDIENTE') matchesStatus = doc.status === 'PENDIENTE';
       else if (statusFilter === 'PUBLICADO') matchesStatus = doc.status === 'PUBLICADO' || doc.status === 'APROBADO';
       else if (statusFilter === 'RECHAZADO') matchesStatus = doc.status === 'RECHAZADO';
+      else if (statusFilter === 'ELIMINACION') matchesStatus = Boolean(doc.solicitudEliminacion);
 
       const matchesCategory =
         categoryFilter === 'TODOS' || doc.category === categoryFilter;
@@ -344,6 +350,15 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           <span><XCircle size={19} /></span>
           <div><small>Rechazados</small><strong>{rejectedCount}</strong></div>
         </button>
+        <button
+          type="button"
+          className={`admin-doc-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'ELIMINACION'}
+          onClick={() => setStatusFilter('ELIMINACION')}
+        >
+          <span><Trash2 size={19} /></span>
+          <div><small>Solicitudes de eliminación</small><strong>{deletionCount}</strong></div>
+        </button>
       </section>
 
       <section className="admin-doc-card" aria-labelledby="admin-doc-list-title">
@@ -434,6 +449,15 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                       <span className={`admin-doc-status is-${doc.status.toLowerCase()}`}>
                         {statusLabels[doc.status] || doc.status}
                       </span>
+                      {doc.solicitudEliminacion && (
+                        <SolicitudEliminacionAcciones
+                          solicitud={doc.solicitudEliminacion}
+                          entidad="documento"
+                          id={doc.id}
+                          titulo={doc.title}
+                          onResuelto={() => cargarDocumentos(true)}
+                        />
+                      )}
                       {doc.status === 'PENDIENTE' && (
                         <small className="admin-doc-cms-hint" style={{ color: '#d97706' }}>Requiere tu revisión</small>
                       )}

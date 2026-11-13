@@ -1,6 +1,7 @@
+import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
+import { Trash2, CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import keycloak from '../../config/keycloak';
@@ -72,7 +73,9 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     (list) => {
       if (typeof onPendingCountChange === 'function') {
         const count = list.filter(
-          (item) => (item.estado || '').toUpperCase() === 'PENDIENTE_APROBACION'
+          (item) =>
+            (item.estado || '').toUpperCase() === 'PENDIENTE_APROBACION' ||
+            Boolean(item.solicitudEliminacion)
         ).length;
         onPendingCountChange(count);
       }
@@ -133,6 +136,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 rejectionReason: noticia.rejectionReason || null,
                 requestedEstado: noticia.requestedEstado || null,
                 previousEstado: noticia.previousEstado || null,
+                solicitudEliminacion: noticia.solicitudEliminacion || null,
                 cambios: Array.isArray(noticia.cambios) ? noticia.cambios : [],
                 esActualizacion: Boolean(noticia.esActualizacion),
               };
@@ -353,7 +357,12 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   const publishedCount = noticias.filter((n) => n.estado === 'PUBLICADO').length;
   const rejectedCount = noticias.filter((n) => n.estado === 'RECHAZADO').length;
 
+  const deletionCount = noticias.filter((n) => n.solicitudEliminacion).length;
+
   const filteredNoticias = noticias.filter((item) => {
+    if (statusFilter === 'ELIMINACION') {
+      return Boolean(item.solicitudEliminacion);
+    }
     if (statusFilter === 'PENDIENTE') {
       return item.estado === 'PENDIENTE_APROBACION';
     }
@@ -448,6 +457,18 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           <span className="admin-news-summary-copy">
             <span>Rechazados</span>
             <strong>{rejectedCount}</strong>
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`admin-news-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'ELIMINACION'}
+          onClick={() => setStatusFilter('ELIMINACION')}
+        >
+          <span className="admin-news-summary-icon"><Trash2 size={19} /></span>
+          <span className="admin-news-summary-copy">
+            <span>Solicitudes de eliminación</span>
+            <strong>{deletionCount}</strong>
           </span>
         </button>
       </div>
@@ -578,6 +599,15 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       <span className={`status-pill-admin ${getBadgeClass(item.status)}`}>
                         {item.status}
                       </span>
+                      {item.solicitudEliminacion && (
+                        <SolicitudEliminacionAcciones
+                          solicitud={item.solicitudEliminacion}
+                          entidad="noticia"
+                          id={item.id}
+                          titulo={item.title}
+                          onResuelto={() => cargarNoticias(true)}
+                        />
+                      )}
                       {item.estado === 'PENDIENTE_APROBACION' &&
                         item.requestedEstado === 'BORRADOR' && (
                           <span

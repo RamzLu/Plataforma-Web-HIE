@@ -1,6 +1,8 @@
+import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Trash2,
   Archive,
   CalendarDays,
   CheckCircle,
@@ -184,10 +186,14 @@ const AdminCapacitacionesView = () => {
     [capacitaciones],
   );
 
+  const deletionCount = capacitacionesVisibles.filter((training) => training.solicitudEliminacion).length;
+
   const filteredCapacitaciones = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('es');
     return capacitacionesVisibles.filter((training) => {
-      const matchesStatus = statusFilter === 'TODOS' || training.estado === statusFilter;
+      const matchesStatus =
+        statusFilter === 'TODOS' ||
+        (statusFilter === 'ELIMINACION' ? Boolean(training.solicitudEliminacion) : training.estado === statusFilter);
       const searchableContent = [
         training.titulo,
         training.descripcion,
@@ -387,6 +393,15 @@ const AdminCapacitacionesView = () => {
         </button>
         <button
           type="button"
+          className={`admin-training-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'ELIMINACION'}
+          onClick={() => setStatusFilter('ELIMINACION')}
+        >
+          <span><Trash2 size={19} /></span>
+          <div><small>Solicitudes de eliminación</small><strong>{deletionCount}</strong></div>
+        </button>
+        <button
+          type="button"
           className={`admin-training-summary-card is-archived ${statusFilter === 'ARCHIVADO' ? 'is-selected' : ''}`}
           aria-pressed={statusFilter === 'ARCHIVADO'}
           onClick={() => setStatusFilter('ARCHIVADO')}
@@ -474,6 +489,15 @@ const AdminCapacitacionesView = () => {
                         <span className={`admin-training-status is-${training.estado?.toLowerCase() || 'borrador'}`}>
                           {STATUS_LABELS[training.estado] || training.estado || 'Sin estado'}
                         </span>
+                        {training.solicitudEliminacion && (
+                        <SolicitudEliminacionAcciones
+                          solicitud={training.solicitudEliminacion}
+                          entidad="capacitacion"
+                          id={training.id}
+                          titulo={training.titulo}
+                          onResuelto={() => cargarCapacitaciones()}
+                        />
+                      )}
                       </td>
                     </tr>
                   ))

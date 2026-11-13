@@ -1,9 +1,12 @@
+import { agregarSolicitudesEliminacion } from "../../utils/eliminacion.utils.js";
 import CmsDocService from "../../services/cms/cms.doc.service.js";
 
 export const obtenerDocumentos = async (req, res, next) => {
   try {
     const result = await CmsDocService.obtenerDocumentos(req.adminView === true);
-    return res.status(200).json(result);
+    return res.status(200).json(
+      req.adminView === true ? await agregarSolicitudesEliminacion(result, () => "documento") : result
+    );
   } catch (error) {
     next(error);
   }

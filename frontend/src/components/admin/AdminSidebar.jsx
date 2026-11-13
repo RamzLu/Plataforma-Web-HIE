@@ -9,8 +9,7 @@ import {
   Building2, 
   Image as ImageIcon, 
   Building,
-  ChevronDown,
-  Trash2
+  ChevronDown
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 import logoCompletoBlanco from "../../assets/logo-completo-blanco.png";
@@ -23,7 +22,6 @@ const AdminSidebar = ({
   pendingDocumentosCount = 0,
   pendingProfesionalesCount = 0,
   pendingResidenciasCount = 0,
-  pendingEliminacionesCount = 0,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
@@ -47,7 +45,6 @@ const AdminSidebar = ({
         { id: "capacitaciones", label: "Capacitaciones Públicas", icon: <GraduationCap /> },
         { id: "graficos", label: "Contenido Gráfico", icon: <ImageIcon /> },
         { id: "institucional", label: "Datos Institucionales", icon: <Building /> },
-        { id: "eliminaciones", label: "Solicitudes de eliminación", icon: <Trash2 />, pendingCount: pendingEliminacionesCount },
       ],
     },
   ];

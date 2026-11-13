@@ -1,6 +1,8 @@
+import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Trash2,
   Archive,
   BookOpen,
   Building2,
@@ -203,6 +205,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
       published: residenciasVisibles.filter((r) => r?.estado === 'PUBLICADO').length,
       scheduled: residenciasVisibles.filter((r) => r?.estado === 'PROGRAMADO').length,
       rejected: residenciasVisibles.filter((r) => r?.estado === 'RECHAZADO').length,
+      deletion: residenciasVisibles.filter((r) => r?.solicitudEliminacion).length,
       archived: residenciasVisibles.filter((r) => r?.estado === 'ARCHIVADO').length,
     }),
     [residenciasVisibles],
@@ -210,14 +213,16 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
 
   useEffect(() => {
     if (typeof onPendingCountChange === 'function') {
-      onPendingCountChange(counts.pending);
+      onPendingCountChange(counts.pending + counts.deletion);
     }
-  }, [counts.pending, onPendingCountChange]);
+  }, [counts.pending, counts.deletion, onPendingCountChange]);
 
   const filteredResidencias = useMemo(() => {
     const query = (search || '').trim().toLocaleLowerCase('es');
     return residenciasVisibles.filter((item) => {
-      const matchesStatus = statusFilter === 'TODOS' || item?.estado === statusFilter;
+      const matchesStatus =
+        statusFilter === 'TODOS' ||
+        (statusFilter === 'ELIMINACION' ? Boolean(item?.solicitudEliminacion) : item?.estado === statusFilter);
       const searchableContent = [
         item?.nombre,
         item?.categoria,
@@ -496,6 +501,20 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             <strong>{counts.rejected}</strong>
           </div>
         </button>
+        <button
+          type="button"
+          className={`admin-res-summary-card-admin is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'ELIMINACION'}
+          onClick={() => setStatusFilter('ELIMINACION')}
+        >
+          <span>
+            <Trash2 size={19} />
+          </span>
+          <div>
+            <small>Solicitudes de eliminación</small>
+            <strong>{counts.deletion}</strong>
+          </div>
+        </button>
 
         <button
           type="button"
@@ -670,6 +689,15 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                         >
                           {STATUS_LABELS[item?.estado] || item?.estado || 'Sin estado'}
                         </span>
+                        {item.solicitudEliminacion && (
+                        <SolicitudEliminacionAcciones
+                          solicitud={item.solicitudEliminacion}
+                          entidad="residencia"
+                          id={item.id}
+                          titulo={item.nombre}
+                          onResuelto={() => cargarResidencias()}
+                        />
+                      )}
                       </td>
                     </tr>
                   );

@@ -1,6 +1,8 @@
+import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Trash2,
   Archive,
   CalendarDays,
   CheckCircle,
@@ -50,6 +52,7 @@ const mapItemFromBackend = (item) => {
     name: item.nombre || '',
     type: item.esServicio ? 'Servicio' : 'Especialidad',
     esServicio: Boolean(item.esServicio),
+    solicitudEliminacion: item.solicitudEliminacion || null,
     location: item.ubicacion || 'Sin ubicación asignada',
     description: item.descripcion || '',
     hours: item.horarios || '',
@@ -85,7 +88,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
     (list) => {
       if (typeof onPendingCountChange === 'function') {
         const count = list.filter(
-          (item) => item.status === 'Pendiente de aprobación'
+          (item) => item.status === 'Pendiente de aprobación' || Boolean(item.solicitudEliminacion)
         ).length;
         onPendingCountChange(count);
       }
@@ -149,12 +152,15 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
     };
   }, [cargarDatos]);
 
+  const deletionCount = items.filter((item) => item.solicitudEliminacion).length;
+
   const filteredItems = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
     return items.filter((item) => {
       const matchesType = typeFilter === 'Todos' || item.type === typeFilter;
       const matchesStatus =
         statusFilter === 'Todos' ||
+        (statusFilter === 'ELIMINACION' && Boolean(item.solicitudEliminacion)) ||
         (statusFilter === 'PENDIENTE' && item.status === 'Pendiente de aprobación') ||
         (statusFilter === 'PUBLICADO' && item.status === 'Publicado') ||
         (statusFilter === 'RECHAZADO' && item.status === 'Rechazado') ||
@@ -315,6 +321,15 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         </button>
         <button
           type="button"
+          className={`admin-es-summary-card is-deletion ${statusFilter === 'ELIMINACION' ? 'is-selected' : ''}`}
+          aria-pressed={statusFilter === 'ELIMINACION'}
+          onClick={() => setStatusFilter('ELIMINACION')}
+        >
+          <span><Trash2 size={19} /></span>
+          <div><small>Solicitudes de eliminación</small><strong>{deletionCount}</strong></div>
+        </button>
+        <button
+          type="button"
           className={`admin-es-summary-card is-archived ${statusFilter === 'ARCHIVADO' ? 'is-selected' : ''}`}
           aria-pressed={statusFilter === 'ARCHIVADO'}
           onClick={() => setStatusFilter('ARCHIVADO')}
@@ -416,6 +431,15 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                       <span className={`admin-es-status ${statusClass(item.status)}`}>
                         {item.status}
                       </span>
+                      {item.solicitudEliminacion && (
+                        <SolicitudEliminacionAcciones
+                          solicitud={item.solicitudEliminacion}
+                          entidad={item.esServicio ? 'servicio' : 'especialidad'}
+                          id={item.id}
+                          titulo={item.name}
+                          onResuelto={() => cargarDatos(true)}
+                        />
+                      )}
                     </td>
                   </tr>
                 ))}
