@@ -1,46 +1,97 @@
-/* Solicitud de eliminación dentro de la fila de cada módulo del panel Admin */
-.solelim {
+/* Solicitud de eliminación en el panel Admin:
+   - la etiqueta del listado es EtiquetaEstado (tipo "eliminacion")
+   - .solelim-bloque: aviso y acciones dentro del modal de detalle */
+.solelim-bloque {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  margin: 16px 24px;
+  padding: 16px;
+  border: 1px solid #e9d5ff;
+  border-radius: 12px;
+  background: #faf5ff;
+  color: #0c2340;
+  text-align: left;
+}
+
+.solelim-bloque.is-inline {
+  margin: 16px 0 0;
+}
+
+.solelim-aviso {
+  display: flex;
   align-items: flex-start;
-  gap: 4px;
-  margin-top: 6px;
-}
-
-.solelim-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: #f3e8ff;
+  gap: 10px;
   color: #7e22ce;
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
 }
 
-.solelim-quien {
-  color: #64748b;
-  font-size: 0.72rem;
+.solelim-aviso svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.solelim-aviso strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.95rem;
+}
+
+.solelim-aviso p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.solelim-advertencia {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.solelim-motivo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.solelim-motivo textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-weight: 400;
+  resize: vertical;
 }
 
 .solelim-acciones {
   display: flex;
-  gap: 6px;
-  margin-top: 2px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .solelim-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 10px;
+  padding: 9px 16px;
   border: 1px solid #cbd5e1;
-  border-radius: 7px;
+  border-radius: 9px;
   background: #fff;
   color: #334155;
-  font-size: 0.75rem;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -59,10 +110,24 @@
   background: #fee2e2;
 }
 
+.solelim-btn.is-danger-solid {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #fff;
+}
+
+.solelim-btn.is-danger-solid:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
 .solelim-btn.is-primary {
   border-color: #006eb3;
   background: #006eb3;
   color: #fff;
+}
+
+.solelim-btn.is-primary:hover:not(:disabled) {
+  background: #005a93;
 }
 
 .solelim-btn:disabled {
@@ -70,76 +135,7 @@
   cursor: not-allowed;
 }
 
-.solelim-btn:focus-visible,
-.solelim-cerrar:focus-visible {
+.solelim-btn:focus-visible {
   outline: 2px solid #006eb3;
   outline-offset: 2px;
-}
-
-.solelim-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgb(15 23 42 / 45%);
-}
-
-.solelim-modal {
-  position: relative;
-  width: min(460px, 100%);
-  padding: 26px;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 20px 50px rgb(0 0 0 / 20%);
-  color: #0c2340;
-  text-align: left;
-}
-
-.solelim-modal h3 {
-  margin: 0 0 10px;
-  font-size: 1.2rem;
-}
-
-.solelim-modal p {
-  margin: 0 0 14px;
-  color: #475569;
-  line-height: 1.5;
-}
-
-.solelim-modal label {
-  display: block;
-  margin-bottom: 6px;
-  color: #334155;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.solelim-modal textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font: inherit;
-  resize: vertical;
-}
-
-.solelim-cerrar {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  border: 0;
-  background: transparent;
-  color: #64748b;
-  cursor: pointer;
-}
-
-.solelim-modal-acciones {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 18px;
 }

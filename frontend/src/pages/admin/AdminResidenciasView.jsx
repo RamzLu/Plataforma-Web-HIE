@@ -1,4 +1,5 @@
-import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
+import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -672,20 +673,14 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                       </td>
 
                       <td data-label="Estado">
-                        <span
-                          className={`admin-res-status-admin is-${(item?.estado || 'borrador').toLowerCase()}`}
-                        >
-                          {STATUS_LABELS[item?.estado] || item?.estado || 'Sin estado'}
-                        </span>
-                        {item.solicitudEliminacion && (
-                        <SolicitudEliminacionAcciones
-                          solicitud={item.solicitudEliminacion}
-                          entidad="residencia"
-                          id={item.id}
-                          titulo={item.nombre}
-                          onResuelto={() => cargarResidencias()}
-                        />
-                      )}
+                        {item.solicitudEliminacion ? (
+                          <EtiquetaEliminacion />
+                        ) : (
+                          <EtiquetaEstado
+                            estado={item?.estado || 'BORRADOR'}
+                            texto={STATUS_LABELS[item?.estado] || item?.estado || 'Sin estado'}
+                          />
+                        )}
                       </td>
                     </tr>
                   );
@@ -716,13 +711,10 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                   <h2 id="admin-res-modal-title">
                     {selectedResidencia?.nombre || 'Residencia'}
                   </h2>
-                  <span
-                    className={`admin-res-status-admin is-${(selectedResidencia?.estado || 'borrador').toLowerCase()}`}
-                  >
-                    {STATUS_LABELS[selectedResidencia?.estado] ||
-                      selectedResidencia?.estado ||
-                      'Sin estado'}
-                  </span>
+                  <EtiquetaEstado
+                    estado={selectedResidencia?.estado || 'BORRADOR'}
+                    texto={STATUS_LABELS[selectedResidencia?.estado] || selectedResidencia?.estado || 'Sin estado'}
+                  />
                   <span className={`admin-res-call-badge-admin is-${convSlugSelected}`}>
                     {convLabelSelected}
                   </span>
@@ -1087,6 +1079,19 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                 </p>
               )}
             </div>
+
+            {selectedResidencia.solicitudEliminacion && (
+              <SolicitudEliminacionAcciones
+                solicitud={selectedResidencia.solicitudEliminacion}
+                entidad="residencia"
+                id={selectedResidencia.id}
+                titulo={selectedResidencia.nombre}
+                onResuelto={async () => {
+                  closeDetails();
+                  await cargarResidencias();
+                }}
+              />
+            )}
 
             {/* Footer de Acciones */}
             {isSelectedPending && (

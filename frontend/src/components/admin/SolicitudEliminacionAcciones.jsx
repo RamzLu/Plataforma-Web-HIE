@@ -1,29 +1,35 @@
 import { useState } from "react";
-import { createPortal } from "react-dom";
-import { Trash2, Undo2, X } from "lucide-react";
+import { CheckCircle, Trash2, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { resolverSolicitudEliminacion } from "../../api/eliminaciones.api";
 import { mensajeDeError } from "../../utils/mensajeDeError";
+import EtiquetaEstado from "../ui/EtiquetaEstado";
 import "../../styles/components/admin/SolicitudEliminacion.css";
 
+const formatearFecha = (valor) => {
+  const fecha = new Date(valor);
+  return Number.isNaN(fecha.getTime()) ? "" : fecha.toLocaleDateString("es-AR");
+};
+
 /**
- * Se muestra en la fila de un contenido publicado que el CM pidió borrar.
+ * Etiqueta para el listado: reemplaza a la de estado cuando el CM pidió borrar el contenido.
+ * La revisión se hace desde el modal de detalle, igual que el resto de las solicitudes.
+ */
+export const EtiquetaEliminacion = () => <EtiquetaEstado tipo="eliminacion" texto="Pide eliminación" />;
+
+/**
+ * Bloque para el modal de detalle de un contenido publicado que el CM pidió borrar.
+ * variante="inline": cuando el bloque va dentro del cuerpo del modal (sin margen lateral).
  * Aprobar lo borra definitivamente; rechazar descarta el pedido y el contenido sigue publicado.
  */
-const SolicitudEliminacionAcciones = ({ solicitud, entidad, id, titulo, onResuelto }) => {
+const SolicitudEliminacionAcciones = ({ solicitud, entidad, id, titulo, onResuelto, variante }) => {
   const [accion, setAccion] = useState(null); // "aprobar" | "rechazar" | null
   const [motivo, setMotivo] = useState("");
   const [enviando, setEnviando] = useState(false);
 
   if (!solicitud) return null;
 
-  const abrir = (event, tipo) => {
-    event.stopPropagation(); // la fila suele abrir el detalle al hacer clic
-    setAccion(tipo);
-  };
-
-  const cerrar = () => {
-    if (enviando) return;
+  const cancelar = () => {
     setAccion(null);
     setMotivo("");
   };
@@ -33,8 +39,7 @@ const SolicitudEliminacionAcciones = ({ solicitud, entidad, id, titulo, onResuel
     try {
       const respuesta = await resolverSolicitudEliminacion(entidad, id, accion === "aprobar", motivo.trim());
       toast.success(respuesta?.message || "Solicitud resuelta.");
-      setAccion(null);
-      setMotivo("");
+      cancelar();
       await onResuelto?.();
     } catch (error) {
       toast.error(mensajeDeError(error, "No se pudo resolver la solicitud de eliminación."));
@@ -43,83 +48,70 @@ const SolicitudEliminacionAcciones = ({ solicitud, entidad, id, titulo, onResuel
     }
   };
 
-  const fecha = new Date(solicitud.fecha);
-  const fechaTexto = Number.isNaN(fecha.getTime()) ? "" : ` · ${fecha.toLocaleDateString("es-AR")}`;
+  const fecha = formatearFecha(solicitud.fecha);
 
   return (
-    <div className="solelim" onClick={(event) => event.stopPropagation()}>
-      <span className="solelim-badge">
-        <Trash2 size={13} aria-hidden="true" />
-        Pide eliminación
-      </span>
-      <small className="solelim-quien">
-        por {solicitud.solicitadoPor}
-        {fechaTexto}
-      </small>
-      <div className="solelim-acciones">
-        <button type="button" className="solelim-btn is-danger" onClick={(e) => abrir(e, "aprobar")}>
-          Aprobar
-        </button>
-        <button type="button" className="solelim-btn" onClick={(e) => abrir(e, "rechazar")}>
-          Rechazar
-        </button>
+    <div className={`solelim-bloque${variante === "inline" ? " is-inline" : ""}`}>
+      <div className="solelim-aviso">
+        <Trash2 size={20} aria-hidden="true" />
+        <div>
+          <strong>Solicitud de eliminación</strong>
+          <p>
+            {solicitud.solicitadoPor || "El Editor CMS"} pidió eliminar este contenido
+            {fecha ? ` el ${fecha}` : ""}. Sigue publicado hasta que lo resuelvas.
+          </p>
+        </div>
       </div>
 
-      {accion &&
-        createPortal(
-          <div className="solelim-overlay" role="presentation" onClick={cerrar}>
-            <div
-              className="solelim-modal"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="solelim-modal-titulo"
-              onClick={(event) => event.stopPropagation()}
+      {accion === "aprobar" && (
+        <p className="solelim-advertencia">
+          Se va a borrar <strong>{titulo}</strong> del portal y de la base de datos. Esta acción no se puede deshacer.
+        </p>
+      )}
+
+      {accion === "rechazar" && (
+        <label className="solelim-motivo">
+          Motivo (opcional)
+          <textarea
+            rows={3}
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            placeholder="Ej.: la información sigue vigente."
+            autoFocus
+          />
+        </label>
+      )}
+
+      <div className="solelim-acciones">
+        {!accion ? (
+          <>
+            <button type="button" className="solelim-btn" onClick={() => setAccion("rechazar")}>
+              <XCircle size={17} aria-hidden="true" /> Rechazar
+            </button>
+            <button type="button" className="solelim-btn is-danger" onClick={() => setAccion("aprobar")}>
+              <CheckCircle size={17} aria-hidden="true" /> Aprobar eliminación
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="solelim-btn" onClick={cancelar} disabled={enviando}>
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className={`solelim-btn ${accion === "aprobar" ? "is-danger-solid" : "is-primary"}`}
+              onClick={confirmar}
+              disabled={enviando}
             >
-              <button type="button" className="solelim-cerrar" aria-label="Cerrar" onClick={cerrar}>
-                <X size={18} />
-              </button>
-              {accion === "aprobar" ? (
-                <>
-                  <h3 id="solelim-modal-titulo">¿Eliminar definitivamente?</h3>
-                  <p>
-                    Se va a borrar <strong>{titulo}</strong> del portal y de la base de datos. Esta acción no se puede
-                    deshacer.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h3 id="solelim-modal-titulo">Rechazar la eliminación</h3>
-                  <p>
-                    <strong>{titulo}</strong> va a seguir publicado como está.
-                  </p>
-                  <label htmlFor="solelim-motivo">Motivo (opcional)</label>
-                  <textarea
-                    id="solelim-motivo"
-                    rows={3}
-                    value={motivo}
-                    onChange={(e) => setMotivo(e.target.value)}
-                    placeholder="Ej.: la información sigue vigente."
-                  />
-                </>
-              )}
-              <div className="solelim-modal-acciones">
-                <button type="button" className="solelim-btn" onClick={cerrar} disabled={enviando}>
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  className={`solelim-btn ${accion === "aprobar" ? "is-danger" : "is-primary"}`}
-                  onClick={confirmar}
-                  disabled={enviando}
-                >
-                  {accion === "aprobar" ? <Trash2 size={15} aria-hidden="true" /> : <Undo2 size={15} aria-hidden="true" />}
-                  {enviando ? "Procesando..." : accion === "aprobar" ? "Sí, eliminar" : "Rechazar solicitud"}
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body
+              {enviando
+                ? "Procesando..."
+                : accion === "aprobar"
+                ? "Sí, eliminar definitivamente"
+                : "Confirmar rechazo"}
+            </button>
+          </>
         )}
+      </div>
     </div>
   );
 };

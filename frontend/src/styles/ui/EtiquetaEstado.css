@@ -1,0 +1,57 @@
+/* Etiqueta de estado compartida por todos los listados y modales del panel Admin */
+.etiqueta-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.etiqueta-estado svg {
+  flex-shrink: 0;
+}
+
+.etiqueta-estado.is-pendiente {
+  border-color: #fde3cf;
+  background: #fff4ec;
+  color: #b45309;
+}
+
+.etiqueta-estado.is-programado {
+  border-color: #cfe5fb;
+  background: #e8f3fe;
+  color: #1d63c6;
+}
+
+.etiqueta-estado.is-publicado {
+  border-color: #c9efd4;
+  background: #e6f8ec;
+  color: #15803d;
+}
+
+.etiqueta-estado.is-rechazado {
+  border-color: #fbd5d5;
+  background: #fdeeee;
+  color: #c0322b;
+}
+
+.etiqueta-estado.is-archivado,
+.etiqueta-estado.is-borrador {
+  border-color: #e2e2e2;
+  background: #f1f1f1;
+  color: #575757;
+}
+
+.etiqueta-estado.is-eliminacion {
+  border-color: #e4d9fc;
+  background: #f1ecfe;
+  color: #6d3fd8;
+}

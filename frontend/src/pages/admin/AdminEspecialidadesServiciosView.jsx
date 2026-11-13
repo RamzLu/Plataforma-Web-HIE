@@ -1,4 +1,5 @@
-import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
+import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -23,13 +24,6 @@ import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin
 import '../../styles/pages/admin/AdminEspecialidadesServiciosView.css';
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
-
-const statusClass = (status) => {
-  if (status === 'Aprobado' || status === 'Publicado') return 'admin-es-status-approved';
-  if (status === 'Rechazado') return 'admin-es-status-rejected';
-  if (status === 'Archivado') return 'admin-es-status-archived';
-  return 'admin-es-status-pending';
-};
 
 const mapItemFromBackend = (item) => {
   const estadoUpper = (item.estado || 'PENDIENTE_APROBACION').toUpperCase();
@@ -418,17 +412,10 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                     <td data-label="Tipo">{item.type}</td>
                     <td data-label="Ubicación">{item.location}</td>
                     <td data-label="Estado">
-                      <span className={`admin-es-status ${statusClass(item.status)}`}>
-                        {item.status}
-                      </span>
-                      {item.solicitudEliminacion && (
-                        <SolicitudEliminacionAcciones
-                          solicitud={item.solicitudEliminacion}
-                          entidad={item.esServicio ? 'servicio' : 'especialidad'}
-                          id={item.id}
-                          titulo={item.name}
-                          onResuelto={() => cargarDatos(true)}
-                        />
+                      {item.solicitudEliminacion ? (
+                        <EtiquetaEliminacion />
+                      ) : (
+                        <EtiquetaEstado estado={item.status} texto={item.status} />
                       )}
                     </td>
                   </tr>
@@ -557,6 +544,19 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                 </label>
               )}
             </div>
+
+            {selectedItem.solicitudEliminacion && (
+              <SolicitudEliminacionAcciones
+                solicitud={selectedItem.solicitudEliminacion}
+                entidad={selectedItem.esServicio ? 'servicio' : 'especialidad'}
+                id={selectedItem.id}
+                titulo={selectedItem.name}
+                onResuelto={async () => {
+                  closeDetails();
+                  await cargarDatos(true);
+                }}
+              />
+            )}
 
             <footer className="admin-es-modal-footer">
               {selectedItem.status === 'Pendiente de aprobación' && !isRejecting && (

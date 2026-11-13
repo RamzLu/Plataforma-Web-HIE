@@ -1,4 +1,5 @@
-import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
+import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
@@ -333,14 +334,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     }
   };
 
-  const getBadgeClass = (status) => {
-    if (status === 'Aprobado' || status === 'Programado' || status === 'Publicado') {
-      return 'status-aprobado-admin';
-    }
-    if (status === 'Rechazado') return 'status-rechazado-admin';
-    return 'status-pendiente-admin';
-  };
-
   const getLayoutClass = (numImages) => {
     if (numImages >= 4) return 'layout-4-admin';
     if (numImages === 3) return 'layout-3-admin';
@@ -530,16 +523,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                           {item.title}
                         </span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
-                          {item.editor && (
-                            <span
-                              style={{
-                                fontSize: '0.75rem',
-                                color: '#64748b',
-                              }}
-                            >
-                              Editado por {item.editedBy || item.editor}
-                            </span>
-                          )}
                           <AdminCambiosPill count={item.cambios?.length} esActualizacion={item.esActualizacion} />
                         </div>
                       </button>
@@ -582,17 +565,10 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                     </div>
 
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-                      <span className={`status-pill-admin ${getBadgeClass(item.status)}`}>
-                        {item.status}
-                      </span>
-                      {item.solicitudEliminacion && (
-                        <SolicitudEliminacionAcciones
-                          solicitud={item.solicitudEliminacion}
-                          entidad="noticia"
-                          id={item.id}
-                          titulo={item.title}
-                          onResuelto={() => cargarNoticias(true)}
-                        />
+                      {item.solicitudEliminacion ? (
+                        <EtiquetaEliminacion />
+                      ) : (
+                        <EtiquetaEstado estado={item.status} texto={item.status} />
                       )}
                       {item.estado === 'PENDIENTE_APROBACION' &&
                         item.requestedEstado === 'BORRADOR' && (
@@ -771,6 +747,19 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 </div>
               )}
             </div>
+
+            {selectedNews.solicitudEliminacion && (
+              <SolicitudEliminacionAcciones
+                solicitud={selectedNews.solicitudEliminacion}
+                entidad="noticia"
+                id={selectedNews.id}
+                titulo={selectedNews.title}
+                onResuelto={async () => {
+                  handleCloseModal();
+                  await cargarNoticias(true);
+                }}
+              />
+            )}
 
 {selectedNews.estado === 'PENDIENTE_APROBACION' && (
               <div className="modal-footer-esp-admin">

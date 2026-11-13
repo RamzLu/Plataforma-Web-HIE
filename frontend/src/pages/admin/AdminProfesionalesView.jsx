@@ -1,4 +1,5 @@
-import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
+import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -436,18 +437,12 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                       </div>
                     </td>
                     <td data-label="Estado">
-                      <span
-                        className={`admin-prof-status is-${item.publicado ? 'aprobado' : item.estado.toLowerCase()}`}
-                      >
-                        {item.publicado ? 'Publicado' : estadoLabels[item.estado]}
-                      </span>
-                      {item.solicitudEliminacion && (
-                        <SolicitudEliminacionAcciones
-                          solicitud={item.solicitudEliminacion}
-                          entidad="profesional"
-                          id={item.id}
-                          titulo={item.nombre}
-                          onResuelto={() => cargarDatos(true)}
+                      {item.solicitudEliminacion ? (
+                        <EtiquetaEliminacion />
+                      ) : (
+                        <EtiquetaEstado
+                          estado={item.publicado ? 'PUBLICADO' : item.estado}
+                          texto={item.publicado ? 'Publicado' : estadoLabels[item.estado]}
                         />
                       )}
                     </td>
@@ -510,9 +505,10 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                   <span className="admin-prof-role">{selectedProfessional.cargo}</span>
                   <h3>{selectedProfessional.nombre}</h3>
                   <span>{selectedProfessional.matricula || 'Matrícula no informada'}</span>
-                  <span className={`admin-prof-status is-${selectedProfessional.publicado ? 'aprobado' : selectedProfessional.estado.toLowerCase()}`}>
-                    {selectedProfessional.publicado ? 'Publicado' : estadoLabels[selectedProfessional.estado]}
-                  </span>
+                  <EtiquetaEstado
+                    estado={selectedProfessional.publicado ? 'PUBLICADO' : selectedProfessional.estado}
+                    texto={selectedProfessional.publicado ? 'Publicado' : estadoLabels[selectedProfessional.estado]}
+                  />
                 </div>
               </div>
 
@@ -574,6 +570,19 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                 </label>
               )}
             </div>
+
+            {selectedProfessional.solicitudEliminacion && (
+              <SolicitudEliminacionAcciones
+                solicitud={selectedProfessional.solicitudEliminacion}
+                entidad="profesional"
+                id={selectedProfessional.id}
+                titulo={selectedProfessional.nombre}
+                onResuelto={async () => {
+                  closeDetails();
+                  await cargarDatos(true);
+                }}
+              />
+            )}
 
             {selectedProfessional.estado === 'PENDIENTE' && (
               <footer className="admin-prof-modal-footer">

@@ -1,4 +1,5 @@
-import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
+import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -477,18 +478,14 @@ const AdminCapacitacionesView = () => {
                         </div>
                       </td>
                       <td data-label="Estado">
-                        <span className={`admin-training-status is-${training.estado?.toLowerCase() || 'borrador'}`}>
-                          {STATUS_LABELS[training.estado] || training.estado || 'Sin estado'}
-                        </span>
-                        {training.solicitudEliminacion && (
-                        <SolicitudEliminacionAcciones
-                          solicitud={training.solicitudEliminacion}
-                          entidad="capacitacion"
-                          id={training.id}
-                          titulo={training.titulo}
-                          onResuelto={() => cargarCapacitaciones()}
-                        />
-                      )}
+                        {training.solicitudEliminacion ? (
+                          <EtiquetaEliminacion />
+                        ) : (
+                          <EtiquetaEstado
+                            estado={training.estado || 'BORRADOR'}
+                            texto={STATUS_LABELS[training.estado] || training.estado || 'Sin estado'}
+                          />
+                        )}
                       </td>
                     </tr>
                   ))
@@ -512,9 +509,10 @@ const AdminCapacitacionesView = () => {
                 <span>Revisión de contenido público</span>
                 <div className="admin-training-title-row">
                   <h2 id="admin-training-modal-title">{selectedTraining.titulo}</h2>
-                  <span className={`admin-training-status is-${selectedTraining.estado?.toLowerCase() || 'borrador'}`}>
-                    {STATUS_LABELS[selectedTraining.estado] || selectedTraining.estado || 'Sin estado'}
-                  </span>
+                  <EtiquetaEstado
+                    estado={selectedTraining.estado || 'BORRADOR'}
+                    texto={STATUS_LABELS[selectedTraining.estado] || selectedTraining.estado || 'Sin estado'}
+                  />
                 </div>
               </div>
               <button type="button" aria-label="Cerrar detalle" onClick={closeDetails}>
@@ -673,6 +671,20 @@ const AdminCapacitacionesView = () => {
                   <strong>Motivo del rechazo</strong>
                   <p>{selectedTraining.motivoRechazo}</p>
                 </div>
+              )}
+
+              {selectedTraining.solicitudEliminacion && (
+                <SolicitudEliminacionAcciones
+                  solicitud={selectedTraining.solicitudEliminacion}
+                  entidad="capacitacion"
+                  id={selectedTraining.id}
+                  titulo={selectedTraining.titulo}
+                  variante="inline"
+                  onResuelto={async () => {
+                    closeDetails();
+                    await cargarCapacitaciones();
+                  }}
+                />
               )}
 
               {selectedTraining.estado === 'PENDIENTE_APROBACION' && (

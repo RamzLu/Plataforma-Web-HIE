@@ -1,4 +1,5 @@
-import SolicitudEliminacionAcciones from "../../components/admin/SolicitudEliminacionAcciones";
+import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -433,17 +434,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                       </div>
                     </td>
                     <td data-label="Estado">
-                      <span className={`admin-doc-status is-${doc.status.toLowerCase()}`}>
-                        {statusLabels[doc.status] || doc.status}
-                      </span>
-                      {doc.solicitudEliminacion && (
-                        <SolicitudEliminacionAcciones
-                          solicitud={doc.solicitudEliminacion}
-                          entidad="documento"
-                          id={doc.id}
-                          titulo={doc.title}
-                          onResuelto={() => cargarDocumentos(true)}
-                        />
+                      {doc.solicitudEliminacion ? (
+                        <EtiquetaEliminacion />
+                      ) : (
+                        <EtiquetaEstado estado={doc.status} texto={statusLabels[doc.status] || doc.status} />
                       )}
                       {doc.status === 'PENDIENTE' && (
                         <small className="admin-doc-cms-hint" style={{ color: '#d97706' }}>Requiere tu revisión</small>
@@ -614,9 +608,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
 
               <div className="admin-doc-state-row">
                 <span>Estado actual</span>
-                <strong className={`admin-doc-status is-${selectedDocument.status.toLowerCase()}`}>
-                  {statusLabels[selectedDocument.status]}
-                </strong>
+                <EtiquetaEstado estado={selectedDocument.status} texto={statusLabels[selectedDocument.status] || selectedDocument.status} />
                 {selectedDocument.status === 'PENDIENTE' && (
                   <small style={{ color: '#d97706' }}>Pendiente de tu decisión para ser publicado.</small>
                 )}
@@ -645,6 +637,19 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                 </label>
               )}
             </div>
+
+            {selectedDocument.solicitudEliminacion && (
+              <SolicitudEliminacionAcciones
+                solicitud={selectedDocument.solicitudEliminacion}
+                entidad="documento"
+                id={selectedDocument.id}
+                titulo={selectedDocument.title}
+                onResuelto={async () => {
+                  closeDetails();
+                  await cargarDocumentos(true);
+                }}
+              />
+            )}
 
             {selectedDocument.status === 'PENDIENTE' && (
               <footer className="admin-doc-modal-footer">
