@@ -439,7 +439,12 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
     if (!itemAEliminar) return;
     try {
       const token = keycloak?.token || localStorage.getItem("token") || "";
-      await deleteCapacitacion(itemAEliminar.id, token);
+      const respuesta = await deleteCapacitacion(itemAEliminar.id, token);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { duration: 6000 });
+        return;
+      }
       recordCmsActivity({
         titulo: `Eliminó capacitación: "${itemAEliminar.titulo || "Capacitación"}"`,
         categoria: "Capacitaciones",

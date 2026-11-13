@@ -157,7 +157,14 @@ const CmsDocsView = ({
       const docToDelete = (docsList || []).find((d) => d.id === id);
       const tituloDoc = docToDelete?.title || docToDelete?.titulo || "Documento";
 
-      await deleteDocumento(id, token);
+      const respuesta = await deleteDocumento(id, token);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { duration: 6000 });
+        setShowDeleteModal(false);
+        setDocAEliminar(null);
+        return;
+      }
       recordCmsActivity({
         titulo: `Eliminó documento: "${tituloDoc}"`,
         categoria: docToDelete?.category || "Documentación",

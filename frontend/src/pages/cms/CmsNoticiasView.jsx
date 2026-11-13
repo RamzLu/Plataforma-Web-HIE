@@ -247,7 +247,14 @@ const CmsNoticiasView = ({
         (newsList || []).find((n) => n.id === id);
       const tituloNoticia = noticia?.title || noticia?.titulo || "Noticia";
 
-      await deleteNoticia(id, token);
+      const respuesta = await deleteNoticia(id, token);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { duration: 6000 });
+        setShowDeleteModal(false);
+        setNoticiaAEliminar(null);
+        return;
+      }
       recordCmsActivity({
         titulo: `Eliminó noticia: "${tituloNoticia}"`,
         categoria: noticia?.category || "Noticias",

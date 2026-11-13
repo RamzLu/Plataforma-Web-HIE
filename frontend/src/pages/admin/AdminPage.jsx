@@ -24,6 +24,8 @@ import AdminCapacitacionesView from '../admin/AdminCapacitacionesView';
 import AdminResidenciasView from '../admin/AdminResidenciasView';
 import AdminContenidoGraficoView from '../admin/AdminContenidoGraficoView';
 import AdminInstitucionalView from '../admin/AdminInstitucionalView';
+import AdminSolicitudesEliminacionView from '../admin/AdminSolicitudesEliminacionView';
+import { getSolicitudesEliminacion } from '../../api/eliminaciones.api';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -41,6 +43,7 @@ const AdminPage = () => {
   const [pendingDocumentosCount, setPendingDocumentosCount] = useState(0);
   const [pendingProfesionalesCount, setPendingProfesionalesCount] = useState(0);
   const [pendingResidenciasCount, setPendingResidenciasCount] = useState(0);
+  const [pendingEliminacionesCount, setPendingEliminacionesCount] = useState(0);
   
   const isKeycloakInitialized = useRef(false);
 
@@ -102,6 +105,12 @@ const AdminPage = () => {
           ).length;
           setPendingResidenciasCount(pending);
         }
+      })
+      .catch(() => {});
+
+    getSolicitudesEliminacion()
+      .then((data) => {
+        if (Array.isArray(data)) setPendingEliminacionesCount(data.length);
       })
       .catch(() => {});
   }, [authenticated, isAdmin]);
@@ -244,6 +253,7 @@ const AdminPage = () => {
         pendingDocumentosCount={pendingDocumentosCount}
         pendingProfesionalesCount={pendingProfesionalesCount}
         pendingResidenciasCount={pendingResidenciasCount}
+        pendingEliminacionesCount={pendingEliminacionesCount}
       />
       
       <div className="admin-main-wrapper">
@@ -282,6 +292,9 @@ const AdminPage = () => {
           )}
           {activeTab === "graficos" && <AdminContenidoGraficoView />}
           {activeTab === "institucional" && <AdminInstitucionalView />}
+          {activeTab === "eliminaciones" && (
+            <AdminSolicitudesEliminacionView onPendingCountChange={setPendingEliminacionesCount} />
+          )}
         </main>
       </div>
     </div>

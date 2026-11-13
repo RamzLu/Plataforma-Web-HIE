@@ -210,7 +210,13 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     
     try {
       const token = keycloak?.token;
-      await deleteProfesional(profesionalToDelete.id, token);
+      const respuesta = await deleteProfesional(profesionalToDelete.id, token);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { id: toastId, duration: 6000 });
+        setShowDeleteModal(false);
+        return;
+      }
       
       const nombreCompleto = `${profesionalToDelete.nombre || ""} ${profesionalToDelete.apellido || ""}`.trim() || "Profesional";
       recordCmsActivity({

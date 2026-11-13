@@ -506,7 +506,14 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
 
     try {
       const token = keycloak?.token;
-      await deleteResidencia(itemAEliminar.id, token);
+      const respuesta = await deleteResidencia(itemAEliminar.id, token);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { id: toastId, duration: 6000 });
+        setShowDeleteModal(false);
+        setItemAEliminar(null);
+        return;
+      }
       recordCmsActivity({
         titulo: `Eliminó residencia: "${itemAEliminar.nombre || "Residencia"}"`,
         categoria: "Residencias",

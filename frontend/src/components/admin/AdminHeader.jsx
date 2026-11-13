@@ -9,6 +9,7 @@ const AdminHeader = ({ userName, onLogout, activeTab }) => {
       usuarios: "GESTIÓN DE USUARIOS",
       roles: "ROLES Y PERMISOS",
       auditoria: "AUDITORÍA DE CAMBIOS",
+      eliminaciones: "SOLICITUDES DE ELIMINACIÓN",
     };
     return names[tabId] || tabId.toUpperCase();
   };

@@ -154,7 +154,13 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   const executeDelete = async () => {
     setIsDeleting(true); 
     try {
-      await deleteEspecialidad(itemAEliminar.id, keycloak.token, itemAEliminar.esServicio);
+      const respuesta = await deleteEspecialidad(itemAEliminar.id, keycloak.token, itemAEliminar.esServicio);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { duration: 6000 });
+        setShowDeleteModal(false);
+        return;
+      }
       const tipo = itemAEliminar.esServicio ? "servicio" : "especialidad";
       recordCmsActivity({
         titulo: `Eliminó ${tipo}: "${itemAEliminar.nombre || ""}"`,
