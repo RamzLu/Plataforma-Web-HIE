@@ -984,3 +984,580 @@
     grid-column: auto;
   }
 }
+
+/* ===================================================
+   Modal de revisión de documento
+   Sigue el diseño entregado (modal-pendiente-aprobacion-documentos: code.html y screen.png).
+   Los avisos de rechazo y el bloque de eliminación vienen de components/admin/AdminRevisionModal.css.
+   Ningún font-weight por encima de 650.
+   =================================================== */
+.admin-doc-overlay.admin-rev-overlay.admin-doc-rv-overlay {
+  padding: 24px;
+  background: rgb(15 23 42 / 60%);
+  backdrop-filter: blur(4px);
+}
+
+.admin-doc-modal.admin-rev-modal.admin-doc-rv-modal {
+  width: min(672px, 100%);
+  max-height: 92vh;
+  border: 1px solid rgb(226 232 240 / 80%);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  color: #1e293b;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+/* Encabezado: solo el título y la X */
+.admin-doc-rv-modal .admin-doc-rv-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-title {
+  margin: 2px 0 0;
+  color: #0a3871;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 32px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-close {
+  display: grid;
+  margin-right: -4px;
+  padding: 8px;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-close:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* Cuerpo */
+.admin-doc-rv-modal .admin-doc-rv-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 16px 24px;
+  background: #fcfdff;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+  scrollbar-width: thin;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-body::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background: #f1f5f9;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-body::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: #cbd5e1;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-body > * {
+  flex-shrink: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-card,
+.admin-doc-rv-modal.admin-rev-modal .admin-cambios-card {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgb(226 232 240 / 90%);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: none;
+}
+
+/* Estado actual */
+.admin-doc-rv-modal .admin-doc-rv-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-status-label {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado svg {
+  width: 14px;
+  height: 14px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado.is-pendiente {
+  border-color: rgb(253 230 138 / 80%);
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado.is-pendiente svg {
+  color: #d97706;
+}
+
+/* Comparativa de modificaciones (componente compartido, con las medidas del diseño) */
+.admin-doc-rv-modal.admin-rev-modal .admin-cambios-card {
+  padding: 14px;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-cambios-header {
+  margin-bottom: 4px;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-cambios-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-cambios-counter {
+  padding: 2px 8px;
+  border: 1px solid #bfdbfe;
+  border-radius: 9999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: normal;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-cambios-desc {
+  margin: 0 0 10px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-cambios-list {
+  gap: 10px;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-cambio-item {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: rgb(248 250 252 / 40%);
+  box-shadow: none;
+  overflow: visible;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-cambio-label-bar {
+  margin-bottom: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-cambio-label {
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-cambio-diff-grid {
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-diff-box {
+  gap: 0;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.625;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-diff-box.before {
+  border: 1px solid #ffe4e6;
+  background: rgb(255 241 242 / 50%);
+  color: #4c0519;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-diff-box.after {
+  border: 1px solid rgb(167 243 208 / 70%);
+  background: rgb(236 253 245 / 40%);
+  color: #022c22;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-diff-badge-wrap {
+  margin-bottom: 4px;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-diff-badge {
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.025em;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-diff-badge.before {
+  background: rgb(255 228 230 / 80%);
+  color: #be123c;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-diff-badge.after {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-diff-text {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.625;
+}
+
+.admin-doc-rv-modal.admin-rev-modal .admin-diff-arrow {
+  padding: 0 4px;
+  color: #94a3b8;
+}
+
+/* Título del documento (destacado) */
+.admin-doc-rv-modal .admin-doc-rv-title-card {
+  padding: 14px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+}
+
+.admin-doc-rv-modal .admin-doc-rv-title-label {
+  margin-bottom: 4px;
+  color: #0a3871;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-doc-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.375;
+  overflow-wrap: anywhere;
+}
+
+/* Campos de datos */
+.admin-doc-rv-modal .admin-doc-rv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-field {
+  min-width: 0;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-field-label {
+  margin-bottom: 4px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-field-text {
+  margin: 0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.625;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-field-text.is-strong {
+  color: #1e293b;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-field-text.is-upper {
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-file-icon {
+  flex-shrink: 0;
+  color: #f43f5e;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-file-name {
+  color: #1e293b;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-file-size {
+  flex-shrink: 0;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* Vista previa */
+.admin-doc-rv-modal .admin-doc-rv-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-preview-title {
+  margin: 0;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-preview-sub {
+  margin: 0;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-expand {
+  display: grid;
+  padding: 6px;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-expand:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-expand:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-viewer {
+  display: flex;
+  height: 460px;
+  min-height: 380px;
+  padding: 12px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #2d3139;
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 5%);
+}
+
+.admin-doc-rv-modal .admin-doc-rv-viewer iframe {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-viewer-msg {
+  display: flex;
+  max-width: 320px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: auto;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-viewer-msg p {
+  margin: 0;
+  color: #f1f5f9;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Enviado por / Última modificación */
+.admin-doc-rv-modal .admin-doc-rv-audit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-audit strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-audit-date {
+  color: #334155;
+  font-weight: 500;
+}
+
+/* Pie y botones */
+.admin-doc-rv-modal .admin-doc-rv-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #fff;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn.is-danger {
+  border-color: #fecdd3;
+  background: #fff;
+  color: #e11d48;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn.is-danger svg {
+  color: #f43f5e;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn.is-danger:hover:not(:disabled) {
+  background: #fff1f2;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn.is-primary {
+  background: #0f172a;
+  color: #fff;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn.is-primary svg {
+  color: #34d399;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn.is-primary:hover:not(:disabled) {
+  background: #1e293b;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn.is-secondary {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn.is-secondary:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.admin-doc-rv-modal .admin-doc-rv-btn:focus-visible {
+  outline: 2px solid rgb(15 23 42 / 30%);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .admin-doc-overlay.admin-rev-overlay.admin-doc-rv-overlay {
+    padding: 12px;
+  }
+
+  .admin-doc-rv-modal .admin-doc-rv-body {
+    padding: 12px 16px;
+  }
+
+  .admin-doc-rv-modal .admin-doc-rv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-doc-rv-modal.admin-rev-modal .admin-cambio-diff-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-doc-rv-modal .admin-doc-rv-viewer {
+    height: 380px;
+  }
+
+  .admin-doc-rv-modal .admin-doc-rv-footer {
+    padding: 16px;
+  }
+}

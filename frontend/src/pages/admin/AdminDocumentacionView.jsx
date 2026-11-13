@@ -5,7 +5,7 @@ import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CalendarDays,
-  CheckCircle,
+  Check,
   FileText,
   FolderOpen,
   Globe2,
@@ -460,149 +460,146 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
       </section>
 
       {selectedDocument && (
-        <div className="admin-doc-overlay admin-rev-overlay" onClick={closeDetails}>
+        <div className="admin-doc-overlay admin-rev-overlay admin-doc-rv-overlay" onClick={closeDetails}>
           <section
-            className="admin-doc-modal admin-rev-modal"
+            className="admin-doc-modal admin-rev-modal admin-doc-rv-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-doc-modal-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <header className="admin-doc-modal-header admin-rev-header">
-              <div>
-                <span className="admin-rev-kicker">Información pública</span>
-                <h2 id="admin-doc-modal-title" className="admin-rev-title">Revisión de documento</h2>
-              </div>
-              <button type="button" className="admin-rev-close" aria-label="Cerrar detalle" onClick={closeDetails}>
+            <header className="admin-doc-rv-header">
+              <h2 id="admin-doc-modal-title" className="admin-doc-rv-title">Revisión de documento</h2>
+              <button type="button" className="admin-doc-rv-close" aria-label="Cerrar detalle" onClick={closeDetails}>
                 <X size={20} />
               </button>
             </header>
 
-            <div className="admin-doc-modal-body admin-rev-body">
+            <div className="admin-doc-rv-body">
+              <section className="admin-doc-rv-card admin-doc-rv-status">
+                <span className="admin-doc-rv-status-label">Estado actual</span>
+                <EtiquetaEstado estado={selectedDocument.status} texto={statusLabels[selectedDocument.status] || selectedDocument.status} />
+              </section>
+
               <AdminCambiosResaltados
                 cambios={selectedDocument.cambios}
                 esActualizacion={selectedDocument.esActualizacion}
               />
-              <div className="admin-doc-info-grid admin-rev-grid">
-                <article className="is-wide is-title">
-                  <h3>Título</h3>
-                  <p>{selectedDocument.title}</p>
-                </article>
-                <article className="is-wide">
-                  <h3>Descripción</h3>
-                  <p>{selectedDocument.description || 'Sin descripción detallada.'}</p>
-                </article>
-                <article>
-                  <h3>Categoría</h3>
-                  <p>{selectedDocument.category}</p>
-                </article>
-                <article>
-                  <h3>Tipo de documento</h3>
-                  <p>{selectedDocument.fileType}</p>
-                </article>
-                <article>
-                  <h3>Subido por</h3>
-                  <p>{selectedDocument.creator}</p>
-                </article>
-                <article className="is-wide">
-                  <h3>Archivo adjunto</h3>
-                  <p>
-                    {selectedDocument.fileName} {selectedDocument.fileSize && <span>· {selectedDocument.fileSize}</span>}
-                  </p>
-                </article>
+
+              <section className="admin-doc-rv-card admin-doc-rv-title-card">
+                <div className="admin-doc-rv-title-label">Título del documento</div>
+                <h3 className="admin-doc-rv-doc-title">{selectedDocument.title}</h3>
+              </section>
+
+              <section className="admin-doc-rv-card admin-doc-rv-field">
+                <div className="admin-doc-rv-field-label">Descripción</div>
+                <p className="admin-doc-rv-field-text">{selectedDocument.description || 'Sin descripción detallada.'}</p>
+              </section>
+
+              <div className="admin-doc-rv-grid">
+                <section className="admin-doc-rv-card admin-doc-rv-field">
+                  <div className="admin-doc-rv-field-label">Categoría</div>
+                  <p className="admin-doc-rv-field-text is-strong">{selectedDocument.category}</p>
+                </section>
+                <section className="admin-doc-rv-card admin-doc-rv-field">
+                  <div className="admin-doc-rv-field-label">Tipo de documento</div>
+                  <p className="admin-doc-rv-field-text is-strong is-upper">{selectedDocument.fileType}</p>
+                </section>
               </div>
 
-              <section className="admin-doc-preview-card admin-rev-card" aria-label="Vista previa del documento">
-                <div className="admin-doc-preview-header">
-                  <div className="admin-doc-preview-heading">
-                    <span className="admin-doc-preview-title">VISTA PREVIA DEL DOCUMENTO</span>
-                    <span className="admin-doc-preview-subtext">
+              <section className="admin-doc-rv-card admin-doc-rv-field">
+                <div className="admin-doc-rv-field-label">Subido por</div>
+                <p className="admin-doc-rv-field-text is-strong">{selectedDocument.creator}</p>
+              </section>
+
+              <section className="admin-doc-rv-card admin-doc-rv-field">
+                <div className="admin-doc-rv-field-label">Archivo adjunto</div>
+                {safeFileUrl ? (
+                  <div className="admin-doc-rv-file">
+                    <svg className="admin-doc-rv-file-icon" width="16" height="16" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path
+                        clipRule="evenodd"
+                        fillRule="evenodd"
+                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                      />
+                    </svg>
+                    <span className="admin-doc-rv-file-name">{selectedDocument.fileName}</span>
+                    {selectedDocument.fileSize && <span className="admin-doc-rv-file-size">· {selectedDocument.fileSize}</span>}
+                  </div>
+                ) : (
+                  <p className="admin-doc-rv-field-text">Sin archivo adjunto</p>
+                )}
+              </section>
+
+              <section className="admin-doc-rv-card admin-doc-rv-preview" aria-label="Vista previa del documento">
+                <div className="admin-doc-rv-preview-header">
+                  <div>
+                    <h3 className="admin-doc-rv-preview-title">Vista previa del documento</h3>
+                    <p className="admin-doc-rv-preview-sub">
                       {safeFileUrl
                         ? isPdf
                           ? 'Visualizador PDF integrado'
                           : 'Vista previa no disponible para este formato'
                         : 'Esperando archivo...'}
-                    </span>
+                    </p>
                   </div>
-                  <div className="admin-doc-preview-toolbar">
-                    <button
-                      type="button"
-                      className="admin-doc-preview-expand-btn"
-                      onClick={() => {
-                        if (safeFileUrl) window.open(safeFileUrl, '_blank', 'noopener,noreferrer');
-                      }}
-                      disabled={!safeFileUrl}
-                      aria-label="Abrir en pestaña nueva"
-                      title="Abrir archivo en pestaña nueva"
-                    >
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
+                  <button
+                    type="button"
+                    className="admin-doc-rv-expand"
+                    onClick={() => {
+                      if (safeFileUrl) window.open(safeFileUrl, '_blank', 'noopener,noreferrer');
+                    }}
+                    disabled={!safeFileUrl}
+                    aria-label="Abrir en pestaña nueva"
+                    title="Abrir archivo en pestaña nueva"
+                  >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                      >
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <polyline points="9 21 3 21 3 15"></polyline>
-                        <line x1="21" y1="3" x2="14" y2="10"></line>
-                        <line x1="3" y1="21" x2="10" y2="14"></line>
-                      </svg>
-                    </button>
-                  </div>
+                      />
+                    </svg>
+                  </button>
                 </div>
 
-                <div className="admin-doc-preview-frame-container">
+                <div className="admin-doc-rv-viewer">
                   {safeFileUrl ? (
                     isPdf ? (
-                      <iframe
-                        src={`${safeFileUrl}#toolbar=0`}
-                        title="Vista previa del documento"
-                        style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }}
-                      />
+                      <iframe src={`${safeFileUrl}#toolbar=0`} title="Vista previa del documento" />
                     ) : (
-                      <div style={{ textAlign: 'center', color: '#64748b', margin: 'auto', padding: '24px' }}>
-                        <FileText size={48} strokeWidth={1.5} style={{ marginBottom: '10px', color: '#0c2340' }} />
-                        <p style={{ fontWeight: 600, margin: '0 0 5px 0', color: '#0c2340' }}>
-                          Archivo {selectedDocument.fileType || 'DOCX'} adjunto
-                        </p>
-                        <p style={{ fontSize: '0.85rem', margin: 0 }}>
-                          La vista previa integrada está disponible para formato PDF. Hacé clic arriba en ↗ para abrir o descargar el archivo.
-                        </p>
+                      <div className="admin-doc-rv-viewer-msg">
+                        <FileText size={40} strokeWidth={1.5} />
+                        <p>Archivo {selectedDocument.fileType || 'DOCX'} adjunto</p>
+                        <span>La vista previa integrada está disponible para formato PDF. Usá el botón de arriba para abrir o descargar el archivo.</span>
                       </div>
                     )
                   ) : (
-                    <div style={{ textAlign: 'center', color: '#94a3b8', margin: 'auto', padding: '24px' }}>
-                      <p>No hay archivo disponible para previsualizar.</p>
+                    <div className="admin-doc-rv-viewer-msg">
+                      <span>No hay archivo disponible para previsualizar.</span>
                     </div>
                   )}
                 </div>
-
-                {!safeFileUrl && (
-                  <div className="admin-doc-preview-footer">
-                    <span className="admin-doc-preview-resolution" style={{ marginLeft: 'auto' }}>
-                      Sin archivo adjunto
-                    </span>
-                  </div>
-                )}
               </section>
 
-              <div className="admin-doc-state-row admin-rev-meta">
-                <span>Estado actual</span>
-                <EtiquetaEstado estado={selectedDocument.status} texto={statusLabels[selectedDocument.status] || selectedDocument.status} />
-              </div>
+              <section className="admin-doc-rv-card admin-doc-rv-audit">
+                <div>
+                  Enviado por <strong>{selectedDocument.editedBy || selectedDocument.creator}</strong>
+                </div>
+                <div>
+                  Última modificación: <span className="admin-doc-rv-audit-date">{selectedDocument.updatedAt}</span>
+                </div>
+              </section>
 
               {selectedDocument.rejectionReason && (
-                <div className="admin-doc-rejection-note admin-rev-note">
+                <div className="admin-rev-note">
                   <strong>Motivo del rechazo</strong>
                   <p>{selectedDocument.rejectionReason}</p>
                 </div>
               )}
 
               {isRejecting && (
-                <label className="admin-doc-rejection-field admin-rev-field">
+                <label className="admin-rev-field">
                   <span>Motivo del rechazo <b>(requerido)</b></span>
                   <textarea
                     value={rejectReason}
@@ -613,6 +610,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                   />
                 </label>
               )}
+
               {selectedDocument.solicitudEliminacion && (
                 <div className="admin-rev-solicitud">
                   <SolicitudEliminacionAcciones
@@ -629,34 +627,32 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
               )}
             </div>
 
-
             {selectedDocument.status === 'PENDIENTE' && (
-              <footer className="admin-doc-modal-footer admin-rev-footer">
+              <footer className="admin-doc-rv-footer">
                 {!isRejecting ? (
                   <>
                     <button
                       type="button"
-                      className="admin-doc-button admin-rev-button is-danger"
+                      className="admin-doc-rv-btn is-danger"
                       onClick={() => setIsRejecting(true)}
                       disabled={submitting}
                     >
-                      <XCircle size={17} /> Rechazar
+                      <XCircle size={16} /> Rechazar
                     </button>
                     <button
                       type="button"
-                      className="admin-doc-button admin-rev-button is-primary"
+                      className="admin-doc-rv-btn is-primary"
                       onClick={handleApprove}
                       disabled={submitting}
                     >
-                      <CheckCircle size={17} />
-                      {submitting ? 'Aprobando...' : 'Aprobar documento'}
+                      <Check size={16} strokeWidth={2.5} /> {submitting ? 'Aprobando...' : 'Aprobar'}
                     </button>
                   </>
                 ) : (
                   <>
                     <button
                       type="button"
-                      className="admin-doc-button admin-rev-button is-secondary"
+                      className="admin-doc-rv-btn is-secondary"
                       onClick={() => {
                         setIsRejecting(false);
                         setRejectReason('');
@@ -667,7 +663,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                     </button>
                     <button
                       type="button"
-                      className="admin-doc-button admin-rev-button is-danger"
+                      className="admin-doc-rv-btn is-danger"
                       onClick={handleReject}
                       disabled={submitting || !rejectReason.trim()}
                     >
