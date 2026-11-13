@@ -1,0 +1,557 @@
+/* ===================================================
+   Modal de "pendiente de aprobación" del panel Admin (carcasa común)
+   La usan Noticias, Documentación, Especialidades y servicios, Profesionales y Residencias.
+   Cada módulo suma estas clases a las suyas (admin-rev-*); aquí viven el tamaño, los colores,
+   la tipografía y el espaciado, para que todos los modales se vean igual.
+   Regla de tipografía: ningún font-weight por encima de 650.
+   Las reglas se repiten con la clase doble o con un ancestro para ganarle a los estilos propios de cada módulo.
+   =================================================== */
+
+/* ---------- Fondo y contenedor ---------- */
+.admin-rev-overlay.admin-rev-overlay {
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgb(15 23 42 / 65%);
+}
+
+.admin-rev-modal.admin-rev-modal {
+  position: relative;
+  display: flex;
+  width: min(720px, 100%);
+  max-width: 100%;
+  max-height: min(90vh, 880px);
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 28px 80px rgb(15 23 42 / 28%);
+  font-family: inherit;
+}
+
+/* Tope de grosor en todo el modal: nada por encima de 650, tampoco lo heredado. */
+.admin-rev-modal h2,
+.admin-rev-modal h3,
+.admin-rev-modal h4,
+.admin-rev-modal strong,
+.admin-rev-modal b,
+.admin-rev-modal button,
+.admin-rev-modal th,
+.admin-rev-modal label {
+  font-weight: 650;
+}
+
+/* ---------- Encabezado ---------- */
+.admin-rev-modal .admin-rev-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 28px 20px;
+  border: 0;
+  border-bottom: 1px solid #eef2f6;
+  background: #fff;
+}
+
+.admin-rev-modal .admin-rev-header > div {
+  min-width: 0;
+}
+
+.admin-rev-modal .admin-rev-kicker {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.admin-rev-modal .admin-rev-title {
+  margin: 6px 0 0;
+  color: #123b6d;
+  font-size: 1.7rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-transform: none;
+}
+
+.admin-rev-modal .admin-rev-close {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  color: #94a3b8;
+  cursor: pointer;
+  transform: none;
+}
+
+.admin-rev-modal .admin-rev-close:hover {
+  background: #f1f5f9;
+  color: #475569;
+  transform: none;
+}
+
+.admin-rev-modal .admin-rev-close svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* ---------- Cuerpo ---------- */
+.admin-rev-modal .admin-rev-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 20px 28px;
+  background: #f8fafc;
+}
+
+.admin-rev-modal .admin-rev-body > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Tarjeta blanca (también se aplica a cada celda de .admin-rev-grid). */
+.admin-rev-modal .admin-rev-card,
+.admin-rev-modal .admin-rev-grid > *,
+.admin-rev-modal .admin-cambios-card,
+.admin-rev-modal .admin-rev-meta {
+  margin: 0;
+  border: 1px solid #e6ebf2;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 4%);
+}
+
+.admin-rev-modal .admin-rev-card {
+  padding: 18px 20px;
+}
+
+/* Tarjeta cuyo contenido ya trae su propio relleno (secciones con encabezado propio). */
+.admin-rev-modal .admin-rev-card.is-flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.admin-rev-modal .admin-rev-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-rev-modal .admin-rev-grid > * {
+  min-width: 0;
+  padding: 16px 18px;
+}
+
+.admin-rev-modal .admin-rev-grid h3,
+.admin-rev-modal .admin-rev-grid h4 {
+  margin: 0 0 8px;
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.admin-rev-modal .admin-rev-grid p {
+  margin: 0;
+  color: #0b1b33;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* Fila de datos sueltos (estado, editor, fechas) */
+.admin-rev-modal .admin-rev-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 22px;
+  padding: 14px 18px;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.admin-rev-modal .admin-rev-meta strong {
+  color: #0b1b33;
+}
+
+/* ---------- Comparativa de cambios ---------- */
+.admin-rev-modal .admin-cambios-card {
+  padding: 18px 20px;
+}
+
+.admin-rev-modal .admin-cambios-title {
+  color: #0b1b33;
+  font-size: 0.95rem;
+}
+
+.admin-rev-modal .admin-cambios-counter {
+  background: #e8f1fd;
+  color: #1d63c6;
+  font-size: 0.68rem;
+  font-weight: 650;
+}
+
+.admin-rev-modal .admin-cambios-desc {
+  color: #64748b;
+}
+
+.admin-rev-modal .admin-cambio-item {
+  border-color: #e6ebf2;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.admin-rev-modal .admin-cambio-label-bar {
+  border-bottom-color: #e6ebf2;
+  background: #f8fafc;
+}
+
+.admin-rev-modal .admin-cambio-label {
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 650;
+}
+
+.admin-rev-modal .admin-cambio-diff-grid {
+  padding: 14px;
+}
+
+.admin-rev-modal .admin-diff-box {
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
+.admin-rev-modal .admin-diff-box.before {
+  border-color: #fde0e0;
+  background: #fff5f5;
+}
+
+.admin-rev-modal .admin-diff-box.after {
+  border-color: #c9efd9;
+  background: #f1fcf6;
+}
+
+.admin-rev-modal .admin-diff-badge {
+  padding: 2px 6px;
+  font-size: 0.62rem;
+  font-weight: 650;
+}
+
+/* ---------- Avisos (archivado, programado, cambio de estado) ---------- */
+.admin-rev-modal .admin-rev-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid #fde68a;
+  border-radius: 14px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.admin-rev-modal .admin-rev-alert svg {
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.admin-rev-modal .admin-rev-alert.is-info {
+  border-color: #cfe5fb;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.admin-rev-modal .admin-rev-alert.is-info svg {
+  color: #1d63c6;
+}
+
+/* ---------- Rechazo ---------- */
+.admin-rev-modal .admin-rev-note {
+  margin: 0;
+  padding: 14px 18px;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.85rem;
+}
+
+.admin-rev-modal .admin-rev-note label {
+  display: block;
+  color: inherit;
+  font-size: 0.85rem;
+}
+
+.admin-rev-modal .admin-rev-note p {
+  margin: 5px 0 0;
+  line-height: 1.5;
+}
+
+.admin-rev-modal .admin-rev-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  color: #334155;
+  font-size: 0.85rem;
+}
+
+.admin-rev-modal .admin-rev-field b {
+  color: #b91c1c;
+}
+
+.admin-rev-modal textarea {
+  font-weight: 400;
+}
+
+.admin-rev-modal .admin-rev-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  background: #fff;
+  color: #0b1b33;
+  font: inherit;
+  resize: vertical;
+}
+
+.admin-rev-modal .admin-rev-field textarea:focus {
+  border-color: #ef4444;
+  outline: 2px solid rgb(239 68 68 / 15%);
+}
+
+/* ---------- Solicitud de eliminación ---------- */
+.admin-rev-modal .admin-rev-solicitud {
+  flex: 0 0 auto;
+}
+
+.admin-rev-modal .solelim-bloque {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 16px;
+  margin: 0;
+  padding: 14px 16px;
+  border-color: #e9d9fb;
+  border-radius: 14px;
+  background: #faf5ff;
+}
+
+.admin-rev-modal .solelim-aviso {
+  grid-column: 1;
+  grid-row: 1;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-rev-modal .solelim-aviso svg {
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  margin-top: 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: #f1e5fd;
+  color: #7e22ce;
+}
+
+.admin-rev-modal .solelim-aviso strong {
+  font-size: 0.92rem;
+}
+
+.admin-rev-modal .solelim-aviso p {
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.admin-rev-modal .solelim-acciones {
+  grid-column: 2;
+  grid-row: 1;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.admin-rev-modal .solelim-advertencia,
+.admin-rev-modal .solelim-motivo {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+/* Si hay que escribir un motivo o confirmar, los botones pasan debajo. */
+.admin-rev-modal .solelim-bloque:has(.solelim-advertencia, .solelim-motivo) .solelim-acciones {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+.admin-rev-modal .solelim-btn {
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 0.8rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.admin-rev-modal .solelim-btn.is-danger {
+  border-color: #fdd0d8;
+  background: #fff1f3;
+  color: #e11d48;
+}
+
+/* ---------- Pie y botones ---------- */
+.admin-rev-modal .admin-rev-footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0;
+  padding: 16px 28px 20px;
+  border: 0;
+  border-top: 1px solid #eef2f6;
+  background: #fff;
+}
+
+.admin-rev-modal .admin-rev-button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: none;
+  color: #334155;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-transform: none;
+  transform: none;
+}
+
+.admin-rev-modal .admin-rev-button:hover:not(:disabled) {
+  box-shadow: none;
+  transform: none;
+}
+
+.admin-rev-modal .admin-rev-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-rev-modal .admin-rev-button.is-primary {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: #fff;
+}
+
+.admin-rev-modal .admin-rev-button.is-primary:hover:not(:disabled) {
+  border-color: #1e293b;
+  background: #1e293b;
+}
+
+.admin-rev-modal .admin-rev-button.is-danger {
+  border-color: #fdd0d8;
+  background: #fff;
+  color: #e11d48;
+}
+
+.admin-rev-modal .admin-rev-button.is-danger:hover:not(:disabled) {
+  background: #fff1f3;
+}
+
+.admin-rev-modal .admin-rev-button.is-secondary {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+
+.admin-rev-modal .admin-rev-button.is-secondary:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.admin-rev-modal .admin-rev-button:focus-visible,
+.admin-rev-modal .admin-rev-close:focus-visible {
+  outline: 2px solid #006eb3;
+  outline-offset: 2px;
+}
+
+/* ---------- Celular: el modal sube desde abajo ---------- */
+@media (max-width: 650px) {
+  .admin-rev-overlay.admin-rev-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .admin-rev-modal.admin-rev-modal {
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .admin-rev-modal .admin-rev-header,
+  .admin-rev-modal .admin-rev-body,
+  .admin-rev-modal .admin-rev-footer {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .admin-rev-modal .admin-rev-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-rev-modal .admin-rev-title {
+    font-size: 1.4rem;
+  }
+
+  .admin-rev-modal .solelim-bloque {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-rev-modal .solelim-acciones {
+    grid-column: 1;
+    grid-row: auto;
+    justify-content: flex-end;
+  }
+
+  .admin-rev-modal .solelim-advertencia,
+  .admin-rev-modal .solelim-motivo {
+    grid-row: auto;
+  }
+
+  .admin-rev-modal .admin-rev-footer .admin-rev-button {
+    flex: 1 1 auto;
+  }
+}

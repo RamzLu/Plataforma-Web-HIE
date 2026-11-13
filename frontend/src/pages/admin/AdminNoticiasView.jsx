@@ -1,3 +1,4 @@
+import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
@@ -607,35 +608,16 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       </div>
 
             {selectedNews && (
-        <div className="modal-overlay-admin" onClick={handleCloseModal}>
-          <div className="modal-content-esp-admin" onClick={(e) => e.stopPropagation()}>
-            {selectedNews.estado === 'PENDIENTE_APROBACION' &&
-              selectedNews.requestedEstado === 'BORRADOR' && (
-                <div className="scheduled-alert-admin">
-                  <AlertTriangle size={20} />
-                  <span>
-                    Solicitud de cambio de estado: El editor del CMS solicita pasar esta noticia
-                    publicada a <strong>Borrador</strong> (retirarla del portal público).
-                  </span>
-                </div>
-              )}
-
-            {selectedNews.scheduledDate &&
-              (selectedNews.estado === 'PENDIENTE_APROBACION' ||
-                selectedNews.estado === 'PROGRAMADO') && (
-                <div className="scheduled-alert-admin">
-                  <CalendarClock size={20} />
-                  <span>
-                    Atención: Esta noticia está programada para publicarse automáticamente el{' '}
-                    {selectedNews.scheduledDate}.
-                  </span>
-                </div>
-              )}
-
-            <div className="modal-header-esp-admin">
-              <h2>COMUNICADO INSTITUCIONAL</h2>
+        <div className="modal-overlay-admin admin-rev-overlay" onClick={handleCloseModal}>
+          <div className="modal-content-esp-admin admin-rev-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-esp-admin admin-rev-header">
+              <div>
+                <span className="admin-rev-kicker">Información pública</span>
+                <h2 className="admin-rev-title">Revisión de noticia</h2>
+              </div>
               <button
-                className="btn-close-modal-admin"
+                className="btn-close-modal-admin admin-rev-close"
+                aria-label="Cerrar detalle"
                 onClick={handleCloseModal}
                 disabled={submitting}
               >
@@ -645,7 +627,30 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               </button>
             </div>
 
-<div className="modal-body-esp-admin">
+<div className="modal-body-esp-admin admin-rev-body">
+              {selectedNews.estado === 'PENDIENTE_APROBACION' &&
+                selectedNews.requestedEstado === 'BORRADOR' && (
+                  <div className="admin-rev-alert">
+                    <AlertTriangle size={18} />
+                    <div>
+                      <strong>Solicitud de cambio de estado:</strong> El editor del CMS solicita pasar esta noticia
+                      publicada a <strong>Borrador</strong> (retirarla del portal público).
+                    </div>
+                  </div>
+                )}
+
+              {selectedNews.scheduledDate &&
+                (selectedNews.estado === 'PENDIENTE_APROBACION' ||
+                  selectedNews.estado === 'PROGRAMADO') && (
+                  <div className="admin-rev-alert is-info">
+                    <CalendarClock size={18} />
+                    <div>
+                      <strong>Publicación programada:</strong> Esta noticia está programada para publicarse
+                      automáticamente el {selectedNews.scheduledDate}.
+                    </div>
+                  </div>
+                )}
+
               {selectedNews.esActualizacion && selectedNews.cambios?.length > 0 && (
                 <div style={{ gridColumn: '1 / -1' }}>
                   <AdminCambiosResaltados
@@ -654,7 +659,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                   />
                 </div>
               )}
-              <div className="preview-mock-left-admin">
+              <div className="preview-mock-left-admin admin-rev-card">
                 <div className="modal-author-row-admin">
                   <div className="hospital-avatar-admin">
                     <img src={avatarHospital} alt="Avatar Hospital" />
@@ -675,7 +680,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               </div>
 
                             {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
-                <div className="news-modal-images-section-admin">
+                <div className="news-modal-images-section-admin admin-rev-card">
                   <div
                     className={`news-modal-images-grid-admin ${getLayoutClass(
                       selectedNews.images.length
@@ -712,7 +717,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               )}
 
 {selectedNews.estado === 'RECHAZADO' && selectedNews.rejectionReason && (
-                <div className="rejection-area-admin">
+                <div className="admin-rev-note">
                   <label>
                     <AlertTriangle
                       size={16}
@@ -727,7 +732,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               )}
 
               {selectedNews.estado === 'PENDIENTE_APROBACION' && isRejecting && (
-                <div className="rejection-area-admin">
+                <div className="admin-rev-field">
                   <label htmlFor="rejection-reason">
                     <AlertTriangle
                       size={16}
@@ -746,34 +751,36 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                   />
                 </div>
               )}
+              {selectedNews.solicitudEliminacion && (
+                <div className="admin-rev-solicitud">
+                  <SolicitudEliminacionAcciones
+                    solicitud={selectedNews.solicitudEliminacion}
+                    entidad="noticia"
+                    id={selectedNews.id}
+                    titulo={selectedNews.title}
+                    onResuelto={async () => {
+                      handleCloseModal();
+                      await cargarNoticias(true);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
-            {selectedNews.solicitudEliminacion && (
-              <SolicitudEliminacionAcciones
-                solicitud={selectedNews.solicitudEliminacion}
-                entidad="noticia"
-                id={selectedNews.id}
-                titulo={selectedNews.title}
-                onResuelto={async () => {
-                  handleCloseModal();
-                  await cargarNoticias(true);
-                }}
-              />
-            )}
 
 {selectedNews.estado === 'PENDIENTE_APROBACION' && (
-              <div className="modal-footer-esp-admin">
+              <div className="modal-footer-esp-admin admin-rev-footer">
                 {!isRejecting ? (
                   <>
                     <button
-                      className="btn-modal-admin btn-modal-danger-admin"
+                      className="btn-modal-admin btn-modal-danger-admin admin-rev-button is-danger"
                       onClick={handleTriggerReject}
                       disabled={submitting}
                     >
                       <XCircle size={18} /> Rechazar
                     </button>
                     <button
-                      className="btn-modal-admin btn-modal-success-admin"
+                      className="btn-modal-admin btn-modal-success-admin admin-rev-button is-primary"
                       onClick={handleApprove}
                       disabled={submitting}
                     >
@@ -788,14 +795,14 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 ) : (
                   <>
                     <button
-                      className="btn-modal-admin btn-modal-cancel-admin"
+                      className="btn-modal-admin btn-modal-cancel-admin admin-rev-button is-secondary"
                       onClick={() => setIsRejecting(false)}
                       disabled={submitting}
                     >
                       Cancelar
                     </button>
                     <button
-                      className="btn-modal-admin btn-modal-confirm-reject-admin"
+                      className="btn-modal-admin btn-modal-confirm-reject-admin admin-rev-button is-danger"
                       onClick={handleConfirmReject}
                       disabled={submitting}
                     >

@@ -1,3 +1,4 @@
+import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
@@ -288,7 +289,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           </div>
           <button
             type="button"
-            className="admin-doc-button is-secondary"
+            className="admin-doc-button admin-rev-button is-secondary"
             onClick={() => cargarDocumentos(false)}
             disabled={loading}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', alignSelf: 'center' }}
@@ -459,31 +460,35 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
       </section>
 
       {selectedDocument && (
-        <div className="admin-doc-overlay" onClick={closeDetails}>
+        <div className="admin-doc-overlay admin-rev-overlay" onClick={closeDetails}>
           <section
-            className="admin-doc-modal"
+            className="admin-doc-modal admin-rev-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-doc-modal-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <header className="admin-doc-modal-header">
+            <header className="admin-doc-modal-header admin-rev-header">
               <div>
-                <span>Revisión de documento institucional</span>
-                <h2 id="admin-doc-modal-title">{selectedDocument.title}</h2>
+                <span className="admin-rev-kicker">Información pública</span>
+                <h2 id="admin-doc-modal-title" className="admin-rev-title">Revisión de documento</h2>
               </div>
-              <button type="button" aria-label="Cerrar detalle" onClick={closeDetails}>
+              <button type="button" className="admin-rev-close" aria-label="Cerrar detalle" onClick={closeDetails}>
                 <X size={20} />
               </button>
             </header>
 
-            <div className="admin-doc-modal-body">
+            <div className="admin-doc-modal-body admin-rev-body">
               <AdminCambiosResaltados
                 cambios={selectedDocument.cambios}
                 esActualizacion={selectedDocument.esActualizacion}
               />
-              <div className="admin-doc-info-grid">
-                <article>
+              <div className="admin-doc-info-grid admin-rev-grid">
+                <article className="is-wide">
+                  <h3>Título</h3>
+                  <p>{selectedDocument.title}</p>
+                </article>
+                <article className="is-wide">
                   <h3>Descripción</h3>
                   <p>{selectedDocument.description || 'Sin descripción detallada.'}</p>
                 </article>
@@ -507,7 +512,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                 </article>
               </div>
 
-              <section className="admin-doc-preview-card" aria-label="Vista previa del documento">
+              <section className="admin-doc-preview-card admin-rev-card" aria-label="Vista previa del documento">
                 <div className="admin-doc-preview-header">
                   <div className="admin-doc-preview-heading">
                     <span className="admin-doc-preview-title">VISTA PREVIA DEL DOCUMENTO</span>
@@ -606,26 +611,20 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                 </div>
               </section>
 
-              <div className="admin-doc-state-row">
+              <div className="admin-doc-state-row admin-rev-meta">
                 <span>Estado actual</span>
                 <EtiquetaEstado estado={selectedDocument.status} texto={statusLabels[selectedDocument.status] || selectedDocument.status} />
-                {selectedDocument.status === 'PENDIENTE' && (
-                  <small style={{ color: '#d97706' }}>Pendiente de tu decisión para ser publicado.</small>
-                )}
-                {selectedDocument.status === 'PUBLICADO' && (
-                  <small style={{ color: '#16a34a' }}>Visible al público en el portal institucional.</small>
-                )}
               </div>
 
               {selectedDocument.rejectionReason && (
-                <div className="admin-doc-rejection-note">
+                <div className="admin-doc-rejection-note admin-rev-note">
                   <strong>Motivo del rechazo</strong>
                   <p>{selectedDocument.rejectionReason}</p>
                 </div>
               )}
 
               {isRejecting && (
-                <label className="admin-doc-rejection-field">
+                <label className="admin-doc-rejection-field admin-rev-field">
                   <span>Motivo del rechazo <b>(requerido)</b></span>
                   <textarea
                     value={rejectReason}
@@ -636,28 +635,30 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                   />
                 </label>
               )}
+              {selectedDocument.solicitudEliminacion && (
+                <div className="admin-rev-solicitud">
+                  <SolicitudEliminacionAcciones
+                    solicitud={selectedDocument.solicitudEliminacion}
+                    entidad="documento"
+                    id={selectedDocument.id}
+                    titulo={selectedDocument.title}
+                    onResuelto={async () => {
+                      closeDetails();
+                      await cargarDocumentos(true);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
-            {selectedDocument.solicitudEliminacion && (
-              <SolicitudEliminacionAcciones
-                solicitud={selectedDocument.solicitudEliminacion}
-                entidad="documento"
-                id={selectedDocument.id}
-                titulo={selectedDocument.title}
-                onResuelto={async () => {
-                  closeDetails();
-                  await cargarDocumentos(true);
-                }}
-              />
-            )}
 
             {selectedDocument.status === 'PENDIENTE' && (
-              <footer className="admin-doc-modal-footer">
+              <footer className="admin-doc-modal-footer admin-rev-footer">
                 {!isRejecting ? (
                   <>
                     <button
                       type="button"
-                      className="admin-doc-button is-danger"
+                      className="admin-doc-button admin-rev-button is-danger"
                       onClick={() => setIsRejecting(true)}
                       disabled={submitting}
                     >
@@ -665,7 +666,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                     </button>
                     <button
                       type="button"
-                      className="admin-doc-button is-primary"
+                      className="admin-doc-button admin-rev-button is-primary"
                       onClick={handleApprove}
                       disabled={submitting}
                     >
@@ -677,7 +678,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                   <>
                     <button
                       type="button"
-                      className="admin-doc-button is-secondary"
+                      className="admin-doc-button admin-rev-button is-secondary"
                       onClick={() => {
                         setIsRejecting(false);
                         setRejectReason('');
@@ -688,7 +689,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                     </button>
                     <button
                       type="button"
-                      className="admin-doc-button is-danger"
+                      className="admin-doc-button admin-rev-button is-danger"
                       onClick={handleReject}
                       disabled={submitting || !rejectReason.trim()}
                     >

@@ -607,7 +607,7 @@
 
 .admin-doc-preview-title {
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 650;
   color: #475569;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -770,7 +770,7 @@
   cursor: pointer;
   font: inherit;
   font-size: 0.83rem;
-  font-weight: 700;
+  font-weight: 650;
   transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
 }
 

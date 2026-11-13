@@ -304,7 +304,7 @@
   color: #854d0e;
   padding: 12px 25px;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 650;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -391,7 +391,7 @@
   margin: 0 0 2px 0;
   font-size: 0.98rem;
   color: #0c2340;
-  font-weight: 700;
+  font-weight: 650;
 }
 
 .author-meta-admin span {
@@ -503,7 +503,7 @@
 
 .rejection-area-admin label {
   color: #991b1b;
-  font-weight: 700;
+  font-weight: 650;
   font-size: 0.95rem;
 }
 
@@ -536,7 +536,7 @@
 .btn-modal-admin {
   padding: 10px 24px;
   border-radius: 50px;
-  font-weight: 700;
+  font-weight: 650;
   font-size: 0.95rem;
   border: none;
   cursor: pointer;
@@ -552,7 +552,7 @@
   border: none;
   border-radius: 50px;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 650;
   text-transform: uppercase;
   cursor: pointer;
 }

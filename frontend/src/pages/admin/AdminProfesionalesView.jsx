@@ -1,3 +1,4 @@
+import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
@@ -467,30 +468,30 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
       </section>
 
       {selectedProfessional && (
-        <div className="admin-prof-overlay" onClick={closeDetails}>
+        <div className="admin-prof-overlay admin-rev-overlay" onClick={closeDetails}>
           <section
-            className="admin-prof-modal"
+            className="admin-prof-modal admin-rev-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-prof-modal-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <header className="admin-prof-modal-header">
+            <header className="admin-prof-modal-header admin-rev-header">
               <div>
-                <span>Revisión de información pública</span>
-                <h2 id="admin-prof-modal-title">{selectedProfessional.nombre}</h2>
+                <span className="admin-rev-kicker">Información pública</span>
+                <h2 id="admin-prof-modal-title" className="admin-rev-title">Revisión de profesional</h2>
               </div>
-              <button type="button" className="admin-prof-close" aria-label="Cerrar detalle" onClick={closeDetails}>
+              <button type="button" className="admin-prof-close admin-rev-close" aria-label="Cerrar detalle" onClick={closeDetails}>
                 <X size={20} />
               </button>
             </header>
 
-            <div className="admin-prof-modal-body">
+            <div className="admin-prof-modal-body admin-rev-body">
               <AdminCambiosResaltados
                 cambios={selectedProfessional.cambios}
                 esActualizacion={selectedProfessional.esActualizacion}
               />
-              <div className="admin-prof-profile">
+              <div className="admin-prof-profile admin-rev-card">
                 <div className="admin-prof-profile-photo">
                   {selectedProfessional.imagen ? (
                     <img
@@ -504,15 +505,18 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                 <div className="admin-prof-profile-summary">
                   <span className="admin-prof-role">{selectedProfessional.cargo}</span>
                   <h3>{selectedProfessional.nombre}</h3>
-                  <span>{selectedProfessional.matricula || 'Matrícula no informada'}</span>
-                  <EtiquetaEstado
-                    estado={selectedProfessional.publicado ? 'PUBLICADO' : selectedProfessional.estado}
-                    texto={selectedProfessional.publicado ? 'Publicado' : estadoLabels[selectedProfessional.estado]}
-                  />
+                  <div className="admin-prof-profile-meta">
+                    <span className="admin-prof-profile-license">{selectedProfessional.matricula || 'Matrícula no informada'}</span>
+                    <span className="admin-prof-profile-divider" aria-hidden="true" />
+                    <EtiquetaEstado
+                      estado={selectedProfessional.publicado ? 'PUBLICADO' : selectedProfessional.estado}
+                      texto={selectedProfessional.publicado ? 'Publicado' : estadoLabels[selectedProfessional.estado]}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="admin-prof-detail-grid">
+              <div className="admin-prof-detail-grid admin-rev-grid">
                 <article className="admin-prof-detail">
                   <h4>Especialidad / Servicio asociado</h4>
                   <p>{selectedProfessional.especialidad}</p>
@@ -535,7 +539,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                 </article>
               </div>
 
-              <div className="admin-prof-state-panel">
+              <div className="admin-prof-state-panel admin-rev-meta">
                 <div>
                   <span>Estado editorial</span>
                   <strong>{estadoLabels[selectedProfessional.estado]}</strong>
@@ -551,14 +555,14 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
               </div>
 
               {selectedProfessional.motivoRechazo && (
-                <div className="admin-prof-rejection-note">
+                <div className="admin-prof-rejection-note admin-rev-note">
                   <strong>Motivo del rechazo anterior</strong>
                   <p>{selectedProfessional.motivoRechazo}</p>
                 </div>
               )}
 
               {isRejecting && (
-                <label className="admin-prof-rejection-field">
+                <label className="admin-prof-rejection-field admin-rev-field">
                   <span>Motivo del rechazo <b>(requerido)</b></span>
                   <textarea
                     value={rejectReason}
@@ -569,28 +573,30 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                   />
                 </label>
               )}
+              {selectedProfessional.solicitudEliminacion && (
+                <div className="admin-prof-solicitud admin-rev-solicitud">
+                  <SolicitudEliminacionAcciones
+                    solicitud={selectedProfessional.solicitudEliminacion}
+                    entidad="profesional"
+                    id={selectedProfessional.id}
+                    titulo={selectedProfessional.nombre}
+                    onResuelto={async () => {
+                      closeDetails();
+                      await cargarDatos(true);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
-            {selectedProfessional.solicitudEliminacion && (
-              <SolicitudEliminacionAcciones
-                solicitud={selectedProfessional.solicitudEliminacion}
-                entidad="profesional"
-                id={selectedProfessional.id}
-                titulo={selectedProfessional.nombre}
-                onResuelto={async () => {
-                  closeDetails();
-                  await cargarDatos(true);
-                }}
-              />
-            )}
 
             {selectedProfessional.estado === 'PENDIENTE' && (
-              <footer className="admin-prof-modal-footer">
+              <footer className="admin-prof-modal-footer admin-rev-footer">
                 {!isRejecting ? (
                   <>
                     <button
                       type="button"
-                      className="admin-prof-button is-danger"
+                      className="admin-prof-button admin-rev-button is-danger"
                       onClick={() => setIsRejecting(true)}
                       disabled={submitting}
                     >
@@ -598,7 +604,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                     </button>
                     <button
                       type="button"
-                      className="admin-prof-button is-primary"
+                      className="admin-prof-button admin-rev-button is-primary"
                       onClick={handleApprove}
                       disabled={submitting}
                     >
@@ -609,7 +615,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                   <>
                     <button
                       type="button"
-                      className="admin-prof-button is-secondary"
+                      className="admin-prof-button admin-rev-button is-secondary"
                       onClick={() => {
                         setIsRejecting(false);
                         setRejectReason('');
@@ -620,7 +626,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                     </button>
                     <button
                       type="button"
-                      className="admin-prof-button is-danger"
+                      className="admin-prof-button admin-rev-button is-danger"
                       onClick={handleReject}
                       disabled={!rejectReason.trim() || submitting}
                     >

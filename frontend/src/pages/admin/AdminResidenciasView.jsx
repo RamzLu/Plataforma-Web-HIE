@@ -1,3 +1,4 @@
+import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
@@ -693,24 +694,38 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
 
       {/* MODAL DE REVISIÓN REDISEÑADO • ELEGANTE, CLARO Y ARMONIOSO */}
       {selectedResidencia && (
-        <div className="admin-res-overlay-admin" onClick={closeDetails}>
+        <div className="admin-res-overlay-admin admin-rev-overlay" onClick={closeDetails}>
           <section
-            className="admin-res-modal-admin"
+            className="admin-res-modal-admin admin-rev-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-res-modal-title"
             onClick={(event) => event.stopPropagation()}
           >
             {/* Header del Modal */}
-            <header className="admin-res-modal-header-admin">
+            <header className="admin-res-modal-header-admin admin-rev-header">
               <div className="admin-res-modal-heading-admin">
-                <span className="admin-res-modal-kicker-admin">
-                  REVISIÓN EDITORIAL • PROGRAMA FORMATIVO DE POSGRADO
-                </span>
+                <span className="admin-res-modal-kicker-admin admin-rev-kicker">Información pública</span>
+                <h2 id="admin-res-modal-title" className="admin-rev-title">Revisión de residencia</h2>
+              </div>
+              <button
+                type="button"
+                className="admin-res-modal-close-btn admin-rev-close"
+                aria-label="Cerrar detalle"
+                onClick={closeDetails}
+              >
+                <X size={20} />
+              </button>
+            </header>
+
+            {/* Cuerpo del Modal */}
+            <div className="admin-res-modal-body-admin admin-rev-body">
+              {/* Nombre y etiquetas de la residencia */}
+              <div className="admin-res-title-card admin-rev-card">
+                <h3 className="admin-res-title-card-name">
+                  {selectedResidencia?.nombre || 'Residencia'}
+                </h3>
                 <div className="admin-res-title-row-admin">
-                  <h2 id="admin-res-modal-title">
-                    {selectedResidencia?.nombre || 'Residencia'}
-                  </h2>
                   <EtiquetaEstado
                     estado={selectedResidencia?.estado || 'BORRADOR'}
                     texto={STATUS_LABELS[selectedResidencia?.estado] || selectedResidencia?.estado || 'Sin estado'}
@@ -726,22 +741,11 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                   )}
                 </div>
               </div>
-              <button
-                type="button"
-                className="admin-res-modal-close-btn"
-                aria-label="Cerrar detalle"
-                onClick={closeDetails}
-              >
-                <X size={20} />
-              </button>
-            </header>
 
-            {/* Cuerpo del Modal */}
-            <div className="admin-res-modal-body-admin">
               {/* Alerta de Solicitud de Archivado */}
               {isSelectedPending && selectedResidencia?.requestedEstado === 'ARCHIVADO' && (
-                <div className="admin-res-archive-alert">
-                  <Archive size={18} className="admin-res-archive-alert-icon" />
+                <div className="admin-rev-alert">
+                  <Archive size={18} />
                   <div>
                     <strong>Solicitud de archivado:</strong> El editor del CMS solicita archivar esta residencia y retirarla del portal público.
                   </div>
@@ -750,20 +754,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
 
               {/* Alerta de Publicación Programada */}
               {selectedResidencia?.fechaPublicacion && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '12px 16px',
-                    borderRadius: '10px',
-                    background: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    color: '#1e40af',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  <Clock3 size={18} style={{ color: '#2563eb', flexShrink: 0 }} />
+                <div className="admin-rev-alert is-info">
+                  <Clock3 size={18} />
                   <div>
                     <strong>Publicación programada:</strong> Esta residencia se publicará automáticamente en el portal el{' '}
                     <strong>{new Date(selectedResidencia.fechaPublicacion).toLocaleString('es-AR', { dateStyle: 'long', timeStyle: 'short' })}</strong>.
@@ -779,14 +771,14 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
 
               {/* Alerta de Rechazo Previo */}
               {(selectedResidencia?.motivoRechazo || selectedResidencia?.rejectionReason) && (
-                <div className="admin-res-rejection-note-admin">
+                <div className="admin-res-rejection-note-admin admin-rev-note">
                   <strong>Motivo de rechazo registrado</strong>
                   <p>{selectedResidencia?.motivoRechazo || selectedResidencia?.rejectionReason}</p>
                 </div>
               )}
 
               {/* BLOQUE 1: Ficha Clave / Datos de Convocatoria (4 columnas limpias) */}
-              <div className="admin-res-summary-strip">
+              <div className="admin-res-summary-strip admin-rev-card">
                 <div className="admin-res-summary-strip-item">
                   <div className="admin-res-strip-icon-wrap">
                     <Building2 size={16} />
@@ -838,7 +830,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               </div>
 
               {/* BLOQUE 2: Contenido y Programa Académico */}
-              <div className="admin-res-section-card">
+              <div className="admin-res-section-card admin-rev-card is-flush">
                 <div className="admin-res-section-card-header">
                   <div className="admin-res-section-card-title">
                     <BookOpen size={18} />
@@ -864,7 +856,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               </div>
 
               {/* BLOQUE 3: Requisitos de Postulación */}
-              <div className="admin-res-section-card">
+              <div className="admin-res-section-card admin-rev-card is-flush">
                 <div className="admin-res-section-card-header">
                   <div className="admin-res-section-card-title">
                     <ListChecks size={18} />
@@ -895,7 +887,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               </div>
 
               {/* BLOQUE 4: Recursos y Documentos Oficiales (2 columnas armonizadas) */}
-              <div className="admin-res-section-card">
+              <div className="admin-res-section-card admin-rev-card is-flush">
                 <div className="admin-res-section-card-header">
                   <div className="admin-res-section-card-title">
                     <FileText size={18} />
@@ -1005,7 +997,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               </div>
 
               {/* BLOQUE 5: Metadatos Editoriales */}
-              <div className="admin-res-review-meta">
+              <div className="admin-res-review-meta admin-rev-meta">
                 <span>
                   Enviado por: <strong>{selectedResidencia.editor || 'Editor CMS'}</strong>
                 </span>
@@ -1020,7 +1012,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               {/* Formulario de Rechazo inline */}
               {isSelectedPending && showRejectForm && (
                 <div
-                  className="admin-res-confirmation-admin"
+                  className="admin-res-confirmation-admin admin-rev-field"
                   role="group"
                   aria-label="Formulario de justificación de rechazo"
                 >
@@ -1050,7 +1042,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                   <div className="admin-res-confirm-buttons-admin">
                     <button
                       type="button"
-                      className="admin-res-cancel-btn-admin"
+                      className="admin-res-cancel-btn-admin admin-rev-button is-secondary"
                       onClick={() => {
                         setShowRejectForm(false);
                         setRejectReason('');
@@ -1062,7 +1054,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                     </button>
                     <button
                       type="button"
-                      className="admin-res-action-btn-admin is-reject"
+                      className="admin-res-action-btn-admin is-reject admin-rev-button is-danger"
                       onClick={handleConfirmReject}
                       disabled={isSaving || !rejectReason.trim()}
                     >
@@ -1078,29 +1070,44 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                   {actionError}
                 </p>
               )}
+              {selectedResidencia.solicitudEliminacion && (
+                <div className="admin-rev-solicitud">
+                  <SolicitudEliminacionAcciones
+                    solicitud={selectedResidencia.solicitudEliminacion}
+                    entidad="residencia"
+                    id={selectedResidencia.id}
+                    titulo={selectedResidencia.nombre}
+                    onResuelto={async () => {
+                      closeDetails();
+                      await cargarResidencias();
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
-            {selectedResidencia.solicitudEliminacion && (
-              <SolicitudEliminacionAcciones
-                solicitud={selectedResidencia.solicitudEliminacion}
-                entidad="residencia"
-                id={selectedResidencia.id}
-                titulo={selectedResidencia.nombre}
-                onResuelto={async () => {
-                  closeDetails();
-                  await cargarResidencias();
-                }}
-              />
-            )}
 
             {/* Footer de Acciones */}
             {isSelectedPending && (
-              <footer className="admin-res-modal-footer-admin">
+              <footer className="admin-res-modal-footer-admin admin-rev-footer">
                 <div className="admin-res-footer-pending-admin">
                   <div className="admin-res-review-actions-admin">
                     <button
                       type="button"
-                      className="admin-res-action-btn-admin is-approve"
+                      className="admin-res-action-btn-admin is-reject admin-rev-button is-danger"
+                      aria-expanded={showRejectForm}
+                      onClick={() => {
+                        setShowRejectForm(true);
+                        setActionError('');
+                      }}
+                      disabled={isSaving}
+                    >
+                      <XCircle size={17} />
+                      Rechazar
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-res-action-btn-admin is-approve admin-rev-button is-primary"
                       onClick={handleApprove}
                       disabled={isSaving}
                     >
@@ -1117,19 +1124,6 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                             : 'Aprobar solicitud'}
                         </>
                       )}
-                    </button>
-                    <button
-                      type="button"
-                      className="admin-res-action-btn-admin is-reject"
-                      aria-expanded={showRejectForm}
-                      onClick={() => {
-                        setShowRejectForm(true);
-                        setActionError('');
-                      }}
-                      disabled={isSaving}
-                    >
-                      <XCircle size={17} />
-                      Rechazar
                     </button>
                   </div>
                 </div>

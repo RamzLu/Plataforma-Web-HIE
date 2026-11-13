@@ -552,7 +552,7 @@
   background: #eff6ff;
   color: #1d4ed8;
   font-size: 1.3rem;
-  font-weight: 700;
+  font-weight: 650;
 }
 
 .admin-prof-profile-summary {
@@ -703,7 +703,7 @@
   cursor: pointer;
   font: inherit;
   font-size: 0.83rem;
-  font-weight: 700;
+  font-weight: 650;
 }
 
 .admin-prof-button:disabled {
@@ -1412,4 +1412,59 @@
     padding: 17px 14px 12px;
     border-radius: 18px;
   }
+}
+
+/* ===================================================
+   Modal de revisión de profesionales: solo lo propio de la tarjeta de perfil.
+   La carcasa (encabezado, cuerpo, pie, botones...) vive en components/admin/AdminRevisionModal.css
+   =================================================== */
+.admin-prof-modal .admin-prof-profile {
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-prof-modal .admin-prof-profile-photo {
+  width: 64px;
+  height: 64px;
+  border: 0;
+  border-radius: 12px;
+}
+
+.admin-prof-modal .admin-prof-profile-summary {
+  gap: 3px;
+}
+
+.admin-prof-modal .admin-prof-role {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.admin-prof-modal .admin-prof-profile-summary h3 {
+  margin: 0;
+  color: #0b1b33;
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
+}
+
+.admin-prof-profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.admin-prof-profile-license {
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.admin-prof-profile-divider {
+  width: 1px;
+  height: 16px;
+  background: #d5dce6;
 }

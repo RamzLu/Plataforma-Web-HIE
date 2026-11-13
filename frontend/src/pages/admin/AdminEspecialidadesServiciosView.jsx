@@ -1,3 +1,4 @@
+import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
@@ -436,24 +437,24 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       </section>
 
       {selectedItem && (
-        <div className="admin-es-modal-overlay" onClick={closeDetails}>
+        <div className="admin-es-modal-overlay admin-rev-overlay" onClick={closeDetails}>
           <section
-            className="admin-es-modal"
+            className="admin-es-modal admin-rev-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-es-modal-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <header className="admin-es-modal-header">
+            <header className="admin-es-modal-header admin-rev-header">
               <div>
-                <span>
-                  {selectedItem.type} · {selectedItem.location}
-                </span>
-                <h2 id="admin-es-modal-title">{selectedItem.name}</h2>
+                <span className="admin-rev-kicker">Información pública</span>
+                <h2 id="admin-es-modal-title" className="admin-rev-title">
+                  Revisión de {selectedItem.esServicio ? 'servicio' : 'especialidad'}
+                </h2>
               </div>
               <button
                 type="button"
-                className="admin-es-close-button"
+                className="admin-es-close-button admin-rev-close"
                 aria-label="Cerrar detalle"
                 onClick={closeDetails}
               >
@@ -461,21 +462,10 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
               </button>
             </header>
 
-            <div className="admin-es-modal-body">
+            <div className="admin-es-modal-body admin-rev-body">
               {selectedItem.status === 'Pendiente de aprobación' && selectedItem.requestedEstado === 'ARCHIVADO' && (
-                <div style={{
-                  margin: '0 0 16px 0',
-                  padding: '12px 16px',
-                  borderRadius: '10px',
-                  backgroundColor: '#fffbeb',
-                  border: '1px solid #fde68a',
-                  color: '#92400e',
-                  fontSize: '0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px'
-                }}>
-                  <Archive size={18} style={{ color: '#d97706', flexShrink: 0 }} />
+                <div className="admin-rev-alert">
+                  <Archive size={18} />
                   <div>
                     <strong>Solicitud de archivado:</strong> El editor del CMS solicita archivar este contenido y retirarlo del portal público.
                   </div>
@@ -485,7 +475,11 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                 cambios={selectedItem.cambios}
                 esActualizacion={selectedItem.esActualizacion}
               />
-              <div className="admin-es-detail-grid">
+              <div className="admin-es-detail-grid admin-rev-grid">
+                <article className="admin-es-detail admin-es-detail-wide">
+                  <h3>Nombre</h3>
+                  <p>{selectedItem.name}</p>
+                </article>
                 <article className="admin-es-detail admin-es-detail-wide">
                   <h3>Descripción</h3>
                   <p>{selectedItem.description || 'Sin descripción cargada.'}</p>
@@ -514,7 +508,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                 </article>
               </div>
 
-              <div className="admin-es-review-meta">
+              <div className="admin-es-review-meta admin-rev-meta">
                 <span>
                   Enviado por <strong>{selectedItem.editor}</strong>
                 </span>
@@ -532,7 +526,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
               </div>
 
               {isRejecting && (
-                <label className="admin-es-rejection-field">
+                <label className="admin-es-rejection-field admin-rev-field">
                   <span>Motivo del rechazo (requerido)</span>
                   <textarea
                     value={rejectReason}
@@ -543,27 +537,29 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                   />
                 </label>
               )}
+              {selectedItem.solicitudEliminacion && (
+                <div className="admin-rev-solicitud">
+                  <SolicitudEliminacionAcciones
+                    solicitud={selectedItem.solicitudEliminacion}
+                    entidad={selectedItem.esServicio ? 'servicio' : 'especialidad'}
+                    id={selectedItem.id}
+                    titulo={selectedItem.name}
+                    onResuelto={async () => {
+                      closeDetails();
+                      await cargarDatos(true);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
-            {selectedItem.solicitudEliminacion && (
-              <SolicitudEliminacionAcciones
-                solicitud={selectedItem.solicitudEliminacion}
-                entidad={selectedItem.esServicio ? 'servicio' : 'especialidad'}
-                id={selectedItem.id}
-                titulo={selectedItem.name}
-                onResuelto={async () => {
-                  closeDetails();
-                  await cargarDatos(true);
-                }}
-              />
-            )}
 
-            <footer className="admin-es-modal-footer">
+            <footer className="admin-es-modal-footer admin-rev-footer">
               {selectedItem.status === 'Pendiente de aprobación' && !isRejecting && (
                 <>
                   <button
                     type="button"
-                    className="admin-es-button admin-es-button-danger"
+                    className="admin-es-button admin-es-button-danger admin-rev-button is-danger"
                     onClick={() => setIsRejecting(true)}
                     disabled={submitting}
                   >
@@ -571,7 +567,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                   </button>
                   <button
                     type="button"
-                    className="admin-es-button admin-es-button-primary"
+                    className="admin-es-button admin-es-button-primary admin-rev-button is-primary"
                     onClick={handleApprove}
                     disabled={submitting}
                   >
@@ -591,7 +587,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                 <>
                   <button
                     type="button"
-                    className="admin-es-button admin-es-button-secondary"
+                    className="admin-es-button admin-es-button-secondary admin-rev-button is-secondary"
                     onClick={() => setIsRejecting(false)}
                     disabled={submitting}
                   >
@@ -599,7 +595,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                   </button>
                   <button
                     type="button"
-                    className="admin-es-button admin-es-button-danger"
+                    className="admin-es-button admin-es-button-danger admin-rev-button is-danger"
                     onClick={handleReject}
                     disabled={submitting}
                   >
@@ -610,7 +606,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
               {selectedItem.status !== 'Pendiente de aprobación' && !isRejecting && (
                 <button
                   type="button"
-                  className="admin-es-button admin-es-button-secondary"
+                  className="admin-es-button admin-es-button-secondary admin-rev-button is-secondary"
                   onClick={closeDetails}
                 >
                   Cerrar

@@ -432,7 +432,7 @@
   border: 1px solid transparent;
   border-radius: 999px;
   font-size: 0.71rem;
-  font-weight: 700;
+  font-weight: 650;
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -574,7 +574,7 @@
   display: block;
   color: #64748b;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 650;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 2px;
@@ -718,7 +718,7 @@
 
 .admin-res-strip-value {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 650;
   color: #0c2340;
   line-height: 1.35;
   word-break: break-word;
@@ -755,7 +755,7 @@
 .admin-res-section-card-title h3 {
   margin: 0;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 650;
   color: #0c2340;
 }
 
@@ -786,7 +786,7 @@
 .admin-res-lead-callout-tag {
   display: block;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 650;
   color: #0284c7;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -810,7 +810,7 @@
 .admin-res-subheading {
   margin: 0;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 650;
   color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -881,7 +881,7 @@
 
 .admin-res-resource-box-title {
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 650;
   color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -935,7 +935,7 @@
   align-items: center;
   gap: 4px;
   font-size: 0.76rem;
-  font-weight: 700;
+  font-weight: 650;
   color: #0284c7;
   text-decoration: none;
   flex-shrink: 0;
@@ -1045,7 +1045,7 @@
 .res-file-name,
 .admin-res-doc-file-name {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 650;
   color: #0c2340;
   white-space: nowrap;
   overflow: hidden;
@@ -1239,7 +1239,7 @@
   border-radius: 10px;
   font: inherit;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 650;
   cursor: pointer;
   transition: background 150ms ease, transform 150ms ease, border-color 150ms ease;
 }
@@ -1419,4 +1419,26 @@
   .admin-res-summary-admin {
     grid-template-columns: 1fr;
   }
+}
+
+/* Tarjeta con el nombre de la residencia y sus etiquetas (la carcasa del modal es components/admin/AdminRevisionModal.css) */
+.admin-res-modal-admin .admin-res-title-card-name {
+  margin: 0;
+  color: #0b1b33;
+  font-size: 1.3rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.admin-res-modal-admin .admin-res-title-card .admin-res-title-row-admin {
+  margin-top: 10px;
+  gap: 8px;
+}
+
+/* En el ancho unificado del modal la ficha de 4 columnas queda apretada: pasa a 2. */
+.admin-res-modal-admin .admin-res-summary-strip {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
 }
