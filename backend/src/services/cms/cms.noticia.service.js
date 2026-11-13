@@ -729,7 +729,7 @@ class CmsNoticiaService {
           entidad: "noticia",
           entidadId: idStr,
           accion: nuevoEstado === "RECHAZADO" ? "RECHAZAR" : "APROBAR",
-          detalle:
+          descripcion:
             nuevoEstado === "RECHAZADO"
               ? `Noticia rechazada. Motivo: ${motivoGuardado}`
               : `Solicitud aprobada (estado resultante: ${nuevoEstado}).`,

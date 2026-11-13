@@ -4,7 +4,7 @@ import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
-import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
@@ -75,7 +75,7 @@ class CmsDocService {
       // Vista pública: documentos con estado PUBLICADO, o snapshots de documentos publicados en revisión
       const [documentosPublicos, pendingMetaMap] = await Promise.all([
         prisma.documento.findMany({
-          where: { estado: { in: ["PUBLICADO", "PENDIENTE_APROBACION"] } },
+          where: { estado: { in: ["PUBLICADO", "PENDIENTE_APROBACION", "RECHAZADO"] } },
           orderBy: { createdAt: "desc" },
           include: {
             archivo: true,
@@ -91,9 +91,10 @@ class CmsDocService {
       for (const doc of documentosPublicos) {
         if (doc.estado === "PUBLICADO") {
           lista.push(this._format(doc));
-        } else if (doc.estado === "PENDIENTE_APROBACION") {
+        } else if (doc.estado === "PENDIENTE_APROBACION" || doc.estado === "RECHAZADO") {
+          // Edición en revisión o rechazada: el portal sigue mostrando la versión publicada anterior.
           const meta = pendingMetaMap.get(doc.id.toString());
-          if (meta?.snapshotPublico) {
+          if (conservaVersionPublica(doc, meta)) {
             lista.push({
               id: doc.id.toString(),
               title: meta.snapshotPublico.titulo || doc.titulo,
@@ -264,8 +265,6 @@ class CmsDocService {
     }
 
     const estadoAnterior = (docExistente.estado || "").toUpperCase();
-    const provieneDePublicada =
-      estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
     const estadoSolicitado = estado ? estado.toUpperCase() : estadoAnterior;
 
     const editorNombre = user?.name || user?.preferred_username || "Editor CMS";
@@ -274,6 +273,11 @@ class CmsDocService {
     // Preservar snapshot si estaba publicado para no romper la visualización pública mientras se revisa
     const metaMap = await this.obtenerMapaPendingMeta();
     const metaExistente = metaMap.get(idStr) || null;
+    // También cuenta como "publicado" si fue una edición rechazada de algo que ya estaba publicado.
+    const provieneDePublicada =
+      estadoAnterior === "PUBLICADO" ||
+      estadoAnterior === "APROBADO" ||
+      conservaVersionPublica(docExistente, metaExistente);
     let snapshotPublico = metaExistente?.snapshotPublico || null;
 
     if (provieneDePublicada && !snapshotPublico) {

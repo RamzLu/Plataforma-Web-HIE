@@ -3,7 +3,7 @@ import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
-import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
@@ -190,7 +190,8 @@ class CmsProfesionalService {
               updatedAt: editorMeta?.updatedAt || prof.updatedAt,
             })
           );
-        } else if (estado === "PENDIENTE_APROBACION" && pendingMeta?.snapshotPublico) {
+        } else if (conservaVersionPublica(prof, pendingMeta)) {
+          // Edición en revisión o rechazada: el portal sigue mostrando la versión publicada anterior.
           resultado.push({
             ...pendingMeta.snapshotPublico,
             id: idStr,
@@ -418,7 +419,10 @@ class CmsProfesionalService {
 
     const existingPending = pendingMap.get(idStr) || null;
     const existingRejection = rejectionMap.get(idStr) || null;
-    const provieneDePublicado = this._estadoDe(profesionalExistente) === "PUBLICADO";
+    // También cuenta como "publicado" si fue una edición rechazada de algo que ya estaba publicado.
+    const provieneDePublicado =
+      this._estadoDe(profesionalExistente) === "PUBLICADO" ||
+      conservaVersionPublica(profesionalExistente, existingPending);
 
     let snapshotPublico = existingPending?.snapshotPublico || null;
     if (provieneDePublicado && !snapshotPublico) {
@@ -703,9 +707,14 @@ class CmsProfesionalService {
     const preservedEditor = pendingMeta?.editor || editorMeta?.editor || "Editor CMS";
 
     if (nuevoEstado === "RECHAZADO") {
+      // Si era una edición de algo ya publicado, se conserva la versión pública anterior (y sus metadatos)
+      // para que el portal siga mostrándola; solo el contenido nuevo queda inactivo.
+      const conservaPublica = conservaVersionPublica(profesionalExistente, pendingMeta);
       const profRechazado = await prisma.profesional.update({
         where: { id: idBigInt },
-        data: { activo: false, estado: "RECHAZADO", updatedAt: new Date() },
+        data: conservaPublica
+          ? { estado: "RECHAZADO", updatedAt: new Date() }
+          : { activo: false, estado: "RECHAZADO", updatedAt: new Date() },
         include: {
           especialidad: true,
           archivo: true,
@@ -714,7 +723,7 @@ class CmsProfesionalService {
       });
 
       await this.guardarMotivoRechazo(idStr, rejectionReason);
-      await this.limpiarPendingMeta(idStr);
+      if (!conservaPublica) await this.limpiarPendingMeta(idStr);
 
       try {
         if (user) {

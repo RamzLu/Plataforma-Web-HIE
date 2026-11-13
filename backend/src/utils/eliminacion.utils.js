@@ -17,6 +17,20 @@ export const ENTIDADES_ELIMINABLES = ["noticia", "documento", "profesional", "es
 const claveDe = (entidad, id) => `${PREFIJO}${entidad}_${id}`;
 
 /**
+ * true si el registro es una edición en revisión (pendiente) o rechazada de algo que ya estaba publicado
+ * y todavía tiene guardada la versión pública anterior. En ese caso el portal sigue mostrando la versión
+ * publicada hasta que el administrador apruebe el cambio.
+ */
+export const conservaVersionPublica = (registro, pendingMeta = null) => {
+  const estado = String(registro?.estado || "").toUpperCase();
+  return (
+    (estado === "PENDIENTE_APROBACION" || estado === "RECHAZADO") &&
+    ["PUBLICADO", "APROBADO"].includes(pendingMeta?.previousEstado) &&
+    Boolean(pendingMeta?.snapshotPublico)
+  );
+};
+
+/**
  * true si el contenido está (o va a estar) visible en el portal: publicado, aprobado, programado,
  * o con una edición pendiente sobre una versión pública.
  */
@@ -25,7 +39,7 @@ export const tieneVersionPublica = (registro, pendingMeta = null) => {
   const pendienteConVersionPublica =
     estado === "PENDIENTE_APROBACION" &&
     (registro?.activo === true || ["PUBLICADO", "APROBADO"].includes(pendingMeta?.previousEstado));
-  return ESTADOS_VISIBLES.includes(estado) || pendienteConVersionPublica;
+  return ESTADOS_VISIBLES.includes(estado) || pendienteConVersionPublica || conservaVersionPublica(registro, pendingMeta);
 };
 
 const registrarAuditoria = async (user, entidad, id, accion, descripcion) => {

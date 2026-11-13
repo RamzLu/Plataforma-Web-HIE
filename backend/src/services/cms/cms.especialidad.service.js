@@ -1,7 +1,7 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
-import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
@@ -145,13 +145,16 @@ class CmsEspecialidadService {
 
     const estadoAnterior = (existente.estado || "").toUpperCase();
     const estadoSolicitado = data.estado ? data.estado.toUpperCase() : estadoAnterior;
-    const provieneDePublicada =
-      estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
 
     const editorNombre = await this._resolverNombreEditor(user, data.editor || data.editorNombre);
 
     const metaMap = await this.obtenerMapaPendingMeta();
     const metaExistente = metaMap.get(this._metaKey(idStr, esServicio)) || null;
+    // También cuenta como "publicada" si fue una edición rechazada de algo que ya estaba publicado.
+    const provieneDePublicada =
+      estadoAnterior === "PUBLICADO" ||
+      estadoAnterior === "APROBADO" ||
+      conservaVersionPublica(existente, metaExistente);
 
     let snapshotPublico = metaExistente?.snapshotPublico || null;
     if (provieneDePublicada && !snapshotPublico) {
@@ -430,10 +433,10 @@ class CmsEspecialidadService {
 
     const [especialidades, servicios, motivosMap, pendingMetaMap, editorMetaMap, auditorias] = await Promise.all([
       prisma.especialidad.findMany({
-        where: esConsultaInterna ? {} : { estado: { in: ["PUBLICADO", "APROBADO", "PENDIENTE_APROBACION"] } },
+        where: esConsultaInterna ? {} : { estado: { in: ["PUBLICADO", "APROBADO", "PENDIENTE_APROBACION", "RECHAZADO"] } },
       }),
       prisma.servicio.findMany({
-        where: esConsultaInterna ? {} : { estado: { in: ["PUBLICADO", "APROBADO", "PENDIENTE_APROBACION"] } },
+        where: esConsultaInterna ? {} : { estado: { in: ["PUBLICADO", "APROBADO", "PENDIENTE_APROBACION", "RECHAZADO"] } },
       }),
       this.obtenerMapaMotivosRechazo(),
       this.obtenerMapaPendingMeta(),
@@ -493,10 +496,7 @@ class CmsEspecialidadService {
 
       if (!esConsultaInterna) {
         const esPublicadaDirecta = estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO";
-        const mantienePublicacionPrevia =
-          estadoUpper === "PENDIENTE_APROBACION" &&
-          pendingMeta?.previousEstado === "PUBLICADO" &&
-          Boolean(pendingMeta?.snapshotPublico);
+        const mantienePublicacionPrevia = conservaVersionPublica(item, pendingMeta);
 
         if (!esPublicadaDirecta && !mantienePublicacionPrevia) {
           return;

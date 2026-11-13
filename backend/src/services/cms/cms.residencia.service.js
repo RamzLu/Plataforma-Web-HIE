@@ -1,6 +1,6 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
-import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
@@ -61,7 +61,7 @@ class CmsResidenciaService {
   async obtenerResidencias(esVistaAdmin = false) {
     const [residencias, motivosMap, pendingMetaMap, editorMetaMap, auditorias] = await Promise.all([
       prisma.residencia.findMany({
-        where: esVistaAdmin === true ? {} : { estado: { in: ["PUBLICADO", "PENDIENTE_APROBACION"] } },
+        where: esVistaAdmin === true ? {} : { estado: { in: ["PUBLICADO", "PENDIENTE_APROBACION", "RECHAZADO"] } },
         orderBy: { createdAt: "desc" },
         include: {
           archivo: true,
@@ -118,10 +118,7 @@ class CmsResidenciaService {
 
       if (!esVistaAdmin) {
         const esPublicadaDirecta = (estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO") && res.activo !== false;
-        const mantienePublicacionPrevia =
-          estadoUpper === "PENDIENTE_APROBACION" &&
-          pendingMeta?.previousEstado === "PUBLICADO" &&
-          Boolean(pendingMeta?.snapshotPublico);
+        const mantienePublicacionPrevia = conservaVersionPublica(res, pendingMeta);
 
         if (!esPublicadaDirecta && !mantienePublicacionPrevia) {
           continue;
@@ -529,10 +526,14 @@ class CmsResidenciaService {
     }
 
     const estadoAnterior = (residenciaExistente.estado || "").toUpperCase();
-    const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
 
     const pendingMap = await this.obtenerMapaPendingMeta();
     const metaExistente = pendingMap.get(idStr) || null;
+    // También cuenta como "publicada" si fue una edición rechazada de algo que ya estaba publicado.
+    const provieneDePublicada =
+      estadoAnterior === "PUBLICADO" ||
+      estadoAnterior === "APROBADO" ||
+      conservaVersionPublica(residenciaExistente, metaExistente);
 
     let estadoNormalizado = residenciaExistente.estado;
     let activoFinal = data.activo !== undefined ? (data.activo === true || data.activo === "true") : residenciaExistente.activo;
@@ -828,7 +829,11 @@ class CmsResidenciaService {
       finalEstado = "RECHAZADO";
       motivoGuardado = (rejectionReason || "").trim() || "Solicitud rechazada por el administrador.";
       await this.guardarMotivoRechazo(idStr, motivoGuardado);
-      await this.limpiarPendingMeta(idStr);
+      // Si era una edición de algo ya publicado, se conservan los metadatos (y la versión pública anterior)
+      // para que el portal siga mostrándola. Si no, no hay nada que conservar.
+      if (!conservaVersionPublica({ estado: "RECHAZADO" }, metaExistente)) {
+        await this.limpiarPendingMeta(idStr);
+      }
     }
     // 4. Si se archiva un borrador directamente:
     else if (estadoUpper === "ARCHIVADO") {
