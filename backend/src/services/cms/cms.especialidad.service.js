@@ -537,11 +537,14 @@ class CmsEspecialidadService {
       this.obtenerMapaMotivosRechazo(),
       this.obtenerMapaPendingMeta(),
       this.obtenerMapaEditorMeta(),
-      prisma.auditoria.findMany({
-        where: { entidad: { in: ["especialidad", "servicio"] } },
-        include: { usuario: true },
-        orderBy: { fechaHora: "desc" },
-      }).catch(() => []),
+      // La auditoría (con datos de usuarios) solo se consulta para la vista interna del CMS/Admin.
+      esConsultaInterna
+        ? prisma.auditoria.findMany({
+            where: { entidad: { in: ["especialidad", "servicio"] } },
+            include: { usuario: true },
+            orderBy: { fechaHora: "desc" },
+          }).catch(() => [])
+        : Promise.resolve([]),
     ]);
 
     const auditMap = new Map();
@@ -552,14 +555,6 @@ class CmsEspecialidadService {
         auditMap.set(key, aud);
       }
     }
-
-    let usuarioPorDefecto = null;
-    try {
-      usuarioPorDefecto = await prisma.usuario.findFirst({
-        where: { activo: true },
-        orderBy: { updatedAt: "desc" },
-      });
-    } catch (_) {}
 
     const resultado = [];
 
@@ -590,10 +585,8 @@ class CmsEspecialidadService {
       } else if (editorMeta?.editor) {
         resolvedEditor = editorMeta.editor;
         resolvedUpdatedAt = editorMeta.updatedAt || null;
-      } else if (usuarioPorDefecto) {
-        const u = usuarioPorDefecto;
-        resolvedEditor = u.apellido && u.apellido !== "Sistema" ? `${u.nombre} ${u.apellido}`.trim() : u.nombre.trim();
       } else {
+        // Sin registro de quién lo editó: no se le atribuye a ningún usuario en particular.
         resolvedEditor = "Editor CMS";
       }
 
@@ -629,7 +622,13 @@ class CmsEspecialidadService {
       procesar(srv, true);
     }
 
-    return resultado.sort((a, b) => a.nombre.localeCompare(b.nombre));
+    resultado.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+    // El portal público no necesita saber quién editó cada registro: no se envían nombres del equipo.
+    if (!esConsultaInterna) {
+      return resultado.map(({ editor, ...publico }) => publico);
+    }
+    return resultado;
   }
 
   async eliminarEspecialidad(id, isServicio) {
