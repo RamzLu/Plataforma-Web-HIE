@@ -78,7 +78,7 @@ model configuracion {
   valor       String
   descripcion String?  @db.VarChar(255)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime @updatedAt
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -104,7 +104,7 @@ model documento {
   updatedBy                            String?             @db.Uuid
   estado                               EstadoEditorial
   createdAt                            DateTime            @default(now())
-  updatedAt                            DateTime
+  updatedAt                            DateTime @updatedAt
   archivo                              archivo             @relation(fields: [archivoId], references: [id])
   categoria_documento                  categoria_documento @relation(fields: [categoriaId], references: [id])
   usuario_documento_createdByTousuario usuario             @relation("documento_createdByTousuario", fields: [createdBy], references: [id])
@@ -141,7 +141,7 @@ model informacion_institucional {
   provincia              String                   @db.VarChar(100)
   codigoPostal           String?                  @db.VarChar(20)
   createdAt              DateTime                 @default(now())
-  updatedAt              DateTime
+  updatedAt              DateTime @updatedAt
   contacto_institucional contacto_institucional[]
 }
 
@@ -156,7 +156,7 @@ model noticia {
   estado                             EstadoEditorial
   fechaPublicacion                   DateTime?
   createdAt                          DateTime          @default(now())
-  updatedAt                          DateTime
+  updatedAt                          DateTime @updatedAt
   categoria_noticia                  categoria_noticia @relation(fields: [categoriaId], references: [id])
   usuario_noticia_createdByTousuario usuario           @relation("noticia_createdByTousuario", fields: [createdBy], references: [id])
   usuario_noticia_updatedByTousuario usuario?          @relation("noticia_updatedByTousuario", fields: [updatedBy], references: [id])
@@ -192,7 +192,7 @@ model profesional {
   /// Estado editorial. Por defecto queda pendiente de aprobación: nada se publica sin revisión del admin.
   estado           EstadoEditorial    @default(PENDIENTE_APROBACION)
   createdAt        DateTime           @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime @updatedAt
   archivo          archivo?           @relation(fields: [archivoId], references: [id])
   especialidad     especialidad       @relation(fields: [especialidadId], references: [id])
   profesional_area profesional_area[]
@@ -223,7 +223,7 @@ model publicacion_academica {
   createdBy                                        String                   @db.Uuid
   updatedBy                                        String?                  @db.Uuid
   createdAt                                        DateTime                 @default(now())
-  updatedAt                                        DateTime
+  updatedAt                                        DateTime @updatedAt
   usuario_publicacion_academica_createdByTousuario usuario                  @relation("publicacion_academica_createdByTousuario", fields: [createdBy], references: [id])
   usuario_publicacion_academica_updatedByTousuario usuario?                 @relation("publicacion_academica_updatedByTousuario", fields: [updatedBy], references: [id])
   publicacion_archivo                              publicacion_archivo[]
@@ -276,7 +276,7 @@ model usuario {
   rolId                                                          BigInt
   activo                                                         Boolean                 @default(true)
   createdAt                                                      DateTime                @default(now())
-  updatedAt                                                      DateTime
+  updatedAt                                                      DateTime @updatedAt
   auditoria                                                      auditoria[]
   documento_documento_createdByTousuario                         documento[]             @relation("documento_createdByTousuario")
   documento_documento_updatedByTousuario                         documento[]             @relation("documento_updatedByTousuario")
@@ -312,7 +312,7 @@ model capacitacion {
   estado      EstadoEditorial
   activo      Boolean         @default(true)
   createdAt   DateTime        @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime @updatedAt
   archivo     archivo?        @relation(fields: [imagenId], references: [id])
 
   @@index([activo])
@@ -332,7 +332,7 @@ model contenido_grafico {
   tipoId                      BigInt
   ubicacionId                 BigInt
   createdAt                   DateTime                    @default(now())
-  updatedAt                   DateTime
+  updatedAt                   DateTime @updatedAt
   estado                      EstadoEditorial
   createdBy                   String                      @db.Uuid
   updatedBy                   String?                     @db.Uuid
@@ -364,7 +364,7 @@ model residencia {
   estado               EstadoEditorial
   activo               Boolean                @default(true)
   createdAt            DateTime               @default(now())
-  updatedAt            DateTime
+  updatedAt            DateTime @updatedAt
   archivo              archivo?               @relation(fields: [imagenId], references: [id])
   residencia_historial residencia_historial[]
 
@@ -382,7 +382,7 @@ model residencia_historial {
   orden        Int        @default(0)
   activo       Boolean    @default(true)
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime @updatedAt
   archivo      archivo?   @relation(fields: [imagenId], references: [id])
   residencia   residencia @relation(fields: [residenciaId], references: [id], onDelete: Cascade)
 

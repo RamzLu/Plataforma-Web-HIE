@@ -873,13 +873,14 @@ class CmsNoticiaService {
   // Lo ejecuta el cron de server.js cada minuto. Los errores se propagan para que el cron los informe.
   async publicarNoticiasProgramadas() {
     const limite = limitePublicacionProgramada();
-    await prisma.noticia.updateMany({
-      where: {
-        estado: "PROGRAMADO",
-        fechaPublicacion: { lte: limite },
-      },
-      data: { estado: "PUBLICADO" },
-    });
+    // SQL directo a propósito: con @updatedAt, un updateMany de Prisma cambiaría también "updatedAt"
+    // y las noticias programadas aparecerían como "Editado" al publicarse solas.
+    await prisma.$executeRaw`
+      UPDATE "noticia"
+      SET "estado" = 'PUBLICADO'::"EstadoEditorial"
+      WHERE "estado" = 'PROGRAMADO'::"EstadoEditorial"
+        AND "fechaPublicacion" <= ${limite}
+    `;
   }
 }
 
