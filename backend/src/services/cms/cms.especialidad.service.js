@@ -1,3 +1,4 @@
+import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
@@ -8,134 +9,23 @@ import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../util
 const REJECTION_KEY_PREFIX = "especialidad_rejection_";
 const PENDING_META_KEY_PREFIX = "especialidad_pending_meta_";
 const EDITOR_META_KEY_PREFIX = "especialidad_editor_meta_";
+const metaEditorial = crearMetaEditorial({ entidad: "especialidad o servicio", rechazo: REJECTION_KEY_PREFIX, pendiente: PENDING_META_KEY_PREFIX, editor: EDITOR_META_KEY_PREFIX });
 
 class CmsEspecialidadService {
   _metaKey(id, esServicio) {
     return `${esServicio ? "srv" : "esp"}_${id}`;
   }
 
-  async obtenerMapaMotivosRechazo() {
-    try {
-      const configs = await prisma.configuracion.findMany({
-        where: { clave: { startsWith: REJECTION_KEY_PREFIX } },
-      });
-      const map = new Map();
-      for (const item of configs) {
-        const itemKey = item.clave.replace(REJECTION_KEY_PREFIX, "");
-        map.set(itemKey, item.valor);
-      }
-      return map;
-    } catch (_) {
-      return new Map();
-    }
-  }
-
-  async guardarMotivoRechazo(id, esServicio, motivo) {
-    const key = this._metaKey(id, esServicio);
-    const clave = `${REJECTION_KEY_PREFIX}${key}`;
-    await prisma.configuracion.upsert({
-      where: { clave },
-      update: { valor: motivo, updatedAt: new Date() },
-      create: {
-        clave,
-        valor: motivo,
-        descripcion: `Motivo de rechazo de ${esServicio ? "servicio" : "especialidad"} ID ${id}`,
-        updatedAt: new Date(),
-      },
-    });
-  }
-
-  async limpiarMotivoRechazo(id, esServicio) {
-    const key = this._metaKey(id, esServicio);
-    const clave = `${REJECTION_KEY_PREFIX}${key}`;
-    await prisma.configuracion.deleteMany({ where: { clave } });
-  }
-
-  async obtenerMapaPendingMeta() {
-    try {
-      const configs = await prisma.configuracion.findMany({
-        where: { clave: { startsWith: PENDING_META_KEY_PREFIX } },
-      });
-      const map = new Map();
-      for (const item of configs) {
-        const itemKey = item.clave.replace(PENDING_META_KEY_PREFIX, "");
-        try {
-          map.set(itemKey, JSON.parse(item.valor));
-        } catch {
-          // JSON inválido: se ignora y se usa el valor por defecto.
-        }
-      }
-      return map;
-    } catch (_) {
-      return new Map();
-    }
-  }
-
-  async guardarPendingMeta(id, esServicio, meta) {
-    const key = this._metaKey(id, esServicio);
-    const clave = `${PENDING_META_KEY_PREFIX}${key}`;
-    await prisma.configuracion.upsert({
-      where: { clave },
-      update: { valor: JSON.stringify(meta), updatedAt: new Date() },
-      create: {
-        clave,
-        valor: JSON.stringify(meta),
-        descripcion: `Metadatos de solicitud pendiente para ${esServicio ? "servicio" : "especialidad"} ID ${id}`,
-        updatedAt: new Date(),
-      },
-    });
-  }
-
-  async limpiarPendingMeta(id, esServicio) {
-    const key = this._metaKey(id, esServicio);
-    const clave = `${PENDING_META_KEY_PREFIX}${key}`;
-    await prisma.configuracion.deleteMany({ where: { clave } });
-  }
-
-  async obtenerMapaEditorMeta() {
-    try {
-      const configs = await prisma.configuracion.findMany({
-        where: { clave: { startsWith: EDITOR_META_KEY_PREFIX } },
-      });
-      const map = new Map();
-      for (const item of configs) {
-        const itemKey = item.clave.replace(EDITOR_META_KEY_PREFIX, "");
-        try {
-          map.set(itemKey, JSON.parse(item.valor));
-        } catch (_) {
-          map.set(itemKey, { editor: item.valor, updatedAt: item.updatedAt });
-        }
-      }
-      return map;
-    } catch (_) {
-      return new Map();
-    }
-  }
-
-  async guardarEditorMeta(id, esServicio, meta) {
-    const key = this._metaKey(id, esServicio);
-    const clave = `${EDITOR_META_KEY_PREFIX}${key}`;
-    const valor =
-      typeof meta === "string"
-        ? JSON.stringify({ editor: meta, updatedAt: new Date().toISOString() })
-        : JSON.stringify(meta);
-    await prisma.configuracion.upsert({
-      where: { clave },
-      update: { valor, updatedAt: new Date() },
-      create: {
-        clave,
-        valor,
-        descripcion: `Editor responsable de ${esServicio ? "servicio" : "especialidad"} ID ${id}`,
-        updatedAt: new Date(),
-      },
-    });
-  }
-
-  async limpiarEditorMeta(id, esServicio) {
-    const key = this._metaKey(id, esServicio);
-    const clave = `${EDITOR_META_KEY_PREFIX}${key}`;
-    await prisma.configuracion.deleteMany({ where: { clave } });
-  }
+  // Metadatos editoriales (motivo de rechazo, cambios pendientes, editor): ver utils/metaEditorial.utils.js
+  obtenerMapaMotivosRechazo() { return metaEditorial.obtenerMapaMotivosRechazo(); }
+  guardarMotivoRechazo(id, esServicio, motivo) { return metaEditorial.guardarMotivoRechazo(this._metaKey(id, esServicio), motivo); }
+  limpiarMotivoRechazo(id, esServicio) { return metaEditorial.limpiarMotivoRechazo(this._metaKey(id, esServicio)); }
+  obtenerMapaPendingMeta() { return metaEditorial.obtenerMapaPendingMeta(); }
+  guardarPendingMeta(id, esServicio, meta) { return metaEditorial.guardarPendingMeta(this._metaKey(id, esServicio), meta); }
+  limpiarPendingMeta(id, esServicio) { return metaEditorial.limpiarPendingMeta(this._metaKey(id, esServicio)); }
+  obtenerMapaEditorMeta() { return metaEditorial.obtenerMapaEditorMeta(); }
+  guardarEditorMeta(id, esServicio, meta) { return metaEditorial.guardarEditorMeta(this._metaKey(id, esServicio), meta); }
+  limpiarEditorMeta(id, esServicio) { return metaEditorial.limpiarEditorMeta(this._metaKey(id, esServicio)); }
 
   async _resolverNombreEditor(user, payloadEditor = null) {
     if (

@@ -1,3 +1,4 @@
+import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
 import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
@@ -10,6 +11,7 @@ const DOCS_BUCKET = "capacitaciones-documentos";
 const MEDIA_BUCKET = "capacitaciones-imagenes-videos";
 const CAPACITACION_PENDING_META_PREFIX = "capacitacion_pending_meta_";
 const CAPACITACION_REJECTION_KEY_PREFIX = "capacitacion_rejection_reason_";
+const metaEditorial = crearMetaEditorial({ entidad: "capacitación", rechazo: CAPACITACION_REJECTION_KEY_PREFIX, pendiente: CAPACITACION_PENDING_META_PREFIX });
 
 const normalizarUrlOpcional = (rawUrl, nombreCampo) => {
   if (rawUrl === null || rawUrl === undefined) return "";
@@ -148,6 +150,14 @@ const INITIAL_SEED_CAPACITACIONES = [
 ];
 
 class CmsCapacitacionService {
+  // Metadatos editoriales (motivo de rechazo, cambios pendientes, editor): ver utils/metaEditorial.utils.js
+  obtenerMapaMotivosRechazo() { return metaEditorial.obtenerMapaMotivosRechazo(); }
+  guardarMotivoRechazo(id, motivo) { return metaEditorial.guardarMotivoRechazo(id, motivo); }
+  limpiarMotivoRechazo(id) { return metaEditorial.limpiarMotivoRechazo(id); }
+  obtenerMapaPendingMeta() { return metaEditorial.obtenerMapaPendingMeta(); }
+  guardarPendingMeta(id, meta) { return metaEditorial.guardarPendingMeta(id, meta); }
+  limpiarPendingMeta(id) { return metaEditorial.limpiarPendingMeta(id); }
+
   async _asegurarDatosIniciales() {
     try {
       const count = await prisma.capacitacion.count();
@@ -188,80 +198,6 @@ class CmsCapacitacionService {
     } catch (error) {
       console.warn("Aviso en auto-seed de capacitaciones:", error.message);
     }
-  }
-
-  async obtenerMapaMotivosRechazo() {
-    try {
-      const configs = await prisma.configuracion.findMany({
-        where: { clave: { startsWith: CAPACITACION_REJECTION_KEY_PREFIX } },
-      });
-      const map = new Map();
-      for (const item of configs) {
-        const itemKey = item.clave.replace(CAPACITACION_REJECTION_KEY_PREFIX, "");
-        map.set(itemKey, item.valor);
-      }
-      return map;
-    } catch (_) {
-      return new Map();
-    }
-  }
-
-  async guardarMotivoRechazo(id, motivo) {
-    const clave = `${CAPACITACION_REJECTION_KEY_PREFIX}${id}`;
-    await prisma.configuracion.upsert({
-      where: { clave },
-      update: { valor: motivo, updatedAt: new Date() },
-      create: {
-        clave,
-        valor: motivo,
-        descripcion: `Motivo de rechazo de capacitación ID ${id}`,
-        updatedAt: new Date(),
-      },
-    });
-  }
-
-  async limpiarMotivoRechazo(id) {
-    const clave = `${CAPACITACION_REJECTION_KEY_PREFIX}${id}`;
-    await prisma.configuracion.deleteMany({ where: { clave } });
-  }
-
-  async obtenerMapaPendingMeta() {
-    try {
-      const configs = await prisma.configuracion.findMany({
-        where: { clave: { startsWith: CAPACITACION_PENDING_META_PREFIX } },
-      });
-      const map = new Map();
-      for (const item of configs) {
-        const itemKey = item.clave.replace(CAPACITACION_PENDING_META_PREFIX, "");
-        try {
-          map.set(itemKey, JSON.parse(item.valor));
-        } catch {
-          // JSON inválido: se ignora y se usa el valor por defecto.
-        }
-      }
-      return map;
-    } catch (_) {
-      return new Map();
-    }
-  }
-
-  async guardarPendingMeta(id, meta) {
-    const clave = `${CAPACITACION_PENDING_META_PREFIX}${id}`;
-    await prisma.configuracion.upsert({
-      where: { clave },
-      update: { valor: JSON.stringify(meta), updatedAt: new Date() },
-      create: {
-        clave,
-        valor: JSON.stringify(meta),
-        descripcion: `Metadatos de solicitud pendiente para capacitación ID ${id}`,
-        updatedAt: new Date(),
-      },
-    });
-  }
-
-  async limpiarPendingMeta(id) {
-    const clave = `${CAPACITACION_PENDING_META_PREFIX}${id}`;
-    await prisma.configuracion.deleteMany({ where: { clave } });
   }
 
   async obtenerCapacitaciones() {

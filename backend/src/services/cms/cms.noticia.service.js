@@ -1,3 +1,4 @@
+import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { asegurarQueSePuedeEliminar } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
@@ -9,114 +10,18 @@ import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 
 const REJECTION_KEY_PREFIX = "noticia_rejection_";
 const PENDING_META_KEY_PREFIX = "noticia_pending_meta_";
+const metaEditorial = crearMetaEditorial({ entidad: "noticia", rechazo: REJECTION_KEY_PREFIX, pendiente: PENDING_META_KEY_PREFIX });
 
 class CmsNoticiaService {
-  async obtenerMapaMotivosRechazo() {
-    try {
-      const configs = await prisma.configuracion.findMany({
-        where: {
-          clave: { startsWith: REJECTION_KEY_PREFIX },
-        },
-      });
-      const map = new Map();
-      for (const item of configs) {
-        const noticiaId = item.clave.replace(REJECTION_KEY_PREFIX, "");
-        map.set(noticiaId, item.valor);
-      }
-      return map;
-    } catch (err) {
-      return new Map();
-    }
-  }
-
-  async obtenerMotivoRechazo(noticiaId) {
-    try {
-      const clave = `${REJECTION_KEY_PREFIX}${noticiaId}`;
-      const config = await prisma.configuracion.findUnique({
-        where: { clave },
-      });
-      return config ? config.valor : null;
-    } catch (err) {
-      return null;
-    }
-  }
-
-  async guardarMotivoRechazo(noticiaId, motivo) {
-    const clave = `${REJECTION_KEY_PREFIX}${noticiaId}`;
-    await prisma.configuracion.upsert({
-      where: { clave },
-      update: { valor: motivo, updatedAt: new Date() },
-      create: {
-        clave,
-        valor: motivo,
-        descripcion: `Motivo de rechazo de la noticia ID ${noticiaId}`,
-        updatedAt: new Date(),
-      },
-    });
-  }
-
-  async limpiarMotivoRechazo(noticiaId) {
-    const clave = `${REJECTION_KEY_PREFIX}${noticiaId}`;
-    await prisma.configuracion.deleteMany({
-      where: { clave },
-    });
-  }
-
-  async obtenerMapaPendingMeta() {
-    try {
-      const configs = await prisma.configuracion.findMany({
-        where: {
-          clave: { startsWith: PENDING_META_KEY_PREFIX },
-        },
-      });
-      const map = new Map();
-      for (const item of configs) {
-        const noticiaId = item.clave.replace(PENDING_META_KEY_PREFIX, "");
-        try {
-          map.set(noticiaId, JSON.parse(item.valor));
-        } catch (_) {
-          // Ignorar JSON malformado
-        }
-      }
-      return map;
-    } catch (_) {
-      return new Map();
-    }
-  }
-
-  async obtenerPendingMeta(noticiaId) {
-    try {
-      const clave = `${PENDING_META_KEY_PREFIX}${noticiaId}`;
-      const config = await prisma.configuracion.findUnique({
-        where: { clave },
-      });
-      return config ? JSON.parse(config.valor) : null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  async guardarPendingMeta(noticiaId, meta) {
-    const clave = `${PENDING_META_KEY_PREFIX}${noticiaId}`;
-    const valor = JSON.stringify(meta);
-    await prisma.configuracion.upsert({
-      where: { clave },
-      update: { valor, updatedAt: new Date() },
-      create: {
-        clave,
-        valor,
-        descripcion: `Metadatos de solicitud pendiente para noticia ID ${noticiaId}`,
-        updatedAt: new Date(),
-      },
-    });
-  }
-
-  async limpiarPendingMeta(noticiaId) {
-    const clave = `${PENDING_META_KEY_PREFIX}${noticiaId}`;
-    await prisma.configuracion.deleteMany({
-      where: { clave },
-    });
-  }
+  // Metadatos editoriales (motivo de rechazo, cambios pendientes, editor): ver utils/metaEditorial.utils.js
+  obtenerMapaMotivosRechazo() { return metaEditorial.obtenerMapaMotivosRechazo(); }
+  obtenerMotivoRechazo(id) { return metaEditorial.obtenerMotivoRechazo(id); }
+  guardarMotivoRechazo(id, motivo) { return metaEditorial.guardarMotivoRechazo(id, motivo); }
+  limpiarMotivoRechazo(id) { return metaEditorial.limpiarMotivoRechazo(id); }
+  obtenerMapaPendingMeta() { return metaEditorial.obtenerMapaPendingMeta(); }
+  obtenerPendingMeta(id) { return metaEditorial.obtenerPendingMeta(id); }
+  guardarPendingMeta(id, meta) { return metaEditorial.guardarPendingMeta(id, meta); }
+  limpiarPendingMeta(id) { return metaEditorial.limpiarPendingMeta(id); }
 
   async crearNoticia(data, archivosSubidos, user) {
     const { titulo, estado, fechaPublicacion, categoriaNombre } = data;
