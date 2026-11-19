@@ -275,3 +275,25 @@
   transform: scale(1.08);
 }
 
+.cap-btn-primary,
+.cap-btn-draft,
+.cap-btn-cancelar {
+  border-radius: 10px;
+}
+
+@media (max-width: 640px) {
+  .cap-modal-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    padding: 16px 20px;
+    gap: 10px;
+  }
+
+  .cap-btn-primary,
+  .cap-btn-draft,
+  .cap-btn-cancelar {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

@@ -364,3 +364,23 @@ input:checked + .esp-slider:before {
   justify-content: center;
   align-items: center;
 }
+
+@media (max-width: 680px) {
+  .esp-form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .esp-full-width {
+    grid-column: span 1;
+  }
+
+  .esp-modal-body {
+    padding: 20px;
+  }
+
+  .esp-toggles-container {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+}

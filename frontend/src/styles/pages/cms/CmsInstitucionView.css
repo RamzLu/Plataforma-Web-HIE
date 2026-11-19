@@ -819,4 +819,36 @@
   .inst-sede-card-display .sede-img-box {
     height: 200px;
   }
+  .inst-add-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.btn-inst-primary,
+.btn-inst-save,
+.btn-inst-cancel {
+  border-radius: 12px;
+}
+
+@media (max-width: 680px) {
+  .inst-card {
+    padding: 18px 16px;
+  }
+  .inst-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .inst-btn-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .btn-inst-primary,
+  .btn-inst-save,
+  .btn-inst-cancel {
+    flex: 1;
+    justify-content: center;
+  }
+  .inst-add-form-grid {
+    grid-template-columns: 1fr;
+  }
 }

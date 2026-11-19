@@ -326,4 +326,33 @@
   height: 20px;
 }
 
+/* =========================================================
+   ARMONIZACIÓN CON PANEL ADMIN Y RESPONSIVIDAD
+   ========================================================= */
+.res-tab-btn-unificado {
+  border-radius: 10px;
+  padding: 8px 15px;
+}
+
+.res-search-input-field,
+.res-select-field {
+  border-radius: 10px;
+}
+
+@media (max-width: 680px) {
+  .res-search-wrapper {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .res-select-field {
+    width: 100%;
+  }
+
+  .res-tab-btn-unificado {
+    font-size: 0.82rem;
+    padding: 7px 12px;
+  }
+}
+
 

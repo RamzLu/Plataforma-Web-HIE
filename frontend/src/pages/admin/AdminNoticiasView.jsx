@@ -125,12 +125,12 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 fechaPublicacion: noticia.fechaPublicacion || null,
                 scheduledDate: noticia.fechaPublicacion
                   ? new Date(noticia.fechaPublicacion).toLocaleString('es-AR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }) + ' hs'
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }) + ' hs'
                   : null,
                 createdAt: noticia.createdAt,
                 updatedAt: noticia.updatedAt,
@@ -212,7 +212,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     try {
       setSubmitting(true);
       if (keycloak.authenticated) {
-        await keycloak.updateToken(30).catch(() => {});
+        await keycloak.updateToken(30).catch(() => { });
       }
 
       const response = await evaluarNoticiaEstado(
@@ -238,21 +238,21 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         estadoFinal === 'PUBLICADO'
           ? 'Publicado'
           : estadoFinal === 'PROGRAMADO'
-          ? 'Programado'
-          : 'Aprobado';
+            ? 'Programado'
+            : 'Aprobado';
 
       const updatedList = noticias.map((item) =>
         item.id === selectedNews.id
           ? {
-              ...item,
-              estado: estadoFinal,
-              status: nuevoStatusLabel,
-              requestedEstado: null,
-              rejectionReason: null,
-              fechaPublicacion:
-                response?.noticia?.fechaPublicacion ?? item.fechaPublicacion,
-              updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
-            }
+            ...item,
+            estado: estadoFinal,
+            status: nuevoStatusLabel,
+            requestedEstado: null,
+            rejectionReason: null,
+            fechaPublicacion:
+              response?.noticia?.fechaPublicacion ?? item.fechaPublicacion,
+            updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
+          }
           : item
       );
 
@@ -295,7 +295,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     try {
       setSubmitting(true);
       if (keycloak.authenticated) {
-        await keycloak.updateToken(30).catch(() => {});
+        await keycloak.updateToken(30).catch(() => { });
       }
 
       const motivoLimpio = rejectReason.trim();
@@ -311,12 +311,12 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       const updatedList = noticias.map((item) =>
         item.id === selectedNews.id
           ? {
-              ...item,
-              estado: 'RECHAZADO',
-              status: 'Rechazado',
-              rejectionReason: motivoLimpio,
-              updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
-            }
+            ...item,
+            estado: 'RECHAZADO',
+            status: 'Rechazado',
+            rejectionReason: motivoLimpio,
+            updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
+          }
           : item
       );
 
@@ -474,7 +474,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           </div>
 
           <div className="data-table-body-admin">
-{loading ? (
+            {loading ? (
               <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
                 Cargando solicitudes de noticias...
               </div>
@@ -483,12 +483,12 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 {statusFilter === 'PENDIENTE'
                   ? 'No hay noticias pendientes de aprobación en este momento.'
                   : statusFilter === 'APROBADO'
-                  ? 'No hay noticias aprobadas registradas.'
-                  : statusFilter === 'PUBLICADO'
-                  ? 'No hay noticias publicadas registradas.'
-                  : statusFilter === 'RECHAZADO'
-                  ? 'No hay noticias rechazadas registradas.'
-                  : 'No hay noticias registradas.'}
+                    ? 'No hay noticias aprobadas registradas.'
+                    : statusFilter === 'PUBLICADO'
+                      ? 'No hay noticias publicadas registradas.'
+                      : statusFilter === 'RECHAZADO'
+                        ? 'No hay noticias rechazadas registradas.'
+                        : 'No hay noticias registradas.'}
               </div>
             ) : (
               paginacion.itemsPagina.map((item) => {
@@ -496,11 +496,11 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                   item.updatedAt &&
                   item.createdAt &&
                   new Date(item.updatedAt).getTime() >
-                    new Date(item.createdAt).getTime() + 5000;
+                  new Date(item.createdAt).getTime() + 5000;
 
                 return (
                   <div className="activity-row-admin" key={item.id}>
-                                        <div className="col-content-admin-box">
+                    <div className="col-content-admin-box">
                       <div
                         className="news-thumb-box-admin"
                         onClick={() => handleOpenModal(item)}
@@ -529,7 +529,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       </button>
                     </div>
 
-                                        <div
+                    <div
                       className="col-text-admin"
                       style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}
                     >
@@ -552,7 +552,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       </small>
                     </div>
 
-                                        <div className="col-categoria-data-admin col-text-admin">
+                    <div className="col-categoria-data-admin col-text-admin">
                       <span
                         className={`category-pill-admin ${item.category === 'General' ? 'general' : ''}`}
                         style={{
@@ -565,7 +565,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       </span>
                     </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
                       {item.solicitudEliminacion ? (
                         <EtiquetaEliminacion />
                       ) : (
@@ -607,7 +607,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         </div>
       </div>
 
-            {selectedNews && (
+      {selectedNews && (
         <div className="modal-overlay-admin admin-rev-overlay" onClick={handleCloseModal}>
           <div className="modal-content-esp-admin admin-rev-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-esp-admin admin-rev-header">
@@ -627,7 +627,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               </button>
             </div>
 
-<div className="modal-body-esp-admin admin-rev-body">
+            <div className="modal-body-esp-admin admin-rev-body">
               {selectedNews.estado === 'PENDIENTE_APROBACION' &&
                 selectedNews.requestedEstado === 'BORRADOR' && (
                   <div className="admin-rev-alert">
@@ -679,7 +679,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 </div>
               </div>
 
-                            {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
+              {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
                 <div className="news-modal-images-section-admin admin-rev-card">
                   <div
                     className={`news-modal-images-grid-admin ${getLayoutClass(
@@ -716,7 +716,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 </div>
               )}
 
-{selectedNews.estado === 'RECHAZADO' && selectedNews.rejectionReason && (
+              {selectedNews.estado === 'RECHAZADO' && selectedNews.rejectionReason && (
                 <div className="admin-rev-note">
                   <label>
                     <AlertTriangle
@@ -768,7 +768,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
             </div>
 
 
-{selectedNews.estado === 'PENDIENTE_APROBACION' && (
+            {selectedNews.estado === 'PENDIENTE_APROBACION' && (
               <div className="modal-footer-esp-admin admin-rev-footer">
                 {!isRejecting ? (
                   <>
@@ -788,8 +788,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       {submitting
                         ? 'Procesando...'
                         : selectedNews.requestedEstado === 'BORRADOR'
-                        ? 'Aprobar paso a Borrador'
-                        : `Aprobar ${selectedNews.scheduledDate ? 'y Programar' : ''}`}
+                          ? 'Aprobar paso a Borrador'
+                          : `Aprobar ${selectedNews.scheduledDate ? 'y Programar' : ''}`}
                     </button>
                   </>
                 ) : (
@@ -813,7 +813,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               </div>
             )}
 
-                </div>
+          </div>
         </div>
       )}
 
