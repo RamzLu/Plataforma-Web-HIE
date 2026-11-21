@@ -6,16 +6,13 @@ baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
   timeout: 15000, 
 });
 
-// Las lecturas con ?admin=true (borradores, programados, inactivos) solo las concede el backend
-// a usuarios con rol 'cm': se les adjunta el token de Keycloak. Las consultas publicas no llevan token.
-const esLecturaAdmin = (config) =>
-  config.params?.admin === true ||
-  config.params?.admin === "true" ||
-  /[?&]admin=true(&|$)/.test(config.url || "");
+// Toda llamada a /cms/... (panel CMS y Admin) lleva el token de Keycloak, renovado si está por vencer.
+// Las del portal público (/portal/...) van sin token.
+const esRutaDelPanel = (config) => /^\/?cms\//.test(config.url || "");
 
 api.interceptors.request.use(
   async (config) => {
-    if (esLecturaAdmin(config) && keycloak.token) {
+    if (esRutaDelPanel(config) && keycloak.token) {
       const hasAuth =
         Boolean(config.headers?.Authorization) ||
         Boolean(config.headers?.authorization) ||

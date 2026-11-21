@@ -3,6 +3,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import cmsRoutes from './routes/cms.routes.js';
+import portalRoutes from './routes/portal.routes.js';
 import errorHandler from './middlewares/error.middleware.js';
 import { prisma } from './config/prisma.js';
 
@@ -104,6 +105,7 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
+app.use('/api/portal', portalRoutes);
 app.use('/api/cms', cmsRoutes);
 
 // Cualquier otra ruta de la API: 404 en el mismo formato JSON que el resto de los errores.

@@ -83,7 +83,7 @@ const CmsPage = () => {
 const fetchNoticias = async () => {
   try {
     setLoading(true);
-    const response = await adminFetch("/cms/noticias?admin=true");
+    const response = await adminFetch("/cms/noticias");
     if (!response.ok) throw new Error("Error al obtener noticias del servidor");
     const data = await response.json();
 

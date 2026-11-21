@@ -1,13 +1,13 @@
 import api from "./axiosConfig.js";
 
 export const getCapacitaciones = async () => {
-  // Listado completo: el backend lo restringe al rol 'cm'; ?admin=true hace que se adjunte el token.
-  const response = await api.get("/cms/capacitaciones?admin=true");
+  // Listado completo (borradores, pendientes, archivadas) para el CMS y el Admin.
+  const response = await api.get("/cms/capacitaciones");
   return response.data;
 };
 
 export const getCapacitacionesPublicas = async () => {
-  const response = await api.get("/cms/capacitaciones");
+  const response = await api.get("/portal/capacitaciones");
   return response.data;
 };
 

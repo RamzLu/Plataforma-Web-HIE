@@ -1,7 +1,7 @@
 import api from "./axiosConfig.js";
 
 export const getDocumentos = async (isAdmin = false) => {
-  const response = await api.get(isAdmin ? "/cms/documentacion?admin=true" : "/cms/documentacion");
+  const response = await api.get(isAdmin ? "/cms/documentacion" : "/portal/documentacion");
   return response.data;
 };
 

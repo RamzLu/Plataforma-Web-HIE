@@ -1,7 +1,7 @@
 import api from "./axiosConfig.js";
 
 export const getResidencias = async (isAdmin = false) => {
-  const response = await api.get(isAdmin ? "/cms/residencias?admin=true" : "/cms/residencias");
+  const response = await api.get(isAdmin ? "/cms/residencias" : "/portal/residencias");
   return response.data;
 };
 

@@ -1,7 +1,7 @@
 import axios from './axiosConfig.js';
 
 export const getEspecialidades = async (isAdmin = false) => {
-  const response = await axios.get(`/cms/especialidades?admin=${isAdmin}`);
+  const response = await axios.get(isAdmin ? "/cms/especialidades" : "/portal/especialidades");
   return response.data;
 };
 

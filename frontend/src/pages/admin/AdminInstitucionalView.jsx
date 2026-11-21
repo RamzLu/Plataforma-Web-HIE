@@ -107,7 +107,7 @@ const AdminInstitucionalView = () => {
   const fetchInstitucionalData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await getInstitucional();
+      const response = await getInstitucional(true);
       if (response) {
         setData((prev) => ({
           ...prev,

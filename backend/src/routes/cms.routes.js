@@ -2,7 +2,6 @@ import { Router } from 'express';
 
 import {
   obtenerContenidosGraficos,
-  obtenerEspacioPublico,
   actualizarEspacioGrafico,
 } from "../controllers/cms/cms.contenidoGrafico.controller.js";
 import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia, evaluarNoticia } from "../controllers/cms/cms.noticia.controller.js";
@@ -27,7 +26,6 @@ import {
 } from "../controllers/cms/cms.residencia.controller.js";
 import {
   obtenerCapacitaciones,
-  obtenerCapacitacionesPublicas,
   crearCapacitacion,
   actualizarCapacitacion,
   cambiarEstadoCapacitacion,
@@ -38,7 +36,7 @@ import {
 
 import { obtenerSolicitudesEliminacion, resolverSolicitudEliminacion } from "../controllers/cms/cms.eliminaciones.controller.js";
 import { obtenerActividadReciente } from "../controllers/cms/cms.actividad.controller.js";
-import { requireCmsAccess, requireAdminAccess, adminViewAccess, requireCmsOrAdminAccess } from '../middlewares/auth.middleware.js'; 
+import { requireCmsAccess, requireAdminAccess, requireCmsOrAdminAccess, vistaCmsAccess } from '../middlewares/auth.middleware.js';
 import { parsearIdBigInt } from '../utils/sanitize.utils.js';
 import {
   uploadImagenSingle,
@@ -48,6 +46,7 @@ import {
   uploadCapacitacionFiles,
 } from '../middlewares/upload.middleware.js'; 
 
+// Panel CMS y Admin: todas las rutas requieren token. El portal público usa /api/portal (portal.routes.js).
 const router = Router();
 
 router.param('id', (req, _res, next, id) => {
@@ -62,7 +61,7 @@ router.param('id', (req, _res, next, id) => {
 // ==========================================
 // MÓDULO: NOTICIAS
 // ==========================================
-router.get('/noticias', adminViewAccess, obtenerNoticias);
+router.get('/noticias', vistaCmsAccess, obtenerNoticias);
 router.post('/noticias', requireCmsAccess, uploadImagenesArray('imagenes', 10), crearNoticia);
 router.put('/noticias/:id', requireCmsAccess, uploadImagenesArray('imagenes', 10), actualizarNoticia);
 router.patch('/noticias/:id/estado', requireAdminAccess, evaluarNoticia);
@@ -71,7 +70,7 @@ router.delete('/noticias/:id', requireCmsAccess, eliminarNoticia);
 // ==========================================
 // MÓDULO: DOCUMENTACIÓN
 // ==========================================
-router.get('/documentacion', adminViewAccess, obtenerDocumentos);
+router.get('/documentacion', vistaCmsAccess, obtenerDocumentos);
 router.post('/documentacion', requireCmsAccess, uploadDocumentoSingle('archivo'), crearDocumento);
 router.put('/documentacion/:id', requireCmsAccess, uploadDocumentoSingle('archivo'), actualizarDocumento);
 router.patch('/documentacion/:id/estado', requireAdminAccess, evaluarDocumento);
@@ -80,8 +79,7 @@ router.delete('/documentacion/:id', requireCmsAccess, eliminarDocumento);
 // ==========================================
 // MÓDULO: CONTENIDO GRÁFICO
 // ==========================================
-router.get("/contenido-grafico", adminViewAccess, obtenerContenidosGraficos);
-router.get("/contenido-grafico/publico/:espacioKey", obtenerEspacioPublico);
+router.get("/contenido-grafico", vistaCmsAccess, obtenerContenidosGraficos);
 router.put(
   "/contenido-grafico/espacio/:espacioKey",
   requireCmsAccess,
@@ -92,7 +90,7 @@ router.put(
 // ==========================================
 // MÓDULO: PROFESIONALES
 // ==========================================
-router.get("/profesionales", adminViewAccess, obtenerProfesionales);
+router.get("/profesionales", vistaCmsAccess, obtenerProfesionales);
 router.post("/profesionales", requireCmsAccess, uploadImagenSingle("archivo"), crearProfesional);
 router.put("/profesionales/:id", requireCmsAccess, uploadImagenSingle("archivo"), actualizarProfesional);
 router.patch("/profesionales/:id/estado", requireAdminAccess, evaluarProfesional);
@@ -101,7 +99,7 @@ router.delete("/profesionales/:id", requireCmsAccess, eliminarProfesional);
 // ==========================================
 // MÓDULO: ESPECIALIDADES
 // ==========================================
-router.get('/especialidades', adminViewAccess, especialidadCtrl.obtenerEspecialidades);
+router.get('/especialidades', vistaCmsAccess, especialidadCtrl.obtenerEspecialidades);
 router.post('/especialidades', requireCmsAccess, especialidadCtrl.crearEspecialidad);
 router.put('/especialidades/:id', requireCmsAccess, especialidadCtrl.actualizarEspecialidad);
 router.patch('/especialidades/:id/estado', requireAdminAccess, especialidadCtrl.evaluarEspecialidad);
@@ -110,7 +108,7 @@ router.delete('/especialidades/:id', requireCmsAccess, especialidadCtrl.eliminar
 // ==========================================
 // MÓDULO: INSTITUCIONAL (AUTORIDADES, REDES Y SEDE)
 // ==========================================
-router.get('/institucional', obtenerInstitucional);
+router.get('/institucional', vistaCmsAccess, obtenerInstitucional);
 router.put('/institucional/sede', requireCmsAccess, uploadImagenSingle('archivo'), actualizarSedeCentral);
 router.put('/institucional/autoridades/reordenar', requireCmsAccess, reordenarAutoridades);
 router.post('/institucional/autoridades', requireCmsAccess, uploadImagenSingle('archivo'), crearAutoridad);
@@ -121,7 +119,7 @@ router.put('/institucional/redes', requireCmsAccess, actualizarRedesSociales);
 // ==========================================
 // MÓDULO: RESIDENCIAS
 // ==========================================
-router.get('/residencias', adminViewAccess, obtenerResidencias);
+router.get('/residencias', vistaCmsAccess, obtenerResidencias);
 router.post('/residencias', requireCmsAccess, uploadResidenciaFiles, crearResidencia);
 router.put('/residencias/:id', requireCmsAccess, uploadResidenciaFiles, actualizarResidencia);
 router.patch('/residencias/:id/estado', requireCmsOrAdminAccess, cambiarEstadoResidencia);
@@ -130,9 +128,7 @@ router.delete('/residencias/:id', requireCmsAccess, eliminarResidencia);
 // ==========================================
 // MÓDULO: CAPACITACIONES
 // ==========================================
-router.get('/capacitaciones', adminViewAccess, obtenerCapacitaciones);
-// Alias anterior del listado público; se mantiene para no romper clientes viejos.
-router.get('/capacitaciones/publicas', obtenerCapacitacionesPublicas);
+router.get('/capacitaciones', vistaCmsAccess, obtenerCapacitaciones);
 router.post('/capacitaciones', requireCmsAccess, uploadCapacitacionFiles, crearCapacitacion);
 router.put('/capacitaciones/:id', requireCmsAccess, uploadCapacitacionFiles, actualizarCapacitacion);
 router.patch('/capacitaciones/:id/estado', requireCmsOrAdminAccess, cambiarEstadoCapacitacion);

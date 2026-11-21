@@ -5,7 +5,7 @@ import keycloak from "../config/keycloak.js";
  * Obtiene la lista de espacios gráficos fijos predefinidos para el CMS.
  */
 export const getContenidosGraficos = async () => {
-  const response = await api.get("/cms/contenido-grafico?admin=true");
+  const response = await api.get("/cms/contenido-grafico");
   return response.data;
 };
 
@@ -14,7 +14,7 @@ export const getContenidosGraficos = async () => {
  */
 export const getEspacioGraficoPublico = async (espacioKey) => {
   const response = await api.get(
-    `/cms/contenido-grafico/publico/${encodeURIComponent(espacioKey)}`
+    `/portal/contenido-grafico/${encodeURIComponent(espacioKey)}`
   );
   return response.data;
 };

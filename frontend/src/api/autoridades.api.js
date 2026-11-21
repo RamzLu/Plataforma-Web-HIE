@@ -6,8 +6,8 @@ import api from "./axiosConfig.js";
  * Retorna { autoridades: [], redesSociales: { facebook, instagram } }
  * Solo devuelve autoridades activas, ordenadas por campo `orden`.
  */
-export const getInstitucional = async () => {
-  const response = await api.get("/cms/institucional");
+export const getInstitucional = async (isAdmin = false) => {
+  const response = await api.get(isAdmin ? "/cms/institucional" : "/portal/institucional");
   return response.data;
 };
 

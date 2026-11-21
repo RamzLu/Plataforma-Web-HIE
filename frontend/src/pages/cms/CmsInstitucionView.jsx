@@ -141,7 +141,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   const fetchInstitucional = async () => {
     setLoading(true);
     try {
-      const data = await getInstitucional();
+      const data = await getInstitucional(true);
       setAutoridades(data.autoridades || []);
       setSocialData(data.redesSociales || { facebook: "", instagram: "" });
       setTempSocial(data.redesSociales || { facebook: "", instagram: "" });
