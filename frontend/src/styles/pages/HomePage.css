@@ -30,12 +30,12 @@
   /* Fondo continuo general sin divisiones por secciones */
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
-    #f8fafc 22%,
+    var(--color-white) 0%,
+    var(--color-slate-50) 22%,
     #e9ebee calc(100% - 760px),
     #a4c2d6 calc(100% - 470px),
-    #2b5b94 calc(100% - 190px),
-    #0d4077 100%
+    var(--color-secondary) calc(100% - 190px),
+    var(--color-secondary-dark) 100%
   );
 }
 
@@ -165,7 +165,7 @@
 .home-page .title-blue,
 .home-page .aprende-title,
 .home-page .banner-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2.2rem;
   font-weight: 300 !important;
   letter-spacing: 1.5px;
@@ -183,7 +183,7 @@
 .home-page .subtitle-dark,
 .home-page .aprende-subtitle,
 .home-page .banner-tag {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 1.4px;
@@ -293,7 +293,7 @@
 }
 
 .home-page .accordion-clean-item.active {
-  background: #ffffff !important;
+  background: var(--color-white) !important;
   box-shadow: var(--home-shadow-hover) !important;
 }
 
@@ -338,7 +338,7 @@
 }
 
 .home-page .editorial-alert-box {
-  background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
+  background: linear-gradient(135deg, var(--color-red-50) 0%, #fff5f5 100%);
   box-shadow: 0 8px 20px -8px rgba(220, 38, 38, 0.22);
 }
 
@@ -374,20 +374,20 @@
 /* Hover accesible con alto contraste en botones read-more y acciones de tarjeta */
 .home-page .preview-read-more:hover,
 .home-page .card-action-link:hover {
-  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%) !important;
-  color: #ffffff !important;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%) !important;
+  color: var(--color-white) !important;
   transform: translateY(-3px);
   box-shadow: 0 10px 22px -4px rgba(13, 64, 119, 0.38) !important;
 }
 
 .home-page .preview-read-more:hover span,
 .home-page .card-action-link:hover span {
-  color: #ffffff !important;
+  color: var(--color-white) !important;
 }
 
 .home-page .preview-read-more:hover .arrow,
 .home-page .card-action-link:hover .arrow {
-  color: #ffffff !important;
+  color: var(--color-white) !important;
   transform: translateX(4px) scale(1.15);
 }
 
@@ -415,12 +415,12 @@
     padding-bottom: 60px;
     background: linear-gradient(
       180deg,
-      #ffffff 0%,
-      #f8fafc 20%,
+      var(--color-white) 0%,
+      var(--color-slate-50) 20%,
       #e9ebee calc(100% - 820px),
       #a4c2d6 calc(100% - 520px),
-      #2b5b94 calc(100% - 200px),
-      #0d4077 100%
+      var(--color-secondary) calc(100% - 200px),
+      var(--color-secondary-dark) 100%
     );
   }
 

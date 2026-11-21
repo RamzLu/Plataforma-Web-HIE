@@ -4,86 +4,86 @@
    ========================================================= */
 
 /* Buscador con ícono idéntico a Profesionales */
-.res-search-wrapper {
+:where(.panel-scope) .res-search-wrapper {
   position: relative;
   display: flex;
   align-items: center;
   min-width: 240px;
 }
 
-.res-search-wrapper svg {
+:where(.panel-scope) .res-search-wrapper svg {
   position: absolute;
   left: 12px;
   width: 16px;
   height: 16px;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   pointer-events: none;
 }
 
-.res-search-input-field {
+:where(.panel-scope) .res-search-input-field {
   width: 100%;
   padding: 8px 14px 8px 36px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   border-radius: 6px;
   font-size: 0.9rem;
   font-family: inherit;
-  color: #0f172a;
-  background-color: #ffffff;
+  color: var(--color-slate-900);
+  background-color: var(--color-white);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.res-search-input-field:focus {
-  border-color: #0284c7;
+:where(.panel-scope) .res-search-input-field:focus {
+  border-color: var(--color-sky-600);
   box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
 }
 
 /* Selector idéntico a Noticias */
-.res-select-field {
+:where(.panel-scope) .res-select-field {
   padding: 8px 12px;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   font-weight: 600;
-  color: #0c2340;
+  color: var(--color-primary);
   outline: none;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   cursor: pointer;
   font-size: 0.9rem;
   transition: border-color 0.2s;
 }
 
-.res-select-field:focus {
-  border-color: #0284c7;
+:where(.panel-scope) .res-select-field:focus {
+  border-color: var(--color-sky-600);
 }
 
 /* Botones de pestañas idénticos a Noticias */
-.res-tab-btn-unificado {
+:where(.panel-scope) .res-tab-btn-unificado {
   padding: 8px 16px;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.15s ease;
-  background-color: #ffffff;
-  color: #334155;
+  background-color: var(--color-white);
+  color: var(--color-slate-700);
 }
 
-.res-tab-btn-unificado:hover:not(.active) {
-  background-color: #f8fafc;
-  border-color: #94a3b8;
+:where(.panel-scope) .res-tab-btn-unificado:hover:not(.active) {
+  background-color: var(--color-slate-50);
+  border-color: var(--color-slate-400);
 }
 
-.res-tab-btn-unificado.active {
-  background-color: #0c2340;
-  color: #ffffff;
-  border-color: #0c2340;
+:where(.panel-scope) .res-tab-btn-unificado.active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
 }
 
 /* Carga de archivos en el Modal */
-.res-file-upload-zone {
-  border: 2px dashed #cbd5e1;
-  background-color: #ffffff;
+:where(.panel-scope) .res-file-upload-zone {
+  border: 2px dashed var(--color-slate-300);
+  background-color: var(--color-white);
   border-radius: 8px;
   padding: 20px;
   text-align: center;
@@ -96,57 +96,57 @@
   gap: 6px;
 }
 
-.res-file-upload-zone:hover,
-.res-file-upload-zone.drag-active {
-  border-color: #0284c7;
-  background-color: #f0f9ff;
+:where(.panel-scope) .res-file-upload-zone:hover,
+:where(.panel-scope) .res-file-upload-zone.drag-active {
+  border-color: var(--color-sky-600);
+  background-color: var(--color-sky-50);
 }
 
-.res-file-icon-wrap {
+:where(.panel-scope) .res-file-icon-wrap {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #e0f2fe;
-  color: #0284c7;
+  background-color: var(--color-sky-100);
+  color: var(--color-sky-600);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 2px;
 }
 
-.res-file-upload-title {
+:where(.panel-scope) .res-file-upload-title {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #0c2340;
+  color: var(--color-primary);
   margin: 0;
 }
 
-.res-file-upload-sub {
+:where(.panel-scope) .res-file-upload-sub {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin: 0;
 }
 
 /* Tarjeta de archivo seleccionado */
-.res-file-selected-card {
+:where(.panel-scope) .res-file-selected-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-slate-200);
   border-radius: 8px;
   gap: 12px;
 }
 
-.res-file-selected-left {
+:where(.panel-scope) .res-file-selected-left {
   display: flex;
   align-items: center;
   gap: 12px;
   overflow: hidden;
 }
 
-.res-file-type-icon {
+:where(.panel-scope) .res-file-type-icon {
   width: 34px;
   height: 34px;
   border-radius: 6px;
@@ -156,41 +156,41 @@
   flex-shrink: 0;
 }
 
-.res-file-type-icon.pdf {
-  background-color: #fee2e2;
-  color: #dc2626;
+:where(.panel-scope) .res-file-type-icon.pdf {
+  background-color: var(--color-red-100);
+  color: var(--color-red-600);
 }
 
-.res-file-type-icon.doc {
-  background-color: #dbeafe;
-  color: #2563eb;
+:where(.panel-scope) .res-file-type-icon.doc {
+  background-color: var(--color-blue-100);
+  color: var(--color-blue-600);
 }
 
-.res-file-meta {
+:where(.panel-scope) .res-file-meta {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.res-file-name {
+:where(.panel-scope) .res-file-name {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #0c2340;
+  color: var(--color-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.res-file-size {
+:where(.panel-scope) .res-file-size {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin-top: 2px;
 }
 
-.res-file-remove-btn {
+:where(.panel-scope) .res-file-remove-btn {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   cursor: pointer;
   padding: 6px;
   border-radius: 6px;
@@ -200,15 +200,15 @@
   transition: all 0.2s ease;
 }
 
-.res-file-remove-btn:hover {
-  background-color: #fee2e2;
-  color: #dc2626;
+:where(.panel-scope) .res-file-remove-btn:hover {
+  background-color: var(--color-red-100);
+  color: var(--color-red-600);
 }
 
 /* =========================================================
    SELECTOR INTERACTIVO DE ESTADOS EN TABLA
    ========================================================= */
-.status-badge-select {
+:where(.panel-scope) .status-badge-select {
   padding: 5px 22px 5px 12px;
   border-radius: 50px;
   font-size: 0.75rem;
@@ -229,30 +229,30 @@
   text-align: center;
 }
 
-.status-badge-select.publicado {
-  background-color: #dcfce7;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
+:where(.panel-scope) .status-badge-select.publicado {
+  background-color: var(--color-green-100);
+  color: var(--color-green-700);
+  border: 1px solid var(--color-green-200);
 }
 
-.status-badge-select.borrador {
+:where(.panel-scope) .status-badge-select.borrador {
   background-color: #fef9c3;
   color: #854d0e;
   border: 1px solid #fde047;
 }
 
-.status-badge-select.archivado {
-  background-color: #f1f5f9;
-  color: #64748b;
-  border: 1px solid #cbd5e1;
+:where(.panel-scope) .status-badge-select.archivado {
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-500);
+  border: 1px solid var(--color-slate-300);
 }
 
-.status-badge-select:hover {
+:where(.panel-scope) .status-badge-select:hover {
   filter: brightness(0.96);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.status-badge-select:focus {
+:where(.panel-scope) .status-badge-select:focus {
   box-shadow: 0 0 0 2px rgba(43, 91, 148, 0.25);
 }
 
@@ -260,28 +260,28 @@
    TARJETAS DE BANNER Y SECCIONES DEL MODAL
    ========================================================= */
 
-.res-banner-card {
+:where(.panel-scope) .res-banner-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-slate-200);
   border-radius: 8px;
   gap: 12px;
 }
 
-.res-banner-thumb {
+:where(.panel-scope) .res-banner-thumb {
   width: 70px;
   height: 48px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
 }
 
-.res-helper-text {
+:where(.panel-scope) .res-helper-text {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin-top: 4px;
   display: block;
   line-height: 1.4;
@@ -290,8 +290,8 @@
 /* =========================================================
    MODAL DE CONFIRMACIÓN DE ELIMINACIÓN UNIFICADO
    ========================================================= */
-.delete-modal-global {
-  background-color: #ffffff !important;
+:where(.panel-scope) .delete-modal-global {
+  background-color: var(--color-white) !important;
   max-width: 400px !important;
   padding: 35px 25px 25px 25px !important;
   position: relative;
@@ -300,13 +300,13 @@
   box-sizing: border-box;
 }
 
-.btn-close-floating {
+:where(.panel-scope) .btn-close-floating {
   position: absolute;
   top: 15px;
   right: 15px;
   background: transparent !important;
   border: none !important;
-  color: #94a3b8 !important;
+  color: var(--color-slate-400) !important;
   cursor: pointer;
   padding: 5px;
   border-radius: 6px;
@@ -316,12 +316,12 @@
   transition: all 0.2s ease;
 }
 
-.btn-close-floating:hover {
-  color: #0f172a !important;
-  background-color: #f1f5f9 !important;
+:where(.panel-scope) .btn-close-floating:hover {
+  color: var(--color-slate-900) !important;
+  background-color: var(--color-slate-100) !important;
 }
 
-.btn-close-floating svg {
+:where(.panel-scope) .btn-close-floating svg {
   width: 20px;
   height: 20px;
 }
@@ -329,27 +329,27 @@
 /* =========================================================
    ARMONIZACIÓN CON PANEL ADMIN Y RESPONSIVIDAD
    ========================================================= */
-.res-tab-btn-unificado {
+:where(.panel-scope) .res-tab-btn-unificado {
   border-radius: 10px;
   padding: 8px 15px;
 }
 
-.res-search-input-field,
-.res-select-field {
+:where(.panel-scope) .res-search-input-field,
+:where(.panel-scope) .res-select-field {
   border-radius: 10px;
 }
 
 @media (max-width: 680px) {
-  .res-search-wrapper {
+  :where(.panel-scope) .res-search-wrapper {
     min-width: 0;
     width: 100%;
   }
 
-  .res-select-field {
+  :where(.panel-scope) .res-select-field {
     width: 100%;
   }
 
-  .res-tab-btn-unificado {
+  :where(.panel-scope) .res-tab-btn-unificado {
     font-size: 0.82rem;
     padding: 7px 12px;
   }

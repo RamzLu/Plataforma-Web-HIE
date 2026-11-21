@@ -4,7 +4,7 @@
   height: 75vh;
   min-height: 550px;
   overflow: hidden;
-  background-color: #0c2340;
+  background-color: var(--color-primary);
   border-radius: 0 !important;
   box-shadow: 0 20px 45px -15px rgba(12, 35, 64, 0.25);
 }
@@ -57,7 +57,7 @@
   min-height: 400px;
   max-height: 650px;
   position: relative;
-  background-color: #0c2340;
+  background-color: var(--color-primary);
   border-radius: 0 !important;
   overflow: hidden;
 }
@@ -71,7 +71,7 @@
   right: 0;
   aspect-ratio: 1501 / 641;
   overflow: hidden;
-  background-color: #0c2340;
+  background-color: var(--color-primary);
   border-radius: 0 !important;
   box-shadow:
     0 22px 48px -14px rgba(12, 35, 64, 0.24),
@@ -150,7 +150,7 @@
 }
 
 .carousel-title {
-  color: #ffffff;
+  color: var(--color-white);
   font-size: clamp(1.8rem, 3.5vw, 3.2rem);
   font-weight: 300;
   line-height: 1.15;
@@ -158,13 +158,7 @@
   text-transform: uppercase;
   text-shadow: 0 4px 16px rgba(12, 35, 64, 0.45);
   letter-spacing: 0.5px;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
 }
 
 .carousel-btn,
@@ -176,7 +170,7 @@
   background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  color: #ffffff;
+  color: var(--color-white);
   border: 1.5px solid rgba(255, 255, 255, 0.85);
   padding: 13px 34px;
   border-radius: 50px;
@@ -200,9 +194,9 @@
 
 .carousel-btn:hover,
 .carousel-btn-conocenos:hover {
-  background-color: #ffffff;
-  color: #0c2340;
-  border-color: #ffffff;
+  background-color: var(--color-white);
+  color: var(--color-primary);
+  border-color: var(--color-white);
   transform: translateY(-4px);
   box-shadow: 0 14px 30px rgba(12, 35, 64, 0.35);
 }
@@ -220,7 +214,7 @@
   background-color: rgba(12, 35, 64, 0.55);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  color: #ffffff;
+  color: var(--color-white);
   border: 1px solid rgba(255, 255, 255, 0.24);
   width: 48px;
   height: 48px;
@@ -236,7 +230,7 @@
 }
 
 .carousel-arrow:hover {
-  background-color: #2b5b94;
+  background-color: var(--color-secondary);
   border-color: rgba(255, 255, 255, 0.55);
   transform: translateY(-50%) scale(1.12);
   box-shadow: 0 12px 26px rgba(12, 35, 64, 0.4);
@@ -288,12 +282,12 @@
 
 .carousel-indicator.active {
   width: 26px;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.55);
 }
 
 .carousel-indicator:hover {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   transform: scale(1.18);
 }
 
@@ -318,7 +312,7 @@
 
 .carousel-dot.active,
 .carousel-dot:hover {
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 /* Responsividad */
@@ -405,7 +399,7 @@
   }
 
   .carousel-dot.active {
-    background-color: #ffffff;
+    background-color: var(--color-white);
     transform: scale(1.2);
   }
 }

@@ -7,6 +7,8 @@ import PageBanner from "../../components/PageBanner";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 import fondoBannerNoticias from "../../assets/banner_noticias.png";
 import "../../styles/pages/NoticiasPage.css";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CATEGORY_MAP = {
   "cancer-mama": "Cáncer de Mama",
@@ -41,6 +43,7 @@ const NoticiasCategoriaPage = () => {
   const [lightbox, setLightbox] = useState({ isOpen: false, images: [], index: 0 });
 
   const dbCategoryName = CATEGORY_MAP[categoria];
+  usePageMeta(dbCategoryName ? `Noticias: ${dbCategoryName}` : "Noticias");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -160,7 +163,7 @@ const NoticiasCategoriaPage = () => {
                   </div>
                   <div className="full-news-images">
                     {news.images && news.images.length > 0 && news.images[0] ? (
-                      <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => openLightbox(news.images, 0)} />
+                      <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => openLightbox(news.images, 0)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => openLightbox(news.images, 0))} />
                     ) : (
                       <DefaultNewsImage alt={news.title} onClick={() => setSelectedNews(news)} />
                     )}
@@ -208,7 +211,7 @@ const NoticiasCategoriaPage = () => {
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
                     const fotosRestantes = selectedNews.images.length - 4;
                     return (
-                      <div key={index} className="mosaic-item" onClick={() => openLightbox(selectedNews.images, index)}>
+                      <div key={index} className="mosaic-item" onClick={() => openLightbox(selectedNews.images, index)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => openLightbox(selectedNews.images, index))}>
                         <img src={img} alt={`Foto noticia ${index + 1}`} />
                         {isLastAndHidden && (
                           <div className="mosaic-overlay"><span>+{fotosRestantes}</span></div>
@@ -228,7 +231,7 @@ const NoticiasCategoriaPage = () => {
       )}
 
       {lightbox.isOpen && (
-        <div className="lightbox-overlay" style={{ zIndex: 999999 }} onClick={closeLightbox}>
+        <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>&times;</button>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             {lightbox.images.length > 1 && (

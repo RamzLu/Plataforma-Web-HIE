@@ -27,8 +27,11 @@ import CmsResidenciasView from "../cms/CmsResidenciasView";
 import CmsCapacitacionesView from "../cms/CmsCapacitacionesView";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CmsPage = () => {
+  usePageMeta("Panel CMS");
   const [initialized, setInitialized] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [isCms, setIsCms] = useState(false);
@@ -296,9 +299,9 @@ const handleDeleteDoc = (id) => {
     }));
   };
 
-if (!initialized) {
+  if (!initialized) {
     return (
-      <div style={{ 
+      <div className="panel-scope" style={{ 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center', 
@@ -334,9 +337,9 @@ if (!initialized) {
     );
   }
 
-if (!authenticated) {
+  if (!authenticated) {
     return (
-      <div style={{ 
+      <div className="panel-scope" style={{ 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center', 
@@ -387,7 +390,7 @@ if (!authenticated) {
     .slice(0, 4);
 
   return (
-    <div className="cms-layout">
+    <div className="cms-layout panel-scope">
       <CmsSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="cms-main-wrapper">
@@ -633,7 +636,7 @@ if (!authenticated) {
                       <div 
                         key={index} 
                         className="mosaic-item"
-                        onClick={() => openLightbox(imageUrls, index)} 
+                        onClick={() => openLightbox(imageUrls, index)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => openLightbox(imageUrls, index))} 
                       >
                         <img src={img.url || img} alt={`Imagen ${index + 1}`} />
                         {isLastAndHidden && (

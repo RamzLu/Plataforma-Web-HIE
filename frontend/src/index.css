@@ -8,10 +8,18 @@
 html, body {
   max-width: 100%; 
   min-height: 100vh;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--font-sans);
   overflow-x: hidden; 
 }
 
+
+/* El diseño está medido para 14px en pantallas de hasta 1440px: con 16px las secciones (inicio, CMS, Admin)
+   no entran en la pantalla. Pasar a 16px requiere revisar antes los tamaños en rem de cada sección. */
+@media (max-width: 1440px) {
+  html {
+    font-size: 14px;
+  }
+}
 
 #root {
   max-width: 100%; 
@@ -21,8 +29,10 @@ html, body {
   flex-direction: column;
 }
 
-@media (max-width: 1440px) {
-  html {
-    font-size: 14px; 
-  }
+/* Foco visible al navegar con teclado (no aparece al hacer clic con el mouse). */
+[role="button"]:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
 }

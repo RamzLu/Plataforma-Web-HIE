@@ -25,7 +25,7 @@ import { sanitizeUrl } from '../../utils/sanitizeUrl';
 import '../../styles/pages/admin/AdminCapacitacionesView.css';
 
 const STATUS_LABELS = {
-  PENDIENTE_APROBACION: 'Pendiente de revisión',
+  PENDIENTE_APROBACION: 'Pendiente de aprobación',
   BORRADOR: 'Borrador',
   APROBADO: 'Aprobado',
   PUBLICADO: 'Publicado',

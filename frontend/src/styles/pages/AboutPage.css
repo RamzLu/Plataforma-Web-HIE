@@ -1,14 +1,8 @@
 .about-page-clean {
   width: 100%;
   min-height: 100vh;
-  background-color: #ffffff;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  background-color: var(--color-white);
+  font-family: var(--font-sans);
   color: #333333;
 }
 
@@ -17,7 +11,7 @@
   width: 100%;
   height: 400px;
   overflow: hidden;
-  background-color: #0c2340;
+  background-color: var(--color-primary);
 }
 
 .hero-banner-img {
@@ -35,7 +29,7 @@
   background: rgba(43, 91, 148, 0.88);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: #ffffff;
+  color: var(--color-white);
   border: none;
   border-radius: 50px;
   padding: 12px 28px;
@@ -52,7 +46,7 @@
 
 .hero-video-btn:hover {
   transform: translateY(-2px);
-  background-color: #0d4077;
+  background-color: var(--color-secondary-dark);
   box-shadow: 0 12px 28px rgba(13, 64, 119, 0.35);
 }
 
@@ -84,7 +78,7 @@
 }
 
 .about-clean-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2.3rem;
   font-weight: 300;
   letter-spacing: 1.5px;
@@ -136,8 +130,8 @@
   align-items: center;
   padding: 14px 22px;
   text-decoration: none;
-  color: #0d4077;
-  background-color: #f8fafc;
+  color: var(--color-secondary-dark);
+  background-color: var(--color-slate-50);
   border-radius: 50px;
   border: none;
   font-size: 0.85rem;
@@ -149,7 +143,7 @@
 
 .sidebar-menu-list a:hover {
   background-color: #eaf6fc;
-  color: #2b5b94;
+  color: var(--color-secondary);
   transform: translateY(-2px);
   box-shadow: 0 8px 22px rgba(43, 91, 148, 0.14);
 }
@@ -157,7 +151,7 @@
 .sidebar-menu-list .arrow {
   font-size: 0.95rem;
   transition: transform 0.25s ease;
-  color: #2b5b94;
+  color: var(--color-secondary);
 }
 
 .sidebar-menu-list a:hover .arrow {
@@ -184,7 +178,7 @@
 }
 
 .stat-clean-num {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2.8rem;
   font-weight: 300;
   letter-spacing: 1px;
@@ -192,7 +186,7 @@
 }
 
 .stat-clean-text {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 1.2px;
@@ -229,7 +223,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 35px;
   align-items: center;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: none;
   border-radius: 24px;
   overflow: hidden;
@@ -305,7 +299,7 @@
   gap: 8px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #2b5b94;
+  color: var(--color-secondary);
   background-color: #eaf6fc;
   padding: 8px 16px;
   border-radius: 50px;
@@ -316,7 +310,7 @@
 .badge-item svg {
   width: 15px;
   height: 15px;
-  stroke: #2b5b94;
+  stroke: var(--color-secondary);
 }
 
 /* RESPONSIVE */
@@ -341,7 +335,7 @@
   height: 480px;
   border-radius: 22px;
   overflow: hidden;
-  background-color: #000000;
+  background-color: var(--color-black);
   cursor: pointer;
   box-shadow: 0 16px 40px -8px rgba(12, 35, 64, 0.16);
 }
@@ -394,12 +388,12 @@
 
 .video-frame-container:hover .play-circle-btn {
   transform: scale(1.08) translateY(-2px);
-  background-color: #ffffff;
+  background-color: var(--color-white);
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
 }
 
 .video-caption-text {
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 0.9rem;
   font-weight: 600;
   letter-spacing: 1px;
@@ -441,7 +435,7 @@
 }
 
 .authorities-tag {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 1.5px;
@@ -449,7 +443,7 @@
 }
 
 .authorities-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2rem;
   font-weight: 300;
   letter-spacing: 1.5px;
@@ -465,7 +459,7 @@
 }
 
 .authority-card {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: none;
   border-radius: 24px;
   overflow: hidden;
@@ -483,7 +477,7 @@
 .authority-img-box {
   width: 100%;
   height: 260px;
-  background-color: #f1f5f9;
+  background-color: var(--color-slate-100);
   overflow: hidden;
   border-radius: 24px 24px 0 0;
 }
@@ -504,7 +498,7 @@
 }
 
 .authority-role {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 1px;
@@ -519,7 +513,7 @@
 }
 
 .authority-spec {
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 0.95rem;
   font-weight: 400;
   line-height: 1.5;
@@ -544,7 +538,7 @@
 }
 
 .valores-tag {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 1.5px;
@@ -552,7 +546,7 @@
 }
 
 .valores-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2rem;
   font-weight: 300;
   letter-spacing: 1.5px;
@@ -567,7 +561,7 @@
 }
 
 .valor-clean-card {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: none;
   border-radius: 24px;
   padding: 28px 24px;
@@ -596,7 +590,7 @@
 .valor-icon-box svg {
   width: 24px;
   height: 24px;
-  stroke: #2b5b94;
+  stroke: var(--color-secondary);
 }
 
 .valor-card-title {
@@ -607,7 +601,7 @@
 }
 
 .valor-card-desc {
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.6;
@@ -618,7 +612,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background-color: #000000;
+  background-color: var(--color-black);
   border-radius: 22px;
 }
 

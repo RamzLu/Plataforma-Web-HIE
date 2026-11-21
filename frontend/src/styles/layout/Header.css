@@ -1,16 +1,16 @@
 .hospital-header-container {
-  --hospital-navy-dark: #0a162e;
+  --hospital-navy-dark: var(--color-primary-dark);
   --hospital-navy: #102747;
   --hospital-navy-hover: #1f3358;
-  --hospital-blue: #2563eb;
-  --hospital-cobalt: #1d4ed8;
-  --hospital-sky: #0284c7;
-  --hospital-light-blue: #e0f2fe;
-  --hospital-text-main: #0a162e;
+  --hospital-blue: var(--color-blue-600);
+  --hospital-cobalt: var(--color-blue-700);
+  --hospital-sky: var(--color-sky-600);
+  --hospital-light-blue: var(--color-sky-100);
+  --hospital-text-main: var(--color-primary-dark);
   --hospital-text-muted: #a7b6ca;
-  --hospital-text-light: #93c5fd;
-  --hospital-bg-white: #ffffff;
-  --hospital-page-surface: #ffffff;
+  --hospital-text-light: var(--color-blue-300);
+  --hospital-bg-white: var(--color-white);
+  --hospital-page-surface: var(--color-white);
   --hospital-border-light: rgba(255, 255, 255, 0.09);
   --navbar-arch-radius: 0px;
   --tab-arch-radius: 22px;
@@ -20,17 +20,11 @@
   position: fixed;
   top: 0;
   left: 0;
-  background: linear-gradient(180deg, #0e1e3d 0%, #0a162e 100%);
+  background: linear-gradient(180deg, #0e1e3d 0%, var(--color-primary-dark) 100%);
   box-shadow: 0 10px 28px -8px rgba(8, 19, 41, 0.42);
-  z-index: 1000;
+  z-index: var(--z-header);
   overflow: visible;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
 }
 
 .hospital-header-container::before,
@@ -160,7 +154,7 @@
 @media (hover: hover) {
   .hospital-header-container .nav-link-item:hover:not(.active) {
     --tab-wing-color: var(--hospital-navy-hover);
-    color: #ffffff;
+    color: var(--color-white);
     background-color: var(--hospital-navy-hover);
     z-index: 2;
   }
@@ -180,7 +174,7 @@
 .hospital-header-container .nav-link-item.active {
   --tab-wing-color: rgba(59, 130, 246, 0.18);
   background-color: rgba(59, 130, 246, 0.18);
-  color: #60a5fa;
+  color: var(--color-blue-400);
   font-weight: 700;
   box-shadow: none;
   z-index: 3;
@@ -197,7 +191,7 @@
   padding: 2px 6px;
   border-radius: 9999px;
   background-color: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
+  color: var(--color-blue-400);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -236,13 +230,13 @@
 .hospital-header-container .btn-location-action {
   background-color: rgba(31, 51, 88, 0.72);
   border: 1.5px solid rgba(147, 197, 253, 0.25);
-  color: #f8fafc;
+  color: var(--color-slate-50);
 }
 
 .hospital-header-container .btn-blueprint-action {
-  background: linear-gradient(135deg, #2563eb 0%, #0284c7 100%);
+  background: linear-gradient(135deg, var(--color-blue-600) 0%, var(--color-sky-600) 100%);
   border: 1.5px solid rgba(147, 197, 253, 0.35);
-  color: #ffffff;
+  color: var(--color-white);
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
 }
 
@@ -259,7 +253,7 @@
   height: 28px;
   border-radius: 9px;
   background-color: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
+  color: var(--color-blue-400);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -281,19 +275,19 @@
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #93c5fd;
+  color: var(--color-blue-300);
   line-height: 1.1;
 }
 
 .hospital-header-container .btn-blueprint-action .action-eyebrow {
-  color: #e0f2fe;
+  color: var(--color-sky-100);
 }
 
 .hospital-header-container .action-title {
   font-size: 12.5px;
   font-weight: 700;
   line-height: 1.2;
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .hospital-header-container .btn-location-action:hover,
@@ -304,13 +298,13 @@
 }
 
 .hospital-header-container .btn-location-action:hover {
-  border-color: #60a5fa;
+  border-color: var(--color-blue-400);
   background-color: #1f3358;
 }
 
 .hospital-header-container .btn-blueprint-action:hover {
-  background: linear-gradient(135deg, #1d4ed8 0%, #0369a1 100%);
-  border-color: #93c5fd;
+  background: linear-gradient(135deg, var(--color-blue-700) 0%, var(--color-sky-700) 100%);
+  border-color: var(--color-blue-300);
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.38);
 }
 
@@ -400,16 +394,16 @@
     background: rgba(31, 51, 88, 0.75);
     border: 1px solid rgba(147, 197, 253, 0.22);
     border-radius: 12px;
-    color: #ffffff;
+    color: var(--color-white);
     cursor: pointer;
-    z-index: 1100;
+    z-index: var(--z-sidebar);
     padding: 6px;
     transition: all 0.25s ease;
   }
 
   .hospital-header-container .mobile-menu-btn:hover {
     background: #1f3358;
-    border-color: #60a5fa;
+    border-color: var(--color-blue-400);
   }
 
   .hospital-header-container .nav-actions-group {
@@ -445,7 +439,7 @@
     width: 280px;
     max-width: 82vw;
     height: 100vh;
-    background: linear-gradient(180deg, #0e1e3d 0%, #0a162e 100%);
+    background: linear-gradient(180deg, #0e1e3d 0%, var(--color-primary-dark) 100%);
     border-left: 1px solid rgba(147, 197, 253, 0.14);
     border-radius: 26px 0 0 26px;
     flex-direction: column;
@@ -454,7 +448,7 @@
     padding: 84px 0 32px 18px;
     box-shadow: -12px 0 32px rgba(5, 12, 28, 0.45);
     transition: right 0.32s cubic-bezier(0.25, 1, 0.5, 1);
-    z-index: 1050;
+    z-index: var(--z-header-raised);
     overflow-y: auto;
     overflow-x: hidden;
   }
@@ -500,12 +494,12 @@
 
   .hospital-header-container .nav-link-item:hover:not(.active) {
     background-color: #1f3358;
-    color: #ffffff;
+    color: var(--color-white);
   }
 
   .hospital-header-container .nav-link-item.active {
     background-color: rgba(59, 130, 246, 0.18);
-    color: #60a5fa;
+    color: var(--color-blue-400);
     font-weight: 700;
     box-shadow: none;
   }

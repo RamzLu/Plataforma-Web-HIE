@@ -2,7 +2,7 @@
 .plano-page {
   padding-top: 110px;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
 }
 
 /* Restricción de ancho para que coincida con el resto de la web */
@@ -28,7 +28,7 @@
 .plano-title {
   font-size: 2.2rem;
   font-weight: 300;
-  color: #2b5b94;
+  color: var(--color-secondary);
   margin: 15px 0 20px 0;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -37,13 +37,13 @@
 .plano-description {
   font-size: 1rem;
   line-height: 1.7;
-  color: #475569;
+  color: var(--color-slate-600);
   margin-bottom: 20px;
 }
 
 .plano-subtext {
   font-weight: 600;
-  color: #0284c7;
+  color: var(--color-sky-600);
   font-size: 1.05rem;
 }
 
@@ -78,7 +78,7 @@
   right: -20px;
   width: 80%;
   height: 120px;
-  background-color: #2b5b94; 
+  background-color: var(--color-secondary); 
   border-radius: 8px;
   z-index: 1;
   opacity: 0.95;

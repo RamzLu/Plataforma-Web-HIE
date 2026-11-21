@@ -1,28 +1,28 @@
 :root {
-  --editorial-navy: #0c2340;
-  --editorial-blue: #2b5b94;
-  --editorial-blue-deep: #0d4077;
-  --editorial-cobalt: #2b5b94;
-  --editorial-sky: #0284c7;
-  --editorial-alert: #dc2626;
+  --editorial-navy: var(--color-primary);
+  --editorial-blue: var(--color-secondary);
+  --editorial-blue-deep: var(--color-secondary-dark);
+  --editorial-cobalt: var(--color-secondary);
+  --editorial-sky: var(--color-sky-600);
+  --editorial-alert: var(--color-red-600);
   --editorial-border3: #cf3d03;
   --editorial-border1: #bfc4ff;
-  --editorial-alert-bg: #fef2f2;
-  --editorial-text: #334155;
-  --editorial-muted: #64748b;
-  --editorial-line: #cbd5e1;
-  --editorial-card-bg: #f8fafc;
+  --editorial-alert-bg: var(--color-red-50);
+  --editorial-text: var(--color-slate-700);
+  --editorial-muted: var(--color-slate-500);
+  --editorial-line: var(--color-slate-300);
+  --editorial-card-bg: var(--color-slate-50);
   --editorial-card-border: rgba(226, 232, 240, 0.8);
 }
 
 /* Contenedor General de la Sección */
 .news-section {
   width: 100%;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--color-white) 0%, var(--color-slate-50) 100%);
   padding: 90px 24px;
   display: flex;
   justify-content: center;
-  font-family: "Manrope", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   color: var(--editorial-text);
   box-sizing: border-box;
   position: relative;
@@ -49,7 +49,7 @@
 }
 
 .news-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2.2rem;
   font-weight: 300;
   letter-spacing: 1.5px;
@@ -72,7 +72,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: 1px solid rgba(226, 232, 240, 0.85);
   border-radius: 26px;
   padding: 34px 28px 28px;
@@ -97,7 +97,7 @@
   right: 28px;
   height: 4px;
   border-radius: 0 0 50px 50px;
-  background: linear-gradient(90deg, #2b5b94 0%, #0d4077 100%);
+  background: linear-gradient(90deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
   opacity: 0.75;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -139,13 +139,13 @@
   align-items: center;
   padding: 6px 14px;
   border-radius: 50px;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   border: 1px solid rgba(43, 91, 148, 0.18);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #2b5b94;
+  color: var(--color-secondary);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -157,12 +157,12 @@
 
 .category-tag.alert-tag {
   color: var(--editorial-alert);
-  background-color: #fef2f2;
+  background-color: var(--color-red-50);
   border-color: rgba(220, 38, 38, 0.22);
 }
 
 .editorial-column:hover .category-tag.alert-tag {
-  background-color: #fee2e2;
+  background-color: var(--color-red-100);
   border-color: rgba(220, 38, 38, 0.38);
 }
 
@@ -192,7 +192,7 @@
 
 /* Modificadores para la segunda línea del título (peso delgado intacto) */
 .title-light-blue {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-weight: 300;
   transition: color 0.3s ease;
 }
@@ -204,14 +204,14 @@
 }
 
 .editorial-title:hover .title-light-blue {
-  color: #0d4077;
+  color: var(--color-secondary-dark);
 }
 
 /* Párrafo descriptivo */
 .editorial-lead-text {
   font-size: 15px;
   line-height: 1.68;
-  color: #334155;
+  color: var(--color-slate-700);
   margin: 0 0 24px 0;
 }
 
@@ -231,7 +231,7 @@
 }
 
 .meta-card {
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 16px;
   padding: 13px 14px;
@@ -243,7 +243,7 @@
 }
 
 .meta-card:hover {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-color: rgba(43, 91, 148, 0.32);
   transform: translateY(-2px);
   box-shadow: 0 8px 18px rgba(43, 91, 148, 0.1);
@@ -267,7 +267,7 @@
    BOX DE ALERTA (COLUMNA 3 - SOFT UI)
    ========================================================= */
 .editorial-alert-box {
-  background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
+  background: linear-gradient(135deg, var(--color-red-50) 0%, #fff5f5 100%);
   border: 1px solid rgba(220, 38, 38, 0.18);
   border-left: 4px solid var(--editorial-alert);
   padding: 16px 18px;
@@ -303,20 +303,20 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   border: 1px solid rgba(226, 232, 240, 0.85);
   border-radius: 50px;
   text-decoration: none;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #334155;
+  color: var(--color-slate-700);
   transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .editorial-sublink:hover {
-  color: #2b5b94;
-  background-color: #ffffff;
+  color: var(--color-secondary);
+  background-color: var(--color-white);
   border-color: rgba(43, 91, 148, 0.35);
   transform: translateY(-2px);
   box-shadow: 0 8px 18px -4px rgba(43, 91, 148, 0.14);
@@ -331,12 +331,12 @@
   align-items: center;
   justify-content: center;
   font-size: 15px;
-  color: #2b5b94;
+  color: var(--color-secondary);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .editorial-sublink:hover .link-arrow {
-  color: #0d4077;
+  color: var(--color-secondary-dark);
   transform: translateX(5px) scale(1.18);
 }
 
@@ -344,7 +344,7 @@
    BANNER DE SEDE CENTRAL (SOFT UI CONTENEDOR CURVO)
    ========================================================= */
 .location-banner {
-  background: #ffffff;
+  background: var(--color-white);
   border: 1px solid rgba(226, 232, 240, 0.85);
   border-radius: 28px;
   padding: 28px 36px;
@@ -380,12 +380,12 @@
   width: 56px;
   height: 56px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e9ebee 100%);
+  background: linear-gradient(135deg, var(--color-slate-50) 0%, #e9ebee 100%);
   border: 1px solid rgba(43, 91, 148, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2b5b94;
+  color: var(--color-secondary);
   flex-shrink: 0;
   box-shadow: 0 6px 16px rgba(43, 91, 148, 0.1);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -396,9 +396,9 @@
 }
 
 .location-banner:hover .location-icon-bubble {
-  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
-  color: #ffffff;
-  border-color: #2b5b94;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  color: var(--color-white);
+  border-color: var(--color-secondary);
   transform: scale(1.08);
   box-shadow: 0 10px 22px rgba(43, 91, 148, 0.25);
 }
@@ -417,7 +417,7 @@
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #2b5b94;
+  color: var(--color-secondary);
   margin-bottom: 4px;
 }
 
@@ -448,7 +448,7 @@
   align-items: center;
   gap: 10px;
   padding: 13px 24px;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   border: 1.5px solid rgba(226, 232, 240, 0.95);
   border-radius: 50px;
   font-size: 13.5px;
@@ -465,9 +465,9 @@
 }
 
 .btn-building-info:hover {
-  background-color: #ffffff;
-  border-color: #2b5b94;
-  color: #2b5b94;
+  background-color: var(--color-white);
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
   transform: translateY(-3px);
   box-shadow: 0 10px 22px rgba(43, 91, 148, 0.14);
 }
@@ -486,20 +486,20 @@
   align-items: center;
   gap: 10px;
   padding: 13px 26px;
-  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
-  border: 1.5px solid #2b5b94;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  border: 1.5px solid var(--color-secondary);
   border-radius: 50px;
   font-size: 13.5px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-white);
   cursor: pointer;
   box-shadow: 0 8px 20px -4px rgba(13, 64, 119, 0.35);
   transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .btn-how-to-arrive:hover {
-  background: linear-gradient(135deg, #0d4077 0%, #0c2340 100%);
-  border-color: #0d4077;
+  background: linear-gradient(135deg, var(--color-secondary-dark) 0%, var(--color-primary) 100%);
+  border-color: var(--color-secondary-dark);
   transform: translateY(-3px);
   box-shadow: 0 14px 28px -4px rgba(12, 35, 64, 0.42);
 }

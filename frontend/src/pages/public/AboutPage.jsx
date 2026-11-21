@@ -19,6 +19,7 @@ import InteractiveTimelineSection from "../../components/InteractiveTimelineSect
 
 // Imagen de fallback cuando la autoridad no tiene foto cargada
 import fotoDirector from "../../assets/imagen-temporal-autoridades.jpg";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
 
 
 const VALORES_INSTITUCIONALES = [
@@ -54,6 +55,7 @@ const VALORES_INSTITUCIONALES = [
 ];
 
 const AboutPage = () => {
+  usePageMeta("Acerca del hospital", "Historia, autoridades, sede y canales de contacto del Hospital Interdistrital Evita de Formosa.");
   const { hash } = useLocation();
 
   const videoSectionRef = useRef(null);

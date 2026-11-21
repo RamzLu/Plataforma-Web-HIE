@@ -32,6 +32,7 @@ import {
   deleteCapacitacion,
   cambiarEstadoCapacitacion,
 } from "../../api/capacitaciones.api";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 // Datos iniciales armonizados con el portal público (CapacitacionPage) y schema.prisma
 
@@ -645,7 +646,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                       </div>
                     )}
                   </div>
-                  <div className="news-title-interactive" onClick={() => handleOpenEdit(item)}>
+                  <div className="news-title-interactive" onClick={() => handleOpenEdit(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenEdit(item))}>
                     <span
                       className="activity-title"
                       style={{
@@ -1110,7 +1111,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     ) : (
                       <div
                         className={`cap-banner-upload-zone ${isDraggingBanner ? "drag-active" : ""}`}
-                        onClick={() => bannerInputRef.current?.click()}
+                        onClick={() => bannerInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => bannerInputRef.current?.click())}
                         onDragOver={(e) => {
                           e.preventDefault();
                           setIsDraggingBanner(true);
@@ -1230,7 +1231,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     ) : (
                       <div
                         className={`res-file-upload-zone ${isDraggingFile ? "drag-active" : ""}`}
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => fileInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => fileInputRef.current?.click())}
                         onDragOver={(e) => {
                           e.preventDefault();
                           setIsDraggingFile(true);

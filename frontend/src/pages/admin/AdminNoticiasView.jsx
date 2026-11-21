@@ -15,6 +15,7 @@ import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin
 import '../../styles/pages/admin/AdminNoticiasView.css';
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const AdminNoticiasView = ({ onPendingCountChange }) => {
   const [noticias, setNoticias] = useState([]);
@@ -499,7 +500,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                     <div className="col-content-admin-box">
                       <div
                         className="news-thumb-box-admin"
-                        onClick={() => handleOpenModal(item)}
+                        onClick={() => handleOpenModal(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenModal(item))}
                       >
                         {item.images && item.images.length > 0 && item.images[0] ? (
                           <img
@@ -692,7 +693,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                         <div
                           className="modal-news-img-box-admin"
                           key={idx}
-                          onClick={() => openLightbox(imageUrls, idx)}
+                          onClick={() => openLightbox(imageUrls, idx)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => openLightbox(imageUrls, idx))}
                           title="Haga clic para maximizar la imagen"
                         >
                           <img src={img.url || img} alt={`Foto noticia ${idx + 1}`} />

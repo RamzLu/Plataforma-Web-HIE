@@ -42,7 +42,7 @@ export const CmsDeleteModal = ({
     <div
       className="modal-overlay"
       onClick={() => !busy && onClose && onClose()}
-      style={{ zIndex: 99999 }}
+      style={{ zIndex: "var(--z-modal-top)" }}
     >
       <div
         className="modal-content-esp delete-modal-global"
@@ -159,7 +159,7 @@ export const CmsConfirmDraftModal = ({
     <div
       className="modal-overlay"
       style={{
-        zIndex: 99999,
+        zIndex: "var(--z-modal-top)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -180,7 +180,7 @@ export const CmsConfirmDraftModal = ({
           boxShadow: "0px 10px 30px rgba(13,34,63,0.08)",
           fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
           position: "relative",
-          zIndex: 999999,
+          zIndex: "var(--z-popover)",
           display: "flex",
           flexDirection: "column",
         }}
@@ -327,7 +327,7 @@ export const CmsUnsavedChangesModal = ({
     <div
       className="modal-overlay"
       style={{
-        zIndex: 99999,
+        zIndex: "var(--z-modal-top)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -348,7 +348,7 @@ export const CmsUnsavedChangesModal = ({
           boxShadow: "0px 10px 30px rgba(13,34,63,0.08)",
           fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
           position: "relative",
-          zIndex: 999999,
+          zIndex: "var(--z-popover)",
           display: "flex",
           flexDirection: "column",
         }}

@@ -1,17 +1,11 @@
 .aprende-section {
   width: 100%;
-  background: linear-gradient(180deg, #f8fafc 0%, #e9ebee 55%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--color-slate-50) 0%, #e9ebee 55%, var(--color-slate-50) 100%);
   padding: 90px 24px;
   display: flex;
   justify-content: center;
   box-sizing: border-box;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
 }
 
 .aprende-container {
@@ -84,7 +78,7 @@
 }
 
 .aprende-subtitle {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 1.5px;
@@ -92,7 +86,7 @@
 }
 
 .aprende-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2.8rem;
   font-weight: 300;
   letter-spacing: 2px;
@@ -102,7 +96,7 @@
 }
 
 .aprende-description {
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 1.04rem;
   font-weight: 300;
   line-height: 1.68;
@@ -119,7 +113,7 @@
 }
 
 .aprende-card {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: none;
   border-radius: 22px;
   padding: 0;
@@ -149,7 +143,7 @@
   border-radius: 0;
   overflow: hidden;
   margin-bottom: 0;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   border: none;
 }
 
@@ -181,7 +175,7 @@
   text-transform: uppercase;
   padding: 4px 10px;
   border-radius: 50px;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
@@ -198,7 +192,7 @@
 }
 
 .card-badge.blue {
-  color: #2b5b94;
+  color: var(--color-secondary);
   background-color: rgba(43, 91, 148, 0.08);
   border-color: rgba(43, 91, 148, 0.2);
 }
@@ -206,7 +200,7 @@
 .card-info h4 {
   font-size: 0.92rem;
   font-weight: 600;
-  color: #0c2340;
+  color: var(--color-primary);
   margin: 0;
   line-height: 1.35;
 }
@@ -217,11 +211,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   border: none;
   border-radius: 50px;
   text-decoration: none;
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -231,9 +225,9 @@
 }
 
 .card-action-link:hover {
-  background-color: #2b5b94;
-  color: #ffffff;
-  border-color: #2b5b94;
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  border-color: var(--color-secondary);
   box-shadow: 0 6px 14px -3px rgba(43, 91, 148, 0.24);
 }
 

@@ -1,7 +1,7 @@
 /* Solicitud de eliminación en el panel Admin:
    - la etiqueta del listado es EtiquetaEstado (tipo "eliminacion")
    - .solelim-bloque: aviso y acciones dentro del modal de detalle */
-.solelim-bloque {
+:where(.panel-scope) .solelim-bloque {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
@@ -11,131 +11,131 @@
   border: 1px solid #e9d5ff;
   border-radius: 12px;
   background: #faf5ff;
-  color: #0c2340;
+  color: var(--color-primary);
   text-align: left;
 }
 
-.solelim-bloque.is-inline {
+:where(.panel-scope) .solelim-bloque.is-inline {
   margin: 16px 0 0;
 }
 
-.solelim-aviso {
+:where(.panel-scope) .solelim-aviso {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   color: #7e22ce;
 }
 
-.solelim-aviso svg {
+:where(.panel-scope) .solelim-aviso svg {
   flex-shrink: 0;
   margin-top: 2px;
 }
 
-.solelim-aviso strong {
+:where(.panel-scope) .solelim-aviso strong {
   display: block;
   margin-bottom: 2px;
   font-size: 0.95rem;
 }
 
-.solelim-aviso p {
+:where(.panel-scope) .solelim-aviso p {
   margin: 0;
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 0.88rem;
   line-height: 1.45;
 }
 
-.solelim-advertencia {
+:where(.panel-scope) .solelim-advertencia {
   margin: 0;
   padding: 10px 12px;
   border-radius: 8px;
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--color-red-50);
+  color: var(--color-red-800);
   font-size: 0.86rem;
   line-height: 1.45;
 }
 
-.solelim-motivo {
+:where(.panel-scope) .solelim-motivo {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 0.85rem;
   font-weight: 600;
 }
 
-.solelim-motivo textarea {
+:where(.panel-scope) .solelim-motivo textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 10px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-white);
   font: inherit;
   font-weight: 400;
   resize: vertical;
 }
 
-.solelim-acciones {
+:where(.panel-scope) .solelim-acciones {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
 }
 
-.solelim-btn {
+:where(.panel-scope) .solelim-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 9px 16px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   border-radius: 9px;
-  background: #fff;
-  color: #334155;
+  background: var(--color-white);
+  color: var(--color-slate-700);
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
 }
 
-.solelim-btn:hover:not(:disabled) {
-  background: #f1f5f9;
+:where(.panel-scope) .solelim-btn:hover:not(:disabled) {
+  background: var(--color-slate-100);
 }
 
-.solelim-btn.is-danger {
-  border-color: #fecaca;
-  background: #fef2f2;
-  color: #b91c1c;
+:where(.panel-scope) .solelim-btn.is-danger {
+  border-color: var(--color-red-200);
+  background: var(--color-red-50);
+  color: var(--color-red-700);
 }
 
-.solelim-btn.is-danger:hover:not(:disabled) {
-  background: #fee2e2;
+:where(.panel-scope) .solelim-btn.is-danger:hover:not(:disabled) {
+  background: var(--color-red-100);
 }
 
-.solelim-btn.is-danger-solid {
-  border-color: #dc2626;
-  background: #dc2626;
-  color: #fff;
+:where(.panel-scope) .solelim-btn.is-danger-solid {
+  border-color: var(--color-red-600);
+  background: var(--color-red-600);
+  color: var(--color-white);
 }
 
-.solelim-btn.is-danger-solid:hover:not(:disabled) {
-  background: #b91c1c;
+:where(.panel-scope) .solelim-btn.is-danger-solid:hover:not(:disabled) {
+  background: var(--color-red-700);
 }
 
-.solelim-btn.is-primary {
+:where(.panel-scope) .solelim-btn.is-primary {
   border-color: #006eb3;
   background: #006eb3;
-  color: #fff;
+  color: var(--color-white);
 }
 
-.solelim-btn.is-primary:hover:not(:disabled) {
+:where(.panel-scope) .solelim-btn.is-primary:hover:not(:disabled) {
   background: #005a93;
 }
 
-.solelim-btn:disabled {
+:where(.panel-scope) .solelim-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.solelim-btn:focus-visible {
+:where(.panel-scope) .solelim-btn:focus-visible {
   outline: 2px solid #006eb3;
   outline-offset: 2px;
 }

@@ -732,7 +732,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
 
       {/* OVERLAY DEL CROPPER DE IMAGEN */}
       {isCropping && imageSrc && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.9)', zIndex: 100000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.9)', zIndex: "var(--z-lightbox)", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           
           <h2 style={{ color: "#fff", marginBottom: "20px", fontWeight: "300", letterSpacing: "1px" }}>Encuadra la foto del profesional</h2>
           

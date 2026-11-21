@@ -5,9 +5,12 @@ import "../../styles/pages/DocumentacionPage.css";
 import PageBanner from "../../components/PageBanner";
 import fondoBanner from "../../assets/banner_documentacion.png";
 import AnimatedContent from "../../components/ui/AnimatedContent";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 
 const DocumentacionPage = () => {
+  usePageMeta("Documentación", "Guías, protocolos y documentos institucionales del Hospital Interdistrital Evita para descargar.");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("TODOS");
   
@@ -196,7 +199,7 @@ const DocumentacionPage = () => {
                     <div 
                       className="doc-row" 
                       key={doc.id}
-                      onClick={() => handleRowClick(doc.fileUrl)}
+                      onClick={() => handleRowClick(doc.fileUrl)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleRowClick(doc.fileUrl))}
                     >
                       <div className="col-titulo">
                         <div className="doc-file-icon-box" aria-hidden="true">

@@ -26,9 +26,10 @@ import {
   PortalResidenciasHeroPreview,
 } from '../../components/cms/CmsContenidoGraficoCorrectionModal';
 import '../../styles/pages/admin/AdminContenidoGraficoView.css';
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const STATUS_LABELS = {
-  PENDIENTE_APROBACION: 'Pendiente de revisión',
+  PENDIENTE_APROBACION: 'Pendiente de aprobación',
   APROBADO: 'Aprobada',
   PUBLICADO: 'Publicada',
   RECHAZADO: 'Rechazada',
@@ -902,7 +903,7 @@ const AdminContenidoGraficoView = ({ onPendingCountChange } = {}) => {
                           <div
                             key={img.id || idx}
                             className={`admin-cg-slide-chip-admin ${idx === currentSafeIndex ? 'is-active' : ''}`}
-                            onClick={() => setSafeIndex(idx)}
+                            onClick={() => setSafeIndex(idx)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setSafeIndex(idx))}
                           >
                             <span>Slide #{idx + 1}</span>
                             <small>{img.fileName || `Imagen ${idx + 1}`}</small>

@@ -10,7 +10,7 @@
 
 .paginacion-resumen {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
 .paginacion-controles {
@@ -27,10 +27,10 @@
   min-width: 36px;
   height: 36px;
   padding: 0 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   border-radius: 8px;
-  background: #ffffff;
-  color: #334155;
+  background: var(--color-white);
+  color: var(--color-slate-700);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -39,8 +39,8 @@
 
 .paginacion-flecha:hover:not(:disabled),
 .paginacion-numero:hover:not(.activa) {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--color-slate-100);
+  border-color: var(--color-slate-300);
 }
 
 .paginacion-flecha:focus-visible,
@@ -57,11 +57,11 @@
 .paginacion-numero.activa {
   background: #006eb3;
   border-color: #006eb3;
-  color: #ffffff;
+  color: var(--color-white);
   cursor: default;
 }
 
 .paginacion-salto {
   padding: 0 4px;
-  color: #94a3b8;
+  color: var(--color-slate-400);
 }

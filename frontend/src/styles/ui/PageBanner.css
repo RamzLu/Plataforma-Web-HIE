@@ -3,7 +3,7 @@
    Estandarización 100% geométrica y tipográfica para todas las vistas públicas:
    - Contenedor externo idéntico en medidas, padding y alineación
    - Contenedor interno (*-inner) con max-width: 1240px exactos y margin: 0 auto
-   - Misma barra vertical izquierda: border-left: 6px solid #2b5b94; padding-left: 36px;
+   - Misma barra vertical izquierda: border-left: 6px solid var(--color-secondary); padding-left: 36px;
    - Título principal h1 delgado: font-weight: 300 !important;
    - Misma familia tipográfica, tamaño, márgenes y alineación en todas las vistas.
    ========================================================= */
@@ -24,12 +24,12 @@
   margin: 0 0 35px 0 !important;
   border-radius: 0 !important;
   box-shadow: 0 14px 35px -8px rgba(12, 35, 64, 0.08) !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-family: var(--font-sans) !important;
 
   /* Degradado institucional suave continuo hacia el cuerpo de la página */
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
+    var(--color-white) 0%,
     #f4f8fc 35%,
     #e8f1fa 70%,
     #dbe9f7 100%
@@ -80,7 +80,7 @@
   width: 100% !important;
   max-width: 1240px !important;
   margin: 0 auto !important;
-  border-left: 6px solid #2b5b94 !important;
+  border-left: 6px solid var(--color-secondary) !important;
   padding-left: 36px !important;
   display: flex !important;
   flex-direction: column !important;
@@ -96,8 +96,8 @@
 .news-main-title,
 .prof-main-title,
 .esp-main-title {
-  color: #2b5b94 !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: var(--color-secondary) !important;
+  font-family: var(--font-sans) !important;
   font-size: 3.2rem !important;
   font-weight: 300 !important;
   text-transform: uppercase !important;
@@ -112,8 +112,8 @@
 .esp-subtitle,
 .doc-header-inner p,
 .prof-header-inner p {
-  color: #64748b !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: var(--color-slate-500) !important;
+  font-family: var(--font-sans) !important;
   font-size: 1.12rem !important;
   font-weight: 400 !important;
   line-height: 1.5 !important;

@@ -3,7 +3,7 @@
    =================================================== */
 
 /* Píldora para filas de tabla */
-.admin-table-diff-pill {
+:where(.panel-scope) .admin-table-diff-pill {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -19,85 +19,85 @@
   white-space: nowrap;
 }
 
-.admin-table-diff-pill svg {
+:where(.panel-scope) .admin-table-diff-pill svg {
   color: #ea580c;
   flex-shrink: 0;
 }
 
 /* Tarjeta contenedora de comparativa dentro del modal */
-.admin-cambios-card {
+:where(.panel-scope) .admin-cambios-card {
   margin: 0 0 20px 0;
   padding: 16px 18px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--color-blue-200);
   border-radius: 14px;
-  background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
+  background: linear-gradient(180deg, #f0f7ff 0%, var(--color-white) 100%);
   box-shadow: 0 4px 14px rgba(2, 132, 199, 0.06);
 }
 
-.admin-cambios-header {
+:where(.panel-scope) .admin-cambios-header {
   margin-bottom: 14px;
 }
 
-.admin-cambios-header-text {
+:where(.panel-scope) .admin-cambios-header-text {
   width: 100%;
 }
 
-.admin-cambios-title {
+:where(.panel-scope) .admin-cambios-title {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0 0 3px 0;
-  color: #0c2340;
+  color: var(--color-primary);
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: -0.2px;
 }
 
-.admin-cambios-counter {
+:where(.panel-scope) .admin-cambios-counter {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #0284c7;
-  color: #ffffff;
+  background: var(--color-sky-600);
+  color: var(--color-white);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.3px;
   text-transform: uppercase;
 }
 
-.admin-cambios-desc {
+:where(.panel-scope) .admin-cambios-desc {
   margin: 0;
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 0.8rem;
   line-height: 1.4;
 }
 
 /* Lista de campos comparados */
-.admin-cambios-list {
+:where(.panel-scope) .admin-cambios-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.admin-cambio-item {
-  border: 1px solid #e2e8f0;
+:where(.panel-scope) .admin-cambio-item {
+  border: 1px solid var(--color-slate-200);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--color-white);
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
-.admin-cambio-label-bar {
+:where(.panel-scope) .admin-cambio-label-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--color-slate-50);
+  border-bottom: 1px solid var(--color-slate-200);
 }
 
-.admin-cambio-label {
-  color: #0c2340;
+:where(.panel-scope) .admin-cambio-label {
+  color: var(--color-primary);
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -105,7 +105,7 @@
 }
 
 /* Grid comparativo Antes / Flecha / Después */
-.admin-cambio-diff-grid {
+:where(.panel-scope) .admin-cambio-diff-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: stretch;
@@ -113,7 +113,7 @@
   padding: 10px 12px;
 }
 
-.admin-diff-box {
+:where(.panel-scope) .admin-diff-box {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -124,24 +124,24 @@
   word-break: break-word;
 }
 
-.admin-diff-box.before {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+:where(.panel-scope) .admin-diff-box.before {
+  background: var(--color-red-50);
+  border: 1px solid var(--color-red-200);
   color: #7f1d1d;
 }
 
-.admin-diff-box.after {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+:where(.panel-scope) .admin-diff-box.after {
+  background: var(--color-green-50);
+  border: 1px solid var(--color-green-200);
   color: #14532d;
 }
 
-.admin-diff-badge-wrap {
+:where(.panel-scope) .admin-diff-badge-wrap {
   display: flex;
   align-items: center;
 }
 
-.admin-diff-badge {
+:where(.panel-scope) .admin-diff-badge {
   display: inline-block;
   padding: 2px 7px;
   border-radius: 4px;
@@ -151,44 +151,44 @@
   text-transform: uppercase;
 }
 
-.admin-diff-badge.before {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
+:where(.panel-scope) .admin-diff-badge.before {
+  background: var(--color-red-100);
+  color: var(--color-red-800);
+  border: 1px solid var(--color-red-300);
 }
 
-.admin-diff-badge.after {
-  background: #dcfce7;
-  color: #166534;
+:where(.panel-scope) .admin-diff-badge.after {
+  background: var(--color-green-100);
+  color: var(--color-green-800);
   border: 1px solid #86efac;
 }
 
-.admin-diff-text {
+:where(.panel-scope) .admin-diff-text {
   white-space: pre-wrap;
   font-size: 0.84rem;
   color: inherit;
 }
 
-.admin-diff-empty {
+:where(.panel-scope) .admin-diff-empty {
   font-style: italic;
   opacity: 0.75;
 }
 
-.admin-diff-arrow {
+:where(.panel-scope) .admin-diff-arrow {
   display: grid;
   place-items: center;
   padding: 0 4px;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   flex-shrink: 0;
 }
 
 @media (max-width: 680px) {
-  .admin-cambio-diff-grid {
+  :where(.panel-scope) .admin-cambio-diff-grid {
     grid-template-columns: 1fr;
     gap: 8px;
   }
 
-  .admin-diff-arrow {
+  :where(.panel-scope) .admin-diff-arrow {
     transform: rotate(90deg);
     padding: 2px 0;
   }

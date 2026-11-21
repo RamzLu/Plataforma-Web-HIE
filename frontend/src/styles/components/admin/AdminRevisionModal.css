@@ -8,9 +8,9 @@
    =================================================== */
 
 /* ---------- Fondo y contenedor ---------- */
-.admin-rev-overlay.admin-rev-overlay {
+:where(.panel-scope) .admin-rev-overlay.admin-rev-overlay {
   position: fixed;
-  z-index: 1100;
+  z-index: var(--z-sidebar);
   inset: 0;
   display: flex;
   align-items: center;
@@ -19,7 +19,7 @@
   background: rgb(15 23 42 / 65%);
 }
 
-.admin-rev-modal.admin-rev-modal {
+:where(.panel-scope) .admin-rev-modal.admin-rev-modal {
   position: relative;
   display: flex;
   width: min(720px, 100%);
@@ -30,25 +30,25 @@
   padding: 0;
   border: 0;
   border-radius: 22px;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 28px 80px rgb(15 23 42 / 28%);
   font-family: inherit;
 }
 
 /* Tope de grosor en todo el modal: nada por encima de 650, tampoco lo heredado. */
-.admin-rev-modal h2,
-.admin-rev-modal h3,
-.admin-rev-modal h4,
-.admin-rev-modal strong,
-.admin-rev-modal b,
-.admin-rev-modal button,
-.admin-rev-modal th,
-.admin-rev-modal label {
+:where(.panel-scope) .admin-rev-modal h2,
+:where(.panel-scope) .admin-rev-modal h3,
+:where(.panel-scope) .admin-rev-modal h4,
+:where(.panel-scope) .admin-rev-modal strong,
+:where(.panel-scope) .admin-rev-modal b,
+:where(.panel-scope) .admin-rev-modal button,
+:where(.panel-scope) .admin-rev-modal th,
+:where(.panel-scope) .admin-rev-modal label {
   font-weight: 650;
 }
 
 /* ---------- Encabezado ---------- */
-.admin-rev-modal .admin-rev-header {
+:where(.panel-scope) .admin-rev-modal .admin-rev-header {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -57,16 +57,16 @@
   padding: 24px 28px 20px;
   border: 0;
   border-bottom: 1px solid #eef2f6;
-  background: #fff;
+  background: var(--color-white);
 }
 
-.admin-rev-modal .admin-rev-header > div {
+:where(.panel-scope) .admin-rev-modal .admin-rev-header > div {
   min-width: 0;
 }
 
-.admin-rev-modal .admin-rev-kicker {
+:where(.panel-scope) .admin-rev-modal .admin-rev-kicker {
   display: block;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   font-size: 0.7rem;
   font-weight: 650;
   letter-spacing: 0.08em;
@@ -74,7 +74,7 @@
   text-transform: uppercase;
 }
 
-.admin-rev-modal .admin-rev-title {
+:where(.panel-scope) .admin-rev-modal .admin-rev-title {
   margin: 6px 0 0;
   color: #123b6d;
   font-size: 1.7rem;
@@ -84,7 +84,7 @@
   text-transform: none;
 }
 
-.admin-rev-modal .admin-rev-close {
+:where(.panel-scope) .admin-rev-modal .admin-rev-close {
   display: grid;
   width: 34px;
   height: 34px;
@@ -95,18 +95,18 @@
   border-radius: 10px;
   background: transparent;
   box-shadow: none;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   cursor: pointer;
   transform: none;
 }
 
-.admin-rev-modal .admin-rev-close:hover {
-  background: #f1f5f9;
-  color: #475569;
+:where(.panel-scope) .admin-rev-modal .admin-rev-close:hover {
+  background: var(--color-slate-100);
+  color: var(--color-slate-600);
   transform: none;
 }
 
-.admin-rev-modal .admin-rev-close svg {
+:where(.panel-scope) .admin-rev-modal .admin-rev-close svg {
   width: 20px;
   height: 20px;
   fill: none;
@@ -116,7 +116,7 @@
 }
 
 /* ---------- Cuerpo ---------- */
-.admin-rev-modal .admin-rev-body {
+:where(.panel-scope) .admin-rev-modal .admin-rev-body {
   display: flex;
   min-height: 0;
   flex: 1 1 auto;
@@ -124,58 +124,58 @@
   gap: 16px;
   overflow-y: auto;
   padding: 20px 28px;
-  background: #f8fafc;
+  background: var(--color-slate-50);
 }
 
-.admin-rev-modal .admin-rev-body > * {
+:where(.panel-scope) .admin-rev-modal .admin-rev-body > * {
   margin-top: 0;
   margin-bottom: 0;
 }
 
 /* Tarjeta blanca (también se aplica a cada celda de .admin-rev-grid). */
-.admin-rev-modal .admin-rev-card,
-.admin-rev-modal .admin-rev-grid > *,
-.admin-rev-modal .admin-cambios-card,
-.admin-rev-modal .admin-rev-meta {
+:where(.panel-scope) .admin-rev-modal .admin-rev-card,
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid > *,
+:where(.panel-scope) .admin-rev-modal .admin-cambios-card,
+:where(.panel-scope) .admin-rev-modal .admin-rev-meta {
   margin: 0;
   border: 1px solid #e6ebf2;
   border-radius: 14px;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 1px 2px rgb(15 23 42 / 4%);
 }
 
-.admin-rev-modal .admin-rev-card {
+:where(.panel-scope) .admin-rev-modal .admin-rev-card {
   padding: 18px 20px;
 }
 
 /* Tarjeta cuyo contenido ya trae su propio relleno (secciones con encabezado propio). */
-.admin-rev-modal .admin-rev-card.is-flush {
+:where(.panel-scope) .admin-rev-modal .admin-rev-card.is-flush {
   padding: 0;
   overflow: hidden;
 }
 
-.admin-rev-modal .admin-rev-grid {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
-.admin-rev-modal .admin-rev-grid > * {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid > * {
   min-width: 0;
   padding: 16px 18px;
 }
 
-.admin-rev-modal .admin-rev-grid h3,
-.admin-rev-modal .admin-rev-grid h4 {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid h3,
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid h4 {
   margin: 0 0 8px;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   font-size: 0.68rem;
   font-weight: 650;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
-.admin-rev-modal .admin-rev-grid p {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid p {
   margin: 0;
   color: #0b1b33;
   font-size: 0.92rem;
@@ -185,11 +185,11 @@
 }
 
 /* Tarjeta del título o nombre del contenido: el dato principal del modal, más grande que el resto. */
-.admin-rev-modal .admin-rev-grid > .is-title {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid > .is-title {
   padding: 18px 20px;
 }
 
-.admin-rev-modal .admin-rev-grid > .is-title p {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid > .is-title p {
   color: #0b1b33;
   font-size: 1.3rem;
   font-weight: 650;
@@ -198,176 +198,176 @@
 }
 
 /* Fila de datos sueltos (estado, editor, fechas) */
-.admin-rev-modal .admin-rev-meta {
+:where(.panel-scope) .admin-rev-modal .admin-rev-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 22px;
   padding: 14px 18px;
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.82rem;
 }
 
-.admin-rev-modal .admin-rev-meta strong {
+:where(.panel-scope) .admin-rev-modal .admin-rev-meta strong {
   color: #0b1b33;
 }
 
 /* ---------- Comparativa de cambios ---------- */
-.admin-rev-modal .admin-cambios-card {
+:where(.panel-scope) .admin-rev-modal .admin-cambios-card {
   padding: 18px 20px;
 }
 
-.admin-rev-modal .admin-cambios-title {
+:where(.panel-scope) .admin-rev-modal .admin-cambios-title {
   color: #0b1b33;
   font-size: 0.95rem;
 }
 
-.admin-rev-modal .admin-cambios-counter {
+:where(.panel-scope) .admin-rev-modal .admin-cambios-counter {
   background: #e8f1fd;
   color: #1d63c6;
   font-size: 0.68rem;
   font-weight: 650;
 }
 
-.admin-rev-modal .admin-cambios-desc {
-  color: #64748b;
+:where(.panel-scope) .admin-rev-modal .admin-cambios-desc {
+  color: var(--color-slate-500);
 }
 
-.admin-rev-modal .admin-cambio-item {
+:where(.panel-scope) .admin-rev-modal .admin-cambio-item {
   border-color: #e6ebf2;
   border-radius: 10px;
   box-shadow: none;
 }
 
-.admin-rev-modal .admin-cambio-label-bar {
+:where(.panel-scope) .admin-rev-modal .admin-cambio-label-bar {
   border-bottom-color: #e6ebf2;
-  background: #f8fafc;
+  background: var(--color-slate-50);
 }
 
-.admin-rev-modal .admin-cambio-label {
-  color: #64748b;
+:where(.panel-scope) .admin-rev-modal .admin-cambio-label {
+  color: var(--color-slate-500);
   font-size: 0.7rem;
   font-weight: 650;
 }
 
-.admin-rev-modal .admin-cambio-diff-grid {
+:where(.panel-scope) .admin-rev-modal .admin-cambio-diff-grid {
   padding: 14px;
 }
 
-.admin-rev-modal .admin-diff-box {
+:where(.panel-scope) .admin-rev-modal .admin-diff-box {
   padding: 12px 14px;
   border-radius: 10px;
 }
 
-.admin-rev-modal .admin-diff-box.before {
+:where(.panel-scope) .admin-rev-modal .admin-diff-box.before {
   border-color: #fde0e0;
   background: #fff5f5;
 }
 
-.admin-rev-modal .admin-diff-box.after {
+:where(.panel-scope) .admin-rev-modal .admin-diff-box.after {
   border-color: #c9efd9;
   background: #f1fcf6;
 }
 
-.admin-rev-modal .admin-diff-badge {
+:where(.panel-scope) .admin-rev-modal .admin-diff-badge {
   padding: 2px 6px;
   font-size: 0.62rem;
   font-weight: 650;
 }
 
 /* ---------- Avisos (archivado, programado, cambio de estado) ---------- */
-.admin-rev-modal .admin-rev-alert {
+:where(.panel-scope) .admin-rev-modal .admin-rev-alert {
   display: flex;
   align-items: center;
   gap: 10px;
   margin: 0;
   padding: 12px 16px;
-  border: 1px solid #fde68a;
+  border: 1px solid var(--color-amber-200);
   border-radius: 14px;
-  background: #fffbeb;
+  background: var(--color-amber-50);
   color: #92400e;
   font-size: 0.85rem;
   line-height: 1.45;
 }
 
-.admin-rev-modal .admin-rev-alert svg {
+:where(.panel-scope) .admin-rev-modal .admin-rev-alert svg {
   flex-shrink: 0;
-  color: #d97706;
+  color: var(--color-amber-600);
 }
 
-.admin-rev-modal .admin-rev-alert.is-info {
+:where(.panel-scope) .admin-rev-modal .admin-rev-alert.is-info {
   border-color: #cfe5fb;
-  background: #eff6ff;
-  color: #1e3a8a;
+  background: var(--color-blue-50);
+  color: var(--color-blue-900);
 }
 
-.admin-rev-modal .admin-rev-alert.is-info svg {
+:where(.panel-scope) .admin-rev-modal .admin-rev-alert.is-info svg {
   color: #1d63c6;
 }
 
 /* ---------- Rechazo ---------- */
-.admin-rev-modal .admin-rev-note {
+:where(.panel-scope) .admin-rev-modal .admin-rev-note {
   margin: 0;
   padding: 14px 18px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-red-200);
   border-radius: 14px;
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--color-red-50);
+  color: var(--color-red-800);
   font-size: 0.85rem;
 }
 
-.admin-rev-modal .admin-rev-note label {
+:where(.panel-scope) .admin-rev-modal .admin-rev-note label {
   display: block;
   color: inherit;
   font-size: 0.85rem;
 }
 
-.admin-rev-modal .admin-rev-note p {
+:where(.panel-scope) .admin-rev-modal .admin-rev-note p {
   margin: 5px 0 0;
   line-height: 1.5;
 }
 
-.admin-rev-modal .admin-rev-field {
+:where(.panel-scope) .admin-rev-modal .admin-rev-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin: 0;
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 0.85rem;
 }
 
-.admin-rev-modal .admin-rev-field b {
-  color: #b91c1c;
+:where(.panel-scope) .admin-rev-modal .admin-rev-field b {
+  color: var(--color-red-700);
 }
 
-.admin-rev-modal textarea {
+:where(.panel-scope) .admin-rev-modal textarea {
   font-weight: 400;
 }
 
-.admin-rev-modal .admin-rev-field textarea {
+:where(.panel-scope) .admin-rev-modal .admin-rev-field textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 12px 14px;
-  border: 1px solid #fca5a5;
+  border: 1px solid var(--color-red-300);
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-white);
   color: #0b1b33;
   font: inherit;
   font-weight: 400;
   resize: vertical;
 }
 
-.admin-rev-modal .admin-rev-field textarea:focus {
-  border-color: #ef4444;
+:where(.panel-scope) .admin-rev-modal .admin-rev-field textarea:focus {
+  border-color: var(--color-red-500);
   outline: 2px solid rgb(239 68 68 / 15%);
 }
 
 /* ---------- Solicitud de eliminación ---------- */
-.admin-rev-modal .admin-rev-solicitud {
+:where(.panel-scope) .admin-rev-modal .admin-rev-solicitud {
   flex: 0 0 auto;
 }
 
-.admin-rev-modal .solelim-bloque {
+:where(.panel-scope) .admin-rev-modal .solelim-bloque {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -379,14 +379,14 @@
   background: #faf5ff;
 }
 
-.admin-rev-modal .solelim-aviso {
+:where(.panel-scope) .admin-rev-modal .solelim-aviso {
   grid-column: 1;
   grid-row: 1;
   align-items: center;
   gap: 12px;
 }
 
-.admin-rev-modal .solelim-aviso svg {
+:where(.panel-scope) .admin-rev-modal .solelim-aviso svg {
   width: 40px;
   height: 40px;
   box-sizing: border-box;
@@ -397,36 +397,36 @@
   color: #7e22ce;
 }
 
-.admin-rev-modal .solelim-aviso strong {
+:where(.panel-scope) .admin-rev-modal .solelim-aviso strong {
   font-size: 0.92rem;
 }
 
-.admin-rev-modal .solelim-aviso p {
-  color: #64748b;
+:where(.panel-scope) .admin-rev-modal .solelim-aviso p {
+  color: var(--color-slate-500);
   font-size: 0.78rem;
   line-height: 1.4;
 }
 
-.admin-rev-modal .solelim-acciones {
+:where(.panel-scope) .admin-rev-modal .solelim-acciones {
   grid-column: 2;
   grid-row: 1;
   flex-wrap: nowrap;
   gap: 8px;
 }
 
-.admin-rev-modal .solelim-advertencia,
-.admin-rev-modal .solelim-motivo {
+:where(.panel-scope) .admin-rev-modal .solelim-advertencia,
+:where(.panel-scope) .admin-rev-modal .solelim-motivo {
   grid-column: 1 / -1;
   grid-row: 2;
 }
 
 /* Si hay que escribir un motivo o confirmar, los botones pasan debajo. */
-.admin-rev-modal .solelim-bloque:has(.solelim-advertencia, .solelim-motivo) .solelim-acciones {
+:where(.panel-scope) .admin-rev-modal .solelim-bloque:has(.solelim-advertencia, .solelim-motivo) .solelim-acciones {
   grid-column: 1 / -1;
   grid-row: 3;
 }
 
-.admin-rev-modal .solelim-btn {
+:where(.panel-scope) .admin-rev-modal .solelim-btn {
   padding: 8px 14px;
   border-radius: 9px;
   font-size: 0.8rem;
@@ -434,14 +434,14 @@
   white-space: nowrap;
 }
 
-.admin-rev-modal .solelim-btn.is-danger {
+:where(.panel-scope) .admin-rev-modal .solelim-btn.is-danger {
   border-color: #fdd0d8;
   background: #fff1f3;
-  color: #e11d48;
+  color: var(--color-rose-600);
 }
 
 /* ---------- Pie y botones ---------- */
-.admin-rev-modal .admin-rev-footer {
+:where(.panel-scope) .admin-rev-modal .admin-rev-footer {
   display: flex;
   flex: 0 0 auto;
   flex-wrap: wrap;
@@ -452,10 +452,10 @@
   padding: 16px 28px 20px;
   border: 0;
   border-top: 1px solid #eef2f6;
-  background: #fff;
+  background: var(--color-white);
 }
 
-.admin-rev-modal .admin-rev-button {
+:where(.panel-scope) .admin-rev-modal .admin-rev-button {
   display: inline-flex;
   min-height: 44px;
   align-items: center;
@@ -464,9 +464,9 @@
   padding: 0 20px;
   border: 1px solid transparent;
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: none;
-  color: #334155;
+  color: var(--color-slate-700);
   cursor: pointer;
   font: inherit;
   font-size: 0.86rem;
@@ -476,96 +476,96 @@
   transform: none;
 }
 
-.admin-rev-modal .admin-rev-button:hover:not(:disabled) {
+:where(.panel-scope) .admin-rev-modal .admin-rev-button:hover:not(:disabled) {
   box-shadow: none;
   transform: none;
 }
 
-.admin-rev-modal .admin-rev-button:disabled {
+:where(.panel-scope) .admin-rev-modal .admin-rev-button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-.admin-rev-modal .admin-rev-button.is-primary {
-  border-color: #0f172a;
-  background: #0f172a;
-  color: #fff;
+:where(.panel-scope) .admin-rev-modal .admin-rev-button.is-primary {
+  border-color: var(--color-slate-900);
+  background: var(--color-slate-900);
+  color: var(--color-white);
 }
 
-.admin-rev-modal .admin-rev-button.is-primary:hover:not(:disabled) {
-  border-color: #1e293b;
-  background: #1e293b;
+:where(.panel-scope) .admin-rev-modal .admin-rev-button.is-primary:hover:not(:disabled) {
+  border-color: var(--color-slate-800);
+  background: var(--color-slate-800);
 }
 
-.admin-rev-modal .admin-rev-button.is-danger {
+:where(.panel-scope) .admin-rev-modal .admin-rev-button.is-danger {
   border-color: #fdd0d8;
-  background: #fff;
-  color: #e11d48;
+  background: var(--color-white);
+  color: var(--color-rose-600);
 }
 
-.admin-rev-modal .admin-rev-button.is-danger:hover:not(:disabled) {
+:where(.panel-scope) .admin-rev-modal .admin-rev-button.is-danger:hover:not(:disabled) {
   background: #fff1f3;
 }
 
-.admin-rev-modal .admin-rev-button.is-secondary {
-  border-color: #cbd5e1;
-  background: #fff;
-  color: #334155;
+:where(.panel-scope) .admin-rev-modal .admin-rev-button.is-secondary {
+  border-color: var(--color-slate-300);
+  background: var(--color-white);
+  color: var(--color-slate-700);
 }
 
-.admin-rev-modal .admin-rev-button.is-secondary:hover:not(:disabled) {
-  background: #f1f5f9;
+:where(.panel-scope) .admin-rev-modal .admin-rev-button.is-secondary:hover:not(:disabled) {
+  background: var(--color-slate-100);
 }
 
-.admin-rev-modal .admin-rev-button:focus-visible,
-.admin-rev-modal .admin-rev-close:focus-visible {
+:where(.panel-scope) .admin-rev-modal .admin-rev-button:focus-visible,
+:where(.panel-scope) .admin-rev-modal .admin-rev-close:focus-visible {
   outline: 2px solid #006eb3;
   outline-offset: 2px;
 }
 
 /* ---------- Celular: el modal sube desde abajo ---------- */
 @media (max-width: 650px) {
-  .admin-rev-overlay.admin-rev-overlay {
+  :where(.panel-scope) .admin-rev-overlay.admin-rev-overlay {
     align-items: flex-end;
     padding: 0;
   }
 
-  .admin-rev-modal.admin-rev-modal {
+  :where(.panel-scope) .admin-rev-modal.admin-rev-modal {
     max-height: 92vh;
     border-radius: 20px 20px 0 0;
   }
 
-  .admin-rev-modal .admin-rev-header,
-  .admin-rev-modal .admin-rev-body,
-  .admin-rev-modal .admin-rev-footer {
+  :where(.panel-scope) .admin-rev-modal .admin-rev-header,
+  :where(.panel-scope) .admin-rev-modal .admin-rev-body,
+  :where(.panel-scope) .admin-rev-modal .admin-rev-footer {
     padding-right: 18px;
     padding-left: 18px;
   }
 
-  .admin-rev-modal .admin-rev-grid {
+  :where(.panel-scope) .admin-rev-modal .admin-rev-grid {
     grid-template-columns: 1fr;
   }
 
-  .admin-rev-modal .admin-rev-title {
+  :where(.panel-scope) .admin-rev-modal .admin-rev-title {
     font-size: 1.4rem;
   }
 
-  .admin-rev-modal .solelim-bloque {
+  :where(.panel-scope) .admin-rev-modal .solelim-bloque {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .admin-rev-modal .solelim-acciones {
+  :where(.panel-scope) .admin-rev-modal .solelim-acciones {
     grid-column: 1;
     grid-row: auto;
     justify-content: flex-end;
   }
 
-  .admin-rev-modal .solelim-advertencia,
-  .admin-rev-modal .solelim-motivo {
+  :where(.panel-scope) .admin-rev-modal .solelim-advertencia,
+  :where(.panel-scope) .admin-rev-modal .solelim-motivo {
     grid-row: auto;
   }
 
-  .admin-rev-modal .admin-rev-footer .admin-rev-button {
+  :where(.panel-scope) .admin-rev-modal .admin-rev-footer .admin-rev-button {
     flex: 1 1 auto;
   }
 }

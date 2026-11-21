@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 import logoCompletoBlanco from "../../assets/logo-completo-blanco.png";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const AdminSidebar = ({
   activeTab,
@@ -63,7 +64,7 @@ const AdminSidebar = ({
         <div className="admin-logo-container-inner">
           <div 
             className="admin-logo"
-            onClick={() => setActiveTab && setActiveTab("dashboard")}
+            onClick={() => setActiveTab && setActiveTab("dashboard")} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setActiveTab && setActiveTab("dashboard"))}
             style={{ cursor: "pointer" }}
             title="Hospital Interdistrital Evita Formosa"
           >
@@ -114,7 +115,7 @@ const AdminSidebar = ({
               {!isGeneral && !isCollapsed && (
                 <div 
                   className={`admin-nav-group-header ${isExpanded ? "active" : ""}`}
-                  onClick={() => handleToggleSection(section.title)}
+                  onClick={() => handleToggleSection(section.title)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleToggleSection(section.title))}
                 >
                   <span className="admin-nav-group-title">{section.title}</span>
                   <ChevronDown size={16} className="accordion-icon" />
@@ -126,7 +127,7 @@ const AdminSidebar = ({
                   <li
                     key={item.id}
                     className={activeTab === item.id ? "active" : ""}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => setActiveTab(item.id)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setActiveTab(item.id))}
                     title={isCollapsed ? item.label : ""}
                   >
                     <div className="admin-nav-item-left">

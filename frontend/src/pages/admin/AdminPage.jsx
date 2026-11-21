@@ -25,6 +25,7 @@ import AdminCapacitacionesView from '../admin/AdminCapacitacionesView';
 import AdminResidenciasView from '../admin/AdminResidenciasView';
 import AdminContenidoGraficoView from '../admin/AdminContenidoGraficoView';
 import AdminInstitucionalView from '../admin/AdminInstitucionalView';
+import { usePageMeta } from "../../hooks/usePageMeta.js";
 
 const SECCIONES_ADMIN = [
   "dashboard", "noticias", "documentacion", "servicios", "profesionales",
@@ -32,6 +33,7 @@ const SECCIONES_ADMIN = [
 ];
 
 const AdminPage = () => {
+  usePageMeta("Panel de administración");
   // La sección activa sale de la URL (/admin/noticias, /admin/profesionales...).
   const { seccion } = useParams();
   const navigate = useNavigate();
@@ -160,7 +162,7 @@ const AdminPage = () => {
 
   if (!initialized) {
     return (
-      <div style={{ 
+      <div className="panel-scope" style={{ 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center', 
@@ -198,7 +200,7 @@ const AdminPage = () => {
 
   if (!authenticated) {
     return (
-      <div style={{ 
+      <div className="panel-scope" style={{ 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center', 
@@ -244,7 +246,7 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="admin-layout">
+    <div className="admin-layout panel-scope">
       <AdminSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}

@@ -6,8 +6,10 @@ import AnimatedContent from "../../components/ui/AnimatedContent";
 
 // Usamos la imagen de la fachada para ilustrar la sección del edificio
 import fotoEdificio from "../../assets/fotoFachadaHIE.jpg"; 
+import { usePageMeta } from "../../hooks/usePageMeta.js";
 
 const PlanoInstitucionalPage = () => {
+  usePageMeta("Plano del hospital", "Plano interactivo del Hospital Interdistrital Evita: ubicación de servicios, guardia y consultorios.");
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);

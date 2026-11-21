@@ -6,8 +6,11 @@ import PageBanner from "../../components/PageBanner";
 import fondoBannerEsp from "../../assets/banner_especialidades.png";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import { getEspecialidades } from "../../api/especialidades.api.js";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const EspecialidadesPage = () => {
+  usePageMeta("Especialidades y servicios", "Especialidades y servicios del Hospital Interdistrital Evita: horarios, requisitos, ubicación y cómo derivar pacientes.");
   const [currentView, setCurrentView] = useState("menu");
   const [selectedItem, setSelectedItem] = useState(null);
   
@@ -116,7 +119,7 @@ const EspecialidadesPage = () => {
               >
                 <div
                   className="menu-card"
-                  onClick={() => setCurrentView("grilla-esp")}
+                  onClick={() => setCurrentView("grilla-esp")} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setCurrentView("grilla-esp"))}
                 >
                   <div className="menu-card-icon">
                     <svg
@@ -145,7 +148,7 @@ const EspecialidadesPage = () => {
               >
                 <div
                   className="menu-card"
-                  onClick={() => setCurrentView("grilla-serv")}
+                  onClick={() => setCurrentView("grilla-serv")} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setCurrentView("grilla-serv"))}
                 >
                   <div className="menu-card-icon">
                     <svg
@@ -207,7 +210,7 @@ const EspecialidadesPage = () => {
                   <div
                     key={item.id}
                     className="specialty-card"
-                    onClick={() => setSelectedItem(item)}
+                    onClick={() => setSelectedItem(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setSelectedItem(item))}
                     style={{ overflow: "hidden", display: "flex", flexDirection: "column", padding: "30px 15px", alignItems: "center", justifyContent: "center" }}
                   >
                     <h3 style={{ margin: 0, textAlign: "center" }}>{item.nombre}</h3>

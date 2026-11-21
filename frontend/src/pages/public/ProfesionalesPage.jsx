@@ -8,6 +8,8 @@ import "../../styles/pages/ProfesionalesPage.css";
 import PageBanner from "../../components/PageBanner";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import { getProfesionales } from "../../api/profesionales.api";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const normalizeText = (text) => {
   if (!text) return "";
@@ -70,7 +72,7 @@ const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
           >
             {slides.map((prof, i) => (
               <SwiperSlide key={`${prof.id}-${i}`} style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
-                <article className="doctor-card" onClick={() => onSelectProf(prof)}>
+                <article className="doctor-card" onClick={() => onSelectProf(prof)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectProf(prof))}>
                   <div className="doctor-image-container">
                     {prof.imagenUrl ? (
                       <img src={prof.imagenUrl} alt={`${prof.nombre} ${prof.apellido}`} className="doctor-photo" loading="lazy" />
@@ -120,6 +122,7 @@ const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
 };
 
 const ProfesionalesPage = () => {
+  usePageMeta("Profesionales", "Equipo de profesionales del Hospital Interdistrital Evita, organizado por especialidad.");
   const [profesionalesDb, setProfesionalesDb] = useState([]);
   const [loading, setLoading] = useState(true);
   

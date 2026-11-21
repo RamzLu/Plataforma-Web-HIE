@@ -22,7 +22,7 @@
 .etiqueta-estado.is-pendiente {
   border-color: #fde3cf;
   background: #fff4ec;
-  color: #b45309;
+  color: var(--color-amber-700);
 }
 
 .etiqueta-estado.is-programado {
@@ -34,7 +34,7 @@
 .etiqueta-estado.is-publicado {
   border-color: #c9efd4;
   background: #e6f8ec;
-  color: #15803d;
+  color: var(--color-green-700);
 }
 
 .etiqueta-estado.is-rechazado {

@@ -15,15 +15,15 @@
   /* Fondo degradado suave continuo que nace del Footer y sube difuminándose hacia la cabecera */
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
-    #f8fafc 24%,
+    var(--color-white) 0%,
+    var(--color-slate-50) 24%,
     #e9ebee calc(100% - 700px),
     #a4c2d6 calc(100% - 420px),
-    #2b5b94 calc(100% - 170px),
-    #0d4077 100%
+    var(--color-secondary) calc(100% - 170px),
+    var(--color-secondary-dark) 100%
   );
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: #0d223f;
+  font-family: var(--font-sans);
+  color: var(--color-primary-soft);
 }
 
 /* Marca de agua decorativa en fondo continuo (estrellas del hospital Evita, sin recortes) */
@@ -81,7 +81,7 @@
 .profesionales-page .public-page-banner-inner {
   max-width: 1240px !important;
   margin: 0 auto !important;
-  border-left: 6px solid #2b5b94 !important;
+  border-left: 6px solid var(--color-secondary) !important;
   padding-left: 36px !important;
   display: flex !important;
   flex-direction: column !important;
@@ -91,8 +91,8 @@
 
 .prof-main-title,
 .profesionales-page .public-page-banner-title {
-  color: #2b5b94 !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: var(--color-secondary) !important;
+  font-family: var(--font-sans) !important;
   font-size: 3.2rem !important;
   font-weight: 300 !important; /* Tipografía delgada reglamentaria */
   text-transform: uppercase !important;
@@ -103,8 +103,8 @@
 
 .prof-subtitle,
 .profesionales-page .public-page-banner-subtitle {
-  color: #64748b !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: var(--color-slate-500) !important;
+  font-family: var(--font-sans) !important;
   font-size: 1.12rem !important;
   font-weight: 400 !important;
   line-height: 1.5 !important;
@@ -141,7 +141,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  background: #ffffff;
+  background: var(--color-white);
   border: none;
   border-radius: 9999px;
   padding: 8px 12px 8px 24px;
@@ -157,7 +157,7 @@
 }
 
 .search-icon {
-  color: #2b5b94;
+  color: var(--color-secondary);
   flex-shrink: 0;
   margin-right: 14px;
 }
@@ -168,13 +168,13 @@
   outline: none;
   font-size: 15.5px;
   font-family: inherit;
-  color: #0c2340;
+  color: var(--color-primary);
   background: transparent;
   height: 100%;
 }
 
 .search-input-field::placeholder {
-  color: #94a3b8;
+  color: var(--color-slate-400);
 }
 
 .filter-dropdowns-row {
@@ -195,8 +195,8 @@
   padding: 10px 40px 10px 20px;
   border-radius: 9999px;
   border: none;
-  background-color: #ffffff;
-  color: #0c2340;
+  background-color: var(--color-white);
+  color: var(--color-primary);
   font-size: 14px;
   font-family: inherit;
   font-weight: 600;
@@ -221,16 +221,16 @@
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #2b5b94;
+  color: var(--color-secondary);
 }
 
 .btn-reset-filters {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #ffffff;
+  background: var(--color-white);
   border: none;
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
@@ -243,8 +243,8 @@
 }
 
 .btn-reset-filters:hover {
-  background-color: #2b5b94;
-  color: #ffffff;
+  background-color: var(--color-secondary);
+  color: var(--color-white);
   box-shadow: 0 8px 20px -2px rgba(43, 91, 148, 0.22);
   transform: translateY(-1px);
 }
@@ -266,7 +266,7 @@
   align-items: center;
   gap: 8px;
   background-color: rgba(43, 91, 148, 0.09);
-  color: #2b5b94;
+  color: var(--color-secondary);
   padding: 7px 18px;
   border-radius: 9999px;
   font-size: 13.5px;
@@ -279,7 +279,7 @@
 .active-specialty-title {
   font-size: 2.6rem;
   font-weight: 300 !important; /* Tipografía delgada estricta */
-  color: #2b5b94;
+  color: var(--color-secondary);
   letter-spacing: -0.02em;
   margin: 0 0 8px 0;
   text-transform: uppercase;
@@ -287,7 +287,7 @@
 
 .active-specialty-subtitle {
   font-size: 15px;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin: 0;
   font-weight: 500;
 }
@@ -312,9 +312,9 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: 1px solid rgba(209, 217, 224, 0.6);
-  color: #2b5b94;
+  color: var(--color-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -325,9 +325,9 @@
 }
 
 .carousel-nav-btn:hover {
-  background-color: #2b5b94;
-  border-color: #2b5b94;
-  color: #ffffff;
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-white);
   transform: translateY(-50%) scale(1.08);
   box-shadow: 0 10px 25px rgba(43, 91, 148, 0.3);
 }
@@ -350,7 +350,7 @@
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-radius: 24px;
   overflow: hidden;
   border: none;
@@ -378,7 +378,7 @@
   position: relative;
   width: 100%;
   height: 300px;
-  background-color: #cbd5e1;
+  background-color: var(--color-slate-300);
   overflow: hidden;
   transition: height 0.35s ease;
   border-radius: 24px 24px 0 0;
@@ -398,11 +398,11 @@
 .doctor-photo-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, #94a3b8 0%, #475569 100%);
+  background: linear-gradient(180deg, var(--color-slate-400) 0%, var(--color-slate-600) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .license-pill {
@@ -416,7 +416,7 @@
   border-radius: 9999px;
   background-color: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
-  color: #0c2340;
+  color: var(--color-primary);
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -425,13 +425,13 @@
 }
 
 .swiper-slide-active .license-pill {
-  background-color: #ffffff;
-  color: #0c2340;
+  background-color: var(--color-white);
+  color: var(--color-primary);
   box-shadow: 0 4px 14px rgba(12, 35, 64, 0.15);
 }
 
 .license-icon {
-  color: #2b5b94;
+  color: var(--color-secondary);
   display: flex;
   align-items: center;
 }
@@ -442,7 +442,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   text-align: center;
   transition: padding 0.3s ease;
 }
@@ -454,7 +454,7 @@
 .doctor-name {
   font-size: 17.5px;
   font-weight: 800;
-  color: #0d223f;
+  color: var(--color-primary-soft);
   margin: 0;
   line-height: 1.25;
   transition: font-size 0.3s ease;
@@ -467,12 +467,12 @@
 .doctor-role {
   font-size: 13.5px;
   line-height: 1.5;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin: 0;
 }
 
 .swiper-slide-active .doctor-role {
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 14px;
 }
 
@@ -491,8 +491,8 @@
   align-items: center;
   gap: 12px;
   padding: 15px 34px;
-  background-color: #ffffff;
-  color: #0d4077;
+  background-color: var(--color-white);
+  color: var(--color-secondary-dark);
   border: 1.5px solid rgba(255, 255, 255, 0.9);
   border-radius: 9999px;
   font-size: 15px;
@@ -505,7 +505,7 @@
 
 .btn-explore-specialties:hover {
   background-color: #f0f7ff;
-  color: #0284c7;
+  color: var(--color-sky-600);
   transform: translateY(-3px);
   box-shadow: 0 18px 38px -4px rgba(12, 35, 64, 0.5);
 }
@@ -516,7 +516,7 @@
 }
 
 .btn-explore-specialties:hover .explore-icon {
-  color: #0284c7;
+  color: var(--color-sky-600);
   transform: translateY(-2px);
 }
 
@@ -532,7 +532,7 @@
   background-color: rgba(12, 35, 64, 0.65); 
   backdrop-filter: blur(12px); 
   -webkit-backdrop-filter: blur(12px);
-  z-index: 99999 !important; /* Prioridad máxima sobre el Navbar */
+  z-index: var(--z-modal-top) !important; /* Prioridad máxima sobre el Navbar */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -542,7 +542,7 @@
 }
 
 .prof-modal-content {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-radius: 26px;
   box-shadow: 0 30px 60px -12px rgba(12, 35, 64, 0.28), 0 12px 24px -6px rgba(12, 35, 64, 0.12);
   max-width: 500px;
@@ -565,10 +565,10 @@
   height: 220px;      
   border-radius: 50%;
   overflow: hidden;
-  border: 6px solid #f8fafc;
+  border: 6px solid var(--color-slate-50);
   box-shadow: 0 10px 25px rgba(12, 35, 64, 0.12); 
   margin-bottom: 22px;
-  background-color: #94a3b8;
+  background-color: var(--color-slate-400);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -582,14 +582,14 @@
 }
 
 .prof-modal-name {
-  color: #0c2340;
+  color: var(--color-primary);
   font-size: 1.85rem;
   font-weight: 500;
   margin: 0 0 6px 0;
 }
 
 .prof-modal-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 1.1rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -598,18 +598,18 @@
 }
 
 .prof-modal-matricula-text {
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 0.9rem;
   font-weight: 700;
   margin: 0 0 16px 0;
-  background-color: #f1f5f9;
+  background-color: var(--color-slate-100);
   padding: 5px 14px;
   border-radius: 9999px;
 }
 
 .prof-modal-specialty {
   background-color: rgba(43, 91, 148, 0.09);
-  color: #2b5b94;
+  color: var(--color-secondary);
   padding: 7px 18px;
   border-radius: 9999px;
   font-size: 0.95rem;
@@ -620,7 +620,7 @@
 }
 
 .prof-modal-desc {
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 1.02rem;
   line-height: 1.6;
   font-weight: 400;
@@ -628,8 +628,8 @@
 }
 
 .btn-cerrar-modal {
-  background: linear-gradient(135deg, #0d4077 0%, #2b5b94 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-secondary-dark) 0%, var(--color-secondary) 100%);
+  color: var(--color-white);
   border: none;
   padding: 13px 36px;
   border-radius: 9999px;

@@ -38,6 +38,7 @@ import {
   CmsConfirmDraftModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 registerLocale("es", es);
 
@@ -668,7 +669,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div
                         className="news-title-interactive"
-                        onClick={() => onViewNews && onViewNews(news)}
+                        onClick={() => onViewNews && onViewNews(news)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onViewNews && onViewNews(news))}
                         title="Ver comunicado completo"
                       >
                         <span className="activity-title news-title-clamped">
@@ -691,7 +692,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                       {isRejected && (
                         <div
                           className="news-rejection-warning-pill"
-                          onClick={() => handleOpenCorrection(news)}
+                          onClick={() => handleOpenCorrection(news)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenCorrection(news))}
                           title="Haga clic para ver el motivo del rechazo y corregir la noticia"
                         >
                           <svg
@@ -757,7 +758,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                       {isRejected ? (
                         <span
                           className="status-badge rejected"
-                          onClick={() => handleOpenCorrection(news)}
+                          onClick={() => handleOpenCorrection(news)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenCorrection(news))}
                           title="Haga clic para corregir la noticia"
                         >
                           • RECHAZADO

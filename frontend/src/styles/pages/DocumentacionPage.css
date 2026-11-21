@@ -13,14 +13,14 @@
   /* Fondo degradado suave que nace del Footer y sube fundiéndose con la página (Estilo Home/Especialidades/Noticias) */
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
-    #f8fafc 24%,
+    var(--color-white) 0%,
+    var(--color-slate-50) 24%,
     #e9ebee calc(100% - 700px),
     #a4c2d6 calc(100% - 420px),
-    #2b5b94 calc(100% - 170px),
-    #0d4077 100%
+    var(--color-secondary) calc(100% - 170px),
+    var(--color-secondary-dark) 100%
   );
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Marca de agua decorativa en fondo continuo (estrellas del hospital Evita, cero cortes) */
@@ -72,7 +72,7 @@
 .doc-header-inner {
   width: 100%;
   max-width: 1500px;
-  border-left: 8px solid #2b5b94;
+  border-left: 8px solid var(--color-secondary);
   padding-left: 40px;
   display: flex;
   flex-direction: column;
@@ -80,7 +80,7 @@
 }
 
 .doc-title-page {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 3.2rem;
   font-weight: 300;
   text-transform: uppercase;
@@ -94,7 +94,7 @@
 }
 
 .doc-info-text p {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 1.15rem;
   font-weight: 400;
   margin: 0;
@@ -134,8 +134,8 @@
 .doc-search-bar {
   display: flex;
   align-items: center;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0; 
+  background-color: var(--color-white);
+  border: 1px solid var(--color-slate-200); 
   border-radius: 50px;
   padding: 13px 10px 12px 20px; 
   width: 100%;
@@ -146,13 +146,13 @@
 
 .doc-search-bar:focus-within {
   box-shadow: 0 6px 15px rgba(43, 91, 148, 0.08);
-  border-color: #cbd5e1;
+  border-color: var(--color-slate-300);
 }
 
 .doc-search-icon {
   width: 18px; 
   height: 18px;
-  color: #94a3b8; 
+  color: var(--color-slate-400); 
   margin-right: 12px;
   flex-shrink: 0;
 }
@@ -162,14 +162,14 @@
   border: none;
   outline: none;
   font-size: 0.95rem; 
-  color: #334155;
+  color: var(--color-slate-700);
   background: transparent;
   font-family: inherit;
   width: 100%;
 }
 
 .doc-search-input::placeholder {
-  color: #cbd5e1;
+  color: var(--color-slate-300);
   font-style: normal; 
   font-weight: 400;
 }
@@ -197,14 +197,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: none; 
   padding: 10px 22px;
   border-radius: 50px; 
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #64748b; 
+  color: var(--color-slate-500); 
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: all 0.2s ease;
@@ -212,14 +212,14 @@
 }
 
 .filter-chip:hover {
-  background-color: #f1f5f9;
-  color: #2b5b94;
+  background-color: var(--color-slate-100);
+  color: var(--color-secondary);
   transform: translateY(-1px);
 }
 
 .filter-chip.active {
-  background-color: #2b5b94; 
-  color: #ffffff; 
+  background-color: var(--color-secondary); 
+  color: var(--color-white); 
   box-shadow: 0 4px 10px rgba(43, 91, 148, 0.2); 
 }
 
@@ -255,7 +255,7 @@
   padding: 16px 80px;
   align-items: center;
   gap: 15px;
-  background-color: #2b5b94;
+  background-color: var(--color-secondary);
   border-radius: 12px;
   margin-bottom: 10px;
   box-shadow: 0 4px 12px rgba(43, 91, 148, 0.15);
@@ -263,7 +263,7 @@
 }
 
 .header-col {
-  color: #ffffff; 
+  color: var(--color-white); 
   font-weight: 600; 
   font-size: 0.85rem; 
   display: flex;
@@ -287,9 +287,9 @@
   padding: 22px 80px; 
   align-items: center;
   gap: 15px;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-radius: 16px; 
-  border: 1px solid #f1f5f9; 
+  border: 1px solid var(--color-slate-100); 
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02); 
   transition: all 0.3s ease; 
   box-sizing: border-box;
@@ -298,7 +298,7 @@
 .doc-row:hover {
   transform: translateY(-2px); 
   box-shadow: 0 12px 25px -5px rgba(43, 91, 148, 0.15); 
-  border-color: #cbd5e1;
+  border-color: var(--color-slate-300);
 }
 
 /* --- TÍTULO MULTILÍNEA --- */
@@ -313,13 +313,13 @@
   height: 44px;
   min-width: 44px;
   border-radius: 13px;
-  background: linear-gradient(135deg, #f0f7fd 0%, #dbeafe 100%);
+  background: linear-gradient(135deg, #f0f7fd 0%, var(--color-blue-100) 100%);
   border: 1px solid rgba(191, 219, 254, 0.7);
   box-shadow: 0 4px 10px -2px rgba(43, 91, 148, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2b5b94;
+  color: var(--color-secondary);
   flex-shrink: 0;
 }
 
@@ -341,7 +341,7 @@
 }
 
 .titulo-text {
-  color: #0f172a; 
+  color: var(--color-slate-900); 
   font-size: 1.1rem; 
   font-weight: 600;
   margin: 0;
@@ -353,13 +353,13 @@
 }
 
 .titulo-text:hover {
-  color: #2b5b94;
+  color: var(--color-secondary);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .col-data {
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 1rem;
   font-weight: 400;
   display: flex;
@@ -397,27 +397,27 @@
 
 /* COLORES ESTILO CAPTURA (CELSTE / VERDE / AMARILLO PASTEL) */
 .cat-guia {
-  background-color: #fffbeb !important; 
-  color: #d97706 !important; 
-  border-color: #fde68a !important;
+  background-color: var(--color-amber-50) !important; 
+  color: var(--color-amber-600) !important; 
+  border-color: var(--color-amber-200) !important;
 }
 
 .cat-inst {
-  background-color: #f0f9ff !important; 
-  color: #0284c7 !important; 
-  border-color: #bae6fd !important;
+  background-color: var(--color-sky-50) !important; 
+  color: var(--color-sky-600) !important; 
+  border-color: var(--color-sky-200) !important;
 }
 
 .cat-prev {
-  background-color: #f0fdf4 !important; 
+  background-color: var(--color-green-50) !important; 
   color: #16a34a !important; 
-  border-color: #bbf7d0 !important;
+  border-color: var(--color-green-200) !important;
 }
 
 .cat-default {
-  background-color: #f8fafc !important; 
-  color: #475569 !important; 
-  border-color: #e2e8f0 !important;
+  background-color: var(--color-slate-50) !important; 
+  color: var(--color-slate-600) !important; 
+  border-color: var(--color-slate-200) !important;
 }
 
 .date-text {
@@ -433,7 +433,7 @@
 .btn-descargar-pill {
   width: 140px; 
   background-color: #eaf6fc;
-  color: #2b5b94;
+  color: var(--color-secondary);
   border: none;
   padding: 10px 0; 
   border-radius: 50px; 
@@ -450,8 +450,8 @@
 }
 
 .btn-descargar-pill:hover {
-  background-color: #2b5b94;
-  color: #ffffff;
+  background-color: var(--color-secondary);
+  color: var(--color-white);
   box-shadow: 0 6px 15px rgba(43, 91, 148, 0.25);
   transform: translateY(-1px);
 }
@@ -475,9 +475,9 @@
 }
 
 .btn-paginacion-arrow {
-  background-color: #ffffff;
-  border: 2px solid #cbd5e1;
-  color: #2b5b94;
+  background-color: var(--color-white);
+  border: 2px solid var(--color-slate-300);
+  color: var(--color-secondary);
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -491,26 +491,26 @@
 }
 
 .btn-paginacion-arrow:hover:not(:disabled) {
-  background-color: #2b5b94;
-  color: #ffffff;
-  border-color: #2b5b94;
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  border-color: var(--color-secondary);
 }
 
 .btn-paginacion-arrow:disabled {
-  color: #cbd5e1;
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
+  color: var(--color-slate-300);
+  background-color: var(--color-slate-50);
+  border-color: var(--color-slate-200);
   cursor: not-allowed;
 }
 
 .pagination-info {
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 1.05rem;
   font-weight: 600;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   padding: 8px 20px;
   border-radius: 50px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
 }
 
 /* =========================================
@@ -526,7 +526,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   .doc-row:active {
-    background-color: #f8fafc;
+    background-color: var(--color-slate-50);
   }
   .doc-search-spacer { display: none; } /* En móvil se oculta el espaciador */
   .col-titulo { margin-bottom: 10px; }
@@ -537,7 +537,7 @@
   .col-data::before {
     content: attr(data-label) ": ";
     font-weight: 700;
-    color: #2b5b94;
+    color: var(--color-secondary);
     margin-right: 8px;
   }
   .col-acciones {

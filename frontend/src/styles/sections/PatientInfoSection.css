@@ -1,11 +1,11 @@
 .patient-section {
   width: 100%;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   padding: 90px 24px;
   display: flex;
   justify-content: center;
   box-sizing: border-box;
-  font-family: "Manrope", system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
 }
 
 .patient-container {
@@ -24,7 +24,7 @@
 }
 
 .subtitle-dark {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 1.4px;
@@ -33,7 +33,7 @@
 }
 
 .title-blue {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2.2rem;
   font-weight: 300;
   letter-spacing: 1.5px;
@@ -63,7 +63,7 @@
 }
 
 .accordion-clean-item {
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   border: 1px solid rgba(226, 232, 240, 0.85);
   border-radius: 20px;
   padding: 0 22px;
@@ -76,7 +76,7 @@
 }
 
 .accordion-clean-item:hover {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-color: rgba(43, 91, 148, 0.35);
   transform: translateY(-3px);
   box-shadow:
@@ -85,7 +85,7 @@
 }
 
 .accordion-clean-item.active {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-color: rgba(43, 91, 148, 0.42);
   box-shadow:
     0 18px 34px -10px rgba(43, 91, 148, 0.16),
@@ -103,7 +103,7 @@
   gap: 16px;
   font-size: 0.94rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--color-slate-700);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
@@ -121,11 +121,11 @@
 }
 
 .accordion-clean-header:hover {
-  color: #0c2340;
+  color: var(--color-primary);
 }
 
 .accordion-clean-item.active .accordion-clean-header {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-weight: 700;
 }
 
@@ -134,9 +134,9 @@
   height: 34px;
   padding: 8px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: 1px solid rgba(226, 232, 240, 0.9);
-  color: #2b5b94;
+  color: var(--color-secondary);
   flex-shrink: 0;
   box-sizing: border-box;
   box-shadow: 0 2px 8px rgba(12, 35, 64, 0.05);
@@ -145,16 +145,16 @@
 
 .accordion-clean-header:hover .accordion-clean-arrow {
   transform: scale(1.15);
-  background-color: #2b5b94;
-  border-color: #2b5b94;
-  color: #ffffff;
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-white);
 }
 
 .accordion-clean-item.active .accordion-clean-arrow {
   transform: rotate(90deg) scale(1.08);
-  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
-  border-color: #2b5b94;
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  border-color: var(--color-secondary);
+  color: var(--color-white);
   box-shadow: 0 6px 14px rgba(43, 91, 148, 0.28);
 }
 
@@ -165,7 +165,7 @@
 .accordion-clean-content {
   padding: 2px 0 22px 0;
   border-top: 1px solid rgba(226, 232, 240, 0.75);
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 0.95rem;
   line-height: 1.65;
   animation: accordionFadeSlide 0.32s cubic-bezier(0.25, 1, 0.5, 1) forwards;

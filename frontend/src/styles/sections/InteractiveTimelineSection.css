@@ -1,16 +1,10 @@
 .timeline-interactive-section {
   width: 100%;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   padding: 40px 20px 80px 20px;
   display: flex;
   justify-content: center;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
   box-sizing: border-box;
 }
 
@@ -36,7 +30,7 @@
 }
 
 .timeline-header-tag {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 1.5px;
@@ -44,7 +38,7 @@
 }
 
 .timeline-header-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2.2rem;
   font-weight: 300; /* Grosor delgado reglamentario */
   letter-spacing: 1.5px;
@@ -70,8 +64,8 @@
 }
 
 .year-tab-btn {
-  background-color: #ffffff;
-  color: #0d223f;
+  background-color: var(--color-white);
+  color: var(--color-primary-soft);
   border: none;
   border-radius: 50px;
   padding: 11px 26px;
@@ -90,12 +84,12 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: var(--accent-color, #2b5b94);
+  background-color: var(--accent-color, var(--color-secondary));
   transition: transform 0.25s ease;
 }
 
 .year-tab-btn:hover {
-  color: var(--accent-color, #2b5b94);
+  color: var(--accent-color, var(--color-secondary));
   transform: translateY(-2px);
   box-shadow: 0 8px 22px rgba(43, 91, 148, 0.14);
 }
@@ -103,7 +97,7 @@
 .year-tab-btn.active {
   background-color: #eaf6fc;
   border: none;
-  color: #0c2340;
+  color: var(--color-primary);
   box-shadow: 0 8px 24px rgba(43, 91, 148, 0.18);
   transform: translateY(-2px);
 }
@@ -135,7 +129,7 @@
   background-color: rgba(2, 31, 66, 0.78);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: #ffffff;
+  color: var(--color-white);
   border-radius: 50px;
   font-size: 0.78rem;
   font-weight: 600;
@@ -161,7 +155,7 @@
 /* Tarjeta de Detalle Soft UI */
 .timeline-detail-card {
   width: 100%;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: none;
   border-radius: 24px;
   overflow: hidden;
@@ -174,7 +168,7 @@
   width: 100%;
   height: 220px;
   position: relative;
-  background-color: #e2e8f0;
+  background-color: var(--color-slate-200);
   border-radius: 24px 24px 0 0;
   overflow: hidden;
 }
@@ -190,7 +184,7 @@
   position: absolute;
   bottom: 14px;
   right: 14px;
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 0.95rem;
   font-weight: 700;
   padding: 5px 16px;
@@ -215,7 +209,7 @@
 }
 
 .detail-title {
-  color: #0c2340;
+  color: var(--color-primary);
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
@@ -223,7 +217,7 @@
 }
 
 .detail-desc {
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 1.05rem;
   font-weight: 400;
   line-height: 1.6;

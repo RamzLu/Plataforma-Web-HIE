@@ -1,12 +1,12 @@
 :root {
   --hf-navy-dark: #081226;
-  --hf-navy-card: #0d223f;
+  --hf-navy-card: var(--color-primary-soft);
   --hf-navy-border: #1a355b;
-  --hf-blue-accent: #0284c7;
-  --hf-blue-light: #38bdf8;
-  --hf-text-main: #ffffff;
-  --hf-text-secondary: #94a3b8;
-  --hf-text-muted: #64748b;
+  --hf-blue-accent: var(--color-sky-600);
+  --hf-blue-light: var(--color-sky-400);
+  --hf-text-main: var(--color-white);
+  --hf-text-secondary: var(--color-slate-400);
+  --hf-text-muted: var(--color-slate-500);
   --hf-border-divider: rgba(255, 255, 255, 0.1);
   --hf-radius-lg: 12px;
   --hf-radius-md: 10px;
@@ -15,16 +15,16 @@
 /* Contenedor Global del Footer */
 .hospital-footer {
   width: 100%;
-  /* Degradado concentrado: nace en #0d4077 (donde termina el Home) y se intensifica */
+  /* Degradado concentrado: nace en var(--color-secondary-dark) (donde termina el Home) y se intensifica */
   background: linear-gradient(
     180deg,
-    #0d4077 0%,
-    #0c2340 38%,
+    var(--color-secondary-dark) 0%,
+    var(--color-primary) 38%,
     #0a1a33 70%,
     var(--hf-navy-dark) 100%
   );
   color: var(--hf-text-main);
-  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
@@ -127,19 +127,19 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: #0284c7;
+  color: var(--color-sky-600);
 }
 
 .logo-text-center {
   font-size: 16px;
   font-weight: 800;
-  color: #0d223f;
+  color: var(--color-primary-soft);
 }
 
 .logo-text-bottom {
   font-size: 15px;
   font-weight: 800;
-  color: #0d223f;
+  color: var(--color-primary-soft);
 }
 
 .footer-brand-mission {
@@ -190,7 +190,7 @@
   -webkit-backdrop-filter: blur(10px);
   border: none;
   border-radius: 50px;
-  color: #ffffff;
+  color: var(--color-white);
   text-decoration: none;
   box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.35);
   transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
@@ -220,7 +220,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--color-white);
   flex-shrink: 0;
   transition: transform 0.2s ease, background-color 0.2s ease;
 }
@@ -241,7 +241,7 @@
 .social-title {
   font-size: 13px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .social-handle {
@@ -256,7 +256,7 @@
 }
 
 .social-card-btn:hover .social-arrow-icon {
-  color: #ffffff;
+  color: var(--color-white);
   transform: translateX(3px);
 }
 
@@ -293,12 +293,12 @@
 
 .bottom-copyright {
   font-size: 13px;
-  color: #cbd5e1;
+  color: var(--color-slate-300);
 }
 
 .bottom-copyright strong {
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .bottom-subtext {

@@ -19,14 +19,14 @@
   /* Fondo degradado suave que nace del Footer y sube fundiéndose con la página (Estilo Home/Especialidades) */
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
-    #f8fafc 24%,
+    var(--color-white) 0%,
+    var(--color-slate-50) 24%,
     #e9ebee calc(100% - 700px),
     #a4c2d6 calc(100% - 420px),
-    #2b5b94 calc(100% - 170px),
-    #0d4077 100%
+    var(--color-secondary) calc(100% - 170px),
+    var(--color-secondary-dark) 100%
   );
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Marca de agua decorativa en fondo continuo (estrellas del hospital Evita, cero cortes) */
@@ -82,7 +82,7 @@
 .noticias-page .public-page-banner-inner {
   max-width: 1240px !important;
   margin: 0 auto !important;
-  border-left: 6px solid #2b5b94 !important;
+  border-left: 6px solid var(--color-secondary) !important;
   padding-left: 36px !important;
   display: flex !important;
   flex-direction: column !important;
@@ -92,8 +92,8 @@
 
 .news-main-title,
 .noticias-page .public-page-banner-title {
-  color: #2b5b94 !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: var(--color-secondary) !important;
+  font-family: var(--font-sans) !important;
   font-size: 3.2rem !important;
   font-weight: 300 !important;
   text-transform: uppercase !important;
@@ -104,8 +104,8 @@
 
 .news-info-text p,
 .noticias-page .public-page-banner-subtitle {
-  color: #64748b !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: var(--color-slate-500) !important;
+  font-family: var(--font-sans) !important;
   font-size: 1.12rem !important;
   font-weight: 400 !important;
   line-height: 1.5 !important;
@@ -148,7 +148,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: #ffffff;
+  background-color: var(--color-white);
   color: #006eb3;
   border: 1px solid #d1d9e0;
   border-radius: 50%;
@@ -165,9 +165,9 @@
 }
 
 .slider-arrow:hover {
-  background-color: #2b5b94;
-  color: #ffffff;
-  border-color: #2b5b94;
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  border-color: var(--color-secondary);
   transform: translateY(-50%) scale(1.06);
   box-shadow: 0 8px 22px rgba(43, 91, 148, 0.25);
 }
@@ -184,7 +184,7 @@
   max-width: 320px;
   width: 320px;
   flex: 0 0 320px;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: none;
   border-radius: 22px;
   box-shadow: 0 10px 25px -4px rgba(12, 35, 64, 0.07), 0 4px 12px -2px rgba(12, 35, 64, 0.03);
@@ -210,11 +210,11 @@
   width: 45px;
   height: 45px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -228,7 +228,7 @@
 .post-meta h3 {
   margin: 0 0 3px 0;
   font-size: 0.95rem;
-  color: #0c2340;
+  color: var(--color-primary);
   font-weight: 700;
   line-height: 1.2;
 }
@@ -249,11 +249,11 @@
 
 .full-news-title {
   font-size: 1.1rem;
-  color: #0c2340;
+  color: var(--color-primary);
   font-weight: 700;
   margin: 0 0 10px 0;
   line-height: 1.3;
-  word-break: break-all;
+  overflow-wrap: anywhere; /* corta solo si la palabra no entra entera */
   overflow-wrap: break-word;
   width: 100%;
   display: -webkit-box;
@@ -264,10 +264,10 @@
 
 .clamped-text {
   font-size: 0.95rem;
-  color: #334155;
+  color: var(--color-slate-700);
   margin: 0 0 15px 0;
   line-height: 1.4;
-  word-break: break-all;
+  overflow-wrap: anywhere; /* corta solo si la palabra no entra entera */
   overflow-wrap: break-word;
   width: 100%;
 
@@ -355,7 +355,7 @@
   background-color: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 999999 !important;
+  z-index: var(--z-modal-top) !important; /* debajo de la galería (--z-lightbox) que se abre desde el modal */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -369,7 +369,7 @@
 }
 
 .news-modal-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 1.35rem;
   font-weight: 700;
   line-height: 1.35;
@@ -418,7 +418,7 @@
   max-height: 100%;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   cursor: pointer;
   flex-shrink: 0;
   transition:
@@ -441,8 +441,8 @@
   padding: 20px 35px 25px 35px; 
   display: flex;
   justify-content: center;
-  background-color: #ffffff; 
-  border-top: 1px solid #e2e8f0; 
+  background-color: var(--color-white); 
+  border-top: 1px solid var(--color-slate-200); 
   flex-shrink: 0; 
   z-index: 10;
 }
@@ -483,7 +483,7 @@
 }
 
 .medical-subtitle {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -494,12 +494,12 @@
 .medical-divider {
   width: 45px;
   height: 2px;
-  background-color: #2b5b94;
+  background-color: var(--color-secondary);
   margin: 15px 0 20px 0;
 }
 
 .medical-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 4.5rem;
   font-weight: 300;
   line-height: 1.05;
@@ -509,7 +509,7 @@
 }
 
 .mini-carousel-card {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   padding: 16px;
   border-radius: 22px;
   box-shadow: 0 10px 30px -5px rgba(12, 35, 64, 0.08);
@@ -558,9 +558,9 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: #f8fafc;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background-color: var(--color-slate-50);
+  color: var(--color-slate-500);
+  border: 1px solid var(--color-slate-200);
   border-radius: 50%;
   width: 35px;
   height: 35px;
@@ -575,8 +575,8 @@
 }
 
 .mini-arrow:hover {
-  background-color: #e2e8f0;
-  color: #0c2340;
+  background-color: var(--color-slate-200);
+  color: var(--color-primary);
 }
 
 .mini-left {
@@ -589,7 +589,7 @@
 .mini-caption {
   margin-top: 15px;
   font-size: 0.95rem;
-  color: #334155;
+  color: var(--color-slate-700);
   font-weight: 400;
   text-align: center;
 }
@@ -605,13 +605,13 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #cbd5e1;
+  background-color: var(--color-slate-300);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .mini-dot.active {
-  background-color: #475569;
+  background-color: var(--color-slate-600);
 }
 
 
@@ -624,7 +624,7 @@
 }
 
 .article-card {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border: none; 
   border-radius: 24px;
   padding: 30px 20px;
@@ -650,13 +650,7 @@
 }
 
 .article-card h3 {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
   font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
@@ -707,7 +701,7 @@
 }
 
 .modal-content-esp {
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   width: 100%;
   max-width: 860px;
   max-height: 90vh;
@@ -722,9 +716,9 @@
 
 
 .modal-header-esp {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   padding: 24px 35px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-slate-200);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -732,7 +726,7 @@
 }
 
 .modal-header-esp h2 {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 1.6rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -744,7 +738,7 @@
 .btn-close-modal {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -784,9 +778,9 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: #ffffff;
-  color: #2b5b94;
-  border: 1px solid #cbd5e1;
+  background-color: var(--color-white);
+  color: var(--color-secondary);
+  border: 1px solid var(--color-slate-300);
   border-radius: 50%;
   width: 38px;
   height: 38px;
@@ -807,9 +801,9 @@
 }
 
 .modal-arrow:hover {
-  background-color: #2b5b94;
-  color: #ffffff;
-  border-color: #2b5b94;
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  border-color: var(--color-secondary);
   transform: translateY(-50%) scale(1.1);
   box-shadow: 0 6px 16px rgba(43, 91, 148, 0.3);
 }
@@ -827,17 +821,17 @@
 }
 
 .modal-body-esp::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--color-slate-100);
   border-radius: 4px;
 }
 
 .modal-body-esp::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--color-slate-300);
   border-radius: 4px;
 }
 
 .modal-body-esp::-webkit-scrollbar-thumb:hover {
-  background: #2b5b94;
+  background: var(--color-secondary);
 }
 
 
@@ -869,7 +863,7 @@
   width: 100%;
   height: auto;
   max-height: calc(90vh - 160px);
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   box-shadow: 0 8px 20px -4px rgba(12, 35, 64, 0.12);
   position: sticky;
   top: 0;
@@ -888,7 +882,7 @@
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #0c2340;
+  background-color: var(--color-primary);
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -952,7 +946,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 2.2rem;
   font-weight: 800;
   backdrop-filter: blur(3px);
@@ -964,19 +958,19 @@
   align-items: center;
   gap: 12px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-slate-200);
 }
 
 .author-meta h3 {
   margin: 0 0 2px 0;
   font-size: 0.98rem;
-  color: #0c2340;
+  color: var(--color-primary);
   font-weight: 700;
 }
 
 .author-meta span {
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--color-slate-500);
   font-weight: 500;
 }
 
@@ -1004,19 +998,19 @@
   height: 300px; 
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease;
-  background-color: #ffffff;
+  background-color: var(--color-white);
 }
 
 .modal-campaign-img:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 20px rgba(43, 91, 148, 0.18);
-  border-color: #2b5b94;
+  border-color: var(--color-secondary);
 }
 
 .modal-campaign-img img {
@@ -1052,7 +1046,7 @@
   background-color: rgba(0, 0, 0, 0.9);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  z-index: 100000 !important;
+  z-index: var(--z-lightbox) !important;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1072,7 +1066,7 @@
   font-size: 3rem;
   font-weight: 300;
   cursor: pointer;
-z-index: 100010 !important;
+z-index: var(--z-lightbox-controls) !important;
   line-height: 1;
   transition: color 0.2s;
 }
@@ -1115,12 +1109,12 @@ z-index: 100010 !important;
   align-items: center;
   cursor: pointer;
   transition: background-color 0.3s;
-  z-index: 100020 !important;;
+  z-index: var(--z-lightbox-controls-top) !important;;
 }
 
 .lightbox-arrow:hover {
   background-color: rgba(255, 255, 255, 0.9);
-  color: #0c2340;
+  color: var(--color-primary);
 }
 
 .lb-left {
@@ -1184,12 +1178,12 @@ z-index: 100010 !important;
 
 .news-modal-body-text blockquote,
 .clamped-text blockquote {
-  border-left: 4px solid #0c2340; 
-  background-color: #f8fafc;      
+  border-left: 4px solid var(--color-primary); 
+  background-color: var(--color-slate-50);      
   padding: 12px 16px;
   margin: 15px 0;
   font-style: italic;
-  color: #475569;
+  color: var(--color-slate-600);
   border-radius: 0 8px 8px 0;
 }
 
@@ -1229,8 +1223,8 @@ z-index: 100010 !important;
   position: absolute;
   top: -12px;
   right: -10px;
-  background-color: #ef4444; /* Rojo vibrante */
-  color: #ffffff;
+  background-color: var(--color-red-500); /* Rojo vibrante */
+  color: var(--color-white);
   font-size: 0.75rem;
   font-weight: 800;
   padding: 4px 10px;
@@ -1238,7 +1232,7 @@ z-index: 100010 !important;
   box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
   z-index: 10;
   letter-spacing: 0.5px;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--color-white);
   animation: pulse-badge 2s infinite;
 }
 

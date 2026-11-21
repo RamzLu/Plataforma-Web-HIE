@@ -69,6 +69,7 @@ import {
   CmsConfirmDraftModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de residencias de la BD
@@ -1425,7 +1426,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     ) : (
                       <div
                         className={`res-file-upload-zone ${isDraggingBanner ? "drag-active" : ""}`}
-                        onClick={() => bannerInputRef.current?.click()}
+                        onClick={() => bannerInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => bannerInputRef.current?.click())}
                         onDragOver={(e) => {
                           e.preventDefault();
                           setIsDraggingBanner(true);
@@ -1563,7 +1564,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     ) : (
                       <div
                         className={`res-file-upload-zone ${isDraggingDoc ? "drag-active" : ""}`}
-                        onClick={() => docInputRef.current?.click()}
+                        onClick={() => docInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => docInputRef.current?.click())}
                         onDragOver={(e) => {
                           e.preventDefault();
                           setIsDraggingDoc(true);

@@ -25,14 +25,14 @@
   /* Fondo degradado suave que nace del Footer y sube fundiéndose con la página */
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
-    #f8fafc 24%,
+    var(--color-white) 0%,
+    var(--color-slate-50) 24%,
     #e9ebee calc(100% - 700px),
     #a4c2d6 calc(100% - 420px),
-    #2b5b94 calc(100% - 170px),
-    #0d4077 100%
+    var(--color-secondary) calc(100% - 170px),
+    var(--color-secondary-dark) 100%
   );
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Marca de agua decorativa en fondo continuo (estrellas del hospital Evita, cero cortes) */
@@ -79,7 +79,7 @@
 
 .res-hero-card {
   width: 100%;
-  background: #ffffff;
+  background: var(--color-white);
   border-radius: 26px;
   overflow: hidden;
   box-shadow: var(--res-shadow-rest);
@@ -108,7 +108,7 @@
 }
 
 .res-hero-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2.35rem;
   font-weight: 300;
   line-height: 1.25;
@@ -123,7 +123,7 @@
 }
 
 .res-hero-description {
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 1.05rem;
   font-weight: 400;
   line-height: 1.7;
@@ -136,8 +136,8 @@
   align-items: center;
   gap: 12px;
   padding: 13px 30px;
-  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  color: var(--color-white);
   border-radius: 50px;
   font-size: 0.95rem;
   font-weight: 600;
@@ -152,7 +152,7 @@
   background: linear-gradient(135deg, #1d4677 0%, #092a50 100%);
   transform: translateY(-2px);
   box-shadow: 0 12px 28px -4px rgba(43, 91, 148, 0.45);
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .res-hero-btn-arrow {
@@ -168,7 +168,7 @@
   width: 100%;
   min-height: 380px;
   overflow: hidden;
-  background-color: #f1f5f9;
+  background-color: var(--color-slate-100);
 }
 
 .res-hero-img {
@@ -201,7 +201,7 @@
 }
 
 .res-section-eyebrow {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -210,7 +210,7 @@
 }
 
 .res-section-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 2.2rem;
   font-weight: 300;
   letter-spacing: 1px;
@@ -220,7 +220,7 @@
 }
 
 .res-section-subtitle {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 1.05rem;
   font-weight: 400;
   margin: 0;
@@ -240,7 +240,7 @@
 
 .res-card {
   width: 100%;
-  background: #ffffff;
+  background: var(--color-white);
   border-radius: 24px;
   overflow: hidden;
   border: none;
@@ -256,7 +256,7 @@
 
 /* Encabezado Azul Institucional de la Tarjeta */
 .res-card-header {
-  background: linear-gradient(135deg, #2b5b94 0%, #1b3b6f 100%);
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #1b3b6f 100%);
   padding: 20px 32px;
   display: flex;
   justify-content: space-between;
@@ -274,7 +274,7 @@
 }
 
 .res-card-title {
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 1.55rem;
   font-weight: 600;
   margin: 0;
@@ -286,7 +286,7 @@
 .res-header-toggle-btn {
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 0.88rem;
   font-weight: 600;
   padding: 8px 22px;
@@ -303,7 +303,7 @@
 
 .res-header-toggle-btn:hover {
   background: rgba(255, 255, 255, 0.32);
-  border-color: #ffffff;
+  border-color: var(--color-white);
   transform: translateY(-1px);
 }
 
@@ -316,7 +316,7 @@
 /* Línea de Metadatos */
 .res-meta-line {
   font-size: 0.94rem;
-  color: #475569;
+  color: var(--color-slate-600);
   line-height: 1.6;
   margin-bottom: 14px;
   display: flex;
@@ -327,16 +327,16 @@
 
 .res-meta-category-label {
   font-weight: 700;
-  color: #0c2340;
+  color: var(--color-primary);
 }
 
 .res-meta-dot {
   margin: 0 4px;
-  color: #94a3b8;
+  color: var(--color-slate-400);
 }
 
 .res-meta-date {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-weight: 600;
 }
 
@@ -346,8 +346,8 @@
   align-items: center;
   padding: 4px 14px;
   border-radius: 50px;
-  background: #e0f2fe;
-  color: #0284c7;
+  background: var(--color-sky-100);
+  color: var(--color-sky-600);
   font-weight: 700;
   font-size: 0.82rem;
   letter-spacing: 0.3px;
@@ -356,7 +356,7 @@
 
 /* Copete / Resumen breve */
 .res-copete {
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 1rem;
   line-height: 1.65;
   margin: 0 0 24px 0;
@@ -372,8 +372,8 @@
 
 /* Botón 'Descargar' (Píldora Azul Institucional) */
 .res-btn-download {
-  background: linear-gradient(135deg, #2b5b94 0%, #0d4077 100%);
-  color: #ffffff !important;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  color: var(--color-white) !important;
   border: none;
   border-radius: 50px;
   padding: 10px 24px;
@@ -392,13 +392,13 @@
   background: linear-gradient(135deg, #1d4677 0%, #092a50 100%);
   transform: translateY(-2px);
   box-shadow: 0 10px 24px -3px rgba(43, 91, 148, 0.38);
-  color: #ffffff !important;
+  color: var(--color-white) !important;
 }
 
 /* Botón 'Ver requisitos y rotación' (Píldora Suave) */
 .res-btn-toggle-req {
   background: #f0f7ff;
-  color: #2b5b94;
+  color: var(--color-secondary);
   border: 1px solid rgba(43, 91, 148, 0.2);
   border-radius: 50px;
   padding: 10px 22px;
@@ -412,9 +412,9 @@
 }
 
 .res-btn-toggle-req:hover {
-  background: #e0f2fe;
-  border-color: #2b5b94;
-  color: #0d4077;
+  background: var(--color-sky-100);
+  border-color: var(--color-secondary);
+  color: var(--color-secondary-dark);
   transform: translateY(-2px);
 }
 
@@ -454,7 +454,7 @@
 
 /* Títulos con íconos de subsección */
 .res-subheading {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 1.05rem;
   font-weight: 700;
   margin: 0 0 12px 0;
@@ -464,7 +464,7 @@
 }
 
 .res-program-description {
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 0.96rem;
   line-height: 1.65;
   margin: 0 0 24px 0;
@@ -479,7 +479,7 @@
 }
 
 .res-stat-box {
-  background: #f8fafc;
+  background: var(--color-slate-50);
   border: 1px solid #eef2f6;
   border-radius: 18px;
   padding: 16px 20px;
@@ -496,7 +496,7 @@
 }
 
 .res-stat-label {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.6px;
@@ -504,7 +504,7 @@
 }
 
 .res-stat-value {
-  color: #0c2340;
+  color: var(--color-primary);
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.35;
@@ -525,12 +525,12 @@
   align-items: flex-start;
   gap: 12px;
   font-size: 0.94rem;
-  color: #334155;
+  color: var(--color-slate-700);
   line-height: 1.55;
 }
 
 .res-check-icon {
-  color: #2b5b94;
+  color: var(--color-secondary);
   flex-shrink: 0;
   margin-top: 3px;
 }
@@ -541,7 +541,7 @@
   height: 200px;
   border-radius: 18px;
   overflow: hidden;
-  background: #f1f5f9;
+  background: var(--color-slate-100);
   margin-bottom: 18px;
   border: none;
   box-shadow: 0 6px 18px rgba(12, 35, 64, 0.06);
@@ -561,14 +561,14 @@
 }
 
 .res-rotation-title {
-  color: #2b5b94;
+  color: var(--color-secondary);
   font-size: 1.05rem;
   font-weight: 700;
   margin: 0 0 8px 0;
 }
 
 .res-rotation-desc {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.92rem;
   line-height: 1.6;
   margin: 0 0 20px 0;
@@ -577,7 +577,7 @@
 /* Botón Descargar Programa PDF (Píldora) */
 .res-btn-program-pdf {
   background: #f0f7ff;
-  color: #2b5b94 !important;
+  color: var(--color-secondary) !important;
   border: 1px solid rgba(43, 91, 148, 0.25);
   border-radius: 50px;
   padding: 12px 24px;
@@ -595,9 +595,9 @@
 }
 
 .res-btn-program-pdf:hover {
-  background: #2b5b94;
-  color: #ffffff !important;
-  border-color: #2b5b94;
+  background: var(--color-secondary);
+  color: var(--color-white) !important;
+  border-color: var(--color-secondary);
   transform: translateY(-2px);
   box-shadow: 0 8px 22px rgba(43, 91, 148, 0.25);
 }
@@ -610,10 +610,10 @@
   width: 100%;
   padding: 64px 24px;
   text-align: center;
-  background: #ffffff;
+  background: var(--color-white);
   border-radius: 24px;
   border: none;
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 1.05rem;
   box-shadow: var(--res-shadow-rest);
   box-sizing: border-box;

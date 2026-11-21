@@ -22,6 +22,8 @@ import imgAlta1 from "../../assets/fondoCARRUSELnoticiasCM.jpg";
 import imgAlta2 from "../../assets/fondoCARRUSELnoticias2.jpg";
 import imgAlta3 from "../../assets/fondoCARRUSELnoticias3.jpg";
 import imgAlta4 from "../../assets/fondoCARRUSELnoticias4.jpg";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const categoriasDestacadas = [
   { id: 1, title: "CÁNCER DE MAMA", slug: "cancer-mama", color: "#005c89", icon: iconMamaStatic, iconAnimated: iconMama },
@@ -79,7 +81,7 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
       </div>
       <div className="full-news-images">
         {news.images && news.images.length > 0 && news.images[0] ? (
-          <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => onOpenLightbox(news.images, 0)} />
+          <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => onOpenLightbox(news.images, 0)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onOpenLightbox(news.images, 0))} />
         ) : (
           <DefaultNewsImage alt={news.title} onClick={() => onOpenNews(news)} />
         )}
@@ -89,6 +91,7 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
 };
 
 const NoticiasPage = () => {
+  usePageMeta("Noticias", "Novedades, comunicados y campañas de salud del Hospital Interdistrital Evita de Formosa.");
   const sliderRef = useRef(null);
   const { hash } = useLocation();
   const navigate = useNavigate();
@@ -239,7 +242,7 @@ const NoticiasPage = () => {
               <p className="mini-caption">{miniCarouselData[altaIndex].caption}</p>
               <div className="mini-dots">
                 {miniCarouselData.map((_, idx) => (
-                  <div key={idx} className={`mini-dot ${altaIndex === idx ? "active" : ""}`} onClick={() => setAltaIndex(idx)} />
+                  <div key={idx} className={`mini-dot ${altaIndex === idx ? "active" : ""}`} onClick={() => setAltaIndex(idx)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setAltaIndex(idx))} />
                 ))}
               </div>
             </div>
@@ -314,7 +317,7 @@ const NoticiasPage = () => {
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
                     const fotosRestantes = selectedNews.images.length - 4;
                     return (
-                      <div key={index} className="mosaic-item" onClick={() => openLightbox(selectedNews.images, index)}>
+                      <div key={index} className="mosaic-item" onClick={() => openLightbox(selectedNews.images, index)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => openLightbox(selectedNews.images, index))}>
                         <img src={img} alt={`Foto noticia ${index + 1}`} />
                         {isLastAndHidden && <div className="mosaic-overlay"><span>+{fotosRestantes}</span></div>}
                       </div>
@@ -332,7 +335,7 @@ const NoticiasPage = () => {
       )}
 
       {lightbox.isOpen && (
-        <div className="lightbox-overlay" style={{ zIndex: 999999 }} onClick={closeLightbox}>
+        <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>&times;</button>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             {lightbox.images.length > 1 && (

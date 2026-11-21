@@ -3,7 +3,7 @@
   display: flex !important;
   align-items: center !important;
   flex-wrap: wrap !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-family: var(--font-sans) !important;
   font-size: 0.95rem !important;
   font-weight: 500 !important;
   text-transform: uppercase !important;
@@ -13,26 +13,26 @@
 }
 
 .breadcrumb-link {
-  color: #2b5b94 !important;
+  color: var(--color-secondary) !important;
   text-decoration: none !important;
   font-weight: 700 !important;
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .breadcrumb-link:hover {
-  color: #0c2340 !important;
+  color: var(--color-primary) !important;
   text-decoration: underline !important;
 }
 
 .breadcrumb-separator {
   margin: 0 10px !important;
-  color: #94a3b8 !important;
+  color: var(--color-slate-400) !important;
   font-weight: 400 !important;
   user-select: none !important;
 }
 
 .breadcrumb-current {
-  color: #0c2340 !important;
+  color: var(--color-primary) !important;
   font-weight: 600 !important;
 }
 

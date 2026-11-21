@@ -9,6 +9,8 @@ import imgCapacitacion1 from "../../assets/fondoCARRUSELnoticias2.jpg";
 import imgCapacitacion2 from "../../assets/fondoCARRUSELnoticias3.jpg";
 import { getCapacitacionesPublicas } from "../../api/capacitaciones.api";
 import { sanitizeUrl } from "../../utils/sanitizeUrl";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const capacitacionesData = [
   {
@@ -287,6 +289,7 @@ const parseVideoUrl = (url) => {
 };
 
 const CapacitacionPage = () => {
+  usePageMeta("Capacitación", "Cursos, jornadas y recursos de capacitación para profesionales de la salud del Hospital Interdistrital Evita.");
   const [capacitaciones, setCapacitaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -568,7 +571,7 @@ const CapacitacionPage = () => {
                       <article
                         className="training-card group"
                         data-category={item.tipo}
-                        onClick={() => setSelectedCurso(item)}
+                        onClick={() => setSelectedCurso(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setSelectedCurso(item))}
                       >
                         <div className="training-card-top">
                           <div className="training-media-container">

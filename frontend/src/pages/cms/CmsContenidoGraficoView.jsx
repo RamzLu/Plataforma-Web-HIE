@@ -23,6 +23,7 @@ import {
   getPortalRouteLabel,
   resolveGraphicImageUrl,
 } from "../../utils/contenidoGraficoPresets.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CmsContenidoGraficoView = () => {
   const [espacios, setEspacios] = useState([
@@ -367,7 +368,7 @@ const CmsContenidoGraficoView = () => {
                       <div className="cg-recurso-box">
                         <div
                           className="cg-thumb-container"
-                          onClick={() => handleOpenPreview(item)}
+                          onClick={() => handleOpenPreview(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenPreview(item))}
                           title="Clic para previsualizar cómo se ve en el portal"
                         >
                           {coverImg ? (
@@ -393,7 +394,7 @@ const CmsContenidoGraficoView = () => {
                             <span
                               className="cg-info-title"
                               title={item.nombre}
-                              onClick={() => handleOpenModify(item)}
+                              onClick={() => handleOpenModify(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenModify(item))}
                             >
                               {item.nombre}
                             </span>
@@ -407,7 +408,7 @@ const CmsContenidoGraficoView = () => {
                           {isRejected && item.rejectionReason && (
                             <div
                               className="cg-rejection-warning-pill"
-                              onClick={() => handleOpenModify(item)}
+                              onClick={() => handleOpenModify(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenModify(item))}
                               title="Hacer clic para ver motivo de rechazo y corregir"
                             >
                               <span

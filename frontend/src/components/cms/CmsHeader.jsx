@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CmsHeader = ({ userName, onLogoutClick, activeTab }) => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -57,7 +58,7 @@ const CmsHeader = ({ userName, onLogoutClick, activeTab }) => {
           
           <div 
             className="cms-user-profile" 
-            onClick={() => setShowDropdown(!showDropdown)}
+            onClick={() => setShowDropdown(!showDropdown)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setShowDropdown(!showDropdown))}
             style={{ 
               cursor: 'pointer', 
               display: 'flex', 

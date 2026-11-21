@@ -33,7 +33,7 @@ import {
 import '../../styles/pages/admin/AdminResidenciasView.css';
 
 const STATUS_LABELS = {
-  PENDIENTE_APROBACION: 'Pendiente de revisión',
+  PENDIENTE_APROBACION: 'Pendiente de aprobación',
   APROBADO: 'Aprobada',
   PUBLICADO: 'Publicada',
   RECHAZADO: 'Rechazada',

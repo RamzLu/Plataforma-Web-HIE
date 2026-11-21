@@ -10,6 +10,7 @@ import {
   normalizeInternalPortalPath,
   resolveGraphicImageUrl,
 } from "../../utils/contenidoGraficoPresets.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CARRUSEL_INICIO_ASPECT = 1501 / 641;
 const PACIENTES_INICIO_ASPECT = 4 / 3;
@@ -370,7 +371,7 @@ export const PortalAprendePreview = ({
           className={`cg-portal-aprende-left ${
             isMainSelected ? "is-selected" : ""
           } ${onSelectItem ? "is-clickable" : ""}`}
-          onClick={() => onSelectItem && onSelectItem(0)}
+          onClick={() => onSelectItem && onSelectItem(0)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectItem && onSelectItem(0))}
           title={
             onSelectItem
               ? "Clic para editar la imagen principal y el encabezado"
@@ -396,7 +397,7 @@ export const PortalAprendePreview = ({
             className={`cg-portal-aprende-text-block ${
               isMainSelected ? "is-selected" : ""
             } ${onSelectItem ? "is-clickable" : ""}`}
-            onClick={() => onSelectItem && onSelectItem(0)}
+            onClick={() => onSelectItem && onSelectItem(0)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectItem && onSelectItem(0))}
             title={
               onSelectItem
                 ? "Clic para editar subtítulo, título y párrafo descriptivo"
@@ -445,7 +446,7 @@ export const PortalAprendePreview = ({
                   className={`cg-portal-aprende-card ${
                     isCardSelected ? "is-selected" : ""
                   } ${onSelectItem ? "is-clickable" : ""}`}
-                  onClick={() => onSelectItem && onSelectItem(itemIndex)}
+                  onClick={() => onSelectItem && onSelectItem(itemIndex)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectItem && onSelectItem(itemIndex))}
                   title={
                     onSelectItem
                       ? `Clic para editar la Tarjeta #${itemIndex}`
@@ -560,7 +561,7 @@ export const PortalResidenciasHeroPreview = ({
         className={`cg-portal-residencias-media ${
           onSelectImage ? "is-clickable" : ""
         }`}
-        onClick={() => onSelectImage && onSelectImage()}
+        onClick={() => onSelectImage && onSelectImage()} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectImage && onSelectImage())}
         title={
           onSelectImage
             ? "Clic para cambiar o recortar la imagen de la sección"
@@ -2510,7 +2511,7 @@ export const CmsContenidoGraficoEditModal = ({
             position: "fixed",
             inset: 0,
             backgroundColor: "rgba(15, 23, 42, 0.92)",
-            zIndex: 100000,
+            zIndex: "var(--z-lightbox)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

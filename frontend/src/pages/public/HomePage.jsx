@@ -9,8 +9,10 @@ import HomeMapBanner from "../../components/HomeMapBanner";
 import logoEstrellas from "../../assets/logoHospitalEvita.png";
 import logoEstrellasBlanco from "../../assets/logoHospitalEvita-blanco.png";
 import "../../styles/pages/HomePage.css";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
 
 const HomePage = () => {
+  usePageMeta(null);
   const { hash } = useLocation();
 
   useEffect(() => {
