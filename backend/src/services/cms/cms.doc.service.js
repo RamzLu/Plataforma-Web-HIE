@@ -34,12 +34,12 @@ class CmsDocService {
     else if (estadoUpper === "PROGRAMADO") statusMapped = "programado";
     else if (estadoUpper === "ARCHIVADO") statusMapped = "archivado";
 
-    const creatorName = doc.usuario_documento_createdByTousuario
-      ? nombreDeUsuario(doc.usuario_documento_createdByTousuario)
+    const creatorName = doc.creador
+      ? nombreDeUsuario(doc.creador)
       : pendingMeta?.editor || "Editor CMS";
 
-    const updaterName = doc.usuario_documento_updatedByTousuario
-      ? nombreDeUsuario(doc.usuario_documento_updatedByTousuario)
+    const updaterName = doc.editor
+      ? nombreDeUsuario(doc.editor)
       : null;
 
     return {
@@ -78,8 +78,8 @@ class CmsDocService {
           include: {
             archivo: true,
             categoria_documento: true,
-            usuario_documento_createdByTousuario: true,
-            usuario_documento_updatedByTousuario: true,
+            creador: true,
+            editor: true,
           },
         }),
         this.obtenerMapaPendingMeta(),
@@ -123,8 +123,8 @@ class CmsDocService {
         include: {
           archivo: true,
           categoria_documento: true,
-          usuario_documento_createdByTousuario: true,
-          usuario_documento_updatedByTousuario: true,
+          creador: true,
+          editor: true,
         },
       }),
       this.obtenerMapaMotivosRechazo(),
@@ -212,7 +212,7 @@ class CmsDocService {
       include: {
         archivo: true,
         categoria_documento: true,
-        usuario_documento_createdByTousuario: true,
+        creador: true,
       },
     });
 
@@ -251,8 +251,8 @@ class CmsDocService {
       include: {
         archivo: true,
         categoria_documento: true,
-        usuario_documento_createdByTousuario: true,
-        usuario_documento_updatedByTousuario: true,
+        creador: true,
+        editor: true,
       },
     });
 
@@ -414,8 +414,8 @@ class CmsDocService {
       include: {
         archivo: true,
         categoria_documento: true,
-        usuario_documento_createdByTousuario: true,
-        usuario_documento_updatedByTousuario: true,
+        creador: true,
+        editor: true,
       },
     });
 
@@ -487,7 +487,7 @@ class CmsDocService {
       include: {
         archivo: true,
         categoria_documento: true,
-        usuario_documento_createdByTousuario: true,
+        creador: true,
       },
     });
 
@@ -541,8 +541,8 @@ class CmsDocService {
       include: {
         archivo: true,
         categoria_documento: true,
-        usuario_documento_createdByTousuario: true,
-        usuario_documento_updatedByTousuario: true,
+        creador: true,
+        editor: true,
       },
     });
 

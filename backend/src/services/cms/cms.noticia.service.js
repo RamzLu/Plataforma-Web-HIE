@@ -66,7 +66,7 @@ class CmsNoticiaService {
         ...(tieneFechaProgramada ? { fechaPublicacion: new Date(fechaPublicacion) } : {}),
       },
       include: {
-        usuario_noticia_createdByTousuario: true,
+        creador: true,
         categoria_noticia: true,
       },
     });
@@ -117,8 +117,8 @@ class CmsNoticiaService {
       imagenesUrlsGuardadas.push(publicUrlData.publicUrl);
     }
 
-    const editorNombre = nuevaNoticia.usuario_noticia_createdByTousuario
-      ? nombreDeUsuario(nuevaNoticia.usuario_noticia_createdByTousuario)
+    const editorNombre = nuevaNoticia.creador
+      ? nombreDeUsuario(nuevaNoticia.creador)
       : "Editor CMS";
 
     const requestedEstado =
@@ -161,8 +161,8 @@ class CmsNoticiaService {
             },
         orderBy: { createdAt: "desc" },
         include: {
-          usuario_noticia_createdByTousuario: true,
-          usuario_noticia_updatedByTousuario: true,
+          creador: true,
+          editor: true,
           noticia_archivo: { include: { archivo: true } },
           categoria_noticia: true,
         },
@@ -193,8 +193,8 @@ class CmsNoticiaService {
 
         if (mantienePublicacionPrevia) {
           const snap = pendingMeta.snapshotPublico;
-          const editorNombreSnap = noticia.usuario_noticia_createdByTousuario
-            ? nombreDeUsuario(noticia.usuario_noticia_createdByTousuario)
+          const editorNombreSnap = noticia.creador
+            ? nombreDeUsuario(noticia.creador)
             : "Editor CMS";
 
           resultado.push({
@@ -226,12 +226,12 @@ class CmsNoticiaService {
         return data.publicUrl;
       });
 
-      const editorNombre = noticia.usuario_noticia_createdByTousuario
-        ? nombreDeUsuario(noticia.usuario_noticia_createdByTousuario)
+      const editorNombre = noticia.creador
+        ? nombreDeUsuario(noticia.creador)
         : "Editor CMS";
 
-      const editadoPorNombre = noticia.usuario_noticia_updatedByTousuario
-        ? nombreDeUsuario(noticia.usuario_noticia_updatedByTousuario)
+      const editadoPorNombre = noticia.editor
+        ? nombreDeUsuario(noticia.editor)
         : null;
 
       let catName = noticia.categoria_noticia ? noticia.categoria_noticia.nombre : "General";
@@ -541,8 +541,8 @@ class CmsNoticiaService {
     const noticiaConArchivos = await prisma.noticia.findUnique({
       where: { id: idBigInt },
       include: {
-        usuario_noticia_createdByTousuario: true,
-        usuario_noticia_updatedByTousuario: true,
+        creador: true,
+        editor: true,
         noticia_archivo: { include: { archivo: true } },
         categoria_noticia: true,
       },
@@ -554,11 +554,11 @@ class CmsNoticiaService {
           .publicUrl
     );
 
-    const editorOriginal = noticiaConArchivos.usuario_noticia_createdByTousuario
-      ? nombreDeUsuario(noticiaConArchivos.usuario_noticia_createdByTousuario)
+    const editorOriginal = noticiaConArchivos.creador
+      ? nombreDeUsuario(noticiaConArchivos.creador)
       : "Editor CMS";
-    const editadoPorNombre = noticiaConArchivos.usuario_noticia_updatedByTousuario
-      ? nombreDeUsuario(noticiaConArchivos.usuario_noticia_updatedByTousuario)
+    const editadoPorNombre = noticiaConArchivos.editor
+      ? nombreDeUsuario(noticiaConArchivos.editor)
       : null;
 
     let catFinal = noticiaConArchivos.categoria_noticia
@@ -721,8 +721,8 @@ class CmsNoticiaService {
         ...extraUpdateData,
       },
       include: {
-        usuario_noticia_createdByTousuario: true,
-        usuario_noticia_updatedByTousuario: true,
+        creador: true,
+        editor: true,
         noticia_archivo: { include: { archivo: true } },
         categoria_noticia: true,
       },
@@ -751,11 +751,11 @@ class CmsNoticiaService {
           .publicUrl
     );
 
-    const editorOriginal = noticiaActualizada.usuario_noticia_createdByTousuario
-      ? nombreDeUsuario(noticiaActualizada.usuario_noticia_createdByTousuario)
+    const editorOriginal = noticiaActualizada.creador
+      ? nombreDeUsuario(noticiaActualizada.creador)
       : "Editor CMS";
-    const editadoPorNombre = noticiaActualizada.usuario_noticia_updatedByTousuario
-      ? nombreDeUsuario(noticiaActualizada.usuario_noticia_updatedByTousuario)
+    const editadoPorNombre = noticiaActualizada.editor
+      ? nombreDeUsuario(noticiaActualizada.editor)
       : null;
 
     let catFinal = noticiaActualizada.categoria_noticia

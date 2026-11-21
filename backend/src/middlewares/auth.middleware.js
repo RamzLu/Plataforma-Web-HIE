@@ -1,4 +1,5 @@
 import { createRemoteJWKSet, jwtVerify, errors as joseErrors } from 'jose';
+import { ejecutarConUsuario } from '../utils/contextoUsuario.utils.js';
 
 let keycloakConfig = null;
 
@@ -70,7 +71,8 @@ export const verifyToken = async (req, res, next) => {
       roles: combinedRoles,
     };
 
-    return next();
+    // El resto del request corre con el usuario disponible para la autoría (createdBy / updatedBy).
+    return ejecutarConUsuario(req.user, () => next());
   } catch (error) {
     if (error instanceof joseErrors.JWTExpired) {
       return res.status(401).json({ error: 'Token expirado.' });

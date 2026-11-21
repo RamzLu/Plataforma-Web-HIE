@@ -247,6 +247,7 @@ class CmsProfesionalService {
         genEsp = await prisma.especialidad.create({
           data: {
             nombre: "Servicio Clave",
+            estado: "PUBLICADO",
             descripcion: "Clasificación interna para servicios",
           },
         });
@@ -262,7 +263,7 @@ class CmsProfesionalService {
       finalEspecialidadId = esp.id;
     }
 
-    let archivoId = null;
+    let imagenId = null;
     if (file) {
       const { nombreUnico, extension } = generarNombreUnico(file.originalname, "prof");
       const { error: storageError } = await supabase.storage
@@ -286,7 +287,7 @@ class CmsProfesionalService {
           tamanioBytes: BigInt(file.size),
         },
       });
-      archivoId = archivoDb.id;
+      imagenId = archivoDb.id;
     }
 
     const estadoSolicitado = data.estado ? data.estado.toUpperCase() : "PUBLICADO";
@@ -301,7 +302,7 @@ class CmsProfesionalService {
         cargo,
         descripcion,
         especialidadId: finalEspecialidadId,
-        archivoId,
+        imagenId,
         activo: false,
         estado: estadoFinal,
         updatedAt: new Date(),
@@ -441,7 +442,7 @@ class CmsProfesionalService {
       finalAreaNombre = servicio.nombre;
 
       let genEsp = await prisma.especialidad.findFirst({ where: { nombre: "Servicio Clave" } });
-      if (!genEsp) genEsp = await prisma.especialidad.create({ data: { nombre: "Servicio Clave" } });
+      if (!genEsp) genEsp = await prisma.especialidad.create({ data: { nombre: "Servicio Clave", estado: "PUBLICADO" } });
       finalEspecialidadId = genEsp.id;
     } else {
       const esp = await prisma.especialidad.findUnique({ where: { id: espIdBigInt } });
@@ -486,7 +487,7 @@ class CmsProfesionalService {
       throw error;
     }
 
-    let archivoId = profesionalExistente.archivoId;
+    let imagenId = profesionalExistente.imagenId;
 
     if (file) {
       if (profesionalExistente.archivo && !snapshotPublico) {
@@ -518,7 +519,7 @@ class CmsProfesionalService {
           tamanioBytes: BigInt(file.size),
         },
       });
-      archivoId = archivoDb.id;
+      imagenId = archivoDb.id;
     }
 
     const estadoSolicitado = data.estado ? data.estado.toUpperCase() : "PUBLICADO";
@@ -536,7 +537,7 @@ class CmsProfesionalService {
         cargo,
         descripcion,
         especialidadId: finalEspecialidadId,
-        archivoId,
+        imagenId,
         activo: esArchivado ? false : profesionalExistente.activo,
         estado: estadoFinal,
         updatedAt: new Date(),
