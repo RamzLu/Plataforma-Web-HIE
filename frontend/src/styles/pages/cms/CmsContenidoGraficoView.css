@@ -307,7 +307,7 @@
   background-color: rgba(239, 244, 255, 0.5);
 }
 
-:where(.panel-scope) .cg-table th {
+:where(.panel-scope) .cg-table th:not(:where(.vista-portal *)) {
   padding: 0.75rem 1rem;
   font-size: 0.6875rem;
   line-height: 0.875rem;
@@ -1162,7 +1162,7 @@
   margin: 0.15rem 0 0 0;
 }
 
-:where(.panel-scope) .cg-correction-meta strong {
+:where(.panel-scope) .cg-correction-meta strong:not(:where(.vista-portal *)) {
   font-weight: 600;
   color: var(--color-slate-700);
 }
@@ -2248,7 +2248,7 @@
   line-height: 1.55;
 }
 
-:where(.panel-scope) .cg-portal-pacientes-item-body p {
+:where(.panel-scope) .cg-portal-pacientes-item-body p:not(:where(.vista-portal *)) {
   margin: 0;
 }
 

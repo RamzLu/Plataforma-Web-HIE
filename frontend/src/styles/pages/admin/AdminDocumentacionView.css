@@ -7,7 +7,7 @@
   color: var(--color-primary);
 }
 
-:where(.panel-scope) .admin-doc-header h1 {
+:where(.panel-scope) .admin-doc-header h1:not(:where(.vista-portal *)) {
   margin: 5px 0;
   color: var(--color-primary);
   font-size: clamp(2rem, 3.2vw, 2.8rem);
@@ -22,7 +22,7 @@
   text-transform: uppercase;
 }
 
-:where(.panel-scope) .admin-doc-header p {
+:where(.panel-scope) .admin-doc-header p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-600);
   font-size: 1rem;
@@ -44,7 +44,7 @@
   justify-content: space-between;
 }
 
-:where(.panel-scope) .admin-doc-feedback button {
+:where(.panel-scope) .admin-doc-feedback button:not(:where(.vista-portal *)) {
   display: grid;
   width: 30px;
   height: 30px;
@@ -57,7 +57,7 @@
   cursor: pointer;
 }
 
-:where(.panel-scope) .admin-doc-feedback button:hover {
+:where(.panel-scope) .admin-doc-feedback button:hover:not(:where(.vista-portal *)) {
   background: var(--color-blue-100);
 }
 
@@ -99,7 +99,7 @@
   outline-offset: 2px;
 }
 
-:where(.panel-scope) .admin-doc-summary-card > span {
+:where(.panel-scope) .admin-doc-summary-card > span:not(:where(.vista-portal *)) {
   display: grid;
   width: 42px;
   height: 42px;
@@ -108,42 +108,42 @@
   border-radius: 14px;
 }
 
-:where(.panel-scope) .admin-doc-summary-card > div {
+:where(.panel-scope) .admin-doc-summary-card > div:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
 
-:where(.panel-scope) .admin-doc-summary-card small {
+:where(.panel-scope) .admin-doc-summary-card small:not(:where(.vista-portal *)) {
   color: var(--color-slate-600);
   font-size: 0.82rem;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-doc-summary-card strong {
+:where(.panel-scope) .admin-doc-summary-card strong:not(:where(.vista-portal *)) {
   color: var(--color-primary);
   font-size: 1.9rem;
   line-height: 1.1;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-doc-summary-card.is-pending > span {
+:where(.panel-scope) .admin-doc-summary-card.is-pending > span:not(:where(.vista-portal *)) {
   background: var(--color-amber-100);
   color: var(--color-amber-700);
 }
 
-:where(.panel-scope) .admin-doc-summary-card.is-approved > span {
+:where(.panel-scope) .admin-doc-summary-card.is-approved > span:not(:where(.vista-portal *)) {
   background: var(--color-green-100);
   color: var(--color-green-700);
 }
 
-:where(.panel-scope) .admin-doc-summary-card.is-rejected > span {
+:where(.panel-scope) .admin-doc-summary-card.is-rejected > span:not(:where(.vista-portal *)) {
   background: var(--color-red-100);
   color: var(--color-red-700);
 }
 
-:where(.panel-scope) .admin-doc-summary-card.is-published > span {
+:where(.panel-scope) .admin-doc-summary-card.is-published > span:not(:where(.vista-portal *)) {
   background: var(--color-sky-100);
   color: var(--color-sky-700);
 }
@@ -191,14 +191,14 @@
   margin-bottom: 20px;
 }
 
-:where(.panel-scope) .admin-doc-card-heading h2 {
+:where(.panel-scope) .admin-doc-card-heading h2:not(:where(.vista-portal *)) {
   margin: 0 0 6px;
   color: var(--color-primary);
   font-size: 1.4rem;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-doc-card-heading p {
+:where(.panel-scope) .admin-doc-card-heading p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-600);
   font-size: 0.9rem;
@@ -238,14 +238,14 @@
 }
 
 :where(.panel-scope) .admin-doc-search:focus-within,
-:where(.panel-scope) .admin-doc-filter select:focus {
+:where(.panel-scope) .admin-doc-filter select:focus:not(:where(.vista-portal *)) {
   border-color: var(--color-blue-300);
   outline: 0;
   background: var(--color-white);
   box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
 }
 
-:where(.panel-scope) .admin-doc-search input {
+:where(.panel-scope) .admin-doc-search input:not(:where(.vista-portal *)) {
   width: 100%;
   border: 0;
   outline: 0;
@@ -255,7 +255,7 @@
   font-size: 0.85rem;
 }
 
-:where(.panel-scope) .admin-doc-search input::placeholder {
+:where(.panel-scope) .admin-doc-search input:not(:where(.vista-portal *))::placeholder {
   color: var(--color-slate-400);
 }
 
@@ -268,7 +268,7 @@
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-doc-filter select {
+:where(.panel-scope) .admin-doc-filter select:not(:where(.vista-portal *)) {
   min-width: 175px;
   min-height: 44px;
   padding: 0 30px 0 10px;
@@ -294,7 +294,7 @@
   text-align: left;
 }
 
-:where(.panel-scope) .admin-doc-table th {
+:where(.panel-scope) .admin-doc-table th:not(:where(.vista-portal *)) {
   padding: 14px 16px;
   border-bottom: 2px solid var(--color-slate-300) !important;
   background: var(--color-slate-100) !important;
@@ -306,7 +306,7 @@
   white-space: nowrap;
 }
 
-:where(.panel-scope) .admin-doc-table td {
+:where(.panel-scope) .admin-doc-table td:not(:where(.vista-portal *)) {
   min-width: 130px;
   padding: 15px 13px;
   border-bottom: 1px solid #edf1f6;
@@ -315,19 +315,19 @@
   vertical-align: middle;
 }
 
-:where(.panel-scope) .admin-doc-table td:first-child {
+:where(.panel-scope) .admin-doc-table td:first-child:not(:where(.vista-portal *)) {
   min-width: 270px;
 }
 
-:where(.panel-scope) .admin-doc-table tbody tr:last-child td {
+:where(.panel-scope) .admin-doc-table tbody tr:last-child td:not(:where(.vista-portal *)) {
   border-bottom: 0;
 }
 
-:where(.panel-scope) .admin-doc-table tbody tr {
+:where(.panel-scope) .admin-doc-table tbody tr:not(:where(.vista-portal *)) {
   transition: background-color 150ms ease;
 }
 
-:where(.panel-scope) .admin-doc-table tbody tr:hover {
+:where(.panel-scope) .admin-doc-table tbody tr:hover:not(:where(.vista-portal *)) {
   background: #f8faff;
 }
 
@@ -355,7 +355,7 @@
   color: #7c3aed;
 }
 
-:where(.panel-scope) .admin-doc-title-cell > span:last-child,
+:where(.panel-scope) .admin-doc-title-cell > span:last-child:not(:where(.vista-portal *)),
 :where(.panel-scope) .admin-doc-category-cell,
 :where(.panel-scope) .admin-doc-creator-cell {
   display: flex;
@@ -391,26 +391,26 @@
   outline-offset: 3px;
 }
 
-:where(.panel-scope) .admin-doc-title-cell small,
-:where(.panel-scope) .admin-doc-category-cell small,
-:where(.panel-scope) .admin-doc-creator-cell small {
+:where(.panel-scope) .admin-doc-title-cell small:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-doc-category-cell small:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-doc-creator-cell small:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.71rem;
 }
 
-:where(.panel-scope) .admin-doc-title-cell small {
+:where(.panel-scope) .admin-doc-title-cell small:not(:where(.vista-portal *)) {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-:where(.panel-scope) .admin-doc-category-cell strong,
-:where(.panel-scope) .admin-doc-creator-cell > span {
+:where(.panel-scope) .admin-doc-category-cell strong:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-doc-creator-cell > span:not(:where(.vista-portal *)) {
   color: var(--color-slate-700);
   font-size: 0.79rem;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-doc-creator-cell small {
+:where(.panel-scope) .admin-doc-creator-cell small:not(:where(.vista-portal *)) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -505,19 +505,19 @@
   background: #fbfcfe;
 }
 
-:where(.panel-scope) .admin-doc-modal-header > div > span {
+:where(.panel-scope) .admin-doc-modal-header > div > span:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.77rem;
 }
 
-:where(.panel-scope) .admin-doc-modal-header h2 {
+:where(.panel-scope) .admin-doc-modal-header h2:not(:where(.vista-portal *)) {
   margin: 5px 0 0;
   color: var(--color-primary);
   font-size: 1.3rem;
   line-height: 1.35;
 }
 
-:where(.panel-scope) .admin-doc-modal-header button {
+:where(.panel-scope) .admin-doc-modal-header button:not(:where(.vista-portal *)) {
   display: grid;
   width: 38px;
   height: 38px;
@@ -530,7 +530,7 @@
   cursor: pointer;
 }
 
-:where(.panel-scope) .admin-doc-modal-header button:hover {
+:where(.panel-scope) .admin-doc-modal-header button:hover:not(:where(.vista-portal *)) {
   border-color: var(--color-blue-200);
   background: var(--color-blue-50);
   color: var(--color-blue-700);
@@ -547,7 +547,7 @@
   gap: 10px;
 }
 
-:where(.panel-scope) .admin-doc-info-grid article {
+:where(.panel-scope) .admin-doc-info-grid article:not(:where(.vista-portal *)) {
   min-width: 0;
   padding: 12px 14px;
   border: 1px solid #e7edf5;
@@ -559,7 +559,7 @@
   grid-column: 1 / -1;
 }
 
-:where(.panel-scope) .admin-doc-info-grid h3 {
+:where(.panel-scope) .admin-doc-info-grid h3:not(:where(.vista-portal *)) {
   margin: 0 0 5px;
   color: var(--color-slate-500);
   font-size: 0.68rem;
@@ -567,7 +567,7 @@
   text-transform: uppercase;
 }
 
-:where(.panel-scope) .admin-doc-info-grid p {
+:where(.panel-scope) .admin-doc-info-grid p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-800);
   font-size: 0.83rem;
@@ -575,7 +575,7 @@
   overflow-wrap: anywhere;
 }
 
-:where(.panel-scope) .admin-doc-info-grid p span {
+:where(.panel-scope) .admin-doc-info-grid p span:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
 }
 
@@ -694,13 +694,13 @@
   background: #fbfcfe;
 }
 
-:where(.panel-scope) .admin-doc-state-row > span {
+:where(.panel-scope) .admin-doc-state-row > span:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.75rem;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-doc-state-row > small {
+:where(.panel-scope) .admin-doc-state-row > small:not(:where(.vista-portal *)) {
   color: var(--color-green-700);
   font-size: 0.72rem;
 }
@@ -715,7 +715,7 @@
   font-size: 0.82rem;
 }
 
-:where(.panel-scope) .admin-doc-rejection-note p {
+:where(.panel-scope) .admin-doc-rejection-note p:not(:where(.vista-portal *)) {
   margin: 5px 0 0;
   line-height: 1.5;
 }
@@ -730,11 +730,11 @@
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-doc-rejection-field b {
+:where(.panel-scope) .admin-doc-rejection-field b:not(:where(.vista-portal *)) {
   color: var(--color-red-700);
 }
 
-:where(.panel-scope) .admin-doc-rejection-field textarea {
+:where(.panel-scope) .admin-doc-rejection-field textarea:not(:where(.vista-portal *)) {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--color-red-300);
@@ -744,7 +744,7 @@
   resize: vertical;
 }
 
-:where(.panel-scope) .admin-doc-rejection-field textarea:focus {
+:where(.panel-scope) .admin-doc-rejection-field textarea:focus:not(:where(.vista-portal *)) {
   border-color: var(--color-red-500);
   outline: 3px solid rgb(239 68 68 / 12%);
 }
@@ -831,7 +831,7 @@
     flex: 1;
   }
 
-  :where(.panel-scope) .admin-doc-filter select {
+  :where(.panel-scope) .admin-doc-filter select:not(:where(.vista-portal *)) {
     width: 100%;
   }
 }
@@ -852,12 +852,12 @@
   }
 
   :where(.panel-scope) .admin-doc-table,
-  :where(.panel-scope) .admin-doc-table tbody {
+  :where(.panel-scope) .admin-doc-table tbody:not(:where(.vista-portal *)) {
     display: block;
     width: 100%;
   }
 
-  :where(.panel-scope) .admin-doc-table thead {
+  :where(.panel-scope) .admin-doc-table thead:not(:where(.vista-portal *)) {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -867,7 +867,7 @@
     clip-path: inset(50%);
   }
 
-  :where(.panel-scope) .admin-doc-table tbody tr {
+  :where(.panel-scope) .admin-doc-table tbody tr:not(:where(.vista-portal *)) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px 15px;
@@ -879,19 +879,19 @@
     box-shadow: 0 5px 16px rgb(15 23 42 / 3%);
   }
 
-  :where(.panel-scope) .admin-doc-table tbody tr:last-child {
+  :where(.panel-scope) .admin-doc-table tbody tr:last-child:not(:where(.vista-portal *)) {
     margin-bottom: 0;
   }
 
-  :where(.panel-scope) .admin-doc-table td,
-  :where(.panel-scope) .admin-doc-table td:first-child {
+  :where(.panel-scope) .admin-doc-table td:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-doc-table td:first-child:not(:where(.vista-portal *)) {
     display: block;
     min-width: 0;
     padding: 0;
     border: 0;
   }
 
-  :where(.panel-scope) .admin-doc-table td::before {
+  :where(.panel-scope) .admin-doc-table td:not(:where(.vista-portal *))::before {
     display: block;
     margin-bottom: 5px;
     color: var(--color-slate-500);
@@ -902,7 +902,7 @@
     text-transform: uppercase;
   }
 
-  :where(.panel-scope) .admin-doc-table td:first-child {
+  :where(.panel-scope) .admin-doc-table td:first-child:not(:where(.vista-portal *)) {
     grid-column: 1 / -1;
   }
 
@@ -976,11 +976,11 @@
     flex: 1 1 145px;
   }
 
-  :where(.panel-scope) .admin-doc-table tbody tr {
+  :where(.panel-scope) .admin-doc-table tbody tr:not(:where(.vista-portal *)) {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  :where(.panel-scope) .admin-doc-table td:first-child {
+  :where(.panel-scope) .admin-doc-table td:first-child:not(:where(.vista-portal *)) {
     grid-column: auto;
   }
 }
@@ -1079,7 +1079,7 @@
   background: var(--color-slate-400);
 }
 
-:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-body > * {
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-body > *:not(:where(.vista-portal *)) {
   flex-shrink: 0;
   margin-top: 0;
   margin-bottom: 0;
@@ -1118,7 +1118,7 @@
   font-weight: 500;
 }
 
-:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado svg {
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado svg:not(:where(.vista-portal *)) {
   width: 14px;
   height: 14px;
 }
@@ -1129,7 +1129,7 @@
   color: var(--color-amber-700);
 }
 
-:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado.is-pendiente svg {
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado.is-pendiente svg:not(:where(.vista-portal *)) {
   color: var(--color-amber-600);
 }
 
@@ -1408,7 +1408,7 @@
   box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 5%);
 }
 
-:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-viewer iframe {
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-viewer iframe:not(:where(.vista-portal *)) {
   width: 100%;
   min-width: 0;
   flex: 1;
@@ -1430,7 +1430,7 @@
   text-align: center;
 }
 
-:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-viewer-msg p {
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-viewer-msg p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-100);
   font-size: 13px;
@@ -1450,7 +1450,7 @@
   line-height: 16px;
 }
 
-:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-audit strong {
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-audit strong:not(:where(.vista-portal *)) {
   color: var(--color-slate-800);
   font-weight: 600;
 }
@@ -1500,7 +1500,7 @@
   color: var(--color-rose-600);
 }
 
-:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-danger svg {
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-danger svg:not(:where(.vista-portal *)) {
   color: #f43f5e;
 }
 
@@ -1513,7 +1513,7 @@
   color: var(--color-white);
 }
 
-:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-primary svg {
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-primary svg:not(:where(.vista-portal *)) {
   color: #34d399;
 }
 

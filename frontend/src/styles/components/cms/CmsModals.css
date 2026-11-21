@@ -38,7 +38,7 @@
   align-items: center;
 }
 
-:where(.panel-scope) .modal-header-esp h2 {
+:where(.panel-scope) .modal-header-esp h2:not(:where(.vista-portal *)) {
   color: var(--color-secondary);
   font-size: 1.4rem;
   font-weight: 400;
@@ -61,7 +61,7 @@
   color: var(--color-rose-600);
 }
 
-:where(.panel-scope) .btn-close-modal svg {
+:where(.panel-scope) .btn-close-modal svg:not(:where(.vista-portal *)) {
   width: 24px;
   height: 24px;
   stroke: currentColor;
@@ -69,7 +69,7 @@
 }
 
 
-:where(.panel-scope) .modal-author-row {
+:where(.panel-scope) .modal-author-row:not(:where(.vista-portal *)) {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -77,7 +77,7 @@
   border-bottom: 1px solid var(--color-slate-200);
 }
 
-:where(.panel-scope) .hospital-avatar {
+:where(.panel-scope) .hospital-avatar:not(:where(.vista-portal *)) {
   width: 45px;
   height: 45px;
   border-radius: 50%;
@@ -85,32 +85,32 @@
   border: 1px solid var(--color-slate-200);
 }
 
-:where(.panel-scope) .hospital-avatar img {
+:where(.panel-scope) .hospital-avatar img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-:where(.panel-scope) .author-meta h3 {
+:where(.panel-scope) .author-meta h3:not(:where(.vista-portal *)) {
   margin: 0 0 2px 0;
   font-size: 0.98rem;
   color: var(--color-primary);
   font-weight: 700;
 }
 
-:where(.panel-scope) .author-meta span {
+:where(.panel-scope) .author-meta span:not(:where(.vista-portal *)) {
   font-size: 0.82rem;
   color: var(--color-slate-500);
 }
 
-:where(.panel-scope) .news-modal-title {
+:where(.panel-scope) .news-modal-title:not(:where(.vista-portal *)) {
   color: var(--color-secondary);
   font-size: 1.80rem;
   font-weight: 400;
   margin: 0;
 }
 
-:where(.panel-scope) .info-text {
+:where(.panel-scope) .info-text:not(:where(.vista-portal *)) {
   font-size: 1rem;
   color: var(--color-slate-700);
   margin: 0;
@@ -120,7 +120,7 @@
 /* =========================================
    MODAL: LAYOUT DE DOS COLUMNAS
 ========================================= */
-:where(.panel-scope) .modal-body-esp {
+:where(.panel-scope) .modal-body-esp:not(:where(.vista-portal *)) {
   padding: 30px 40px;
   display: grid;
   grid-template-columns: 1.4fr 1fr; /* 58% para texto, 42% para mosaico */
@@ -130,12 +130,12 @@
 }
 
 @media (max-width: 900px) {
-  :where(.panel-scope) .modal-body-esp {
+  :where(.panel-scope) .modal-body-esp:not(:where(.vista-portal *)) {
     grid-template-columns: 1fr; /* Pasa a 1 columna en móviles */
   }
 }
 
-:where(.panel-scope) .modal-left-content {
+:where(.panel-scope) .modal-left-content:not(:where(.vista-portal *)) {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -144,7 +144,7 @@
 /* =========================================
    MOSAICO DINÁMICO DE IMÁGENES (TIPO FACEBOOK)
 ========================================= */
-:where(.panel-scope) .news-modal-default-img-wrap {
+:where(.panel-scope) .news-modal-default-img-wrap:not(:where(.vista-portal *)) {
   width: 100%;
   height: 480px;
   border-radius: 16px;
@@ -154,7 +154,7 @@
   top: 0;
 }
 
-:where(.panel-scope) .mosaic-gallery {
+:where(.panel-scope) .mosaic-gallery:not(:where(.vista-portal *)) {
   display: grid;
   gap: 4px; /* Espaciado ajustado para crear el efecto cuadrícula */
   border-radius: 16px;
@@ -167,13 +167,13 @@
   top: 0;
 }
 
-:where(.panel-scope) .mosaic-item {
+:where(.panel-scope) .mosaic-item:not(:where(.vista-portal *)) {
   position: relative;
   cursor: pointer;
   overflow: hidden;
 }
 
-:where(.panel-scope) .mosaic-item::after {
+:where(.panel-scope) .mosaic-item:not(:where(.vista-portal *))::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -182,11 +182,11 @@
   transition: opacity 0.2s ease;
 }
 
-:where(.panel-scope) .mosaic-item:hover::after {
+:where(.panel-scope) .mosaic-item:hover:not(:where(.vista-portal *))::after {
   opacity: 0.15;
 }
 
-:where(.panel-scope) .mosaic-item img {
+:where(.panel-scope) .mosaic-item img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -194,15 +194,15 @@
 }
 
 /* Variantes del Mosaico según cantidad de fotos */
-:where(.panel-scope) .layout-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-:where(.panel-scope) .layout-2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
-:where(.panel-scope) .layout-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
-:where(.panel-scope) .layout-3 .mosaic-item:nth-child(1) { grid-column: span 2; }
-:where(.panel-scope) .layout-4 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
-:where(.panel-scope) .layout-4 .mosaic-item:nth-child(1) { grid-column: span 3; }
+:where(.panel-scope) .layout-1:not(:where(.vista-portal *)) { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+:where(.panel-scope) .layout-2:not(:where(.vista-portal *)) { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
+:where(.panel-scope) .layout-3:not(:where(.vista-portal *)) { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
+:where(.panel-scope) .layout-3 .mosaic-item:nth-child(1):not(:where(.vista-portal *)) { grid-column: span 2; }
+:where(.panel-scope) .layout-4:not(:where(.vista-portal *)) { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
+:where(.panel-scope) .layout-4 .mosaic-item:nth-child(1):not(:where(.vista-portal *)) { grid-column: span 3; }
 
 /* Capa oscura con el +X para la última foto */
-:where(.panel-scope) .mosaic-overlay {
+:where(.panel-scope) .mosaic-overlay:not(:where(.vista-portal *)) {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(12, 35, 64, 0.75);
@@ -246,7 +246,7 @@
   max-width: 450px !important;
 }
 
-:where(.panel-scope) .text-center {
+:where(.panel-scope) .text-center:not(:where(.vista-portal *)) {
   text-align: center;
 }
 
@@ -470,7 +470,7 @@
   color: var(--color-primary-soft);
 }
 
-:where(.panel-scope) .user-text-logout strong {
+:where(.panel-scope) .user-text-logout strong:not(:where(.vista-portal *)) {
   font-weight: 700;
 }
 
@@ -587,7 +587,7 @@
   color: var(--color-slate-900);
 }
 
-:where(.panel-scope) .btn-close-floating svg {
+:where(.panel-scope) .btn-close-floating svg:not(:where(.vista-portal *)) {
   width: 20px;
   height: 20px;
 }
@@ -611,7 +611,7 @@
   margin-bottom: 20px;
 }
 
-:where(.panel-scope) .delete-icon-wrapper svg {
+:where(.panel-scope) .delete-icon-wrapper svg:not(:where(.vista-portal *)) {
   width: 24px;
   height: 24px;
 }
@@ -655,7 +655,7 @@
   line-height: 1.5;
 }
 
-:where(.panel-scope) .delete-modal-text strong {
+:where(.panel-scope) .delete-modal-text strong:not(:where(.vista-portal *)) {
   color: var(--color-slate-900);
   font-weight: 700;
 }
@@ -666,7 +666,7 @@
   width: 100%;
 }
 
-:where(.panel-scope) .delete-modal-footer button {
+:where(.panel-scope) .delete-modal-footer button:not(:where(.vista-portal *)) {
   flex: 1; 
   padding: 12px 0;
   font-size: 0.95rem;
@@ -703,7 +703,7 @@
   border-radius: 16px 16px 0 0;
 }
 
-:where(.panel-scope) .modal-header-esp h2 {
+:where(.panel-scope) .modal-header-esp h2:not(:where(.vista-portal *)) {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-secondary);

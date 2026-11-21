@@ -364,21 +364,21 @@
   overflow: hidden;
 }
 
-:where(.panel-scope) .preview-avatar-mock img {
+:where(.panel-scope) .preview-avatar-mock img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: contain;
   padding: 4px; 
 }
 
-:where(.panel-scope) .preview-mock-author-meta h3 {
+:where(.panel-scope) .preview-mock-author-meta h3:not(:where(.vista-portal *)) {
   margin: 0 0 3px 0;
   font-size: 0.95rem;
   color: var(--color-primary);
   font-weight: 700;
 }
 
-:where(.panel-scope) .preview-mock-author-meta span {
+:where(.panel-scope) .preview-mock-author-meta span:not(:where(.vista-portal *)) {
   font-size: 0.8rem;
   color: var(--color-slate-500);
   font-weight: 500;
@@ -419,7 +419,7 @@
   overflow: hidden;
 }
 
-:where(.panel-scope) .preview-mosaic-item img {
+:where(.panel-scope) .preview-mosaic-item img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -457,11 +457,11 @@
 }
 
 
-:where(.panel-scope) .preview-mosaic-gallery.layout-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-:where(.panel-scope) .preview-mosaic-gallery.layout-2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
-:where(.panel-scope) .preview-mosaic-gallery.layout-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
+:where(.panel-scope) .preview-mosaic-gallery.layout-1:not(:where(.vista-portal *)) { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+:where(.panel-scope) .preview-mosaic-gallery.layout-2:not(:where(.vista-portal *)) { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
+:where(.panel-scope) .preview-mosaic-gallery.layout-3:not(:where(.vista-portal *)) { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
 :where(.panel-scope) .preview-mosaic-gallery.layout-3 .preview-mosaic-item:nth-child(1) { grid-column: span 2; }
-:where(.panel-scope) .preview-mosaic-gallery.layout-4 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
+:where(.panel-scope) .preview-mosaic-gallery.layout-4:not(:where(.vista-portal *)) { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
 :where(.panel-scope) .preview-mosaic-gallery.layout-4 .preview-mosaic-item:nth-child(1) { grid-column: span 3; }
 
 
@@ -492,7 +492,7 @@
   color: var(--color-slate-900);
 }
 
-:where(.panel-scope) .btn-close-floating svg {
+:where(.panel-scope) .btn-close-floating svg:not(:where(.vista-portal *)) {
   width: 20px;
   height: 20px;
 }
@@ -518,7 +518,7 @@
   margin-bottom: 20px;
 }
 
-:where(.panel-scope) .delete-icon-wrapper svg {
+:where(.panel-scope) .delete-icon-wrapper svg:not(:where(.vista-portal *)) {
   width: 24px;
   height: 24px;
 }
@@ -563,7 +563,7 @@
   line-height: 1.5;
 }
 
-:where(.panel-scope) .delete-modal-text strong {
+:where(.panel-scope) .delete-modal-text strong:not(:where(.vista-portal *)) {
   color: var(--color-slate-900);
   font-weight: 700;
 }
@@ -575,7 +575,7 @@
   width: 100%;
 }
 
-:where(.panel-scope) .delete-modal-footer button {
+:where(.panel-scope) .delete-modal-footer button:not(:where(.vista-portal *)) {
   flex: 1; /* Obliga a ambos botones a medir exactamente el 50% */
   padding: 12px 0;
   font-size: 0.95rem;
@@ -699,7 +699,8 @@
   white-space: nowrap;
 }
 
-@media (max-width: 1400px) {
+/* Vista previa en una columna solo en pantallas chicas: en notebooks (1280-1440px) el panel tiene lugar para dos. */
+@media (max-width: 1200px) {
   :where(.panel-scope) .preview-mock-modal-body {
     grid-template-columns: 1fr;
   }
@@ -809,14 +810,14 @@
   border-color: var(--color-red-300);
 }
 
-:where(.panel-scope) .news-rejection-warning-pill svg {
+:where(.panel-scope) .news-rejection-warning-pill svg:not(:where(.vista-portal *)) {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
   color: var(--color-red-500);
 }
 
-:where(.panel-scope) .news-rejection-warning-pill span {
+:where(.panel-scope) .news-rejection-warning-pill span:not(:where(.vista-portal *)) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -883,7 +884,7 @@
   gap: 14px;
 }
 
-:where(.panel-scope) .news-correction-title-group h2 {
+:where(.panel-scope) .news-correction-title-group h2:not(:where(.vista-portal *)) {
   font-size: 1.35rem;
   font-weight: 800;
   color: var(--color-slate-900);
@@ -1045,7 +1046,7 @@
   border: 1px solid var(--color-slate-300);
 }
 
-:where(.panel-scope) .news-correction-thumb-item img {
+:where(.panel-scope) .news-correction-thumb-item img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: cover;

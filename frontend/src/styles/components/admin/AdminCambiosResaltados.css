@@ -19,7 +19,7 @@
   white-space: nowrap;
 }
 
-:where(.panel-scope) .admin-table-diff-pill svg {
+:where(.panel-scope) .admin-table-diff-pill svg:not(:where(.vista-portal *)) {
   color: #ea580c;
   flex-shrink: 0;
 }

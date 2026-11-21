@@ -40,7 +40,7 @@
   margin-bottom: 4px;
 }
 
-:where(.panel-scope) .admin-inst-header-info-admin h1 {
+:where(.panel-scope) .admin-inst-header-info-admin h1:not(:where(.vista-portal *)) {
   margin: 5px 0;
   color: var(--color-primary);
   font-size: clamp(2.4rem, 3.2vw, 3.2rem);
@@ -49,7 +49,7 @@
   line-height: 1.15;
 }
 
-:where(.panel-scope) .admin-inst-header-info-admin p {
+:where(.panel-scope) .admin-inst-header-info-admin p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-600);
   font-size: 1.05rem;
@@ -84,7 +84,7 @@
   color: var(--color-red-800);
 }
 
-:where(.panel-scope) .admin-inst-feedback-admin button {
+:where(.panel-scope) .admin-inst-feedback-admin button:not(:where(.vista-portal *)) {
   display: grid;
   place-items: center;
   width: 28px;
@@ -96,7 +96,7 @@
   cursor: pointer;
 }
 
-:where(.panel-scope) .admin-inst-feedback-admin button:hover {
+:where(.panel-scope) .admin-inst-feedback-admin button:hover:not(:where(.vista-portal *)) {
   background: rgba(0, 0, 0, 0.06);
 }
 
@@ -214,7 +214,7 @@
   min-width: 0;
 }
 
-:where(.panel-scope) .admin-inst-card-text-admin small {
+:where(.panel-scope) .admin-inst-card-text-admin small:not(:where(.vista-portal *)) {
   font-size: 0.76rem;
   font-weight: 600;
   color: var(--color-slate-500);
@@ -224,7 +224,7 @@
   text-overflow: ellipsis;
 }
 
-:where(.panel-scope) .admin-inst-card-text-admin strong {
+:where(.panel-scope) .admin-inst-card-text-admin strong:not(:where(.vista-portal *)) {
   font-size: 1.55rem;
   font-weight: 700;
   color: var(--color-primary);
@@ -471,7 +471,7 @@
   overflow: hidden;
 }
 
-:where(.panel-scope) .admin-inst-sede-img-box-admin img {
+:where(.panel-scope) .admin-inst-sede-img-box-admin img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -590,7 +590,7 @@
   gap: 8px;
 }
 
-:where(.panel-scope) .admin-inst-fixed-title-wrap-admin h4 {
+:where(.panel-scope) .admin-inst-fixed-title-wrap-admin h4:not(:where(.vista-portal *)) {
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-primary);
@@ -638,7 +638,7 @@
   font-size: 0.88rem;
 }
 
-:where(.panel-scope) .admin-inst-table-admin th {
+:where(.panel-scope) .admin-inst-table-admin th:not(:where(.vista-portal *)) {
   background-color: var(--color-slate-50);
   color: var(--color-slate-500);
   font-size: 0.75rem;
@@ -650,14 +650,14 @@
   white-space: nowrap;
 }
 
-:where(.panel-scope) .admin-inst-table-admin td {
+:where(.panel-scope) .admin-inst-table-admin td:not(:where(.vista-portal *)) {
   padding: 16px 20px;
   border-bottom: 1px solid var(--color-slate-100);
   color: var(--color-slate-700);
   vertical-align: middle;
 }
 
-:where(.panel-scope) .admin-inst-table-admin tbody tr:last-child td {
+:where(.panel-scope) .admin-inst-table-admin tbody tr:last-child td:not(:where(.vista-portal *)) {
   border-bottom: none;
 }
 
@@ -746,14 +746,14 @@
   flex-wrap: wrap;
 }
 
-:where(.panel-scope) .admin-inst-review-actions-title-admin h3 {
+:where(.panel-scope) .admin-inst-review-actions-title-admin h3:not(:where(.vista-portal *)) {
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--color-primary);
   margin: 0 0 4px 0;
 }
 
-:where(.panel-scope) .admin-inst-review-actions-title-admin p {
+:where(.panel-scope) .admin-inst-review-actions-title-admin p:not(:where(.vista-portal *)) {
   font-size: 0.86rem;
   color: var(--color-slate-500);
   margin: 0;
@@ -820,7 +820,7 @@
   animation: adminInstFadeSlide 0.2s ease-out;
 }
 
-:where(.panel-scope) .admin-inst-reject-box-admin label {
+:where(.panel-scope) .admin-inst-reject-box-admin label:not(:where(.vista-portal *)) {
   font-size: 0.84rem;
   font-weight: 700;
   color: var(--color-red-800);
@@ -893,13 +893,13 @@
   color: var(--color-red-800);
 }
 
-:where(.panel-scope) .admin-inst-rejected-notice-admin strong {
+:where(.panel-scope) .admin-inst-rejected-notice-admin strong:not(:where(.vista-portal *)) {
   display: block;
   font-size: 0.9rem;
   margin-bottom: 3px;
 }
 
-:where(.panel-scope) .admin-inst-rejected-notice-admin p {
+:where(.panel-scope) .admin-inst-rejected-notice-admin p:not(:where(.vista-portal *)) {
   font-size: 0.85rem;
   margin: 0;
   color: #7f1d1d;

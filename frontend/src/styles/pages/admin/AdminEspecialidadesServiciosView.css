@@ -18,19 +18,19 @@
   text-transform: uppercase;
 }
 
-:where(.panel-scope) .admin-es-page-header h1 {
+:where(.panel-scope) .admin-es-page-header h1:not(:where(.vista-portal *)) {
   margin: 5px 0;
   color: var(--color-primary);
   font-size: 3rem;
   font-weight: 200;
 }
 
-:where(.panel-scope) .admin-es-page-header p {
+:where(.panel-scope) .admin-es-page-header p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-600);
 }
 
-:where(.panel-scope) .admin-es-card-heading p {
+:where(.panel-scope) .admin-es-card-heading p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-600);
   font-size: 0.9rem;
@@ -53,7 +53,7 @@
   margin-bottom: 22px;
 }
 
-:where(.panel-scope) .admin-es-card-heading h2 {
+:where(.panel-scope) .admin-es-card-heading h2:not(:where(.vista-portal *)) {
   margin: 0 0 6px;
   color: var(--color-primary);
   font-size: 1.4rem;
@@ -117,7 +117,7 @@
   outline-offset: 2px;
 }
 
-:where(.panel-scope) .admin-es-summary-card > span {
+:where(.panel-scope) .admin-es-summary-card > span:not(:where(.vista-portal *)) {
   display: grid;
   width: 42px;
   height: 42px;
@@ -126,47 +126,47 @@
   border-radius: 14px;
 }
 
-:where(.panel-scope) .admin-es-summary-card > div {
+:where(.panel-scope) .admin-es-summary-card > div:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
 
-:where(.panel-scope) .admin-es-summary-card small {
+:where(.panel-scope) .admin-es-summary-card small:not(:where(.vista-portal *)) {
   color: var(--color-slate-600);
   font-size: 0.82rem;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-es-summary-card strong {
+:where(.panel-scope) .admin-es-summary-card strong:not(:where(.vista-portal *)) {
   color: var(--color-primary);
   font-size: 1.9rem;
   line-height: 1.1;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-es-summary-card.is-pending > span {
+:where(.panel-scope) .admin-es-summary-card.is-pending > span:not(:where(.vista-portal *)) {
   background: var(--color-amber-100);
   color: var(--color-amber-700);
 }
 
-:where(.panel-scope) .admin-es-summary-card.is-approved > span {
+:where(.panel-scope) .admin-es-summary-card.is-approved > span:not(:where(.vista-portal *)) {
   background: var(--color-green-100);
   color: var(--color-green-700);
 }
 
-:where(.panel-scope) .admin-es-summary-card.is-published > span {
+:where(.panel-scope) .admin-es-summary-card.is-published > span:not(:where(.vista-portal *)) {
   background: var(--color-sky-100);
   color: var(--color-sky-700);
 }
 
-:where(.panel-scope) .admin-es-summary-card.is-rejected > span {
+:where(.panel-scope) .admin-es-summary-card.is-rejected > span:not(:where(.vista-portal *)) {
   background: var(--color-red-100);
   color: var(--color-red-700);
 }
 
-:where(.panel-scope) .admin-es-summary-card.is-archived > span {
+:where(.panel-scope) .admin-es-summary-card.is-archived > span:not(:where(.vista-portal *)) {
   background: var(--color-slate-100);
   color: var(--color-slate-600);
 }
@@ -210,7 +210,7 @@
   color: var(--color-slate-500);
 }
 
-:where(.panel-scope) .admin-es-search input {
+:where(.panel-scope) .admin-es-search input:not(:where(.vista-portal *)) {
   width: 100%;
   border: 0;
   outline: 0;
@@ -219,7 +219,7 @@
 }
 
 :where(.panel-scope) .admin-es-search:focus-within,
-:where(.panel-scope) .admin-es-filter select:focus {
+:where(.panel-scope) .admin-es-filter select:focus:not(:where(.vista-portal *)) {
   border-color: var(--color-primary);
   outline: 2px solid rgb(12 35 64 / 12%);
 }
@@ -233,7 +233,7 @@
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-es-filter select {
+:where(.panel-scope) .admin-es-filter select:not(:where(.vista-portal *)) {
   min-width: 155px;
   height: 42px;
   padding: 0 30px 0 10px;
@@ -257,7 +257,7 @@
   text-align: left;
 }
 
-:where(.panel-scope) .admin-es-table th {
+:where(.panel-scope) .admin-es-table th:not(:where(.vista-portal *)) {
   padding: 14px 16px;
   border-bottom: 2px solid var(--color-slate-300) !important;
   background: var(--color-slate-100) !important;
@@ -269,7 +269,7 @@
   white-space: nowrap;
 }
 
-:where(.panel-scope) .admin-es-table td {
+:where(.panel-scope) .admin-es-table td:not(:where(.vista-portal *)) {
   min-width: 110px;
   padding: 13px 12px;
   border-bottom: 1px solid var(--color-slate-200);
@@ -277,23 +277,23 @@
   font-size: 0.85rem;
 }
 
-:where(.panel-scope) .admin-es-table tbody tr:last-child td {
+:where(.panel-scope) .admin-es-table tbody tr:last-child td:not(:where(.vista-portal *)) {
   border-bottom: 0;
 }
 
-:where(.panel-scope) .admin-es-table tbody tr:hover {
+:where(.panel-scope) .admin-es-table tbody tr:hover:not(:where(.vista-portal *)) {
   background: var(--color-slate-50);
 }
 
-:where(.panel-scope) .admin-es-table td:first-child {
+:where(.panel-scope) .admin-es-table td:first-child:not(:where(.vista-portal *)) {
   min-width: 215px;
 }
 
-:where(.panel-scope) .admin-es-table td:nth-child(2) {
+:where(.panel-scope) .admin-es-table td:nth-child(2):not(:where(.vista-portal *)) {
   min-width: 130px;
 }
 
-:where(.panel-scope) .admin-es-table td small {
+:where(.panel-scope) .admin-es-table td small:not(:where(.vista-portal *)) {
   display: block;
   margin-top: 3px;
   color: var(--color-slate-500);
@@ -379,7 +379,7 @@
 }
 
 :where(.panel-scope) .admin-es-close-button,
-:where(.panel-scope) .admin-es-feedback button {
+:where(.panel-scope) .admin-es-feedback button:not(:where(.vista-portal *)) {
   display: grid;
   width: 36px;
   height: 36px;
@@ -414,7 +414,7 @@
   font-size: 0.9rem;
 }
 
-:where(.panel-scope) .admin-es-feedback button {
+:where(.panel-scope) .admin-es-feedback button:not(:where(.vista-portal *)) {
   width: 30px;
   height: 30px;
   flex-shrink: 0;
@@ -452,12 +452,12 @@
   border-bottom: 1px solid var(--color-slate-200);
 }
 
-:where(.panel-scope) .admin-es-modal-header span {
+:where(.panel-scope) .admin-es-modal-header span:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.78rem;
 }
 
-:where(.panel-scope) .admin-es-modal-header h2 {
+:where(.panel-scope) .admin-es-modal-header h2:not(:where(.vista-portal *)) {
   margin: 5px 0 0;
   color: var(--color-primary);
   font-size: 1.5rem;
@@ -489,7 +489,7 @@
   grid-column: 1 / -1;
 }
 
-:where(.panel-scope) .admin-es-detail h3 {
+:where(.panel-scope) .admin-es-detail h3:not(:where(.vista-portal *)) {
   margin: 0 0 5px;
   color: var(--color-slate-500);
   font-size: 0.72rem;
@@ -497,7 +497,7 @@
   text-transform: uppercase;
 }
 
-:where(.panel-scope) .admin-es-detail p {
+:where(.panel-scope) .admin-es-detail p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-800);
   font-size: 0.9rem;
@@ -514,7 +514,7 @@
   font-size: 0.78rem;
 }
 
-:where(.panel-scope) .admin-es-review-meta strong {
+:where(.panel-scope) .admin-es-review-meta strong:not(:where(.vista-portal *)) {
   color: var(--color-slate-700);
 }
 
@@ -528,7 +528,7 @@
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-es-rejection-field textarea {
+:where(.panel-scope) .admin-es-rejection-field textarea:not(:where(.vista-portal *)) {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--color-slate-300);
@@ -605,7 +605,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  :where(.panel-scope) .admin-es-page-header h1 {
+  :where(.panel-scope) .admin-es-page-header h1:not(:where(.vista-portal *)) {
     font-size: 2.4rem;
   }
 
@@ -626,7 +626,7 @@
     flex: 1;
   }
 
-  :where(.panel-scope) .admin-es-filter select {
+  :where(.panel-scope) .admin-es-filter select:not(:where(.vista-portal *)) {
     width: 100%;
   }
 }
@@ -641,7 +641,7 @@
     flex-direction: column;
   }
 
-  :where(.panel-scope) .admin-es-page-header h1 {
+  :where(.panel-scope) .admin-es-page-header h1:not(:where(.vista-portal *)) {
     font-size: 2rem;
   }
 
@@ -683,7 +683,7 @@
   gap: 22px;
 }
 
-:where(.panel-scope) .admin-es-page-header h1 {
+:where(.panel-scope) .admin-es-page-header h1:not(:where(.vista-portal *)) {
   font-size: clamp(2rem, 3.2vw, 2.8rem);
   font-weight: 200;
   letter-spacing: normal;
@@ -701,7 +701,7 @@
 }
 
 :where(.panel-scope) .admin-es-search,
-:where(.panel-scope) .admin-es-filter select {
+:where(.panel-scope) .admin-es-filter select:not(:where(.vista-portal *)) {
   min-height: 44px;
   border-color: #e1e8f0;
   border-radius: 12px;
@@ -710,7 +710,7 @@
 }
 
 :where(.panel-scope) .admin-es-search:focus-within,
-:where(.panel-scope) .admin-es-filter select:focus {
+:where(.panel-scope) .admin-es-filter select:focus:not(:where(.vista-portal *)) {
   border-color: var(--color-blue-300);
   outline: 0;
   background: var(--color-white);
@@ -723,7 +723,7 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
 }
 
-:where(.panel-scope) .admin-es-table th {
+:where(.panel-scope) .admin-es-table th:not(:where(.vista-portal *)) {
   padding: 14px 16px;
   border-bottom: 2px solid var(--color-slate-300) !important;
   background: var(--color-slate-100) !important;
@@ -733,17 +733,17 @@
   letter-spacing: 0.5px;
 }
 
-:where(.panel-scope) .admin-es-table td {
+:where(.panel-scope) .admin-es-table td:not(:where(.vista-portal *)) {
   padding-top: 15px;
   padding-bottom: 15px;
   border-bottom-color: #edf1f6;
 }
 
-:where(.panel-scope) .admin-es-table tbody tr {
+:where(.panel-scope) .admin-es-table tbody tr:not(:where(.vista-portal *)) {
   transition: background-color 160ms ease;
 }
 
-:where(.panel-scope) .admin-es-table tbody tr:hover {
+:where(.panel-scope) .admin-es-table tbody tr:hover:not(:where(.vista-portal *)) {
   background: #f8faff;
 }
 
@@ -901,7 +901,7 @@
   background: var(--color-slate-400);
 }
 
-:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-body > * {
+:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-body > *:not(:where(.vista-portal *)) {
   flex-shrink: 0;
   margin-top: 0;
   margin-bottom: 0;
@@ -941,7 +941,7 @@
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-status .etiqueta-estado svg {
+:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-status .etiqueta-estado svg:not(:where(.vista-portal *)) {
   width: 14px;
   height: 14px;
 }
@@ -952,7 +952,7 @@
   color: var(--color-amber-700);
 }
 
-:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-status .etiqueta-estado.is-pendiente svg {
+:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-status .etiqueta-estado.is-pendiente svg:not(:where(.vista-portal *)) {
   color: var(--color-amber-600);
 }
 
@@ -1164,7 +1164,7 @@
   line-height: 16px;
 }
 
-:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-audit strong {
+:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-audit strong:not(:where(.vista-portal *)) {
   color: var(--color-slate-800);
   font-weight: 600;
 }
@@ -1209,7 +1209,7 @@
   color: var(--color-rose-600);
 }
 
-:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-btn.is-danger svg {
+:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-btn.is-danger svg:not(:where(.vista-portal *)) {
   color: #f43f5e;
 }
 
@@ -1222,7 +1222,7 @@
   color: var(--color-white);
 }
 
-:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-btn.is-primary svg {
+:where(.panel-scope) .admin-es-rv-modal .admin-es-rv-btn.is-primary svg:not(:where(.vista-portal *)) {
   color: #34d399;
 }
 

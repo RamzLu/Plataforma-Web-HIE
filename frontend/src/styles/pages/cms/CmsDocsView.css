@@ -259,7 +259,7 @@
 
 :where(.panel-scope) .field-required-docs { color: var(--color-rose-600); margin-left: 3px; }
 
-:where(.panel-scope) .text-input-docs {
+:where(.panel-scope) .text-input-docs:not(:where(.vista-portal *)) {
   width: 100%;
   padding: 10px 14px;
   font-size: 14px;
@@ -272,7 +272,7 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-:where(.panel-scope) .text-input-docs:focus {
+:where(.panel-scope) .text-input-docs:focus:not(:where(.vista-portal *)) {
   outline: none;
   border-color: var(--color-primary-soft);
   box-shadow: 0 0 0 3px rgba(13, 34, 63, 0.15);

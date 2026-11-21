@@ -35,15 +35,54 @@
   font-family: inherit;
 }
 
+/* Revisión de noticias: más ancho para que la vista previa tenga el mismo ancho que el modal público. */
+:where(.panel-scope) .admin-rev-modal.admin-rev-modal--noticia {
+  width: min(880px, 100%); /* deja 800px por dentro para la vista previa, como el modal público */
+}
+
+/* Marco de la vista previa "así se verá en el portal" (adentro usa el CSS público de NoticiasPage.css). */
+:where(.panel-scope) .admin-rev-portal-preview {
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-slate-50);
+  box-shadow: var(--shadow-md);
+}
+
+:where(.panel-scope) .admin-rev-portal-preview-label {
+  display: block;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* La vista previa usa el contenedor del modal público (.modal-content-esp, mismo ancho máximo y fondo).
+   Solo se le quitan las propiedades de ventana flotante. Las reglas del panel no alcanzan nada de lo que
+   está adentro (ver ":not(:where(.vista-portal *))"), así que se ve igual que en el portal. */
+:where(.panel-scope) .admin-rev-portal-preview .vista-portal.modal-content-esp {
+  max-height: none;
+  margin: 0 auto;
+  overflow: visible;
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+}
+
 /* Tope de grosor en todo el modal: nada por encima de 650, tampoco lo heredado. */
-:where(.panel-scope) .admin-rev-modal h2,
-:where(.panel-scope) .admin-rev-modal h3,
-:where(.panel-scope) .admin-rev-modal h4,
-:where(.panel-scope) .admin-rev-modal strong,
-:where(.panel-scope) .admin-rev-modal b,
-:where(.panel-scope) .admin-rev-modal button,
-:where(.panel-scope) .admin-rev-modal th,
-:where(.panel-scope) .admin-rev-modal label {
+:where(.panel-scope) .admin-rev-modal h2:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-rev-modal h3:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-rev-modal h4:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-rev-modal strong:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-rev-modal b:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-rev-modal button:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-rev-modal th:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-rev-modal label:not(:where(.vista-portal *)) {
   font-weight: 650;
 }
 
@@ -60,7 +99,7 @@
   background: var(--color-white);
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-header > div {
+:where(.panel-scope) .admin-rev-modal .admin-rev-header > div:not(:where(.vista-portal *)) {
   min-width: 0;
 }
 
@@ -106,7 +145,7 @@
   transform: none;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-close svg {
+:where(.panel-scope) .admin-rev-modal .admin-rev-close svg:not(:where(.vista-portal *)) {
   width: 20px;
   height: 20px;
   fill: none;
@@ -127,14 +166,14 @@
   background: var(--color-slate-50);
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-body > * {
+:where(.panel-scope) .admin-rev-modal .admin-rev-body > *:not(:where(.vista-portal *)) {
   margin-top: 0;
   margin-bottom: 0;
 }
 
 /* Tarjeta blanca (también se aplica a cada celda de .admin-rev-grid). */
 :where(.panel-scope) .admin-rev-modal .admin-rev-card,
-:where(.panel-scope) .admin-rev-modal .admin-rev-grid > *,
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid > *:not(:where(.vista-portal *)),
 :where(.panel-scope) .admin-rev-modal .admin-cambios-card,
 :where(.panel-scope) .admin-rev-modal .admin-rev-meta {
   margin: 0;
@@ -160,13 +199,13 @@
   gap: 12px;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-grid > * {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid > *:not(:where(.vista-portal *)) {
   min-width: 0;
   padding: 16px 18px;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-grid h3,
-:where(.panel-scope) .admin-rev-modal .admin-rev-grid h4 {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid h3:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid h4:not(:where(.vista-portal *)) {
   margin: 0 0 8px;
   color: var(--color-slate-400);
   font-size: 0.68rem;
@@ -175,7 +214,7 @@
   text-transform: uppercase;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-grid p {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid p:not(:where(.vista-portal *)) {
   margin: 0;
   color: #0b1b33;
   font-size: 0.92rem;
@@ -189,7 +228,7 @@
   padding: 18px 20px;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-grid > .is-title p {
+:where(.panel-scope) .admin-rev-modal .admin-rev-grid > .is-title p:not(:where(.vista-portal *)) {
   color: #0b1b33;
   font-size: 1.3rem;
   font-weight: 650;
@@ -208,7 +247,7 @@
   font-size: 0.82rem;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-meta strong {
+:where(.panel-scope) .admin-rev-modal .admin-rev-meta strong:not(:where(.vista-portal *)) {
   color: #0b1b33;
 }
 
@@ -290,7 +329,7 @@
   line-height: 1.45;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-alert svg {
+:where(.panel-scope) .admin-rev-modal .admin-rev-alert svg:not(:where(.vista-portal *)) {
   flex-shrink: 0;
   color: var(--color-amber-600);
 }
@@ -301,7 +340,7 @@
   color: var(--color-blue-900);
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-alert.is-info svg {
+:where(.panel-scope) .admin-rev-modal .admin-rev-alert.is-info svg:not(:where(.vista-portal *)) {
   color: #1d63c6;
 }
 
@@ -316,13 +355,13 @@
   font-size: 0.85rem;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-note label {
+:where(.panel-scope) .admin-rev-modal .admin-rev-note label:not(:where(.vista-portal *)) {
   display: block;
   color: inherit;
   font-size: 0.85rem;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-note p {
+:where(.panel-scope) .admin-rev-modal .admin-rev-note p:not(:where(.vista-portal *)) {
   margin: 5px 0 0;
   line-height: 1.5;
 }
@@ -336,15 +375,15 @@
   font-size: 0.85rem;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-field b {
+:where(.panel-scope) .admin-rev-modal .admin-rev-field b:not(:where(.vista-portal *)) {
   color: var(--color-red-700);
 }
 
-:where(.panel-scope) .admin-rev-modal textarea {
+:where(.panel-scope) .admin-rev-modal textarea:not(:where(.vista-portal *)) {
   font-weight: 400;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-field textarea {
+:where(.panel-scope) .admin-rev-modal .admin-rev-field textarea:not(:where(.vista-portal *)) {
   width: 100%;
   box-sizing: border-box;
   padding: 12px 14px;
@@ -357,7 +396,7 @@
   resize: vertical;
 }
 
-:where(.panel-scope) .admin-rev-modal .admin-rev-field textarea:focus {
+:where(.panel-scope) .admin-rev-modal .admin-rev-field textarea:focus:not(:where(.vista-portal *)) {
   border-color: var(--color-red-500);
   outline: 2px solid rgb(239 68 68 / 15%);
 }
@@ -386,7 +425,7 @@
   gap: 12px;
 }
 
-:where(.panel-scope) .admin-rev-modal .solelim-aviso svg {
+:where(.panel-scope) .admin-rev-modal .solelim-aviso svg:not(:where(.vista-portal *)) {
   width: 40px;
   height: 40px;
   box-sizing: border-box;
@@ -397,11 +436,11 @@
   color: #7e22ce;
 }
 
-:where(.panel-scope) .admin-rev-modal .solelim-aviso strong {
+:where(.panel-scope) .admin-rev-modal .solelim-aviso strong:not(:where(.vista-portal *)) {
   font-size: 0.92rem;
 }
 
-:where(.panel-scope) .admin-rev-modal .solelim-aviso p {
+:where(.panel-scope) .admin-rev-modal .solelim-aviso p:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.78rem;
   line-height: 1.4;

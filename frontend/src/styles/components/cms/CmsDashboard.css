@@ -111,7 +111,7 @@
   color: #552eb0; 
 }
 
-:where(.panel-scope) .stat-icon svg {
+:where(.panel-scope) .stat-icon svg:not(:where(.vista-portal *)) {
   width: 20px;
   height: 20px;
 }
@@ -127,7 +127,7 @@
   gap: 6px;
 }
 
-:where(.panel-scope) .stat-badge svg {
+:where(.panel-scope) .stat-badge svg:not(:where(.vista-portal *)) {
   width: 14px;
   height: 14px;
 }
@@ -335,7 +335,7 @@
   margin-right: 15px;
 }
 
-:where(.panel-scope) .quick-action-icon svg { 
+:where(.panel-scope) .quick-action-icon svg:not(:where(.vista-portal *)) { 
   width: 20px; 
   height: 20px; 
 }
@@ -627,25 +627,25 @@
   font-weight: 600;
 }
 
-:where(.panel-scope) .ck-content ul {
+:where(.panel-scope) .ck-content ul:not(:where(.vista-portal *)) {
   list-style-type: disc !important;
   margin-left: 25px !important;
   margin-bottom: 10px !important;
 }
 
-:where(.panel-scope) .ck-content ol {
+:where(.panel-scope) .ck-content ol:not(:where(.vista-portal *)) {
   list-style-type: decimal !important;
   margin-left: 25px !important;
   margin-bottom: 10px !important;
 }
 
-:where(.panel-scope) .news-modal-body-text ul {
+:where(.panel-scope) .news-modal-body-text ul:not(:where(.vista-portal *)) {
   list-style-type: disc;
   margin-left: 25px;
   margin-bottom: 10px;
 }
 
-:where(.panel-scope) .news-modal-body-text ol {
+:where(.panel-scope) .news-modal-body-text ol:not(:where(.vista-portal *)) {
   list-style-type: decimal;
   margin-left: 25px;
   margin-bottom: 10px;
@@ -762,7 +762,7 @@
   margin-bottom: 12px;
 }
 
-:where(.panel-scope) .cms-news-date-badge svg {
+:where(.panel-scope) .cms-news-date-badge svg:not(:where(.vista-portal *)) {
   color: var(--color-blue-600);
   width: 14px;
   height: 14px;
@@ -788,7 +788,7 @@
   overflow: hidden;
 }
 
-:where(.panel-scope) .cms-news-content p {
+:where(.panel-scope) .cms-news-content p:not(:where(.vista-portal *)) {
   font-size: 0.85rem;
   color: var(--color-slate-500);
   margin: 0;

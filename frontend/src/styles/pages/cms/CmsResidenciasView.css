@@ -11,7 +11,7 @@
   min-width: 240px;
 }
 
-:where(.panel-scope) .res-search-wrapper svg {
+:where(.panel-scope) .res-search-wrapper svg:not(:where(.vista-portal *)) {
   position: absolute;
   left: 12px;
   width: 16px;
@@ -321,7 +321,7 @@
   background-color: var(--color-slate-100) !important;
 }
 
-:where(.panel-scope) .btn-close-floating svg {
+:where(.panel-scope) .btn-close-floating svg:not(:where(.vista-portal *)) {
   width: 20px;
   height: 20px;
 }

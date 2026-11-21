@@ -17,14 +17,14 @@
   letter-spacing: 1px;
 }
 
-:where(.panel-scope) .admin-page-header-admin h1 {
+:where(.panel-scope) .admin-page-header-admin h1:not(:where(.vista-portal *)) {
   font-size: 3.2rem;
   font-weight: 200;
   color: var(--color-primary);
   margin: 5px 0;
 }
 
-:where(.panel-scope) .admin-page-header-admin p {
+:where(.panel-scope) .admin-page-header-admin p:not(:where(.vista-portal *)) {
   color: var(--color-slate-600);
   font-size: 1.05rem;
   margin: 0;
@@ -73,10 +73,14 @@
 }
 
 :where(.panel-scope) .data-table-container-admin {
+  /* Columnas compartidas por encabezado y filas: con mínimos para que nada se corte;
+     si no entran, la tabla se desplaza hacia el costado en vez de recortarse. */
+  --noticias-columnas: minmax(220px, 2.6fr) minmax(150px, 1.4fr) minmax(100px, 1fr) minmax(200px, 1.2fr);
   width: 100%;
   background-color: var(--color-white) !important;
   border-radius: 12px !important;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   border: 1px solid var(--color-slate-300) !important;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
 }
@@ -88,7 +92,9 @@
   color: var(--color-primary) !important;
   padding: 14px 16px;
   display: grid;
-  grid-template-columns: 2.8fr 1.5fr 1fr 1.2fr;
+  grid-template-columns: var(--noticias-columnas);
+  gap: 10px;
+  min-width: 732px; /* suma de los mínimos de columnas + gaps + padding */
   font-size: 0.8rem;
   letter-spacing: 0.5px;
   position: sticky;
@@ -109,12 +115,13 @@
   border-bottom: 1px solid var(--color-slate-100);
   transition: background-color 0.15s ease;
   display: grid;
-  grid-template-columns: 2.8fr 1.5fr 1fr 1.2fr;
+  grid-template-columns: var(--noticias-columnas);
   align-items: center;
   gap: 10px;
+  min-width: 732px; /* suma de los mínimos de columnas + gaps + padding */
 }
 
-:where(.panel-scope) .activity-row-admin > div {
+:where(.panel-scope) .activity-row-admin > div:not(:where(.vista-portal *)) {
   min-width: 0;
 }
 
@@ -320,7 +327,7 @@
   align-items: center;
 }
 
-:where(.panel-scope) .modal-header-esp-admin h2 {
+:where(.panel-scope) .modal-header-esp-admin h2:not(:where(.vista-portal *)) {
   color: var(--color-secondary);
   font-size: 1.4rem;
   font-weight: 400;
@@ -343,7 +350,7 @@
   color: var(--color-rose-600);
 }
 
-:where(.panel-scope) .btn-close-modal-admin svg {
+:where(.panel-scope) .btn-close-modal-admin svg:not(:where(.vista-portal *)) {
   width: 24px;
   height: 24px;
   stroke: currentColor;
@@ -381,20 +388,20 @@
   border: 1px solid var(--color-slate-200);
 }
 
-:where(.panel-scope) .hospital-avatar-admin img {
+:where(.panel-scope) .hospital-avatar-admin img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-:where(.panel-scope) .author-meta-admin h3 {
+:where(.panel-scope) .author-meta-admin h3:not(:where(.vista-portal *)) {
   margin: 0 0 2px 0;
   font-size: 0.98rem;
   color: var(--color-primary);
   font-weight: 650;
 }
 
-:where(.panel-scope) .author-meta-admin span {
+:where(.panel-scope) .author-meta-admin span:not(:where(.vista-portal *)) {
   font-size: 0.8rem;
   color: var(--color-slate-500);
   font-weight: 500;
@@ -420,7 +427,7 @@
   word-break: break-word;
 }
 
-:where(.panel-scope) .news-modal-body-text-admin p {
+:where(.panel-scope) .news-modal-body-text-admin p:not(:where(.vista-portal *)) {
   margin-top: 0;
   margin-bottom: 15px;
 }
@@ -458,7 +465,7 @@
   cursor: pointer;
 }
 
-:where(.panel-scope) .modal-news-img-box-admin img {
+:where(.panel-scope) .modal-news-img-box-admin img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -501,7 +508,7 @@
   animation: expandDown 0.3s ease-out forwards;
 }
 
-:where(.panel-scope) .rejection-area-admin label {
+:where(.panel-scope) .rejection-area-admin label:not(:where(.vista-portal *)) {
   color: var(--color-red-800);
   font-weight: 650;
   font-size: 0.95rem;
@@ -759,7 +766,7 @@
   gap: 22px;
 }
 
-:where(.panel-scope) .admin-page-header-admin h1 {
+:where(.panel-scope) .admin-page-header-admin h1:not(:where(.vista-portal *)) {
   font-size: clamp(2rem, 3.2vw, 2.8rem);
   font-weight: 200;
   letter-spacing: normal;
@@ -916,13 +923,13 @@
   gap: 3px;
 }
 
-:where(.panel-scope) .admin-news-summary-copy > span {
+:where(.panel-scope) .admin-news-summary-copy > span:not(:where(.vista-portal *)) {
   color: var(--color-slate-600);
   font-size: 0.82rem;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-news-summary-copy strong {
+:where(.panel-scope) .admin-news-summary-copy strong:not(:where(.vista-portal *)) {
   color: var(--color-primary);
   font-size: 1.9rem;
   line-height: 1.1;
@@ -982,7 +989,7 @@
     height: 34px;
   }
 
-  :where(.panel-scope) .admin-news-summary-copy > span {
+  :where(.panel-scope) .admin-news-summary-copy > span:not(:where(.vista-portal *)) {
     font-size: 0.68rem;
   }
 

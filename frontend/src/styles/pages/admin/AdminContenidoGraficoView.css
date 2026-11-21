@@ -27,7 +27,7 @@
   margin-bottom: 4px;
 }
 
-:where(.panel-scope) .admin-cg-page-admin .admin-page-header-admin h1 {
+:where(.panel-scope) .admin-cg-page-admin .admin-page-header-admin h1:not(:where(.vista-portal *)) {
   margin: 5px 0;
   color: var(--color-primary);
   font-size: clamp(2.4rem, 3.2vw, 3.2rem);
@@ -36,7 +36,7 @@
   line-height: 1.15;
 }
 
-:where(.panel-scope) .admin-cg-page-admin .admin-page-header-admin p {
+:where(.panel-scope) .admin-cg-page-admin .admin-page-header-admin p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-600);
   font-size: 1.05rem;
@@ -62,7 +62,7 @@
   font-size: 0.84rem;
 }
 
-:where(.panel-scope) .admin-cg-feedback-admin button {
+:where(.panel-scope) .admin-cg-feedback-admin button:not(:where(.vista-portal *)) {
   display: grid;
   width: 32px;
   height: 32px;
@@ -75,7 +75,7 @@
   cursor: pointer;
 }
 
-:where(.panel-scope) .admin-cg-feedback-admin button:hover {
+:where(.panel-scope) .admin-cg-feedback-admin button:hover:not(:where(.vista-portal *)) {
   background: rgb(15 23 42 / 7%);
 }
 
@@ -148,7 +148,7 @@
   outline-offset: 2px;
 }
 
-:where(.panel-scope) .admin-cg-summary-card-admin > span {
+:where(.panel-scope) .admin-cg-summary-card-admin > span:not(:where(.vista-portal *)) {
   display: grid;
   width: 42px;
   height: 42px;
@@ -157,46 +157,46 @@
   border-radius: 14px;
 }
 
-:where(.panel-scope) .admin-cg-summary-card-admin > div {
+:where(.panel-scope) .admin-cg-summary-card-admin > div:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
 
-:where(.panel-scope) .admin-cg-summary-card-admin small {
+:where(.panel-scope) .admin-cg-summary-card-admin small:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.76rem;
 }
 
-:where(.panel-scope) .admin-cg-summary-card-admin strong {
+:where(.panel-scope) .admin-cg-summary-card-admin strong:not(:where(.vista-portal *)) {
   color: var(--color-primary);
   font-size: 1.9rem;
   line-height: 1.1;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-cg-summary-card-admin.is-pending > span {
+:where(.panel-scope) .admin-cg-summary-card-admin.is-pending > span:not(:where(.vista-portal *)) {
   background: var(--color-amber-100);
   color: var(--color-amber-700);
 }
 
-:where(.panel-scope) .admin-cg-summary-card-admin.is-approved > span {
+:where(.panel-scope) .admin-cg-summary-card-admin.is-approved > span:not(:where(.vista-portal *)) {
   background: var(--color-green-100);
   color: var(--color-green-700);
 }
 
-:where(.panel-scope) .admin-cg-summary-card-admin.is-published > span {
+:where(.panel-scope) .admin-cg-summary-card-admin.is-published > span:not(:where(.vista-portal *)) {
   background: var(--color-sky-100);
   color: var(--color-sky-700);
 }
 
-:where(.panel-scope) .admin-cg-summary-card-admin.is-rejected > span {
+:where(.panel-scope) .admin-cg-summary-card-admin.is-rejected > span:not(:where(.vista-portal *)) {
   background: var(--color-red-100);
   color: var(--color-red-700);
 }
 
-:where(.panel-scope) .admin-cg-summary-card-admin.is-archived > span {
+:where(.panel-scope) .admin-cg-summary-card-admin.is-archived > span:not(:where(.vista-portal *)) {
   background: var(--color-slate-100);
   color: var(--color-slate-600);
 }
@@ -216,14 +216,14 @@
   margin-bottom: 20px;
 }
 
-:where(.panel-scope) .admin-cg-card-heading-admin h2 {
+:where(.panel-scope) .admin-cg-card-heading-admin h2:not(:where(.vista-portal *)) {
   margin: 0 0 6px;
   color: var(--color-primary);
   font-size: 1.4rem;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-cg-card-heading-admin p {
+:where(.panel-scope) .admin-cg-card-heading-admin p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-600);
   font-size: 0.9rem;
@@ -270,7 +270,7 @@
   box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
 }
 
-:where(.panel-scope) .admin-cg-search-admin input {
+:where(.panel-scope) .admin-cg-search-admin input:not(:where(.vista-portal *)) {
   width: 100%;
   border: 0;
   outline: 0;
@@ -316,27 +316,27 @@
   text-align: left;
 }
 
-:where(.panel-scope) .admin-cg-table-admin th:nth-child(1),
-:where(.panel-scope) .admin-cg-table-admin td:nth-child(1) {
+:where(.panel-scope) .admin-cg-table-admin th:nth-child(1):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-cg-table-admin td:nth-child(1):not(:where(.vista-portal *)) {
   width: 44%;
 }
 
-:where(.panel-scope) .admin-cg-table-admin th:nth-child(2),
-:where(.panel-scope) .admin-cg-table-admin td:nth-child(2) {
+:where(.panel-scope) .admin-cg-table-admin th:nth-child(2):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-cg-table-admin td:nth-child(2):not(:where(.vista-portal *)) {
   width: 20%;
 }
 
-:where(.panel-scope) .admin-cg-table-admin th:nth-child(3),
-:where(.panel-scope) .admin-cg-table-admin td:nth-child(3) {
+:where(.panel-scope) .admin-cg-table-admin th:nth-child(3):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-cg-table-admin td:nth-child(3):not(:where(.vista-portal *)) {
   width: 18%;
 }
 
-:where(.panel-scope) .admin-cg-table-admin th:nth-child(4),
-:where(.panel-scope) .admin-cg-table-admin td:nth-child(4) {
+:where(.panel-scope) .admin-cg-table-admin th:nth-child(4):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-cg-table-admin td:nth-child(4):not(:where(.vista-portal *)) {
   width: 18%;
 }
 
-:where(.panel-scope) .admin-cg-table-admin th {
+:where(.panel-scope) .admin-cg-table-admin th:not(:where(.vista-portal *)) {
   padding: 16px 20px;
   border-bottom: 1px solid var(--color-slate-200);
   background-color: var(--color-slate-50);
@@ -348,7 +348,7 @@
   white-space: nowrap;
 }
 
-:where(.panel-scope) .admin-cg-table-admin td {
+:where(.panel-scope) .admin-cg-table-admin td:not(:where(.vista-portal *)) {
   min-width: 120px;
   padding: 15px 16px;
   border-bottom: 1px solid #edf1f6;
@@ -357,11 +357,11 @@
   vertical-align: middle;
 }
 
-:where(.panel-scope) .admin-cg-table-admin td:first-child {
+:where(.panel-scope) .admin-cg-table-admin td:first-child:not(:where(.vista-portal *)) {
   min-width: 280px;
 }
 
-:where(.panel-scope) .admin-cg-table-admin tbody tr:last-child td {
+:where(.panel-scope) .admin-cg-table-admin tbody tr:last-child td:not(:where(.vista-portal *)) {
   border-bottom: 0;
 }
 
@@ -451,7 +451,7 @@
   text-decoration: underline;
 }
 
-:where(.panel-scope) .admin-cg-info-col-admin small {
+:where(.panel-scope) .admin-cg-info-col-admin small:not(:where(.vista-portal *)) {
   display: -webkit-box;
   overflow: hidden;
   color: var(--color-slate-500);
@@ -615,7 +615,7 @@
   flex: 1;
 }
 
-:where(.panel-scope) .admin-cg-modal-header-admin > div > span {
+:where(.panel-scope) .admin-cg-modal-header-admin > div > span:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.72rem;
   font-weight: 700;
@@ -631,7 +631,7 @@
   margin-top: 5px;
 }
 
-:where(.panel-scope) .admin-cg-modal-header-admin h2 {
+:where(.panel-scope) .admin-cg-modal-header-admin h2:not(:where(.vista-portal *)) {
   min-width: 0;
   margin: 0;
   color: var(--color-primary);
@@ -675,7 +675,7 @@
   font-size: 0.82rem;
 }
 
-:where(.panel-scope) .admin-cg-rejection-banner-admin p {
+:where(.panel-scope) .admin-cg-rejection-banner-admin p:not(:where(.vista-portal *)) {
   margin: 4px 0 0;
   line-height: 1.5;
 }
@@ -702,7 +702,7 @@
   letter-spacing: 0.02em;
 }
 
-:where(.panel-scope) .admin-cg-label-admin small {
+:where(.panel-scope) .admin-cg-label-admin small:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.75rem;
   font-weight: 500;
@@ -717,13 +717,13 @@
   border-bottom: 1px solid var(--color-slate-200);
 }
 
-:where(.panel-scope) .admin-cg-editor-header-bar-admin span {
+:where(.panel-scope) .admin-cg-editor-header-bar-admin span:not(:where(.vista-portal *)) {
   color: var(--color-sky-700);
   font-size: 0.82rem;
   font-weight: 700;
 }
 
-:where(.panel-scope) .admin-cg-editor-header-bar-admin small {
+:where(.panel-scope) .admin-cg-editor-header-bar-admin small:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.74rem;
 }
@@ -836,13 +836,13 @@
   background: var(--color-blue-50);
 }
 
-:where(.panel-scope) .admin-cg-slide-chip-admin span {
+:where(.panel-scope) .admin-cg-slide-chip-admin span:not(:where(.vista-portal *)) {
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--color-primary);
 }
 
-:where(.panel-scope) .admin-cg-slide-chip-admin small {
+:where(.panel-scope) .admin-cg-slide-chip-admin small:not(:where(.vista-portal *)) {
   font-size: 0.7rem;
   color: var(--color-slate-500);
 }
@@ -858,20 +858,20 @@
   background: var(--color-slate-50);
 }
 
-:where(.panel-scope) .admin-cg-params-summary-bar-admin > div {
+:where(.panel-scope) .admin-cg-params-summary-bar-admin > div:not(:where(.vista-portal *)) {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
 
-:where(.panel-scope) .admin-cg-params-summary-bar-admin small {
+:where(.panel-scope) .admin-cg-params-summary-bar-admin small:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
-:where(.panel-scope) .admin-cg-params-summary-bar-admin strong {
+:where(.panel-scope) .admin-cg-params-summary-bar-admin strong:not(:where(.vista-portal *)) {
   color: var(--color-primary);
   font-size: 0.84rem;
   font-weight: 650;
@@ -904,7 +904,7 @@
   }
 }
 
-:where(.panel-scope) .admin-cg-rejection-form-admin label span {
+:where(.panel-scope) .admin-cg-rejection-form-admin label span:not(:where(.vista-portal *)) {
   display: block;
   margin-bottom: 6px;
   color: var(--color-slate-600);
@@ -912,11 +912,11 @@
   font-weight: 700;
 }
 
-:where(.panel-scope) .admin-cg-rejection-form-admin label b {
+:where(.panel-scope) .admin-cg-rejection-form-admin label b:not(:where(.vista-portal *)) {
   color: var(--color-red-700);
 }
 
-:where(.panel-scope) .admin-cg-rejection-form-admin textarea {
+:where(.panel-scope) .admin-cg-rejection-form-admin textarea:not(:where(.vista-portal *)) {
   width: 100%;
   resize: vertical;
   padding: 10px 12px;
@@ -929,13 +929,13 @@
   box-sizing: border-box;
 }
 
-:where(.panel-scope) .admin-cg-rejection-form-admin textarea:focus {
+:where(.panel-scope) .admin-cg-rejection-form-admin textarea:focus:not(:where(.vista-portal *)) {
   border-color: #f87171;
   outline: 0;
   box-shadow: 0 0 0 4px rgb(239 68 68 / 12%);
 }
 
-:where(.panel-scope) .admin-cg-rejection-form-admin p {
+:where(.panel-scope) .admin-cg-rejection-form-admin p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-500);
   font-size: 0.78rem;
@@ -1073,29 +1073,29 @@
     width: 100%;
   }
 
-  :where(.panel-scope) .admin-cg-table-admin thead {
+  :where(.panel-scope) .admin-cg-table-admin thead:not(:where(.vista-portal *)) {
     display: none;
   }
 
   :where(.panel-scope) .admin-cg-table-admin,
-  :where(.panel-scope) .admin-cg-table-admin tbody,
-  :where(.panel-scope) .admin-cg-table-admin tr,
-  :where(.panel-scope) .admin-cg-table-admin td {
+  :where(.panel-scope) .admin-cg-table-admin tbody:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-cg-table-admin tr:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-cg-table-admin td:not(:where(.vista-portal *)) {
     display: block;
     width: 100%;
   }
 
-  :where(.panel-scope) .admin-cg-table-admin td:nth-child(n) {
+  :where(.panel-scope) .admin-cg-table-admin td:nth-child(n):not(:where(.vista-portal *)) {
     width: 100%;
   }
 
-  :where(.panel-scope) .admin-cg-table-admin tbody tr {
+  :where(.panel-scope) .admin-cg-table-admin tbody tr:not(:where(.vista-portal *)) {
     padding: 13px 15px;
     border-bottom: 1px solid #edf1f6;
   }
 
-  :where(.panel-scope) .admin-cg-table-admin td,
-  :where(.panel-scope) .admin-cg-table-admin td:first-child {
+  :where(.panel-scope) .admin-cg-table-admin td:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-cg-table-admin td:first-child:not(:where(.vista-portal *)) {
     display: flex;
     min-width: 0;
     align-items: flex-start;
@@ -1106,13 +1106,13 @@
     text-align: right;
   }
 
-  :where(.panel-scope) .admin-cg-table-admin td:first-child {
+  :where(.panel-scope) .admin-cg-table-admin td:first-child:not(:where(.vista-portal *)) {
     display: block;
     min-width: 0;
     text-align: left;
   }
 
-  :where(.panel-scope) .admin-cg-table-admin td:not(:first-child)::before {
+  :where(.panel-scope) .admin-cg-table-admin td:not(:first-child):not(:where(.vista-portal *))::before {
     flex: 0 0 110px;
     color: var(--color-slate-500);
     content: attr(data-label);
@@ -1139,12 +1139,12 @@
     padding: 11px;
   }
 
-  :where(.panel-scope) .admin-cg-summary-card-admin > span {
+  :where(.panel-scope) .admin-cg-summary-card-admin > span:not(:where(.vista-portal *)) {
     width: 34px;
     height: 34px;
   }
 
-  :where(.panel-scope) .admin-cg-summary-card-admin small {
+  :where(.panel-scope) .admin-cg-summary-card-admin small:not(:where(.vista-portal *)) {
     font-size: 0.68rem;
   }
 

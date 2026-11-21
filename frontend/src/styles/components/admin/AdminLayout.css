@@ -132,7 +132,7 @@
   color: var(--color-white);
 }
 
-:where(.panel-scope) .admin-collapse-btn svg {
+:where(.panel-scope) .admin-collapse-btn svg:not(:where(.vista-portal *)) {
   width: 18px;
   height: 18px;
 }
@@ -275,7 +275,7 @@
   gap: 12px;
 }
 
-:where(.panel-scope) .admin-header-left svg {
+:where(.panel-scope) .admin-header-left svg:not(:where(.vista-portal *)) {
   width: 22px;
   height: 22px;
   stroke: var(--color-slate-500);
@@ -384,12 +384,12 @@
   letter-spacing: 1px;
 }
 
-:where(.panel-scope) .admin-page-title h1,
-:where(.panel-scope) .admin-view-heading h1,
-:where(.panel-scope) .admin-page-header-admin h1,
-:where(.panel-scope) .admin-es-page-header h1,
-:where(.panel-scope) .admin-prof-header h1,
-:where(.panel-scope) .admin-doc-header h1 {
+:where(.panel-scope) .admin-page-title h1:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-view-heading h1:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-page-header-admin h1:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-es-page-header h1:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-prof-header h1:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-doc-header h1:not(:where(.vista-portal *)) {
   color: var(--color-primary);
   font-size: clamp(1.75rem, 3.2vw, 2.8rem);
   font-weight: 200;
@@ -398,7 +398,7 @@
   margin: 5px 0;
 }
 
-:where(.panel-scope) .admin-page-title p {
+:where(.panel-scope) .admin-page-title p:not(:where(.vista-portal *)) {
   color: var(--color-slate-600);
   font-size: 1rem;
   margin: 0;
@@ -512,7 +512,7 @@
   max-height: 560px;
 }
 
-:where(.panel-scope) .admin-nav li {
+:where(.panel-scope) .admin-nav li:not(:where(.vista-portal *)) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -527,13 +527,13 @@
   outline: none;
 }
 
-:where(.panel-scope) .admin-nav li:focus,
-:where(.panel-scope) .admin-nav li:focus-visible,
-:where(.panel-scope) .admin-nav li:active {
+:where(.panel-scope) .admin-nav li:focus:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-nav li:focus-visible:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-nav li:active:not(:where(.vista-portal *)) {
   outline: none;
 }
 
-:where(.panel-scope) .admin-nav li:hover:not(.active) {
+:where(.panel-scope) .admin-nav li:hover:not(.active):not(:where(.vista-portal *)) {
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-white);
 }
@@ -563,7 +563,7 @@
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-sidebar.collapsed .admin-nav li {
+:where(.panel-scope) .admin-sidebar.collapsed .admin-nav li:not(:where(.vista-portal *)) {
   width: 42px;
   height: 42px;
   min-height: 42px;
@@ -648,7 +648,7 @@
   gap: 13px;
 }
 
-:where(.panel-scope) .admin-header-left > svg {
+:where(.panel-scope) .admin-header-left > svg:not(:where(.vista-portal *)) {
   width: 38px;
   height: 38px;
   padding: 9px;
@@ -756,13 +756,13 @@
 
 :where(.panel-scope) .admin-nav-group-header:focus-visible,
 :where(.panel-scope) .admin-collapse-btn:focus-visible,
-:where(.panel-scope) .admin-header button:focus-visible {
+:where(.panel-scope) .admin-header button:focus-visible:not(:where(.vista-portal *)) {
   outline: 3px solid rgb(96 165 250 / 65%);
   outline-offset: 2px;
 }
 
-:where(.panel-scope) .admin-nav li:focus,
-:where(.panel-scope) .admin-nav li:focus-visible {
+:where(.panel-scope) .admin-nav li:focus:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-nav li:focus-visible:not(:where(.vista-portal *)) {
   outline: none !important;
 }
 
@@ -874,8 +874,8 @@
     overflow: visible;
   }
 
-  :where(.panel-scope) .admin-nav li,
-  :where(.panel-scope) .admin-sidebar.collapsed .admin-nav li {
+  :where(.panel-scope) .admin-nav li:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-sidebar.collapsed .admin-nav li:not(:where(.vista-portal *)) {
     width: 44px;
     min-height: 44px;
     justify-content: center;
@@ -901,7 +901,7 @@
     min-width: 0;
   }
 
-  :where(.panel-scope) .admin-header-left > svg {
+  :where(.panel-scope) .admin-header-left > svg:not(:where(.vista-portal *)) {
     width: 34px;
     height: 34px;
     flex: 0 0 auto;
@@ -974,8 +974,8 @@
     border-bottom-right-radius: 0;
   }
 
-  :where(.panel-scope) .admin-nav li,
-  :where(.panel-scope) .admin-sidebar.collapsed .admin-nav li {
+  :where(.panel-scope) .admin-nav li:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-sidebar.collapsed .admin-nav li:not(:where(.vista-portal *)) {
     width: 40px;
     min-height: 42px;
   }
@@ -1037,8 +1037,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   :where(.panel-scope) .admin-sidebar,
-  :where(.panel-scope) .admin-nav *,
-  :where(.panel-scope) .admin-header *,
+  :where(.panel-scope) .admin-nav *:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-header *:not(:where(.vista-portal *)),
   :where(.panel-scope) .admin-collapse-btn {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;

@@ -21,7 +21,7 @@
   border-radius: 12px 12px 0 0;
 }
 
-:where(.panel-scope) .modal-header-esp h2 {
+:where(.panel-scope) .modal-header-esp h2:not(:where(.vista-portal *)) {
   font-size: 1.25rem;
   font-weight: 500;
   color: var(--color-secondary); /* Color principal institucional */
@@ -125,7 +125,7 @@
   height: 24px;
 }
 
-:where(.panel-scope) .esp-switch input {
+:where(.panel-scope) .esp-switch input:not(:where(.vista-portal *)) {
   opacity: 0;
   width: 0;
   height: 0;
@@ -179,13 +179,13 @@
   gap: 2px;
 }
 
-:where(.panel-scope) .esp-saving-dots span {
+:where(.panel-scope) .esp-saving-dots span:not(:where(.vista-portal *)) {
   animation: esp-blink 1.4s infinite both;
   font-size: 1.1em;
 }
 
-:where(.panel-scope) .esp-saving-dots span:nth-child(2) { animation-delay: 0.2s; }
-:where(.panel-scope) .esp-saving-dots span:nth-child(3) { animation-delay: 0.4s; }
+:where(.panel-scope) .esp-saving-dots span:nth-child(2):not(:where(.vista-portal *)) { animation-delay: 0.2s; }
+:where(.panel-scope) .esp-saving-dots span:nth-child(3):not(:where(.vista-portal *)) { animation-delay: 0.4s; }
 
 @keyframes esp-blink {
   0%, 80%, 100% { opacity: 0; }
@@ -273,7 +273,7 @@
   color: var(--color-slate-900);
 }
 
-:where(.panel-scope) .btn-close-floating svg {
+:where(.panel-scope) .btn-close-floating svg:not(:where(.vista-portal *)) {
   width: 20px;
   height: 20px;
 }
@@ -299,7 +299,7 @@
   margin-bottom: 20px;
 }
 
-:where(.panel-scope) .delete-icon-wrapper svg {
+:where(.panel-scope) .delete-icon-wrapper svg:not(:where(.vista-portal *)) {
   width: 24px;
   height: 24px;
 }
@@ -344,7 +344,7 @@
   line-height: 1.5;
 }
 
-:where(.panel-scope) .delete-modal-text strong {
+:where(.panel-scope) .delete-modal-text strong:not(:where(.vista-portal *)) {
   color: var(--color-slate-900);
   font-weight: 700;
 }
@@ -356,7 +356,7 @@
   width: 100%;
 }
 
-:where(.panel-scope) .delete-modal-footer button {
+:where(.panel-scope) .delete-modal-footer button:not(:where(.vista-portal *)) {
   flex: 1; /* Obliga a ambos botones a medir exactamente el 50% */
   padding: 12px 0;
   font-size: 0.95rem;

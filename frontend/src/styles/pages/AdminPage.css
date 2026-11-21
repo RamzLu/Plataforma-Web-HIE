@@ -23,7 +23,7 @@
   padding: 40px;
 }
 
-:where(.panel-scope) .admin-content-area .admin-view-heading h1 {
+:where(.panel-scope) .admin-content-area .admin-view-heading h1:not(:where(.vista-portal *)) {
   margin: 5px 0;
   color: var(--color-primary);
   font-size: clamp(1.75rem, 3.2vw, 2.8rem);
@@ -32,7 +32,7 @@
   line-height: 1.15;
 }
 
-:where(.panel-scope) .admin-content-area .admin-view-heading p {
+:where(.panel-scope) .admin-content-area .admin-view-heading p:not(:where(.vista-portal *)) {
   max-width: 760px;
   margin: 0;
   color: var(--color-slate-600);

@@ -332,13 +332,6 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     }
   };
 
-  const getLayoutClass = (numImages) => {
-    if (numImages >= 4) return 'layout-4-admin';
-    if (numImages === 3) return 'layout-3-admin';
-    if (numImages === 2) return 'layout-2-admin';
-    return 'layout-1-admin';
-  };
-
   // Las solicitudes de eliminación también esperan respuesta del admin: cuentan como pendientes.
   const pendingCount = noticias.filter(
     (n) => n.estado === 'PENDIENTE_APROBACION' || Boolean(n.solicitudEliminacion)
@@ -606,7 +599,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
 
       {selectedNews && (
         <div className="modal-overlay-admin admin-rev-overlay" onClick={handleCloseModal}>
-          <div className="modal-content-esp-admin admin-rev-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content-esp-admin admin-rev-modal admin-rev-modal--noticia" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header-esp-admin admin-rev-header">
               <div>
                 <span className="admin-rev-kicker">Información pública</span>
@@ -656,62 +649,57 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                   />
                 </div>
               )}
-              <div className="preview-mock-left-admin admin-rev-card">
-                <div className="modal-author-row-admin">
-                  <div className="hospital-avatar-admin">
-                    <img src={avatarHospital} alt="Avatar Hospital" />
+              {/* Vista previa: mismo HTML y CSS que el modal público de Noticias (NoticiasPage.css). */}
+              <section className="admin-rev-portal-preview" aria-label="Vista previa de la noticia en el portal">
+                <span className="admin-rev-portal-preview-label">Así se verá en el portal</span>
+                <div className="modal-content-esp vista-portal">
+                <div className="modal-body-esp">
+                  <div className="modal-left-content">
+                    <div className="modal-author-row">
+                      <div className="hospital-avatar"><img src={avatarHospital} alt="Avatar Hospital" /></div>
+                      <div className="author-meta">
+                        <h3>Hospital Interdistrital Evita Formosa</h3>
+                        <span>{selectedNews.date}</span>
+                      </div>
+                    </div>
+                    <h3 className="news-modal-title">{selectedNews.title}</h3>
+                    <div className="news-modal-body-text">
+                      <div className="info-text" dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedNews.content) }} />
+                    </div>
                   </div>
-                  <div className="author-meta-admin">
-                    <h3>Hospital Interdistrital Evita Formosa</h3>
-                    <span>{selectedNews.date}</span>
-                  </div>
+                  {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
+                    <div className={`mosaic-gallery layout-${Math.min(selectedNews.images.length, 4)}`}>
+                      {selectedNews.images.slice(0, 4).map((img, idx) => {
+                        const imageUrls = selectedNews.images.map((i) => i.url || i);
+                        const isLastAndHidden = idx === 3 && selectedNews.images.length > 4;
+                        return (
+                          <div
+                            key={idx}
+                            className="mosaic-item"
+                            onClick={() => openLightbox(imageUrls, idx)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => activarConTeclado(e, () => openLightbox(imageUrls, idx))}
+                            title="Haga clic para maximizar la imagen"
+                          >
+                            <img src={img.url || img} alt={`Foto noticia ${idx + 1}`} />
+                            {isLastAndHidden && (
+                              <div className="mosaic-overlay">
+                                <span>+{selectedNews.images.length - 4}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="news-modal-default-img-wrap">
+                      <DefaultNewsImage alt={selectedNews.title} />
+                    </div>
+                  )}
                 </div>
-
-                <div className="news-modal-headline-admin">
-                  <h3 className="news-modal-title-admin">{selectedNews.title}</h3>
                 </div>
-
-                <div className="news-modal-body-text-admin">
-                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedNews.content) }} />
-                </div>
-              </div>
-
-              {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
-                <div className="news-modal-images-section-admin admin-rev-card">
-                  <div
-                    className={`news-modal-images-grid-admin ${getLayoutClass(
-                      selectedNews.images.length
-                    )}`}
-                  >
-                    {selectedNews.images.slice(0, 4).map((img, idx) => {
-                      const isLastAndHidden =
-                        idx === 3 && selectedNews.images.length > 4;
-                      const fotosRestantes = selectedNews.images.length - 4;
-                      const imageUrls = selectedNews.images.map((i) => i.url || i);
-
-                      return (
-                        <div
-                          className="modal-news-img-box-admin"
-                          key={idx}
-                          onClick={() => openLightbox(imageUrls, idx)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => openLightbox(imageUrls, idx))}
-                          title="Haga clic para maximizar la imagen"
-                        >
-                          <img src={img.url || img} alt={`Foto noticia ${idx + 1}`} />
-                          {isLastAndHidden && (
-                            <div className="mosaic-overlay-admin">
-                              <span>+{fotosRestantes}</span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <div className="news-modal-default-img-wrap-admin">
-                  <DefaultNewsImage alt={selectedNews.title} />
-                </div>
-              )}
+              </section>
 
               {selectedNews.estado === 'RECHAZADO' && selectedNews.rejectionReason && (
                 <div className="admin-rev-note">

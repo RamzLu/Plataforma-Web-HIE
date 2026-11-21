@@ -22,8 +22,8 @@
   font-size: 0.84rem;
 }
 
-:where(.panel-scope) .admin-res-feedback-admin button,
-:where(.panel-scope) .admin-res-modal-header-admin button {
+:where(.panel-scope) .admin-res-feedback-admin button:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-res-modal-header-admin button:not(:where(.vista-portal *)) {
   display: grid;
   width: 32px;
   height: 32px;
@@ -36,8 +36,8 @@
   cursor: pointer;
 }
 
-:where(.panel-scope) .admin-res-feedback-admin button:hover,
-:where(.panel-scope) .admin-res-modal-header-admin button:hover {
+:where(.panel-scope) .admin-res-feedback-admin button:hover:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-res-modal-header-admin button:hover:not(:where(.vista-portal *)) {
   background: rgb(15 23 42 / 7%);
 }
 
@@ -110,7 +110,7 @@
   outline-offset: 2px;
 }
 
-:where(.panel-scope) .admin-res-summary-card-admin > span {
+:where(.panel-scope) .admin-res-summary-card-admin > span:not(:where(.vista-portal *)) {
   display: grid;
   width: 42px;
   height: 42px;
@@ -119,46 +119,46 @@
   border-radius: 14px;
 }
 
-:where(.panel-scope) .admin-res-summary-card-admin > div {
+:where(.panel-scope) .admin-res-summary-card-admin > div:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
 
-:where(.panel-scope) .admin-res-summary-card-admin small {
+:where(.panel-scope) .admin-res-summary-card-admin small:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.76rem;
 }
 
-:where(.panel-scope) .admin-res-summary-card-admin strong {
+:where(.panel-scope) .admin-res-summary-card-admin strong:not(:where(.vista-portal *)) {
   color: var(--color-primary);
   font-size: 1.9rem;
   line-height: 1.1;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-res-summary-card-admin.is-pending > span {
+:where(.panel-scope) .admin-res-summary-card-admin.is-pending > span:not(:where(.vista-portal *)) {
   background: var(--color-amber-100);
   color: var(--color-amber-700);
 }
 
-:where(.panel-scope) .admin-res-summary-card-admin.is-approved > span {
+:where(.panel-scope) .admin-res-summary-card-admin.is-approved > span:not(:where(.vista-portal *)) {
   background: var(--color-green-100);
   color: var(--color-green-700);
 }
 
-:where(.panel-scope) .admin-res-summary-card-admin.is-published > span {
+:where(.panel-scope) .admin-res-summary-card-admin.is-published > span:not(:where(.vista-portal *)) {
   background: var(--color-sky-100);
   color: var(--color-sky-700);
 }
 
-:where(.panel-scope) .admin-res-summary-card-admin.is-rejected > span {
+:where(.panel-scope) .admin-res-summary-card-admin.is-rejected > span:not(:where(.vista-portal *)) {
   background: var(--color-red-100);
   color: var(--color-red-700);
 }
 
-:where(.panel-scope) .admin-res-summary-card-admin.is-archived > span {
+:where(.panel-scope) .admin-res-summary-card-admin.is-archived > span:not(:where(.vista-portal *)) {
   background: var(--color-slate-100);
   color: var(--color-slate-600);
 }
@@ -178,14 +178,14 @@
   margin-bottom: 20px;
 }
 
-:where(.panel-scope) .admin-res-card-heading-admin h2 {
+:where(.panel-scope) .admin-res-card-heading-admin h2:not(:where(.vista-portal *)) {
   margin: 0 0 6px;
   color: var(--color-primary);
   font-size: 1.4rem;
   font-weight: 600;
 }
 
-:where(.panel-scope) .admin-res-card-heading-admin p {
+:where(.panel-scope) .admin-res-card-heading-admin p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-600);
   font-size: 0.9rem;
@@ -231,7 +231,7 @@
   box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
 }
 
-:where(.panel-scope) .admin-res-search-admin input {
+:where(.panel-scope) .admin-res-search-admin input:not(:where(.vista-portal *)) {
   width: 100%;
   border: 0;
   outline: 0;
@@ -241,7 +241,7 @@
   font-size: 0.85rem;
 }
 
-:where(.panel-scope) .admin-res-search-admin input::placeholder {
+:where(.panel-scope) .admin-res-search-admin input:not(:where(.vista-portal *))::placeholder {
   color: var(--color-slate-400);
 }
 
@@ -261,27 +261,27 @@
   text-align: left;
 }
 
-:where(.panel-scope) .admin-res-table-admin th:nth-child(1),
-:where(.panel-scope) .admin-res-table-admin td:nth-child(1) {
+:where(.panel-scope) .admin-res-table-admin th:nth-child(1):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-res-table-admin td:nth-child(1):not(:where(.vista-portal *)) {
   width: 42%;
 }
 
-:where(.panel-scope) .admin-res-table-admin th:nth-child(2),
-:where(.panel-scope) .admin-res-table-admin td:nth-child(2) {
+:where(.panel-scope) .admin-res-table-admin th:nth-child(2):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-res-table-admin td:nth-child(2):not(:where(.vista-portal *)) {
   width: 18%;
 }
 
-:where(.panel-scope) .admin-res-table-admin th:nth-child(3),
-:where(.panel-scope) .admin-res-table-admin td:nth-child(3) {
+:where(.panel-scope) .admin-res-table-admin th:nth-child(3):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-res-table-admin td:nth-child(3):not(:where(.vista-portal *)) {
   width: 24%;
 }
 
-:where(.panel-scope) .admin-res-table-admin th:nth-child(4),
-:where(.panel-scope) .admin-res-table-admin td:nth-child(4) {
+:where(.panel-scope) .admin-res-table-admin th:nth-child(4):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-res-table-admin td:nth-child(4):not(:where(.vista-portal *)) {
   width: 16%;
 }
 
-:where(.panel-scope) .admin-res-table-admin th {
+:where(.panel-scope) .admin-res-table-admin th:not(:where(.vista-portal *)) {
   padding: 14px 16px;
   border-bottom: 2px solid var(--color-slate-300) !important;
   background: var(--color-slate-100) !important;
@@ -293,7 +293,7 @@
   white-space: nowrap;
 }
 
-:where(.panel-scope) .admin-res-table-admin td {
+:where(.panel-scope) .admin-res-table-admin td:not(:where(.vista-portal *)) {
   min-width: 120px;
   padding: 15px 16px;
   border-bottom: 1px solid #edf1f6;
@@ -302,11 +302,11 @@
   vertical-align: middle;
 }
 
-:where(.panel-scope) .admin-res-table-admin td:first-child {
+:where(.panel-scope) .admin-res-table-admin td:first-child:not(:where(.vista-portal *)) {
   min-width: 270px;
 }
 
-:where(.panel-scope) .admin-res-table-admin tbody tr:last-child td {
+:where(.panel-scope) .admin-res-table-admin tbody tr:last-child td:not(:where(.vista-portal *)) {
   border-bottom: 0;
 }
 
@@ -334,7 +334,7 @@
   gap: 12px;
 }
 
-:where(.panel-scope) .admin-res-title-cell-admin > img,
+:where(.panel-scope) .admin-res-title-cell-admin > img:not(:where(.vista-portal *)),
 :where(.panel-scope) .admin-res-placeholder-admin {
   display: grid;
   width: 54px;
@@ -349,7 +349,7 @@
   object-fit: cover;
 }
 
-:where(.panel-scope) .admin-res-title-cell-admin > span:last-child {
+:where(.panel-scope) .admin-res-title-cell-admin > span:last-child:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -374,7 +374,7 @@
   text-decoration: underline;
 }
 
-:where(.panel-scope) .admin-res-title-cell-admin small {
+:where(.panel-scope) .admin-res-title-cell-admin small:not(:where(.vista-portal *)) {
   display: -webkit-box;
   overflow: hidden;
   color: var(--color-slate-500);
@@ -406,7 +406,7 @@
   gap: 7px;
 }
 
-:where(.panel-scope) .admin-res-meta-cell-admin > span:first-child {
+:where(.panel-scope) .admin-res-meta-cell-admin > span:first-child:not(:where(.vista-portal *)) {
   display: flex;
   align-items: flex-start;
   gap: 6px;
@@ -414,7 +414,7 @@
   font-weight: 500;
 }
 
-:where(.panel-scope) .admin-res-meta-cell-admin svg {
+:where(.panel-scope) .admin-res-meta-cell-admin svg:not(:where(.vista-portal *)) {
   flex: 0 0 auto;
   margin-top: 2px;
   color: var(--color-slate-500);
@@ -608,7 +608,7 @@
   margin-top: 5px;
 }
 
-:where(.panel-scope) .admin-res-modal-header-admin h2 {
+:where(.panel-scope) .admin-res-modal-header-admin h2:not(:where(.vista-portal *)) {
   min-width: 0;
   margin: 0;
   color: var(--color-primary);
@@ -648,7 +648,7 @@
 }
 
 /* Los bloques internos no deben comprimirse nunca para no recortar textos */
-:where(.panel-scope) .admin-res-modal-body-admin > * {
+:where(.panel-scope) .admin-res-modal-body-admin > *:not(:where(.vista-portal *)) {
   flex-shrink: 0;
 }
 
@@ -748,11 +748,11 @@
   color: var(--color-primary);
 }
 
-:where(.panel-scope) .admin-res-section-card-title svg {
+:where(.panel-scope) .admin-res-section-card-title svg:not(:where(.vista-portal *)) {
   color: var(--color-sky-600);
 }
 
-:where(.panel-scope) .admin-res-section-card-title h3 {
+:where(.panel-scope) .admin-res-section-card-title h3:not(:where(.vista-portal *)) {
   margin: 0;
   font-size: 0.88rem;
   font-weight: 650;
@@ -793,7 +793,7 @@
   margin-bottom: 4px;
 }
 
-:where(.panel-scope) .admin-res-lead-callout p {
+:where(.panel-scope) .admin-res-lead-callout p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-800);
   font-size: 0.88rem;
@@ -816,7 +816,7 @@
   letter-spacing: 0.03em;
 }
 
-:where(.panel-scope) .admin-res-program-desc p {
+:where(.panel-scope) .admin-res-program-desc p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-700);
   font-size: 0.88rem;
@@ -925,7 +925,7 @@
   white-space: nowrap;
 }
 
-:where(.panel-scope) .admin-res-banner-name svg {
+:where(.panel-scope) .admin-res-banner-name svg:not(:where(.vista-portal *)) {
   color: var(--color-sky-600);
   flex-shrink: 0;
 }
@@ -982,7 +982,7 @@
   margin-bottom: 2px;
 }
 
-:where(.panel-scope) .admin-res-doc-legend p {
+:where(.panel-scope) .admin-res-doc-legend p:not(:where(.vista-portal *)) {
   margin: 0;
   font-size: 0.82rem;
   color: var(--color-slate-700);
@@ -1112,7 +1112,7 @@
   color: var(--color-slate-500);
 }
 
-:where(.panel-scope) .admin-res-review-meta span strong {
+:where(.panel-scope) .admin-res-review-meta span strong:not(:where(.vista-portal *)) {
   color: var(--color-primary);
 }
 
@@ -1125,7 +1125,7 @@
   font-size: 0.82rem;
 }
 
-:where(.panel-scope) .admin-res-rejection-note-admin p {
+:where(.panel-scope) .admin-res-rejection-note-admin p:not(:where(.vista-portal *)) {
   margin: 5px 0 0;
   line-height: 1.5;
 }
@@ -1155,12 +1155,12 @@
   }
 }
 
-:where(.panel-scope) .admin-res-confirmation-admin p {
+:where(.panel-scope) .admin-res-confirmation-admin p:not(:where(.vista-portal *)) {
   margin: 0;
   line-height: 1.5;
 }
 
-:where(.panel-scope) .admin-res-confirmation-admin label {
+:where(.panel-scope) .admin-res-confirmation-admin label:not(:where(.vista-portal *)) {
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -1168,11 +1168,11 @@
   font-weight: 650;
 }
 
-:where(.panel-scope) .admin-res-confirmation-admin label b {
+:where(.panel-scope) .admin-res-confirmation-admin label b:not(:where(.vista-portal *)) {
   color: var(--color-red-700);
 }
 
-:where(.panel-scope) .admin-res-confirmation-admin textarea {
+:where(.panel-scope) .admin-res-confirmation-admin textarea:not(:where(.vista-portal *)) {
   width: 100%;
   resize: vertical;
   padding: 10px 12px;
@@ -1185,7 +1185,7 @@
   box-sizing: border-box;
 }
 
-:where(.panel-scope) .admin-res-confirmation-admin textarea:focus {
+:where(.panel-scope) .admin-res-confirmation-admin textarea:focus:not(:where(.vista-portal *)) {
   border-color: #f87171;
   outline: 0;
   box-shadow: 0 0 0 4px rgb(239 68 68 / 12%);
@@ -1318,29 +1318,29 @@
     gap: 10px;
   }
 
-  :where(.panel-scope) .admin-res-table-admin thead {
+  :where(.panel-scope) .admin-res-table-admin thead:not(:where(.vista-portal *)) {
     display: none;
   }
 
   :where(.panel-scope) .admin-res-table-admin,
-  :where(.panel-scope) .admin-res-table-admin tbody,
-  :where(.panel-scope) .admin-res-table-admin tr,
-  :where(.panel-scope) .admin-res-table-admin td {
+  :where(.panel-scope) .admin-res-table-admin tbody:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-res-table-admin tr:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-res-table-admin td:not(:where(.vista-portal *)) {
     display: block;
     width: 100%;
   }
 
-  :where(.panel-scope) .admin-res-table-admin td:nth-child(n) {
+  :where(.panel-scope) .admin-res-table-admin td:nth-child(n):not(:where(.vista-portal *)) {
     width: 100%;
   }
 
-  :where(.panel-scope) .admin-res-table-admin tbody tr {
+  :where(.panel-scope) .admin-res-table-admin tbody tr:not(:where(.vista-portal *)) {
     padding: 13px 15px;
     border-bottom: 1px solid #edf1f6;
   }
 
-  :where(.panel-scope) .admin-res-table-admin td,
-  :where(.panel-scope) .admin-res-table-admin td:first-child {
+  :where(.panel-scope) .admin-res-table-admin td:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-res-table-admin td:first-child:not(:where(.vista-portal *)) {
     display: flex;
     min-width: 0;
     align-items: flex-start;
@@ -1351,13 +1351,13 @@
     text-align: right;
   }
 
-  :where(.panel-scope) .admin-res-table-admin td:first-child {
+  :where(.panel-scope) .admin-res-table-admin td:first-child:not(:where(.vista-portal *)) {
     display: block;
     min-width: 0;
     text-align: left;
   }
 
-  :where(.panel-scope) .admin-res-table-admin td:not(:first-child)::before {
+  :where(.panel-scope) .admin-res-table-admin td:not(:first-child):not(:where(.vista-portal *))::before {
     flex: 0 0 110px;
     color: var(--color-slate-500);
     content: attr(data-label);
@@ -1384,12 +1384,12 @@
     padding: 11px;
   }
 
-  :where(.panel-scope) .admin-res-summary-card-admin > span {
+  :where(.panel-scope) .admin-res-summary-card-admin > span:not(:where(.vista-portal *)) {
     width: 34px;
     height: 34px;
   }
 
-  :where(.panel-scope) .admin-res-summary-card-admin small {
+  :where(.panel-scope) .admin-res-summary-card-admin small:not(:where(.vista-portal *)) {
     font-size: 0.68rem;
   }
 

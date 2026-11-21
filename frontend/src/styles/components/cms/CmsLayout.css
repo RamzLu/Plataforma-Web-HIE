@@ -145,7 +145,7 @@
   color: var(--color-white);
 }
 
-:where(.panel-scope) .cms-collapse-btn svg {
+:where(.panel-scope) .cms-collapse-btn svg:not(:where(.vista-portal *)) {
   width: 18px;
   height: 18px;
 }
@@ -278,8 +278,8 @@
 }
 
 /* Diseño de los items de la lista (Estilo Admin) */
-:where(.panel-scope) .cms-nav li,
-:where(.panel-scope) .cms-nav-submenu li {
+:where(.panel-scope) .cms-nav li:not(:where(.vista-portal *)),
+:where(.panel-scope) .cms-nav-submenu li:not(:where(.vista-portal *)) {
   display: flex;
   align-items: center;
   min-height: 42px;
@@ -295,17 +295,17 @@
   outline: none;
 }
 
-:where(.panel-scope) .cms-nav li:focus,
-:where(.panel-scope) .cms-nav li:focus-visible,
-:where(.panel-scope) .cms-nav li:active,
-:where(.panel-scope) .cms-nav-submenu li:focus,
-:where(.panel-scope) .cms-nav-submenu li:focus-visible,
-:where(.panel-scope) .cms-nav-submenu li:active {
+:where(.panel-scope) .cms-nav li:focus:not(:where(.vista-portal *)),
+:where(.panel-scope) .cms-nav li:focus-visible:not(:where(.vista-portal *)),
+:where(.panel-scope) .cms-nav li:active:not(:where(.vista-portal *)),
+:where(.panel-scope) .cms-nav-submenu li:focus:not(:where(.vista-portal *)),
+:where(.panel-scope) .cms-nav-submenu li:focus-visible:not(:where(.vista-portal *)),
+:where(.panel-scope) .cms-nav-submenu li:active:not(:where(.vista-portal *)) {
   outline: none !important;
 }
 
-:where(.panel-scope) .cms-nav li:hover:not(.active),
-:where(.panel-scope) .cms-nav-submenu li:hover:not(.active) {
+:where(.panel-scope) .cms-nav li:hover:not(.active):not(:where(.vista-portal *)),
+:where(.panel-scope) .cms-nav-submenu li:hover:not(.active):not(:where(.vista-portal *)) {
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-white);
 }
@@ -354,8 +354,8 @@
   font-weight: 600;
 }
 
-:where(.panel-scope) .cms-sidebar.collapsed .cms-nav li,
-:where(.panel-scope) .cms-sidebar.collapsed .cms-nav-submenu li {
+:where(.panel-scope) .cms-sidebar.collapsed .cms-nav li:not(:where(.vista-portal *)),
+:where(.panel-scope) .cms-sidebar.collapsed .cms-nav-submenu li:not(:where(.vista-portal *)) {
   width: 42px;
   height: 42px;
   min-height: 42px;
@@ -419,7 +419,7 @@
   min-width: 0;
 }
 
-:where(.panel-scope) .cms-header-left > svg {
+:where(.panel-scope) .cms-header-left > svg:not(:where(.vista-portal *)) {
   width: 38px;
   height: 38px;
   padding: 9px;
@@ -520,8 +520,8 @@
   box-sizing: border-box;
 }
 
-:where(.panel-scope) .cms-avatar svg,
-:where(.panel-scope) .cms-user-avatar svg {
+:where(.panel-scope) .cms-avatar svg:not(:where(.vista-portal *)),
+:where(.panel-scope) .cms-user-avatar svg:not(:where(.vista-portal *)) {
   width: 20px;
   height: 20px;
 }
@@ -583,7 +583,7 @@
   letter-spacing: 1px;
 }
 
-:where(.panel-scope) .cms-page-title h1 {
+:where(.panel-scope) .cms-page-title h1:not(:where(.vista-portal *)) {
   color: var(--color-primary);
   font-size: clamp(1.75rem, 3.2vw, 2.8rem);
   font-weight: 200 !important;
@@ -592,7 +592,7 @@
   margin: 5px 0;
 }
 
-:where(.panel-scope) .cms-page-title p {
+:where(.panel-scope) .cms-page-title p:not(:where(.vista-portal *)) {
   max-width: 760px;
   color: var(--color-slate-600);
   font-size: 1rem;
@@ -602,7 +602,7 @@
 
 :where(.panel-scope) .cms-nav-group-header:focus-visible,
 :where(.panel-scope) .cms-collapse-btn:focus-visible,
-:where(.panel-scope) .cms-header button:focus-visible {
+:where(.panel-scope) .cms-header button:focus-visible:not(:where(.vista-portal *)) {
   outline: 3px solid rgb(96 165 250 / 65%);
   outline-offset: 2px;
 }
@@ -709,10 +709,10 @@
     overflow: visible;
   }
 
-  :where(.panel-scope) .cms-nav li,
-  :where(.panel-scope) .cms-nav-submenu li,
-  :where(.panel-scope) .cms-sidebar.collapsed .cms-nav li,
-  :where(.panel-scope) .cms-sidebar.collapsed .cms-nav-submenu li {
+  :where(.panel-scope) .cms-nav li:not(:where(.vista-portal *)),
+  :where(.panel-scope) .cms-nav-submenu li:not(:where(.vista-portal *)),
+  :where(.panel-scope) .cms-sidebar.collapsed .cms-nav li:not(:where(.vista-portal *)),
+  :where(.panel-scope) .cms-sidebar.collapsed .cms-nav-submenu li:not(:where(.vista-portal *)) {
     width: 44px;
     height: 44px;
     min-height: 44px;
@@ -746,7 +746,7 @@
     min-width: 0;
   }
 
-  :where(.panel-scope) .cms-header-left > svg {
+  :where(.panel-scope) .cms-header-left > svg:not(:where(.vista-portal *)) {
     width: 34px;
     height: 34px;
     flex: 0 0 auto;
@@ -802,7 +802,7 @@
     margin-bottom: 18px;
   }
 
-  :where(.panel-scope) .cms-page-title p {
+  :where(.panel-scope) .cms-page-title p:not(:where(.vista-portal *)) {
     font-size: 0.9rem;
   }
 }
@@ -830,10 +830,10 @@
     border-bottom-right-radius: 0;
   }
 
-  :where(.panel-scope) .cms-nav li,
-  :where(.panel-scope) .cms-nav-submenu li,
-  :where(.panel-scope) .cms-sidebar.collapsed .cms-nav li,
-  :where(.panel-scope) .cms-sidebar.collapsed .cms-nav-submenu li {
+  :where(.panel-scope) .cms-nav li:not(:where(.vista-portal *)),
+  :where(.panel-scope) .cms-nav-submenu li:not(:where(.vista-portal *)),
+  :where(.panel-scope) .cms-sidebar.collapsed .cms-nav li:not(:where(.vista-portal *)),
+  :where(.panel-scope) .cms-sidebar.collapsed .cms-nav-submenu li:not(:where(.vista-portal *)) {
     width: 40px;
     height: 42px;
     min-height: 42px;
@@ -853,8 +853,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   :where(.panel-scope) .cms-sidebar,
-  :where(.panel-scope) .cms-nav *,
-  :where(.panel-scope) .cms-header *,
+  :where(.panel-scope) .cms-nav *:not(:where(.vista-portal *)),
+  :where(.panel-scope) .cms-header *:not(:where(.vista-portal *)),
   :where(.panel-scope) .cms-collapse-btn {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;

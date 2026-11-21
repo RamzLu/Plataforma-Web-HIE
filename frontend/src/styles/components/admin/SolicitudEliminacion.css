@@ -26,18 +26,18 @@
   color: #7e22ce;
 }
 
-:where(.panel-scope) .solelim-aviso svg {
+:where(.panel-scope) .solelim-aviso svg:not(:where(.vista-portal *)) {
   flex-shrink: 0;
   margin-top: 2px;
 }
 
-:where(.panel-scope) .solelim-aviso strong {
+:where(.panel-scope) .solelim-aviso strong:not(:where(.vista-portal *)) {
   display: block;
   margin-bottom: 2px;
   font-size: 0.95rem;
 }
 
-:where(.panel-scope) .solelim-aviso p {
+:where(.panel-scope) .solelim-aviso p:not(:where(.vista-portal *)) {
   margin: 0;
   color: var(--color-slate-600);
   font-size: 0.88rem;
@@ -63,7 +63,7 @@
   font-weight: 600;
 }
 
-:where(.panel-scope) .solelim-motivo textarea {
+:where(.panel-scope) .solelim-motivo textarea:not(:where(.vista-portal *)) {
   width: 100%;
   box-sizing: border-box;
   padding: 10px;
