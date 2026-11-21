@@ -62,6 +62,17 @@ const CmsPage = () => {
 
   const isKeycloakInitialized = useRef(false);
 
+  // Versiones anteriores guardaban en el navegador la lista completa de la vista admin
+  // (borradores incluidos). Se borra lo que haya quedado para que no persista tras cerrar sesión.
+  useEffect(() => {
+    try {
+      localStorage.removeItem("portal_docs_data");
+      localStorage.removeItem("portal_news_data");
+    } catch {
+      // Sin acceso a localStorage no hay nada que limpiar.
+    }
+  }, []);
+
   const handleQuickAction = (tabId, openModal = true) => {
     setActiveTab(tabId);
     if (openModal) {
@@ -109,32 +120,15 @@ const fetchNoticias = async () => {
   }
 };
 
-  const leerCacheLocal = (clave) => {
-    try {
-      const raw = localStorage.getItem(clave);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-
   const fetchDocs = async () => {
     try {
       const response = await adminFetch("/cms/documentacion");
       if (!response.ok) throw new Error("Error al obtener documentos");
       const data = await response.json();
       
-      if (Array.isArray(data)) {
-        setDocsList(data);
-        localStorage.setItem("portal_docs_data", JSON.stringify(data));
-      } else {
-        setDocsList(leerCacheLocal("portal_docs_data"));
-      }
+      setDocsList(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error obteniendo documentos:", error);
-      setDocsList(leerCacheLocal("portal_docs_data"));
     }
   };
 
@@ -154,7 +148,6 @@ const fetchNoticias = async () => {
   const handleAddNewDoc = (nuevoDoc) => {
     const updatedList = [nuevoDoc, ...docsList];
     setDocsList(updatedList);
-    localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
   };
 
   const handleUpdateDoc = (updatedDoc) => {
@@ -162,13 +155,11 @@ const fetchNoticias = async () => {
       item.id === updatedDoc.id ? updatedDoc : item,
     );
     setDocsList(updatedList);
-    localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
   };
 
 const handleDeleteDoc = (id) => {
     const filtered = docsList.filter((d) => d.id !== id);
     setDocsList(filtered);
-    localStorage.setItem("portal_docs_data", JSON.stringify(filtered));
   };
 
   // Las lecturas del CMS exigen token con rol 'cm': se piden recien cuando la sesion esta lista.
@@ -275,7 +266,6 @@ const handleDeleteDoc = (id) => {
     const updatedList = [nuevaNoticia, ...newsList];
     setNewsList(updatedList);
     updateStats(updatedList, docsList);
-    localStorage.setItem("portal_news_data", JSON.stringify(updatedList));
   };
 
   const handleUpdateNews = (updatedNews) => {
@@ -290,7 +280,6 @@ const handleDeleteDoc = (id) => {
     const filtered = newsList.filter((n) => n.id !== id);
     setNewsList(filtered);
     updateStats(filtered, docsList);
-    localStorage.setItem("portal_news_data", JSON.stringify(filtered));
   };
 
   const testBackendConnection = async () => {

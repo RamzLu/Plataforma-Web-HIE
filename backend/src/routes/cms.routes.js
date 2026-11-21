@@ -37,6 +37,7 @@ import {
 
 
 import { obtenerSolicitudesEliminacion, resolverSolicitudEliminacion } from "../controllers/cms/cms.eliminaciones.controller.js";
+import { obtenerActividadReciente } from "../controllers/cms/cms.actividad.controller.js";
 import { requireCmsAccess, requireAdminAccess, adminViewAccess, requireCmsOrAdminAccess } from '../middlewares/auth.middleware.js'; 
 import { parsearIdBigInt } from '../utils/sanitize.utils.js';
 import {
@@ -149,5 +150,10 @@ router.delete('/capacitaciones/:id', requireCmsAccess, eliminarCapacitacion);
 // ==========================================
 router.get('/solicitudes-eliminacion', requireAdminAccess, obtenerSolicitudesEliminacion);
 router.patch('/solicitudes-eliminacion/:entidad/:id', requireAdminAccess, resolverSolicitudEliminacion);
+
+// ==========================================
+// ACTIVIDAD RECIENTE (tabla auditoria)
+// ==========================================
+router.get('/actividad', requireCmsOrAdminAccess, obtenerActividadReciente);
 
 export default router;

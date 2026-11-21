@@ -71,6 +71,7 @@ const CmsRecentActivity = ({
   const [extraRes, setExtraRes] = useState([]);
   const [, setLoadingExtras] = useState(true);
   const [loggedActivities, setLoggedActivities] = useState(() => getCmsActivityLog());
+  const [serverActivities, setServerActivities] = useState([]);
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -93,10 +94,14 @@ const CmsRecentActivity = ({
       adminFetch("/cms/residencias")
         .then((r) => r.json())
         .catch(() => []),
-    ]).then(([caps, res]) => {
+      adminFetch("/cms/actividad?limite=30")
+        .then((r) => (r.ok ? r.json() : []))
+        .catch(() => []),
+    ]).then(([caps, res, auditoria]) => {
       if (isMounted) {
         if (Array.isArray(caps)) setExtraCaps(caps);
         if (Array.isArray(res)) setExtraRes(res);
+        if (Array.isArray(auditoria)) setServerActivities(auditoria);
         setLoadingExtras(false);
       }
     });
@@ -235,6 +240,22 @@ const CmsRecentActivity = ({
       editor: log.editor || userName,
       estado: resolveEstado(log.estado),
       timestamp: log.timestamp || Date.now(),
+    });
+  });
+
+  // Movimientos registrados en el servidor (tabla auditoria), compartidos entre todos los editores.
+  // Las altas y ediciones ya salen de las listas de arriba; acá se suman aprobaciones, rechazos,
+  // eliminaciones y pedidos de eliminación.
+  (serverActivities || []).forEach((a) => {
+    const accion = String(a.accion || "").toUpperCase();
+    if (["CREAR", "MODIFICAR", "ACTUALIZAR"].includes(accion)) return;
+    activities.push({
+      id: `audit-${a.id}`,
+      titulo: a.descripcion || `${accion} ${a.entidad}`,
+      categoria: a.entidad ? a.entidad.charAt(0).toUpperCase() + a.entidad.slice(1) : "General",
+      editor: a.usuario || "Editor CMS",
+      estado: resolveEstado(accion.includes("ELIMIN") ? "ELIMINADO" : accion),
+      timestamp: a.fechaHora ? new Date(a.fechaHora).getTime() : 0,
     });
   });
 
