@@ -88,12 +88,6 @@ router.put(
   uploadImagenesArray("imagenes", 15),
   actualizarEspacioGrafico
 );
-router.put(
-  "/contenido-grafico/:espacioKey",
-  requireCmsAccess,
-  uploadImagenesArray("imagenes", 15),
-  actualizarEspacioGrafico
-);
 
 // ==========================================
 // MÓDULO: PROFESIONALES
@@ -136,8 +130,8 @@ router.delete('/residencias/:id', requireCmsAccess, eliminarResidencia);
 // ==========================================
 // MÓDULO: CAPACITACIONES
 // ==========================================
-// Listado completo (borradores/archivadas): CMS y Administrador. El portal publico usa /capacitaciones/publicas.
-router.get('/capacitaciones', requireCmsOrAdminAccess, obtenerCapacitaciones);
+router.get('/capacitaciones', adminViewAccess, obtenerCapacitaciones);
+// Alias anterior del listado público; se mantiene para no romper clientes viejos.
 router.get('/capacitaciones/publicas', obtenerCapacitacionesPublicas);
 router.post('/capacitaciones', requireCmsAccess, uploadCapacitacionFiles, crearCapacitacion);
 router.put('/capacitaciones/:id', requireCmsAccess, uploadCapacitacionFiles, actualizarCapacitacion);

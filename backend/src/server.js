@@ -2,10 +2,9 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
-import rolesRoutes from './routes/roles.routes.js'
-import adminRoutes from './routes/admin.routes.js';
 import cmsRoutes from './routes/cms.routes.js';
 import errorHandler from './middlewares/error.middleware.js';
+import { prisma } from './config/prisma.js';
 
 import cron from 'node-cron';
 import CmsNoticiaService from './services/cms/cms.noticia.service.js';
@@ -95,9 +94,24 @@ app.use('/api', writeLimiter);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-app.use('/api/roles', rolesRoutes)
-app.use('/api/admin', adminRoutes);
+// Estado del servicio, para monitoreo o el balanceador. No requiere token y no expone datos.
+app.get('/api/health', async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return res.status(200).json({ status: 'ok', baseDeDatos: 'ok' });
+  } catch {
+    return res.status(503).json({ status: 'degradado', baseDeDatos: 'sin conexión' });
+  }
+});
+
 app.use('/api/cms', cmsRoutes);
+
+// Cualquier otra ruta de la API: 404 en el mismo formato JSON que el resto de los errores.
+app.use('/api', (_req, _res, next) => {
+  const error = new Error('El recurso solicitado no existe.');
+  error.statusCode = 404;
+  next(error);
+});
 
 app.use(errorHandler);
 

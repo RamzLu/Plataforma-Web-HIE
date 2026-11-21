@@ -7,7 +7,7 @@ export const getCapacitaciones = async () => {
 };
 
 export const getCapacitacionesPublicas = async () => {
-  const response = await api.get("/cms/capacitaciones/publicas");
+  const response = await api.get("/cms/capacitaciones");
   return response.data;
 };
 

@@ -1000,8 +1000,10 @@ class CmsResidenciaService {
       }
 
       if (fechaPub && fechaPub <= limite) {
-        await prisma.residencia.update({
-          where: { id: res.id },
+        // updateMany con estado en el filtro: si alguien la cambió desde la lectura de arriba
+        // (por ejemplo, la archivó), no se publica.
+        await prisma.residencia.updateMany({
+          where: { id: res.id, estado: "PROGRAMADO" },
           data: {
             estado: "PUBLICADO",
             activo: true,

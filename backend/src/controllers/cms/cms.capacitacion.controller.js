@@ -2,8 +2,13 @@ import { agregarSolicitudesEliminacion } from "../../utils/eliminacion.utils.js"
 import { usuarioTieneRol, ROLES_ADMIN } from "../../middlewares/auth.middleware.js";
 import CmsCapacitacionService from "../../services/cms/cms.capacitacion.service.js";
 
+// Mismo criterio que el resto de los módulos: sin ?admin=true devuelve solo lo publicado (portal);
+// con ?admin=true (token de CMS o Admin) devuelve todo, con las solicitudes de eliminación.
 export const obtenerCapacitaciones = async (req, res, next) => {
   try {
+    if (req.adminView !== true) {
+      return res.status(200).json(await CmsCapacitacionService.obtenerCapacitacionesPublicas());
+    }
     const capacitaciones = await CmsCapacitacionService.obtenerCapacitaciones();
     return res.status(200).json(await agregarSolicitudesEliminacion(capacitaciones, () => "capacitacion"));
   } catch (error) {
