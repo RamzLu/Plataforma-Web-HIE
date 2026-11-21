@@ -103,6 +103,11 @@ model documento {
   createdBy                            String              @db.Uuid
   updatedBy                            String?             @db.Uuid
   estado                               EstadoEditorial
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason                      String?
+  pendingMeta                          Json?
+  editorMeta                           Json?
+  solicitudEliminacion                 Json?
   createdAt                            DateTime            @default(now())
   updatedAt                            DateTime            @updatedAt
   archivo                              archivo             @relation(fields: [archivoId], references: [id])
@@ -128,6 +133,11 @@ model especialidad {
   documentacionNecesaria String?
   informacionDerivacion  String?
   estado                 EstadoEditorial @default(PUBLICADO)
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason        String?
+  pendingMeta            Json?
+  editorMeta             Json?
+  solicitudEliminacion   Json?
   profesional            profesional[]
 }
 
@@ -154,6 +164,11 @@ model noticia {
   createdBy                          String            @db.Uuid
   updatedBy                          String?           @db.Uuid
   estado                             EstadoEditorial
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason                    String?
+  pendingMeta                        Json?
+  editorMeta                         Json?
+  solicitudEliminacion               Json?
   fechaPublicacion                   DateTime?
   createdAt                          DateTime          @default(now())
   updatedAt                          DateTime          @updatedAt
@@ -180,22 +195,27 @@ model noticia_archivo {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model profesional {
-  id               BigInt             @id @default(autoincrement())
-  nombre           String             @db.VarChar(100)
-  apellido         String             @db.VarChar(100)
-  matricula        String?            @db.VarChar(50)
-  cargo            String?            @db.VarChar(100)
-  especialidadId   BigInt
-  archivoId        BigInt?
-  descripcion      String?
-  activo           Boolean            @default(true)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                   BigInt             @id @default(autoincrement())
+  nombre               String             @db.VarChar(100)
+  apellido             String             @db.VarChar(100)
+  matricula            String?            @db.VarChar(50)
+  cargo                String?            @db.VarChar(100)
+  especialidadId       BigInt
+  archivoId            BigInt?
+  descripcion          String?
+  activo               Boolean            @default(true)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
   /// Estado editorial. Por defecto queda pendiente de aprobación: nada se publica sin revisión del admin.
-  estado           EstadoEditorial    @default(PENDIENTE_APROBACION)
-  archivo          archivo?           @relation(fields: [archivoId], references: [id])
-  especialidad     especialidad       @relation(fields: [especialidadId], references: [id])
-  profesional_area profesional_area[]
+  estado               EstadoEditorial    @default(PENDIENTE_APROBACION)
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  pendingMeta          Json?
+  editorMeta           Json?
+  solicitudEliminacion Json?
+  archivo              archivo?           @relation(fields: [archivoId], references: [id])
+  especialidad         especialidad       @relation(fields: [especialidadId], references: [id])
+  profesional_area     profesional_area[]
 
   @@index([archivoId])
   @@index([especialidadId])
@@ -262,6 +282,11 @@ model servicio {
   informacionDerivacion  String?
   ubicacion              String?
   estado                 EstadoEditorial @default(PUBLICADO)
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason        String?
+  pendingMeta            Json?
+  editorMeta             Json?
+  solicitudEliminacion   Json?
   servicio_area          servicio_area[]
 }
 
@@ -300,20 +325,25 @@ model servicio_area {
 }
 
 model capacitacion {
-  id          BigInt          @id @default(autoincrement())
-  titulo      String          @db.VarChar(200)
-  descripcion String?
-  contenido   String?
-  imagenId    BigInt?
-  videoUrl    String?
-  enlaceUrl   String?
-  fechaInicio DateTime?
-  fechaFin    DateTime?
-  estado      EstadoEditorial
-  activo      Boolean         @default(true)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  archivo     archivo?        @relation(fields: [imagenId], references: [id])
+  id                   BigInt          @id @default(autoincrement())
+  titulo               String          @db.VarChar(200)
+  descripcion          String?
+  contenido            String?
+  imagenId             BigInt?
+  videoUrl             String?
+  enlaceUrl            String?
+  fechaInicio          DateTime?
+  fechaFin             DateTime?
+  estado               EstadoEditorial
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  pendingMeta          Json?
+  editorMeta           Json?
+  solicitudEliminacion Json?
+  activo               Boolean         @default(true)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  archivo              archivo?        @relation(fields: [imagenId], references: [id])
 
   @@index([activo])
   @@index([estado])
@@ -362,6 +392,11 @@ model residencia {
   convocatoria         String?
   fechaConvocatoria    DateTime?
   estado               EstadoEditorial
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  pendingMeta          Json?
+  editorMeta           Json?
+  solicitudEliminacion Json?
   activo               Boolean                @default(true)
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt

@@ -8,9 +8,7 @@ import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOT
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
-const REJECTION_KEY_PREFIX = "documento_rejection_";
-const PENDING_META_KEY_PREFIX = "documento_pending_meta_";
-const metaEditorial = crearMetaEditorial({ entidad: "documento", rechazo: REJECTION_KEY_PREFIX, pendiente: PENDING_META_KEY_PREFIX });
+const metaEditorial = crearMetaEditorial({ entidad: "documento", modelos: { "": "documento" } });
 
 class CmsDocService {
   // Metadatos editoriales (motivo de rechazo, cambios pendientes, editor): ver utils/metaEditorial.utils.js

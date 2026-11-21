@@ -6,10 +6,7 @@ import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
-const REJECTION_KEY_PREFIX = "especialidad_rejection_";
-const PENDING_META_KEY_PREFIX = "especialidad_pending_meta_";
-const EDITOR_META_KEY_PREFIX = "especialidad_editor_meta_";
-const metaEditorial = crearMetaEditorial({ entidad: "especialidad o servicio", rechazo: REJECTION_KEY_PREFIX, pendiente: PENDING_META_KEY_PREFIX, editor: EDITOR_META_KEY_PREFIX });
+const metaEditorial = crearMetaEditorial({ entidad: "especialidad o servicio", modelos: { esp_: "especialidad", srv_: "servicio" } });
 
 class CmsEspecialidadService {
   _metaKey(id, esServicio) {

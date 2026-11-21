@@ -9,9 +9,7 @@ import { calcularCambios } from "../../utils/cambios.utils.js";
 
 const DOCS_BUCKET = "capacitaciones-documentos";
 const MEDIA_BUCKET = "capacitaciones-imagenes-videos";
-const CAPACITACION_PENDING_META_PREFIX = "capacitacion_pending_meta_";
-const CAPACITACION_REJECTION_KEY_PREFIX = "capacitacion_rejection_reason_";
-const metaEditorial = crearMetaEditorial({ entidad: "capacitación", rechazo: CAPACITACION_REJECTION_KEY_PREFIX, pendiente: CAPACITACION_PENDING_META_PREFIX });
+const metaEditorial = crearMetaEditorial({ entidad: "capacitación", modelos: { "": "capacitacion" } });
 
 const normalizarUrlOpcional = (rawUrl, nombreCampo) => {
   if (rawUrl === null || rawUrl === undefined) return "";

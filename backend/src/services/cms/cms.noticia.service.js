@@ -8,9 +8,7 @@ import { sanitizarHtmlNoticia, parsearIdBigInt, parsearArregloJson } from "../..
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 
-const REJECTION_KEY_PREFIX = "noticia_rejection_";
-const PENDING_META_KEY_PREFIX = "noticia_pending_meta_";
-const metaEditorial = crearMetaEditorial({ entidad: "noticia", rechazo: REJECTION_KEY_PREFIX, pendiente: PENDING_META_KEY_PREFIX });
+const metaEditorial = crearMetaEditorial({ entidad: "noticia", modelos: { "": "noticia" } });
 
 class CmsNoticiaService {
   // Metadatos editoriales (motivo de rechazo, cambios pendientes, editor): ver utils/metaEditorial.utils.js

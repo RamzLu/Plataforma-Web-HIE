@@ -26,8 +26,24 @@ if (process.env.NODE_ENV !== "production") {
 
 const adapter = new PrismaPg(pool);
 
+// Columnas internas del flujo editorial (ver utils/metaEditorial.utils.js y utils/eliminacion.utils.js).
+// Se omiten por defecto en todas las consultas para que nunca lleguen al portal público por un
+// "...registro"; quien las necesita las pide explícitamente con select.
+const COLUMNAS_EDITORIALES = {
+  rejectionReason: true,
+  pendingMeta: true,
+  editorMeta: true,
+  solicitudEliminacion: true,
+};
+const omitirColumnasEditoriales = Object.fromEntries(
+  ["noticia", "documento", "profesional", "especialidad", "servicio", "residencia", "capacitacion"].map(
+    (modelo) => [modelo, COLUMNAS_EDITORIALES]
+  )
+);
+
 export const prisma = globalForPrisma.prisma || new PrismaClient({
   adapter,
+  omit: omitirColumnasEditoriales,
   log: process.env.NODE_ENV === "development"
     ? ["query", "info", "warn", "error"]
     : ["error"],

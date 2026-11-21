@@ -3,18 +3,38 @@
 // Lo que nunca fue público (borradores, rechazados, archivados, pendientes nuevos) se borra directamente.
 // Lo que está visible en el portal no se borra: queda una "solicitud de eliminación" que el administrador
 // aprueba (y recién ahí se borra) o rechaza (y el contenido queda como estaba). Mientras tanto sigue visible.
-// Las solicitudes se guardan en la tabla configuracion con la clave "eliminacion_<entidad>_<id>".
+// Las solicitudes se guardan como JSON en la columna "solicitudEliminacion" de la tabla de cada entidad.
 
+import { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import { obtenerOCrearUsuarioLocal } from "./user.utils.js";
 import { registrarFalla } from "./log.utils.js";
+import { escribirColumnaEditorial } from "./metaEditorial.utils.js";
 
 const ESTADOS_VISIBLES = ["PUBLICADO", "APROBADO", "PROGRAMADO"];
-const PREFIJO = "eliminacion_";
 
+// El nombre de cada entidad coincide con el de su modelo de Prisma.
 export const ENTIDADES_ELIMINABLES = ["noticia", "documento", "profesional", "especialidad", "servicio", "residencia", "capacitacion"];
 
-const claveDe = (entidad, id) => `${PREFIJO}${entidad}_${id}`;
+const modeloDe = (entidad) => {
+  if (!ENTIDADES_ELIMINABLES.includes(entidad)) {
+    throw new Error(`Entidad no válida para solicitudes de eliminación: "${entidad}".`);
+  }
+  return prisma[entidad];
+};
+
+const leerSolicitud = async (entidad, id) => {
+  const fila = await modeloDe(entidad).findUnique({
+    where: { id: BigInt(id) },
+    select: { solicitudEliminacion: true },
+  });
+  return fila?.solicitudEliminacion ?? null;
+};
+
+const escribirSolicitud = (entidad, id, valor) => {
+  modeloDe(entidad);
+  return escribirColumnaEditorial(entidad, id, "solicitudEliminacion", valor);
+};
 
 /**
  * true si el registro es una edición en revisión (pendiente) o rechazada de algo que ya estaba publicado
@@ -64,8 +84,7 @@ const registrarAuditoria = async (user, entidad, id, accion, descripcion) => {
 
 /** Guarda la solicitud (si no existe ya) y devuelve la respuesta para el CMS. */
 export const solicitarEliminacion = async ({ entidad, id, titulo, user, reemplazaEdicion = false }) => {
-  const clave = claveDe(entidad, id);
-  const existente = await prisma.configuracion.findUnique({ where: { clave } });
+  const existente = await leerSolicitud(entidad, id);
   if (existente) {
     return {
       solicitudEliminacion: true,
@@ -80,16 +99,7 @@ export const solicitarEliminacion = async ({ entidad, id, titulo, user, reemplaz
     solicitadoPor: user?.name || user?.username || "Editor CMS",
     fecha: new Date().toISOString(),
   };
-  await prisma.configuracion.upsert({
-    where: { clave },
-    update: { valor: JSON.stringify(solicitud), updatedAt: new Date() },
-    create: {
-      clave,
-      valor: JSON.stringify(solicitud),
-      descripcion: `Solicitud de eliminación de ${entidad} ID ${id}`,
-      updatedAt: new Date(),
-    },
-  });
+  await escribirSolicitud(entidad, id, solicitud);
   await registrarAuditoria(
     user,
     entidad,
@@ -107,27 +117,21 @@ export const solicitarEliminacion = async ({ entidad, id, titulo, user, reemplaz
   };
 };
 
-export const obtenerSolicitudEliminacion = async (entidad, id) => {
-  const fila = await prisma.configuracion.findUnique({ where: { clave: claveDe(entidad, id) } });
-  if (!fila) return null;
-  try {
-    return JSON.parse(fila.valor);
-  } catch {
-    return { entidad, id: String(id), titulo: "(sin título)", solicitadoPor: "Editor CMS", fecha: fila.updatedAt };
-  }
-};
+export const obtenerSolicitudEliminacion = (entidad, id) => leerSolicitud(entidad, id);
 
 export const listarSolicitudesEliminacion = async () => {
-  const filas = await prisma.configuracion.findMany({ where: { clave: { startsWith: PREFIJO } } });
-  return filas
-    .map((fila) => {
-      try {
-        return JSON.parse(fila.valor);
-      } catch {
-        return null; // fila corrupta: se omite
-      }
-    })
-    .filter(Boolean)
+  const porEntidad = await Promise.all(
+    ENTIDADES_ELIMINABLES.map((entidad) =>
+      prisma[entidad].findMany({
+        where: { solicitudEliminacion: { not: Prisma.DbNull } },
+        select: { solicitudEliminacion: true },
+      })
+    )
+  );
+  return porEntidad
+    .flat()
+    .map((fila) => fila.solicitudEliminacion)
+    .filter((s) => s && typeof s === "object")
     .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
 };
 
@@ -149,8 +153,7 @@ export const agregarSolicitudesEliminacion = async (items, entidadDe) => {
   }
 };
 
-export const limpiarSolicitudEliminacion = (entidad, id) =>
-  prisma.configuracion.deleteMany({ where: { clave: claveDe(entidad, id) } });
+export const limpiarSolicitudEliminacion = (entidad, id) => escribirSolicitud(entidad, id, null);
 
 export const registrarResolucionEliminacion = (user, solicitud, aprobada, motivo = "") =>
   registrarAuditoria(

@@ -9,10 +9,7 @@ import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../util
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 
-const RESIDENCIA_PENDING_META_PREFIX = "residencia_pending_meta_";
-const RESIDENCIA_REJECTION_KEY_PREFIX = "residencia_rejection_reason_";
-const RESIDENCIA_EDITOR_META_PREFIX = "residencia_editor_meta_";
-const metaEditorial = crearMetaEditorial({ entidad: "residencia", rechazo: RESIDENCIA_REJECTION_KEY_PREFIX, pendiente: RESIDENCIA_PENDING_META_PREFIX, editor: RESIDENCIA_EDITOR_META_PREFIX });
+const metaEditorial = crearMetaEditorial({ entidad: "residencia", modelos: { "": "residencia" } });
 
 const formatBytes = (bytes) => {
   const n = Number(bytes || 0);

@@ -8,10 +8,7 @@ import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 
-const REJECTION_KEY_PREFIX = "profesional_rejection_";
-const PENDING_META_KEY_PREFIX = "profesional_pending_meta_";
-const EDITOR_META_KEY_PREFIX = "profesional_editor_meta_";
-const metaEditorial = crearMetaEditorial({ entidad: "profesional", rechazo: REJECTION_KEY_PREFIX, pendiente: PENDING_META_KEY_PREFIX, editor: EDITOR_META_KEY_PREFIX });
+const metaEditorial = crearMetaEditorial({ entidad: "profesional", modelos: { "": "profesional" } });
 
 class CmsProfesionalService {
   // Metadatos editoriales (motivo de rechazo, cambios pendientes, editor): ver utils/metaEditorial.utils.js
