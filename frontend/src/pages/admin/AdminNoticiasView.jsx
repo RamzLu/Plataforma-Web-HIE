@@ -183,12 +183,10 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       }
     };
 
-    window.addEventListener('focus', handleVisibilityOrFocus);
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
     return () => {
       clearInterval(intervalId);
-      window.removeEventListener('focus', handleVisibilityOrFocus);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
   }, [cargarNoticias]);
@@ -217,8 +215,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
 
       const response = await evaluarNoticiaEstado(
         selectedNews.id,
-        { estado: 'APROBADO' },
-        keycloak.token
+        { estado: 'APROBADO' }
       );
 
       const estadoFinal = (response?.noticia?.estado || 'APROBADO').toUpperCase();
@@ -304,8 +301,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         {
           estado: 'RECHAZADO',
           rejectionReason: motivoLimpio,
-        },
-        keycloak.token
+        }
       );
 
       const updatedList = noticias.map((item) =>

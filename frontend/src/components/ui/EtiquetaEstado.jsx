@@ -14,7 +14,7 @@ const ICONOS = {
 };
 
 /** Acepta el estado del backend (PENDIENTE_APROBACION, PUBLICADO...) o la etiqueta ya traducida ("Publicada"...). */
-export const tipoDeEstado = (estado = "") => {
+const tipoDeEstado = (estado = "") => {
   const valor = String(estado).toUpperCase();
   if (valor.includes("ELIMINA")) return "eliminacion";
   if (valor.includes("PENDIENTE")) return "pendiente";

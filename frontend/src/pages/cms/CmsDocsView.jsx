@@ -88,19 +88,7 @@ const CmsDocsView = ({
     }
   }, [onRefreshDocs]);
 
-  React.useEffect(() => {
-    const handleFocus = () => {
-      if (document.visibilityState === "visible" && typeof onRefreshDocs === "function") {
-        onRefreshDocs();
-      }
-    };
-    window.addEventListener("focus", handleFocus);
-    document.addEventListener("visibilitychange", handleFocus);
-    return () => {
-      window.removeEventListener("focus", handleFocus);
-      document.removeEventListener("visibilitychange", handleFocus);
-    };
-  }, [onRefreshDocs]);
+  // El refresco al volver a la pestaña lo hace CmsPage para todas las secciones.
 
   const handleOpenEdit = (doc) => {
     setEditingId(doc.id);
@@ -147,8 +135,7 @@ const CmsDocsView = ({
     setDeletingId(id);
 
     try {
-      const token = keycloak.token;
-      if (!token) {
+      if (!keycloak.token) {
         toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
@@ -157,7 +144,7 @@ const CmsDocsView = ({
       const docToDelete = (docsList || []).find((d) => d.id === id);
       const tituloDoc = docToDelete?.title || docToDelete?.titulo || "Documento";
 
-      const respuesta = await deleteDocumento(id, token);
+      const respuesta = await deleteDocumento(id);
       // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
       if (respuesta?.solicitudEliminacion) {
         toast.success(respuesta.message, { duration: 6000 });
@@ -271,8 +258,7 @@ const CmsDocsView = ({
 
     setSaving(true);
     try {
-      const token = keycloak.token;
-      if (!token) {
+      if (!keycloak.token) {
         toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
@@ -291,9 +277,9 @@ const CmsDocsView = ({
 
       let data;
       if (editingId) {
-        data = await updateDocumento(editingId, formData, token);
+        data = await updateDocumento(editingId, formData);
       } else {
-        data = await createDocumento(formData, token);
+        data = await createDocumento(formData);
       }
 
       const docBackend = data.documento;

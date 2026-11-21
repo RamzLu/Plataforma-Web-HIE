@@ -24,7 +24,6 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import keycloak from '../../config/keycloak';
 import { cambiarEstadoResidencia, getResidencias } from '../../api/residencias.api';
 import { sanitizeUrl } from '../../utils/sanitizeUrl';
 import {
@@ -295,9 +294,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
         selectedResidencia?.requestedEstado === 'PROGRAMADO' ||
         Boolean(selectedResidencia?.fechaPublicacion && new Date(selectedResidencia.fechaPublicacion) > new Date());
       const finalEstado = isArchiving ? 'ARCHIVADO' : isScheduling ? 'PROGRAMADO' : 'PUBLICADO';
-      const token = keycloak?.token || localStorage.getItem('token') || '';
 
-      await cambiarEstadoResidencia(selectedResidencia.id, 'APROBADO', token);
+      await cambiarEstadoResidencia(selectedResidencia.id, 'APROBADO');
 
       setResidencias((current) =>
         current.map((item) =>
@@ -345,8 +343,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
     setActionError('');
 
     try {
-      const token = keycloak?.token || localStorage.getItem('token') || '';
-      await cambiarEstadoResidencia(selectedResidencia.id, 'RECHAZADO', token, reason);
+      await cambiarEstadoResidencia(selectedResidencia.id, 'RECHAZADO', reason);
 
       setResidencias((current) =>
         current.map((item) =>

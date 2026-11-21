@@ -209,8 +209,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     const toastId = toast.loading("Eliminando profesional...");
     
     try {
-      const token = keycloak?.token;
-      const respuesta = await deleteProfesional(profesionalToDelete.id, token);
+      const respuesta = await deleteProfesional(profesionalToDelete.id);
       // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
       if (respuesta?.solicitudEliminacion) {
         toast.success(respuesta.message, { id: toastId, duration: 6000 });
@@ -281,7 +280,6 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
       if (keycloak.authenticated) {
         await keycloak.updateToken(30).catch(() => {});
       }
-      const token = keycloak?.token;
       const editorNombre =
         keycloak?.tokenParsed?.name ||
         keycloak?.idTokenParsed?.name ||
@@ -303,8 +301,8 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
       }
 
       const resultado = editingId
-        ? await updateProfesional(editingId, dataForm, token)
-        : await createProfesional(dataForm, token);
+        ? await updateProfesional(editingId, dataForm)
+        : await createProfesional(dataForm);
       
       const profGuardado = resultado?.profesional;
       const estadoResultante = (profGuardado?.estado || "PENDIENTE_APROBACION").toUpperCase();

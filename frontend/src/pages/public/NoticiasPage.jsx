@@ -336,11 +336,11 @@ const NoticiasPage = () => {
           <button className="lightbox-close" onClick={closeLightbox}>&times;</button>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             {lightbox.images.length > 1 && (
-              <button className="lightbox-arrow lb-left" onClick={(e) => { e.stopPropagation(); setLightbox(prev => ({ ...prev, index: (prev.index - 1 + prev.images.length) % prev.images.length })); }}>&#10094;</button>
+              <button className="lightbox-arrow lb-left" onClick={prevLightboxImage}>&#10094;</button>
             )}
             <img src={lightbox.images[lightbox.index]} alt="Ampliada" className="lightbox-img" />
             {lightbox.images.length > 1 && (
-              <button className="lightbox-arrow lb-right" onClick={(e) => { e.stopPropagation(); setLightbox(prev => ({ ...prev, index: (prev.index + 1) % prev.images.length })); }}>&#10095;</button>
+              <button className="lightbox-arrow lb-right" onClick={nextLightboxImage}>&#10095;</button>
             )}
           </div>
         </div>

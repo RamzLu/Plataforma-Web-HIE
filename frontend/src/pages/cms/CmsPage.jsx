@@ -1,6 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
-import { adminFetch } from "../../api/adminFetch.js";
+import { getNoticias } from "../../api/noticias.api.js";
+import { getDocumentos } from "../../api/documentos.api.js";
+import { getProfesionales } from "../../api/profesionales.api.js";
 
 import keycloak from "../../config/keycloak";
 import { ROLES_CMS, tieneAlgunRol } from "../../utils/roles";
@@ -31,13 +34,15 @@ const CmsPage = () => {
   const [isCms, setIsCms] = useState(false);
   const [userName, setUserName] = useState("Usuario CMS");
 
-  const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem("cms_active_tab") || "dashboard";
-  });
-  
-  useEffect(() => {
-    localStorage.setItem("cms_active_tab", activeTab);
-  }, [activeTab]);
+  // La sección activa sale de la URL (/cms/noticias, /cms/profesionales...): se puede compartir
+  // el link y el botón "atrás" del navegador vuelve a la sección anterior.
+  const { seccion } = useParams();
+  const navigate = useNavigate();
+  const activeTab = seccion || "dashboard";
+  const setActiveTab = useCallback(
+    (tab) => navigate(!tab || tab === "dashboard" ? "/cms" : `/cms/${tab}`),
+    [navigate]
+  );
   
   const [selectedNews, setSelectedNews] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -83,9 +88,7 @@ const CmsPage = () => {
 const fetchNoticias = async () => {
   try {
     setLoading(true);
-    const response = await adminFetch("/cms/noticias");
-    if (!response.ok) throw new Error("Error al obtener noticias del servidor");
-    const data = await response.json();
+    const data = await getNoticias(true);
 
     if (data && data.length > 0) {
       const noticiasFormateadas = data.map((noticia) => ({
@@ -122,10 +125,7 @@ const fetchNoticias = async () => {
 
   const fetchDocs = async () => {
     try {
-      const response = await adminFetch("/cms/documentacion");
-      if (!response.ok) throw new Error("Error al obtener documentos");
-      const data = await response.json();
-      
+      const data = await getDocumentos(true);
       setDocsList(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error obteniendo documentos:", error);
@@ -134,9 +134,7 @@ const fetchNoticias = async () => {
 
   const fetchProfesionales = async () => {
     try {
-      const response = await adminFetch("/cms/profesionales");
-      if (!response.ok) throw new Error("Error al obtener profesionales");
-      const data = await response.json();
+      const data = await getProfesionales(true);
       if (data && Array.isArray(data)) {
         setProfesionalesList(data);
       }
@@ -192,12 +190,9 @@ const handleDeleteDoc = (id) => {
         fetchProfesionales();
       }
     };
-    window.addEventListener("focus", handleFocusOrVisibility);
+    // Solo visibilitychange: escuchar también "focus" pedía todo dos veces al volver a la pestaña.
     document.addEventListener("visibilitychange", handleFocusOrVisibility);
-    return () => {
-      window.removeEventListener("focus", handleFocusOrVisibility);
-      document.removeEventListener("visibilitychange", handleFocusOrVisibility);
-    };
+    return () => document.removeEventListener("visibilitychange", handleFocusOrVisibility);
   }, [authenticated, isCms]);
 
   useEffect(() => {
@@ -214,7 +209,6 @@ const handleDeleteDoc = (id) => {
           keycloak.tokenParsed?.preferred_username ||
           "Editor CMS";
         setUserName(name);
-        updateStats(newsList, docsList);
       }
       return;
     }
@@ -234,14 +228,12 @@ const handleDeleteDoc = (id) => {
             keycloak.tokenParsed?.preferred_username ||
             "Editor CMS";
           setUserName(name);
-
-          updateStats(newsList, docsList);
         }
       })
       .catch((err) => {
         console.error("Error al inicializar Keycloak:", err);
       });
-  }, [newsList]);
+  }, []); // Las estadísticas se recalculan en el efecto que depende de las listas.
 
   const updateStats = (currentNews = newsList, currentDocs = docsList, currentProfs = profesionalesList) => {
     const publicadas = (currentNews || []).filter((n) => (n.estado || "").toUpperCase() === "PUBLICADO").length;
@@ -282,18 +274,6 @@ const handleDeleteDoc = (id) => {
     updateStats(filtered, docsList);
   };
 
-  const testBackendConnection = async () => {
-    try {
-      const response = await adminFetch("/cms/noticias");
-      if (!response.ok) throw new Error("Error en la respuesta del servidor");
-      const data = await response.json();
-      console.log("Respuesta del Backend:", data);
-      alert("Conexión exitosa. Revisa la consola.");
-    } catch (err) {
-      console.error("Error conectando al backend", err);
-      alert("Error al conectar con el backend.");
-    }
-  };
 
   const openLightbox = (images, index) =>
     setLightbox({ isOpen: true, images, index });
@@ -413,7 +393,6 @@ if (!authenticated) {
       <div className="cms-main-wrapper">
         <CmsHeader
           userName={userName}
-          testBackendConnection={testBackendConnection}
           onLogoutClick={() => setShowLogoutModal(true)}
           activeTab={activeTab}
         />
@@ -595,7 +574,6 @@ if (!authenticated) {
                   if (keycloak && typeof keycloak.logout === 'function') {
                     keycloak.logout();
                   } else {
-                    localStorage.removeItem("cms_active_tab");
                     window.location.href = "/";
                   }
                 }}

@@ -235,8 +235,7 @@ const CmsNoticiasView = ({
     setDeletingId(id);
 
     try {
-      const token = keycloak.token;
-      if (!token) {
+      if (!keycloak.token) {
         toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
@@ -247,7 +246,7 @@ const CmsNoticiasView = ({
         (newsList || []).find((n) => n.id === id);
       const tituloNoticia = noticia?.title || noticia?.titulo || "Noticia";
 
-      const respuesta = await deleteNoticia(id, token);
+      const respuesta = await deleteNoticia(id);
       // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
       if (respuesta?.solicitudEliminacion) {
         toast.success(respuesta.message, { duration: 6000 });
@@ -339,8 +338,7 @@ const CmsNoticiasView = ({
       if (keycloak.authenticated) {
         await keycloak.updateToken(30).catch(() => {});
       }
-      const token = keycloak.token;
-      if (!token) {
+      if (!keycloak.token) {
         toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
@@ -400,7 +398,7 @@ const CmsNoticiasView = ({
 
       let data;
       if (editingId) {
-        data = await updateNoticia(editingId, formData, token);
+        data = await updateNoticia(editingId, formData);
         const estadoDevuelto = (data.noticia?.estado || "").toUpperCase();
         if (estadoSolicitado === "BORRADOR" && estadoDevuelto === "PENDIENTE_APROBACION") {
           toast.success(
@@ -420,7 +418,7 @@ const CmsNoticiasView = ({
           );
         }
       } else {
-        data = await createNoticia(formData, token);
+        data = await createNoticia(formData);
         const estadoDevuelto = (data.noticia?.estado || "").toUpperCase();
         toast.success(
           estadoDevuelto === "BORRADOR"

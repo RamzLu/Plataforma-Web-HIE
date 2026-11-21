@@ -282,7 +282,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
         formData.append("archivo", sedeForm.archivo);
       }
 
-      const res = await updateSedeCentral(formData, keycloak?.token);
+      const res = await updateSedeCentral(formData);
       const updated = res.sedeCentral;
 
       if (updated) {
@@ -469,7 +469,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
       }
 
       if (editingAutoridad) {
-        const data = await updateAutoridad(editingAutoridad.id, formData, keycloak?.token);
+        const data = await updateAutoridad(editingAutoridad.id, formData);
         setAutoridades((prev) =>
           prev
             .map((a) => (a.id === editingAutoridad.id ? data.autoridad : a))
@@ -477,7 +477,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
         );
         toast.success("¡Autoridad actualizada con éxito!", { id: toastId });
       } else {
-        const data = await createAutoridad(formData, keycloak?.token);
+        const data = await createAutoridad(formData);
         setAutoridades((prev) =>
           [...prev, data.autoridad].sort((a, b) => a.orden - b.orden)
         );
@@ -541,7 +541,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     const toastId = toast.loading("Guardando nuevo orden...");
     try {
       const ordenIds = updatedList.map((a) => a.id);
-      await reordenarAutoridades(ordenIds, keycloak?.token);
+      await reordenarAutoridades(ordenIds);
       toast.success("¡Orden actualizado con éxito!", { id: toastId });
     } catch {
       toast.error("Error al actualizar el orden.", { id: toastId });
@@ -557,7 +557,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     const toastId = toast.loading("Eliminando autoridad...");
 
     try {
-      await deleteAutoridad(autoridadToDelete.id, keycloak?.token);
+      await deleteAutoridad(autoridadToDelete.id);
 
       const nombreAutoridad = `${autoridadToDelete.nombre || ""} ${autoridadToDelete.apellido || ""}`.trim() || "Autoridad";
       recordCmsActivity({
@@ -595,8 +595,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
         {
           facebook: fbRaw ? sanitizeUrl(fbRaw) : "",
           instagram: igRaw ? sanitizeUrl(igRaw) : "",
-        },
-        keycloak?.token
+        }
       );
 
       setSocialData(data);

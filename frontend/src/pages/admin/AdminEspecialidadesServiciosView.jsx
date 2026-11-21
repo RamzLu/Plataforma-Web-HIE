@@ -136,12 +136,10 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         cargarDatos(true);
       }
     };
-    window.addEventListener('focus', handleVisibilityOrFocus);
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
     return () => {
       clearInterval(intervalId);
-      window.removeEventListener('focus', handleVisibilityOrFocus);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
   }, [cargarDatos]);
@@ -182,8 +180,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       }
       await evaluarEspecialidadEstado(
         selectedItem.id,
-        { estado: 'APROBADO', isServicio: selectedItem.esServicio },
-        keycloak.token
+        { estado: 'APROBADO', isServicio: selectedItem.esServicio }
       );
       const fueArchivado = selectedItem.requestedEstado === 'ARCHIVADO';
       toast.success(
@@ -223,8 +220,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
           estado: 'RECHAZADO',
           rejectionReason: rejectReason.trim(),
           isServicio: selectedItem.esServicio,
-        },
-        keycloak.token
+        }
       );
       toast.success(`"${selectedItem.name}" fue rechazado. Se notificó al Editor CMS.`);
       setFeedback(`"${selectedItem.name}" fue rechazado.`);

@@ -327,7 +327,6 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
     setIsSaving(true);
 
     try {
-      const token = keycloak?.token || localStorage.getItem("token") || "";
       const dataToSend = new FormData();
       dataToSend.append("titulo", formData.titulo.trim());
       dataToSend.append("estado", estadoFinal);
@@ -371,7 +370,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       }
 
       if (editingId) {
-        const resp = await updateCapacitacion(editingId, dataToSend, token);
+        const resp = await updateCapacitacion(editingId, dataToSend);
         const esPendienteArchivado =
           resp?.capacitacion?.estado === "PENDIENTE_APROBACION" &&
           resp?.capacitacion?.requestedEstado === "ARCHIVADO";
@@ -383,7 +382,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
             : "Capacitación actualizada con éxito."
         );
       } else {
-        await createCapacitacion(dataToSend, token);
+        await createCapacitacion(dataToSend);
         toast.success(
           estadoFinal === "BORRADOR"
             ? "Borrador guardado con éxito."
@@ -408,8 +407,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   // Cambio de estado interactivo (Publicado, Borrador, Archivado)
   const handleCambiarEstado = async (id, nuevoEstado) => {
     try {
-      const token = keycloak?.token || localStorage.getItem("token") || "";
-      const resp = await cambiarEstadoCapacitacion(id, nuevoEstado, token);
+      const resp = await cambiarEstadoCapacitacion(id, nuevoEstado);
       const estadoLegible =
         nuevoEstado === "PUBLICADO"
           ? "Publicado"
@@ -438,8 +436,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   const executeDelete = async () => {
     if (!itemAEliminar) return;
     try {
-      const token = keycloak?.token || localStorage.getItem("token") || "";
-      const respuesta = await deleteCapacitacion(itemAEliminar.id, token);
+      const respuesta = await deleteCapacitacion(itemAEliminar.id);
       // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
       if (respuesta?.solicitudEliminacion) {
         toast.success(respuesta.message, { duration: 6000 });

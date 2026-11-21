@@ -1,70 +1,25 @@
 import api from "./axiosConfig.js";
 
-// ─── DATOS INSTITUCIONALES PÚBLICOS ──────────────────────────────────────────
+// Las llamadas a /cms/... llevan el token de Keycloak automáticamente (ver axiosConfig.js).
 
 /**
  * Retorna { autoridades: [], redesSociales: { facebook, instagram } }
  * Solo devuelve autoridades activas, ordenadas por campo `orden`.
  */
-export const getInstitucional = async (isAdmin = false) => {
-  const response = await api.get(isAdmin ? "/cms/institucional" : "/portal/institucional");
-  return response.data;
-};
+export const getInstitucional = async (isAdmin = false) =>
+  (await api.get(isAdmin ? "/cms/institucional" : "/portal/institucional")).data;
 
-// ─── CRUD (requiere token) ────────────────────────────────────────────────────
+export const createAutoridad = async (formData) =>
+  (await api.post("/cms/institucional/autoridades", formData)).data;
 
-export const createAutoridad = async (formData, token) => {
-  const response = await api.post("/cms/institucional/autoridades", formData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
+export const updateAutoridad = async (id, formData) =>
+  (await api.put(`/cms/institucional/autoridades/${id}`, formData)).data;
 
-export const updateAutoridad = async (id, formData, token) => {
-  const response = await api.put(`/cms/institucional/autoridades/${id}`, formData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
+export const deleteAutoridad = async (id) => (await api.delete(`/cms/institucional/autoridades/${id}`)).data;
 
-export const deleteAutoridad = async (id, token) => {
-  const response = await api.delete(`/cms/institucional/autoridades/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
+export const reordenarAutoridades = async (ordenIds) =>
+  (await api.put("/cms/institucional/autoridades/reordenar", { ordenIds })).data;
 
-export const reordenarAutoridades = async (ordenIds, token) => {
-  const response = await api.put(
-    "/cms/institucional/autoridades/reordenar",
-    { ordenIds },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  return response.data;
-};
+export const updateRedesSociales = async (data) => (await api.put("/cms/institucional/redes", data)).data;
 
-export const updateRedesSociales = async (data, token) => {
-  const response = await api.put("/cms/institucional/redes", data, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-};
-
-// ─── SEDE CENTRAL ─────────────────────────────────────────────────────────────
-
-export const updateSedeCentral = async (formData, token) => {
-  const response = await api.put("/cms/institucional/sede", formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-};
+export const updateSedeCentral = async (formData) => (await api.put("/cms/institucional/sede", formData)).data;

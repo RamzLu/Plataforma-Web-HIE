@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { adminFetch } from "../../api/adminFetch.js";
+import { getCapacitaciones } from "../../api/capacitaciones.api.js";
+import { getResidencias } from "../../api/residencias.api.js";
+import { getActividadReciente } from "../../api/actividad.api.js";
 import { getCmsActivityLog } from "../../utils/cmsActivityLogger";
 
 const formatActivityDate = (timestamp) => {
@@ -88,15 +90,9 @@ const CmsRecentActivity = ({
   useEffect(() => {
     let isMounted = true;
     Promise.all([
-      adminFetch("/cms/capacitaciones")
-        .then((r) => r.json())
-        .catch(() => []),
-      adminFetch("/cms/residencias")
-        .then((r) => r.json())
-        .catch(() => []),
-      adminFetch("/cms/actividad?limite=30")
-        .then((r) => (r.ok ? r.json() : []))
-        .catch(() => []),
+      getCapacitaciones().catch(() => []),
+      getResidencias(true).catch(() => []),
+      getActividadReciente(30).catch(() => []),
     ]).then(([caps, res, auditoria]) => {
       if (isMounted) {
         if (Array.isArray(caps)) setExtraCaps(caps);
@@ -239,7 +235,7 @@ const CmsRecentActivity = ({
       categoria: log.categoria || "General",
       editor: log.editor || userName,
       estado: resolveEstado(log.estado),
-      timestamp: log.timestamp || Date.now(),
+      timestamp: log.timestamp || 0,
     });
   });
 

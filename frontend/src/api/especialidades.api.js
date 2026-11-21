@@ -1,34 +1,16 @@
-import axios from './axiosConfig.js';
+import api from "./axiosConfig.js";
 
-export const getEspecialidades = async (isAdmin = false) => {
-  const response = await axios.get(isAdmin ? "/cms/especialidades" : "/portal/especialidades");
-  return response.data;
-};
+// Las llamadas a /cms/... llevan el token de Keycloak automáticamente (ver axiosConfig.js).
 
-export const createEspecialidad = async (data, token) => {
-  const response = await axios.post('/cms/especialidades', data, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
+export const getEspecialidades = async (isAdmin = false) =>
+  (await api.get(isAdmin ? "/cms/especialidades" : "/portal/especialidades")).data;
 
-export const updateEspecialidad = async (id, data, token) => {
-  const response = await axios.put(`/cms/especialidades/${id}`, data, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
+export const createEspecialidad = async (data) => (await api.post("/cms/especialidades", data)).data;
 
-export const evaluarEspecialidadEstado = async (id, payload, token) => {
-  const response = await axios.patch(`/cms/especialidades/${id}/estado`, payload, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
+export const updateEspecialidad = async (id, data) => (await api.put(`/cms/especialidades/${id}`, data)).data;
 
-export const deleteEspecialidad = async (id, token, isServicio) => {
-  const response = await axios.delete(`/cms/especialidades/${id}?isServicio=${isServicio}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
+export const evaluarEspecialidadEstado = async (id, payload) =>
+  (await api.patch(`/cms/especialidades/${id}/estado`, payload)).data;
+
+export const deleteEspecialidad = async (id, isServicio) =>
+  (await api.delete(`/cms/especialidades/${id}`, { params: { isServicio } })).data;

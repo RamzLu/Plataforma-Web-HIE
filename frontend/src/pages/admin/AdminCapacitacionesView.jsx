@@ -18,9 +18,8 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import keycloak from '../../config/keycloak';
-import api from '../../api/axiosConfig';
-import { getCapacitaciones } from '../../api/capacitaciones.api';
+
+import { getCapacitaciones, revisarCapacitacion } from '../../api/capacitaciones.api';
 import capacitacionesBanner from '../../assets/banner_capacitaciones.png';
 import { sanitizeUrl } from '../../utils/sanitizeUrl';
 import '../../styles/pages/admin/AdminCapacitacionesView.css';
@@ -278,13 +277,7 @@ const AdminCapacitacionesView = () => {
         return;
       }
 
-      const token = keycloak?.token || localStorage.getItem('token') || '';
-      const response = await api.patch(
-        `/cms/capacitaciones/${selectedTraining.id}/revision`,
-        { estado: pendingAction, motivoRechazo: reason },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const result = response.data;
+      const result = await revisarCapacitacion(selectedTraining.id, pendingAction, reason);
       if (!result?.capacitacion) {
         throw new Error('El servidor no devolvió la capacitación actualizada.');
       }

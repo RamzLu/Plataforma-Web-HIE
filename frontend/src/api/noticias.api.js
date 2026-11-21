@@ -1,34 +1,15 @@
-import api from "./axiosConfig";
+import api from "./axiosConfig.js";
 
-export const getNoticias = async (isAdmin = false) => {
-  const response = await api.get(isAdmin ? "/cms/noticias" : "/portal/noticias");
-  return response.data;
-};
+// Las llamadas a /cms/... llevan el token de Keycloak automáticamente (ver axiosConfig.js).
 
-export const createNoticia = async (formData, token) => {
-  const response = await api.post("/cms/noticias", formData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
+export const getNoticias = async (isAdmin = false) =>
+  (await api.get(isAdmin ? "/cms/noticias" : "/portal/noticias")).data;
 
-export const updateNoticia = async (id, formData, token) => {
-  const response = await api.put(`/cms/noticias/${id}`, formData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
+export const createNoticia = async (formData) => (await api.post("/cms/noticias", formData)).data;
 
-export const evaluarNoticiaEstado = async (id, payload, token) => {
-  const response = await api.patch(`/cms/noticias/${id}/estado`, payload, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
+export const updateNoticia = async (id, formData) => (await api.put(`/cms/noticias/${id}`, formData)).data;
 
-export const deleteNoticia = async (id, token) => {
-  const response = await api.delete(`/cms/noticias/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
+export const evaluarNoticiaEstado = async (id, payload) =>
+  (await api.patch(`/cms/noticias/${id}/estado`, payload)).data;
+
+export const deleteNoticia = async (id) => (await api.delete(`/cms/noticias/${id}`)).data;

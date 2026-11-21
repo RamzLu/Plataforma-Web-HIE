@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import '../../styles/pages/AdminPage.css'; 
 import "../../styles/components/admin/AdminLayout.css"; 
@@ -25,12 +26,20 @@ import AdminResidenciasView from '../admin/AdminResidenciasView';
 import AdminContenidoGraficoView from '../admin/AdminContenidoGraficoView';
 import AdminInstitucionalView from '../admin/AdminInstitucionalView';
 
+const SECCIONES_ADMIN = [
+  "dashboard", "noticias", "documentacion", "servicios", "profesionales",
+  "residencias", "capacitaciones", "graficos", "institucional",
+];
+
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState(() => {
-    const saved = localStorage.getItem("admin_active_tab");
-    const obsoleteTabs = ["usuarios", "roles", "auditoria"];
-    return obsoleteTabs.includes(saved) ? "dashboard" : (saved || "dashboard");
-  });
+  // La sección activa sale de la URL (/admin/noticias, /admin/profesionales...).
+  const { seccion } = useParams();
+  const navigate = useNavigate();
+  const activeTab = seccion || "dashboard";
+  const setActiveTab = useCallback(
+    (tab) => navigate(!tab || tab === "dashboard" ? "/admin" : `/admin/${tab}`),
+    [navigate]
+  );
 
   const [initialized, setInitialized] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -44,9 +53,6 @@ const AdminPage = () => {
   
   const isKeycloakInitialized = useRef(false);
 
-  useEffect(() => {
-    localStorage.setItem("admin_active_tab", activeTab);
-  }, [activeTab]);
 
   useEffect(() => {
     if (!authenticated || !isAdmin) return;
@@ -141,13 +147,16 @@ const AdminPage = () => {
 
   const handleLogout = () => {
     if (keycloak && typeof keycloak.logout === 'function') {
-      localStorage.removeItem("admin_active_tab");
       keycloak.logout({ redirectUri: window.location.origin });
     } else {
-      localStorage.removeItem("admin_active_tab");
       window.location.href = "/";
     }
   };
+
+  // Una sección que no existe (link viejo o mal escrito) vuelve al dashboard.
+  if (!SECCIONES_ADMIN.includes(activeTab)) {
+    return <Navigate to="/admin" replace />;
+  }
 
   if (!initialized) {
     return (

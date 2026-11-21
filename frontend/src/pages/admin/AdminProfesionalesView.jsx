@@ -140,12 +140,10 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
         cargarDatos(true);
       }
     };
-    window.addEventListener('focus', handleVisibilityOrFocus);
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
     return () => {
       clearInterval(intervalId);
-      window.removeEventListener('focus', handleVisibilityOrFocus);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
   }, [cargarDatos]);
@@ -204,8 +202,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
       }
       await evaluarProfesionalEstado(
         selectedProfessional.id,
-        { estado: 'APROBADO' },
-        keycloak.token
+        { estado: 'APROBADO' }
       );
       toast.success(`"${selectedProfessional.nombre}" fue aprobado y publicado.`);
       setFeedback(`"${selectedProfessional.nombre}" fue aprobado y publicado con éxito.`);
@@ -235,8 +232,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
         {
           estado: 'RECHAZADO',
           rejectionReason: rejectReason.trim(),
-        },
-        keycloak.token
+        }
       );
       toast.success(`"${selectedProfessional.nombre}" fue rechazado. Se notificó al Editor CMS.`);
       setFeedback(`Se registró el rechazo de "${selectedProfessional.nombre}" con su motivo.`);

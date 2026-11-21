@@ -20,7 +20,7 @@ import CapacitacionPage from "./pages/public/CapacitacionPage";
 import ResidenciasPage from "./pages/public/ResidenciasPage";
 import AboutPage from "./pages/public/AboutPage";
 import CmsPage from "./pages/cms/CmsPage";
-import AdminPage from './pages/admin/AdminPage';
+import AdminPage from "./pages/admin/AdminPage";
 import PlanoInstitucionalPage from "./pages/public/PlanoInstitucionalPage";
 import NoticiasCategoriaPage from "./pages/public/NoticiasCategoriaPage";
 
@@ -47,8 +47,8 @@ const AppLayout = () => {
         <Route path="/residencias" element={<ResidenciasPage />} />
         <Route path="/acerca-de" element={<AboutPage />} />
         <Route path="/plano" element={<PlanoInstitucionalPage />} />
-        <Route path="/cms" element={<CmsPage />} />
-        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/cms/:seccion?" element={<CmsPage />} />
+        <Route path="/admin/:seccion?" element={<AdminPage />} />
 
         <Route
           path="*"

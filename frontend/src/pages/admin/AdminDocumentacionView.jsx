@@ -135,11 +135,9 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
       }
     };
 
-    window.addEventListener('focus', handleVisibilityOrFocus);
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
     return () => {
-      window.removeEventListener('focus', handleVisibilityOrFocus);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
   }, [cargarDocumentos]);
@@ -230,8 +228,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
 
       await evaluarDocumentoEstado(
         selectedDocument.id,
-        { estado: 'APROBADO' },
-        keycloak.token
+        { estado: 'APROBADO' }
       );
 
       toast.success(`“${selectedDocument.title}” fue aprobado y publicado.`);
@@ -262,8 +259,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
 
       await evaluarDocumentoEstado(
         selectedDocument.id,
-        { estado: 'RECHAZADO', rejectionReason: reason },
-        keycloak.token
+        { estado: 'RECHAZADO', rejectionReason: reason }
       );
 
       toast.success(`“${selectedDocument.title}” fue rechazado.`);

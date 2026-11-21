@@ -357,7 +357,6 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     );
 
     try {
-      const token = keycloak?.token;
       const dataForm = new FormData();
       dataForm.append("nombre", formData.nombre.trim());
       dataForm.append("categoria", formData.categoria.trim());
@@ -400,9 +399,9 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
 
       let resp;
       if (editingId) {
-        resp = await updateResidencia(editingId, dataForm, token);
+        resp = await updateResidencia(editingId, dataForm);
       } else {
-        resp = await createResidencia(dataForm, token);
+        resp = await createResidencia(dataForm);
       }
 
       const resObj = resp?.residencia || resp;
@@ -476,8 +475,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
 
     const toastId = toast.loading(`Cambiando estado a ${estadoLegible}...`);
     try {
-      const token = keycloak?.token;
-      const resp = await cambiarEstadoResidencia(id, nuevoEstado, token);
+      const resp = await cambiarEstadoResidencia(id, nuevoEstado);
       const msg =
         resp?.message ||
         (nuevoEstado === "ARCHIVADO"
@@ -505,8 +503,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     const toastId = toast.loading("Eliminando residencia...");
 
     try {
-      const token = keycloak?.token;
-      const respuesta = await deleteResidencia(itemAEliminar.id, token);
+      const respuesta = await deleteResidencia(itemAEliminar.id);
       // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
       if (respuesta?.solicitudEliminacion) {
         toast.success(respuesta.message, { id: toastId, duration: 6000 });

@@ -1,0 +1,82 @@
+# Plataforma Web HIE
+
+Portal institucional del Hospital Interdistrital Evita, con un **CMS** para cargar contenido y un **panel de administración** que lo revisa antes de publicarlo.
+
+| Parte | Tecnología | Carpeta |
+|---|---|---|
+| Portal público, CMS y Admin | React 19 + Vite | `frontend/` |
+| API | Node.js + Express 5 | `backend/` |
+| Base de datos | PostgreSQL (Supabase) con Prisma 7 | `backend/prisma/` |
+| Archivos (imágenes, PDF) | Supabase Storage | — |
+| Inicio de sesión | Keycloak | — |
+
+## Puesta en marcha
+
+Requisitos: Node.js 22 o superior, acceso a la base de Supabase y un Keycloak con el realm configurado.
+
+```bash
+npm install                      # concurrently (raíz)
+npm install --prefix backend
+npm install --prefix frontend
+
+cp backend/.env.example backend/.env     # completar los valores
+cp frontend/.env.example frontend/.env
+
+npm run db-generate --prefix backend     # genera el cliente de Prisma
+npm run dev                              # backend (3000) + frontend (5173)
+```
+
+- Portal: http://localhost:5173
+- CMS: http://localhost:5173/cms
+- Admin: http://localhost:5173/admin
+- Estado de la API: http://localhost:3000/api/health
+
+## Base de datos y migraciones
+
+El esquema está en `backend/prisma/schema.prisma` y los cambios se aplican con migraciones (`backend/prisma/migrations`).
+
+```bash
+npm run migrate-status --prefix backend   # qué migraciones faltan aplicar
+npm run migrate-deploy --prefix backend   # aplica las pendientes
+```
+
+> **No usar `prisma migrate dev` ni `prisma db push` contra la base compartida.** La base tiene historial previo a las migraciones del repo y `migrate dev` ofrece resetearla (borra todos los datos). Para crear una migración nueva, generar el SQL con `prisma migrate diff` y aplicarlo con `migrate-deploy`.
+
+## API
+
+| Prefijo | Uso | Autenticación |
+|---|---|---|
+| `/api/portal/...` | Lectura de contenido publicado para el sitio público | No |
+| `/api/cms/...` | Todo lo del CMS y del Admin (borradores, edición, revisión) | Token de Keycloak |
+| `/api/health` | Estado del servidor y de la base | No |
+
+En el frontend, todas las llamadas pasan por `src/api/*.api.js`; el cliente de `src/api/axiosConfig.js` agrega el token a las rutas `/cms` automáticamente.
+
+## Roles y flujo editorial
+
+Los roles salen del token de Keycloak (realm o cliente):
+
+- **CM** (`cm`, `editor-cms`, `cms`): crea y edita contenido. Lo que pide publicar queda *pendiente de aprobación*.
+- **Administrador** (`admin-hie`, `admin-hief`, `admin`, ...): aprueba o rechaza, y resuelve los pedidos de eliminación de contenido publicado.
+
+Las listas de roles están duplicadas en `backend/src/middlewares/auth.middleware.js` y `frontend/src/utils/roles.js`: si se cambia una, hay que cambiar la otra.
+
+Para probar el circuito completo en una misma computadora, usar dos perfiles del navegador (uno con un usuario CM y otro con un administrador): Keycloak mantiene una sola sesión por navegador.
+
+## Almacenamiento
+
+Buckets de Supabase Storage que usa el backend: `noticias-imagenes`, `documentos`, `banners-imagenes`, `autoridades-imagenes`, `capacitaciones-imagenes-videos`, `capacitaciones-documentos`.
+
+## Scripts útiles
+
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` (raíz) | Levanta backend y frontend juntos |
+| `npm test --prefix backend` | Tests del backend (`node --test`) |
+| `npm run lint --prefix frontend` | ESLint del frontend |
+| `npm run build --prefix frontend` | Build de producción del frontend |
+
+## Despliegue
+
+- El frontend es una SPA: el servidor que la publique tiene que devolver `index.html` para cualquier ruta (por ejemplo `/cms/noticias`), si no los links directos a secciones dan 404.
+- En el backend, definir `NODE_ENV=production`, `CORS_ORIGINS` con el dominio del frontend y, si hay proxy delante, `TRUST_PROXY`.

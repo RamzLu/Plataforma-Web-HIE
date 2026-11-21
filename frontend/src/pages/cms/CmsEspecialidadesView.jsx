@@ -38,8 +38,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState(null);
 
-  useEffect(() => { cargarDatos(); }, []);
-
   const cargarDatos = async () => {
     setLoading(true);
     try {
@@ -48,6 +46,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     } catch { toast.error("Error al cargar los datos."); } 
     finally { setLoading(false); }
   };
+
+  useEffect(() => { cargarDatos(); }, []);
 
   const handleCloseAttempt = () => {
     if (hasUnsavedChanges) {
@@ -115,12 +115,11 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       if (keycloak.authenticated) {
         await keycloak.updateToken(30).catch(() => {});
       }
-      const token = keycloak.token;
       let resp;
       if (editingId) {
-        resp = await updateEspecialidad(editingId, payload, token);
+        resp = await updateEspecialidad(editingId, payload);
       } else {
-        resp = await createEspecialidad(payload, token);
+        resp = await createEspecialidad(payload);
       }
 
       const estadoResultante = (resp?.data?.estado || payload.estado || "PENDIENTE_APROBACION").toUpperCase();
@@ -154,7 +153,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   const executeDelete = async () => {
     setIsDeleting(true); 
     try {
-      const respuesta = await deleteEspecialidad(itemAEliminar.id, keycloak.token, itemAEliminar.esServicio);
+      const respuesta = await deleteEspecialidad(itemAEliminar.id, itemAEliminar.esServicio);
       // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
       if (respuesta?.solicitudEliminacion) {
         toast.success(respuesta.message, { duration: 6000 });
