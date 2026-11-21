@@ -8,6 +8,7 @@ import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOT
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "documento", modelos: { "": "documento" } });
 
@@ -149,11 +150,12 @@ class CmsDocService {
       throw error;
     }
 
-    const estadoSolicitado = estado ? estado.toUpperCase() : "PUBLICADO";
-    // Si el CM solicita 'BORRADOR', se guarda como borrador.
-    // De lo contrario, pasa obligatoriamente por aprobación del administrador: PENDIENTE_APROBACION.
-    const estadoFinal =
-      estadoSolicitado === "BORRADOR" ? "BORRADOR" : "PENDIENTE_APROBACION";
+    // Regla común (utils/flujoEditorial.utils.js). Sin estado, el CMS de documentos pide publicar.
+    const solicitud = resolverSolicitud({
+      estadoActual: null,
+      intencion: intencionDesdeEstado(estado || "PUBLICADO"),
+    });
+    const estadoFinal = solicitud.estado;
 
     let categoriaDb = await prisma.categoria_documento.findFirst({
       where: { nombre: { equals: categoria || "Información institucional", mode: "insensitive" } },
@@ -220,13 +222,11 @@ class CmsDocService {
     const idStr = nuevoDocumento.id.toString();
     const editorNombre = user?.name || user?.preferred_username || "Editor CMS";
 
-    if (estadoFinal === "PENDIENTE_APROBACION") {
+    if (solicitud.meta) {
       await this.guardarPendingMeta(idStr, {
-        previousEstado: null,
-        targetEstado: "PUBLICADO",
+        ...solicitud.meta,
         editor: editorNombre,
         updatedAt: new Date().toISOString(),
-        snapshotPublico: null,
       });
     }
 
@@ -273,19 +273,14 @@ class CmsDocService {
     // Preservar snapshot si estaba publicado para no romper la visualización pública mientras se revisa
     const metaMap = await this.obtenerMapaPendingMeta();
     const metaExistente = metaMap.get(idStr) || null;
-    // También cuenta como "publicado" si fue una edición rechazada de algo que ya estaba publicado.
-    const provieneDePublicada =
-      estadoAnterior === "PUBLICADO" ||
-      estadoAnterior === "APROBADO" ||
-      conservaVersionPublica(docExistente, metaExistente);
-    let snapshotPublico = metaExistente?.snapshotPublico || null;
-
-    if (provieneDePublicada && !snapshotPublico) {
+    // Es o fue público (también una edición rechazada de algo publicado): sus archivos se conservan.
+    const provieneDePublicada = fuePublico(estadoAnterior, metaExistente);
+    const armarSnapshotPublico = () => {
       const pubUrlAnterior = docExistente.archivo
         ? supabase.storage.from("documentos").getPublicUrl(docExistente.archivo.nombreArchivo).data.publicUrl
         : "";
 
-      snapshotPublico = {
+      return {
         titulo: docExistente.titulo,
         descripcion: docExistente.descripcion || "",
         category: docExistente.categoria_documento?.nombre || "Información institucional",
@@ -296,7 +291,7 @@ class CmsDocService {
           : "",
         fileUrl: pubUrlAnterior,
       };
-    }
+    };
 
     // Validación: verificar si hubo cambios antes de procesar archivos o base de datos
     const catAnteriorNombre = docExistente.categoria_documento?.nombre || "Información institucional";
@@ -328,20 +323,25 @@ class CmsDocService {
       throw error;
     }
 
-    let estadoFinal = "PENDIENTE_APROBACION";
-    if (estadoSolicitado === "BORRADOR" && !provieneDePublicada) {
-      estadoFinal = "BORRADOR";
-      await this.limpiarPendingMeta(idStr);
-      await this.limpiarMotivoRechazo(idStr);
-    } else {
-      estadoFinal = "PENDIENTE_APROBACION";
+    // Regla común (utils/flujoEditorial.utils.js): lo que es o fue público pasa por el administrador
+    // (incluido despublicarlo) y el portal sigue mostrando la versión publicada mientras tanto.
+    const solicitud = resolverSolicitud({
+      estadoActual: estadoAnterior,
+      meta: metaExistente,
+      intencion: intencionDesdeEstado(estadoSolicitado),
+      snapshotActual: armarSnapshotPublico,
+    });
+    const estadoFinal = solicitud.estado;
+    if (solicitud.meta) {
       await this.guardarPendingMeta(idStr, {
-        previousEstado: provieneDePublicada ? "PUBLICADO" : estadoAnterior,
-        targetEstado: "PUBLICADO",
+        ...solicitud.meta,
         editor: editorNombre,
         updatedAt: new Date().toISOString(),
-        snapshotPublico,
       });
+    } else {
+      await this.limpiarPendingMeta(idStr);
+    }
+    if (solicitud.limpiarMotivo) {
       await this.limpiarMotivoRechazo(idStr);
     }
 
@@ -500,38 +500,24 @@ class CmsDocService {
       throw error;
     }
 
-    // El administrador únicamente puede aprobar o rechazar documentos que estén pendientes
-    if (existente.estado !== "PENDIENTE_APROBACION") {
-      const error = new Error("Solo se pueden aprobar o rechazar documentos que estén pendientes de aprobación.");
-      error.statusCode = 400;
-      throw error;
-    }
+    // Regla común (utils/flujoEditorial.utils.js): solo lo pendiente; aprobar aplica lo pedido
+    // (publicar o despublicar); rechazar exige motivo y conserva la versión publicada si la había.
+    const pendingMeta = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
+    const revision = resolverRevision({
+      estadoActual: existente.estado,
+      meta: pendingMeta,
+      decision: decisionDesdeEstado(estado),
+      motivo: rejectionReason,
+    });
+    const nuevoEstado = revision.estado;
+    const motivoGuardado = revision.motivo;
 
-    const estadoUpper = estado.toUpperCase();
-    if (estadoUpper !== "APROBADO" && estadoUpper !== "PUBLICADO" && estadoUpper !== "RECHAZADO") {
-      const error = new Error(
-        "Acción no permitida: el administrador únicamente puede aprobar o rechazar el documento."
-      );
-      error.statusCode = 400;
-      throw error;
-    }
-
-    let nuevoEstado = existente.estado;
-    let motivoGuardado = null;
-
-    if (estadoUpper === "RECHAZADO") {
-      if (!rejectionReason || !rejectionReason.trim()) {
-        const error = new Error("Debe especificar un motivo de rechazo.");
-        error.statusCode = 400;
-        throw error;
-      }
-      nuevoEstado = "RECHAZADO";
-      motivoGuardado = rejectionReason.trim();
-      await this.guardarMotivoRechazo(idStr, motivoGuardado);
+    if (revision.motivo) {
+      await this.guardarMotivoRechazo(idStr, revision.motivo);
     } else {
-      // APROBADO o PUBLICADO -> pasa a estar publicado en el portal
-      nuevoEstado = "PUBLICADO";
       await this.limpiarMotivoRechazo(idStr);
+    }
+    if (revision.meta === null) {
       await this.limpiarPendingMeta(idStr);
     }
 
@@ -561,7 +547,7 @@ class CmsDocService {
           descripcion:
             nuevoEstado === "RECHAZADO"
               ? `Documento "${existente.titulo}" rechazado. Motivo: ${motivoGuardado}`
-              : `Documento "${existente.titulo}" aprobado y publicado.`,
+              : `Documento "${existente.titulo}" aprobado (estado resultante: ${nuevoEstado}).`,
         },
       });
     } catch (error) {
@@ -572,6 +558,8 @@ class CmsDocService {
       message:
         nuevoEstado === "RECHAZADO"
           ? "Documento rechazado con éxito."
+          : nuevoEstado === "BORRADOR"
+          ? "Solicitud aprobada: el documento se retiró del portal y quedó como borrador."
           : "Documento aprobado y publicado con éxito.",
       documento: this._format(actualizado, motivoGuardado),
     };

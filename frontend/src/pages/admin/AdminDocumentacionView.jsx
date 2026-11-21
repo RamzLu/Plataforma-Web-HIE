@@ -13,6 +13,7 @@ import {
   Search,
   X,
   XCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import keycloak from '../../config/keycloak';
@@ -67,6 +68,7 @@ const mapDocumentFromBackend = (doc) => {
     previewText: doc.description || 'Documento institucional para revisión y evaluación.',
     cambios: Array.isArray(doc.cambios) ? doc.cambios : [],
     esActualizacion: Boolean(doc.esActualizacion),
+    requestedEstado: doc.requestedEstado || null,
   };
 };
 
@@ -476,6 +478,16 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                 <span className="admin-doc-rv-status-label">Estado actual</span>
                 <EtiquetaEstado estado={selectedDocument.status} texto={statusLabels[selectedDocument.status] || selectedDocument.status} />
               </section>
+
+              {selectedDocument.status === 'PENDIENTE' && selectedDocument.requestedEstado === 'BORRADOR' && (
+                <div className="admin-doc-rv-alert" role="note">
+                  <AlertTriangle size={18} aria-hidden="true" />
+                  <div>
+                    <strong>Solicitud de retiro:</strong> el editor del CMS pide pasar este documento publicado a{' '}
+                    <strong>Borrador</strong>. Si lo aprobás, deja de verse en el portal.
+                  </div>
+                </div>
+              )}
 
               <AdminCambiosResaltados
                 cambios={selectedDocument.cambios}
