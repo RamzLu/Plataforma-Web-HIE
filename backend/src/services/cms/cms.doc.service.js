@@ -7,6 +7,7 @@ import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.uti
 import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
+import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "documento", modelos: { "": "documento" } });
 
@@ -229,6 +230,7 @@ class CmsDocService {
       });
     }
 
+    await registrarAuditoria(user, { entidad: "documento", id: nuevoDocumento.id, accion: ACCIONES.CREAR, descripcion: `Creó el documento "${nuevoDocumento.titulo}".` });
     return {
       message:
         estadoFinal === "PENDIENTE_APROBACION"
@@ -462,6 +464,7 @@ class CmsDocService {
     }
 
     await limpiarSolicitudEliminacion("documento", idStr); // editar después de pedir la baja anula el pedido
+    await registrarAuditoria(user, { entidad: "documento", id: idStr, accion: ACCIONES.MODIFICAR, descripcion: `Modificó el documento "${documentoActualizado.titulo}".` });
     return {
       message:
         estadoFinal === "PENDIENTE_APROBACION"
@@ -619,6 +622,7 @@ class CmsDocService {
       }
     }
 
+    await registrarAuditoria(user, { entidad: "documento", id: idStr, accion: ACCIONES.ELIMINAR, descripcion: `Eliminó el documento "${doc.titulo}".` });
     return { message: "Documento eliminado con éxito" };
   }
 }

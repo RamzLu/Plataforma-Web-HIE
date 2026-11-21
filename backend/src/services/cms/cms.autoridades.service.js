@@ -527,7 +527,7 @@ class CmsAutoridadesService {
       .create({
         data: {
           usuarioId: usuarioLocal.id,
-          accion: "ACTUALIZAR",
+          accion: "MODIFICAR",
           entidad: "informacion_institucional",
           entidadId: UBICACION_SEDE_CENTRAL,
           descripcion: "Actualizó los datos y fotografía de la Sede Central en Acerca de",

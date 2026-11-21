@@ -6,6 +6,7 @@ import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios } from "../../utils/cambios.utils.js";
+import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 
 const DOCS_BUCKET = "capacitaciones-documentos";
 const MEDIA_BUCKET = "capacitaciones-imagenes-videos";
@@ -247,7 +248,7 @@ class CmsCapacitacionService {
     return resultado;
   }
 
-  async crearCapacitacion(data, files) {
+  async crearCapacitacion(data, files, user = null) {
     if (!data.titulo || !data.titulo.trim()) {
       const error = new Error("El título de la capacitación es obligatorio.");
       error.statusCode = 400;
@@ -428,13 +429,14 @@ class CmsCapacitacionService {
       },
     });
 
+    await registrarAuditoria(user, { entidad: "capacitacion", id: nueva.id, accion: ACCIONES.CREAR, descripcion: `Creó la capacitación "${nueva.titulo}".` });
     return {
       message: "Capacitación creada con éxito.",
       capacitacion: this._formatCapacitacion(nueva),
     };
   }
 
-  async actualizarCapacitacion(id, data, files) {
+  async actualizarCapacitacion(id, data, files, user = null) {
     const idBigInt = parsearIdBigInt(id, "ID de capacitación");
     const existing = await prisma.capacitacion.findUnique({
       where: { id: idBigInt },
@@ -750,6 +752,7 @@ class CmsCapacitacionService {
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
 
+    await registrarAuditoria(user, { entidad: "capacitacion", id: updated.id, accion: ACCIONES.MODIFICAR, descripcion: `Modificó la capacitación "${updated.titulo}".` });
     return {
       message:
         data.estado && data.estado.toUpperCase() === "ARCHIVADO" && estadoNormalizado === "PENDIENTE_APROBACION"
@@ -877,6 +880,15 @@ class CmsCapacitacionService {
       mensaje = "La capacitación ya está publicada.";
     }
 
+    await registrarAuditoria(user, {
+      entidad: "capacitacion",
+      id: idStr,
+      accion: esAdmin
+        ? finalEstado === "RECHAZADO" ? ACCIONES.RECHAZAR : ACCIONES.APROBAR
+        : finalEstado === "PENDIENTE_APROBACION" ? ACCIONES.SOLICITAR_REVISION
+        : finalEstado === "ARCHIVADO" ? ACCIONES.ARCHIVAR : ACCIONES.MODIFICAR,
+      descripcion: `Capacitación "${updated.titulo}": estado ${finalEstado}.`,
+    });
     return {
       message: mensaje,
       capacitacion: this._formatCapacitacion(updated, motivoActual, pendingMetaActual),
@@ -923,6 +935,7 @@ class CmsCapacitacionService {
       }
     }
 
+    await registrarAuditoria(user, { entidad: "capacitacion", id, accion: ACCIONES.ELIMINAR, descripcion: `Eliminó la capacitación "${existing.titulo}".` });
     return {
       message: "Capacitación eliminada con éxito.",
       id: id.toString(),

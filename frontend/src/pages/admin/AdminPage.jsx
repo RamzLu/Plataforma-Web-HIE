@@ -11,6 +11,7 @@ import { getEspecialidades } from '../../api/especialidades.api';
 import { getDocumentos } from '../../api/documentos.api';
 import { getProfesionales } from '../../api/profesionales.api';
 import { getResidencias } from '../../api/residencias.api';
+import { getCapacitaciones } from '../../api/capacitaciones.api';
 
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminHeader from '../../components/admin/AdminHeader';
@@ -52,6 +53,7 @@ const AdminPage = () => {
   const [pendingDocumentosCount, setPendingDocumentosCount] = useState(0);
   const [pendingProfesionalesCount, setPendingProfesionalesCount] = useState(0);
   const [pendingResidenciasCount, setPendingResidenciasCount] = useState(0);
+  const [pendingCapacitacionesCount, setPendingCapacitacionesCount] = useState(0);
   
   const isKeycloakInitialized = useRef(false);
 
@@ -109,6 +111,16 @@ const AdminPage = () => {
             (r) => (r.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(r.solicitudEliminacion)
           ).length;
           setPendingResidenciasCount(pending);
+        }
+      })
+      .catch(() => {});
+    getCapacitaciones()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const pending = data.filter(
+            (c) => (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(c.solicitudEliminacion)
+          ).length;
+          setPendingCapacitacionesCount(pending);
         }
       })
       .catch(() => {});
@@ -255,6 +267,7 @@ const AdminPage = () => {
         pendingDocumentosCount={pendingDocumentosCount}
         pendingProfesionalesCount={pendingProfesionalesCount}
         pendingResidenciasCount={pendingResidenciasCount}
+        pendingCapacitacionesCount={pendingCapacitacionesCount}
       />
       
       <div className="admin-main-wrapper">
@@ -285,7 +298,9 @@ const AdminPage = () => {
               onPendingCountChange={setPendingDocumentosCount}
             />
           )}
-          {activeTab === "capacitaciones" && <AdminCapacitacionesView />}
+          {activeTab === "capacitaciones" && (
+            <AdminCapacitacionesView onPendingCountChange={setPendingCapacitacionesCount} />
+          )}
           {activeTab === "residencias" && (
             <AdminResidenciasView
               onPendingCountChange={setPendingResidenciasCount}

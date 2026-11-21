@@ -7,6 +7,7 @@ import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.uti
 import { sanitizarHtmlNoticia, parsearIdBigInt, parsearArregloJson } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
+import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "noticia", modelos: { "": "noticia" } });
 
@@ -128,6 +129,7 @@ class CmsNoticiaService {
           : "PUBLICADO"
         : null;
 
+    await registrarAuditoria(user, { entidad: "noticia", id: nuevaNoticia.id, accion: ACCIONES.CREAR, descripcion: `Creó la noticia "${nuevaNoticia.titulo}".` });
     return {
       message: "Exito",
       noticia: {
@@ -308,6 +310,7 @@ class CmsNoticiaService {
     await prisma.noticia.delete({ where: { id: idBigInt } });
     await this.limpiarMotivoRechazo(id.toString());
     await this.limpiarPendingMeta(id.toString());
+    await registrarAuditoria(user, { entidad: "noticia", id, accion: ACCIONES.ELIMINAR, descripcion: `Eliminó la noticia "${noticia.titulo}".` });
     return { message: "Exito" };
   }
 
@@ -621,6 +624,7 @@ class CmsNoticiaService {
     }
 
     await limpiarSolicitudEliminacion("noticia", id.toString()); // editar después de pedir la baja anula el pedido
+    await registrarAuditoria(user, { entidad: "noticia", id: idStr, accion: ACCIONES.MODIFICAR, descripcion: `Modificó la noticia "${noticiaActualizada.titulo}".` });
     return {
       message: "Exito",
       noticia: {

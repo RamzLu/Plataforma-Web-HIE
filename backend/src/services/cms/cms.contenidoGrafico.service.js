@@ -1333,7 +1333,7 @@ class CmsContenidoGraficoService {
         .create({
           data: {
             usuarioId: usuarioLocal.id,
-            accion: "ACTUALIZAR",
+            accion: "MODIFICAR",
             entidad: "contenido_grafico",
             entidadId: def.id,
             descripcion: `Actualizó "${def.nombre}" (encabezado, imagen principal y 3 tarjetas)`,
@@ -1531,7 +1531,7 @@ class CmsContenidoGraficoService {
         .create({
           data: {
             usuarioId: usuarioLocal.id,
-            accion: "ACTUALIZAR",
+            accion: "MODIFICAR",
             entidad: "contenido_grafico",
             entidadId: def.id,
             descripcion: `Actualizó "${def.nombre}" (${slidesResueltos.length} desplegables)`,
@@ -1739,7 +1739,7 @@ class CmsContenidoGraficoService {
         .create({
           data: {
             usuarioId: usuarioLocal.id,
-            accion: "ACTUALIZAR",
+            accion: "MODIFICAR",
             entidad: "contenido_grafico",
             entidadId: def.id,
             descripcion: `Actualizó "${def.nombre}" en Residencias`,
@@ -1944,7 +1944,7 @@ class CmsContenidoGraficoService {
       .create({
         data: {
           usuarioId: usuarioLocal.id,
-          accion: "ACTUALIZAR",
+          accion: "MODIFICAR",
           entidad: "contenido_grafico",
           entidadId: def.id,
           descripcion: `Actualizó "${def.nombre}" (${slidesResueltos.length} imágenes)`,

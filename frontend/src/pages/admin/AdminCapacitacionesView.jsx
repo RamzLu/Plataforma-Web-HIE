@@ -144,7 +144,7 @@ const formatPeriod = (training) => {
   return `${start} – ${end}`;
 };
 
-const AdminCapacitacionesView = () => {
+const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
   const [capacitaciones, setCapacitaciones] = useState([]);
   const [isSimulation, setIsSimulation] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -222,6 +222,12 @@ const AdminCapacitacionesView = () => {
     }),
     [capacitacionesVisibles],
   );
+
+  useEffect(() => {
+    if (typeof onPendingCountChange === 'function') {
+      onPendingCountChange(counts.pending);
+    }
+  }, [counts.pending, onPendingCountChange]);
 
   const closeDetails = () => {
     setSelectedId(null);

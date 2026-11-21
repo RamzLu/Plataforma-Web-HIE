@@ -7,6 +7,7 @@ import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOT
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
+import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "profesional", modelos: { "": "profesional" } });
 
@@ -144,7 +145,7 @@ class CmsProfesionalService {
               .findMany({
                 where: {
                   entidad: "profesional",
-                  accion: { in: ["CREAR", "ACTUALIZAR"] },
+                  accion: { in: ["CREAR", "ACTUALIZAR", "MODIFICAR"] }, // ACTUALIZAR: registros anteriores
                 },
                 include: { usuario: true },
                 orderBy: { fechaHora: "desc" },
@@ -619,7 +620,7 @@ class CmsProfesionalService {
             usuarioId: usuarioLocal.id,
             entidad: "profesional",
             entidadId: idStr,
-            accion: "ACTUALIZAR",
+            accion: "MODIFICAR",
             descripcion: `Actualización de profesional "${nombre} ${apellido}".`,
           },
         });
@@ -842,6 +843,7 @@ class CmsProfesionalService {
     await this.limpiarPendingMeta(idStr);
     await this.limpiarEditorMeta(idStr);
 
+    await registrarAuditoria(user, { entidad: "profesional", id: idStr, accion: ACCIONES.ELIMINAR, descripcion: `Eliminó al profesional "${`${profesional.nombre} ${profesional.apellido}`.trim()}".` });
     return { message: "¡Profesional eliminado con éxito!" };
   }
 }

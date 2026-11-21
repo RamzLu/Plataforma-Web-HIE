@@ -7,7 +7,7 @@
 
 import { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
-import { obtenerOCrearUsuarioLocal } from "./user.utils.js";
+import { registrarAuditoria } from "./auditoria.utils.js";
 import { registrarFalla } from "./log.utils.js";
 import { escribirColumnaEditorial } from "./metaEditorial.utils.js";
 
@@ -70,18 +70,6 @@ export const tieneVersionPublica = (registro, pendingMeta = null) => {
   return ESTADOS_VISIBLES.includes(estado) || pendienteConVersionPublica || conservaVersionPublica(registro, pendingMeta);
 };
 
-const registrarAuditoria = async (user, entidad, id, accion, descripcion) => {
-  if (!user) return;
-  try {
-    const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-    await prisma.auditoria.create({
-      data: { usuarioId: usuarioLocal.id, entidad, entidadId: String(id), accion, descripcion },
-    });
-  } catch (error) {
-    registrarFalla("Auditoría", error);
-  }
-};
-
 /** Guarda la solicitud (si no existe ya) y devuelve la respuesta para el CMS. */
 export const solicitarEliminacion = async ({ entidad, id, titulo, user, reemplazaEdicion = false }) => {
   const existente = await leerSolicitud(entidad, id);
@@ -100,13 +88,8 @@ export const solicitarEliminacion = async ({ entidad, id, titulo, user, reemplaz
     fecha: new Date().toISOString(),
   };
   await escribirSolicitud(entidad, id, solicitud);
-  await registrarAuditoria(
-    user,
-    entidad,
-    id,
-    "SOLICITAR_ELIMINACION",
-    `Solicitud de eliminación de "${solicitud.titulo}".${reemplazaEdicion ? " Reemplaza a su edición pendiente." : ""}`
-  );
+  await registrarAuditoria(user, { entidad, id, accion: "SOLICITAR_ELIMINACION", descripcion: `Solicitud de eliminación de "${solicitud.titulo}".${reemplazaEdicion ? " Reemplaza a su edición pendiente." : ""}`,
+  });
 
   return {
     solicitudEliminacion: true,
@@ -156,12 +139,7 @@ export const agregarSolicitudesEliminacion = async (items, entidadDe) => {
 export const limpiarSolicitudEliminacion = (entidad, id) => escribirSolicitud(entidad, id, null);
 
 export const registrarResolucionEliminacion = (user, solicitud, aprobada, motivo = "") =>
-  registrarAuditoria(
-    user,
-    solicitud.entidad,
-    solicitud.id,
-    aprobada ? "APROBAR_ELIMINACION" : "RECHAZAR_ELIMINACION",
-    aprobada
+  registrarAuditoria(user, { entidad: solicitud.entidad, id: solicitud.id, accion: aprobada ? "APROBAR_ELIMINACION" : "RECHAZAR_ELIMINACION", descripcion: aprobada
       ? `Eliminación aprobada de "${solicitud.titulo}".`
-      : `Eliminación rechazada de "${solicitud.titulo}".${motivo ? ` Motivo: ${motivo}` : ""}`
-  );
+      : `Eliminación rechazada de "${solicitud.titulo}".${motivo ? ` Motivo: ${motivo}` : ""}`,
+  });

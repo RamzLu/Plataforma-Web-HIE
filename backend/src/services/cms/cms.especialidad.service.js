@@ -5,6 +5,7 @@ import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOT
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
+import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "especialidad o servicio", modelos: { esp_: "especialidad", srv_: "servicio" } });
 
@@ -405,7 +406,7 @@ class CmsEspecialidadService {
             nuevoEstado === "RECHAZADO"
               ? "RECHAZAR"
               : nuevoEstado === "ARCHIVADO"
-              ? "DESACTIVAR"
+              ? "ARCHIVAR"
               : "APROBAR",
           descripcion:
             nuevoEstado === "RECHAZADO"
@@ -574,6 +575,7 @@ class CmsEspecialidadService {
     await this.limpiarPendingMeta(idStr, esServicio);
     await this.limpiarEditorMeta(idStr, esServicio);
 
+    await registrarAuditoria(user, { entidad, id: idStr, accion: ACCIONES.ELIMINAR, descripcion: `Eliminó ${esServicio ? "el servicio" : "la especialidad"} "${registro.nombre}".` });
     return { message: "Eliminado con éxito" };
   }
 

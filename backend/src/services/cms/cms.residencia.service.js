@@ -8,6 +8,7 @@ import { sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
+import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "residencia", modelos: { "": "residencia" } });
 
@@ -871,7 +872,7 @@ class CmsResidenciaService {
               finalEstado === "RECHAZADO"
                 ? "RECHAZAR"
                 : finalEstado === "ARCHIVADO"
-                ? "DESACTIVAR"
+                ? "ARCHIVAR"
                 : finalEstado === "PENDIENTE_APROBACION"
                 ? "SOLICITAR_REVISION"
                 : "APROBAR",
@@ -973,6 +974,7 @@ class CmsResidenciaService {
       }
     }
 
+    await registrarAuditoria(user, { entidad: "residencia", id, accion: ACCIONES.ELIMINAR, descripcion: `Eliminó la residencia "${residencia.nombre}".` });
     return {
       message: "Residencia eliminada correctamente.",
       id: id.toString(),
