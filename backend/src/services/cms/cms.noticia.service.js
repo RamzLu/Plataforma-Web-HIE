@@ -8,6 +8,7 @@ import { sanitizarHtmlNoticia, parsearIdBigInt, parsearArregloJson } from "../..
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "noticia", modelos: { "": "noticia" } });
 
@@ -34,9 +35,15 @@ class CmsNoticiaService {
     }
 
     const estadoSolicitado = estado ? estado.toUpperCase() : "BORRADOR";
-    // Cuando el CM crea una noticia nueva como BORRADOR queda en BORRADOR; si solicita publicar o programar pasa a PENDIENTE_APROBACION
-    const estadoFinal =
-      estadoSolicitado === "BORRADOR" ? "BORRADOR" : "PENDIENTE_APROBACION";
+    const tieneFechaProgramada =
+      (estadoSolicitado === "PROGRAMADO" || estadoSolicitado === "PENDIENTE_APROBACION") &&
+      Boolean(fechaPublicacion);
+    // Regla común (utils/flujoEditorial.utils.js): borrador queda en borrador; publicar/programar va a revisión.
+    const solicitud = resolverSolicitud({
+      estadoActual: null,
+      intencion: intencionDesdeEstado(estadoSolicitado, { tieneFecha: tieneFechaProgramada }),
+    });
+    const estadoFinal = solicitud.estado;
 
     let nombreCat = categoriaNombre || "General";
     if (nombreCat.toLowerCase() === "noticias" || nombreCat.toLowerCase() === "noticia") {
@@ -51,10 +58,6 @@ class CmsNoticiaService {
     }
 
     const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-
-    const tieneFechaProgramada =
-      (estadoSolicitado === "PROGRAMADO" || estadoSolicitado === "PENDIENTE_APROBACION") &&
-      Boolean(fechaPublicacion);
 
     const nuevaNoticia = await prisma.noticia.create({
       data: {
@@ -72,13 +75,8 @@ class CmsNoticiaService {
       },
     });
 
-    if (estadoFinal === "PENDIENTE_APROBACION") {
-      const targetNormalizado = tieneFechaProgramada ? "PROGRAMADO" : "PUBLICADO";
-      await this.guardarPendingMeta(nuevaNoticia.id.toString(), {
-        previousEstado: null,
-        targetEstado: targetNormalizado,
-        snapshotPublico: null,
-      });
+    if (solicitud.meta) {
+      await this.guardarPendingMeta(nuevaNoticia.id.toString(), solicitud.meta);
     }
 
     const imagenesUrlsGuardadas = [];
@@ -122,12 +120,7 @@ class CmsNoticiaService {
       ? nombreDeUsuario(nuevaNoticia.creador)
       : "Editor CMS";
 
-    const requestedEstado =
-      estadoFinal === "PENDIENTE_APROBACION"
-        ? tieneFechaProgramada
-          ? "PROGRAMADO"
-          : "PUBLICADO"
-        : null;
+    const requestedEstado = solicitud.meta?.targetEstado ?? null;
 
     await registrarAuditoria(user, { entidad: "noticia", id: nuevaNoticia.id, accion: ACCIONES.CREAR, descripcion: `Creó la noticia "${nuevaNoticia.titulo}".` });
     return {
@@ -341,18 +334,6 @@ class CmsNoticiaService {
     const estadoAnterior = (noticiaExistente.estado || "").toUpperCase();
     const estadoSolicitado = estado ? estado.toUpperCase() : estadoAnterior;
 
-    // Determinamos si la noticia ya había sido aprobada/publicada previamente
-    const origenPrevio = metaExistente?.previousEstado || estadoAnterior;
-    const provieneDePublicada =
-      estadoAnterior === "PUBLICADO" ||
-      estadoAnterior === "APROBADO" ||
-      estadoAnterior === "PROGRAMADO" ||
-      origenPrevio === "PUBLICADO" ||
-      origenPrevio === "APROBADO" ||
-      origenPrevio === "PROGRAMADO";
-
-    // Construimos o preservamos el snapshot público si la noticia estaba PUBLICADO/APROBADO en el portal
-    let snapshotPublico = metaExistente?.snapshotPublico || null;
     const imgsPrevias = noticiaExistente.noticia_archivo.map((na) => {
       const { data: pubData } = supabase.storage
         .from("noticias-imagenes")
@@ -366,14 +347,6 @@ class CmsNoticiaService {
       catPrevia = "General";
     }
 
-    if (estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO") {
-      snapshotPublico = {
-        titulo: noticiaExistente.titulo,
-        contenido: noticiaExistente.contenido,
-        category: catPrevia,
-        images: imgsPrevias,
-      };
-    }
 
     // Validación: verificar si hubo cambios reales antes de modificar la noticia
     const camposNoticiaPre = [
@@ -423,38 +396,33 @@ class CmsNoticiaService {
       updatedBy: usuarioEditor.id,
     };
 
-    let requestedEstadoFinal = null;
+    // Regla común (utils/flujoEditorial.utils.js): lo que es o fue público siempre pasa por el administrador,
+    // y mientras tanto el portal sigue mostrando la versión publicada (snapshotPublico).
+    const tieneFechaProgramada =
+      (estadoSolicitado === "PROGRAMADO" || estadoSolicitado === "PENDIENTE_APROBACION") &&
+      Boolean(fechaPublicacion);
+    const solicitud = resolverSolicitud({
+      estadoActual: estadoAnterior,
+      meta: metaExistente,
+      intencion: intencionDesdeEstado(estadoSolicitado, { tieneFecha: tieneFechaProgramada }),
+      snapshotActual: () => ({
+        titulo: noticiaExistente.titulo,
+        contenido: noticiaExistente.contenido,
+        category: catPrevia,
+        images: imgsPrevias,
+      }),
+    });
+    const snapshotPublico = solicitud.meta?.snapshotPublico ?? null;
 
-    if (estadoSolicitado === "BORRADOR" && !provieneDePublicada) {
-      // Solo puede guardarse directamente como BORRADOR si aún nunca estuvo publicada/aprobada
-      dataUpdate.estado = "BORRADOR";
-      dataUpdate.fechaPublicacion = null;
-      await this.limpiarPendingMeta(idStr);
+    dataUpdate.estado = solicitud.estado;
+    dataUpdate.fechaPublicacion =
+      solicitud.meta?.targetEstado === "PROGRAMADO" ? new Date(fechaPublicacion) : null;
+    if (solicitud.meta) {
+      await this.guardarPendingMeta(idStr, solicitud.meta);
     } else {
-      // Si proviene de una noticia ya PUBLICADO/PROGRAMADO (incluso si el CM elige pasarla a BORRADOR)
-      // o si solicita publicar/programar, requiere obligatoriamente aprobación del Admin
-      dataUpdate.estado = "PENDIENTE_APROBACION";
-
-      if (estadoSolicitado === "BORRADOR") {
-        dataUpdate.fechaPublicacion = null;
-        requestedEstadoFinal = "BORRADOR";
-      } else if (
-        (estadoSolicitado === "PROGRAMADO" || estadoSolicitado === "PENDIENTE_APROBACION") &&
-        fechaPublicacion
-      ) {
-        dataUpdate.fechaPublicacion = new Date(fechaPublicacion);
-        requestedEstadoFinal = "PROGRAMADO";
-      } else {
-        dataUpdate.fechaPublicacion = null;
-        requestedEstadoFinal = "PUBLICADO";
-      }
-
-      await this.guardarPendingMeta(idStr, {
-        previousEstado: provieneDePublicada ? origenPrevio : estadoAnterior,
-        targetEstado: requestedEstadoFinal,
-        snapshotPublico,
-      });
-
+      await this.limpiarPendingMeta(idStr);
+    }
+    if (solicitud.limpiarMotivo) {
       await this.limpiarMotivoRechazo(idStr);
     }
 
@@ -667,54 +635,29 @@ class CmsNoticiaService {
       throw error;
     }
 
-    // El administrador únicamente puede aprobar o rechazar solicitudes pendientes enviadas desde el CMS
-    if (noticiaExistente.estado !== "PENDIENTE_APROBACION") {
-      const error = new Error(
-        "Solo se pueden aprobar o rechazar noticias que estén pendientes de aprobación."
-      );
-      error.statusCode = 400;
-      throw error;
-    }
-
     const idStr = id.toString();
     const pendingMeta = await this.obtenerPendingMeta(idStr);
     const usuarioAdmin = await obtenerOCrearUsuarioLocal(user);
-    const estadoUpper = estado.toUpperCase();
 
-    let nuevoEstado = noticiaExistente.estado;
-    let motivoGuardado = null;
-    const extraUpdateData = {};
+    // Regla común (utils/flujoEditorial.utils.js): solo lo pendiente; aprobar aplica lo pedido; rechazar exige motivo.
+    const revision = resolverRevision({
+      estadoActual: noticiaExistente.estado,
+      meta: pendingMeta,
+      decision: decisionDesdeEstado(estado),
+      motivo: rejectionReason,
+      fechaProgramada: noticiaExistente.fechaPublicacion,
+    });
+    const nuevoEstado = revision.estado;
+    const motivoGuardado = revision.motivo;
+    const extraUpdateData = revision.limpiarFecha ? { fechaPublicacion: null } : {};
 
-    if (estadoUpper === "RECHAZADO") {
-      if (!rejectionReason || !rejectionReason.trim()) {
-        const error = new Error("Debe especificar un motivo de rechazo.");
-        error.statusCode = 400;
-        throw error;
-      }
-      nuevoEstado = "RECHAZADO";
-      motivoGuardado = rejectionReason.trim();
-      await this.guardarMotivoRechazo(idStr, motivoGuardado);
-    } else if (
-      estadoUpper === "APROBADO" ||
-      estadoUpper === "PUBLICADO" ||
-      estadoUpper === "PROGRAMADO"
-    ) {
-      if (pendingMeta?.targetEstado === "BORRADOR") {
-        // El Admin aprobó la solicitud del CM de pasar una noticia publicada a BORRADOR
-        nuevoEstado = "BORRADOR";
-        extraUpdateData.fechaPublicacion = null;
-      } else {
-        const ahora = new Date();
-        const tieneProgramacionFutura =
-          noticiaExistente.fechaPublicacion && new Date(noticiaExistente.fechaPublicacion) > ahora;
-
-        nuevoEstado = tieneProgramacionFutura ? "PROGRAMADO" : "PUBLICADO";
-      }
-
-      await this.limpiarMotivoRechazo(idStr);
-      await this.limpiarPendingMeta(idStr);
+    if (revision.motivo) {
+      await this.guardarMotivoRechazo(idStr, revision.motivo);
     } else {
-      nuevoEstado = estadoUpper;
+      await this.limpiarMotivoRechazo(idStr);
+    }
+    if (revision.meta === null) {
+      await this.limpiarPendingMeta(idStr);
     }
 
     const noticiaActualizada = await prisma.noticia.update({
