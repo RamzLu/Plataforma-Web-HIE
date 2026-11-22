@@ -1,12 +1,13 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
-import { tieneVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { generarNombreUnico } from "../../utils/file.utils.js";
 import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
-import { calcularCambios } from "../../utils/cambios.utils.js";
+import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
 
 const DOCS_BUCKET = "capacitaciones-documentos";
 const MEDIA_BUCKET = "capacitaciones-imagenes-videos";
@@ -157,6 +158,26 @@ class CmsCapacitacionService {
   guardarPendingMeta(id, meta) { return metaEditorial.guardarPendingMeta(id, meta); }
   limpiarPendingMeta(id) { return metaEditorial.limpiarPendingMeta(id); }
 
+  _nombreEditor(user) {
+    return user?.name || user?.preferred_username || user?.username || "Editor CMS";
+  }
+
+  // Versión pública de una capacitación, tal como se guarda para que el portal la siga mostrando
+  // mientras hay una edición en revisión.
+  _armarSnapshotPublico(c) {
+    return {
+      titulo: c.titulo,
+      descripcion: c.descripcion,
+      contenido: c.contenido,
+      imagenId: c.imagenId,
+      videoUrl: c.videoUrl,
+      enlaceUrl: c.enlaceUrl,
+      fechaInicio: c.fechaInicio,
+      fechaFin: c.fechaFin,
+      archivo: c.archivo,
+    };
+  }
+
   async _asegurarDatosIniciales() {
     try {
       const count = await prisma.capacitacion.count();
@@ -223,10 +244,8 @@ class CmsCapacitacionService {
     const [capacitaciones, pendingMetaMap] = await Promise.all([
       prisma.capacitacion.findMany({
         where: {
-          OR: [
-            { estado: "PUBLICADO", activo: true },
-            { estado: "PENDIENTE_APROBACION", activo: true },
-          ],
+          activo: true,
+          estado: { in: ["PUBLICADO", "APROBADO", "PENDIENTE_APROBACION", "RECHAZADO"] },
         },
         orderBy: { createdAt: "desc" },
         include: {
@@ -238,12 +257,30 @@ class CmsCapacitacionService {
 
     const resultado = [];
     for (const c of capacitaciones) {
-      const idStr = c.id.toString();
-      const pMeta = pendingMetaMap.get(idStr);
-      if (c.estado === "PENDIENTE_APROBACION" && pMeta?.previousEstado !== "PUBLICADO") {
-        continue;
+      const pMeta = pendingMetaMap.get(c.id.toString()) || null;
+      const esPedidoViejo =
+        c.estado === "PENDIENTE_APROBACION" && pMeta?.previousEstado === "PUBLICADO" && !pMeta?.snapshotPublico;
+      if (c.estado === "PUBLICADO" || c.estado === "APROBADO" || esPedidoViejo) {
+        // Los pedidos de archivado anteriores al módulo común no guardaron la versión pública: su contenido
+        // no cambió, así que se sigue mostrando el registro actual.
+        resultado.push(this._formatCapacitacion(c, null, null));
+      } else if (conservaVersionPublica(c, pMeta)) {
+        // Edición en revisión o rechazada: el portal sigue mostrando la versión publicada anterior.
+        const snap = pMeta.snapshotPublico;
+        resultado.push(
+          this._formatCapacitacion(
+            {
+              ...c,
+              ...snap,
+              estado: "PUBLICADO",
+              fechaInicio: snap.fechaInicio ? new Date(snap.fechaInicio) : null,
+              fechaFin: snap.fechaFin ? new Date(snap.fechaFin) : null,
+            },
+            null,
+            null
+          )
+        );
       }
-      resultado.push(this._formatCapacitacion(c, null, pMeta));
     }
     return resultado;
   }
@@ -383,13 +420,12 @@ class CmsCapacitacionService {
       if (!isNaN(parsed.getTime())) fechaFinDate = parsed;
     }
 
-    let estadoNormalizado = "PUBLICADO";
-    if (data.estado) {
-      const upper = data.estado.toUpperCase();
-      if (["PUBLICADO", "BORRADOR", "ARCHIVADO"].includes(upper)) {
-        estadoNormalizado = upper;
-      }
-    }
+    // Regla común (utils/flujoEditorial.utils.js). Sin estado, el CMS pide publicar.
+    const solicitud = resolverSolicitud({
+      estadoActual: null,
+      intencion: intencionDesdeEstado(data.estado || "PUBLICADO"),
+    });
+    const estadoNormalizado = solicitud.estado;
 
     const finalVideoUrl = videoUrl || (archivoTipoDetectado === "video" ? archivoUrl : null);
 
@@ -429,10 +465,22 @@ class CmsCapacitacionService {
       },
     });
 
+    let pendingMeta = null;
+    if (solicitud.meta) {
+      pendingMeta = {
+        ...solicitud.meta,
+        editor: this._nombreEditor(user),
+        updatedAt: new Date().toISOString(),
+      };
+      await this.guardarPendingMeta(nueva.id.toString(), pendingMeta);
+    }
+
     await registrarAuditoria(user, { entidad: "capacitacion", id: nueva.id, accion: ACCIONES.CREAR, descripcion: `Creó la capacitación "${nueva.titulo}".` });
     return {
-      message: "Capacitación creada con éxito.",
-      capacitacion: this._formatCapacitacion(nueva),
+      message: solicitud.meta
+        ? "Capacitación enviada a revisión del administrador para su aprobación."
+        : "Capacitación creada con éxito.",
+      capacitacion: this._formatCapacitacion(nueva, null, pendingMeta),
     };
   }
 
@@ -651,7 +699,9 @@ class CmsCapacitacionService {
 
     const idStr = id.toString();
     const estadoAnterior = (existing.estado || "").toUpperCase();
-    const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
+    const metaExistente = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
+    // Es o fue público (también una edición rechazada de algo publicado).
+    const provieneDePublicada = fuePublico(estadoAnterior, metaExistente);
 
     // Validación: verificar si hubo cambios reales antes de actualizar la capacitación
     const camposCapCheck = [
@@ -708,25 +758,45 @@ class CmsCapacitacionService {
       throw error;
     }
 
-    let estadoNormalizado = existing.estado;
-    let activoFinal = data.activo !== undefined ? (data.activo === true || data.activo === "true") : existing.activo;
+    // Regla común (utils/flujoEditorial.utils.js): lo que es o fue público pasa por el administrador
+    // (incluido despublicarlo o archivarlo) y el portal sigue mostrando la versión publicada mientras tanto.
+    // Sin estado: lo archivado o en borrador se mantiene y el resto pide publicar.
+    const estadoPedido = data.estado
+      ? data.estado
+      : ["ARCHIVADO", "BORRADOR"].includes(estadoAnterior)
+      ? estadoAnterior
+      : "PUBLICADO";
+    const solicitud = resolverSolicitud({
+      estadoActual: estadoAnterior,
+      meta: metaExistente,
+      intencion: intencionDesdeEstado(estadoPedido),
+      snapshotActual: () => this._armarSnapshotPublico(existing),
+      hayCambios: cambiosCap.length > 0 || bannerModificado || archivoModificado,
+    });
+    const estadoNormalizado = solicitud.estado;
+    const targetEstado = solicitud.meta?.targetEstado || null;
+    const activoFinal =
+      estadoNormalizado === "ARCHIVADO"
+        ? false
+        : data.activo !== undefined
+        ? data.activo === true || data.activo === "true"
+        : existing.activo;
 
-    if (data.estado) {
-      const estadoUpper = data.estado.toUpperCase();
-      if (estadoUpper === "ARCHIVADO" && provieneDePublicada) {
-        estadoNormalizado = "PENDIENTE_APROBACION";
-        await this.guardarPendingMeta(idStr, {
-          previousEstado: "PUBLICADO",
-          targetEstado: "ARCHIVADO",
-          updatedAt: new Date().toISOString(),
-        });
-        await this.limpiarMotivoRechazo(idStr);
-      } else if (["PUBLICADO", "BORRADOR", "ARCHIVADO", "PENDIENTE_APROBACION", "PROGRAMADO"].includes(estadoUpper)) {
-        estadoNormalizado = estadoUpper;
-        if (estadoUpper === "ARCHIVADO") {
-          activoFinal = false;
-        }
-      }
+    if (solicitud.sinCambios) {
+      // Pidió el mismo estado que ya tiene, sin tocar el contenido: no se genera una revisión.
+    } else if (solicitud.meta) {
+      await this.guardarPendingMeta(idStr, {
+        ...solicitud.meta,
+        editor: this._nombreEditor(user),
+        updatedAt: new Date().toISOString(),
+        cambios: combinarCambios(metaExistente?.cambios || [], cambiosCap),
+        esActualizacion: provieneDePublicada || Boolean(metaExistente?.esActualizacion),
+      });
+    } else {
+      await this.limpiarPendingMeta(idStr);
+    }
+    if (solicitud.limpiarMotivo) {
+      await this.limpiarMotivoRechazo(idStr);
     }
 
     const updated = await prisma.capacitacion.update({
@@ -755,8 +825,12 @@ class CmsCapacitacionService {
     await registrarAuditoria(user, { entidad: "capacitacion", id: updated.id, accion: ACCIONES.MODIFICAR, descripcion: `Modificó la capacitación "${updated.titulo}".` });
     return {
       message:
-        data.estado && data.estado.toUpperCase() === "ARCHIVADO" && estadoNormalizado === "PENDIENTE_APROBACION"
+        estadoNormalizado === "PENDIENTE_APROBACION" && targetEstado === "ARCHIVADO"
           ? "Solicitud de archivado enviada a revisión del administrador."
+          : estadoNormalizado === "PENDIENTE_APROBACION" && targetEstado === "BORRADOR"
+          ? "Solicitud para retirar la capacitación del portal enviada a revisión del administrador."
+          : estadoNormalizado === "PENDIENTE_APROBACION"
+          ? "Modificaciones enviadas a revisión del administrador."
           : "Capacitación actualizada con éxito.",
       capacitacion: this._formatCapacitacion(updated, motivoActual, pendingMetaActual),
     };
@@ -785,77 +859,76 @@ class CmsCapacitacionService {
     }
 
     const estadoAnterior = (existing.estado || "").toUpperCase();
-    const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
 
     const pendingMap = await this.obtenerMapaPendingMeta();
     const metaExistente = pendingMap.get(idStr) || null;
 
-    // Solo el administrador aprueba o rechaza. Si el CM pide publicar, se envía a revisión.
+    // Solo el administrador aprueba o rechaza.
     if (!esAdmin && (upper === "APROBADO" || upper === "RECHAZADO")) {
       const error = new Error("Solo el administrador puede aprobar o rechazar.");
       error.statusCode = 403;
       throw error;
     }
-    const esSolicitudDeRevision =
-      !esAdmin && ["PUBLICADO", "PROGRAMADO", "PENDIENTE_APROBACION"].includes(upper);
 
-    let finalEstado = upper;
+    let finalEstado;
     let finalActivo = existing.activo;
+    let sinCambios = false;
+    // El CM pidió publicar: sirve para elegir el mensaje.
+    const pidePublicar = !esAdmin && ["PUBLICADO", "PENDIENTE_APROBACION"].includes(upper);
 
-    // 0. El CM pide publicar: queda pendiente hasta que el administrador lo apruebe.
-    if (esSolicitudDeRevision) {
-      finalEstado = provieneDePublicada && upper !== "PENDIENTE_APROBACION" ? estadoAnterior : "PENDIENTE_APROBACION";
-      if (finalEstado === "PENDIENTE_APROBACION") {
-        await this.guardarPendingMeta(idStr, {
-          ...(metaExistente || {}),
-          previousEstado: metaExistente?.previousEstado ?? (estadoAnterior || null),
-          targetEstado: upper === "PROGRAMADO" ? "PROGRAMADO" : "PUBLICADO",
-          updatedAt: new Date().toISOString(),
-        });
+    // El Admin puede dejar directamente en borrador o archivar; el resto de lo suyo es decidir una solicitud.
+    const adminDirecto = esAdmin && ["BORRADOR", "ARCHIVADO"].includes(upper);
+
+    if (adminDirecto) {
+      finalEstado = upper;
+      if (upper === "ARCHIVADO") finalActivo = false;
+      await this.limpiarPendingMeta(idStr);
+      await this.limpiarMotivoRechazo(idStr);
+    } else if (esAdmin) {
+      // Regla común (utils/flujoEditorial.utils.js): solo lo pendiente; aprobar aplica lo pedido
+      // (publicar, despublicar o archivar); rechazar exige motivo y conserva la versión publicada.
+      const revision = resolverRevision({
+        estadoActual: estadoAnterior,
+        meta: metaExistente,
+        decision: decisionDesdeEstado(upper),
+        motivo: rejectionReason,
+      });
+      finalEstado = revision.estado;
+      if (revision.activo !== undefined) finalActivo = revision.activo;
+
+      if (finalEstado === "RECHAZADO") {
+        await this.guardarMotivoRechazo(idStr, revision.motivo);
+        // Si era una edición de algo ya publicado se conservan los metadatos (y la versión pública anterior).
+        if (revision.meta === null) await this.limpiarPendingMeta(idStr);
+      } else {
+        await this.limpiarPendingMeta(idStr);
         await this.limpiarMotivoRechazo(idStr);
       }
-    }
-    // 1. Solicitud de archivado de algo publicado -> requiere aprobación Admin
-    else if (upper === "ARCHIVADO" && provieneDePublicada) {
-      finalEstado = "PENDIENTE_APROBACION";
-      await this.guardarPendingMeta(idStr, {
-        previousEstado: "PUBLICADO",
-        targetEstado: "ARCHIVADO",
-        updatedAt: new Date().toISOString(),
+    } else {
+      // El CM pide: lo que es o fue público pasa por el administrador (incluido despublicarlo o archivarlo).
+      const solicitud = resolverSolicitud({
+        estadoActual: estadoAnterior,
+        meta: metaExistente,
+        intencion: intencionDesdeEstado(upper),
+        snapshotActual: () => this._armarSnapshotPublico(existing),
+        hayCambios: false,
       });
-      await this.limpiarMotivoRechazo(idStr);
-    }
-    // 2. Aprobación por parte de Admin (APROBADO o PUBLICADO):
-    else if (upper === "APROBADO" || upper === "PUBLICADO") {
-      if (metaExistente?.targetEstado === "ARCHIVADO") {
-        finalEstado = "ARCHIVADO";
-        finalActivo = false;
-      } else {
-        finalEstado = "PUBLICADO";
-        finalActivo = true;
+      finalEstado = solicitud.estado;
+      sinCambios = solicitud.sinCambios;
+      if (finalEstado === "ARCHIVADO") finalActivo = false;
+
+      if (!sinCambios) {
+        if (solicitud.meta) {
+          await this.guardarPendingMeta(idStr, {
+            ...solicitud.meta,
+            editor: this._nombreEditor(user),
+            updatedAt: new Date().toISOString(),
+          });
+        } else {
+          await this.limpiarPendingMeta(idStr);
+        }
+        if (solicitud.limpiarMotivo) await this.limpiarMotivoRechazo(idStr);
       }
-      await this.limpiarPendingMeta(idStr);
-      await this.limpiarMotivoRechazo(idStr);
-    }
-    // 3. Rechazo por parte de Admin:
-    else if (upper === "RECHAZADO") {
-      finalEstado = "RECHAZADO";
-      const motivo = (rejectionReason || "").trim() || "Solicitud rechazada por el administrador.";
-      await this.guardarMotivoRechazo(idStr, motivo);
-      await this.limpiarPendingMeta(idStr);
-    }
-    // 4. Archivado de un borrador directamente:
-    else if (upper === "ARCHIVADO") {
-      finalEstado = "ARCHIVADO";
-      finalActivo = false;
-      await this.limpiarPendingMeta(idStr);
-      await this.limpiarMotivoRechazo(idStr);
-    }
-    // 5. Otros:
-    else {
-      finalEstado = upper;
-      await this.limpiarPendingMeta(idStr);
-      await this.limpiarMotivoRechazo(idStr);
     }
 
     const updated = await prisma.capacitacion.update({
@@ -871,12 +944,15 @@ class CmsCapacitacionService {
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
 
+    const targetPedido = pendingMetaActual?.targetEstado;
     let mensaje = `Estado actualizado a ${finalEstado}.`;
-    if (upper === "ARCHIVADO" && finalEstado === "PENDIENTE_APROBACION") {
+    if (finalEstado === "PENDIENTE_APROBACION" && targetPedido === "ARCHIVADO") {
       mensaje = "Solicitud de archivado enviada a revisión del administrador.";
-    } else if (esSolicitudDeRevision && finalEstado === "PENDIENTE_APROBACION") {
+    } else if (finalEstado === "PENDIENTE_APROBACION" && targetPedido === "BORRADOR") {
+      mensaje = "Solicitud para retirar la capacitación del portal enviada a revisión del administrador.";
+    } else if (pidePublicar && finalEstado === "PENDIENTE_APROBACION") {
       mensaje = "Capacitación enviada a revisión del administrador para su publicación.";
-    } else if (esSolicitudDeRevision) {
+    } else if (pidePublicar && sinCambios) {
       mensaje = "La capacitación ya está publicada.";
     }
 
@@ -1046,6 +1122,9 @@ class CmsCapacitacionService {
       updatedAt: c.updatedAt ? c.updatedAt.toISOString() : "",
 
       requestedEstado: (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
+      cambios: (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
+      esActualizacion: (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
+      editor: pendingMeta?.editor || null,
       motivoRechazo: motivoRechazo || null,
       rejectionReason: motivoRechazo || null,
     };

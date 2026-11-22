@@ -17,7 +17,6 @@ import {
   createResidencia,
   updateResidencia,
   deleteResidencia,
-  cambiarEstadoResidencia,
 } from "../../api/residencias.api";
 
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -70,6 +69,7 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 
 const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de residencias de la BD
@@ -82,6 +82,11 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Modales
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  // Si lo que se edita está (o estuvo) publicado, retirarlo del portal se pide archivándolo, no pasándolo a borrador.
+  const editandoPublicado = (() => {
+    const actual = (Array.isArray(residencias) ? residencias : []).find((r) => r.id === editingId);
+    return Boolean(actual && (["PUBLICADO", "PROGRAMADO", "APROBADO"].includes(actual.estado) || actual.esActualizacion));
+  })();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [showConfirmDraftModal, setShowConfirmDraftModal] = useState(false);
@@ -462,33 +467,6 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       toast.error(msg, { id: toastId });
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  // Cambiar estado interactivo (Publicado, Borrador, Archivado)
-  const handleCambiarEstado = async (id, nuevoEstado) => {
-    const estadoLegible =
-      nuevoEstado === "PUBLICADO"
-        ? "Publicado"
-        : nuevoEstado === "BORRADOR"
-          ? "Borrador"
-          : "Archivado";
-
-    const toastId = toast.loading(`Cambiando estado a ${estadoLegible}...`);
-    try {
-      const resp = await cambiarEstadoResidencia(id, nuevoEstado);
-      const msg =
-        resp?.message ||
-        (nuevoEstado === "ARCHIVADO"
-          ? "Solicitud de archivado enviada a revisión del administrador."
-          : `Estado actualizado a ${estadoLegible} con éxito.`);
-      toast.success(msg, { id: toastId });
-      await cargarResidencias();
-    } catch (error) {
-      console.error("Error al cambiar estado:", error);
-      const msg =
-        mensajeDeError(error, "Error al cambiar el estado.");
-      toast.error(msg, { id: toastId });
     }
   };
 
@@ -947,16 +925,10 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                       Rechazado
                     </span>
                   ) : (
-                    <select
-                      value={res.estado}
-                      onChange={(e) => handleCambiarEstado(res.id, e.target.value)}
-                      className={`status-badge-select ${res.estado?.toLowerCase()}`}
-                      title="Cambiar estado: Publicado / Borrador / Archivado"
-                    >
-                      <option value="PUBLICADO">Publicado</option>
-                      <option value="BORRADOR">Borrador</option>
-                      <option value="ARCHIVADO">Archivado</option>
-                    </select>
+                    <EtiquetaEstado
+                      estado={res.estado}
+                      texto={res.estado === "PUBLICADO" ? "Publicado" : res.estado === "ARCHIVADO" ? "Archivado" : "Borrador"}
+                    />
                   )}
                 </div>
 
@@ -1172,9 +1144,13 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                       className="esp-form-input"
                     >
                       <option value="PUBLICADO">Publicar (Enviar a aprobación)</option>
-                      <option value="BORRADOR">Borrador</option>
+                      {!editandoPublicado && <option value="BORRADOR">Borrador</option>}
                       <option value="PROGRAMADO">Programado (Enviar a aprobación)</option>
-                      {editingId && <option value="ARCHIVADO">Archivado</option>}
+                      {editingId && (
+                        <option value="ARCHIVADO">
+                          {editandoPublicado ? "Archivar (pedir retiro del portal)" : "Archivado"}
+                        </option>
+                      )}
                     </select>
                   </div>
 

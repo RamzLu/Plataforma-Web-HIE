@@ -297,3 +297,14 @@
   }
 }
 
+
+:where(.panel-scope) .cap-motivo-rechazo {
+  display: block;
+  max-width: 130px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-red-700, #b91c1c);
+  text-align: center;
+  overflow-wrap: anywhere;
+}

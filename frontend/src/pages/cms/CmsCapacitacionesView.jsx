@@ -30,9 +30,9 @@ import {
   createCapacitacion,
   updateCapacitacion,
   deleteCapacitacion,
-  cambiarEstadoCapacitacion,
 } from "../../api/capacitaciones.api";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 
 // Datos iniciales armonizados con el portal público (CapacitacionPage) y schema.prisma
 
@@ -40,13 +40,18 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   // Lista de capacitaciones obtenidas desde la base de datos
   const [capacitaciones, setCapacitaciones] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("PUBLICADOS"); // PUBLICADOS, BORRADORES, ARCHIVADOS
+  const [activeTab, setActiveTab] = useState("PUBLICADOS"); // PUBLICADOS, PENDIENTES, RECHAZADOS, BORRADORES, ARCHIVADOS
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroModalidad, setFiltroModalidad] = useState("TODAS");
 
   // Modales
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  // Si lo que se edita está (o estuvo) publicado, retirarlo del portal se pide archivándolo, no pasándolo a borrador.
+  const editandoPublicado = (() => {
+    const actual = capacitaciones.find((c) => c.id === editingId);
+    return Boolean(actual && (["PUBLICADO", "APROBADO"].includes(actual.estado) || actual.esActualizacion));
+  })();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -271,7 +276,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
 
     setFormData({
       titulo: item.titulo || "",
-      estado: item.estado || "PUBLICADO",
+      estado: ["BORRADOR", "ARCHIVADO"].includes(item.estado) ? item.estado : "PUBLICADO",
       modalidad: item.modalidad || "Presencial",
       tipoRecurso: (() => {
         if (tipoArch === "documento") return "pdf";
@@ -372,23 +377,24 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
 
       if (editingId) {
         const resp = await updateCapacitacion(editingId, dataToSend);
-        const esPendienteArchivado =
-          resp?.capacitacion?.estado === "PENDIENTE_APROBACION" &&
-          resp?.capacitacion?.requestedEstado === "ARCHIVADO";
         toast.success(
-          esPendienteArchivado
-            ? "Solicitud de archivado enviada a revisión del administrador."
+          resp?.capacitacion?.estado === "PENDIENTE_APROBACION"
+            ? resp.message
             : estadoFinal === "BORRADOR"
             ? "Borrador actualizado con éxito."
             : "Capacitación actualizada con éxito."
         );
+        if (resp?.capacitacion?.estado === "PENDIENTE_APROBACION") setActiveTab("PENDIENTES");
       } else {
-        await createCapacitacion(dataToSend);
+        const resp = await createCapacitacion(dataToSend);
         toast.success(
-          estadoFinal === "BORRADOR"
+          resp?.capacitacion?.estado === "PENDIENTE_APROBACION"
+            ? resp.message
+            : estadoFinal === "BORRADOR"
             ? "Borrador guardado con éxito."
             : "Capacitación creada con éxito."
         );
+        if (resp?.capacitacion?.estado === "PENDIENTE_APROBACION") setActiveTab("PENDIENTES");
       }
 
       await cargarCapacitaciones();
@@ -402,29 +408,6 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       toast.error(mensajeDeError(error, "Error al guardar la capacitación."));
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  // Cambio de estado interactivo (Publicado, Borrador, Archivado)
-  const handleCambiarEstado = async (id, nuevoEstado) => {
-    try {
-      const resp = await cambiarEstadoCapacitacion(id, nuevoEstado);
-      const estadoLegible =
-        nuevoEstado === "PUBLICADO"
-          ? "Publicado"
-          : nuevoEstado === "BORRADOR"
-          ? "Borrador"
-          : "Archivado";
-      const msg =
-        resp?.message ||
-        (nuevoEstado === "ARCHIVADO"
-          ? "Solicitud de archivado enviada a revisión del administrador."
-          : `Estado actualizado a ${estadoLegible}.`);
-      toast.success(msg);
-      await cargarCapacitaciones();
-    } catch (error) {
-      console.error("Error al cambiar estado:", error);
-      toast.error(mensajeDeError(error, "No se pudo actualizar el estado de la capacitación."));
     }
   };
 
@@ -465,6 +448,10 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
     const matchEstado =
       activeTab === "PUBLICADOS"
         ? item.estado === "PUBLICADO"
+        : activeTab === "PENDIENTES"
+        ? item.estado === "PENDIENTE_APROBACION"
+        : activeTab === "RECHAZADOS"
+        ? item.estado === "RECHAZADO"
         : activeTab === "BORRADORES"
         ? item.estado === "BORRADOR"
         : item.estado === "ARCHIVADO";
@@ -512,6 +499,20 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
           onClick={() => setActiveTab("PUBLICADOS")}
         >
           Publicados
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
+          onClick={() => setActiveTab("PENDIENTES")}
+        >
+          Pendientes
+        </button>
+        <button
+          type="button"
+          className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
+          onClick={() => setActiveTab("RECHAZADOS")}
+        >
+          Rechazados
         </button>
         <button
           type="button"
@@ -767,20 +768,36 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                   style={{
                     width: "135px",
                     display: "flex",
+                    flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
+                    gap: "4px",
                   }}
                 >
-                  <select
-                    value={item.estado}
-                    onChange={(e) => handleCambiarEstado(item.id, e.target.value)}
-                    className={`status-badge-select ${item.estado?.toLowerCase()}`}
-                    title="Cambiar estado: Publicado / Borrador / Archivado"
-                  >
-                    <option value="PUBLICADO">Publicado</option>
-                    <option value="BORRADOR">Borrador</option>
-                    <option value="ARCHIVADO">Archivado</option>
-                  </select>
+                  {item.estado === "PENDIENTE_APROBACION" || item.estado === "RECHAZADO" ? (
+                    <span title={item.estado === "RECHAZADO" ? item.motivoRechazo || "" : undefined}>
+                      <EtiquetaEstado
+                        estado={item.estado}
+                        texto={
+                          item.estado === "RECHAZADO"
+                            ? "Rechazado"
+                            : item.requestedEstado === "ARCHIVADO"
+                            ? "Archivado solicitado"
+                            : item.requestedEstado === "BORRADOR"
+                            ? "Retiro solicitado"
+                            : "En revisión"
+                        }
+                      />
+                    </span>
+                  ) : (
+                    <EtiquetaEstado
+                      estado={item.estado}
+                      texto={item.estado === "PUBLICADO" ? "Publicado" : item.estado === "ARCHIVADO" ? "Archivado" : "Borrador"}
+                    />
+                  )}
+                  {item.estado === "RECHAZADO" && item.motivoRechazo && (
+                    <span className="cap-motivo-rechazo">Motivo: {item.motivoRechazo}</span>
+                  )}
                 </div>
 
                 {/* Columna ACCIONES */}
@@ -898,9 +915,11 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                       className="esp-form-input"
                       style={{ fontWeight: "600" }}
                     >
-                      <option value="BORRADOR">Borrador</option>
+                      {!editandoPublicado && <option value="BORRADOR">Borrador</option>}
                       <option value="PUBLICADO">Publicado</option>
-                      <option value="ARCHIVADO">Archivado</option>
+                      <option value="ARCHIVADO">
+                        {editandoPublicado ? "Archivar (pedir retiro del portal)" : "Archivado"}
+                      </option>
                     </select>
                   </div>
 

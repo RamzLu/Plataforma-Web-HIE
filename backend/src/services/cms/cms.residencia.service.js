@@ -127,7 +127,12 @@ class CmsResidenciaService {
           const snap = pendingMeta.snapshotPublico;
           resultado.push(
             this._formatResidencia(
-              { ...res, ...snap },
+              {
+                ...res,
+                ...snap,
+                // La versión guardada vuelve de la base con las fechas como texto.
+                fechaConvocatoria: snap.fechaConvocatoria ? new Date(snap.fechaConvocatoria) : null,
+              },
               null,
               null,
               resolvedEditor,

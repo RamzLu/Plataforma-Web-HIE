@@ -1,5 +1,6 @@
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -258,8 +259,9 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
     setActionError('');
     try {
       const isArchiving = selectedTraining.requestedEstado === 'ARCHIVADO';
+      const isUnpublishing = selectedTraining.requestedEstado === 'BORRADOR';
       const finalEstado = pendingAction === 'APROBADO'
-        ? (isArchiving ? 'ARCHIVADO' : 'PUBLICADO')
+        ? (isArchiving ? 'ARCHIVADO' : isUnpublishing ? 'BORRADOR' : 'PUBLICADO')
         : 'RECHAZADO';
 
       if (isSimulation) {
@@ -277,6 +279,8 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
         setFeedback(
           isArchiving && pendingAction === 'APROBADO'
             ? `“${selectedTraining.titulo}” fue archivada con éxito.`
+            : isUnpublishing && pendingAction === 'APROBADO'
+            ? `“${selectedTraining.titulo}” se retiró del portal y quedó como borrador.`
             : `“${selectedTraining.titulo}” quedó ${STATUS_LABELS[finalEstado]?.toLocaleLowerCase('es') || finalEstado}.`
         );
         closeDetails();
@@ -295,6 +299,8 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
       setFeedback(
         isArchiving && pendingAction === 'APROBADO'
           ? `“${selectedTraining.titulo}” fue archivada con éxito.`
+          : isUnpublishing && pendingAction === 'APROBADO'
+          ? `“${selectedTraining.titulo}” se retiró del portal y quedó como borrador.`
           : `“${selectedTraining.titulo}” quedó ${STATUS_LABELS[result.capacitacion.estado]?.toLocaleLowerCase('es') || result.capacitacion.estado}.`
       );
       closeDetails();
@@ -539,6 +545,29 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                   </div>
                 </div>
               )}
+              {selectedTraining.estado === 'PENDIENTE_APROBACION' && selectedTraining.requestedEstado === 'BORRADOR' && (
+                <div style={{
+                  margin: '0 0 16px 0',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  backgroundColor: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  color: '#92400e',
+                  fontSize: '0.875rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  <Archive size={18} style={{ color: '#d97706', flexShrink: 0 }} />
+                  <div>
+                    <strong>Solicitud de retiro:</strong> El editor del CMS pide pasar esta capacitación publicada a Borrador. Si la aprobás, deja de verse en el portal.
+                  </div>
+                </div>
+              )}
+              <AdminCambiosResaltados
+                cambios={selectedTraining.cambios}
+                esActualizacion={selectedTraining.esActualizacion}
+              />
               <div className="admin-training-info-grid">
                 <article className="is-wide">
                   <h3>Modalidad de la capacitación</h3>
@@ -693,6 +722,10 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                       <>
                         <Archive size={17} /> Aprobar archivado
                       </>
+                    ) : selectedTraining.requestedEstado === 'BORRADOR' ? (
+                      <>
+                        <Archive size={17} /> Aprobar retiro
+                      </>
                     ) : (
                       <>
                         <CheckCircle size={17} /> Aprobar
@@ -730,8 +763,10 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                     </>
                   ) : selectedTraining.requestedEstado === 'ARCHIVADO' ? (
                     <p>¿Confirmás archivar esta capacitación? Se retirará de la visualización pública.</p>
+                  ) : selectedTraining.requestedEstado === 'BORRADOR' ? (
+                    <p>¿Confirmás retirar esta capacitación del portal? Quedará como borrador.</p>
                   ) : (
-                    <p>¿Confirmás aprobar este contenido? Quedará habilitado para continuar con su publicación desde el CMS.</p>
+                    <p>¿Confirmás aprobar este contenido? Se publicará en el portal.</p>
                   )}
                   {actionError && <p className="admin-training-error" role="alert">{actionError}</p>}
                   <div>
