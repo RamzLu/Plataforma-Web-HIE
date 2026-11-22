@@ -580,10 +580,9 @@ class CmsNoticiaService {
         },
         camposNoticia
       );
-      const cambiosPrevios =
-        metaExistente && noticiaExistente.estado === "PENDIENTE_APROBACION"
-          ? metaExistente.cambios || []
-          : [];
+      // Los cambios se acumulan contra la versión pública mientras la edición siga viva: si el Admin la rechazó y el CM
+      // la vuelve a editar, lo que ya se había modificado (por ejemplo el título) tiene que seguir apareciendo.
+      const cambiosPrevios = metaExistente?.cambios || [];
       metaActual = {
         ...metaActual,
         cambios: combinarCambios(cambiosPrevios, nuevosCambios),

@@ -139,6 +139,15 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  /* En una grilla, una columna no se achica por debajo de su palabra más larga: sin esto, un texto sin
+     espacios la ensancha, empuja el mosaico y aparece una barra de scroll horizontal. */
+  min-width: 0;
+}
+
+/* Los textos largos sin espacios se cortan en vez de salirse del modal. */
+:where(.panel-scope) .modal-left-content:not(:where(.vista-portal *)) :is(.news-modal-title, .info-text) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* =========================================

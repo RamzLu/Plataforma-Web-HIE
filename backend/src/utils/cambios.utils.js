@@ -162,14 +162,26 @@ export const combinarCambios = (cambiosPrevios = [], cambiosNuevos = []) => {
   return Array.from(mapa.values());
 };
 
+/** Las URLs http(s) de un valor de tipo "image" / "images" (una por línea). */
+const urlsDeImagenes = (valor) =>
+  String(valor ?? "")
+    .split("\n")
+    .map((url) => url.trim())
+    .filter((url) => /^https?:\/\//i.test(url));
+
 /**
- * Versión pública (sin valores crudos) para enviar al frontend.
+ * Versión para enviar al frontend (sin los valores crudos).
+ * En los cambios de imágenes se agregan las URLs de antes y después, para que el Admin vea las imágenes
+ * (las agregadas y las quitadas) y no solo "3 imágenes (1 agregada)".
  */
 export const cambiosParaCliente = (cambios = []) =>
-  (Array.isArray(cambios) ? cambios : []).map(({ campo, label, tipo, antes, despues }) => ({
+  (Array.isArray(cambios) ? cambios : []).map(({ campo, label, tipo, antes, despues, valorAntes, valorDespues }) => ({
     campo,
     label,
     tipo,
     antes,
     despues,
+    ...(tipo === "images" || tipo === "image"
+      ? { imagenes: { antes: urlsDeImagenes(valorAntes), despues: urlsDeImagenes(valorDespues) } }
+      : {}),
   }));

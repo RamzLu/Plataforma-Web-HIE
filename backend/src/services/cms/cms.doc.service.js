@@ -454,8 +454,9 @@ class CmsDocService {
           { key: "archivo", label: "Archivo adjunto" },
         ]
       );
-      const cambiosPrevios =
-        estadoAnterior === "PENDIENTE_APROBACION" ? metaExistente?.cambios || [] : [];
+      // Los cambios se acumulan contra la versión pública mientras la edición siga viva: si el Admin la rechazó y el CM
+      // la vuelve a editar, lo que ya se había modificado (por ejemplo el título) tiene que seguir apareciendo.
+      const cambiosPrevios = metaExistente?.cambios || [];
       const metaGuardada = (await this.obtenerMapaPendingMeta()).get(idStr) || {};
       await this.guardarPendingMeta(idStr, {
         ...metaGuardada,

@@ -263,8 +263,9 @@ class CmsEspecialidadService {
         { key: "informacionDerivacion", label: "Información de derivación" },
       ];
       const nuevosCambios = calcularCambios(existente, actualizada, camposEsp);
-      const cambiosPrevios =
-        estadoAnterior === "PENDIENTE_APROBACION" ? metaExistente?.cambios || [] : [];
+      // Los cambios se acumulan contra la versión pública mientras la edición siga viva: si el Admin la rechazó y el CM
+      // la vuelve a editar, lo que ya se había modificado (por ejemplo el título) tiene que seguir apareciendo.
+      const cambiosPrevios = metaExistente?.cambios || [];
       const metaGuardada =
         (await this.obtenerMapaPendingMeta()).get(this._metaKey(idStr, esServicio)) || {};
       await this.guardarPendingMeta(idStr, esServicio, {
