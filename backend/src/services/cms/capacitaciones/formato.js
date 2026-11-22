@@ -3,7 +3,7 @@
 import { supabase } from "../../../config/supabase.js";
 import { sanitizarUrlLectura } from "../../../utils/sanitize.utils.js";
 import { cambiosParaCliente } from "../../../utils/cambios.utils.js";
-import { estaVisibleEnPortal, nombreDeLaVersionPublica } from "../../../utils/eliminacion.utils.js";
+import { estaVisibleEnPortal, nombreDeLaVersionPublica, conservaVersionPublica } from "../../../utils/eliminacion.utils.js";
 import { BUCKET_MEDIOS } from "./archivos.js";
 
 export const formatearCapacitacion = (c, motivoRechazo = null, pendingMeta = null) => {
@@ -112,8 +112,22 @@ export const formatearCapacitacion = (c, motivoRechazo = null, pendingMeta = nul
     updatedAt: c.updatedAt ? c.updatedAt.toISOString() : "",
 
     requestedEstado: (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
-    cambios: (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
-    esActualizacion: (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
+    cambios: (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || conservaVersionPublica(c, pendingMeta) ? cambiosParaCliente(pendingMeta?.cambios) : [],
+    esActualizacion: ((c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || conservaVersionPublica(c, pendingMeta)) && Boolean(pendingMeta?.esActualizacion),
+    // La versión publicada (la que ve el portal) mientras la actualización está en revisión o rechazada.
+    versionPublicada: conservaVersionPublica(c, pendingMeta)
+      ? formatearCapacitacion(
+          {
+            ...c,
+            ...pendingMeta.snapshotPublico,
+            estado: "PUBLICADO",
+            fechaInicio: pendingMeta.snapshotPublico.fechaInicio ? new Date(pendingMeta.snapshotPublico.fechaInicio) : null,
+            fechaFin: pendingMeta.snapshotPublico.fechaFin ? new Date(pendingMeta.snapshotPublico.fechaFin) : null,
+          },
+          null,
+          null
+        )
+      : null,
     editor: pendingMeta?.editor || null,
     motivoRechazo: motivoRechazo || null,
     rejectionReason: motivoRechazo || null,

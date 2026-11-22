@@ -111,11 +111,16 @@ class CmsProfesionalService {
           tituloPublicado: conservaVersionPublica(prof, pendingMeta)
             ? `${pendingMeta.snapshotPublico?.nombre || ""} ${pendingMeta.snapshotPublico?.apellido || ""}`.trim() || null
             : null,
+          // Lo que ve hoy el portal, para poder mostrar la versión publicada mientras la actualización está en revisión.
+          versionPublicada: conservaVersionPublica(prof, pendingMeta)
+            ? { ...pendingMeta.snapshotPublico, id: idStr, estado: "PUBLICADO", publicado: true, activo: true }
+            : null,
           rejectionReason,
           editor: pendingMeta?.editor || editorMeta?.editor || "Editor CMS",
           updatedAt: pendingMeta?.updatedAt || editorMeta?.updatedAt || prof.updatedAt,
-          cambios: estado === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
-          esActualizacion: estado === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
+          // Los cambios se ven mientras la edición esté en revisión y también si el Admin la rechazó.
+          cambios: estado === "PENDIENTE_APROBACION" || conservaVersionPublica(prof, pendingMeta) ? cambiosParaCliente(pendingMeta?.cambios) : [],
+          esActualizacion: (estado === "PENDIENTE_APROBACION" || conservaVersionPublica(prof, pendingMeta)) && Boolean(pendingMeta?.esActualizacion),
           requestedEstado: estado === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
         })
       );

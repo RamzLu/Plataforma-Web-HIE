@@ -3,7 +3,7 @@
 import { supabase } from "../../../config/supabase.js";
 import { sanitizarUrlLectura } from "../../../utils/sanitize.utils.js";
 import { cambiosParaCliente } from "../../../utils/cambios.utils.js";
-import { estaVisibleEnPortal, nombreDeLaVersionPublica } from "../../../utils/eliminacion.utils.js";
+import { estaVisibleEnPortal, nombreDeLaVersionPublica, conservaVersionPublica } from "../../../utils/eliminacion.utils.js";
 import { BUCKET_BANNER } from "./archivos.js";
 
 export const formatearResidencia = (res, motivoRechazo = null, pendingMeta = null, editor = null, updatedAtCustom = null) => {
@@ -98,6 +98,22 @@ export const formatearResidencia = (res, motivoRechazo = null, pendingMeta = nul
     estado: res.estado,
     visibleEnPortal: estaVisibleEnPortal(res, pendingMeta),
     tituloPublicado: nombreDeLaVersionPublica(res, pendingMeta, "nombre"),
+    // La versión publicada (la que ve el portal) mientras la actualización está en revisión o rechazada.
+    versionPublicada: conservaVersionPublica(res, pendingMeta)
+      ? formatearResidencia(
+          {
+            ...res,
+            ...pendingMeta.snapshotPublico,
+            estado: "PUBLICADO",
+            // La versión guardada vuelve de la base con las fechas como texto.
+            fechaConvocatoria: pendingMeta.snapshotPublico.fechaConvocatoria ? new Date(pendingMeta.snapshotPublico.fechaConvocatoria) : null,
+          },
+          null,
+          null,
+          editor,
+          updatedAtCustom
+        )
+      : null,
     activo: res.activo,
     createdAt: res.createdAt ? res.createdAt.toISOString() : "",
     updatedAt: res.updatedAt ? res.updatedAt.toISOString() : "",

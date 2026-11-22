@@ -3,7 +3,7 @@
 import { supabase } from "../../../config/supabase.js";
 import { nombreDeUsuario } from "../../../utils/user.utils.js";
 import { cambiosParaCliente } from "../../../utils/cambios.utils.js";
-import { estaVisibleEnPortal, nombreDeLaVersionPublica } from "../../../utils/eliminacion.utils.js";
+import { estaVisibleEnPortal, nombreDeLaVersionPublica, conservaVersionPublica } from "../../../utils/eliminacion.utils.js";
 import { BUCKET_DOCUMENTOS } from "./archivo.js";
 
 export const CATEGORIA_POR_DEFECTO = "Información institucional";
@@ -33,6 +33,9 @@ export const datosDeArchivo = (archivo) => ({
 export const formatearDocumento = (doc, motivoRechazo = null, pendingMeta = null) => {
   const estadoUpper = (doc.estado || "PENDIENTE_APROBACION").toUpperCase();
   const creatorName = doc.creador ? nombreDeUsuario(doc.creador) : pendingMeta?.editor || "Editor CMS";
+  // Con una edición pendiente o rechazada sobre algo publicado, el Admin sigue viendo qué se quería cambiar
+  // y puede abrir la versión publicada (la que ve el portal).
+  const conserva = conservaVersionPublica(doc, pendingMeta);
 
   return {
     id: doc.id.toString(),
@@ -50,8 +53,9 @@ export const formatearDocumento = (doc, motivoRechazo = null, pendingMeta = null
     rejectionReason: motivoRechazo,
     requestedEstado: pendingMeta?.targetEstado || null,
     previousEstado: pendingMeta?.previousEstado || null,
-    cambios: estadoUpper === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
-    esActualizacion: estadoUpper === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
+    cambios: estadoUpper === "PENDIENTE_APROBACION" || conserva ? cambiosParaCliente(pendingMeta?.cambios) : [],
+    esActualizacion: (estadoUpper === "PENDIENTE_APROBACION" || conserva) && Boolean(pendingMeta?.esActualizacion),
+    versionPublicada: conserva ? formatearVersionPublicada(doc, pendingMeta) : null,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt || doc.createdAt,
   };

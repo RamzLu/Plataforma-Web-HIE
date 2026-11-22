@@ -68,6 +68,7 @@ export const construirItemProfesional = (prof, servicios, options = {}) => {
     publicado: estado === "PUBLICADO",
     activo: prof.activo !== false,
     visibleEnPortal: Boolean(options.visibleEnPortal),
+    versionPublicada: options.versionPublicada || null,
     tituloPublicado: options.tituloPublicado || null,
     rejectionReason: options.rejectionReason || null,
     editor,

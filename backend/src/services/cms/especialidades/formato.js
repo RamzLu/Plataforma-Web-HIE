@@ -1,7 +1,7 @@
 // Cómo se le muestra una especialidad o un servicio al panel y al portal.
 
 import { cambiosParaCliente } from "../../../utils/cambios.utils.js";
-import { estaVisibleEnPortal, nombreDeLaVersionPublica } from "../../../utils/eliminacion.utils.js";
+import { estaVisibleEnPortal, nombreDeLaVersionPublica, conservaVersionPublica } from "../../../utils/eliminacion.utils.js";
 
 /** Los requisitos se guardan como JSON (lista) o, en registros viejos, como texto con un requisito por línea. */
 const leerRequisitos = (requisitos) => {
@@ -33,6 +33,7 @@ const fechaLegible = (valor) => {
 /** Una especialidad o un servicio tal como lo lee el panel y el portal. */
 export const formatearEspecialidad = (registro, esServicio, rejectionReason = null, meta = null, editorOverride = null, updatedAtOverride = null) => {
   const esPendiente = (registro.estado || "").toUpperCase() === "PENDIENTE_APROBACION";
+  const conserva = conservaVersionPublica(registro, meta);
   return {
     ...registro,
     id: registro.id.toString(),
@@ -43,8 +44,12 @@ export const formatearEspecialidad = (registro, esServicio, rejectionReason = nu
     rejectionReason: rejectionReason || null,
     editor: editorOverride || meta?.editor || "Editor CMS",
     updatedAtFormatted: fechaLegible(updatedAtOverride || meta?.updatedAt || null),
-    cambios: esPendiente ? cambiosParaCliente(meta?.cambios) : [],
-    esActualizacion: esPendiente && Boolean(meta?.esActualizacion),
+    cambios: esPendiente || conserva ? cambiosParaCliente(meta?.cambios) : [],
+    esActualizacion: (esPendiente || conserva) && Boolean(meta?.esActualizacion),
+    // La versión publicada (la que ve el portal) mientras la actualización está en revisión o rechazada.
+    versionPublicada: conserva
+      ? formatearEspecialidad({ ...registro, ...meta.snapshotPublico, estado: "PUBLICADO" }, esServicio, null, null, editorOverride, updatedAtOverride)
+      : null,
     requestedEstado: esPendiente ? meta?.targetEstado || null : null,
   };
 };
