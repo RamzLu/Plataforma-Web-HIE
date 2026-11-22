@@ -52,6 +52,23 @@ npm run migrate-deploy --prefix backend   # aplica las pendientes
 
 En el frontend, todas las llamadas pasan por `src/api/*.api.js`; el cliente de `src/api/axiosConfig.js` agrega el token a las rutas `/cms` automáticamente.
 
+### Módulos con flujo editorial
+
+Noticias (`noticias`), documentación (`documentacion`), profesionales (`profesionales`), especialidades y servicios (`especialidades`), residencias (`residencias`) y capacitaciones (`capacitaciones`) exponen **las mismas rutas**. El CM pide y el Admin revisa:
+
+| Ruta | Quién | Qué hace |
+|---|---|---|
+| `GET /api/portal/<módulo>` | Público | Solo lo publicado |
+| `GET /api/cms/<módulo>` | CM y Admin | Todo (borradores, pendientes, rechazados...) |
+| `POST /api/cms/<módulo>` | CM | Crea. El campo `estado` pide qué hacer: `BORRADOR`, `PUBLICADO`, `PROGRAMADO` o `ARCHIVADO` |
+| `PUT /api/cms/<módulo>/:id` | CM | Edita o pide un cambio de estado (con `estado`). Si estaba publicado, queda pendiente |
+| `PATCH /api/cms/<módulo>/:id/revision` | Admin | `{ "decision": "APROBAR" \| "RECHAZAR", "motivo": "..." }` (el rechazo exige motivo) |
+| `DELETE /api/cms/<módulo>/:id` | CM | Elimina. Si está publicado responde `202` y queda una solicitud para el Admin |
+
+`POST`, `PUT` y `PATCH` responden `{ message, data }`, con el registro en `data`. Especialidades y servicios comparten ruta: se distinguen con `esServicio` (en el cuerpo, o como parámetro de la URL al eliminar).
+
+Las rutas se arman en un solo lugar (`backend/src/routes/cms.routes.js`) a partir de la lista de `backend/src/services/cms/editorial.modulos.js`, y el frontend las usa con `src/api/editorial.api.js`. Para sumar un módulo se agrega una entrada a esa lista.
+
 ## Roles y flujo editorial
 
 Los roles salen del token de Keycloak (realm o cliente):

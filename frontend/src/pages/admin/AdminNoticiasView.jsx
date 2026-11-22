@@ -7,7 +7,7 @@ import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe
 import toast from 'react-hot-toast';
 
 import keycloak from '../../config/keycloak';
-import { getNoticias, evaluarNoticiaEstado } from '../../api/noticias.api';
+import { getNoticias, revisarNoticia } from '../../api/noticias.api';
 import avatarHospital from '../../assets/logoHospitalEvita.png';
 import DefaultNewsImage from '../../components/ui/DefaultNewsImage';
 import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
@@ -214,12 +214,9 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         await keycloak.updateToken(30).catch(() => { });
       }
 
-      const response = await evaluarNoticiaEstado(
-        selectedNews.id,
-        { estado: 'APROBADO' }
-      );
+      const response = await revisarNoticia(selectedNews.id, 'APROBAR');
 
-      const estadoFinal = (response?.noticia?.estado || 'APROBADO').toUpperCase();
+      const estadoFinal = (response?.data?.estado || 'APROBADO').toUpperCase();
 
       if (estadoFinal === 'BORRADOR') {
         const updatedList = noticias.filter((item) => item.id !== selectedNews.id);
@@ -248,8 +245,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
             requestedEstado: null,
             rejectionReason: null,
             fechaPublicacion:
-              response?.noticia?.fechaPublicacion ?? item.fechaPublicacion,
-            updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
+              response?.data?.fechaPublicacion ?? item.fechaPublicacion,
+            updatedAt: response?.data?.updatedAt || new Date().toISOString(),
           }
           : item
       );
@@ -297,13 +294,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       }
 
       const motivoLimpio = rejectReason.trim();
-      const response = await evaluarNoticiaEstado(
-        selectedNews.id,
-        {
-          estado: 'RECHAZADO',
-          rejectionReason: motivoLimpio,
-        }
-      );
+      const response = await revisarNoticia(selectedNews.id, 'RECHAZAR', motivoLimpio);
 
       const updatedList = noticias.map((item) =>
         item.id === selectedNews.id
@@ -312,7 +303,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
             estado: 'RECHAZADO',
             status: 'Rechazado',
             rejectionReason: motivoLimpio,
-            updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
+            updatedAt: response?.data?.updatedAt || new Date().toISOString(),
           }
           : item
       );

@@ -19,7 +19,7 @@ import toast from 'react-hot-toast';
 import keycloak from '../../config/keycloak';
 import {
   getEspecialidades,
-  evaluarEspecialidadEstado,
+  revisarEspecialidad,
 } from '../../api/especialidades.api.js';
 import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminEspecialidadesServiciosView.css';
@@ -178,10 +178,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       if (keycloak.authenticated) {
         await keycloak.updateToken(30).catch(() => {});
       }
-      await evaluarEspecialidadEstado(
-        selectedItem.id,
-        { estado: 'APROBADO', isServicio: selectedItem.esServicio }
-      );
+      await revisarEspecialidad(selectedItem.id, 'APROBAR', '', selectedItem.esServicio);
       const fueArchivado = selectedItem.requestedEstado === 'ARCHIVADO';
       toast.success(
         fueArchivado
@@ -214,14 +211,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       if (keycloak.authenticated) {
         await keycloak.updateToken(30).catch(() => {});
       }
-      await evaluarEspecialidadEstado(
-        selectedItem.id,
-        {
-          estado: 'RECHAZADO',
-          rejectionReason: rejectReason.trim(),
-          isServicio: selectedItem.esServicio,
-        }
-      );
+      await revisarEspecialidad(selectedItem.id, 'RECHAZAR', rejectReason.trim(), selectedItem.esServicio);
       toast.success(`"${selectedItem.name}" fue rechazado. Se notificó al Editor CMS.`);
       setFeedback(`"${selectedItem.name}" fue rechazado.`);
       closeDetails();

@@ -24,7 +24,7 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import { cambiarEstadoResidencia, getResidencias } from '../../api/residencias.api';
+import { revisarResidencia, getResidencias } from '../../api/residencias.api';
 import { sanitizeUrl } from '../../utils/sanitizeUrl';
 import {
   AdminCambiosPill,
@@ -296,7 +296,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
       const isUnpublishing = selectedResidencia?.requestedEstado === 'BORRADOR';
       const finalEstado = isArchiving ? 'ARCHIVADO' : isUnpublishing ? 'BORRADOR' : isScheduling ? 'PROGRAMADO' : 'PUBLICADO';
 
-      await cambiarEstadoResidencia(selectedResidencia.id, 'APROBADO');
+      await revisarResidencia(selectedResidencia.id, 'APROBAR');
 
       setResidencias((current) =>
         current.map((item) =>
@@ -346,7 +346,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
     setActionError('');
 
     try {
-      await cambiarEstadoResidencia(selectedResidencia.id, 'RECHAZADO', reason);
+      await revisarResidencia(selectedResidencia.id, 'RECHAZAR', reason);
 
       setResidencias((current) =>
         current.map((item) =>

@@ -1,15 +1,9 @@
-import api from "./axiosConfig.js";
+import { crearApiEditorial } from "./editorial.api.js";
 
-// Las llamadas a /cms/... llevan el token de Keycloak automáticamente (ver axiosConfig.js).
+const noticias = crearApiEditorial("noticias");
 
-export const getNoticias = async (isAdmin = false) =>
-  (await api.get(isAdmin ? "/cms/noticias" : "/portal/noticias")).data;
-
-export const createNoticia = async (formData) => (await api.post("/cms/noticias", formData)).data;
-
-export const updateNoticia = async (id, formData) => (await api.put(`/cms/noticias/${id}`, formData)).data;
-
-export const evaluarNoticiaEstado = async (id, payload) =>
-  (await api.patch(`/cms/noticias/${id}/estado`, payload)).data;
-
-export const deleteNoticia = async (id) => (await api.delete(`/cms/noticias/${id}`)).data;
+export const getNoticias = noticias.listar;
+export const createNoticia = noticias.crear;
+export const updateNoticia = noticias.actualizar;
+export const revisarNoticia = noticias.revisar;
+export const deleteNoticia = noticias.eliminar;

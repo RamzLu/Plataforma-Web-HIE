@@ -4,10 +4,6 @@ import {
   obtenerContenidosGraficos,
   actualizarEspacioGrafico,
 } from "../controllers/cms/cms.contenidoGrafico.controller.js";
-import { crearNoticia, obtenerNoticias, eliminarNoticia, actualizarNoticia, evaluarNoticia } from "../controllers/cms/cms.noticia.controller.js";
-import { obtenerDocumentos, crearDocumento, actualizarDocumento, eliminarDocumento, evaluarDocumento } from "../controllers/cms/cms.doc.controller.js";
-import { obtenerProfesionales, crearProfesional, eliminarProfesional, actualizarProfesional, evaluarProfesional } from "../controllers/cms/cms.profesional.controller.js";
-import * as especialidadCtrl from '../controllers/cms/cms.especialidad.controller.js';
 import { 
   obtenerInstitucional, 
   crearAutoridad, 
@@ -17,34 +13,13 @@ import {
   actualizarRedesSociales,
   actualizarSedeCentral
 } from "../controllers/cms/cms.institucional.controller.js";
-import {
-  obtenerResidencias,
-  crearResidencia,
-  actualizarResidencia,
-  eliminarResidencia,
-  cambiarEstadoResidencia
-} from "../controllers/cms/cms.residencia.controller.js";
-import {
-  obtenerCapacitaciones,
-  crearCapacitacion,
-  actualizarCapacitacion,
-  cambiarEstadoCapacitacion,
-  revisarCapacitacion,
-  eliminarCapacitacion
-} from "../controllers/cms/cms.capacitacion.controller.js";
-
-
+import { crearControladorEditorial } from "../controllers/cms/editorial.controller.js";
+import { MODULOS_EDITORIALES } from "../services/cms/editorial.modulos.js";
 import { obtenerSolicitudesEliminacion, resolverSolicitudEliminacion } from "../controllers/cms/cms.eliminaciones.controller.js";
 import { obtenerActividadReciente } from "../controllers/cms/cms.actividad.controller.js";
 import { requireCmsAccess, requireAdminAccess, requireCmsOrAdminAccess, vistaCmsAccess } from '../middlewares/auth.middleware.js';
 import { parsearIdBigInt } from '../utils/sanitize.utils.js';
-import {
-  uploadImagenSingle,
-  uploadImagenesArray,
-  uploadDocumentoSingle,
-  uploadResidenciaFiles,
-  uploadCapacitacionFiles,
-} from '../middlewares/upload.middleware.js'; 
+import { uploadImagenSingle, uploadImagenesArray } from '../middlewares/upload.middleware.js';
 
 // Panel CMS y Admin: todas las rutas requieren token. El portal público usa /api/portal (portal.routes.js).
 const router = Router();
@@ -59,22 +34,23 @@ router.param('id', (req, _res, next, id) => {
 });
 
 // ==========================================
-// MÓDULO: NOTICIAS
+// MÓDULOS CON FLUJO EDITORIAL (noticias, documentación, profesionales, especialidades, residencias, capacitaciones)
+// Todos exponen las mismas rutas. El CM pide (crear / editar con el campo "estado") y el Admin revisa:
+//   GET    /<módulo>                listado (?admin=true: vista interna)
+//   POST   /<módulo>                crear
+//   PUT    /<módulo>/:id            editar o pedir un cambio de estado (publicar, archivar...)
+//   PATCH  /<módulo>/:id/revision   Admin: { decision: "APROBAR" | "RECHAZAR", motivo }
+//   DELETE /<módulo>/:id            eliminar (si está publicado queda una solicitud para el Admin)
 // ==========================================
-router.get('/noticias', vistaCmsAccess, obtenerNoticias);
-router.post('/noticias', requireCmsAccess, uploadImagenesArray('imagenes', 10), crearNoticia);
-router.put('/noticias/:id', requireCmsAccess, uploadImagenesArray('imagenes', 10), actualizarNoticia);
-router.patch('/noticias/:id/estado', requireAdminAccess, evaluarNoticia);
-router.delete('/noticias/:id', requireCmsAccess, eliminarNoticia);
-
-// ==========================================
-// MÓDULO: DOCUMENTACIÓN
-// ==========================================
-router.get('/documentacion', vistaCmsAccess, obtenerDocumentos);
-router.post('/documentacion', requireCmsAccess, uploadDocumentoSingle('archivo'), crearDocumento);
-router.put('/documentacion/:id', requireCmsAccess, uploadDocumentoSingle('archivo'), actualizarDocumento);
-router.patch('/documentacion/:id/estado', requireAdminAccess, evaluarDocumento);
-router.delete('/documentacion/:id', requireCmsAccess, eliminarDocumento);
+for (const modulo of MODULOS_EDITORIALES) {
+  const controlador = crearControladorEditorial(modulo);
+  const archivos = modulo.archivos ? [modulo.archivos] : [];
+  router.get(`/${modulo.ruta}`, vistaCmsAccess, controlador.listar);
+  router.post(`/${modulo.ruta}`, requireCmsAccess, ...archivos, controlador.crear);
+  router.put(`/${modulo.ruta}/:id`, requireCmsAccess, ...archivos, controlador.actualizar);
+  router.patch(`/${modulo.ruta}/:id/revision`, requireAdminAccess, controlador.revisar);
+  router.delete(`/${modulo.ruta}/:id`, requireCmsAccess, controlador.eliminar);
+}
 
 // ==========================================
 // MÓDULO: CONTENIDO GRÁFICO
@@ -88,24 +64,6 @@ router.put(
 );
 
 // ==========================================
-// MÓDULO: PROFESIONALES
-// ==========================================
-router.get("/profesionales", vistaCmsAccess, obtenerProfesionales);
-router.post("/profesionales", requireCmsAccess, uploadImagenSingle("archivo"), crearProfesional);
-router.put("/profesionales/:id", requireCmsAccess, uploadImagenSingle("archivo"), actualizarProfesional);
-router.patch("/profesionales/:id/estado", requireAdminAccess, evaluarProfesional);
-router.delete("/profesionales/:id", requireCmsAccess, eliminarProfesional);
-
-// ==========================================
-// MÓDULO: ESPECIALIDADES
-// ==========================================
-router.get('/especialidades', vistaCmsAccess, especialidadCtrl.obtenerEspecialidades);
-router.post('/especialidades', requireCmsAccess, especialidadCtrl.crearEspecialidad);
-router.put('/especialidades/:id', requireCmsAccess, especialidadCtrl.actualizarEspecialidad);
-router.patch('/especialidades/:id/estado', requireAdminAccess, especialidadCtrl.evaluarEspecialidad);
-router.delete('/especialidades/:id', requireCmsAccess, especialidadCtrl.eliminarEspecialidad);
-
-// ==========================================
 // MÓDULO: INSTITUCIONAL (AUTORIDADES, REDES Y SEDE)
 // ==========================================
 router.get('/institucional', vistaCmsAccess, obtenerInstitucional);
@@ -115,25 +73,6 @@ router.post('/institucional/autoridades', requireCmsAccess, uploadImagenSingle('
 router.put('/institucional/autoridades/:id', requireCmsAccess, uploadImagenSingle('archivo'), actualizarAutoridad);
 router.delete('/institucional/autoridades/:id', requireCmsAccess, eliminarAutoridad);
 router.put('/institucional/redes', requireCmsAccess, actualizarRedesSociales);
-
-// ==========================================
-// MÓDULO: RESIDENCIAS
-// ==========================================
-router.get('/residencias', vistaCmsAccess, obtenerResidencias);
-router.post('/residencias', requireCmsAccess, uploadResidenciaFiles, crearResidencia);
-router.put('/residencias/:id', requireCmsAccess, uploadResidenciaFiles, actualizarResidencia);
-router.patch('/residencias/:id/estado', requireCmsOrAdminAccess, cambiarEstadoResidencia);
-router.delete('/residencias/:id', requireCmsAccess, eliminarResidencia);
-
-// ==========================================
-// MÓDULO: CAPACITACIONES
-// ==========================================
-router.get('/capacitaciones', vistaCmsAccess, obtenerCapacitaciones);
-router.post('/capacitaciones', requireCmsAccess, uploadCapacitacionFiles, crearCapacitacion);
-router.put('/capacitaciones/:id', requireCmsAccess, uploadCapacitacionFiles, actualizarCapacitacion);
-router.patch('/capacitaciones/:id/estado', requireCmsOrAdminAccess, cambiarEstadoCapacitacion);
-router.patch('/capacitaciones/:id/revision', requireCmsOrAdminAccess, revisarCapacitacion);
-router.delete('/capacitaciones/:id', requireCmsAccess, eliminarCapacitacion);
 
 // ==========================================
 // SOLICITUDES DE ELIMINACIÓN (contenido publicado que el CM pidió borrar)

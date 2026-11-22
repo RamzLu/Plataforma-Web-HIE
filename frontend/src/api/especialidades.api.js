@@ -1,16 +1,11 @@
-import api from "./axiosConfig.js";
+import { crearApiEditorial } from "./editorial.api.js";
 
-// Las llamadas a /cms/... llevan el token de Keycloak automáticamente (ver axiosConfig.js).
+// Especialidades y servicios comparten ruta: "esServicio" dice a cuál se refiere (en el cuerpo, o en la URL al eliminar).
+const especialidades = crearApiEditorial("especialidades");
 
-export const getEspecialidades = async (isAdmin = false) =>
-  (await api.get(isAdmin ? "/cms/especialidades" : "/portal/especialidades")).data;
-
-export const createEspecialidad = async (data) => (await api.post("/cms/especialidades", data)).data;
-
-export const updateEspecialidad = async (id, data) => (await api.put(`/cms/especialidades/${id}`, data)).data;
-
-export const evaluarEspecialidadEstado = async (id, payload) =>
-  (await api.patch(`/cms/especialidades/${id}/estado`, payload)).data;
-
-export const deleteEspecialidad = async (id, isServicio) =>
-  (await api.delete(`/cms/especialidades/${id}`, { params: { isServicio } })).data;
+export const getEspecialidades = especialidades.listar;
+export const createEspecialidad = especialidades.crear;
+export const updateEspecialidad = especialidades.actualizar;
+export const revisarEspecialidad = (id, decision, motivo = "", esServicio = false) =>
+  especialidades.revisar(id, decision, motivo, { esServicio });
+export const deleteEspecialidad = (id, esServicio = false) => especialidades.eliminar(id, { esServicio });

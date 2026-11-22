@@ -378,23 +378,23 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       if (editingId) {
         const resp = await updateCapacitacion(editingId, dataToSend);
         toast.success(
-          resp?.capacitacion?.estado === "PENDIENTE_APROBACION"
+          resp?.data?.estado === "PENDIENTE_APROBACION"
             ? resp.message
             : estadoFinal === "BORRADOR"
             ? "Borrador actualizado con éxito."
             : "Capacitación actualizada con éxito."
         );
-        if (resp?.capacitacion?.estado === "PENDIENTE_APROBACION") setActiveTab("PENDIENTES");
+        if (resp?.data?.estado === "PENDIENTE_APROBACION") setActiveTab("PENDIENTES");
       } else {
         const resp = await createCapacitacion(dataToSend);
         toast.success(
-          resp?.capacitacion?.estado === "PENDIENTE_APROBACION"
+          resp?.data?.estado === "PENDIENTE_APROBACION"
             ? resp.message
             : estadoFinal === "BORRADOR"
             ? "Borrador guardado con éxito."
             : "Capacitación creada con éxito."
         );
-        if (resp?.capacitacion?.estado === "PENDIENTE_APROBACION") setActiveTab("PENDIENTES");
+        if (resp?.data?.estado === "PENDIENTE_APROBACION") setActiveTab("PENDIENTES");
       }
 
       await cargarCapacitaciones();

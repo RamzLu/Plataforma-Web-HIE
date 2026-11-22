@@ -304,7 +304,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
         ? await updateProfesional(editingId, dataForm)
         : await createProfesional(dataForm);
       
-      const profGuardado = resultado?.profesional;
+      const profGuardado = resultado?.data;
       const estadoResultante = (profGuardado?.estado || "PENDIENTE_APROBACION").toUpperCase();
 
       if (estadoResultante === "PENDIENTE_APROBACION") {

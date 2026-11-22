@@ -20,7 +20,7 @@ import toast from 'react-hot-toast';
 import keycloak from '../../config/keycloak';
 import {
   getProfesionales,
-  evaluarProfesionalEstado,
+  revisarProfesional,
 } from '../../api/profesionales.api.js';
 import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminProfesionalesView.css';
@@ -202,10 +202,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
       if (keycloak.authenticated) {
         await keycloak.updateToken(30).catch(() => {});
       }
-      await evaluarProfesionalEstado(
-        selectedProfessional.id,
-        { estado: 'APROBADO' }
-      );
+      await revisarProfesional(selectedProfessional.id, 'APROBAR');
       toast.success(`"${selectedProfessional.nombre}" fue aprobado y publicado.`);
       setFeedback(`"${selectedProfessional.nombre}" fue aprobado y publicado con éxito.`);
       closeDetails();
@@ -229,13 +226,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
       if (keycloak.authenticated) {
         await keycloak.updateToken(30).catch(() => {});
       }
-      await evaluarProfesionalEstado(
-        selectedProfessional.id,
-        {
-          estado: 'RECHAZADO',
-          rejectionReason: rejectReason.trim(),
-        }
-      );
+      await revisarProfesional(selectedProfessional.id, 'RECHAZAR', rejectReason.trim());
       toast.success(`"${selectedProfessional.nombre}" fue rechazado. Se notificó al Editor CMS.`);
       setFeedback(`Se registró el rechazo de "${selectedProfessional.nombre}" con su motivo.`);
       closeDetails();

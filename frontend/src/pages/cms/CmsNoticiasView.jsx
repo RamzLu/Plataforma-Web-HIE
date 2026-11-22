@@ -400,7 +400,7 @@ const CmsNoticiasView = ({
       let data;
       if (editingId) {
         data = await updateNoticia(editingId, formData);
-        const estadoDevuelto = (data.noticia?.estado || "").toUpperCase();
+        const estadoDevuelto = (data.data?.estado || "").toUpperCase();
         if (estadoSolicitado === "BORRADOR" && estadoDevuelto === "PENDIENTE_APROBACION") {
           toast.success(
             "Solicitud para pasar la noticia a Borrador enviada al administrador para su aprobación."
@@ -420,7 +420,7 @@ const CmsNoticiasView = ({
         }
       } else {
         data = await createNoticia(formData);
-        const estadoDevuelto = (data.noticia?.estado || "").toUpperCase();
+        const estadoDevuelto = (data.data?.estado || "").toUpperCase();
         toast.success(
           estadoDevuelto === "BORRADOR"
             ? "Borrador guardado con éxito."
@@ -428,7 +428,7 @@ const CmsNoticiasView = ({
         );
       }
 
-const estadoGuardado = data.noticia?.estado || "PENDIENTE_APROBACION";
+const estadoGuardado = data.data?.estado || "PENDIENTE_APROBACION";
 
       const catSlugMap = {
         "cáncer de mama": "cancer-mama",
@@ -451,28 +451,28 @@ const estadoGuardado = data.noticia?.estado || "PENDIENTE_APROBACION";
         editor: editorResponsable,
         estado: estadoFinal,
         timestamp: Date.now(),
-        newsId: String(data.noticia?.id || editingId),
+        newsId: String(data.data?.id || editingId),
       });
 
       const noticiaFormateada = {
-        id: data.noticia?.id || editingId,
+        id: data.data?.id || editingId,
         title: titulo,
         body: [textoContenido],
-date: data.noticia?.createdAt
-          ? new Date(data.noticia.createdAt).toLocaleDateString("es-AR")
+date: data.data?.createdAt
+          ? new Date(data.data.createdAt).toLocaleDateString("es-AR")
           : new Date().toLocaleDateString("es-AR"),
-        createdAt: data.noticia?.createdAt || prevNoticia?.createdAt || new Date().toISOString(),
-        updatedAt: data.noticia?.updatedAt || new Date().toISOString(),
+        createdAt: data.data?.createdAt || prevNoticia?.createdAt || new Date().toISOString(),
+        updatedAt: data.data?.updatedAt || new Date().toISOString(),
         category: categoria || "General",
         estado: estadoGuardado,
-        requestedEstado: data.noticia?.requestedEstado || null,
-        previousEstado: data.noticia?.previousEstado || null,
+        requestedEstado: data.data?.requestedEstado || null,
+        previousEstado: data.data?.previousEstado || null,
         isDraft: estadoGuardado === "BORRADOR",
-        images: data.noticia?.images || imagenesUrls || [],
-editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
-        editedBy: editingId ? (data.noticia?.editedBy || editorResponsable) : null,
-        fechaPublicacion: data.noticia?.fechaPublicacion || null,
-        rejectionReason: data.noticia?.rejectionReason || null,
+        images: data.data?.images || imagenesUrls || [],
+editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
+        editedBy: editingId ? (data.data?.editedBy || editorResponsable) : null,
+        fechaPublicacion: data.data?.fechaPublicacion || null,
+        rejectionReason: data.data?.rejectionReason || null,
         actionTitle: accionTitulo,
       };
 

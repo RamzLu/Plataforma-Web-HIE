@@ -1,21 +1,9 @@
-import api from "./axiosConfig.js";
+import { crearApiEditorial } from "./editorial.api.js";
 
-// Las llamadas a /cms/... llevan el token de Keycloak automáticamente (ver axiosConfig.js).
+const residencias = crearApiEditorial("residencias");
 
-export const getResidencias = async (isAdmin = false) =>
-  (await api.get(isAdmin ? "/cms/residencias" : "/portal/residencias")).data;
-
-export const createResidencia = async (formData) => (await api.post("/cms/residencias", formData)).data;
-
-export const updateResidencia = async (id, formData) => (await api.put(`/cms/residencias/${id}`, formData)).data;
-
-export const deleteResidencia = async (id) => (await api.delete(`/cms/residencias/${id}`)).data;
-
-export const cambiarEstadoResidencia = async (id, estado, rejectionReason = "") =>
-  (
-    await api.patch(`/cms/residencias/${id}/estado`, {
-      estado,
-      rejectionReason,
-      motivoRechazo: rejectionReason,
-    })
-  ).data;
+export const getResidencias = residencias.listar;
+export const createResidencia = residencias.crear;
+export const updateResidencia = residencias.actualizar;
+export const revisarResidencia = residencias.revisar;
+export const deleteResidencia = residencias.eliminar;

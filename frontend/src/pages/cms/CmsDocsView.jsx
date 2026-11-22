@@ -283,7 +283,7 @@ const CmsDocsView = ({
         data = await createDocumento(formData);
       }
 
-      const docBackend = data.documento;
+      const docBackend = data.data;
       const docFormateado = {
         id: docBackend?.id || editingId,
         title: titulo,

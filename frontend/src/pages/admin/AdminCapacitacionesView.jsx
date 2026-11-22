@@ -287,13 +287,13 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
         return;
       }
 
-      const result = await revisarCapacitacion(selectedTraining.id, pendingAction, reason);
-      if (!result?.capacitacion) {
+      const result = await revisarCapacitacion(selectedTraining.id, pendingAction === 'APROBADO' ? 'APROBAR' : 'RECHAZAR', reason);
+      if (!result?.data) {
         throw new Error('El servidor no devolvió la capacitación actualizada.');
       }
       setCapacitaciones((current) =>
         current.map((training) =>
-          training.id === result.capacitacion.id ? result.capacitacion : training,
+          training.id === result.data.id ? result.data : training,
         ),
       );
       setFeedback(
@@ -301,7 +301,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
           ? `“${selectedTraining.titulo}” fue archivada con éxito.`
           : isUnpublishing && pendingAction === 'APROBADO'
           ? `“${selectedTraining.titulo}” se retiró del portal y quedó como borrador.`
-          : `“${selectedTraining.titulo}” quedó ${STATUS_LABELS[result.capacitacion.estado]?.toLocaleLowerCase('es') || result.capacitacion.estado}.`
+          : `“${selectedTraining.titulo}” quedó ${STATUS_LABELS[result.data.estado]?.toLocaleLowerCase('es') || result.data.estado}.`
       );
       closeDetails();
     } catch (saveError) {

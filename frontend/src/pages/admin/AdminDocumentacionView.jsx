@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import keycloak from '../../config/keycloak';
-import { getDocumentos, evaluarDocumentoEstado } from '../../api/documentos.api.js';
+import { getDocumentos, revisarDocumento } from '../../api/documentos.api.js';
 import { sanitizeUrl } from '../../utils/sanitizeUrl.js';
 import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminDocumentacionView.css';
@@ -228,10 +228,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         await keycloak.updateToken(30).catch(() => {});
       }
 
-      await evaluarDocumentoEstado(
-        selectedDocument.id,
-        { estado: 'APROBADO' }
-      );
+      await revisarDocumento(selectedDocument.id, 'APROBAR');
 
       toast.success(`“${selectedDocument.title}” fue aprobado y publicado.`);
       setFeedback(`“${selectedDocument.title}” fue aprobado y ya está visible en el portal.`);
@@ -259,10 +256,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         await keycloak.updateToken(30).catch(() => {});
       }
 
-      await evaluarDocumentoEstado(
-        selectedDocument.id,
-        { estado: 'RECHAZADO', rejectionReason: reason }
-      );
+      await revisarDocumento(selectedDocument.id, 'RECHAZAR', reason);
 
       toast.success(`“${selectedDocument.title}” fue rechazado.`);
       setFeedback(`“${selectedDocument.title}” fue rechazado y se enviaron las correcciones al CMS.`);

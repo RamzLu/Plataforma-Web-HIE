@@ -727,24 +727,13 @@ class CmsResidenciaService {
     };
   }
 
-  async cambiarEstado(id, nuevoEstado, user = null, rejectionReason = null, { esAdmin = false } = {}) {
-    if (!nuevoEstado) {
-      const error = new Error("El nuevo estado es obligatorio.");
-      error.statusCode = 400;
-      throw error;
-    }
-
-    const estadoUpper = nuevoEstado.trim().toUpperCase();
-    const estadosValidos = ["PUBLICADO", "BORRADOR", "ARCHIVADO", "APROBADO", "RECHAZADO", "PENDIENTE_APROBACION", "PROGRAMADO"];
-
-    if (!estadosValidos.includes(estadoUpper)) {
-      const error = new Error(
-        `Estado no válido: '${nuevoEstado}'. Los estados permitidos son: ${estadosValidos.join(", ")}.`
-      );
-      error.statusCode = 400;
-      throw error;
-    }
-
+  /**
+   * Revisión del administrador (PATCH /residencias/:id/revision).
+   * Regla común (utils/flujoEditorial.utils.js): solo lo pendiente; aprobar aplica lo pedido (publicar,
+   * programar, despublicar o archivar); rechazar exige motivo y conserva la versión publicada si la había.
+   * @param decision "APROBAR" | "RECHAZAR"
+   */
+  async revisar(id, { decision, motivo = null } = {}, user = null) {
     const idBigInt = parsearIdBigInt(id, "ID de residencia");
     const idStr = id.toString();
 
@@ -759,17 +748,7 @@ class CmsResidenciaService {
       throw error;
     }
 
-    const estadoAnterior = (residenciaExistente.estado || "").toUpperCase();
-
-    const pendingMap = await this.obtenerMapaPendingMeta();
-    const metaExistente = pendingMap.get(idStr) || null;
-
-    // Solo el administrador aprueba o rechaza.
-    if (!esAdmin && (estadoUpper === "APROBADO" || estadoUpper === "RECHAZADO")) {
-      const error = new Error("Solo el administrador puede aprobar o rechazar.");
-      error.statusCode = 403;
-      throw error;
-    }
+    const metaExistente = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
 
     let contenidoParsed = {};
     if (residenciaExistente.contenido) {
@@ -780,92 +759,37 @@ class CmsResidenciaService {
       }
     }
 
-    let finalEstado;
-    let motivoGuardado = null;
-    let finalActivo = residenciaExistente.activo;
-    let sinCambios = false;
-    // El CM pidió publicar o programar: sirve para elegir el mensaje.
-    const pidePublicar = !esAdmin && ["PUBLICADO", "PROGRAMADO", "PENDIENTE_APROBACION"].includes(estadoUpper);
+    const revision = resolverRevision({
+      estadoActual: residenciaExistente.estado,
+      meta: metaExistente,
+      decision: decisionDesdeEstado(decision),
+      motivo,
+      fechaProgramada: metaExistente?.targetEstado === "PROGRAMADO" ? contenidoParsed.fechaPublicacion || null : null,
+    });
+    const finalEstado = revision.estado;
+    const motivoGuardado = revision.motivo;
+    const finalActivo = revision.activo !== undefined ? revision.activo : residenciaExistente.activo;
 
-    // El Admin puede dejar directamente en borrador o archivar; el resto de lo suyo es decidir una solicitud.
-    const adminDirecto = esAdmin && ["BORRADOR", "ARCHIVADO"].includes(estadoUpper);
-
-    if (adminDirecto) {
-      finalEstado = estadoUpper;
-      if (estadoUpper === "ARCHIVADO") finalActivo = false;
+    if (finalEstado === "RECHAZADO") {
+      await this.guardarMotivoRechazo(idStr, motivoGuardado);
+      // Si era una edición de algo ya publicado se conservan los metadatos (y la versión pública anterior).
+      if (revision.meta === null) await this.limpiarPendingMeta(idStr);
+    } else {
+      if (metaExistente?.editor && metaExistente.editor !== "Editor CMS") {
+        await this.guardarEditorMeta(idStr, {
+          editor: metaExistente.editor,
+          updatedAt: metaExistente.updatedAt || new Date().toISOString(),
+        });
+      }
+      // Aprobada la edición, los archivos de la versión pública anterior que ya no se usan se borran.
+      if (metaExistente?.snapshotPublico) {
+        await eliminarArchivosReemplazados({
+          anteriores: archivosDeResidencia(metaExistente.snapshotPublico),
+          vigentes: archivosDeResidencia(residenciaExistente),
+        });
+      }
       await this.limpiarPendingMeta(idStr);
       await this.limpiarMotivoRechazo(idStr);
-    } else if (esAdmin) {
-      // Regla común (utils/flujoEditorial.utils.js): solo lo pendiente; aprobar aplica lo pedido
-      // (publicar, programar, despublicar o archivar); rechazar exige motivo y conserva la versión publicada.
-      const revision = resolverRevision({
-        estadoActual: estadoAnterior,
-        meta: metaExistente,
-        decision: decisionDesdeEstado(estadoUpper),
-        motivo: rejectionReason,
-        fechaProgramada:
-          metaExistente?.targetEstado === "PROGRAMADO" || estadoUpper === "PROGRAMADO"
-            ? contenidoParsed.fechaPublicacion || null
-            : null,
-      });
-      finalEstado = revision.estado;
-      motivoGuardado = revision.motivo;
-      if (revision.activo !== undefined) finalActivo = revision.activo;
-
-      if (finalEstado === "RECHAZADO") {
-        await this.guardarMotivoRechazo(idStr, motivoGuardado);
-        // Si era una edición de algo ya publicado se conservan los metadatos (y la versión pública anterior).
-        if (revision.meta === null) await this.limpiarPendingMeta(idStr);
-      } else {
-        if (metaExistente?.editor && metaExistente.editor !== "Editor CMS") {
-          await this.guardarEditorMeta(idStr, {
-            editor: metaExistente.editor,
-            updatedAt: metaExistente.updatedAt || new Date().toISOString(),
-          });
-        }
-        // Aprobada la edición, los archivos de la versión pública anterior que ya no se usan se borran.
-        if (metaExistente?.snapshotPublico) {
-          await eliminarArchivosReemplazados({
-            anteriores: archivosDeResidencia(metaExistente.snapshotPublico),
-            vigentes: archivosDeResidencia(residenciaExistente),
-          });
-        }
-        await this.limpiarPendingMeta(idStr);
-        await this.limpiarMotivoRechazo(idStr);
-      }
-    } else {
-      // El CM pide: lo que es o fue público pasa por el administrador (incluido despublicarlo o archivarlo).
-      const solicitud = resolverSolicitud({
-        estadoActual: estadoAnterior,
-        meta: metaExistente,
-        intencion: intencionDesdeEstado(estadoUpper, { tieneFecha: Boolean(contenidoParsed.fechaPublicacion) }),
-        snapshotActual: () => ({
-          nombre: residenciaExistente.nombre,
-          descripcion: residenciaExistente.descripcion,
-          contenido: residenciaExistente.contenido,
-          imagenId: residenciaExistente.imagenId,
-          convocatoria: residenciaExistente.convocatoria,
-          fechaConvocatoria: residenciaExistente.fechaConvocatoria,
-          archivo: residenciaExistente.archivo,
-        }),
-        hayCambios: false,
-      });
-      finalEstado = solicitud.estado;
-      sinCambios = solicitud.sinCambios;
-      if (finalEstado === "ARCHIVADO") finalActivo = false;
-
-      if (!sinCambios) {
-        if (solicitud.meta) {
-          await this.guardarPendingMeta(idStr, {
-            ...solicitud.meta,
-            editor: await this._resolverNombreEditor(user, null),
-            updatedAt: new Date().toISOString(),
-          });
-        } else {
-          await this.limpiarPendingMeta(idStr);
-        }
-        if (solicitud.limpiarMotivo) await this.limpiarMotivoRechazo(idStr);
-      }
     }
 
     const residenciaActualizada = await prisma.residencia.update({
@@ -888,14 +812,7 @@ class CmsResidenciaService {
             usuarioId: usuarioLocal.id,
             entidad: "residencia",
             entidadId: idStr,
-            accion:
-              finalEstado === "RECHAZADO"
-                ? "RECHAZAR"
-                : finalEstado === "ARCHIVADO"
-                ? "ARCHIVAR"
-                : finalEstado === "PENDIENTE_APROBACION"
-                ? "SOLICITAR_REVISION"
-                : "APROBAR",
+            accion: finalEstado === "RECHAZADO" ? "RECHAZAR" : finalEstado === "ARCHIVADO" ? "ARCHIVAR" : "APROBAR",
             descripcion:
               finalEstado === "RECHAZADO"
                 ? `Residencia "${residenciaExistente.nombre}" rechazada. Motivo: ${motivoGuardado}`
@@ -910,20 +827,8 @@ class CmsResidenciaService {
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
 
-    const targetPedido = pendingMetaActual?.targetEstado;
-    let mensaje = `Estado actualizado a ${finalEstado} con éxito.`;
-    if (finalEstado === "PENDIENTE_APROBACION" && targetPedido === "ARCHIVADO") {
-      mensaje = "Solicitud de archivado enviada a revisión del administrador.";
-    } else if (finalEstado === "PENDIENTE_APROBACION" && targetPedido === "BORRADOR") {
-      mensaje = "Solicitud para retirar la residencia del portal enviada a revisión del administrador.";
-    } else if (pidePublicar && finalEstado === "PENDIENTE_APROBACION") {
-      mensaje = "Residencia enviada a revisión del administrador para su publicación.";
-    } else if (pidePublicar && sinCambios) {
-      mensaje = "La residencia ya está publicada.";
-    }
-
     return {
-      message: mensaje,
+      message: finalEstado === "RECHAZADO" ? "Residencia rechazada." : `Estado actualizado a ${finalEstado} con éxito.`,
       residencia: this._formatResidencia(residenciaActualizada, motivoActual, pendingMetaActual),
     };
   }

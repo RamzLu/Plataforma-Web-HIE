@@ -1,11 +1,7 @@
 import { Router } from 'express';
 
-import { obtenerNoticias } from '../controllers/cms/cms.noticia.controller.js';
-import { obtenerDocumentos } from '../controllers/cms/cms.doc.controller.js';
-import { obtenerProfesionales } from '../controllers/cms/cms.profesional.controller.js';
-import { obtenerEspecialidades } from '../controllers/cms/cms.especialidad.controller.js';
-import { obtenerResidencias } from '../controllers/cms/cms.residencia.controller.js';
-import { obtenerCapacitacionesPublicas } from '../controllers/cms/cms.capacitacion.controller.js';
+import { crearControladorEditorial } from '../controllers/cms/editorial.controller.js';
+import { MODULOS_EDITORIALES } from '../services/cms/editorial.modulos.js';
 import { obtenerInstitucional } from '../controllers/cms/cms.institucional.controller.js';
 import { obtenerEspacioPublico } from '../controllers/cms/cms.contenidoGrafico.controller.js';
 
@@ -18,12 +14,10 @@ router.use((req, _res, next) => {
   next();
 });
 
-router.get('/noticias', obtenerNoticias);
-router.get('/documentacion', obtenerDocumentos);
-router.get('/profesionales', obtenerProfesionales);
-router.get('/especialidades', obtenerEspecialidades);
-router.get('/residencias', obtenerResidencias);
-router.get('/capacitaciones', obtenerCapacitacionesPublicas);
+// Mismos módulos que el CMS, solo el listado (con req.adminView = false devuelven solo lo publicado).
+for (const modulo of MODULOS_EDITORIALES) {
+  router.get(`/${modulo.ruta}`, crearControladorEditorial(modulo).listar);
+}
 router.get('/institucional', obtenerInstitucional);
 router.get('/contenido-grafico/:espacioKey', obtenerEspacioPublico);
 

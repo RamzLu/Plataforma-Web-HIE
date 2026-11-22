@@ -410,7 +410,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         resp = await createResidencia(dataForm);
       }
 
-      const resObj = resp?.residencia || resp;
+      const resObj = resp?.data || resp;
       const estadoResultante = (resObj?.estado || estadoFinal).toUpperCase();
 
       if (estadoResultante === "PENDIENTE_APROBACION") {
