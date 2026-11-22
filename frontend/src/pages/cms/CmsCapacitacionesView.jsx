@@ -488,7 +488,24 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   });
 
   return (
-    <div className="cms-dashboard-card">
+    <>
+      <div style={{ marginBottom: "18px" }}>
+        <FiltrosEstado
+                  activa={activeTab}
+                  onCambiar={setActiveTab}
+                  todos
+                  onActualizar={cargarCapacitaciones}
+                  opciones={[
+                    { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
+                    { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
+                    { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
+                    { clave: "BORRADORES", tipo: "borrador", cuenta: cuentas.BORRADORES },
+                    { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
+                  ]}
+                />
+      </div>
+
+      <div className="cms-dashboard-card">
       {/* Cabecera idéntica a Noticias, Profesionales y Residencias */}
       <div className="news-view-header">
         <div>
@@ -501,24 +518,10 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
         </div>
       </div>
 
-      <div style={{ marginBottom: "14px" }}>
-        <FiltrosEstado
-          activa={activeTab}
-          onCambiar={setActiveTab}
-          crear={{ texto: "+ AÑADIR CAPACITACIÓN", onClick: handleOpenCreate }}
-          todos
-          onActualizar={cargarCapacitaciones}
-          opciones={[
-            { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
-            { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
-            { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
-            { clave: "BORRADORES", tipo: "borrador", cuenta: cuentas.BORRADORES },
-            { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
-          ]}
-        />
-      </div>
+      
 
       <BarraFiltros
+        crear={{ texto: "+ AÑADIR CAPACITACIÓN", onClick: handleOpenCreate }}
         busqueda={{ etiqueta: "Buscar capacitación", placeholder: "Buscar por título o contenido...", valor: searchTerm, onCambio: setSearchTerm }}
         select={{
           etiqueta: "Modalidad",
@@ -1291,7 +1294,8 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
         itemType="la capacitación"
         requiereAprobacion={requiereAprobacionParaEliminar(itemAEliminar)}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

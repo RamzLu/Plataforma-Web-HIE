@@ -400,7 +400,24 @@ const CmsDocsView = ({
   }, [docsList, activeTab, searchTerm, filtroCategoria]);
 
   return (
-    <div className="cms-dashboard-card">
+    <>
+      <div style={{ marginBottom: "18px" }}>
+        <FiltrosEstado
+                  activa={activeTab}
+                  onCambiar={setActiveTab}
+                  todos
+                  onActualizar={onRefreshDocs}
+                  actualizando={loading}
+                  opciones={[
+                    { clave: "PENDIENTES", tipo: "pendiente", cuenta: counts.PENDIENTES },
+                    { clave: "PUBLICADOS", tipo: "publicado", cuenta: counts.PUBLICADOS },
+                    { clave: "RECHAZADOS", tipo: "rechazado", cuenta: counts.RECHAZADOS },
+                    { clave: "BORRADORES", tipo: "borrador", cuenta: counts.BORRADORES },
+                  ]}
+                />
+      </div>
+
+      <div className="cms-dashboard-card">
       <div className="docs-view-header">
         <div>
           <h3 className="cms-card-title docs-view-title">Documentación institucional</h3>
@@ -408,24 +425,10 @@ const CmsDocsView = ({
         </div>
       </div>
 
-      <div style={{ margin: "16px 0 14px" }}>
-        <FiltrosEstado
-          activa={activeTab}
-          onCambiar={setActiveTab}
-          crear={{ texto: "+ AÑADIR DOCUMENTO", onClick: handleOpenCreate }}
-          todos
-          onActualizar={onRefreshDocs}
-          actualizando={loading}
-          opciones={[
-            { clave: "PENDIENTES", tipo: "pendiente", cuenta: counts.PENDIENTES },
-            { clave: "PUBLICADOS", tipo: "publicado", cuenta: counts.PUBLICADOS },
-            { clave: "RECHAZADOS", tipo: "rechazado", cuenta: counts.RECHAZADOS },
-            { clave: "BORRADORES", tipo: "borrador", cuenta: counts.BORRADORES },
-          ]}
-        />
-      </div>
+      
 
       <BarraFiltros
+        crear={{ texto: "+ AÑADIR DOCUMENTO", onClick: handleOpenCreate }}
         busqueda={{ etiqueta: "Buscar documento", placeholder: "Buscar por título, archivo o categoría...", valor: searchTerm, onCambio: setSearchTerm }}
         select={{
           etiqueta: "Categoría",
@@ -806,7 +809,8 @@ const CmsDocsView = ({
         itemType="este documento"
         loading={saving}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

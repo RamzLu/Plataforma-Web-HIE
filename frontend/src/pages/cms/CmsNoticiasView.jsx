@@ -533,7 +533,25 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
   );
 
   return (
-    <div className="cms-dashboard-card">
+    <>
+      <div style={{ marginBottom: "18px" }}>
+        <FiltrosEstado
+                    activa={viewTab}
+                    onCambiar={setViewTab}
+                    todos
+                    onActualizar={onRefresh}
+                    actualizando={loading}
+                    opciones={[
+                      { clave: "PENDIENTE_APROBACION", tipo: "pendiente", cuenta: cuentas.PENDIENTE_APROBACION },
+                      { clave: "PUBLICADO", tipo: "publicado", cuenta: cuentas.PUBLICADO },
+                      { clave: "PROGRAMADO", tipo: "programado", cuenta: cuentas.PROGRAMADO },
+                      { clave: "RECHAZADO", tipo: "rechazado", cuenta: cuentas.RECHAZADO },
+                      { clave: "BORRADOR", tipo: "borrador", cuenta: cuentas.BORRADOR },
+                    ]}
+                  />
+      </div>
+
+      <div className="cms-dashboard-card">
       <div className="news-view-header">
         <div>
           <h3 className="cms-card-title news-view-title">Listado de las noticias</h3>
@@ -543,35 +561,8 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
         </div>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-          flexWrap: "wrap",
-          gap: 0,
-        }}
-      >
-        <div style={{ width: "100%", marginBottom: "14px" }}>
-          <FiltrosEstado
-            activa={viewTab}
-            onCambiar={setViewTab}
-            crear={{ texto: "+ AÑADIR NOTICIA", onClick: handleOpenCreate }}
-            todos
-            onActualizar={onRefresh}
-            actualizando={loading}
-            opciones={[
-              { clave: "PENDIENTE_APROBACION", tipo: "pendiente", cuenta: cuentas.PENDIENTE_APROBACION },
-              { clave: "PUBLICADO", tipo: "publicado", cuenta: cuentas.PUBLICADO },
-              { clave: "PROGRAMADO", tipo: "programado", cuenta: cuentas.PROGRAMADO },
-              { clave: "RECHAZADO", tipo: "rechazado", cuenta: cuentas.RECHAZADO },
-              { clave: "BORRADOR", tipo: "borrador", cuenta: cuentas.BORRADOR },
-            ]}
-          />
-        </div>
-
-        <BarraFiltros
+      <BarraFiltros
+        crear={{ texto: "+ AÑADIR NOTICIA", onClick: handleOpenCreate }}
           busqueda={{ etiqueta: "Buscar noticia", placeholder: "Buscar por título...", valor: busqueda, onCambio: setBusqueda }}
           select={{
             etiqueta: "Clasificación",
@@ -580,7 +571,6 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
             opciones: [{ valor: "Todas", texto: "Todas las clasificaciones" }, ...CATEGORIAS.map((c) => ({ valor: c, texto: c }))],
           }}
         />
-      </div>
 
       <div className="cms-news-table-container">
         <div className="news-table-head">
@@ -1480,7 +1470,8 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
         onDiscard={handleForceClose}
         onSaveDraft={(e) => handleSave(e, "BORRADOR", true)}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -580,7 +580,25 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   };
 
   return (
-    <div className="cms-dashboard-card">
+    <>
+      <div style={{ marginBottom: "18px" }}>
+        <FiltrosEstado
+                    activa={activeTab}
+                    onCambiar={setActiveTab}
+                    todos
+                    onActualizar={cargarResidencias}
+                    opciones={[
+                      { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
+                      { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
+                      { clave: "PROGRAMADOS", tipo: "programado", cuenta: cuentas.PROGRAMADOS },
+                      { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
+                      { clave: "BORRADORES", tipo: "borrador", cuenta: cuentas.BORRADORES },
+                      { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
+                    ]}
+                  />
+      </div>
+
+      <div className="cms-dashboard-card">
       {/* Cabecera */}
       <div className="news-view-header">
         <div>
@@ -594,38 +612,10 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       </div>
 
       {/* Barra de herramientas: Pestañas a la izquierda, buscador a la derecha */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-          flexWrap: "wrap",
-          gap: 0,
-        }}
-      >
-        <div style={{ width: "100%", marginBottom: "14px" }}>
-        <FiltrosEstado
-            activa={activeTab}
-            onCambiar={setActiveTab}
-            crear={{ texto: "+ AÑADIR RESIDENCIA", onClick: handleOpenCreate }}
-            todos
-            onActualizar={cargarResidencias}
-            opciones={[
-              { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
-              { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
-              { clave: "PROGRAMADOS", tipo: "programado", cuenta: cuentas.PROGRAMADOS },
-              { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
-              { clave: "BORRADORES", tipo: "borrador", cuenta: cuentas.BORRADORES },
-              { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
-            ]}
-          />
-        </div>
-
-        <BarraFiltros
+      <BarraFiltros
+        crear={{ texto: "+ AÑADIR RESIDENCIA", onClick: handleOpenCreate }}
           busqueda={{ etiqueta: "Buscar residencia", placeholder: "Buscar por programa o categoría...", valor: searchTerm, onCambio: setSearchTerm }}
         />
-      </div>
 
       {/* Tabla Unificada con diseño armonizado idéntico a Profesionales */}
       <div className="cms-news-table-container">
@@ -1579,7 +1569,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         requiereAprobacion={requiereAprobacionParaEliminar(itemAEliminar)}
         isDeleting={isDeleting}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

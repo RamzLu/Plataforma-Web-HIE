@@ -227,7 +227,24 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   const paginacion = usePaginacion(vistaPublicados(datosFiltrados, activeTab === "PUBLICADOS"), 10, [activeTab, filtroTipo, searchTerm]);
 
   return (
-    <div className="cms-dashboard-card">
+    <>
+      <div style={{ marginBottom: "18px" }}>
+        <FiltrosEstado
+                    activa={activeTab}
+                    onCambiar={setActiveTab}
+                    todos
+                    onActualizar={cargarDatos}
+                    actualizando={loading}
+                    opciones={[
+                      { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
+                      { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
+                      { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
+                      { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
+                    ]}
+                  />
+      </div>
+
+      <div className="cms-dashboard-card">
       <div className="news-view-header">
         <div>
           <h3 className="cms-card-title news-view-title">
@@ -239,26 +256,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         </div>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: 0 }}>
-        
-        <div style={{ marginBottom: "14px", width: "100%" }}>
-          <FiltrosEstado
-            activa={activeTab}
-            onCambiar={setActiveTab}
-            crear={{ texto: "+ AÑADIR ESPECIALIDAD", onClick: handleOpenCreate }}
-            todos
-            onActualizar={cargarDatos}
-            actualizando={loading}
-            opciones={[
-              { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
-              { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
-              { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
-              { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
-            ]}
-          />
-        </div>
-
-        <BarraFiltros
+      <BarraFiltros
+        crear={{ texto: "+ AÑADIR ESPECIALIDAD", onClick: handleOpenCreate }}
           busqueda={{ etiqueta: "Buscar especialidad o servicio", placeholder: "Buscar por nombre o ubicación...", valor: searchTerm, onCambio: setSearchTerm }}
           select={{
             etiqueta: "Clasificación",
@@ -271,7 +270,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
             ],
           }}
         />
-      </div>
 
       <div className="cms-news-table-container">
         <div className="activity-table-head news-table-head" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -512,7 +510,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         requiereAprobacion={requiereAprobacionParaEliminar(itemAEliminar)}
         isDeleting={isDeleting}
       />
-    </div>
+      </div>
+    </>
   );
 };
 
