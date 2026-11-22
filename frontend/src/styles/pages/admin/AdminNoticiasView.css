@@ -877,7 +877,7 @@
   gap: 13px;
   padding: 17px;
   border: 1px solid var(--color-slate-200);
-  border-radius: 14px;
+  border-radius: 18px;
   background: var(--color-white);
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
   color: inherit;
@@ -913,14 +913,14 @@
   height: 42px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 14px;
 }
 
 :where(.panel-scope) .admin-news-summary-copy {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 :where(.panel-scope) .admin-news-summary-copy > span:not(:where(.vista-portal *)) {

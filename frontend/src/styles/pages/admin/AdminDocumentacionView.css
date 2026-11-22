@@ -448,13 +448,6 @@
   color: var(--color-red-700);
 }
 
-:where(.panel-scope) .admin-doc-cms-hint {
-  display: block;
-  margin-top: 5px;
-  color: var(--color-slate-500);
-  font-size: 0.67rem;
-}
-
 :where(.panel-scope) .admin-doc-empty {
   padding: 32px !important;
   color: var(--color-slate-500) !important;

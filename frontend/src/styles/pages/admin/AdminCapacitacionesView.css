@@ -121,8 +121,9 @@
 }
 
 :where(.panel-scope) .admin-training-summary-card small:not(:where(.vista-portal *)) {
-  color: var(--color-slate-500);
-  font-size: 0.76rem;
+  color: var(--color-slate-600);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 :where(.panel-scope) .admin-training-summary-card strong:not(:where(.vista-portal *)) {

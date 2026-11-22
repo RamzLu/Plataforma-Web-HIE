@@ -80,7 +80,7 @@
   gap: 13px;
   padding: 17px;
   border: 1px solid var(--color-slate-200);
-  border-radius: 14px;
+  border-radius: 18px;
   background: var(--color-white);
   box-shadow: 0 5px 18px rgb(15 23 42 / 3%);
   color: inherit;
@@ -95,19 +95,20 @@
   height: 42px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 14px;
 }
 
 :where(.panel-scope) .admin-prof-summary-card > div:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 :where(.panel-scope) .admin-prof-summary-card > div span:not(:where(.vista-portal *)) {
-  color: var(--color-slate-500);
-  font-size: 0.76rem;
+  color: var(--color-slate-600);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 :where(.panel-scope) .admin-prof-summary-card strong:not(:where(.vista-portal *)) {

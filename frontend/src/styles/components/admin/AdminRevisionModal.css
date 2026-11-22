@@ -40,6 +40,13 @@
   width: min(880px, 100%); /* deja 800px por dentro para la vista previa, como el modal público */
 }
 
+/* El cuerpo de este modal también lleva la clase .modal-body-esp-admin (pensada para una grilla), que trae
+   "align-items: start". En una columna eso achica cada bloque a su contenido: la tarjeta de modificaciones
+   quedaba más angosta que la vista previa. Con "stretch" todos ocupan el ancho completo. */
+:where(.panel-scope) .admin-rev-modal.admin-rev-modal--noticia .admin-rev-body {
+  align-items: stretch;
+}
+
 /* Marco de la vista previa "así se verá en el portal" (adentro usa el CSS público de NoticiasPage.css). */
 :where(.panel-scope) .admin-rev-portal-preview {
   flex-shrink: 0;
@@ -72,6 +79,23 @@
   border-radius: 0;
   box-shadow: none;
   animation: none;
+}
+
+/* Una sola imagen en la vista previa: la tarjeta conserva su tamaño (480 px) y la imagen se adapta a ella,
+   ocupando todo el espacio (recorta lo que sobre), sin dejar un bloque vacío debajo. */
+:where(.panel-scope) .admin-rev-portal-preview .vista-portal .mosaic-gallery.layout-1 {
+  height: 480px;
+  grid-template-rows: 1fr;
+}
+
+:where(.panel-scope) .admin-rev-portal-preview .vista-portal .mosaic-gallery.layout-1 .mosaic-item {
+  height: 100%;
+}
+
+:where(.panel-scope) .admin-rev-portal-preview .vista-portal .mosaic-gallery.layout-1 .mosaic-item img {
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
 }
 
 /* Tope de grosor en todo el modal: nada por encima de 650, tampoco lo heredado. */

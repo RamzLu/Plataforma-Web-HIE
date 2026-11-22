@@ -203,7 +203,11 @@
 }
 
 /* Variantes del Mosaico según cantidad de fotos */
+/* Una sola imagen: la tarjeta conserva su tamaño y la imagen se adapta a ella (recorta lo que sobre). El selector
+   lleva .mosaic-gallery para ganarle a las reglas del portal, que dejan la imagen con su propia altura. */
 :where(.panel-scope) .layout-1:not(:where(.vista-portal *)) { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+:where(.panel-scope) .mosaic-gallery.layout-1 .mosaic-item:not(:where(.vista-portal *)) { height: 100%; }
+:where(.panel-scope) .mosaic-gallery.layout-1 .mosaic-item img:not(:where(.vista-portal *)) { height: 100%; max-height: none; object-fit: cover; }
 :where(.panel-scope) .layout-2:not(:where(.vista-portal *)) { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
 :where(.panel-scope) .layout-3:not(:where(.vista-portal *)) { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
 :where(.panel-scope) .layout-3 .mosaic-item:nth-child(1):not(:where(.vista-portal *)) { grid-column: span 2; }
