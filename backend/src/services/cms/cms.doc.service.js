@@ -2,14 +2,17 @@ import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
-import { generarNombreUnico } from "../../utils/file.utils.js";
-import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
-import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, estaVisibleEnPortal, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
-import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
+import { combinarCambios } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 import { eliminarArchivosReemplazados, refDeArchivo, refDesdeUrl } from "../../utils/archivos.utils.js";
 import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
+import { formatearDocumento, formatearVersionPublicada, datosDeArchivo, CATEGORIA_POR_DEFECTO } from "./documentos/formato.js";
+import { subirDocumento, BUCKET_DOCUMENTOS } from "./documentos/archivo.js";
+import { buscarOCrearCategoria } from "./documentos/categoria.js";
+import { cambiosDeTexto, cambiosDeDocumento } from "./documentos/cambios.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "documento", modelos: { "": "documento" } });
 
@@ -21,55 +24,6 @@ class CmsDocService {
   obtenerMapaPendingMeta() { return metaEditorial.obtenerMapaPendingMeta(); }
   guardarPendingMeta(id, meta) { return metaEditorial.guardarPendingMeta(id, meta); }
   limpiarPendingMeta(id) { return metaEditorial.limpiarPendingMeta(id); }
-
-  _format(doc, motivoRechazo = null, pendingMeta = null) {
-    const pubUrl = doc.archivo
-      ? supabase.storage.from("documentos").getPublicUrl(doc.archivo.nombreArchivo).data.publicUrl
-      : "";
-
-    const estadoUpper = (doc.estado || "PENDIENTE_APROBACION").toUpperCase();
-
-    let statusMapped = "borrador";
-    if (estadoUpper === "PUBLICADO") statusMapped = "publicado";
-    else if (estadoUpper === "APROBADO") statusMapped = "aprobado";
-    else if (estadoUpper === "PENDIENTE_APROBACION") statusMapped = "pendiente";
-    else if (estadoUpper === "RECHAZADO") statusMapped = "rechazado";
-    else if (estadoUpper === "PROGRAMADO") statusMapped = "programado";
-    else if (estadoUpper === "ARCHIVADO") statusMapped = "archivado";
-
-    const creatorName = doc.creador
-      ? nombreDeUsuario(doc.creador)
-      : pendingMeta?.editor || "Editor CMS";
-
-    const updaterName = doc.editor
-      ? nombreDeUsuario(doc.editor)
-      : null;
-
-    return {
-      id: doc.id.toString(),
-      title: doc.titulo,
-      description: doc.descripcion || "",
-      category: doc.categoria_documento?.nombre || "Información institucional",
-      status: statusMapped,
-      estado: estadoUpper,
-      creator: creatorName,
-      editor: creatorName,
-      editedBy: updaterName,
-      fileName: doc.archivo?.nombreOriginal || "",
-      fileType: doc.archivo?.extension ? doc.archivo.extension.toUpperCase() : "PDF",
-      fileSize: doc.archivo?.tamanioBytes
-        ? `${(Number(doc.archivo.tamanioBytes) / (1024 * 1024)).toFixed(1)} MB`
-        : "",
-      fileUrl: pubUrl,
-      rejectionReason: motivoRechazo,
-      requestedEstado: pendingMeta?.targetEstado || null,
-      previousEstado: pendingMeta?.previousEstado || null,
-      cambios: estadoUpper === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
-      esActualizacion: estadoUpper === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt || doc.createdAt,
-    };
-  }
 
   async obtenerDocumentos(esVistaAdmin = false) {
     if (!esVistaAdmin) {
@@ -91,28 +45,12 @@ class CmsDocService {
       const lista = [];
       for (const doc of documentosPublicos) {
         if (doc.estado === "PUBLICADO") {
-          lista.push(this._format(doc));
+          lista.push(formatearDocumento(doc));
         } else if (doc.estado === "PENDIENTE_APROBACION" || doc.estado === "RECHAZADO") {
           // Edición en revisión o rechazada: el portal sigue mostrando la versión publicada anterior.
           const meta = pendingMetaMap.get(doc.id.toString());
           if (conservaVersionPublica(doc, meta)) {
-            lista.push({
-              id: doc.id.toString(),
-              title: meta.snapshotPublico.titulo || doc.titulo,
-              description: meta.snapshotPublico.descripcion || doc.descripcion || "",
-              category: meta.snapshotPublico.category || doc.categoria_documento?.nombre || "Información institucional",
-              status: "publicado",
-              estado: "PUBLICADO",
-              creator: meta.editor || "Editor CMS",
-              editor: meta.editor || "Editor CMS",
-              editedBy: null,
-              fileName: meta.snapshotPublico.fileName || doc.archivo?.nombreOriginal || "",
-              fileType: meta.snapshotPublico.fileType || (doc.archivo?.extension ? doc.archivo.extension.toUpperCase() : "PDF"),
-              fileSize: meta.snapshotPublico.fileSize || (doc.archivo?.tamanioBytes ? `${(Number(doc.archivo.tamanioBytes) / (1024 * 1024)).toFixed(1)} MB` : ""),
-              fileUrl: meta.snapshotPublico.fileUrl || (doc.archivo ? supabase.storage.from("documentos").getPublicUrl(doc.archivo.nombreArchivo).data.publicUrl : ""),
-              createdAt: doc.createdAt,
-              updatedAt: doc.updatedAt || doc.createdAt,
-            });
+            lista.push(formatearVersionPublicada(doc, meta));
           }
         }
       }
@@ -138,7 +76,7 @@ class CmsDocService {
       const idStr = doc.id.toString();
       const motivo = motivosMap.get(idStr) || null;
       const pendingMeta = pendingMetaMap.get(idStr) || null;
-      return this._format(doc, motivo, pendingMeta);
+      return formatearDocumento(doc, motivo, pendingMeta);
     });
   }
 
@@ -158,50 +96,10 @@ class CmsDocService {
     });
     const estadoFinal = solicitud.estado;
 
-    let categoriaDb = await prisma.categoria_documento.findFirst({
-      where: { nombre: { equals: categoria || "Información institucional", mode: "insensitive" } },
-    });
-    if (!categoriaDb) {
-      categoriaDb = await prisma.categoria_documento.create({
-        data: {
-          nombre: categoria || "Información institucional",
-          descripcion: "Generada automáticamente",
-          activo: true,
-        },
-      });
-    }
+    const categoriaDb = await buscarOCrearCategoria(categoria || CATEGORIA_POR_DEFECTO);
 
     const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-    const { nombreUnico, extension } = generarNombreUnico(archivoSubido.originalname, "doc");
-
-    const { error: storageError } = await supabase.storage
-      .from("documentos")
-      .upload(nombreUnico, archivoSubido.buffer, {
-        contentType: archivoSubido.mimetype,
-        upsert: true,
-      });
-
-    if (storageError) {
-      console.error("Error subiendo documento a Supabase:", storageError.message);
-      const error = new Error("No se pudo almacenar el documento.");
-      error.statusCode = 500;
-      throw error;
-    }
-
-    const { data: publicUrlData } = supabase.storage
-      .from("documentos")
-      .getPublicUrl(nombreUnico);
-
-    const archivoDb = await prisma.archivo.create({
-      data: {
-        nombreOriginal: archivoSubido.originalname,
-        nombreArchivo: nombreUnico,
-        ruta: `documentos/${nombreUnico}`,
-        extension,
-        mimeType: archivoSubido.mimetype,
-        tamanioBytes: BigInt(archivoSubido.size),
-      },
-    });
+    const { fila: archivoDb, url: urlPublica } = await subirDocumento(archivoSubido);
 
     const nuevoDocumento = await prisma.documento.create({
       data: {
@@ -238,8 +136,8 @@ class CmsDocService {
           ? "Documento enviado a revisión del administrador para su aprobación."
           : "Documento guardado como borrador con éxito.",
       documento: {
-        ...this._format(nuevoDocumento, null, { editor: editorNombre }),
-        fileUrl: publicUrlData.publicUrl,
+        ...formatearDocumento(nuevoDocumento, null, { editor: editorNombre }),
+        fileUrl: urlPublica,
       },
     };
   }
@@ -276,34 +174,18 @@ class CmsDocService {
     const metaExistente = metaMap.get(idStr) || null;
     // Es o fue público (también una edición rechazada de algo publicado): sus archivos se conservan.
     const provieneDePublicada = fuePublico(estadoAnterior, metaExistente);
-    const armarSnapshotPublico = () => {
-      const pubUrlAnterior = docExistente.archivo
-        ? supabase.storage.from("documentos").getPublicUrl(docExistente.archivo.nombreArchivo).data.publicUrl
-        : "";
-
-      return {
-        titulo: docExistente.titulo,
-        descripcion: docExistente.descripcion || "",
-        category: docExistente.categoria_documento?.nombre || "Información institucional",
-        fileName: docExistente.archivo?.nombreOriginal || "",
-        fileType: docExistente.archivo?.extension ? docExistente.archivo.extension.toUpperCase() : "PDF",
-        fileSize: docExistente.archivo?.tamanioBytes
-          ? `${(Number(docExistente.archivo.tamanioBytes) / (1024 * 1024)).toFixed(1)} MB`
-          : "",
-        fileUrl: pubUrlAnterior,
-      };
-    };
+    const armarSnapshotPublico = () => ({
+      titulo: docExistente.titulo,
+      descripcion: docExistente.descripcion || "",
+      category: docExistente.categoria_documento?.nombre || CATEGORIA_POR_DEFECTO,
+      ...datosDeArchivo(docExistente.archivo),
+    });
 
     // Validación: verificar si hubo cambios antes de procesar archivos o base de datos
-    const catAnteriorNombre = docExistente.categoria_documento?.nombre || "Información institucional";
+    const catAnteriorNombre = docExistente.categoria_documento?.nombre || CATEGORIA_POR_DEFECTO;
     const catNuevaNombre = categoria ? categoria.trim() : catAnteriorNombre;
 
-    const camposDocCheck = [
-      { key: "titulo", label: "Título del documento" },
-      { key: "descripcion", label: "Descripción" },
-      { key: "categoria", label: "Categoría" },
-    ];
-    const cambiosDoc = calcularCambios(
+    const cambiosDoc = cambiosDeTexto(
       {
         titulo: docExistente.titulo,
         descripcion: docExistente.descripcion || "",
@@ -313,8 +195,7 @@ class CmsDocService {
         titulo: titulo !== undefined ? titulo.trim() : docExistente.titulo,
         descripcion: descripcion !== undefined ? (descripcion ? descripcion.trim() : "") : (docExistente.descripcion || ""),
         categoria: catNuevaNombre,
-      },
-      camposDocCheck
+      }
     );
     const estadoCambioDoc = Boolean(estado && estado.toUpperCase() !== estadoAnterior);
 
@@ -348,57 +229,19 @@ class CmsDocService {
 
     let categoriaId = docExistente.categoriaId;
     if (categoria) {
-      let categoriaDb = await prisma.categoria_documento.findFirst({
-        where: { nombre: { equals: categoria, mode: "insensitive" } },
-      });
-      if (!categoriaDb) {
-        categoriaDb = await prisma.categoria_documento.create({
-          data: {
-            nombre: categoria,
-            descripcion: "Generada automáticamente",
-            activo: true,
-          },
-        });
-      }
-      categoriaId = categoriaDb.id;
+      categoriaId = (await buscarOCrearCategoria(categoria)).id;
     }
 
     let archivoId = docExistente.archivoId;
     let oldArchivoIdAEliminar = null;
 
     if (archivoSubido) {
-      const { nombreUnico, extension } = generarNombreUnico(archivoSubido.originalname, "doc");
-
-      const { error: storageError } = await supabase.storage
-        .from("documentos")
-        .upload(nombreUnico, archivoSubido.buffer, {
-          contentType: archivoSubido.mimetype,
-          upsert: true,
-        });
-
-      if (storageError) {
-        console.error("Error subiendo archivo nuevo a Supabase:", storageError.message);
-        const error = new Error("No se pudo almacenar el nuevo documento.");
-        error.statusCode = 500;
-        throw error;
-      }
-
-      const nuevoArchivoDb = await prisma.archivo.create({
-        data: {
-          nombreOriginal: archivoSubido.originalname,
-          nombreArchivo: nombreUnico,
-          ruta: `documentos/${nombreUnico}`,
-          extension,
-          mimeType: archivoSubido.mimetype,
-          tamanioBytes: BigInt(archivoSubido.size),
-        },
-      });
-
-      archivoId = nuevoArchivoDb.id;
+      const { fila } = await subirDocumento(archivoSubido);
+      archivoId = fila.id;
 
       // Si no proviene de publicada (por ejemplo era un borrador o rechazado), podemos borrar el archivo anterior
       if (!provieneDePublicada && docExistente.archivo) {
-        await supabase.storage.from("documentos").remove([docExistente.archivo.nombreArchivo]);
+        await supabase.storage.from(BUCKET_DOCUMENTOS).remove([docExistente.archivo.nombreArchivo]);
         oldArchivoIdAEliminar = docExistente.archivoId;
       }
     }
@@ -432,27 +275,21 @@ class CmsDocService {
 
     // Detección automática de cambios para la revisión del Admin
     if (estadoFinal === "PENDIENTE_APROBACION") {
-      const nuevosCambios = calcularCambios(
+      const nuevosCambios = cambiosDeDocumento(
         {
           titulo: docExistente.titulo,
           descripcion: docExistente.descripcion,
-          categoria: docExistente.categoria_documento?.nombre || "Información institucional",
+          categoria: docExistente.categoria_documento?.nombre || CATEGORIA_POR_DEFECTO,
           archivo: docExistente.archivo?.nombreOriginal || "",
         },
         {
           titulo: documentoActualizado.titulo,
           descripcion: documentoActualizado.descripcion,
-          categoria: documentoActualizado.categoria_documento?.nombre || "Información institucional",
+          categoria: documentoActualizado.categoria_documento?.nombre || CATEGORIA_POR_DEFECTO,
           archivo: archivoSubido
             ? `${documentoActualizado.archivo?.nombreOriginal || "Archivo"} (nuevo archivo)`
             : documentoActualizado.archivo?.nombreOriginal || "",
-        },
-        [
-          { key: "titulo", label: "Título" },
-          { key: "descripcion", label: "Descripción" },
-          { key: "categoria", label: "Categoría" },
-          { key: "archivo", label: "Archivo adjunto" },
-        ]
+        }
       );
       // Los cambios se acumulan contra la versión pública mientras la edición siga viva: si el Admin la rechazó y el CM
       // la vuelve a editar, lo que ya se había modificado (por ejemplo el título) tiene que seguir apareciendo.
@@ -472,7 +309,11 @@ class CmsDocService {
         estadoFinal === "PENDIENTE_APROBACION"
           ? "Modificaciones enviadas a revisión del administrador."
           : "Documento actualizado como borrador con éxito.",
-      documento: this._format(documentoActualizado, null, { editor: editorNombre }),
+      documento: {
+        ...formatearDocumento(documentoActualizado, null, { editor: editorNombre }),
+        // El portal sigue mostrando la versión publicada mientras la edición está en revisión.
+        visibleEnPortal: estaVisibleEnPortal(documentoActualizado, (await this.obtenerMapaPendingMeta()).get(idStr) || null),
+      },
     };
   }
 
@@ -546,23 +387,12 @@ class CmsDocService {
     }
 
     // Registrar auditoría
-    try {
-      const usuarioAdmin = await obtenerOCrearUsuarioLocal(user);
-      await prisma.auditoria.create({
-        data: {
-          usuarioId: usuarioAdmin.id,
-          entidad: "documento",
-          entidadId: idStr,
-          accion: nuevoEstado === "RECHAZADO" ? "RECHAZAR" : "APROBAR",
-          descripcion:
-            nuevoEstado === "RECHAZADO"
-              ? `Documento "${existente.titulo}" rechazado. Motivo: ${motivoGuardado}`
-              : `Documento "${existente.titulo}" aprobado (estado resultante: ${nuevoEstado}).`,
-        },
-      });
-    } catch (error) {
-      registrarFalla("Auditoría", error);
-    }
+    await registrarAuditoria(user, {
+      entidad: "documento",
+      id: idStr,
+      accion: nuevoEstado === "RECHAZADO" ? ACCIONES.RECHAZAR : ACCIONES.APROBAR,
+      descripcion: nuevoEstado === "RECHAZADO" ? `Documento "${existente.titulo}" rechazado. Motivo: ${motivoGuardado}` : `Documento "${existente.titulo}" aprobado (estado resultante: ${nuevoEstado}).`,
+    });
 
     return {
       message:
@@ -571,7 +401,7 @@ class CmsDocService {
           : nuevoEstado === "BORRADOR"
           ? "Solicitud aprobada: el documento se retiró del portal y quedó como borrador."
           : "Documento aprobado y publicado con éxito.",
-      documento: this._format(actualizado, motivoGuardado),
+      documento: formatearDocumento(actualizado, motivoGuardado),
     };
   }
 

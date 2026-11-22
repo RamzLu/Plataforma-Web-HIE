@@ -1,17 +1,24 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
-import { tieneVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, tieneEdicionPendiente, estaVisibleEnPortal, nombreDeLaVersionPublica, conservaVersionPublica, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
-import { generarNombreUnico } from "../../utils/file.utils.js";
-import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { sanitizarHtmlNoticia, parsearIdBigInt, parsearArregloJson } from "../../utils/sanitize.utils.js";
-import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
+import { combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 import { eliminarArchivosReemplazados, refDeArchivo, refDesdeUrl } from "../../utils/archivos.utils.js";
 import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado } from "../../utils/flujoEditorial.utils.js";
+import { urlsDeImagenes, subirImagenes, quitarImagenesDescartadas } from "./noticias/imagenes.js";
+import { nombreCategoriaVisible, buscarOCrearCategoria } from "./noticias/categoria.js";
+import { cambiosDeTexto, cambiosDeNoticia } from "./noticias/cambios.js";
+import { nombresDeEditores, formatearNoticia, formatearVersionPublicada, formatearNoticiaGuardada } from "./noticias/formato.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "noticia", modelos: { "": "noticia" } });
+
+/** ¿Se pidió programar la publicación? (estado de programación y con fecha) */
+const pideProgramar = (estado, fechaPublicacion) =>
+  (estado === "PROGRAMADO" || estado === "PENDIENTE_APROBACION") && Boolean(fechaPublicacion);
 
 class CmsNoticiaService {
   // Metadatos editoriales (motivo de rechazo, cambios pendientes, editor): ver utils/metaEditorial.utils.js
@@ -36,9 +43,7 @@ class CmsNoticiaService {
     }
 
     const estadoSolicitado = estado ? estado.toUpperCase() : "BORRADOR";
-    const tieneFechaProgramada =
-      (estadoSolicitado === "PROGRAMADO" || estadoSolicitado === "PENDIENTE_APROBACION") &&
-      Boolean(fechaPublicacion);
+    const tieneFechaProgramada = pideProgramar(estadoSolicitado, fechaPublicacion);
     // Regla común (utils/flujoEditorial.utils.js): borrador queda en borrador; publicar/programar va a revisión.
     const solicitud = resolverSolicitud({
       estadoActual: null,
@@ -46,18 +51,7 @@ class CmsNoticiaService {
     });
     const estadoFinal = solicitud.estado;
 
-    let nombreCat = categoriaNombre || "General";
-    if (nombreCat.toLowerCase() === "noticias" || nombreCat.toLowerCase() === "noticia") {
-      nombreCat = "General";
-    }
-
-    let categoria = await prisma.categoria_noticia.findFirst({ where: { nombre: nombreCat } });
-    if (!categoria) {
-      categoria = await prisma.categoria_noticia.create({
-        data: { nombre: nombreCat, descripcion: `Clasificación ${nombreCat}` },
-      });
-    }
-
+    const categoria = await buscarOCrearCategoria(nombreCategoriaVisible(categoriaNombre));
     const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
 
     const nuevaNoticia = await prisma.noticia.create({
@@ -80,66 +74,20 @@ class CmsNoticiaService {
       await this.guardarPendingMeta(nuevaNoticia.id.toString(), solicitud.meta);
     }
 
-    const imagenesUrlsGuardadas = [];
-
-    for (const file of archivosSubidos) {
-      const { nombreUnico, extension } = generarNombreUnico(file.originalname, "img");
-
-      const { error: storageError } = await supabase.storage
-        .from("noticias-imagenes")
-        .upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
-
-      if (storageError) {
-        console.error("Error al subir imagen de noticia a Supabase:", storageError.message);
-        const error = new Error("No se pudo almacenar la imagen de la noticia.");
-        error.statusCode = 500;
-        throw error;
-      }
-
-      const archivoDb = await prisma.archivo.create({
-        data: {
-          nombreOriginal: file.originalname,
-          nombreArchivo: nombreUnico,
-          ruta: `noticias-imagenes/${nombreUnico}`,
-          extension,
-          mimeType: file.mimetype,
-          tamanioBytes: BigInt(file.size),
-        },
-      });
-
-      await prisma.noticia_archivo.create({
-        data: { noticiaId: nuevaNoticia.id, archivoId: archivoDb.id },
-      });
-
-      const { data: publicUrlData } = supabase.storage
-        .from("noticias-imagenes")
-        .getPublicUrl(nombreUnico);
-      imagenesUrlsGuardadas.push(publicUrlData.publicUrl);
-    }
-
-    const editorNombre = nuevaNoticia.creador
-      ? nombreDeUsuario(nuevaNoticia.creador)
-      : "Editor CMS";
-
-    const requestedEstado = solicitud.meta?.targetEstado ?? null;
+    const imagenesUrlsGuardadas = await subirImagenes(nuevaNoticia.id, archivosSubidos);
 
     await registrarAuditoria(user, { entidad: "noticia", id: nuevaNoticia.id, accion: ACCIONES.CREAR, descripcion: `Creó la noticia "${nuevaNoticia.titulo}".` });
     return {
       message: "Exito",
-      noticia: {
-        ...nuevaNoticia,
-        id: nuevaNoticia.id.toString(),
-        categoriaId: nuevaNoticia.categoriaId.toString(),
-        category: nuevaNoticia.categoria_noticia.nombre,
-        estado: nuevaNoticia.estado,
-        requestedEstado,
+      noticia: formatearNoticiaGuardada(nuevaNoticia, {
+        categoria: nuevaNoticia.categoria_noticia.nombre,
+        requestedEstado: solicitud.meta?.targetEstado ?? null,
         previousEstado: null,
-        isDraft: nuevaNoticia.estado === "BORRADOR",
-        images: imagenesUrlsGuardadas,
-        editor: editorNombre,
+        imagenes: imagenesUrlsGuardadas,
+        editor: nombresDeEditores(nuevaNoticia).editor,
         editedBy: null,
         rejectionReason: null,
-      },
+      }),
     };
   }
 
@@ -175,12 +123,10 @@ class CmsNoticiaService {
       const estadoUpper = (noticia.estado || "").toUpperCase();
 
       if (!esConsultaInterna) {
-        const esPublicadaDirecta =
-          estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO";
+        const esPublicadaDirecta = estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO";
         const mantienePublicacionPrevia =
           (estadoUpper === "PENDIENTE_APROBACION" || estadoUpper === "RECHAZADO") &&
-          (pendingMeta?.previousEstado === "PUBLICADO" ||
-            pendingMeta?.previousEstado === "APROBADO") &&
+          (pendingMeta?.previousEstado === "PUBLICADO" || pendingMeta?.previousEstado === "APROBADO") &&
           Boolean(pendingMeta?.snapshotPublico);
 
         if (!esPublicadaDirecta && !mantienePublicacionPrevia) {
@@ -188,78 +134,29 @@ class CmsNoticiaService {
         }
 
         if (mantienePublicacionPrevia) {
-          const snap = pendingMeta.snapshotPublico;
-          const editorNombreSnap = noticia.creador
-            ? nombreDeUsuario(noticia.creador)
-            : "Editor CMS";
-
-          resultado.push({
-            id: idStr,
-            title: snap.titulo,
-            titulo: snap.titulo,
-            body: [snap.contenido],
-            contenido: snap.contenido,
-            date: new Date(noticia.createdAt).toLocaleDateString("es-AR"),
-            fechaPublicacion: noticia.fechaPublicacion,
-            createdAt: noticia.createdAt,
-            updatedAt: noticia.updatedAt,
-            category: snap.category || "General",
-            estado: "PUBLICADO",
-            isDraft: false,
-            images: snap.images || [],
-            editor: editorNombreSnap,
-            editedBy: null,
-            rejectionReason: null,
-          });
+          resultado.push(formatearVersionPublicada(noticia, pendingMeta.snapshotPublico));
           continue;
         }
       }
 
-      const imgs = noticia.noticia_archivo.map((na) => {
-        const { data } = supabase.storage
-          .from("noticias-imagenes")
-          .getPublicUrl(na.archivo.nombreArchivo);
-        return data.publicUrl;
-      });
-
-      const editorNombre = noticia.creador
-        ? nombreDeUsuario(noticia.creador)
-        : "Editor CMS";
-
-      const editadoPorNombre = noticia.editor
-        ? nombreDeUsuario(noticia.editor)
-        : null;
-
-      let catName = noticia.categoria_noticia ? noticia.categoria_noticia.nombre : "General";
-      if (catName.toLowerCase() === "noticias" || catName.toLowerCase() === "noticia") {
-        catName = "General";
-      }
-
-      resultado.push({
-        id: idStr,
-        title: noticia.titulo,
-        titulo: noticia.titulo,
-        body: [noticia.contenido],
-        contenido: noticia.contenido,
-        date: new Date(noticia.createdAt).toLocaleDateString("es-AR"),
-        fechaPublicacion: noticia.fechaPublicacion,
-        createdAt: noticia.createdAt,
-        updatedAt: noticia.updatedAt,
-        category: catName,
-        estado: noticia.estado,
-        requestedEstado:
-          estadoUpper === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
-        previousEstado: pendingMeta?.previousEstado || null,
-        isDraft: noticia.estado === "BORRADOR",
-        images: imgs,
-        editor: editorNombre,
-        editedBy: editadoPorNombre,
-        rejectionReason: motivosMap.get(idStr) || null,
-        cambios:
-          estadoUpper === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
-        esActualizacion:
-          estadoUpper === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
-      });
+      resultado.push(
+        formatearNoticia(noticia, {
+          imagenes: urlsDeImagenes(noticia.noticia_archivo),
+          categoria: nombreCategoriaVisible(noticia.categoria_noticia?.nombre),
+          requestedEstado: estadoUpper === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
+          previousEstado: pendingMeta?.previousEstado || null,
+          visibleEnPortal: estaVisibleEnPortal(noticia, pendingMeta),
+          tituloPublicado: nombreDeLaVersionPublica(noticia, pendingMeta, "titulo"),
+          rejectionReason: motivosMap.get(idStr) || null,
+          extra: {
+            // Los cambios se ven mientras la edición esté en revisión y también si el Admin la rechazó.
+            cambios: estadoUpper === "PENDIENTE_APROBACION" || conservaVersionPublica(noticia, pendingMeta) ? cambiosParaCliente(pendingMeta?.cambios) : [],
+            esActualizacion: (estadoUpper === "PENDIENTE_APROBACION" || conservaVersionPublica(noticia, pendingMeta)) && Boolean(pendingMeta?.esActualizacion),
+            // Lo que ve hoy el portal, para poder mostrar la versión publicada mientras la actualización está en revisión.
+            versionPublicada: esConsultaInterna && conservaVersionPublica(noticia, pendingMeta) ? pendingMeta.snapshotPublico : null,
+          },
+        })
+      );
     }
 
     // El portal público no necesita saber quién editó cada registro: no se envían nombres del equipo.
@@ -335,31 +232,12 @@ class CmsNoticiaService {
     const estadoAnterior = (noticiaExistente.estado || "").toUpperCase();
     const estadoSolicitado = estado ? estado.toUpperCase() : estadoAnterior;
 
-    const imgsPrevias = noticiaExistente.noticia_archivo.map((na) => {
-      const { data: pubData } = supabase.storage
-        .from("noticias-imagenes")
-        .getPublicUrl(na.archivo.nombreArchivo);
-      return pubData.publicUrl;
-    });
-    let catPrevia = noticiaExistente.categoria_noticia
-      ? noticiaExistente.categoria_noticia.nombre
-      : "General";
-    if (catPrevia.toLowerCase() === "noticias" || catPrevia.toLowerCase() === "noticia") {
-      catPrevia = "General";
-    }
-
+    const imgsPrevias = urlsDeImagenes(noticiaExistente.noticia_archivo);
+    const catPrevia = nombreCategoriaVisible(noticiaExistente.categoria_noticia?.nombre);
 
     // Validación: verificar si hubo cambios reales antes de modificar la noticia
-    const camposNoticiaPre = [
-      { key: "titulo", label: "Título" },
-      { key: "category", label: "Categoría" },
-      { key: "contenido", label: "Contenido", tipo: "html" },
-      { key: "fechaPublicacion", label: "Fecha de publicación programada", tipo: "datetime" },
-    ];
-    let catNuevaCheck = (categoriaNombre ? categoriaNombre.trim() : catPrevia);
-    if (["noticias", "noticia"].includes(catNuevaCheck.toLowerCase())) catNuevaCheck = "General";
-
-    const cambiosTexto = calcularCambios(
+    const catNuevaCheck = nombreCategoriaVisible(categoriaNombre ? categoriaNombre.trim() : catPrevia);
+    const cambiosTexto = cambiosDeTexto(
       {
         titulo: noticiaExistente.titulo,
         category: catPrevia,
@@ -371,8 +249,7 @@ class CmsNoticiaService {
         category: catNuevaCheck,
         contenido: contenido !== undefined ? contenido : noticiaExistente.contenido,
         fechaPublicacion: fechaPublicacion !== undefined ? (fechaPublicacion ? new Date(fechaPublicacion) : null) : noticiaExistente.fechaPublicacion,
-      },
-      camposNoticiaPre
+      }
     );
 
     const hayNuevasImagenes = Array.isArray(archivosSubidos) && archivosSubidos.length > 0;
@@ -399,13 +276,10 @@ class CmsNoticiaService {
 
     // Regla común (utils/flujoEditorial.utils.js): lo que es o fue público siempre pasa por el administrador,
     // y mientras tanto el portal sigue mostrando la versión publicada (snapshotPublico).
-    const tieneFechaProgramada =
-      (estadoSolicitado === "PROGRAMADO" || estadoSolicitado === "PENDIENTE_APROBACION") &&
-      Boolean(fechaPublicacion);
     const solicitud = resolverSolicitud({
       estadoActual: estadoAnterior,
       meta: metaExistente,
-      intencion: intencionDesdeEstado(estadoSolicitado, { tieneFecha: tieneFechaProgramada }),
+      intencion: intencionDesdeEstado(estadoSolicitado, { tieneFecha: pideProgramar(estadoSolicitado, fechaPublicacion) }),
       snapshotActual: () => ({
         titulo: noticiaExistente.titulo,
         contenido: noticiaExistente.contenido,
@@ -428,32 +302,7 @@ class CmsNoticiaService {
     }
 
     if (categoriaNombre) {
-      let nombreCatActualizar = categoriaNombre.trim();
-
-      if (
-        nombreCatActualizar.toLowerCase() === "noticias" ||
-        nombreCatActualizar.toLowerCase() === "noticia"
-      ) {
-        nombreCatActualizar = "General";
-      }
-
-      let categoria = await prisma.categoria_noticia.findFirst({
-        where: {
-          nombre: {
-            equals: nombreCatActualizar,
-            mode: "insensitive",
-          },
-        },
-      });
-
-      if (!categoria) {
-        categoria = await prisma.categoria_noticia.create({
-          data: {
-            nombre: nombreCatActualizar,
-            descripcion: `Clasificación ${nombreCatActualizar}`,
-          },
-        });
-      }
+      const categoria = await buscarOCrearCategoria(nombreCategoriaVisible(categoriaNombre.trim()), { sinDistinguirMayusculas: true });
       dataUpdate.categoriaId = categoria.id;
     }
 
@@ -462,53 +311,12 @@ class CmsNoticiaService {
       data: dataUpdate,
     });
 
-    const urlsProtegidasSnapshot = snapshotPublico?.images || [];
-
-    for (const na of noticiaExistente.noticia_archivo) {
-      const archivo = na.archivo;
-      const { data: urlData } = supabase.storage
-        .from("noticias-imagenes")
-        .getPublicUrl(archivo.nombreArchivo);
-
-      if (!urlsConservadas.includes(urlData.publicUrl)) {
-        await prisma.noticia_archivo.deleteMany({
-          where: { noticiaId: noticiaActualizada.id, archivoId: archivo.id },
-        });
-        if (!urlsProtegidasSnapshot.includes(urlData.publicUrl)) {
-          await supabase.storage.from("noticias-imagenes").remove([archivo.nombreArchivo]);
-          await prisma.archivo.delete({ where: { id: archivo.id } }).catch(() => {});
-        }
-      }
-    }
-
-    for (const file of archivosSubidos) {
-      const { nombreUnico, extension } = generarNombreUnico(file.originalname, "img");
-
-      const { error: storageError } = await supabase.storage
-        .from("noticias-imagenes")
-        .upload(nombreUnico, file.buffer, { contentType: file.mimetype, upsert: true });
-
-      if (storageError) {
-        console.error("Error al subir imagen de noticia a Supabase:", storageError.message);
-        const err = new Error("No se pudo almacenar la imagen de la noticia.");
-        err.statusCode = 500;
-        throw err;
-      }
-
-      const archivoDb = await prisma.archivo.create({
-        data: {
-          nombreOriginal: file.originalname,
-          nombreArchivo: nombreUnico,
-          ruta: `noticias-imagenes/${nombreUnico}`,
-          extension,
-          mimeType: file.mimetype,
-          tamanioBytes: BigInt(file.size),
-        },
-      });
-      await prisma.noticia_archivo.create({
-        data: { noticiaId: noticiaActualizada.id, archivoId: archivoDb.id },
-      });
-    }
+    await quitarImagenesDescartadas({
+      noticia: noticiaExistente,
+      urlsConservadas,
+      urlsProtegidas: snapshotPublico?.images || [],
+    });
+    await subirImagenes(noticiaActualizada.id, archivosSubidos);
 
     const noticiaConArchivos = await prisma.noticia.findUnique({
       where: { id: idBigInt },
@@ -520,56 +328,22 @@ class CmsNoticiaService {
       },
     });
 
-    const imgs = noticiaConArchivos.noticia_archivo.map(
-      (na) =>
-        supabase.storage.from("noticias-imagenes").getPublicUrl(na.archivo.nombreArchivo).data
-          .publicUrl
-    );
-
-    const editorOriginal = noticiaConArchivos.creador
-      ? nombreDeUsuario(noticiaConArchivos.creador)
-      : "Editor CMS";
-    const editadoPorNombre = noticiaConArchivos.editor
-      ? nombreDeUsuario(noticiaConArchivos.editor)
-      : null;
-
-    let catFinal = noticiaConArchivos.categoria_noticia
-      ? noticiaConArchivos.categoria_noticia.nombre
-      : "General";
-    if (catFinal.toLowerCase() === "noticias" || catFinal.toLowerCase() === "noticia") {
-      catFinal = "General";
-    }
+    const imgs = urlsDeImagenes(noticiaConArchivos.noticia_archivo);
+    const { editor: editorOriginal, editedBy: editadoPorNombre } = nombresDeEditores(noticiaConArchivos);
+    const catFinal = nombreCategoriaVisible(noticiaConArchivos.categoria_noticia?.nombre);
 
     const motivoActual = await this.obtenerMotivoRechazo(idStr);
     let metaActual = await this.obtenerPendingMeta(idStr);
 
     // Detección automática de cambios para que el Admin vea qué se modificó
     if (noticiaActualizada.estado === "PENDIENTE_APROBACION" && metaActual) {
-      const imgsPreviasCambio = noticiaExistente.noticia_archivo.map(
-        (na) =>
-          supabase.storage.from("noticias-imagenes").getPublicUrl(na.archivo.nombreArchivo).data
-            .publicUrl
-      );
-      let catPreviaCambio = noticiaExistente.categoria_noticia
-        ? noticiaExistente.categoria_noticia.nombre
-        : "General";
-      if (["noticias", "noticia"].includes(catPreviaCambio.toLowerCase())) {
-        catPreviaCambio = "General";
-      }
-      const camposNoticia = [
-        { key: "titulo", label: "Título" },
-        { key: "category", label: "Categoría" },
-        { key: "contenido", label: "Contenido", tipo: "html" },
-        { key: "fechaPublicacion", label: "Fecha de publicación programada", tipo: "datetime" },
-        { key: "images", label: "Imágenes", tipo: "images" },
-      ];
-      const nuevosCambios = calcularCambios(
+      const nuevosCambios = cambiosDeNoticia(
         {
           titulo: noticiaExistente.titulo,
-          category: catPreviaCambio,
+          category: catPrevia,
           contenido: noticiaExistente.contenido,
           fechaPublicacion: noticiaExistente.fechaPublicacion,
-          images: imgsPreviasCambio,
+          images: imgsPrevias,
         },
         {
           titulo: noticiaActualizada.titulo,
@@ -577,8 +351,7 @@ class CmsNoticiaService {
           contenido: noticiaActualizada.contenido,
           fechaPublicacion: noticiaActualizada.fechaPublicacion,
           images: imgs,
-        },
-        camposNoticia
+        }
       );
       // Los cambios se acumulan contra la versión pública mientras la edición siga viva: si el Admin la rechazó y el CM
       // la vuelve a editar, lo que ya se había modificado (por ejemplo el título) tiene que seguir apareciendo.
@@ -595,23 +368,16 @@ class CmsNoticiaService {
     await registrarAuditoria(user, { entidad: "noticia", id: idStr, accion: ACCIONES.MODIFICAR, descripcion: `Modificó la noticia "${noticiaActualizada.titulo}".` });
     return {
       message: "Exito",
-      noticia: {
-        ...noticiaActualizada,
-        id: noticiaActualizada.id.toString(),
-        categoriaId: noticiaActualizada.categoriaId.toString(),
-        category: catFinal,
-        estado: noticiaActualizada.estado,
-        requestedEstado:
-          noticiaActualizada.estado === "PENDIENTE_APROBACION"
-            ? metaActual?.targetEstado || null
-            : null,
+      noticia: formatearNoticiaGuardada(noticiaActualizada, {
+        categoria: catFinal,
+        requestedEstado: noticiaActualizada.estado === "PENDIENTE_APROBACION" ? metaActual?.targetEstado || null : null,
         previousEstado: metaActual?.previousEstado || null,
-        isDraft: noticiaActualizada.estado === "BORRADOR",
-        images: imgs,
+        visibleEnPortal: estaVisibleEnPortal(noticiaActualizada, metaActual),
+        imagenes: imgs,
         editor: editorOriginal,
         editedBy: editadoPorNombre,
         rejectionReason: motivoActual,
-      },
+      }),
     };
   }
 
@@ -637,7 +403,7 @@ class CmsNoticiaService {
 
     const idStr = id.toString();
     const pendingMeta = await this.obtenerPendingMeta(idStr);
-    const usuarioAdmin = await obtenerOCrearUsuarioLocal(user);
+    await obtenerOCrearUsuarioLocal(user); // valida la identidad del administrador antes de decidir
 
     // Regla común (utils/flujoEditorial.utils.js): solo lo pendiente; aprobar aplica lo pedido; rechazar exige motivo.
     const revision = resolverRevision({
@@ -683,67 +449,28 @@ class CmsNoticiaService {
       });
     }
 
-    try {
-      await prisma.auditoria.create({
-        data: {
-          usuarioId: usuarioAdmin.id,
-          entidad: "noticia",
-          entidadId: idStr,
-          accion: nuevoEstado === "RECHAZADO" ? "RECHAZAR" : "APROBAR",
-          descripcion:
-            nuevoEstado === "RECHAZADO"
-              ? `Noticia rechazada. Motivo: ${motivoGuardado}`
-              : `Solicitud aprobada (estado resultante: ${nuevoEstado}).`,
-        },
-      });
-    } catch (_) {
-      // No bloquear si falla el registro de auditoría
-    }
-
-    const imgs = noticiaActualizada.noticia_archivo.map(
-      (na) =>
-        supabase.storage.from("noticias-imagenes").getPublicUrl(na.archivo.nombreArchivo).data
-          .publicUrl
-    );
-
-    const editorOriginal = noticiaActualizada.creador
-      ? nombreDeUsuario(noticiaActualizada.creador)
-      : "Editor CMS";
-    const editadoPorNombre = noticiaActualizada.editor
-      ? nombreDeUsuario(noticiaActualizada.editor)
-      : null;
-
-    let catFinal = noticiaActualizada.categoria_noticia
-      ? noticiaActualizada.categoria_noticia.nombre
-      : "General";
-    if (catFinal.toLowerCase() === "noticias" || catFinal.toLowerCase() === "noticia") {
-      catFinal = "General";
-    }
+    await registrarAuditoria(user, {
+      entidad: "noticia",
+      id: idStr,
+      accion: nuevoEstado === "RECHAZADO" ? ACCIONES.RECHAZAR : ACCIONES.APROBAR,
+      descripcion:
+        nuevoEstado === "RECHAZADO"
+          ? `Noticia rechazada. Motivo: ${motivoGuardado}`
+          : `Solicitud aprobada (estado resultante: ${nuevoEstado}).`,
+    });
 
     const metaRestante = await this.obtenerPendingMeta(idStr);
 
     return {
       message: "Exito",
-      noticia: {
-        id: noticiaActualizada.id.toString(),
-        title: noticiaActualizada.titulo,
-        titulo: noticiaActualizada.titulo,
-        body: [noticiaActualizada.contenido],
-        contenido: noticiaActualizada.contenido,
-        date: new Date(noticiaActualizada.createdAt).toLocaleDateString("es-AR"),
-        fechaPublicacion: noticiaActualizada.fechaPublicacion,
-        createdAt: noticiaActualizada.createdAt,
-        updatedAt: noticiaActualizada.updatedAt,
-        category: catFinal,
-        estado: noticiaActualizada.estado,
+      noticia: formatearNoticia(noticiaActualizada, {
+        imagenes: urlsDeImagenes(noticiaActualizada.noticia_archivo),
+        categoria: nombreCategoriaVisible(noticiaActualizada.categoria_noticia?.nombre),
         requestedEstado: null,
         previousEstado: metaRestante?.previousEstado || null,
-        isDraft: noticiaActualizada.estado === "BORRADOR",
-        images: imgs,
-        editor: editorOriginal,
-        editedBy: editadoPorNombre,
+        visibleEnPortal: estaVisibleEnPortal(noticiaActualizada, metaRestante),
         rejectionReason: motivoGuardado,
-      },
+      }),
     };
   }
 

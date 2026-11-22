@@ -50,6 +50,13 @@ export const conservaVersionPublica = (registro, pendingMeta = null) => {
   );
 };
 
+/**
+ * Nombre (título) con el que está publicado hoy un registro que se está editando, o null si no hay edición en curso
+ * sobre una versión pública. `clave` es el campo del nombre en la versión guardada ("titulo" o "nombre").
+ */
+export const nombreDeLaVersionPublica = (registro, pendingMeta = null, clave = "titulo") =>
+  conservaVersionPublica(registro, pendingMeta) ? pendingMeta.snapshotPublico?.[clave] ?? null : null;
+
 /** Motivo que ve el CM cuando su edición pendiente queda reemplazada por un pedido de eliminación. */
 export const MOTIVO_EDICION_REEMPLAZADA =
   "Esta edición quedó reemplazada por tu pedido de eliminación de este contenido.";
@@ -69,6 +76,14 @@ export const tieneVersionPublica = (registro, pendingMeta = null) => {
     (registro?.activo === true || ["PUBLICADO", "APROBADO"].includes(pendingMeta?.previousEstado));
   return ESTADOS_VISIBLES.includes(estado) || pendienteConVersionPublica || conservaVersionPublica(registro, pendingMeta);
 };
+
+/**
+ * true si el portal está mostrando hoy este contenido: publicado, o con una edición en revisión o rechazada
+ * encima de una versión que sigue pública. El panel lo usa para no dar a entender que algo dejó de estar publicado
+ * solo porque se está editando.
+ */
+export const estaVisibleEnPortal = (registro, pendingMeta = null) =>
+  ["PUBLICADO", "APROBADO"].includes(String(registro?.estado || "").toUpperCase()) || conservaVersionPublica(registro, pendingMeta);
 
 /** Guarda la solicitud (si no existe ya) y devuelve la respuesta para el CMS. */
 export const solicitarEliminacion = async ({ entidad, id, titulo, user, reemplazaEdicion = false }) => {

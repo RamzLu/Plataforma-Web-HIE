@@ -32,3 +32,19 @@ test("un pendiente nuevo (nunca publicado) no tiene versión pública", () => {
 test("sin snapshot guardado no se conserva la versión pública", () => {
   assert.equal(conservaVersionPublica({ estado: "RECHAZADO" }, { previousEstado: "PUBLICADO" }), false);
 });
+
+test("estaVisibleEnPortal: lo publicado y las ediciones sobre una versión pública siguen a la vista", async () => {
+  const { estaVisibleEnPortal } = await import("../src/utils/eliminacion.utils.js");
+  assert.equal(estaVisibleEnPortal({ estado: "PUBLICADO" }), true);
+  assert.equal(estaVisibleEnPortal({ estado: "APROBADO" }), true);
+  assert.equal(estaVisibleEnPortal({ estado: "PENDIENTE_APROBACION" }, metaConVersionPublica), true, "edición en revisión");
+  assert.equal(estaVisibleEnPortal({ estado: "RECHAZADO" }, metaConVersionPublica), true, "edición rechazada");
+});
+
+test("estaVisibleEnPortal: lo que nunca fue público, o está archivado o programado, no", async () => {
+  const { estaVisibleEnPortal } = await import("../src/utils/eliminacion.utils.js");
+  assert.equal(estaVisibleEnPortal({ estado: "PENDIENTE_APROBACION" }, null), false, "pendiente nuevo");
+  assert.equal(estaVisibleEnPortal({ estado: "PENDIENTE_APROBACION" }, { previousEstado: "BORRADOR" }), false);
+  assert.equal(estaVisibleEnPortal({ estado: "RECHAZADO" }, null), false, "rechazado que nunca fue público");
+  for (const estado of ["BORRADOR", "ARCHIVADO", "PROGRAMADO"]) assert.equal(estaVisibleEnPortal({ estado }), false, estado);
+});

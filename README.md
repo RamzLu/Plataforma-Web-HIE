@@ -71,6 +71,21 @@ Cada cuerpo se valida con [zod](https://zod.dev) antes de llegar al controlador 
 
 Las rutas se arman en un solo lugar (`backend/src/routes/cms.routes.js`) a partir de la lista de `backend/src/services/cms/editorial.modulos.js`, y el frontend las usa con `src/api/editorial.api.js`. Para sumar un módulo se agrega una entrada a esa lista.
 
+### Cómo está organizado el backend
+
+Los servicios de cada módulo están en `backend/src/services/cms/`. El archivo `cms.<módulo>.service.js` tiene la lógica del flujo (crear, editar, revisar, eliminar, listar) y lo demás vive en una carpeta con el nombre del módulo, siempre con la misma forma:
+
+| Archivo | Qué tiene |
+|---|---|
+| `formato.js` | Cómo se le muestra el registro al panel y al portal |
+| `cambios.js` | Qué campos cambiaron al editar (lo que ve el Admin al revisar) |
+| `archivos.js` / `foto.js` / `imagenes.js` | Subida, reemplazo y protección de los archivos del módulo |
+| `datos.js`, `categoria.js`, `area.js`, `seed.js` | Datos propios de cada módulo |
+
+Lo que es común a varios módulos está en `backend/src/utils/`: `flujoEditorial.utils.js` (las reglas de qué pasa al pedir y al decidir), `almacenamiento.utils.js` (subir archivos), `archivos.utils.js` (borrar los que ya no usa nadie al aprobar), `editor.utils.js` (quién editó) y `cambios.utils.js`.
+
+Contenido gráfico (`cms.contenidoGrafico.service.js`) tiene un flujo por tipo de espacio en `contenidoGrafico/flujos/` y su formato por tipo en `contenidoGrafico/formatos/`.
+
 ## Roles y flujo editorial
 
 Los roles salen del token de Keycloak (realm o cliente):

@@ -1,37 +1,35 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
-import { registrarFalla } from "../../utils/log.utils.js";
 import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
-import { generarNombreUnico } from "../../utils/file.utils.js";
-import { sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
-import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
-import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
+import { parsearIdBigInt, esVerdadero } from "../../utils/sanitize.utils.js";
+import { parsearFecha } from "../../utils/fechas.utils.js";
+import { combinarCambios } from "../../utils/cambios.utils.js";
+import { resolverNombreEditor, resolverEditorVisible } from "../../utils/editor.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
-import { eliminarArchivosReemplazados, refDeArchivo } from "../../utils/archivos.utils.js";
+import { eliminarArchivosReemplazados } from "../../utils/archivos.utils.js";
+import { formatearResidencia } from "./residencias/formato.js";
+import {
+  separarArchivos,
+  subirBanner,
+  subirDocumento,
+  archivosPublicos,
+  quitarBannerAnterior,
+  quitarDocumentoAnterior,
+  archivosDeResidencia,
+} from "./residencias/archivos.js";
+import {
+  leerContenido,
+  tieneFechaProgramada,
+  armarContenidoNuevo,
+  armarContenidoEditado,
+  fechaConvocatoriaEditada,
+} from "./residencias/datos.js";
+import { cambiosDeResidencia } from "./residencias/cambios.js";
 import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "residencia", modelos: { "": "residencia" } });
-
-const formatBytes = (bytes) => {
-  const n = Number(bytes || 0);
-  if (n > 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
-  if (n > 0) return `${(n / 1024).toFixed(0)} KB`;
-  return "";
-};
-
-// Archivos de una residencia (o de su versión pública guardada): el banner y el documento adjunto.
-const archivosDeResidencia = ({ archivo, contenido }) => {
-  const refs = [refDeArchivo(archivo)];
-  try {
-    const nombre = JSON.parse(contenido || "{}")?.documento?.documentoArchivoNombre;
-    if (nombre) refs.push({ bucket: "documentos", nombre });
-  } catch {
-    // JSON inválido: no hay documento adjunto que considerar.
-  }
-  return refs;
-};
 
 class CmsResidenciaService {
   // Metadatos editoriales (motivo de rechazo, cambios pendientes, editor): ver utils/metaEditorial.utils.js
@@ -44,31 +42,6 @@ class CmsResidenciaService {
   obtenerMapaEditorMeta() { return metaEditorial.obtenerMapaEditorMeta(); }
   guardarEditorMeta(id, meta) { return metaEditorial.guardarEditorMeta(id, meta); }
   limpiarEditorMeta(id) { return metaEditorial.limpiarEditorMeta(id); }
-
-  async _resolverNombreEditor(user, payloadEditor = null) {
-    if (
-      payloadEditor &&
-      typeof payloadEditor === "string" &&
-      payloadEditor.trim() &&
-      payloadEditor !== "Editor CMS"
-    ) {
-      return payloadEditor.trim();
-    }
-    if (user) {
-      try {
-        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-        if (usuarioLocal?.nombre) {
-          return nombreDeUsuario(usuarioLocal);
-        }
-      } catch (error) {
-        registrarFalla("Usuario local", error);
-      }
-      if (user.name && user.name.trim()) return user.name.trim();
-      if (user.preferred_username && user.preferred_username.trim()) return user.preferred_username.trim();
-      if (user.username && user.username.trim()) return user.username.trim();
-    }
-    return "Editor CMS";
-  }
 
   async obtenerResidencias(esVistaAdmin = false) {
     const [residencias, motivosMap, pendingMetaMap, editorMetaMap, auditorias] = await Promise.all([
@@ -105,28 +78,11 @@ class CmsResidenciaService {
       const auditItem = auditMap.get(idStr) || null;
       const estadoUpper = (res.estado || "").toUpperCase();
 
-      let resolvedEditor = null;
-      let resolvedUpdatedAt = null;
-
-      if (pendingMeta?.editor && pendingMeta.editor !== "Editor CMS") {
-        resolvedEditor = pendingMeta.editor;
-        resolvedUpdatedAt = pendingMeta.updatedAt || null;
-      } else if (editorMeta?.editor && editorMeta.editor !== "Editor CMS") {
-        resolvedEditor = editorMeta.editor;
-        resolvedUpdatedAt = editorMeta.updatedAt || null;
-      } else if (auditItem?.usuario) {
-        const u = auditItem.usuario;
-        resolvedEditor = nombreDeUsuario(u);
-        resolvedUpdatedAt = auditItem.fechaHora;
-      } else if (pendingMeta?.editor) {
-        resolvedEditor = pendingMeta.editor;
-        resolvedUpdatedAt = pendingMeta.updatedAt || null;
-      } else if (editorMeta?.editor) {
-        resolvedEditor = editorMeta.editor;
-        resolvedUpdatedAt = editorMeta.updatedAt || null;
-      } else {
-        resolvedEditor = "Editor CMS";
-      }
+      const { editor: resolvedEditor, updatedAt: resolvedUpdatedAt } = resolverEditorVisible({
+        pendingMeta,
+        editorMeta,
+        auditoria: auditItem,
+      });
 
       if (!esVistaAdmin) {
         const esPublicadaDirecta = (estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO") && res.activo !== false;
@@ -139,7 +95,7 @@ class CmsResidenciaService {
         if (mantienePublicacionPrevia) {
           const snap = pendingMeta.snapshotPublico;
           resultado.push(
-            this._formatResidencia(
+            formatearResidencia(
               {
                 ...res,
                 ...snap,
@@ -157,7 +113,7 @@ class CmsResidenciaService {
       }
 
       resultado.push(
-        this._formatResidencia(res, motivoRechazo, pendingMeta, resolvedEditor, resolvedUpdatedAt)
+        formatearResidencia(res, motivoRechazo, pendingMeta, resolvedEditor, resolvedUpdatedAt)
       );
     }
 
@@ -171,113 +127,17 @@ class CmsResidenciaService {
       throw error;
     }
 
-    const editorNombre = await this._resolverNombreEditor(user, data.editor);
+    const editorNombre = await resolverNombreEditor(user, data.editor);
     const nowIso = new Date().toISOString();
+    const { banner: bannerFile, documento: docFile } = separarArchivos(files);
 
-    const filesArray = Array.isArray(files) ? files : (files ? [files] : []);
-    const bannerFile = filesArray.find((f) => f.fieldname === "banner" || f.fieldname === "imagen");
-    const docFile = filesArray.find((f) => f.fieldname === "archivo" || f.fieldname === "documento");
-
-    let imagenId = null;
-
-    if (bannerFile) {
-      const { nombreUnico, extension } = generarNombreUnico(bannerFile.originalname, "residencia_banner");
-      const { error: storageError } = await supabase.storage
-        .from("noticias-imagenes")
-        .upload(nombreUnico, bannerFile.buffer, {
-          contentType: bannerFile.mimetype,
-          upsert: true,
-        });
-
-      if (storageError) {
-        console.error("Error subiendo imagen de banner a Supabase:", storageError);
-        const error = new Error("No se pudo almacenar el banner de la residencia.");
-        error.statusCode = 500;
-        throw error;
-      }
-
-      const archivoBannerDb = await prisma.archivo.create({
-        data: {
-          nombreOriginal: bannerFile.originalname,
-          nombreArchivo: nombreUnico,
-          ruta: `noticias-imagenes/${nombreUnico}`,
-          extension: extension || "jpg",
-          mimeType: bannerFile.mimetype,
-          tamanioBytes: BigInt(bannerFile.size || 0),
-        },
-      });
-
-      imagenId = archivoBannerDb.id;
-    }
-
-    let documentoMeta = null;
-    if (docFile) {
-      const { nombreUnico, extension } = generarNombreUnico(docFile.originalname, "residencia_doc");
-      const { error: storageError } = await supabase.storage
-        .from("documentos")
-        .upload(nombreUnico, docFile.buffer, {
-          contentType: docFile.mimetype,
-          upsert: true,
-        });
-
-      if (storageError) {
-        console.error("Error subiendo documento a Supabase:", storageError);
-        const error = new Error("No se pudo almacenar el documento adjunto de la residencia.");
-        error.statusCode = 500;
-        throw error;
-      }
-
-      const archivoDocDb = await prisma.archivo.create({
-        data: {
-          nombreOriginal: docFile.originalname,
-          nombreArchivo: nombreUnico,
-          ruta: `documentos/${nombreUnico}`,
-          extension: extension || "pdf",
-          mimeType: docFile.mimetype,
-          tamanioBytes: BigInt(docFile.size || 0),
-        },
-      });
-
-      const { data: pubUrlData } = supabase.storage.from("documentos").getPublicUrl(nombreUnico);
-
-      documentoMeta = {
-        documentoId: archivoDocDb.id.toString(),
-        documentoNombre: docFile.originalname,
-        documentoTamano: formatBytes(docFile.size),
-        documentoTipo: (extension || "pdf").toUpperCase(),
-        documentoUrl: pubUrlData?.publicUrl || "",
-        documentoArchivoNombre: nombreUnico,
-      };
-    }
-
-    const tieneFechaProgramada =
-      (data.estado?.toUpperCase() === "PROGRAMADO" || data.estado?.toUpperCase() === "PENDIENTE_APROBACION") &&
-      Boolean(data.fechaPublicacion);
-
-    const contenidoPayload = {
-      categoria: data.categoria || "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
-      descripcionPrograma: data.descripcionPrograma || "",
-      cupos: data.cupos || "",
-      duracion: data.duracion || "",
-      requisitos: data.requisitos || "",
-      reglamentoRotacion: data.reglamentoRotacion || "",
-      fechaInicio: data.fechaInicio || "",
-      fechaPublicacion: tieneFechaProgramada ? data.fechaPublicacion : null,
-      documento: documentoMeta,
-    };
-
-    let fechaConvocatoriaDate = null;
-    if (data.fechaConvocatoria) {
-      const parsed = new Date(data.fechaConvocatoria);
-      if (!isNaN(parsed.getTime())) {
-        fechaConvocatoriaDate = parsed;
-      }
-    }
+    const imagenId = bannerFile ? await subirBanner(bannerFile) : null;
+    const documento = docFile ? await subirDocumento(docFile) : null;
 
     // Regla común (utils/flujoEditorial.utils.js). Sin estado, el CMS pide publicar.
     const solicitud = resolverSolicitud({
       estadoActual: null,
-      intencion: intencionDesdeEstado(data.estado || "PUBLICADO", { tieneFecha: tieneFechaProgramada }),
+      intencion: intencionDesdeEstado(data.estado || "PUBLICADO", { tieneFecha: tieneFechaProgramada(data) }),
     });
     const estadoNormalizado = solicitud.estado;
 
@@ -285,12 +145,12 @@ class CmsResidenciaService {
       data: {
         nombre: data.nombre.trim(),
         descripcion: data.descripcion ? data.descripcion.trim() : null,
-        contenido: JSON.stringify(contenidoPayload),
-        imagenId: imagenId,
+        contenido: JSON.stringify(armarContenidoNuevo(data, documento)),
+        imagenId,
         convocatoria: data.convocatoria ? data.convocatoria.trim() : "Convocatoria Abierta",
-        fechaConvocatoria: fechaConvocatoriaDate,
+        fechaConvocatoria: parsearFecha(data.fechaConvocatoria),
         estado: estadoNormalizado,
-        activo: data.activo !== undefined ? (data.activo === true || data.activo === "true") : true,
+        activo: data.activo !== undefined ? esVerdadero(data.activo) : true,
         updatedAt: new Date(),
       },
       include: {
@@ -319,29 +179,14 @@ class CmsResidenciaService {
       await this.guardarPendingMeta(idStr, pendingMeta);
     }
 
-    try {
-      if (user) {
-        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-        await prisma.auditoria.create({
-          data: {
-            usuarioId: usuarioLocal.id,
-            entidad: "residencia",
-            entidadId: idStr,
-            accion: "CREAR",
-            descripcion: `Creación de residencia "${nueva.nombre}".`,
-          },
-        });
-      }
-    } catch (error) {
-      registrarFalla("Auditoría", error);
-    }
+    await registrarAuditoria(user, { entidad: "residencia", id: idStr, accion: ACCIONES.CREAR, descripcion: `Creación de residencia "${nueva.nombre}".` });
 
     return {
       message:
         estadoNormalizado === "PENDIENTE_APROBACION"
           ? "Residencia enviada a revisión del administrador para su aprobación."
           : "Residencia creada con éxito.",
-      residencia: this._formatResidencia(nueva, null, pendingMeta, editorNombre, nowIso),
+      residencia: formatearResidencia(nueva, null, pendingMeta, editorNombre, nowIso),
     };
   }
 
@@ -360,7 +205,7 @@ class CmsResidenciaService {
       throw error;
     }
 
-    const editorNombre = await this._resolverNombreEditor(user, data.editor);
+    const editorNombre = await resolverNombreEditor(user, data.editor);
     const nowIso = new Date().toISOString();
 
     const estadoAnterior = (residenciaExistente.estado || "").toUpperCase();
@@ -370,247 +215,44 @@ class CmsResidenciaService {
     const provieneDePublicada = fuePublico(estadoAnterior, metaExistente);
 
     // El banner y el documento de la versión pública no se borran del almacenamiento mientras el portal
-    // la siga mostrando: si hay una edición en revisión, la pública es la guardada en "snapshotPublico";
-    // si no, es la del registro actual.
-    const snapshotPublico = metaExistente?.snapshotPublico || null;
-    const bannerPublicoId = provieneDePublicada
-      ? (snapshotPublico ? snapshotPublico.imagenId : residenciaExistente.imagenId)
-      : null;
-    let documentoPublicoId = null;
-    if (provieneDePublicada) {
-      try {
-        const contenidoPublico = JSON.parse((snapshotPublico ? snapshotPublico.contenido : residenciaExistente.contenido) || "{}");
-        documentoPublicoId = contenidoPublico?.documento?.documentoId ?? null;
-      } catch {
-        // JSON inválido: no hay documento público que proteger.
-      }
+    // la siga mostrando (ver archivosPublicos).
+    const { esBannerPublico, esDocumentoPublico } = archivosPublicos({
+      provieneDePublicada,
+      snapshotPublico: metaExistente?.snapshotPublico || null,
+      residencia: residenciaExistente,
+    });
+    const { banner: bannerFile, documento: docFile } = separarArchivos(files);
+
+    let imagenId = residenciaExistente.imagenId;
+    if (esVerdadero(data.eliminarBanner)) {
+      await quitarBannerAnterior(residenciaExistente.archivo, esBannerPublico);
+      imagenId = null;
     }
-    const esBannerPublico = (archivoId) => bannerPublicoId != null && String(archivoId) === String(bannerPublicoId);
-    const esDocumentoPublico = (archivoId) => documentoPublicoId != null && String(archivoId) === String(documentoPublicoId);
-
-    const filesArray = Array.isArray(files) ? files : (files ? [files] : []);
-    const bannerFile = filesArray.find((f) => f.fieldname === "banner" || f.fieldname === "imagen");
-    const docFile = filesArray.find((f) => f.fieldname === "archivo" || f.fieldname === "documento");
-
-    let finalImagenId = residenciaExistente.imagenId;
-
-    if (data.eliminarBanner === "true" || data.eliminarBanner === true) {
-      if (residenciaExistente.archivo && !esBannerPublico(residenciaExistente.archivo.id)) {
-        try {
-          await supabase.storage
-            .from("noticias-imagenes")
-            .remove([residenciaExistente.archivo.nombreArchivo]);
-          await prisma.archivo.delete({ where: { id: residenciaExistente.archivo.id } });
-        } catch (e) {
-          console.warn("No se pudo remover el banner anterior:", e.message);
-        }
-      }
-      finalImagenId = null;
-    }
-
     if (bannerFile) {
-      if (residenciaExistente.archivo && !esBannerPublico(residenciaExistente.archivo.id)) {
-        try {
-          await supabase.storage
-            .from("noticias-imagenes")
-            .remove([residenciaExistente.archivo.nombreArchivo]);
-          await prisma.archivo.delete({ where: { id: residenciaExistente.archivo.id } });
-        } catch (e) {
-          console.warn("No se pudo remover banner previo:", e.message);
-        }
-      }
-
-      const { nombreUnico, extension } = generarNombreUnico(bannerFile.originalname, "residencia_banner");
-      const { error: storageError } = await supabase.storage
-        .from("noticias-imagenes")
-        .upload(nombreUnico, bannerFile.buffer, {
-          contentType: bannerFile.mimetype,
-          upsert: true,
-        });
-
-      if (storageError) {
-        console.error("Error subiendo banner a Supabase:", storageError);
-        const error = new Error("No se pudo almacenar el banner de la residencia.");
-        error.statusCode = 500;
-        throw error;
-      }
-
-      const nuevoArchivoBanner = await prisma.archivo.create({
-        data: {
-          nombreOriginal: bannerFile.originalname,
-          nombreArchivo: nombreUnico,
-          ruta: `noticias-imagenes/${nombreUnico}`,
-          extension: extension || "jpg",
-          mimeType: bannerFile.mimetype,
-          tamanioBytes: BigInt(bannerFile.size || 0),
-        },
-      });
-
-      finalImagenId = nuevoArchivoBanner.id;
+      await quitarBannerAnterior(residenciaExistente.archivo, esBannerPublico);
+      imagenId = await subirBanner(bannerFile);
     }
 
-    let contenidoPrevio = {};
-    if (residenciaExistente.contenido) {
-      try {
-        contenidoPrevio = JSON.parse(residenciaExistente.contenido);
-      } catch (err) {
-        contenidoPrevio = {};
-      }
+    const contenidoPrevio = leerContenido(residenciaExistente.contenido);
+    let documento = contenidoPrevio.documento || null;
+    if (esVerdadero(data.eliminarDocumento)) {
+      await quitarDocumentoAnterior(documento, esDocumentoPublico);
+      documento = null;
     }
-
-    let documentoMeta = contenidoPrevio.documento || null;
-
-    if (data.eliminarDocumento === "true" || data.eliminarDocumento === true) {
-      if (documentoMeta?.documentoId && !esDocumentoPublico(documentoMeta.documentoId)) {
-        try {
-          if (documentoMeta.documentoArchivoNombre) {
-            await supabase.storage
-              .from("documentos")
-              .remove([documentoMeta.documentoArchivoNombre]);
-          }
-          await prisma.archivo.delete({ where: { id: parsearIdBigInt(documentoMeta.documentoId, "ID de documento") } });
-        } catch (e) {
-          console.warn("No se pudo remover documento previo:", e.message);
-        }
-      }
-      documentoMeta = null;
-    }
-
     if (docFile) {
-      if (documentoMeta?.documentoId && !esDocumentoPublico(documentoMeta.documentoId)) {
-        try {
-          if (documentoMeta.documentoArchivoNombre) {
-            await supabase.storage
-              .from("documentos")
-              .remove([documentoMeta.documentoArchivoNombre]);
-          }
-          await prisma.archivo.delete({ where: { id: parsearIdBigInt(documentoMeta.documentoId, "ID de documento") } });
-        } catch (e) {
-          console.warn("No se pudo remover documento previo:", e.message);
-        }
-      }
-
-      const { nombreUnico, extension } = generarNombreUnico(docFile.originalname, "residencia_doc");
-      const { error: storageError } = await supabase.storage
-        .from("documentos")
-        .upload(nombreUnico, docFile.buffer, {
-          contentType: docFile.mimetype,
-          upsert: true,
-        });
-
-      if (storageError) {
-        console.error("Error subiendo documento a Supabase:", storageError);
-        const error = new Error("No se pudo almacenar el documento de la residencia.");
-        error.statusCode = 500;
-        throw error;
-      }
-
-      const nuevoArchivoDoc = await prisma.archivo.create({
-        data: {
-          nombreOriginal: docFile.originalname,
-          nombreArchivo: nombreUnico,
-          ruta: `documentos/${nombreUnico}`,
-          extension: extension || "pdf",
-          mimeType: docFile.mimetype,
-          tamanioBytes: BigInt(docFile.size || 0),
-        },
-      });
-
-      const { data: pubUrlData } = supabase.storage.from("documentos").getPublicUrl(nombreUnico);
-
-      documentoMeta = {
-        documentoId: nuevoArchivoDoc.id.toString(),
-        documentoNombre: docFile.originalname,
-        documentoTamano: formatBytes(docFile.size),
-        documentoTipo: (extension || "pdf").toUpperCase(),
-        documentoUrl: pubUrlData?.publicUrl || "",
-        documentoArchivoNombre: nombreUnico,
-      };
+      await quitarDocumentoAnterior(documento, esDocumentoPublico);
+      documento = await subirDocumento(docFile);
     }
 
-    const tieneFechaProgramada =
-      (data.estado?.toUpperCase() === "PROGRAMADO" || data.estado?.toUpperCase() === "PENDIENTE_APROBACION") &&
-      Boolean(data.fechaPublicacion);
+    const contenido = armarContenidoEditado(data, contenidoPrevio, documento);
+    const fechaConvocatoria = fechaConvocatoriaEditada(data.fechaConvocatoria, residenciaExistente.fechaConvocatoria);
 
-    const contenidoPayload = {
-      categoria: data.categoria !== undefined ? data.categoria : (contenidoPrevio.categoria || ""),
-      descripcionPrograma: data.descripcionPrograma !== undefined ? data.descripcionPrograma : (contenidoPrevio.descripcionPrograma || ""),
-      cupos: data.cupos !== undefined ? data.cupos : (contenidoPrevio.cupos || ""),
-      duracion: data.duracion !== undefined ? data.duracion : (contenidoPrevio.duracion || ""),
-      requisitos: data.requisitos !== undefined ? data.requisitos : (contenidoPrevio.requisitos || ""),
-      reglamentoRotacion: data.reglamentoRotacion !== undefined ? data.reglamentoRotacion : (contenidoPrevio.reglamentoRotacion || ""),
-      fechaInicio: data.fechaInicio !== undefined ? data.fechaInicio : (contenidoPrevio.fechaInicio || ""),
-      fechaPublicacion: data.fechaPublicacion !== undefined ? (data.fechaPublicacion || null) : (contenidoPrevio.fechaPublicacion || null),
-      documento: documentoMeta,
-    };
-
-    let fechaConvocatoriaDate = residenciaExistente.fechaConvocatoria;
-    if (data.fechaConvocatoria !== undefined) {
-      if (data.fechaConvocatoria && data.fechaConvocatoria !== "") {
-        const parsed = new Date(data.fechaConvocatoria);
-        fechaConvocatoriaDate = !isNaN(parsed.getTime()) ? parsed : null;
-      } else {
-        fechaConvocatoriaDate = null;
-      }
-    }
-
-    // Preparar datos para comparación de cambios
-    const antesData = {
-      nombre: residenciaExistente.nombre || "",
-      categoria: contenidoPrevio.categoria || "",
-      convocatoria: residenciaExistente.convocatoria || "",
-      fechaInicio: contenidoPrevio.fechaInicio || "",
-      fechaConvocatoria: residenciaExistente.fechaConvocatoria
-        ? residenciaExistente.fechaConvocatoria.toISOString().split("T")[0]
-        : "",
-      descripcion: residenciaExistente.descripcion || "",
-      descripcionPrograma: contenidoPrevio.descripcionPrograma || "",
-      duracion: contenidoPrevio.duracion || "",
-      cupos: contenidoPrevio.cupos || "",
-      requisitos: contenidoPrevio.requisitos || "",
-      reglamentoRotacion: contenidoPrevio.reglamentoRotacion || "",
-      bannerNombre: residenciaExistente.archivo?.nombreOriginal || "",
-      documentoNombre: contenidoPrevio.documento?.documentoNombre || "",
-    };
-
-    const despuesData = {
-      nombre: data.nombre !== undefined ? data.nombre.trim() : antesData.nombre,
-      categoria: data.categoria !== undefined ? data.categoria.trim() : antesData.categoria,
-      convocatoria: data.convocatoria !== undefined ? data.convocatoria.trim() : antesData.convocatoria,
-      fechaInicio: data.fechaInicio !== undefined ? (data.fechaInicio || "") : antesData.fechaInicio,
-      fechaConvocatoria: data.fechaConvocatoria !== undefined ? (data.fechaConvocatoria || "") : antesData.fechaConvocatoria,
-      descripcion: data.descripcion !== undefined ? data.descripcion.trim() : antesData.descripcion,
-      descripcionPrograma: data.descripcionPrograma !== undefined ? data.descripcionPrograma.trim() : antesData.descripcionPrograma,
-      duracion: data.duracion !== undefined ? data.duracion.trim() : antesData.duracion,
-      cupos: data.cupos !== undefined ? (data.cupos || "").trim() : antesData.cupos,
-      requisitos: data.requisitos !== undefined ? data.requisitos.trim() : antesData.requisitos,
-      reglamentoRotacion: data.reglamentoRotacion !== undefined ? data.reglamentoRotacion.trim() : antesData.reglamentoRotacion,
-      bannerNombre: bannerFile ? bannerFile.originalname : (data.eliminarBanner ? "" : antesData.bannerNombre),
-      documentoNombre: docFile ? docFile.originalname : (data.eliminarDocumento ? "" : antesData.documentoNombre),
-    };
-
-    const camposRes = [
-      { key: "nombre", label: "Nombre de la residencia" },
-      { key: "categoria", label: "Categoría institucional" },
-      { key: "convocatoria", label: "Estado de convocatoria" },
-      { key: "fechaInicio", label: "Fecha de inicio / apertura" },
-      { key: "fechaConvocatoria", label: "Fecha límite / examen" },
-      { key: "duracion", label: "Duración" },
-      { key: "cupos", label: "Cupos" },
-      { key: "descripcion", label: "Resumen breve" },
-      { key: "descripcionPrograma", label: "Programa académico" },
-      { key: "requisitos", label: "Requisitos de postulación", tipo: "list" },
-      { key: "reglamentoRotacion", label: "Leyenda de reglamento" },
-      { key: "bannerNombre", label: "Imagen de banner" },
-      { key: "documentoNombre", label: "Documento adjunto" },
-    ];
-
-    const todosCambios = calcularCambios(antesData, despuesData, camposRes);
+    const todosCambios = cambiosDeResidencia(residenciaExistente, contenidoPrevio, data, { banner: bannerFile, documento: docFile });
     const estadoCambio = Boolean(data.estado && data.estado.toUpperCase() !== estadoAnterior);
-    const bannerModificado = Boolean(bannerFile || data.eliminarBanner === "true" || data.eliminarBanner === true);
-    const docModificado = Boolean(docFile || data.eliminarDocumento === "true" || data.eliminarDocumento === true);
+    const bannerModificado = Boolean(bannerFile || esVerdadero(data.eliminarBanner));
+    const docModificado = Boolean(docFile || esVerdadero(data.eliminarDocumento));
     const fechaPubAnterior = contenidoPrevio.fechaPublicacion || null;
-    const fechaPubNueva = data.fechaPublicacion !== undefined ? (data.fechaPublicacion || null) : fechaPubAnterior;
+    const fechaPubNueva = data.fechaPublicacion !== undefined ? data.fechaPublicacion || null : fechaPubAnterior;
     const fechaPubCambio = fechaPubAnterior !== fechaPubNueva;
 
     if (todosCambios.length === 0 && !estadoCambio && !bannerModificado && !docModificado && !fechaPubCambio) {
@@ -630,7 +272,7 @@ class CmsResidenciaService {
     const solicitud = resolverSolicitud({
       estadoActual: estadoAnterior,
       meta: metaExistente,
-      intencion: intencionDesdeEstado(estadoPedido, { tieneFecha: Boolean(contenidoPayload.fechaPublicacion) }),
+      intencion: intencionDesdeEstado(estadoPedido, { tieneFecha: Boolean(contenido.fechaPublicacion) }),
       snapshotActual: () => ({
         nombre: residenciaExistente.nombre,
         descripcion: residenciaExistente.descripcion,
@@ -648,7 +290,7 @@ class CmsResidenciaService {
       estadoNormalizado === "ARCHIVADO"
         ? false
         : data.activo !== undefined
-        ? data.activo === true || data.activo === "true"
+        ? esVerdadero(data.activo)
         : residenciaExistente.activo;
 
     if (solicitud.sinCambios) {
@@ -678,10 +320,10 @@ class CmsResidenciaService {
       data: {
         nombre: data.nombre !== undefined ? data.nombre.trim() : residenciaExistente.nombre,
         descripcion: data.descripcion !== undefined ? data.descripcion : residenciaExistente.descripcion,
-        contenido: JSON.stringify(contenidoPayload),
-        imagenId: finalImagenId,
+        contenido: JSON.stringify(contenido),
+        imagenId,
         convocatoria: data.convocatoria !== undefined ? (data.convocatoria ? data.convocatoria.trim() : null) : residenciaExistente.convocatoria,
-        fechaConvocatoria: fechaConvocatoriaDate,
+        fechaConvocatoria,
         estado: estadoNormalizado,
         activo: activoFinal,
         updatedAt: new Date(),
@@ -691,22 +333,7 @@ class CmsResidenciaService {
       },
     });
 
-    try {
-      if (user) {
-        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-        await prisma.auditoria.create({
-          data: {
-            usuarioId: usuarioLocal.id,
-            entidad: "residencia",
-            entidadId: idStr,
-            accion: "MODIFICAR",
-            descripcion: `Actualización de residencia "${actualizada.nombre}".`,
-          },
-        });
-      }
-    } catch (error) {
-      registrarFalla("Auditoría", error);
-    }
+    await registrarAuditoria(user, { entidad: "residencia", id: idStr, accion: ACCIONES.MODIFICAR, descripcion: `Actualización de residencia "${actualizada.nombre}".` });
 
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
@@ -723,7 +350,7 @@ class CmsResidenciaService {
     await limpiarSolicitudEliminacion("residencia", idStr); // editar después de pedir la baja anula el pedido
     return {
       message: mensaje,
-      residencia: this._formatResidencia(actualizada, motivoActual, pendingMetaActual, editorNombre, nowIso),
+      residencia: formatearResidencia(actualizada, motivoActual, pendingMetaActual, editorNombre, nowIso),
     };
   }
 
@@ -804,32 +431,22 @@ class CmsResidenciaService {
       },
     });
 
-    try {
-      if (user) {
-        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-        await prisma.auditoria.create({
-          data: {
-            usuarioId: usuarioLocal.id,
-            entidad: "residencia",
-            entidadId: idStr,
-            accion: finalEstado === "RECHAZADO" ? "RECHAZAR" : finalEstado === "ARCHIVADO" ? "ARCHIVAR" : "APROBAR",
-            descripcion:
-              finalEstado === "RECHAZADO"
-                ? `Residencia "${residenciaExistente.nombre}" rechazada. Motivo: ${motivoGuardado}`
-                : `Residencia "${residenciaExistente.nombre}" evaluada como ${finalEstado}.`,
-          },
-        });
-      }
-    } catch (error) {
-      registrarFalla("Auditoría", error);
-    }
+    await registrarAuditoria(user, {
+      entidad: "residencia",
+      id: idStr,
+      accion: finalEstado === "RECHAZADO" ? ACCIONES.RECHAZAR : finalEstado === "ARCHIVADO" ? ACCIONES.ARCHIVAR : ACCIONES.APROBAR,
+      descripcion:
+        finalEstado === "RECHAZADO"
+          ? `Residencia "${residenciaExistente.nombre}" rechazada. Motivo: ${motivoGuardado}`
+          : `Residencia "${residenciaExistente.nombre}" evaluada como ${finalEstado}.`,
+    });
 
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
 
     return {
       message: finalEstado === "RECHAZADO" ? "Residencia rechazada." : `Estado actualizado a ${finalEstado} con éxito.`,
-      residencia: this._formatResidencia(residenciaActualizada, motivoActual, pendingMetaActual),
+      residencia: formatearResidencia(residenciaActualizada, motivoActual, pendingMetaActual),
     };
   }
 
@@ -944,133 +561,6 @@ class CmsResidenciaService {
     }
   }
 
-  _formatResidencia(res, motivoRechazo = null, pendingMeta = null, editor = null, updatedAtCustom = null) {
-    let extra = {
-      categoria: "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
-      descripcionPrograma: "",
-      cupos: "",
-      duracion: "",
-      requisitos: "",
-      reglamentoRotacion: "",
-      fechaInicio: "",
-      fechaPublicacion: null,
-      documento: null,
-    };
-
-    if (res.contenido) {
-      try {
-        const parsed = JSON.parse(res.contenido);
-        if (typeof parsed === "object" && parsed !== null) {
-          extra = { ...extra, ...parsed };
-        }
-      } catch {
-        // JSON inválido: se ignora y se usa el valor por defecto.
-      }
-    }
-
-    let bannerUrl = "";
-    let bannerNombre = "";
-    if (res.archivo) {
-      bannerNombre = res.archivo.nombreOriginal || "";
-      const { data } = supabase.storage
-        .from("noticias-imagenes")
-        .getPublicUrl(res.archivo.nombreArchivo);
-      bannerUrl = data?.publicUrl || "";
-    }
-
-    const doc = extra.documento || {};
-    const documentoUrl = sanitizarUrlLectura(doc.documentoUrl, "");
-    const documentoNombre = doc.documentoNombre || "";
-    const documentoTamano = doc.documentoTamano || "";
-    const documentoTipo = doc.documentoTipo || (documentoNombre ? documentoNombre.split(".").pop().toUpperCase() : "PDF");
-
-    const editorResolved = editor || pendingMeta?.editor || "Editor CMS";
-    const rawUpdatedAt = updatedAtCustom || pendingMeta?.updatedAt || res.updatedAt || res.createdAt;
-    let fechaActualizacion = "Reciente";
-    if (rawUpdatedAt) {
-      try {
-        const d = new Date(rawUpdatedAt);
-        if (!isNaN(d.getTime())) {
-          fechaActualizacion = d.toLocaleDateString("es-AR", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          });
-        }
-      } catch {
-        // Fecha inválida: se muestra el texto por defecto.
-      }
-    }
-
-    let fechaCarga = "Reciente";
-    if (res.createdAt) {
-      try {
-        const d = new Date(res.createdAt);
-        if (!isNaN(d.getTime())) {
-          fechaCarga = d.toLocaleDateString("es-AR", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          });
-        }
-      } catch {
-        // Fecha inválida: se muestra el texto por defecto.
-      }
-    }
-
-    const cambios = pendingMeta?.cambios ? cambiosParaCliente(pendingMeta.cambios) : [];
-    const esActualizacion = Boolean(pendingMeta?.esActualizacion);
-
-    return {
-      id: res.id.toString(),
-      nombre: res.nombre,
-      descripcion: res.descripcion || "",
-      convocatoria: res.convocatoria || "Convocatoria Abierta",
-      fechaInicio: extra.fechaInicio || "",
-      fechaInicioVigencia: extra.fechaInicio || "",
-      fechaConvocatoria: res.fechaConvocatoria
-        ? res.fechaConvocatoria.toISOString().split("T")[0]
-        : "",
-      fechaPublicacion: extra.fechaPublicacion || null,
-      fechaProgramada: extra.fechaPublicacion || null,
-      estado: res.estado,
-      activo: res.activo,
-      createdAt: res.createdAt ? res.createdAt.toISOString() : "",
-      updatedAt: res.updatedAt ? res.updatedAt.toISOString() : "",
-
-      categoria: extra.categoria || "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
-      descripcionPrograma: extra.descripcionPrograma || "",
-      cupos: extra.cupos || "",
-      duracion: extra.duracion || "",
-      requisitos: extra.requisitos || "",
-      reglamentoRotacion: extra.reglamentoRotacion || "",
-
-      bannerId: res.imagenId ? res.imagenId.toString() : null,
-      bannerNombre,
-      bannerUrl,
-
-      documentoId: doc.documentoId || null,
-      documentoNombre,
-      documentoTamano,
-      documentoTipo,
-      documentoUrl,
-
-      archivoNombre: documentoNombre,
-      archivoUrl: documentoUrl,
-      archivoTamano: documentoTamano,
-      archivoTipo: documentoTipo,
-
-      editor: editorResolved,
-      fechaActualizacion,
-      fechaCarga,
-      cambios,
-      esActualizacion,
-
-      requestedEstado: (res.estado || "").toUpperCase() === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
-      motivoRechazo: motivoRechazo || null,
-      rejectionReason: motivoRechazo || null,
-    };
-  }
 }
 
 export default new CmsResidenciaService();

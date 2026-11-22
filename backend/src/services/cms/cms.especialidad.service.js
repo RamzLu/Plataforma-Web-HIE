@@ -1,14 +1,18 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
-import { registrarFalla } from "../../utils/log.utils.js";
 import { prisma } from "../../config/prisma.js";
-import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, conservaVersionPublica, estaVisibleEnPortal, tieneEdicionPendiente, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
-import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
-import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
+import { resolverNombreEditor, resolverEditorVisible } from "../../utils/editor.utils.js";
+import { combinarCambios } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado } from "../../utils/flujoEditorial.utils.js";
+import { formatearEspecialidad } from "./especialidades/formato.js";
+import { cambiosDeEspecialidad, requisitosComoTexto } from "./especialidades/cambios.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "especialidad o servicio", modelos: { esp_: "especialidad", srv_: "servicio" } });
+
+// Especialidades y servicios comparten ruta y lógica, pero viven en tablas distintas.
+const modeloDe = (esServicio) => (esServicio ? prisma.servicio : prisma.especialidad);
 
 class CmsEspecialidadService {
   _metaKey(id, esServicio) {
@@ -26,31 +30,6 @@ class CmsEspecialidadService {
   guardarEditorMeta(id, esServicio, meta) { return metaEditorial.guardarEditorMeta(this._metaKey(id, esServicio), meta); }
   limpiarEditorMeta(id, esServicio) { return metaEditorial.limpiarEditorMeta(this._metaKey(id, esServicio)); }
 
-  async _resolverNombreEditor(user, payloadEditor = null) {
-    if (
-      payloadEditor &&
-      typeof payloadEditor === "string" &&
-      payloadEditor.trim() &&
-      payloadEditor !== "Editor CMS"
-    ) {
-      return payloadEditor.trim();
-    }
-    if (user) {
-      try {
-        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-        if (usuarioLocal?.nombre) {
-          return nombreDeUsuario(usuarioLocal);
-        }
-      } catch (error) {
-        registrarFalla("Usuario local", error);
-      }
-      if (user.name && user.name.trim()) return user.name.trim();
-      if (user.preferred_username && user.preferred_username.trim()) return user.preferred_username.trim();
-      if (user.username && user.username.trim()) return user.username.trim();
-    }
-    return "Editor CMS";
-  }
-
   async crearEspecialidad(data, user) {
     const esServicio = data.esServicio === true || data.esServicio === "true";
     // Regla común (utils/flujoEditorial.utils.js). Sin estado, el CMS pide publicar.
@@ -65,24 +44,15 @@ class CmsEspecialidadService {
       descripcion: data.descripcion || null,
       ubicacion: data.ubicacion || null,
       horarios: data.horarios || null,
-      requisitos: data.requisitos
-        ? typeof data.requisitos === "string"
-          ? data.requisitos
-          : JSON.stringify(data.requisitos)
-        : "[]",
+      requisitos: data.requisitos ? requisitosComoTexto(data.requisitos) : "[]",
       documentacionNecesaria: data.documentacionNecesaria || null,
       informacionDerivacion: data.informacionDerivacion || null,
       estado: estadoFinal,
     };
 
-    const editorNombre = await this._resolverNombreEditor(user, data.editor || data.editorNombre);
+    const editorNombre = await resolverNombreEditor(user, data.editor || data.editorNombre);
 
-    let nuevoRegistro;
-    if (esServicio) {
-      nuevoRegistro = await prisma.servicio.create({ data: payload });
-    } else {
-      nuevoRegistro = await prisma.especialidad.create({ data: payload });
-    }
+    const nuevoRegistro = await modeloDe(esServicio).create({ data: payload });
 
     const idStr = nuevoRegistro.id.toString();
     const nowIso = new Date().toISOString();
@@ -100,26 +70,11 @@ class CmsEspecialidadService {
       });
     }
 
-    try {
-      if (user) {
-        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-        await prisma.auditoria.create({
-          data: {
-            usuarioId: usuarioLocal.id,
-            entidad: esServicio ? "servicio" : "especialidad",
-            entidadId: idStr,
-            accion: "CREAR",
-            descripcion: `Creación de ${esServicio ? "servicio" : "especialidad"} "${data.nombre}".`,
-          },
-        });
-      }
-    } catch (error) {
-      registrarFalla("Auditoría", error);
-    }
+    await registrarAuditoria(user, { entidad: esServicio ? "servicio" : "especialidad", id: idStr, accion: ACCIONES.CREAR, descripcion: `Creación de ${esServicio ? "servicio" : "especialidad"} "${data.nombre}".` });
 
     return {
       message: esServicio ? "Servicio creado con éxito" : "Especialidad creada con éxito",
-      data: this._format(nuevoRegistro, esServicio, null, {
+      data: formatearEspecialidad(nuevoRegistro, esServicio, null, {
         editor: editorNombre,
         updatedAt: nowIso,
       }),
@@ -131,9 +86,7 @@ class CmsEspecialidadService {
     const esServicio = data.esServicio === true || data.esServicio === "true";
     const idStr = id.toString();
 
-    let existente = esServicio
-      ? await prisma.servicio.findUnique({ where: { id: idBigInt } })
-      : await prisma.especialidad.findUnique({ where: { id: idBigInt } });
+    const existente = await modeloDe(esServicio).findUnique({ where: { id: idBigInt } });
 
     if (!existente) {
       const error = new Error(`${esServicio ? "Servicio" : "Especialidad"} no encontrado/a.`);
@@ -145,7 +98,7 @@ class CmsEspecialidadService {
     // Sin estado: se mantiene archivado lo archivado y todo lo demás pide publicar.
     const estadoSolicitado = data.estado ? data.estado.toUpperCase() : estadoAnterior === "ARCHIVADO" ? "ARCHIVADO" : "PUBLICADO";
 
-    const editorNombre = await this._resolverNombreEditor(user, data.editor || data.editorNombre);
+    const editorNombre = await resolverNombreEditor(user, data.editor || data.editorNombre);
 
     const metaMap = await this.obtenerMapaPendingMeta();
     const metaExistente = metaMap.get(this._metaKey(idStr, esServicio)) || null;
@@ -163,29 +116,17 @@ class CmsEspecialidadService {
     const nowIso = new Date().toISOString();
 
     // Validación: verificar si hubo cambios antes de modificar la base de datos
-    const camposEsp = [
-      { key: "nombre", label: "Nombre" },
-      { key: "descripcion", label: "Descripción" },
-      { key: "ubicacion", label: "Ubicación" },
-      { key: "horarios", label: "Horarios" },
-      { key: "requisitos", label: "Requisitos", tipo: "list" },
-      { key: "documentacionNecesaria", label: "Documentación necesaria" },
-      { key: "informacionDerivacion", label: "Información de derivación" },
-    ];
-    const cambiosEsp = calcularCambios(
+    const cambiosEsp = cambiosDeEspecialidad(
       existente,
       {
         nombre: data.nombre !== undefined ? data.nombre : existente.nombre,
         descripcion: data.descripcion !== undefined ? data.descripcion : existente.descripcion,
         ubicacion: data.ubicacion !== undefined ? data.ubicacion : existente.ubicacion,
         horarios: data.horarios !== undefined ? data.horarios : existente.horarios,
-        requisitos: data.requisitos !== undefined
-          ? (typeof data.requisitos === "string" ? data.requisitos : JSON.stringify(data.requisitos))
-          : existente.requisitos,
+        requisitos: data.requisitos !== undefined ? requisitosComoTexto(data.requisitos) : existente.requisitos,
         documentacionNecesaria: data.documentacionNecesaria !== undefined ? data.documentacionNecesaria : existente.documentacionNecesaria,
         informacionDerivacion: data.informacionDerivacion !== undefined ? data.informacionDerivacion : existente.informacionDerivacion,
-      },
-      camposEsp
+      }
     );
     const estadoCambioEsp = Boolean(data.estado && data.estado.toUpperCase() !== estadoAnterior);
 
@@ -228,11 +169,7 @@ class CmsEspecialidadService {
       descripcion: data.descripcion !== undefined ? data.descripcion : existente.descripcion,
       ubicacion: data.ubicacion !== undefined ? data.ubicacion : existente.ubicacion,
       horarios: data.horarios !== undefined ? data.horarios : existente.horarios,
-      requisitos: data.requisitos
-        ? typeof data.requisitos === "string"
-          ? data.requisitos
-          : JSON.stringify(data.requisitos)
-        : existente.requisitos,
+      requisitos: data.requisitos ? requisitosComoTexto(data.requisitos) : existente.requisitos,
       documentacionNecesaria:
         data.documentacionNecesaria !== undefined
           ? data.documentacionNecesaria
@@ -244,25 +181,11 @@ class CmsEspecialidadService {
       estado: estadoFinal,
     };
 
-    let actualizada;
-    if (esServicio) {
-      actualizada = await prisma.servicio.update({ where: { id: idBigInt }, data: payload });
-    } else {
-      actualizada = await prisma.especialidad.update({ where: { id: idBigInt }, data: payload });
-    }
+    const actualizada = await modeloDe(esServicio).update({ where: { id: idBigInt }, data: payload });
 
     // Detección automática de cambios para la revisión del Admin
     if (estadoFinal === "PENDIENTE_APROBACION") {
-      const camposEsp = [
-        { key: "nombre", label: "Nombre" },
-        { key: "descripcion", label: "Descripción" },
-        { key: "ubicacion", label: "Ubicación" },
-        { key: "horarios", label: "Horarios" },
-        { key: "requisitos", label: "Requisitos", tipo: "list" },
-        { key: "documentacionNecesaria", label: "Documentación necesaria" },
-        { key: "informacionDerivacion", label: "Información de derivación" },
-      ];
-      const nuevosCambios = calcularCambios(existente, actualizada, camposEsp);
+      const nuevosCambios = cambiosDeEspecialidad(existente, actualizada);
       // Los cambios se acumulan contra la versión pública mientras la edición siga viva: si el Admin la rechazó y el CM
       // la vuelve a editar, lo que ya se había modificado (por ejemplo el título) tiene que seguir apareciendo.
       const cambiosPrevios = metaExistente?.cambios || [];
@@ -275,30 +198,16 @@ class CmsEspecialidadService {
       });
     }
 
-    try {
-      if (user) {
-        const usuarioLocal = await obtenerOCrearUsuarioLocal(user);
-        await prisma.auditoria.create({
-          data: {
-            usuarioId: usuarioLocal.id,
-            entidad: esServicio ? "servicio" : "especialidad",
-            entidadId: idStr,
-            accion: "MODIFICAR",
-            descripcion: `Actualización de ${esServicio ? "servicio" : "especialidad"} "${actualizada.nombre}".`,
-          },
-        });
-      }
-    } catch (error) {
-      registrarFalla("Auditoría", error);
-    }
+    await registrarAuditoria(user, { entidad: esServicio ? "servicio" : "especialidad", id: idStr, accion: ACCIONES.MODIFICAR, descripcion: `Actualización de ${esServicio ? "servicio" : "especialidad"} "${actualizada.nombre}".` });
 
     await limpiarSolicitudEliminacion(esServicio ? "servicio" : "especialidad", idStr); // editar después de pedir la baja anula el pedido
     return {
       message: esServicio ? "Servicio actualizado con éxito" : "Especialidad actualizada con éxito",
-      data: this._format(actualizada, esServicio, null, {
-        editor: editorNombre,
-        updatedAt: nowIso,
-      }),
+      data: {
+        ...formatearEspecialidad(actualizada, esServicio, null, { editor: editorNombre, updatedAt: nowIso }),
+        // El portal sigue mostrando la versión publicada mientras la edición está en revisión.
+        visibleEnPortal: estaVisibleEnPortal(actualizada, (await this.obtenerMapaPendingMeta()).get(this._metaKey(idStr, esServicio)) || null),
+      },
     };
   }
 
@@ -313,9 +222,7 @@ class CmsEspecialidadService {
 
     const { estado, rejectionReason } = payload;
 
-    let existente = esServicio
-      ? await prisma.servicio.findUnique({ where: { id: idBigInt } })
-      : await prisma.especialidad.findUnique({ where: { id: idBigInt } });
+    const existente = await modeloDe(esServicio).findUnique({ where: { id: idBigInt } });
 
     if (!existente) {
       const error = new Error(`${esServicio ? "Servicio" : "Especialidad"} no encontrado/a.`);
@@ -350,48 +257,21 @@ class CmsEspecialidadService {
       await this.limpiarPendingMeta(idStr, esServicio);
     }
 
-    let actualizado;
-    if (esServicio) {
-      actualizado = await prisma.servicio.update({
-        where: { id: idBigInt },
-        data: { estado: nuevoEstado },
-      });
-    } else {
-      actualizado = await prisma.especialidad.update({
-        where: { id: idBigInt },
-        data: { estado: nuevoEstado },
-      });
-    }
+    const actualizado = await modeloDe(esServicio).update({ where: { id: idBigInt }, data: { estado: nuevoEstado } });
 
-    try {
-      const usuarioAdmin = await obtenerOCrearUsuarioLocal(user);
-      await prisma.auditoria.create({
-        data: {
-          usuarioId: usuarioAdmin.id,
-          entidad: esServicio ? "servicio" : "especialidad",
-          entidadId: idStr,
-          accion:
-            nuevoEstado === "RECHAZADO"
-              ? "RECHAZAR"
-              : nuevoEstado === "ARCHIVADO"
-              ? "ARCHIVAR"
-              : "APROBAR",
-          descripcion:
-            nuevoEstado === "RECHAZADO"
-              ? `${esServicio ? "Servicio" : "Especialidad"} "${existente.nombre}" rechazado/a. Motivo: ${motivoGuardado}`
-              : `${esServicio ? "Servicio" : "Especialidad"} "${existente.nombre}" evaluado/a como ${nuevoEstado}.`,
-        },
-      });
-    } catch (error) {
-      registrarFalla("Auditoría", error);
-    }
+    await registrarAuditoria(user, {
+      entidad: esServicio ? "servicio" : "especialidad",
+      id: idStr,
+      accion: nuevoEstado === "RECHAZADO" ? ACCIONES.RECHAZAR : nuevoEstado === "ARCHIVADO" ? ACCIONES.ARCHIVAR : ACCIONES.APROBAR,
+      descripcion: nuevoEstado === "RECHAZADO" ? `${esServicio ? "Servicio" : "Especialidad"} "${existente.nombre}" rechazado/a. Motivo: ${motivoGuardado}` : `${esServicio ? "Servicio" : "Especialidad"} "${existente.nombre}" evaluado/a como ${nuevoEstado}.`,
+    });
 
     const editorMetaMap = await this.obtenerMapaEditorMeta();
     const eMeta = editorMetaMap.get(this._metaKey(idStr, esServicio));
 
     return {
       message: "Estado actualizado con éxito",
-      data: this._format(actualizado, esServicio, motivoGuardado, null, eMeta?.editor, eMeta?.updatedAt),
+      data: formatearEspecialidad(actualizado, esServicio, motivoGuardado, null, eMeta?.editor, eMeta?.updatedAt),
     };
   }
 
@@ -437,29 +317,11 @@ class CmsEspecialidadService {
       const auditItem = auditMap.get(key) || null;
       const estadoUpper = (item.estado || "").toUpperCase();
 
-      let resolvedEditor = null;
-      let resolvedUpdatedAt = null;
-
-      if (pendingMeta?.editor && pendingMeta.editor !== "Editor CMS") {
-        resolvedEditor = pendingMeta.editor;
-        resolvedUpdatedAt = pendingMeta.updatedAt || null;
-      } else if (editorMeta?.editor && editorMeta.editor !== "Editor CMS") {
-        resolvedEditor = editorMeta.editor;
-        resolvedUpdatedAt = editorMeta.updatedAt || null;
-      } else if (auditItem?.usuario) {
-        const u = auditItem.usuario;
-        resolvedEditor = nombreDeUsuario(u);
-        resolvedUpdatedAt = auditItem.fechaHora;
-      } else if (pendingMeta?.editor) {
-        resolvedEditor = pendingMeta.editor;
-        resolvedUpdatedAt = pendingMeta.updatedAt || null;
-      } else if (editorMeta?.editor) {
-        resolvedEditor = editorMeta.editor;
-        resolvedUpdatedAt = editorMeta.updatedAt || null;
-      } else {
-        // Sin registro de quién lo editó: no se le atribuye a ningún usuario en particular.
-        resolvedEditor = "Editor CMS";
-      }
+      const { editor: resolvedEditor, updatedAt: resolvedUpdatedAt } = resolverEditorVisible({
+        pendingMeta,
+        editorMeta,
+        auditoria: auditItem,
+      });
 
       if (!esConsultaInterna) {
         const esPublicadaDirecta = estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO";
@@ -472,14 +334,14 @@ class CmsEspecialidadService {
         if (mantienePublicacionPrevia) {
           const snap = pendingMeta.snapshotPublico;
           resultado.push(
-            this._format({ ...item, ...snap }, esServicio, null, null, resolvedEditor, resolvedUpdatedAt)
+            formatearEspecialidad({ ...item, ...snap }, esServicio, null, null, resolvedEditor, resolvedUpdatedAt)
           );
           return;
         }
       }
 
       resultado.push(
-        this._format(item, esServicio, motivoRechazo, pendingMeta, resolvedEditor, resolvedUpdatedAt)
+        formatearEspecialidad(item, esServicio, motivoRechazo, pendingMeta, resolvedEditor, resolvedUpdatedAt)
       );
     };
 
@@ -504,9 +366,7 @@ class CmsEspecialidadService {
     const esServicio = isServicio === "true" || isServicio === true;
     const idStr = id.toString();
 
-    const registro = esServicio
-      ? await prisma.servicio.findUnique({ where: { id: idBigInt } })
-      : await prisma.especialidad.findUnique({ where: { id: idBigInt } });
+    const registro = await modeloDe(esServicio).findUnique({ where: { id: idBigInt } });
     if (!registro) {
       const error = new Error(esServicio ? "Servicio no encontrado." : "Especialidad no encontrada.");
       error.statusCode = 404;
@@ -519,8 +379,7 @@ class CmsEspecialidadService {
       // Si había una edición pendiente, queda reemplazada por este pedido (gana la última acción del CM).
       const reemplazaEdicion = tieneEdicionPendiente(registro, pendingMeta);
       if (reemplazaEdicion) {
-        const modelo = esServicio ? prisma.servicio : prisma.especialidad;
-        await modelo.update({ where: { id: idBigInt }, data: { estado: "RECHAZADO" } });
+        await modeloDe(esServicio).update({ where: { id: idBigInt }, data: { estado: "RECHAZADO" } });
         await this.guardarMotivoRechazo(idStr, esServicio, MOTIVO_EDICION_REEMPLAZADA);
       }
       return solicitarEliminacion({ entidad, id: idStr, titulo: registro.nombre, user, reemplazaEdicion });
@@ -547,49 +406,6 @@ class CmsEspecialidadService {
     return { message: "Eliminado con éxito" };
   }
 
-  _format(registro, esServicio, rejectionReason = null, meta = null, editorOverride = null, updatedAtOverride = null) {
-    let requisitosProcesados = [];
-    if (registro.requisitos) {
-      try {
-        const parsed = JSON.parse(registro.requisitos);
-        requisitosProcesados = Array.isArray(parsed) ? parsed : [];
-      } catch (error) {
-        requisitosProcesados =
-          typeof registro.requisitos === "string"
-            ? registro.requisitos
-                .split("\n")
-                .map((r) => r.trim())
-                .filter((r) => r !== "")
-            : [];
-      }
-    }
-    const finalEditor = editorOverride || meta?.editor || "Editor CMS";
-    const finalDateRaw = updatedAtOverride || meta?.updatedAt || null;
-    let finalDateFormat = "Reciente";
-    if (finalDateRaw) {
-      try {
-        const d = new Date(finalDateRaw);
-        if (!isNaN(d.getTime())) {
-          finalDateFormat = d.toLocaleDateString("es-AR");
-        }
-      } catch {
-        // Fecha inválida: se muestra el texto por defecto.
-      }
-    }
-    const esPendiente = (registro.estado || "").toUpperCase() === "PENDIENTE_APROBACION";
-    return {
-      ...registro,
-      id: registro.id.toString(),
-      esServicio,
-      requisitos: requisitosProcesados,
-      rejectionReason: rejectionReason || null,
-      editor: finalEditor,
-      updatedAtFormatted: finalDateFormat,
-      cambios: esPendiente ? cambiosParaCliente(meta?.cambios) : [],
-      esActualizacion: esPendiente && Boolean(meta?.esActualizacion),
-      requestedEstado: esPendiente ? meta?.targetEstado || null : null,
-    };
-  }
 }
 
 export default new CmsEspecialidadService();
