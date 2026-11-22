@@ -71,9 +71,11 @@ export const tieneEdicionPendiente = (registro, pendingMeta = null) =>
  */
 export const tieneVersionPublica = (registro, pendingMeta = null) => {
   const estado = String(registro?.estado || "").toUpperCase();
+  // "activo" solo sirve como pista en registros viejos que no guardaron de dónde vienen (sin metadatos): residencias
+  // y capacitaciones lo traen en true por defecto, así que con metadatos se mira el estado de origen.
   const pendienteConVersionPublica =
     estado === "PENDIENTE_APROBACION" &&
-    (registro?.activo === true || ["PUBLICADO", "APROBADO"].includes(pendingMeta?.previousEstado));
+    ((registro?.activo === true && !pendingMeta) || ["PUBLICADO", "APROBADO"].includes(pendingMeta?.previousEstado));
   return ESTADOS_VISIBLES.includes(estado) || pendienteConVersionPublica || conservaVersionPublica(registro, pendingMeta);
 };
 

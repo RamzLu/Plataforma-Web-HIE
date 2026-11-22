@@ -1,6 +1,6 @@
 import { crearMetaEditorial } from "../../utils/metaEditorial.utils.js";
 import { registrarFalla } from "../../utils/log.utils.js";
-import { tieneVersionPublica, conservaVersionPublica, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
+import { tieneVersionPublica, tieneEdicionPendiente, conservaVersionPublica, MOTIVO_EDICION_REEMPLAZADA, solicitarEliminacion, limpiarSolicitudEliminacion } from "../../utils/eliminacion.utils.js";
 import { prisma } from "../../config/prisma.js";
 import { supabase } from "../../config/supabase.js";
 import { sanitizarUrlLectura, parsearIdBigInt, esVerdadero } from "../../utils/sanitize.utils.js";
@@ -485,8 +485,15 @@ class CmsCapacitacionService {
     }
 
     // Si está visible en el portal, el CM no lo borra: queda una solicitud para el administrador.
-    if (!forzar && tieneVersionPublica(existing, (await this.obtenerMapaPendingMeta()).get(id.toString()) || null)) {
-      return solicitarEliminacion({ entidad: "capacitacion", id: id.toString(), titulo: existing.titulo, user });
+    const pendingMetaElim = (await this.obtenerMapaPendingMeta()).get(id.toString()) || null;
+    if (!forzar && tieneVersionPublica(existing, pendingMetaElim)) {
+      // Si había una edición pendiente, queda reemplazada por este pedido (gana la última acción del CM).
+      const reemplazaEdicion = tieneEdicionPendiente(existing, pendingMetaElim);
+      if (reemplazaEdicion) {
+        await prisma.capacitacion.update({ where: { id: idBigInt }, data: { estado: "RECHAZADO" } });
+        await this.guardarMotivoRechazo(id.toString(), MOTIVO_EDICION_REEMPLAZADA);
+      }
+      return solicitarEliminacion({ entidad: "capacitacion", id: id.toString(), titulo: existing.titulo, user, reemplazaEdicion });
     }
     await limpiarSolicitudEliminacion("capacitacion", id.toString());
 

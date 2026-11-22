@@ -29,6 +29,16 @@ test("un pendiente nuevo (nunca publicado) no tiene versión pública", () => {
   assert.equal(tieneVersionPublica(registro, { previousEstado: "BORRADOR" }), false);
 });
 
+test("un pendiente nuevo con activo en true (residencias, capacitaciones) tampoco tiene versión pública", () => {
+  const registro = { estado: "PENDIENTE_APROBACION", activo: true };
+  assert.equal(tieneVersionPublica(registro, { previousEstado: "BORRADOR" }), false);
+  assert.equal(tieneVersionPublica(registro, { previousEstado: null, targetEstado: "PUBLICADO" }), false);
+});
+
+test("un pendiente viejo con activo en true y sin metadatos se sigue tratando como publicado", () => {
+  assert.equal(tieneVersionPublica({ estado: "PENDIENTE_APROBACION", activo: true }, null), true);
+});
+
 test("sin snapshot guardado no se conserva la versión pública", () => {
   assert.equal(conservaVersionPublica({ estado: "RECHAZADO" }, { previousEstado: "PUBLICADO" }), false);
 });
