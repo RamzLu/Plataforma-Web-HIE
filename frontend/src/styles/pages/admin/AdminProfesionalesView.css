@@ -1910,3 +1910,21 @@
     padding: 16px;
   }
 }
+
+:where(.panel-scope) .admin-prof-rv-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-amber-200);
+  border-radius: var(--radius-md);
+  background: var(--color-amber-50);
+  color: var(--color-amber-700);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+:where(.panel-scope) .admin-prof-rv-alert svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}

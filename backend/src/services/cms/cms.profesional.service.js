@@ -8,6 +8,7 @@ import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "profesional", modelos: { "": "profesional" } });
 
@@ -120,6 +121,7 @@ class CmsProfesionalService {
       imagenUrl: pubUrl,
       cambios: options.cambios || [],
       esActualizacion: Boolean(options.esActualizacion),
+      requestedEstado: options.requestedEstado || null,
       createdAt: prof.createdAt,
       updatedAt: prof.updatedAt,
     };
@@ -209,6 +211,7 @@ class CmsProfesionalService {
           updatedAt: pendingMeta?.updatedAt || editorMeta?.updatedAt || prof.updatedAt,
           cambios: estado === "PENDIENTE_APROBACION" ? cambiosParaCliente(pendingMeta?.cambios) : [],
           esActualizacion: estado === "PENDIENTE_APROBACION" && Boolean(pendingMeta?.esActualizacion),
+          requestedEstado: estado === "PENDIENTE_APROBACION" ? pendingMeta?.targetEstado || null : null,
         })
       );
     }
@@ -291,9 +294,12 @@ class CmsProfesionalService {
       imagenId = archivoDb.id;
     }
 
-    const estadoSolicitado = data.estado ? data.estado.toUpperCase() : "PUBLICADO";
-    const esArchivado = estadoSolicitado === "ARCHIVADO" || estadoSolicitado === "BORRADOR";
-    const estadoFinal = esArchivado ? "ARCHIVADO" : "PENDIENTE_APROBACION";
+    // Regla común (utils/flujoEditorial.utils.js). Sin estado, el CMS de profesionales pide publicar.
+    const solicitud = resolverSolicitud({
+      estadoActual: null,
+      intencion: intencionDesdeEstado(data.estado || "PUBLICADO"),
+    });
+    const estadoFinal = solicitud.estado;
 
     const nuevoProfesional = await prisma.profesional.create({
       data: {
@@ -329,13 +335,11 @@ class CmsProfesionalService {
       updatedAt: nowIso,
     });
 
-    if (estadoFinal === "PENDIENTE_APROBACION") {
+    if (solicitud.meta) {
       await this.guardarPendingMeta(idStr, {
-        previousEstado: null,
-        targetEstado: "PUBLICADO",
+        ...solicitud.meta,
         editor: editorNombre,
         updatedAt: nowIso,
-        snapshotPublico: null,
       });
     }
 
@@ -367,6 +371,8 @@ class CmsProfesionalService {
       message:
         estadoFinal === "PENDIENTE_APROBACION"
           ? "Profesional enviado a revisión del administrador para su aprobación."
+          : estadoFinal === "BORRADOR"
+          ? "¡Profesional guardado como borrador!"
           : "¡Profesional guardado como archivado!",
       profesional: {
         id: idStr,
@@ -378,7 +384,7 @@ class CmsProfesionalService {
         especialidadNombre: finalAreaNombre || nuevoProfesional.especialidad.nombre,
         esServicioClave: esServicio === "true" || esServicio === true,
         especialidadId: especialidadId.toString(),
-        estado: estadoFinal,
+        estado: this._estadoDe({ estado: estadoFinal }),
         publicado: false,
         activo: false,
         rejectionReason: null,
@@ -396,7 +402,7 @@ class CmsProfesionalService {
     const { nombre, apellido, matricula, cargo, descripcion, especialidadId, esServicio } = data;
     const espIdBigInt = parsearIdBigInt(especialidadId, "ID de área o especialidad");
 
-    const [profesionalExistente, servicios, pendingMap, rejectionMap] = await Promise.all([
+    const [profesionalExistente, servicios, pendingMap] = await Promise.all([
       prisma.profesional.findUnique({
         where: { id: idBigInt },
         include: {
@@ -407,7 +413,6 @@ class CmsProfesionalService {
       }),
       prisma.servicio.findMany(),
       this.obtenerMapaPendingMeta(),
-      this.obtenerMapaMotivosRechazo(),
     ]);
 
     if (!profesionalExistente) {
@@ -417,18 +422,10 @@ class CmsProfesionalService {
     }
 
     const existingPending = pendingMap.get(idStr) || null;
-    const existingRejection = rejectionMap.get(idStr) || null;
-    // También cuenta como "publicado" si fue una edición rechazada de algo que ya estaba publicado.
-    const provieneDePublicado =
-      this._estadoDe(profesionalExistente) === "PUBLICADO" ||
-      conservaVersionPublica(profesionalExistente, existingPending);
-
-    let snapshotPublico = existingPending?.snapshotPublico || null;
-    if (provieneDePublicado && !snapshotPublico) {
-      snapshotPublico = this._construirItemProfesional(profesionalExistente, servicios, {
-        estado: "PUBLICADO",
-      });
-    }
+    // Es o fue público (también una edición rechazada de algo publicado): su foto se conserva.
+    const provieneDePublicado = fuePublico(profesionalExistente.estado, existingPending);
+    const armarSnapshotPublico = () =>
+      this._construirItemProfesional(profesionalExistente, servicios, { estado: "PUBLICADO" });
 
     let finalEspecialidadId;
     let finalAreaNombre = null;
@@ -488,10 +485,21 @@ class CmsProfesionalService {
       throw error;
     }
 
+    // Regla común (utils/flujoEditorial.utils.js): lo que es o fue público pasa por el administrador
+    // (incluido despublicarlo o archivarlo) y el portal sigue mostrando la versión publicada mientras tanto.
+    const solicitud = resolverSolicitud({
+      estadoActual: profesionalExistente.estado,
+      meta: existingPending,
+      intencion: intencionDesdeEstado(data.estado || "PUBLICADO"),
+      snapshotActual: armarSnapshotPublico,
+      hayCambios: cambiosProf.length > 0 || Boolean(file),
+    });
+    const estadoFinal = solicitud.estado;
+
     let imagenId = profesionalExistente.imagenId;
 
     if (file) {
-      if (profesionalExistente.archivo && !snapshotPublico) {
+      if (profesionalExistente.archivo && !provieneDePublicado) {
         await supabase.storage
           .from("noticias-imagenes")
           .remove([profesionalExistente.archivo.nombreArchivo]);
@@ -523,12 +531,6 @@ class CmsProfesionalService {
       imagenId = archivoDb.id;
     }
 
-    const estadoSolicitado = data.estado ? data.estado.toUpperCase() : "PUBLICADO";
-    const esArchivado =
-      (estadoSolicitado === "ARCHIVADO" || estadoSolicitado === "BORRADOR") &&
-      !provieneDePublicado;
-    const estadoFinal = esArchivado ? "ARCHIVADO" : "PENDIENTE_APROBACION";
-
     const profActualizado = await prisma.profesional.update({
       where: { id: idBigInt },
       data: {
@@ -539,7 +541,7 @@ class CmsProfesionalService {
         descripcion,
         especialidadId: finalEspecialidadId,
         imagenId,
-        activo: esArchivado ? false : profesionalExistente.activo,
+        activo: solicitud.meta ? profesionalExistente.activo : false,
         estado: estadoFinal,
         updatedAt: new Date(),
       },
@@ -563,10 +565,10 @@ class CmsProfesionalService {
       updatedAt: nowIso,
     });
 
-    if (esArchivado) {
+    if (!solicitud.meta) {
       await this.limpiarPendingMeta(idStr);
-      await this.limpiarMotivoRechazo(idStr);
-    } else {
+      if (solicitud.limpiarMotivo) await this.limpiarMotivoRechazo(idStr);
+    } else if (!solicitud.sinCambios) {
       // Detección automática de cambios para la revisión del Admin
       const versionAnterior = this._construirItemProfesional(profesionalExistente, servicios, {});
       let urlNueva = versionAnterior.imagenUrl;
@@ -601,11 +603,9 @@ class CmsProfesionalService {
       const cambiosPrevios = existingPending?.cambios || [];
 
       await this.guardarPendingMeta(idStr, {
-        previousEstado: provieneDePublicado ? "PUBLICADO" : existingRejection ? "RECHAZADO" : null,
-        targetEstado: estadoSolicitado === "ARCHIVADO" ? "ARCHIVADO" : "PUBLICADO",
+        ...solicitud.meta,
         editor: editorNombre,
         updatedAt: nowIso,
-        snapshotPublico,
         cambios: combinarCambios(cambiosPrevios, nuevosCambios),
         esActualizacion: true,
       });
@@ -641,6 +641,8 @@ class CmsProfesionalService {
       message:
         estadoFinal === "PENDIENTE_APROBACION"
           ? "Modificaciones enviadas a revisión del administrador."
+          : estadoFinal === "BORRADOR"
+          ? "¡Profesional guardado como borrador!"
           : "¡Profesional actualizado con éxito!",
       profesional: {
         id: idStr,
@@ -652,7 +654,7 @@ class CmsProfesionalService {
         especialidadNombre: finalAreaNombre || profActualizado.especialidad.nombre,
         esServicioClave: esServicio === "true" || esServicio === true,
         especialidadId: especialidadId.toString(),
-        estado: estadoFinal,
+        estado: this._estadoDe({ estado: estadoFinal }),
         publicado: false,
         activo: profActualizado.activo,
         rejectionReason: null,
@@ -667,20 +669,7 @@ class CmsProfesionalService {
   async evaluarProfesional(id, payload = {}, user = null) {
     const idBigInt = parsearIdBigInt(id, "ID de profesional");
     const idStr = idBigInt.toString();
-    const nuevoEstado = (payload.estado || "").toUpperCase();
-    const rejectionReason = payload.rejectionReason ? payload.rejectionReason.trim() : null;
-
-    if (!["APROBADO", "PUBLICADO", "RECHAZADO"].includes(nuevoEstado)) {
-      const error = new Error("El estado de evaluación debe ser APROBADO, PUBLICADO o RECHAZADO.");
-      error.statusCode = 400;
-      throw error;
-    }
-
-    if (nuevoEstado === "RECHAZADO" && !rejectionReason) {
-      const error = new Error("Debe proporcionar un motivo de rechazo.");
-      error.statusCode = 400;
-      throw error;
-    }
+    const decision = decisionDesdeEstado(payload.estado);
 
     const [profesionalExistente, servicios, pendingMap, editorMap] = await Promise.all([
       prisma.profesional.findUnique({
@@ -706,10 +695,20 @@ class CmsProfesionalService {
     const editorMeta = editorMap.get(idStr) || null;
     const preservedEditor = pendingMeta?.editor || editorMeta?.editor || "Editor CMS";
 
-    if (nuevoEstado === "RECHAZADO") {
+    // Regla común (utils/flujoEditorial.utils.js): solo lo pendiente; aprobar aplica lo pedido
+    // (publicar, despublicar o archivar); rechazar exige motivo y conserva la versión publicada si la había.
+    const revision = resolverRevision({
+      estadoActual: profesionalExistente.estado,
+      meta: pendingMeta,
+      decision,
+      motivo: payload.rejectionReason,
+    });
+    const rejectionReason = revision.motivo;
+
+    if (revision.estado === "RECHAZADO") {
       // Si era una edición de algo ya publicado, se conserva la versión pública anterior (y sus metadatos)
       // para que el portal siga mostrándola; solo el contenido nuevo queda inactivo.
-      const conservaPublica = conservaVersionPublica(profesionalExistente, pendingMeta);
+      const conservaPublica = revision.meta === "conservar";
       const profRechazado = await prisma.profesional.update({
         where: { id: idBigInt },
         data: conservaPublica
@@ -753,13 +752,13 @@ class CmsProfesionalService {
       };
     }
 
-    // APROBADO / PUBLICADO
-    const targetArchivado = pendingMeta?.targetEstado === "ARCHIVADO";
+    // Aprobado: PUBLICADO, BORRADOR (despublicar) o ARCHIVADO. Profesionales no tiene fecha de publicación.
+    const estadoAprobado = revision.estado;
     const profAprobado = await prisma.profesional.update({
       where: { id: idBigInt },
       data: {
-        activo: !targetArchivado,
-        estado: targetArchivado ? "ARCHIVADO" : "PUBLICADO",
+        activo: estadoAprobado === "PUBLICADO",
+        estado: estadoAprobado,
         updatedAt: new Date(),
       },
       include: {
@@ -785,7 +784,7 @@ class CmsProfesionalService {
             entidad: "profesional",
             entidadId: idStr,
             accion: "APROBAR",
-            descripcion: `Aprobación y publicación de profesional "${profAprobado.nombre} ${profAprobado.apellido}".`,
+            descripcion: `Aprobación de profesional "${profAprobado.nombre} ${profAprobado.apellido}" (estado resultante: ${estadoAprobado}).`,
           },
         });
       }
@@ -794,9 +793,13 @@ class CmsProfesionalService {
     }
 
     return {
-      message: "Profesional aprobado y publicado con éxito.",
+      message:
+        estadoAprobado === "PUBLICADO"
+          ? "Profesional aprobado y publicado con éxito."
+          : estadoAprobado === "BORRADOR"
+          ? "Solicitud aprobada: el profesional se retiró del portal y quedó como borrador."
+          : "Solicitud aprobada: el profesional se retiró del portal y quedó archivado.",
       data: this._construirItemProfesional(profAprobado, servicios, {
-        estado: targetArchivado ? "ARCHIVADO" : "PUBLICADO",
         rejectionReason: null,
         editor: preservedEditor,
         updatedAt: new Date().toISOString(),

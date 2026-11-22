@@ -14,6 +14,7 @@ import {
   Stethoscope,
   X,
   XCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import keycloak from '../../config/keycloak';
@@ -68,6 +69,7 @@ const mapProfesionalFromBackend = (item) => {
     motivoRechazo: item.rejectionReason || '',
     cambios: Array.isArray(item.cambios) ? item.cambios : [],
     esActualizacion: Boolean(item.esActualizacion),
+    requestedEstado: item.requestedEstado || null,
   };
 };
 
@@ -487,6 +489,18 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                   texto={selectedProfessional.publicado ? 'Publicado' : estadoLabels[selectedProfessional.estado]}
                 />
               </div>
+
+              {selectedProfessional.estado === 'PENDIENTE' &&
+                ['BORRADOR', 'ARCHIVADO'].includes(selectedProfessional.requestedEstado) && (
+                  <div className="admin-prof-rv-alert" role="note">
+                    <AlertTriangle size={18} aria-hidden="true" />
+                    <div>
+                      <strong>Solicitud de retiro:</strong> el editor del CMS pide pasar este profesional a{' '}
+                      <strong>{selectedProfessional.requestedEstado === 'BORRADOR' ? 'Borrador' : 'Archivado'}</strong>.
+                      Si lo aprobás, deja de verse en el portal.
+                    </div>
+                  </div>
+                )}
 
               <AdminCambiosResaltados
                 cambios={selectedProfessional.cambios}
