@@ -26,6 +26,8 @@ import {
 } from "../../components/cms/CmsModals";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import BarraFiltros from "../../components/ui/BarraFiltros";
 import keycloak from "../../config/keycloak";
 import {
   getCapacitaciones,
@@ -35,6 +37,7 @@ import {
 } from "../../api/capacitaciones.api";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
 
 // Datos iniciales armonizados con el portal público (CapacitacionPage) y schema.prisma
 
@@ -446,9 +449,21 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   };
 
   // Filtrado de datos
+  // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
+  const cuentas = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, BORRADORES: 0, ARCHIVADOS: 0 };
+  capacitaciones.forEach((item) => {
+    if (estaPublicadoEnPortal(item)) cuentas.PUBLICADOS++;
+    if (item.estado === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
+    else if (item.estado === "RECHAZADO") cuentas.RECHAZADOS++;
+    else if (item.estado === "BORRADOR") cuentas.BORRADORES++;
+    else if (item.estado === "ARCHIVADO") cuentas.ARCHIVADOS++;
+  });
+
   const datosFiltrados = capacitaciones.filter((item) => {
     const matchEstado =
-      activeTab === "PUBLICADOS"
+      activeTab === "TODOS"
+        ? true
+        : activeTab === "PUBLICADOS"
         ? estaPublicadoEnPortal(item)
         : activeTab === "PENDIENTES"
         ? item.estado === "PENDIENTE_APROBACION"
@@ -484,113 +499,39 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
             Administre los cursos, talleres, material formativo y jornadas institucionales del hospital.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn-crear-noticia-header"
-          onClick={handleOpenCreate}
-        >
-          + AÑADIR CAPACITACIÓN
-        </button>
       </div>
 
-      {/* Pestañas de estado unificadas solo con texto */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("PUBLICADOS")}
-        >
-          Publicados
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
-          onClick={() => setActiveTab("PENDIENTES")}
-        >
-          Pendientes
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("RECHAZADOS")}
-        >
-          Rechazados
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "BORRADORES" ? "active" : ""}`}
-          onClick={() => setActiveTab("BORRADORES")}
-        >
-          Borradores
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("ARCHIVADOS")}
-        >
-          Archivados
-        </button>
+      <div style={{ marginBottom: "14px" }}>
+        <FiltrosEstado
+          activa={activeTab}
+          onCambiar={setActiveTab}
+          crear={{ texto: "+ AÑADIR CAPACITACIÓN", onClick: handleOpenCreate }}
+          todos
+          onActualizar={cargarCapacitaciones}
+          opciones={[
+            { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
+            { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
+            { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
+            { clave: "BORRADORES", tipo: "borrador", cuenta: cuentas.BORRADORES },
+            { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
+          ]}
+        />
       </div>
 
-      {/* Barra de herramientas: Buscador a la izquierda y Filtro por modalidad a la derecha */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "16px",
-          marginBottom: "20px",
-          flexWrap: "wrap",
+      <BarraFiltros
+        busqueda={{ etiqueta: "Buscar capacitación", placeholder: "Buscar por título o contenido...", valor: searchTerm, onCambio: setSearchTerm }}
+        select={{
+          etiqueta: "Modalidad",
+          valor: filtroModalidad,
+          onCambio: setFiltroModalidad,
+          opciones: [
+            { valor: "TODAS", texto: "Todas las modalidades" },
+            { valor: "Presencial", texto: "Presencial" },
+            { valor: "Virtual", texto: "Virtual / On-Demand" },
+            { valor: "Híbrida", texto: "Híbrida" },
+          ],
         }}
-      >
-        <div className="res-search-wrapper" style={{ minWidth: "340px", maxWidth: "480px", flex: "1 1 340px" }}>
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input
-            type="text"
-            placeholder="Buscar por título o contenido..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="res-search-input-field"
-            style={{ width: "100%" }}
-          />
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "auto" }}>
-          <span
-            style={{
-              fontSize: "0.8rem",
-              fontWeight: "700",
-              color: "#64748b",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              whiteSpace: "nowrap",
-            }}
-          >
-            MODALIDAD:
-          </span>
-          <select
-            value={filtroModalidad}
-            onChange={(e) => setFiltroModalidad(e.target.value)}
-            className="res-select-field"
-            style={{ minWidth: "190px" }}
-          >
-            <option value="TODAS">Todas las modalidades</option>
-            <option value="Presencial">Presencial</option>
-            <option value="Virtual">Virtual / On-Demand</option>
-            <option value="Híbrida">Híbrida</option>
-          </select>
-        </div>
-      </div>
+      />
 
       {/* Contenedor de la tabla idéntico al estilo de Profesionales y Noticias */}
       <div className="cms-news-table-container">
@@ -787,14 +728,14 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                             ? "Archivado solicitado"
                             : item.requestedEstado === "BORRADOR"
                             ? "Retiro solicitado"
-                            : "En revisión"
+                            : textoDeEstado(item.estadoVista || item.estado)
                         }
                       />
                     </span>
                   ) : (
                     <EtiquetaEstado
                       estado={(item.estadoVista || item.estado)}
-                      texto={(item.estadoVista || item.estado) === "PUBLICADO" ? "Publicado" : (item.estadoVista || item.estado) === "ARCHIVADO" ? "Archivado" : "Borrador"}
+                      texto={textoDeEstado(item.estadoVista || item.estado)}
                     />
                   )}
                   {item.estado === "RECHAZADO" && item.motivoRechazo && (

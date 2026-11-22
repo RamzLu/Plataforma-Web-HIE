@@ -23,6 +23,10 @@ import {
 } from "../../components/cms/CmsModals";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import BarraFiltros from "../../components/ui/BarraFiltros";
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -121,12 +125,24 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     fetchDatos();
   }, []);
 
+  // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
+  const cuentas = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
+  profesionales.forEach((prof) => {
+    const e = (prof.estado || (prof.publicado ? "PUBLICADO" : "PENDIENTE_APROBACION")).toUpperCase();
+    if (estaPublicadoEnPortal(prof)) cuentas.PUBLICADOS++;
+    if (e === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
+    else if (e === "RECHAZADO") cuentas.RECHAZADOS++;
+    else if (e === "ARCHIVADO" || e === "BORRADOR") cuentas.ARCHIVADOS++;
+  });
+
   const profesionalesFiltrados = profesionales.filter(prof => {
     const estadoItem = (
       prof.estado || (prof.publicado ? "PUBLICADO" : "PENDIENTE_APROBACION")
     ).toUpperCase();
     let matchEstado = false;
-    if (activeTab === "PUBLICADOS") {
+    if (activeTab === "TODOS") {
+      matchEstado = true;
+    } else if (activeTab === "PUBLICADOS") {
       matchEstado = estaPublicadoEnPortal(prof);
     } else if (activeTab === "PENDIENTES") {
       matchEstado = estadoItem === "PENDIENTE_APROBACION";
@@ -357,60 +373,37 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
             Gestione las fichas de los profesionales de la institución.
           </p>
         </div>
-        <button type="button" className="btn-crear-noticia-header news-btn-submit" onClick={handleOpenCreate}>
-          + AÑADIR PROFESIONAL
-        </button>
       </div>
 
-      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "18px" }}>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("PUBLICADOS")}
-        >
-          Publicados
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
-          onClick={() => setActiveTab("PENDIENTES")}
-        >
-          Pendientes de aprobación
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("RECHAZADOS")}
-        >
-          Rechazados
-        </button>
+      <div style={{ marginBottom: "14px" }}>
+        <FiltrosEstado
+          activa={activeTab}
+          onCambiar={setActiveTab}
+          crear={{ texto: "+ AÑADIR PROFESIONAL", onClick: handleOpenCreate }}
+          todos
+          onActualizar={fetchDatos}
+          opciones={[
+            { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
+            { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
+            { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
+            { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
+          ]}
+        />
       </div>
 
-      <div className="profesionales-filtros">
-        <div className="filtro-busqueda">
-          <label>Buscar profesional</label>
-          <div className="input-icon-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input 
-              type="text" 
-              placeholder="Buscar por nombre o apellido..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="filtro-select">
-          <label>Clasificar vista</label>
-          <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
-            <option value="Todos">Todos</option>
-            <option value="ESPECIALIDAD">Especialidades Médicas</option>
-            <option value="SERVICIO">Servicios Clave</option>
-          </select>
-        </div>
-      </div>
+      <BarraFiltros
+        busqueda={{ etiqueta: "Buscar profesional", placeholder: "Buscar por nombre o apellido...", valor: searchTerm, onCambio: setSearchTerm }}
+        select={{
+          etiqueta: "Clasificación",
+          valor: filtroTipo,
+          onCambio: setFiltroTipo,
+          opciones: [
+            { valor: "Todos", texto: "Todas las clasificaciones" },
+            { valor: "ESPECIALIDAD", texto: "Especialidades Médicas" },
+            { valor: "SERVICIO", texto: "Servicios Clave" },
+          ],
+        }}
+      />
 
       <div className="cms-news-table-container">
         <div className="activity-table-head news-table-head" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -506,19 +499,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                 </div>
 
                 <div style={{ width: "130px", textAlign: "center" }}>
-                  <span
-                    className={`status-badge ${
-                      (prof.estadoVista || estadoProf) === "PUBLICADO"
-                        ? "publicado"
-                        : (prof.estadoVista || estadoProf) === "PENDIENTE_APROBACION"
-                        ? "pendiente"
-                        : (prof.estadoVista || estadoProf) === "RECHAZADO"
-                        ? "rechazado"
-                        : "archivado"
-                    }`}
-                  >
-                    {(prof.estadoVista || estadoProf) === "PENDIENTE_APROBACION" ? "PENDIENTE" : (prof.estadoVista || estadoProf)}
-                  </span>
+                  <EtiquetaEstado estado={prof.estadoVista || estadoProf} texto={textoDeEstado(prof.estadoVista || estadoProf)} />
                   <SiguePublicado item={prof} activo={activeTab === "PUBLICADOS"} />
                 </div>
 

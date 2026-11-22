@@ -49,6 +49,23 @@
   align-items: center;
   gap: 12px;
 }
+:where(.panel-scope) .docs-table-head {
+  padding: 14px 16px;
+  border-bottom: 2px solid var(--color-slate-300);
+  background-color: var(--color-slate-100);
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.5px;
+}
+
+:where(.panel-scope) .docs-table-row .col-estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
 :where(.panel-scope) .docs-table-row { 
   padding: 14px 16px; 
   border-bottom: 1px solid #eef2f7; 

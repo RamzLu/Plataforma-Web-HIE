@@ -41,6 +41,10 @@ import {
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import BarraFiltros from "../../components/ui/BarraFiltros";
 
 registerLocale("es", es);
 
@@ -87,11 +91,13 @@ const CmsNoticiasView = ({
   onUpdateNews,
   onViewNews,
   loading,
+  onRefresh,
   initialCreateModal = false,
   onModalOpened,
 }) => {
   const [viewTab, setViewTab] = useState("PUBLICADO");
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
+  const [busqueda, setBusqueda] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
@@ -114,6 +120,14 @@ const CmsNoticiasView = ({
   const [noticiaAEliminar, setNoticiaAEliminar] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
+  const cuentas = { PUBLICADO: 0, BORRADOR: 0, PENDIENTE_APROBACION: 0, PROGRAMADO: 0, RECHAZADO: 0 };
+  (newsList || []).forEach((n) => {
+    const e = n.estado ? n.estado.toUpperCase() : n.isDraft ? "BORRADOR" : "PUBLICADO";
+    if (estaPublicadoEnPortal(n)) cuentas.PUBLICADO++;
+    if (e in cuentas && e !== "PUBLICADO") cuentas[e]++;
+  });
+
   const filteredNews = (newsList || []).filter((n) => {
     const estadoItem = n.estado
       ? n.estado.toUpperCase()
@@ -122,15 +136,18 @@ const CmsNoticiasView = ({
       : "PUBLICADO";
 
     const matchEstado =
-      viewTab === "PUBLICADO"
+      viewTab === "TODOS"
+        ? true
+        : viewTab === "PUBLICADO"
         ? estaPublicadoEnPortal(n)
         : estadoItem === viewTab;
 
     const matchCategoria =
       filtroCategoria === "Todas" || n.category === filtroCategoria;
-    return matchEstado && matchCategoria;
+    const matchBusqueda = !busqueda || String(n.title || "").toLowerCase().includes(busqueda.trim().toLowerCase());
+    return matchEstado && matchCategoria && matchBusqueda;
   });
-  const paginacion = usePaginacion(vistaPublicados(filteredNews, viewTab === "PUBLICADO"), 10, [viewTab, filtroCategoria]);
+  const paginacion = usePaginacion(vistaPublicados(filteredNews, viewTab === "PUBLICADO"), 10, [viewTab, filtroCategoria, busqueda]);
 
   const handleOpenCreate = () => {
     setEditingId(null);
@@ -524,13 +541,6 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
             Administre las publicaciones y artículos clasificados del portal.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn-crear-noticia-header"
-          onClick={handleOpenCreate}
-        >
-          + CREAR NOTICIA
-        </button>
       </div>
 
       <div
@@ -540,80 +550,36 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
           alignItems: "center",
           marginBottom: "20px",
           flexWrap: "wrap",
-          gap: "15px",
+          gap: 0,
         }}
       >
-        <div className="news-tabs-group">
-          <button
-            type="button"
-            className={`news-tab-item ${viewTab === "PUBLICADO" ? "active" : ""}`}
-            onClick={() => setViewTab("PUBLICADO")}
-          >
-            Publicados
-          </button>
-          <button
-            type="button"
-            className={`news-tab-item ${viewTab === "BORRADOR" ? "active" : ""}`}
-            onClick={() => setViewTab("BORRADOR")}
-          >
-            Borradores
-          </button>
-          <button
-            type="button"
-            className={`news-tab-item ${
-              viewTab === "PENDIENTE_APROBACION" ? "active" : ""
-            }`}
-            onClick={() => setViewTab("PENDIENTE_APROBACION")}
-          >
-            Pendientes
-          </button>
-          <button
-            type="button"
-            className={`news-tab-item ${viewTab === "PROGRAMADO" ? "active" : ""}`}
-            onClick={() => setViewTab("PROGRAMADO")}
-          >
-            Programados
-          </button>
-          <button
-            type="button"
-            className={`news-tab-item ${viewTab === "RECHAZADO" ? "active" : ""}`}
-            onClick={() => setViewTab("RECHAZADO")}
-          >
-            Rechazados
-          </button>
+        <div style={{ width: "100%", marginBottom: "14px" }}>
+          <FiltrosEstado
+            activa={viewTab}
+            onCambiar={setViewTab}
+            crear={{ texto: "+ AÑADIR NOTICIA", onClick: handleOpenCreate }}
+            todos
+            onActualizar={onRefresh}
+            actualizando={loading}
+            opciones={[
+              { clave: "PENDIENTE_APROBACION", tipo: "pendiente", cuenta: cuentas.PENDIENTE_APROBACION },
+              { clave: "PUBLICADO", tipo: "publicado", cuenta: cuentas.PUBLICADO },
+              { clave: "PROGRAMADO", tipo: "programado", cuenta: cuentas.PROGRAMADO },
+              { clave: "RECHAZADO", tipo: "rechazado", cuenta: cuentas.RECHAZADO },
+              { clave: "BORRADOR", tipo: "borrador", cuenta: cuentas.BORRADOR },
+            ]}
+          />
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span
-            style={{
-              fontSize: "0.85rem",
-              fontWeight: "700",
-              color: "#64748b",
-              textTransform: "uppercase",
-            }}
-          >
-            Filtrar por:
-          </span>
-          <select
-            value={filtroCategoria}
-            onChange={(e) => setFiltroCategoria(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid #cbd5e1",
-              fontWeight: "600",
-              color: "#0c2340",
-              outline: "none",
-            }}
-          >
-            <option value="Todas">Todas las clasificaciones</option>
-            {CATEGORIAS.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
+        <BarraFiltros
+          busqueda={{ etiqueta: "Buscar noticia", placeholder: "Buscar por título...", valor: busqueda, onCambio: setBusqueda }}
+          select={{
+            etiqueta: "Clasificación",
+            valor: filtroCategoria,
+            onCambio: setFiltroCategoria,
+            opciones: [{ valor: "Todas", texto: "Todas las clasificaciones" }, ...CATEGORIAS.map((c) => ({ valor: c, texto: c }))],
+          }}
+        />
       </div>
 
       <div className="cms-news-table-container">
@@ -760,26 +726,17 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                     <div className="status-wrapper">
                       {isRejected && !news.estadoVista ? (
                         <span
-                          className="status-badge rejected"
-                          onClick={() => handleOpenCorrection(news)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenCorrection(news))}
+                          onClick={() => handleOpenCorrection(news)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => activarConTeclado(e, () => handleOpenCorrection(news))}
                           title="Haga clic para corregir la noticia"
+                          style={{ cursor: "pointer" }}
                         >
-                          • RECHAZADO
+                          <EtiquetaEstado estado="RECHAZADO" texto="Rechazado" />
                         </span>
                       ) : (
-                        <span
-                          className={`status-badge ${
-                            estadoMostrado === "PUBLICADO" || estadoMostrado === "APROBADO"
-                              ? "publicado"
-                              : estadoMostrado === "PROGRAMADO"
-                              ? "programado"
-                              : "pendiente"
-                          }`}
-                        >
-                          {estadoMostrado === "PENDIENTE_APROBACION"
-                            ? "PENDIENTE"
-                            : estadoMostrado}
-                        </span>
+                        <EtiquetaEstado estado={estadoMostrado} texto={textoDeEstado(estadoMostrado)} />
                       )}
 
                       <SiguePublicado item={news} activo={viewTab === "PUBLICADO"} />

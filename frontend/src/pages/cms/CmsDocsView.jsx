@@ -15,6 +15,16 @@ import {
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import BarraFiltros from "../../components/ui/BarraFiltros";
+
+// El servidor puede enviar la fecha como texto ISO (2026-11-13T16:13:12Z); se muestra como dd/mm/aaaa.
+const fechaLegible = (valor) => {
+  if (!valor) return "Actualizado hoy";
+  const fecha = new Date(valor);
+  return /^\d{4}-\d{2}-\d{2}T/.test(String(valor)) && !isNaN(fecha) ? fecha.toLocaleDateString("es-AR") : valor;
+};
 
 const CATEGORIAS = [
   "Información institucional", 
@@ -43,6 +53,7 @@ const CmsDocsView = ({
   // Pestañas y búsqueda unificadas con Especialidades y Noticias
   const [activeTab, setActiveTab] = useState("PUBLICADOS");
   const [searchTerm, setSearchTerm] = useState("");
+  const [filtroCategoria, setFiltroCategoria] = useState("TODAS");
   
   // Estados para control de cambios sin guardar y borradores
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -345,14 +356,6 @@ const CmsDocsView = ({
     return "Borrador";
   };
 
-  const getBadgeClass = (doc) => {
-    const e = (doc.estadoVista || doc.estado || doc.status || "borrador").toUpperCase();
-    if (e === "PUBLICADO" || e === "APROBADO") return "publicado";
-    if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") return "pendiente";
-    if (e === "RECHAZADO") return "rechazado";
-    return "borrador";
-  };
-
   const isPdf = archivo 
     ? archivo.name.toLowerCase().endsWith('.pdf') 
     : nombreArchivoActual.toLowerCase().endsWith('.pdf');
@@ -378,7 +381,8 @@ const CmsDocsView = ({
     return (docsList || []).filter((doc) => {
       const e = (doc.estado || doc.status || "").toUpperCase();
       let matchTab = false;
-      if (activeTab === "PUBLICADOS") matchTab = estaPublicadoEnPortal(doc);
+      if (activeTab === "TODOS") matchTab = true;
+      else if (activeTab === "PUBLICADOS") matchTab = estaPublicadoEnPortal(doc);
       else if (activeTab === "PENDIENTES") matchTab = e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO";
       else if (activeTab === "RECHAZADOS") matchTab = e === "RECHAZADO";
       else if (activeTab === "BORRADORES") matchTab = e === "BORRADOR" || e === "ARCHIVADO" || !e;
@@ -390,9 +394,10 @@ const CmsDocsView = ({
         doc.editor || "",
       ].join(" ").toLowerCase();
 
-      return matchTab && (!term || searchable.includes(term));
+      const matchCategoria = filtroCategoria === "TODAS" || doc.category === filtroCategoria;
+      return matchTab && matchCategoria && (!term || searchable.includes(term));
     });
-  }, [docsList, activeTab, searchTerm]);
+  }, [docsList, activeTab, searchTerm, filtroCategoria]);
 
   return (
     <div className="cms-dashboard-card">
@@ -401,62 +406,34 @@ const CmsDocsView = ({
           <h3 className="cms-card-title docs-view-title">Documentación institucional</h3>
           <p className="docs-view-subtitle">Subí formularios y protocolos. Los documentos aprobados por el Administrador se publicarán en el portal.</p>
         </div>
-        <button type="button" className="btn-subir-doc-header" onClick={handleOpenCreate}>
-          + CARGAR DOCUMENTO
-        </button>
       </div>
 
-      {/* Pestañas de estado idénticas a Especialidades y Noticias */}
-      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "16px", marginBottom: "16px" }}>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("PUBLICADOS")}
-        >
-          Publicados ({counts.PUBLICADOS})
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
-          onClick={() => setActiveTab("PENDIENTES")}
-        >
-          Pendientes de aprobación ({counts.PENDIENTES})
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("RECHAZADOS")}
-        >
-          Rechazados ({counts.RECHAZADOS})
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "BORRADORES" ? "active" : ""}`}
-          onClick={() => setActiveTab("BORRADORES")}
-        >
-          Borradores ({counts.BORRADORES})
-        </button>
-      </div>
-
-      {/* Barra de búsqueda */}
-      <div style={{ marginBottom: "16px" }}>
-        <input
-          type="search"
-          placeholder="Buscar documento por título, archivo o categoría..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            width: "100%",
-            maxWidth: "420px",
-            padding: "9px 14px",
-            borderRadius: "8px",
-            border: "1px solid #cbd5e1",
-            fontSize: "0.9rem",
-            color: "#0c2340",
-            backgroundColor: "#fff"
-          }}
+      <div style={{ margin: "16px 0 14px" }}>
+        <FiltrosEstado
+          activa={activeTab}
+          onCambiar={setActiveTab}
+          crear={{ texto: "+ AÑADIR DOCUMENTO", onClick: handleOpenCreate }}
+          todos
+          onActualizar={onRefreshDocs}
+          actualizando={loading}
+          opciones={[
+            { clave: "PENDIENTES", tipo: "pendiente", cuenta: counts.PENDIENTES },
+            { clave: "PUBLICADOS", tipo: "publicado", cuenta: counts.PUBLICADOS },
+            { clave: "RECHAZADOS", tipo: "rechazado", cuenta: counts.RECHAZADOS },
+            { clave: "BORRADORES", tipo: "borrador", cuenta: counts.BORRADORES },
+          ]}
         />
       </div>
+
+      <BarraFiltros
+        busqueda={{ etiqueta: "Buscar documento", placeholder: "Buscar por título, archivo o categoría...", valor: searchTerm, onCambio: setSearchTerm }}
+        select={{
+          etiqueta: "Categoría",
+          valor: filtroCategoria,
+          onCambio: setFiltroCategoria,
+          opciones: [{ valor: "TODAS", texto: "Todas las categorías" }, ...CATEGORIAS.map((c) => ({ valor: c, texto: c }))],
+        }}
+      />
 
       <div className="cms-docs-table-container">
         <div className="activity-table-head docs-table-head">
@@ -532,16 +509,14 @@ const CmsDocsView = ({
                   <span style={{ fontWeight: 600, color: '#0c2340' }}>{doc.editor || userName || "Usuario CMS"}</span>
                   <small style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
                     <CalendarDays size={12} />
-                    {doc.updatedAt || "Actualizado hoy"}
+                    {fechaLegible(doc.updatedAt)}
                   </small>
                 </div>
 
                 <div className="col-categoria">{doc.category || "Información institucional"}</div>
                 
                 <div className="col-estado">
-                  <span className={`status-badge ${getBadgeClass(doc)}`}>
-                    {getTextoEstado(doc)}
-                  </span>
+                  <EtiquetaEstado estado={doc.estadoVista || doc.estado || doc.status} texto={getTextoEstado(doc)} />
                   <SiguePublicado item={doc} activo={activeTab === "PUBLICADOS"} />
                 </div>
 

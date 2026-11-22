@@ -71,7 +71,10 @@ import {
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import BarraFiltros from "../../components/ui/BarraFiltros";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
 
 const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de residencias de la BD
@@ -520,11 +523,26 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   };
 
   // Filtrado de datos
+  // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
+  const cuentas = { PUBLICADOS: 0, PROGRAMADOS: 0, PENDIENTES: 0, BORRADORES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
+  (Array.isArray(residencias) ? residencias : []).forEach((res) => {
+    if (!res) return;
+    const e = (res.estado || "PUBLICADO").toUpperCase();
+    if (estaPublicadoEnPortal(res)) cuentas.PUBLICADOS++;
+    if (e === "PROGRAMADO") cuentas.PROGRAMADOS++;
+    else if (e === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
+    else if (e === "BORRADOR") cuentas.BORRADORES++;
+    else if (e === "RECHAZADO") cuentas.RECHAZADOS++;
+    else if (e === "ARCHIVADO") cuentas.ARCHIVADOS++;
+  });
+
   const datosFiltrados = (Array.isArray(residencias) ? residencias : []).filter((res) => {
     if (!res) return false;
     const estadoItem = (res.estado || "PUBLICADO").toUpperCase();
     let matchEstado = false;
-    if (activeTab === "PUBLICADOS") {
+    if (activeTab === "TODOS") {
+      matchEstado = true;
+    } else if (activeTab === "PUBLICADOS") {
       matchEstado = estaPublicadoEnPortal(res);
     } else if (activeTab === "PROGRAMADOS") {
       matchEstado = estadoItem === "PROGRAMADO";
@@ -573,13 +591,6 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
             Administre los programas formativos, convocatorias, banner y reglamentos que se visualizan en el portal de residencias.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn-crear-noticia-header"
-          onClick={handleOpenCreate}
-        >
-          + AÑADIR RESIDENCIA
-        </button>
       </div>
 
       {/* Barra de herramientas: Pestañas a la izquierda, buscador a la derecha */}
@@ -590,85 +601,30 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
           alignItems: "center",
           marginBottom: "20px",
           flexWrap: "wrap",
-          gap: "15px",
+          gap: 0,
         }}
       >
-        {/* Pestañas de estado */}
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <button
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("PUBLICADOS")}
-          >
-            Publicados
-          </button>
-          <button
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "PROGRAMADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("PROGRAMADOS")}
-          >
-            Programados
-          </button>
-          <button
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
-            onClick={() => setActiveTab("PENDIENTES")}
-          >
-            Pendientes de aprobación
-          </button>
-          <button
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "BORRADORES" ? "active" : ""}`}
-            onClick={() => setActiveTab("BORRADORES")}
-          >
-            Borradores
-          </button>
-          <button
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("RECHAZADOS")}
-          >
-            Rechazados
-          </button>
-          <button
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("ARCHIVADOS")}
-          >
-            Archivados
-          </button>
+        <div style={{ width: "100%", marginBottom: "14px" }}>
+        <FiltrosEstado
+            activa={activeTab}
+            onCambiar={setActiveTab}
+            crear={{ texto: "+ AÑADIR RESIDENCIA", onClick: handleOpenCreate }}
+            todos
+            onActualizar={cargarResidencias}
+            opciones={[
+              { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
+              { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
+              { clave: "PROGRAMADOS", tipo: "programado", cuenta: cuentas.PROGRAMADOS },
+              { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
+              { clave: "BORRADORES", tipo: "borrador", cuenta: cuentas.BORRADORES },
+              { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
+            ]}
+          />
         </div>
 
-        {/* Buscador */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div className="res-search-wrapper">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input
-              type="text"
-              placeholder="Buscar por programa o categoría..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="res-search-input-field"
-            />
-          </div>
-        </div>
+        <BarraFiltros
+          busqueda={{ etiqueta: "Buscar residencia", placeholder: "Buscar por programa o categoría...", valor: searchTerm, onCambio: setSearchTerm }}
+        />
       </div>
 
       {/* Tabla Unificada con diseño armonizado idéntico a Profesionales */}
@@ -876,67 +832,33 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     alignItems: "center",
                   }}
                 >
-                  {(res.estadoVista || res.estado) === "PENDIENTE_APROBACION" ? (
-                    <span
-                      style={{
-                        backgroundColor: "#fffbeb",
-                        color: "#b45309",
-                        border: "1px solid #fde68a",
-                        padding: "4px 8px",
-                        borderRadius: "999px",
-                        fontSize: "0.78rem",
-                        fontWeight: "600",
-                        display: "inline-block",
-                        textAlign: "center",
-                      }}
-                    >
-                      {res.requestedEstado === "ARCHIVADO"
-                        ? "Archivado solicitado"
-                        : res.requestedEstado === "BORRADOR"
-                        ? "Retiro solicitado"
-                        : res.requestedEstado === "PROGRAMADO"
-                        ? "Programación en revisión"
-                        : "En revisión"}
-                    </span>
-                  ) : (res.estadoVista || res.estado) === "PROGRAMADO" ? (
-                    <span
-                      style={{
-                        backgroundColor: "#eff6ff",
-                        color: "#2563eb",
-                        border: "1px solid #bfdbfe",
-                        padding: "4px 8px",
-                        borderRadius: "999px",
-                        fontSize: "0.78rem",
-                        fontWeight: "600",
-                        display: "inline-block",
-                        textAlign: "center",
-                      }}
-                      title={res.fechaPublicacion ? `Programado para: ${new Date(res.fechaPublicacion).toLocaleString('es-AR')}` : "Programado"}
-                    >
-                      Programado
-                    </span>
-                  ) : (res.estadoVista || res.estado) === "RECHAZADO" ? (
-                    <span
-                      style={{
-                        backgroundColor: "#fef2f2",
-                        color: "#b91c1c",
-                        border: "1px solid #fecaca",
-                        padding: "4px 8px",
-                        borderRadius: "999px",
-                        fontSize: "0.78rem",
-                        fontWeight: "600",
-                        display: "inline-block",
-                        textAlign: "center",
-                      }}
-                    >
-                      Rechazado
-                    </span>
-                  ) : (
-                    <EtiquetaEstado
-                      estado={(res.estadoVista || res.estado)}
-                      texto={(res.estadoVista || res.estado) === "PUBLICADO" ? "Publicado" : (res.estadoVista || res.estado) === "ARCHIVADO" ? "Archivado" : "Borrador"}
-                    />
-                  )}
+                  {(() => {
+                    const estadoMostrado = res.estadoVista || res.estado;
+                    if (estadoMostrado === "PENDIENTE_APROBACION") {
+                      return (
+                        <EtiquetaEstado
+                          estado={estadoMostrado}
+                          texto={
+                            res.requestedEstado === "ARCHIVADO"
+                              ? "Archivado solicitado"
+                              : res.requestedEstado === "BORRADOR"
+                              ? "Retiro solicitado"
+                              : res.requestedEstado === "PROGRAMADO"
+                              ? "Programación en revisión"
+                              : textoDeEstado(estadoMostrado)
+                          }
+                        />
+                      );
+                    }
+                    if (estadoMostrado === "PROGRAMADO") {
+                      return (
+                        <span title={res.fechaPublicacion ? `Programado para: ${new Date(res.fechaPublicacion).toLocaleString("es-AR")}` : "Programado"}>
+                          <EtiquetaEstado estado={estadoMostrado} texto={textoDeEstado(estadoMostrado)} />
+                        </span>
+                      );
+                    }
+                    return <EtiquetaEstado estado={estadoMostrado} texto={textoDeEstado(estadoMostrado)} />;
+                  })()}
                   <SiguePublicado item={res} activo={activeTab === "PUBLICADOS"} />
                 </div>
 

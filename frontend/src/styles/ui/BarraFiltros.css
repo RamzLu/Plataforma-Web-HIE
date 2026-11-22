@@ -1,0 +1,87 @@
+/* Buscador y filtro por clasificación compartidos por los listados del panel del CMS. */
+:where(.panel-scope) .barra-filtros {
+  display: flex;
+  flex-basis: 100%;
+  width: 100%;
+  align-items: flex-end;
+  gap: 20px;
+  margin: 0 0 25px;
+  padding: 20px 24px;
+  border: 1px solid #e7edf5;
+  border-radius: 16px;
+  background: var(--color-white);
+  box-shadow: 0 6px 18px rgb(15 23 42 / 3%);
+}
+
+:where(.panel-scope) .barra-filtros-busqueda,
+:where(.panel-scope) .barra-filtros-select {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+:where(.panel-scope) .barra-filtros-busqueda {
+  flex: 2;
+}
+
+:where(.panel-scope) .barra-filtros-select {
+  flex: 1;
+}
+
+:where(.panel-scope) .barra-filtros label:not(:where(.vista-portal *)) {
+  color: var(--color-slate-500);
+  font-size: 0.85rem;
+  font-weight: 650;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+:where(.panel-scope) .barra-filtros-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+:where(.panel-scope) .barra-filtros-input svg:not(:where(.vista-portal *)) {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: var(--color-slate-400);
+  pointer-events: none;
+}
+
+:where(.panel-scope) .barra-filtros-input input:not(:where(.vista-portal *)),
+:where(.panel-scope) .barra-filtros-select select:not(:where(.vista-portal *)) {
+  width: 100%;
+  border: 1px solid var(--color-slate-300);
+  border-radius: 10px;
+  outline: none;
+  background: var(--color-white);
+  color: var(--color-slate-900);
+  font-size: 0.95rem;
+}
+
+:where(.panel-scope) .barra-filtros-input input:not(:where(.vista-portal *)) {
+  padding: 10px 14px 10px 42px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+:where(.panel-scope) .barra-filtros-select select:not(:where(.vista-portal *)) {
+  padding: 10px 14px;
+}
+
+:where(.panel-scope) .barra-filtros-input input:focus:not(:where(.vista-portal *)),
+:where(.panel-scope) .barra-filtros-select select:focus:not(:where(.vista-portal *)) {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+@media (max-width: 768px) {
+  :where(.panel-scope) .barra-filtros {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px;
+  }
+}

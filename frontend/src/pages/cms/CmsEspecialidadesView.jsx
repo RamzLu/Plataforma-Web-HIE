@@ -16,6 +16,10 @@ import {
 } from "../../components/cms/CmsModals";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import BarraFiltros from "../../components/ui/BarraFiltros";
 
 const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) => {
   const [especialidades, setEspecialidades] = useState([]);
@@ -182,10 +186,22 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     }
   };
 
+  // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
+  const cuentas = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
+  especialidades.forEach((esp) => {
+    const e = (esp.estado || "PUBLICADO").toUpperCase();
+    if (estaPublicadoEnPortal(esp)) cuentas.PUBLICADOS++;
+    if (e === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
+    else if (e === "RECHAZADO") cuentas.RECHAZADOS++;
+    else if (e === "ARCHIVADO" || e === "BORRADOR") cuentas.ARCHIVADOS++;
+  });
+
   const datosFiltrados = especialidades.filter((esp) => {
     const estadoItem = (esp.estado || "PUBLICADO").toUpperCase();
     let matchEstado = false;
-    if (activeTab === "PUBLICADOS") {
+    if (activeTab === "TODOS") {
+      matchEstado = true;
+    } else if (activeTab === "PUBLICADOS") {
       matchEstado = estaPublicadoEnPortal(esp);
     } else if (activeTab === "PENDIENTES") {
       matchEstado = estadoItem === "PENDIENTE_APROBACION";
@@ -221,74 +237,40 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
             Administre las especialidades médicas y servicios clave de la institución.
           </p>
         </div>
-        <button type="button" className="btn-crear-noticia-header" onClick={handleOpenCreate}>
-          + AÑADIR ESPECIALIDAD
-        </button>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: 0 }}>
         
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <button 
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("PUBLICADOS")}
-          >
-            Publicados
-          </button>
-          <button 
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
-            onClick={() => setActiveTab("PENDIENTES")}
-          >
-            Pendientes de aprobación
-          </button>
-          <button 
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("RECHAZADOS")}
-          >
-            Rechazados
-          </button>
-          <button 
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("ARCHIVADOS")}
-          >
-            Archivados
-          </button>
+        <div style={{ marginBottom: "14px", width: "100%" }}>
+          <FiltrosEstado
+            activa={activeTab}
+            onCambiar={setActiveTab}
+            crear={{ texto: "+ AÑADIR ESPECIALIDAD", onClick: handleOpenCreate }}
+            todos
+            onActualizar={cargarDatos}
+            actualizando={loading}
+            opciones={[
+              { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
+              { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
+              { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
+              { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
+            ]}
+          />
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-          <div className="res-search-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input 
-              type="text" 
-              placeholder="Buscar por nombre o ubicación..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="res-search-input-field"
-            />
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-              FILTRAR POR:
-            </span>
-            <select 
-              value={filtroTipo} 
-              onChange={(e) => setFiltroTipo(e.target.value)}
-              className="res-select-field"
-            >
-              <option value="TODOS">Todas las clasificaciones</option>
-              <option value="ESPECIALIDADES">Solo Especialidades</option>
-              <option value="SERVICIOS">Solo Servicios Clave</option>
-            </select>
-          </div>
-        </div>
+        <BarraFiltros
+          busqueda={{ etiqueta: "Buscar especialidad o servicio", placeholder: "Buscar por nombre o ubicación...", valor: searchTerm, onCambio: setSearchTerm }}
+          select={{
+            etiqueta: "Clasificación",
+            valor: filtroTipo,
+            onCambio: setFiltroTipo,
+            opciones: [
+              { valor: "TODOS", texto: "Todas las clasificaciones" },
+              { valor: "ESPECIALIDADES", texto: "Solo Especialidades" },
+              { valor: "SERVICIOS", texto: "Solo Servicios Clave" },
+            ],
+          }}
+        />
       </div>
 
       <div className="cms-news-table-container">
@@ -373,21 +355,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                 </div>
 
                 <div style={{ width: "130px", textAlign: "center" }}>
-                  <span
-                    className={`status-badge ${
-                      (esp.estadoVista || esp.estado) === "PUBLICADO"
-                        ? "publicado"
-                        : (esp.estadoVista || esp.estado) === "PENDIENTE_APROBACION"
-                        ? "pendiente"
-                        : (esp.estadoVista || esp.estado) === "RECHAZADO"
-                        ? "rechazado"
-                        : "archivado"
-                    }`}
-                  >
-                    {(esp.estadoVista || esp.estado) === "PENDIENTE_APROBACION"
-                      ? "PENDIENTE"
-                      : (esp.estadoVista || esp.estado)}
-                  </span>
+                  <EtiquetaEstado estado={esp.estadoVista || esp.estado} texto={textoDeEstado(esp.estadoVista || esp.estado)} />
                   <SiguePublicado item={esp} activo={activeTab === "PUBLICADOS"} />
                 </div>
 

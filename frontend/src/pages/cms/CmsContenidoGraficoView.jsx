@@ -3,6 +3,8 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
 import "../../styles/pages/cms/CmsContenidoGraficoView.css";
 import {
   getContenidosGraficos,
@@ -436,35 +438,19 @@ const CmsContenidoGraficoView = () => {
                     </td>
 
                     <td className="cg-td-estado">
-                      {isApproved && (
-                        <span className="cg-status-badge status-aprobado">
-                          <span className="cg-status-dot dot-aprobado"></span>
-                          PUBLICADO
-                        </span>
-                      )}
+                      {isApproved && <EtiquetaEstado estado="PUBLICADO" texto={textoDeEstado("PUBLICADO")} />}
                       {isRejected && (
                         <button
                           type="button"
-                          className="cg-status-badge status-rechazado clickable"
                           onClick={() => handleOpenModify(item)}
                           title="Hacer clic para corregir el espacio observado"
+                          style={{ padding: 0, border: 0, background: "none", cursor: "pointer" }}
                         >
-                          <span className="cg-status-dot dot-rechazado"></span>
-                          RECHAZADO
+                          <EtiquetaEstado estado="RECHAZADO" texto={textoDeEstado("RECHAZADO")} />
                         </button>
                       )}
-                      {isPending && (
-                        <span className="cg-status-badge status-pendiente">
-                          <span className="cg-status-dot dot-pendiente"></span>
-                          PENDIENTE
-                        </span>
-                      )}
-                      {isDraft && (
-                        <span className="cg-status-badge status-borrador">
-                          <span className="cg-status-dot dot-borrador"></span>
-                          BORRADOR
-                        </span>
-                      )}
+                      {isPending && <EtiquetaEstado estado="PENDIENTE_APROBACION" texto={textoDeEstado("PENDIENTE_APROBACION")} />}
+                      {isDraft && <EtiquetaEstado estado="BORRADOR" texto={textoDeEstado("BORRADOR")} />}
                     </td>
 
                     <td className="cg-td-acciones">
