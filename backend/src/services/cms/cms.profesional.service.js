@@ -8,6 +8,7 @@ import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { eliminarArchivosReemplazados, refDeArchivo, refDesdeUrl } from "../../utils/archivos.utils.js";
 import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "profesional", modelos: { "": "profesional" } });
@@ -767,6 +768,14 @@ class CmsProfesionalService {
         profesional_area: { include: { area: true } },
       },
     });
+
+    // Aprobada la edición, la foto de la versión pública anterior que ya no se usa se borra.
+    if (pendingMeta?.snapshotPublico) {
+      await eliminarArchivosReemplazados({
+        anteriores: [refDesdeUrl(pendingMeta.snapshotPublico.imagenUrl)],
+        vigentes: [refDeArchivo(profAprobado.archivo)],
+      });
+    }
 
     await this.limpiarMotivoRechazo(idStr);
     await this.limpiarPendingMeta(idStr);

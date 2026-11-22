@@ -8,6 +8,7 @@ import { tieneVersionPublica, conservaVersionPublica, tieneEdicionPendiente, MOT
 import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { eliminarArchivosReemplazados, refDeArchivo, refDesdeUrl } from "../../utils/archivos.utils.js";
 import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "documento", modelos: { "": "documento" } });
@@ -534,6 +535,14 @@ class CmsDocService {
         editor: true,
       },
     });
+
+    // Aprobada la edición, el archivo de la versión pública anterior que ya no se usa se borra.
+    if (nuevoEstado !== "RECHAZADO" && pendingMeta?.snapshotPublico) {
+      await eliminarArchivosReemplazados({
+        anteriores: [refDesdeUrl(pendingMeta.snapshotPublico.fileUrl)],
+        vigentes: [refDeArchivo(actualizado.archivo)],
+      });
+    }
 
     // Registrar auditoría
     try {

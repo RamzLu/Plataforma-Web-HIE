@@ -9,6 +9,7 @@ import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../util
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { eliminarArchivosReemplazados, refDeArchivo } from "../../utils/archivos.utils.js";
 import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "residencia", modelos: { "": "residencia" } });
@@ -18,6 +19,18 @@ const formatBytes = (bytes) => {
   if (n > 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
   if (n > 0) return `${(n / 1024).toFixed(0)} KB`;
   return "";
+};
+
+// Archivos de una residencia (o de su versión pública guardada): el banner y el documento adjunto.
+const archivosDeResidencia = ({ archivo, contenido }) => {
+  const refs = [refDeArchivo(archivo)];
+  try {
+    const nombre = JSON.parse(contenido || "{}")?.documento?.documentoArchivoNombre;
+    if (nombre) refs.push({ bucket: "documentos", nombre });
+  } catch {
+    // JSON inválido: no hay documento adjunto que considerar.
+  }
+  return refs;
 };
 
 class CmsResidenciaService {
@@ -808,6 +821,13 @@ class CmsResidenciaService {
           await this.guardarEditorMeta(idStr, {
             editor: metaExistente.editor,
             updatedAt: metaExistente.updatedAt || new Date().toISOString(),
+          });
+        }
+        // Aprobada la edición, los archivos de la versión pública anterior que ya no se usan se borran.
+        if (metaExistente?.snapshotPublico) {
+          await eliminarArchivosReemplazados({
+            anteriores: archivosDeResidencia(metaExistente.snapshotPublico),
+            vigentes: archivosDeResidencia(residenciaExistente),
           });
         }
         await this.limpiarPendingMeta(idStr);

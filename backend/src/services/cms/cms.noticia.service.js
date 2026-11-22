@@ -8,6 +8,7 @@ import { sanitizarHtmlNoticia, parsearIdBigInt, parsearArregloJson } from "../..
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { eliminarArchivosReemplazados, refDeArchivo, refDesdeUrl } from "../../utils/archivos.utils.js";
 import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "noticia", modelos: { "": "noticia" } });
@@ -674,6 +675,14 @@ class CmsNoticiaService {
         categoria_noticia: true,
       },
     });
+
+    // Aprobada la edición, las imágenes de la versión pública anterior que ya no se usan se borran.
+    if (nuevoEstado !== "RECHAZADO" && pendingMeta?.snapshotPublico) {
+      await eliminarArchivosReemplazados({
+        anteriores: (pendingMeta.snapshotPublico.images || []).map((url) => refDesdeUrl(url)),
+        vigentes: noticiaActualizada.noticia_archivo.map((na) => refDeArchivo(na.archivo)),
+      });
+    }
 
     try {
       await prisma.auditoria.create({

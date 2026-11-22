@@ -7,6 +7,7 @@ import { generarNombreUnico } from "../../utils/file.utils.js";
 import { validarUrlHttp, sanitizarUrlLectura, parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { eliminarArchivosReemplazados, refDeArchivo, refDesdeUrl } from "../../utils/archivos.utils.js";
 import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
 
 const DOCS_BUCKET = "capacitaciones-documentos";
@@ -148,6 +149,21 @@ const INITIAL_SEED_CAPACITACIONES = [
     activo: true,
   },
 ];
+
+// Archivos de una capacitación (o de su versión pública guardada): banner, material y video subidos.
+// Los links externos (YouTube, etc.) no se tocan: refDesdeUrl solo reconoce nuestro almacenamiento.
+const archivosDeCapacitacion = ({ archivo, contenido, videoUrl }) => {
+  const refs = [refDeArchivo(archivo), refDesdeUrl(videoUrl)];
+  try {
+    const extra = JSON.parse(contenido || "{}");
+    for (const url of [extra.archivoUrl, extra.bannerUrl, extra.imagenUrl, extra.videoUrl]) {
+      refs.push(refDesdeUrl(url));
+    }
+  } catch {
+    // JSON inválido: solo cuentan el banner y el video guardados en las columnas.
+  }
+  return refs;
+};
 
 class CmsCapacitacionService {
   // Metadatos editoriales (motivo de rechazo, cambios pendientes, editor): ver utils/metaEditorial.utils.js
@@ -901,6 +917,13 @@ class CmsCapacitacionService {
         // Si era una edición de algo ya publicado se conservan los metadatos (y la versión pública anterior).
         if (revision.meta === null) await this.limpiarPendingMeta(idStr);
       } else {
+        // Aprobada la edición, los archivos de la versión pública anterior que ya no se usan se borran.
+        if (metaExistente?.snapshotPublico) {
+          await eliminarArchivosReemplazados({
+            anteriores: archivosDeCapacitacion(metaExistente.snapshotPublico),
+            vigentes: archivosDeCapacitacion(existing),
+          });
+        }
         await this.limpiarPendingMeta(idStr);
         await this.limpiarMotivoRechazo(idStr);
       }
