@@ -293,7 +293,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
       const isScheduling =
         selectedResidencia?.requestedEstado === 'PROGRAMADO' ||
         Boolean(selectedResidencia?.fechaPublicacion && new Date(selectedResidencia.fechaPublicacion) > new Date());
-      const finalEstado = isArchiving ? 'ARCHIVADO' : isScheduling ? 'PROGRAMADO' : 'PUBLICADO';
+      const isUnpublishing = selectedResidencia?.requestedEstado === 'BORRADOR';
+      const finalEstado = isArchiving ? 'ARCHIVADO' : isUnpublishing ? 'BORRADOR' : isScheduling ? 'PROGRAMADO' : 'PUBLICADO';
 
       await cambiarEstadoResidencia(selectedResidencia.id, 'APROBADO');
 
@@ -316,6 +317,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
       setFeedback(
         isArchiving
           ? `La residencia “${selectedResidencia?.nombre || 'Residencia'}” fue archivada con éxito.`
+          : isUnpublishing
+          ? `La residencia “${selectedResidencia?.nombre || 'Residencia'}” se retiró del portal y quedó como borrador.`
           : isScheduling
           ? `La residencia “${selectedResidencia?.nombre || 'Residencia'}” fue aprobada y programada correctamente.`
           : `La solicitud de “${selectedResidencia?.nombre || 'Residencia'}” fue aprobada correctamente.`
@@ -745,6 +748,15 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                   <Archive size={18} />
                   <div>
                     <strong>Solicitud de archivado:</strong> El editor del CMS solicita archivar esta residencia y retirarla del portal público.
+                  </div>
+                </div>
+              )}
+
+              {isSelectedPending && selectedResidencia?.requestedEstado === 'BORRADOR' && (
+                <div className="admin-rev-alert">
+                  <Archive size={18} />
+                  <div>
+                    <strong>Solicitud de retiro:</strong> El editor del CMS pide pasar esta residencia publicada a Borrador. Si la aprobás, deja de verse en el portal.
                   </div>
                 </div>
               )}

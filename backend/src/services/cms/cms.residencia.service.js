@@ -9,6 +9,7 @@ import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../util
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "residencia", modelos: { "": "residencia" } });
 
@@ -255,24 +256,12 @@ class CmsResidenciaService {
       }
     }
 
-    let estadoNormalizado = "PENDIENTE_APROBACION";
-    let targetEstado = "PUBLICADO";
-    if (data.estado) {
-      const estadoUpper = data.estado.toUpperCase();
-      if (estadoUpper === "BORRADOR") {
-        estadoNormalizado = "BORRADOR";
-        targetEstado = "BORRADOR";
-      } else if (estadoUpper === "ARCHIVADO") {
-        estadoNormalizado = "ARCHIVADO";
-        targetEstado = "ARCHIVADO";
-      } else if (estadoUpper === "PROGRAMADO") {
-        estadoNormalizado = "PENDIENTE_APROBACION";
-        targetEstado = "PROGRAMADO";
-      } else {
-        estadoNormalizado = "PENDIENTE_APROBACION";
-        targetEstado = tieneFechaProgramada ? "PROGRAMADO" : "PUBLICADO";
-      }
-    }
+    // Regla común (utils/flujoEditorial.utils.js). Sin estado, el CMS pide publicar.
+    const solicitud = resolverSolicitud({
+      estadoActual: null,
+      intencion: intencionDesdeEstado(data.estado || "PUBLICADO", { tieneFecha: tieneFechaProgramada }),
+    });
+    const estadoNormalizado = solicitud.estado;
 
     const nueva = await prisma.residencia.create({
       data: {
@@ -301,10 +290,9 @@ class CmsResidenciaService {
 
     // Si entra como PENDIENTE_APROBACION, guardar pending meta
     let pendingMeta = null;
-    if (estadoNormalizado === "PENDIENTE_APROBACION") {
+    if (solicitud.meta) {
       pendingMeta = {
-        previousEstado: null,
-        targetEstado: targetEstado,
+        ...solicitud.meta,
         editor: editorNombre,
         updatedAt: nowIso,
         cambios: null,
@@ -357,6 +345,31 @@ class CmsResidenciaService {
     const editorNombre = await this._resolverNombreEditor(user, data.editor);
     const nowIso = new Date().toISOString();
 
+    const estadoAnterior = (residenciaExistente.estado || "").toUpperCase();
+    const pendingMap = await this.obtenerMapaPendingMeta();
+    const metaExistente = pendingMap.get(idStr) || null;
+    // Es o fue público (también una edición rechazada de algo publicado o programado).
+    const provieneDePublicada = fuePublico(estadoAnterior, metaExistente);
+
+    // El banner y el documento de la versión pública no se borran del almacenamiento mientras el portal
+    // la siga mostrando: si hay una edición en revisión, la pública es la guardada en "snapshotPublico";
+    // si no, es la del registro actual.
+    const snapshotPublico = metaExistente?.snapshotPublico || null;
+    const bannerPublicoId = provieneDePublicada
+      ? (snapshotPublico ? snapshotPublico.imagenId : residenciaExistente.imagenId)
+      : null;
+    let documentoPublicoId = null;
+    if (provieneDePublicada) {
+      try {
+        const contenidoPublico = JSON.parse((snapshotPublico ? snapshotPublico.contenido : residenciaExistente.contenido) || "{}");
+        documentoPublicoId = contenidoPublico?.documento?.documentoId ?? null;
+      } catch {
+        // JSON inválido: no hay documento público que proteger.
+      }
+    }
+    const esBannerPublico = (archivoId) => bannerPublicoId != null && String(archivoId) === String(bannerPublicoId);
+    const esDocumentoPublico = (archivoId) => documentoPublicoId != null && String(archivoId) === String(documentoPublicoId);
+
     const filesArray = Array.isArray(files) ? files : (files ? [files] : []);
     const bannerFile = filesArray.find((f) => f.fieldname === "banner" || f.fieldname === "imagen");
     const docFile = filesArray.find((f) => f.fieldname === "archivo" || f.fieldname === "documento");
@@ -364,7 +377,7 @@ class CmsResidenciaService {
     let finalImagenId = residenciaExistente.imagenId;
 
     if (data.eliminarBanner === "true" || data.eliminarBanner === true) {
-      if (residenciaExistente.archivo) {
+      if (residenciaExistente.archivo && !esBannerPublico(residenciaExistente.archivo.id)) {
         try {
           await supabase.storage
             .from("noticias-imagenes")
@@ -378,7 +391,7 @@ class CmsResidenciaService {
     }
 
     if (bannerFile) {
-      if (residenciaExistente.archivo) {
+      if (residenciaExistente.archivo && !esBannerPublico(residenciaExistente.archivo.id)) {
         try {
           await supabase.storage
             .from("noticias-imagenes")
@@ -430,7 +443,7 @@ class CmsResidenciaService {
     let documentoMeta = contenidoPrevio.documento || null;
 
     if (data.eliminarDocumento === "true" || data.eliminarDocumento === true) {
-      if (documentoMeta?.documentoId) {
+      if (documentoMeta?.documentoId && !esDocumentoPublico(documentoMeta.documentoId)) {
         try {
           if (documentoMeta.documentoArchivoNombre) {
             await supabase.storage
@@ -446,7 +459,7 @@ class CmsResidenciaService {
     }
 
     if (docFile) {
-      if (documentoMeta?.documentoId) {
+      if (documentoMeta?.documentoId && !esDocumentoPublico(documentoMeta.documentoId)) {
         try {
           if (documentoMeta.documentoArchivoNombre) {
             await supabase.storage
@@ -523,45 +536,6 @@ class CmsResidenciaService {
       }
     }
 
-    const estadoAnterior = (residenciaExistente.estado || "").toUpperCase();
-
-    const pendingMap = await this.obtenerMapaPendingMeta();
-    const metaExistente = pendingMap.get(idStr) || null;
-    // También cuenta como "publicada" si fue una edición rechazada de algo que ya estaba publicado.
-    const provieneDePublicada =
-      estadoAnterior === "PUBLICADO" ||
-      estadoAnterior === "APROBADO" ||
-      conservaVersionPublica(residenciaExistente, metaExistente);
-
-    let estadoNormalizado = residenciaExistente.estado;
-    let activoFinal = data.activo !== undefined ? (data.activo === true || data.activo === "true") : residenciaExistente.activo;
-    let targetEstado = metaExistente?.targetEstado || "PUBLICADO";
-
-    // Si la residencia ya estaba publicada y se modifica o se solicita archivar:
-    if (provieneDePublicada) {
-      estadoNormalizado = "PENDIENTE_APROBACION";
-      if (data.estado && data.estado.toUpperCase() === "ARCHIVADO") {
-        targetEstado = "ARCHIVADO";
-      } else if (data.estado && data.estado.toUpperCase() === "PROGRAMADO") {
-        targetEstado = "PROGRAMADO";
-      } else {
-        targetEstado = "PUBLICADO";
-      }
-    } else if (data.estado) {
-      const estadoUpper = data.estado.toUpperCase();
-      if (estadoUpper === "ARCHIVADO") {
-        estadoNormalizado = "ARCHIVADO";
-        activoFinal = false;
-        targetEstado = "ARCHIVADO";
-      } else if (estadoUpper === "PROGRAMADO") {
-        estadoNormalizado = "PENDIENTE_APROBACION";
-        targetEstado = "PROGRAMADO";
-      } else if (["PUBLICADO", "BORRADOR", "ARCHIVADO", "PENDIENTE_APROBACION"].includes(estadoUpper)) {
-        estadoNormalizado = estadoUpper;
-        targetEstado = estadoUpper === "PENDIENTE_APROBACION" && tieneFechaProgramada ? "PROGRAMADO" : estadoUpper;
-      }
-    }
-
     // Preparar datos para comparación de cambios
     const antesData = {
       nombre: residenciaExistente.nombre || "",
@@ -627,34 +601,52 @@ class CmsResidenciaService {
       throw error;
     }
 
-    if (estadoNormalizado === "PENDIENTE_APROBACION") {
-      const nuevosCambios = todosCambios;
-      const cambiosPrevios = (metaExistente?.cambios) || [];
-      const cambiosCombinados = combinarCambios(cambiosPrevios, nuevosCambios);
-      const esActualizacion = provieneDePublicada || Boolean(metaExistente?.esActualizacion);
+    // Regla común (utils/flujoEditorial.utils.js): lo que es o fue público pasa por el administrador
+    // (incluido despublicarlo o archivarlo) y el portal sigue mostrando la versión publicada mientras tanto.
+    // Sin estado: lo archivado o en borrador se mantiene, lo programado sigue programado y el resto pide publicar.
+    const estadoPedido = data.estado
+      ? data.estado
+      : ["ARCHIVADO", "BORRADOR", "PROGRAMADO"].includes(estadoAnterior)
+      ? estadoAnterior
+      : "PUBLICADO";
+    const solicitud = resolverSolicitud({
+      estadoActual: estadoAnterior,
+      meta: metaExistente,
+      intencion: intencionDesdeEstado(estadoPedido, { tieneFecha: Boolean(contenidoPayload.fechaPublicacion) }),
+      snapshotActual: () => ({
+        nombre: residenciaExistente.nombre,
+        descripcion: residenciaExistente.descripcion,
+        contenido: residenciaExistente.contenido,
+        imagenId: residenciaExistente.imagenId,
+        convocatoria: residenciaExistente.convocatoria,
+        fechaConvocatoria: residenciaExistente.fechaConvocatoria,
+        archivo: residenciaExistente.archivo,
+      }),
+      hayCambios: todosCambios.length > 0 || bannerModificado || docModificado || fechaPubCambio,
+    });
+    const estadoNormalizado = solicitud.estado;
+    const targetEstado = solicitud.meta?.targetEstado || null;
+    const activoFinal =
+      estadoNormalizado === "ARCHIVADO"
+        ? false
+        : data.activo !== undefined
+        ? data.activo === true || data.activo === "true"
+        : residenciaExistente.activo;
 
-      let snapshotPublico = metaExistente?.snapshotPublico || null;
-      if (provieneDePublicada && !snapshotPublico) {
-        snapshotPublico = {
-          nombre: residenciaExistente.nombre,
-          descripcion: residenciaExistente.descripcion,
-          contenido: residenciaExistente.contenido,
-          imagenId: residenciaExistente.imagenId,
-          convocatoria: residenciaExistente.convocatoria,
-          fechaConvocatoria: residenciaExistente.fechaConvocatoria,
-          archivo: residenciaExistente.archivo,
-        };
-      }
-
+    if (solicitud.sinCambios) {
+      // Pidió el mismo estado que ya tiene, sin tocar el contenido: no se genera una revisión.
+    } else if (solicitud.meta) {
       await this.guardarPendingMeta(idStr, {
-        previousEstado: provieneDePublicada ? "PUBLICADO" : (metaExistente?.previousEstado || null),
-        targetEstado,
-        snapshotPublico,
+        ...solicitud.meta,
         editor: editorNombre,
         updatedAt: nowIso,
-        cambios: cambiosCombinados,
-        esActualizacion,
+        cambios: combinarCambios(metaExistente?.cambios || [], todosCambios),
+        esActualizacion: provieneDePublicada || Boolean(metaExistente?.esActualizacion),
       });
+    } else {
+      await this.limpiarPendingMeta(idStr);
+    }
+    if (solicitud.limpiarMotivo) {
       await this.limpiarMotivoRechazo(idStr);
     }
 
@@ -704,6 +696,8 @@ class CmsResidenciaService {
     let mensaje = "Residencia actualizada con éxito.";
     if (targetEstado === "ARCHIVADO" && estadoNormalizado === "PENDIENTE_APROBACION") {
       mensaje = "Solicitud de archivado enviada a revisión del administrador.";
+    } else if (targetEstado === "BORRADOR" && estadoNormalizado === "PENDIENTE_APROBACION") {
+      mensaje = "Solicitud para retirar la residencia del portal enviada a revisión del administrador.";
     } else if (estadoNormalizado === "PENDIENTE_APROBACION" && provieneDePublicada) {
       mensaje = "Modificaciones enviadas a revisión del administrador.";
     }
@@ -748,104 +742,105 @@ class CmsResidenciaService {
     }
 
     const estadoAnterior = (residenciaExistente.estado || "").toUpperCase();
-    const provieneDePublicada = estadoAnterior === "PUBLICADO" || estadoAnterior === "APROBADO";
 
     const pendingMap = await this.obtenerMapaPendingMeta();
     const metaExistente = pendingMap.get(idStr) || null;
 
-    // Solo el administrador aprueba o rechaza. Si el CM pide publicar, se envía a revisión.
+    // Solo el administrador aprueba o rechaza.
     if (!esAdmin && (estadoUpper === "APROBADO" || estadoUpper === "RECHAZADO")) {
       const error = new Error("Solo el administrador puede aprobar o rechazar.");
       error.statusCode = 403;
       throw error;
     }
-    const esSolicitudDeRevision =
-      !esAdmin && ["PUBLICADO", "PROGRAMADO", "PENDIENTE_APROBACION"].includes(estadoUpper);
 
-    let finalEstado = estadoUpper;
+    let contenidoParsed = {};
+    if (residenciaExistente.contenido) {
+      try {
+        contenidoParsed = JSON.parse(residenciaExistente.contenido);
+      } catch {
+        // JSON inválido: se ignora y se usa el valor por defecto.
+      }
+    }
+
+    let finalEstado;
     let motivoGuardado = null;
     let finalActivo = residenciaExistente.activo;
+    let sinCambios = false;
+    // El CM pidió publicar o programar: sirve para elegir el mensaje.
+    const pidePublicar = !esAdmin && ["PUBLICADO", "PROGRAMADO", "PENDIENTE_APROBACION"].includes(estadoUpper);
 
-    // 0. El CM pide publicar: queda pendiente hasta que el administrador lo apruebe.
-    if (esSolicitudDeRevision) {
-      finalEstado = provieneDePublicada && estadoUpper !== "PENDIENTE_APROBACION" ? estadoAnterior : "PENDIENTE_APROBACION";
-      if (finalEstado === "PENDIENTE_APROBACION") {
-        await this.guardarPendingMeta(idStr, {
-          ...(metaExistente || {}),
-          previousEstado: metaExistente?.previousEstado ?? (estadoAnterior || null),
-          targetEstado: estadoUpper === "PROGRAMADO" ? "PROGRAMADO" : "PUBLICADO",
-          updatedAt: new Date().toISOString(),
-        });
+    // El Admin puede dejar directamente en borrador o archivar; el resto de lo suyo es decidir una solicitud.
+    const adminDirecto = esAdmin && ["BORRADOR", "ARCHIVADO"].includes(estadoUpper);
+
+    if (adminDirecto) {
+      finalEstado = estadoUpper;
+      if (estadoUpper === "ARCHIVADO") finalActivo = false;
+      await this.limpiarPendingMeta(idStr);
+      await this.limpiarMotivoRechazo(idStr);
+    } else if (esAdmin) {
+      // Regla común (utils/flujoEditorial.utils.js): solo lo pendiente; aprobar aplica lo pedido
+      // (publicar, programar, despublicar o archivar); rechazar exige motivo y conserva la versión publicada.
+      const revision = resolverRevision({
+        estadoActual: estadoAnterior,
+        meta: metaExistente,
+        decision: decisionDesdeEstado(estadoUpper),
+        motivo: rejectionReason,
+        fechaProgramada:
+          metaExistente?.targetEstado === "PROGRAMADO" || estadoUpper === "PROGRAMADO"
+            ? contenidoParsed.fechaPublicacion || null
+            : null,
+      });
+      finalEstado = revision.estado;
+      motivoGuardado = revision.motivo;
+      if (revision.activo !== undefined) finalActivo = revision.activo;
+
+      if (finalEstado === "RECHAZADO") {
+        await this.guardarMotivoRechazo(idStr, motivoGuardado);
+        // Si era una edición de algo ya publicado se conservan los metadatos (y la versión pública anterior).
+        if (revision.meta === null) await this.limpiarPendingMeta(idStr);
+      } else {
+        if (metaExistente?.editor && metaExistente.editor !== "Editor CMS") {
+          await this.guardarEditorMeta(idStr, {
+            editor: metaExistente.editor,
+            updatedAt: metaExistente.updatedAt || new Date().toISOString(),
+          });
+        }
+        await this.limpiarPendingMeta(idStr);
         await this.limpiarMotivoRechazo(idStr);
       }
-    }
-    // 1. Si el CM solicita ARCHIVAR una residencia que ya estaba publicada:
-    // Requiere aprobación del administrador -> PENDIENTE_APROBACION
-    else if (estadoUpper === "ARCHIVADO" && provieneDePublicada) {
-      finalEstado = "PENDIENTE_APROBACION";
-      await this.guardarPendingMeta(idStr, {
-        previousEstado: "PUBLICADO",
-        targetEstado: "ARCHIVADO",
-        updatedAt: new Date().toISOString(),
+    } else {
+      // El CM pide: lo que es o fue público pasa por el administrador (incluido despublicarlo o archivarlo).
+      const solicitud = resolverSolicitud({
+        estadoActual: estadoAnterior,
+        meta: metaExistente,
+        intencion: intencionDesdeEstado(estadoUpper, { tieneFecha: Boolean(contenidoParsed.fechaPublicacion) }),
+        snapshotActual: () => ({
+          nombre: residenciaExistente.nombre,
+          descripcion: residenciaExistente.descripcion,
+          contenido: residenciaExistente.contenido,
+          imagenId: residenciaExistente.imagenId,
+          convocatoria: residenciaExistente.convocatoria,
+          fechaConvocatoria: residenciaExistente.fechaConvocatoria,
+          archivo: residenciaExistente.archivo,
+        }),
+        hayCambios: false,
       });
-      await this.limpiarMotivoRechazo(idStr);
-    }
-    // 2. Si el Admin aprueba la residencia (APROBADO, PUBLICADO o PROGRAMADO):
-    else if (estadoUpper === "APROBADO" || estadoUpper === "PUBLICADO" || estadoUpper === "PROGRAMADO") {
-      if (metaExistente?.targetEstado === "ARCHIVADO") {
-        finalEstado = "ARCHIVADO";
-        finalActivo = false;
-      } else {
-        let contenidoParsed = {};
-        if (residenciaExistente.contenido) {
-          try {
-            contenidoParsed = JSON.parse(residenciaExistente.contenido);
-          } catch {
-            // JSON inválido: se ignora y se usa el valor por defecto.
-          }
-        }
-        const ahora = new Date();
-        const fechaPub = contenidoParsed.fechaPublicacion ? new Date(contenidoParsed.fechaPublicacion) : null;
-        const tieneProgramacionFutura =
-          (metaExistente?.targetEstado === "PROGRAMADO" || estadoUpper === "PROGRAMADO") &&
-          fechaPub &&
-          fechaPub > ahora;
+      finalEstado = solicitud.estado;
+      sinCambios = solicitud.sinCambios;
+      if (finalEstado === "ARCHIVADO") finalActivo = false;
 
-        finalEstado = tieneProgramacionFutura ? "PROGRAMADO" : "PUBLICADO";
-        finalActivo = true;
+      if (!sinCambios) {
+        if (solicitud.meta) {
+          await this.guardarPendingMeta(idStr, {
+            ...solicitud.meta,
+            editor: await this._resolverNombreEditor(user, null),
+            updatedAt: new Date().toISOString(),
+          });
+        } else {
+          await this.limpiarPendingMeta(idStr);
+        }
+        if (solicitud.limpiarMotivo) await this.limpiarMotivoRechazo(idStr);
       }
-      if (metaExistente?.editor && metaExistente.editor !== "Editor CMS") {
-        await this.guardarEditorMeta(idStr, {
-          editor: metaExistente.editor,
-          updatedAt: metaExistente.updatedAt || new Date().toISOString(),
-        });
-      }
-      await this.limpiarPendingMeta(idStr);
-      await this.limpiarMotivoRechazo(idStr);
-    }
-    // 3. Si el Admin rechaza la residencia:
-    else if (estadoUpper === "RECHAZADO") {
-      finalEstado = "RECHAZADO";
-      motivoGuardado = (rejectionReason || "").trim() || "Solicitud rechazada por el administrador.";
-      await this.guardarMotivoRechazo(idStr, motivoGuardado);
-      // Si era una edición de algo ya publicado, se conservan los metadatos (y la versión pública anterior)
-      // para que el portal siga mostrándola. Si no, no hay nada que conservar.
-      if (!conservaVersionPublica({ estado: "RECHAZADO" }, metaExistente)) {
-        await this.limpiarPendingMeta(idStr);
-      }
-    }
-    // 4. Si se archiva un borrador directamente:
-    else if (estadoUpper === "ARCHIVADO") {
-      finalEstado = "ARCHIVADO";
-      finalActivo = false;
-      await this.limpiarPendingMeta(idStr);
-      await this.limpiarMotivoRechazo(idStr);
-    }
-    // 5. Otras transiciones (BORRADOR, etc.)
-    else {
-      finalEstado = estadoUpper;
-      await this.limpiarPendingMeta(idStr);
-      await this.limpiarMotivoRechazo(idStr);
     }
 
     const residenciaActualizada = await prisma.residencia.update({
@@ -890,12 +885,15 @@ class CmsResidenciaService {
     const pendingMetaActual = (await this.obtenerMapaPendingMeta()).get(idStr) || null;
     const motivoActual = (await this.obtenerMapaMotivosRechazo()).get(idStr) || null;
 
+    const targetPedido = pendingMetaActual?.targetEstado;
     let mensaje = `Estado actualizado a ${finalEstado} con éxito.`;
-    if (estadoUpper === "ARCHIVADO" && finalEstado === "PENDIENTE_APROBACION") {
+    if (finalEstado === "PENDIENTE_APROBACION" && targetPedido === "ARCHIVADO") {
       mensaje = "Solicitud de archivado enviada a revisión del administrador.";
-    } else if (esSolicitudDeRevision && finalEstado === "PENDIENTE_APROBACION") {
+    } else if (finalEstado === "PENDIENTE_APROBACION" && targetPedido === "BORRADOR") {
+      mensaje = "Solicitud para retirar la residencia del portal enviada a revisión del administrador.";
+    } else if (pidePublicar && finalEstado === "PENDIENTE_APROBACION") {
       mensaje = "Residencia enviada a revisión del administrador para su publicación.";
-    } else if (esSolicitudDeRevision) {
+    } else if (pidePublicar && sinCambios) {
       mensaje = "La residencia ya está publicada.";
     }
 

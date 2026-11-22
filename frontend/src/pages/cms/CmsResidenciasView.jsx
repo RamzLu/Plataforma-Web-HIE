@@ -907,6 +907,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     >
                       {res.requestedEstado === "ARCHIVADO"
                         ? "Archivado solicitado"
+                        : res.requestedEstado === "BORRADOR"
+                        ? "Retiro solicitado"
                         : res.requestedEstado === "PROGRAMADO"
                         ? "Programación en revisión"
                         : "En revisión"}
