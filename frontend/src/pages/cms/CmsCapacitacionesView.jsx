@@ -24,6 +24,8 @@ import {
   CmsDeleteModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import keycloak from "../../config/keycloak";
 import {
   getCapacitaciones,
@@ -447,7 +449,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   const datosFiltrados = capacitaciones.filter((item) => {
     const matchEstado =
       activeTab === "PUBLICADOS"
-        ? item.estado === "PUBLICADO"
+        ? estaPublicadoEnPortal(item)
         : activeTab === "PENDIENTES"
         ? item.estado === "PENDIENTE_APROBACION"
         : activeTab === "RECHAZADOS"
@@ -616,7 +618,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
               No se encontraron capacitaciones registradas con este criterio.
             </div>
           ) : (
-            datosFiltrados.map((item) => (
+            vistaPublicados(datosFiltrados, activeTab === "PUBLICADOS").map((item) => (
               <div
                 className="activity-row news-table-row"
                 key={item.id}
@@ -657,7 +659,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                         display: "block",
                       }}
                     >
-                      {item.titulo}
+                      {tituloEnLista(item, activeTab === "PUBLICADOS", item.titulo)}
                     </span>
                     {item.disertantes && (
                       <span
@@ -774,12 +776,12 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     gap: "4px",
                   }}
                 >
-                  {item.estado === "PENDIENTE_APROBACION" || item.estado === "RECHAZADO" ? (
-                    <span title={item.estado === "RECHAZADO" ? item.motivoRechazo || "" : undefined}>
+                  {(item.estadoVista || item.estado) === "PENDIENTE_APROBACION" || (item.estadoVista || item.estado) === "RECHAZADO" ? (
+                    <span title={(item.estadoVista || item.estado) === "RECHAZADO" ? item.motivoRechazo || "" : undefined}>
                       <EtiquetaEstado
-                        estado={item.estado}
+                        estado={(item.estadoVista || item.estado)}
                         texto={
-                          item.estado === "RECHAZADO"
+                          (item.estadoVista || item.estado) === "RECHAZADO"
                             ? "Rechazado"
                             : item.requestedEstado === "ARCHIVADO"
                             ? "Archivado solicitado"
@@ -791,13 +793,14 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     </span>
                   ) : (
                     <EtiquetaEstado
-                      estado={item.estado}
-                      texto={item.estado === "PUBLICADO" ? "Publicado" : item.estado === "ARCHIVADO" ? "Archivado" : "Borrador"}
+                      estado={(item.estadoVista || item.estado)}
+                      texto={(item.estadoVista || item.estado) === "PUBLICADO" ? "Publicado" : (item.estadoVista || item.estado) === "ARCHIVADO" ? "Archivado" : "Borrador"}
                     />
                   )}
                   {item.estado === "RECHAZADO" && item.motivoRechazo && (
                     <span className="cap-motivo-rechazo">Motivo: {item.motivoRechazo}</span>
                   )}
+                  <SiguePublicado item={item} activo={activeTab === "PUBLICADOS"} />
                 </div>
 
                 {/* Columna ACCIONES */}
@@ -1345,6 +1348,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
         onConfirm={executeDelete}
         itemName={itemAEliminar?.titulo}
         itemType="la capacitación"
+        requiereAprobacion={requiereAprobacionParaEliminar(itemAEliminar)}
       />
     </div>
   );

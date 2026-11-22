@@ -39,6 +39,8 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 
 registerLocale("es", es);
 
@@ -121,14 +123,14 @@ const CmsNoticiasView = ({
 
     const matchEstado =
       viewTab === "PUBLICADO"
-        ? estadoItem === "PUBLICADO" || estadoItem === "APROBADO"
+        ? estaPublicadoEnPortal(n)
         : estadoItem === viewTab;
 
     const matchCategoria =
       filtroCategoria === "Todas" || n.category === filtroCategoria;
     return matchEstado && matchCategoria;
   });
-  const paginacion = usePaginacion(filteredNews, 10, [viewTab, filtroCategoria]);
+  const paginacion = usePaginacion(vistaPublicados(filteredNews, viewTab === "PUBLICADO"), 10, [viewTab, filtroCategoria]);
 
   const handleOpenCreate = () => {
     setEditingId(null);
@@ -643,6 +645,7 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                 news.estado || (news.isDraft ? "BORRADOR" : "PUBLICADO")
               ).toUpperCase();
               const isRejected = estadoUpper === "RECHAZADO";
+              const estadoMostrado = news.estadoVista || estadoUpper;
 
               return (
                 <div className="news-table-row" key={news.id}>
@@ -673,7 +676,7 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                         title="Ver comunicado completo"
                       >
                         <span className="activity-title news-title-clamped">
-                          {news.title}
+                          {tituloEnLista(news, viewTab === "PUBLICADO", news.title)}
                         </span>
                         {news.editedBy && (
                           <span
@@ -755,7 +758,7 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
 
                   <div className="col-estado">
                     <div className="status-wrapper">
-                      {isRejected ? (
+                      {isRejected && !news.estadoVista ? (
                         <span
                           className="status-badge rejected"
                           onClick={() => handleOpenCorrection(news)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenCorrection(news))}
@@ -766,28 +769,30 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                       ) : (
                         <span
                           className={`status-badge ${
-                            estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO"
+                            estadoMostrado === "PUBLICADO" || estadoMostrado === "APROBADO"
                               ? "publicado"
-                              : estadoUpper === "PROGRAMADO"
+                              : estadoMostrado === "PROGRAMADO"
                               ? "programado"
                               : "pendiente"
                           }`}
                         >
-                          {estadoUpper === "PENDIENTE_APROBACION"
+                          {estadoMostrado === "PENDIENTE_APROBACION"
                             ? "PENDIENTE"
-                            : estadoUpper}
+                            : estadoMostrado}
                         </span>
                       )}
 
-                      {estadoUpper === "PENDIENTE_APROBACION" &&
+                      <SiguePublicado item={news} activo={viewTab === "PUBLICADO"} />
+
+                      {estadoMostrado === "PENDIENTE_APROBACION" &&
                         news.requestedEstado === "BORRADOR" && (
                           <span className="status-programmed-date">
                             Cambio a: Borrador
                           </span>
                         )}
 
-                      {(estadoUpper === "PROGRAMADO" ||
-                        estadoUpper === "PENDIENTE_APROBACION") &&
+                      {(estadoMostrado === "PROGRAMADO" ||
+                        estadoMostrado === "PENDIENTE_APROBACION") &&
                         news.fechaPublicacion && (
                           <span className="status-programmed-date">
                             Para:{" "}
@@ -911,6 +916,7 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleExecuteDelete}
         itemType="la noticia"
+        requiereAprobacion={requiereAprobacionParaEliminar((newsList || []).find((n) => n.id === noticiaAEliminar))}
         isDeleting={deletingId === noticiaAEliminar}
       />
 

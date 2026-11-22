@@ -109,6 +109,8 @@ const fetchNoticias = async () => {
         requestedEstado: noticia.requestedEstado || null,
         previousEstado: noticia.previousEstado || null,
         isDraft: noticia.isDraft || false,
+        visibleEnPortal: Boolean(noticia.visibleEnPortal),
+        tituloPublicado: noticia.tituloPublicado || null,
         images: noticia.images || [],
         editor: noticia.editor || "Editor CMS",
         editedBy: noticia.editedBy || null,

@@ -1,13 +1,15 @@
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CalendarDays,
   Check,
   FileText,
-  FolderOpen,
+  Clock3,
   Globe2,
   RefreshCw,
   Search,
@@ -69,6 +71,8 @@ const mapDocumentFromBackend = (doc) => {
     cambios: Array.isArray(doc.cambios) ? doc.cambios : [],
     esActualizacion: Boolean(doc.esActualizacion),
     requestedEstado: doc.requestedEstado || null,
+    visibleEnPortal: Boolean(doc.visibleEnPortal),
+    tituloPublicado: doc.tituloPublicado || null,
   };
 };
 
@@ -176,7 +180,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
     return documents.filter((doc) => {
       let matchesStatus = true;
       if (statusFilter === 'PENDIENTE') matchesStatus = doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion);
-      else if (statusFilter === 'PUBLICADO') matchesStatus = doc.status === 'PUBLICADO' || doc.status === 'APROBADO';
+      else if (statusFilter === 'PUBLICADO') matchesStatus = estaPublicadoEnPortal(doc);
       else if (statusFilter === 'RECHAZADO') matchesStatus = doc.status === 'RECHAZADO';
 
       const matchesCategory =
@@ -205,7 +209,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
     [documents]
   );
   const publishedCount = useMemo(
-    () => documents.filter((doc) => doc.status === 'PUBLICADO' || doc.status === 'APROBADO').length,
+    () => documents.filter(estaPublicadoEnPortal).length,
     [documents]
   );
   const rejectedCount = useMemo(
@@ -319,7 +323,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           aria-pressed={statusFilter === 'PENDIENTE'}
           onClick={() => setStatusFilter('PENDIENTE')}
         >
-          <span><FolderOpen size={19} /></span>
+          <span><Clock3 size={19} /></span>
           <div><small>Pendientes de aprobación</small><strong>{pendingCount}</strong></div>
         </button>
         <button
@@ -329,7 +333,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           onClick={() => setStatusFilter('PUBLICADO')}
         >
           <span><Globe2 size={19} /></span>
-          <div><small>Publicados en el portal</small><strong>{publishedCount}</strong></div>
+          <div><small>Visibles al público</small><strong>{publishedCount}</strong></div>
         </button>
         <button
           type="button"
@@ -392,7 +396,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredDocuments.map((doc) => (
+                {vistaPublicados(filteredDocuments, statusFilter === 'PUBLICADO').map((doc) => (
                   <tr key={doc.id}>
                     <td data-label="Documento / archivo">
                       <div className="admin-doc-title-cell">
@@ -405,11 +409,11 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                             className="admin-doc-title-button"
                             onClick={() => setSelectedId(doc.id)}
                           >
-                            {doc.title}
+                            {tituloEnLista(doc, statusFilter === 'PUBLICADO', doc.title)}
                           </button>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
                             <small>{doc.fileName}</small>
-                            <AdminCambiosPill count={doc.cambios?.length} esActualizacion={doc.esActualizacion} />
+                            <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={doc.cambios?.length} esActualizacion={doc.esActualizacion} />
                           </div>
                         </span>
                       </div>
@@ -430,10 +434,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                       {doc.solicitudEliminacion ? (
                         <EtiquetaEliminacion />
                       ) : (
-                        <EtiquetaEstado estado={doc.status} texto={statusLabels[doc.status] || doc.status} />
-                      )}
-                      {doc.status === 'PENDIENTE' && (
-                        <small className="admin-doc-cms-hint" style={{ color: '#d97706' }}>Requiere tu revisión</small>
+                        <>
+                          <EtiquetaEstado estado={doc.statusVista || doc.status} texto={statusLabels[doc.statusVista || doc.status] || doc.status} />
+                          <SiguePublicado item={doc} activo={statusFilter === 'PUBLICADO'} />
+                        </>
                       )}
                     </td>
                   </tr>

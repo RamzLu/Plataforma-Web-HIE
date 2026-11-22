@@ -1,6 +1,8 @@
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -70,6 +72,8 @@ const mapProfesionalFromBackend = (item) => {
     cambios: Array.isArray(item.cambios) ? item.cambios : [],
     esActualizacion: Boolean(item.esActualizacion),
     requestedEstado: item.requestedEstado || null,
+    visibleEnPortal: Boolean(item.visibleEnPortal),
+    tituloPublicado: item.tituloPublicado || null,
   };
 };
 
@@ -160,7 +164,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
         statusFilter === 'TODOS' ||
         (statusFilter === 'PENDIENTE' && Boolean(item.solicitudEliminacion)) ||
         (statusFilter === 'PUBLICADO'
-          ? item.publicado
+          ? estaPublicadoEnPortal(item)
           : item.estado === statusFilter);
       const matchesType = typeFilter === 'TODOS' || item.tipo === typeFilter;
       const searchableText = [
@@ -181,13 +185,13 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
       );
     });
   }, [profesionales, search, statusFilter, typeFilter]);
-  const paginacion = usePaginacion(filteredProfesionales, 10, [search, statusFilter, typeFilter]);
+  const paginacion = usePaginacion(vistaPublicados(filteredProfesionales, statusFilter === 'PUBLICADO'), 10, [search, statusFilter, typeFilter]);
 
   const pendingCount = profesionales.filter(
     (item) => item.estado === 'PENDIENTE' || Boolean(item.solicitudEliminacion)
   ).length;
   const rejectedCount = profesionales.filter((item) => item.estado === 'RECHAZADO').length;
-  const publishedCount = profesionales.filter((item) => item.publicado).length;
+  const publishedCount = profesionales.filter(estaPublicadoEnPortal).length;
 
   const closeDetails = () => {
     setSelectedId(null);
@@ -405,11 +409,11 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                             className="admin-prof-name-button"
                             onClick={() => setSelectedId(item.id)}
                           >
-                            {item.nombre}
+                            {tituloEnLista(item, statusFilter === 'PUBLICADO', item.nombre)}
                           </button>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                             <span>{item.cargo}</span>
-                            <AdminCambiosPill count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+                            <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={item.cambios?.length} esActualizacion={item.esActualizacion} />
                           </div>
                         </div>
                       </div>
@@ -430,10 +434,13 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                       {item.solicitudEliminacion ? (
                         <EtiquetaEliminacion />
                       ) : (
-                        <EtiquetaEstado
-                          estado={item.publicado ? 'PUBLICADO' : item.estado}
-                          texto={item.publicado ? 'Publicado' : estadoLabels[item.estado]}
-                        />
+                        <>
+                          <EtiquetaEstado
+                            estado={item.publicado || item.estadoVista ? 'PUBLICADO' : item.estado}
+                            texto={item.publicado || item.estadoVista ? 'Publicado' : estadoLabels[item.estado]}
+                          />
+                          <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+                        </>
                       )}
                     </td>
                   </tr>

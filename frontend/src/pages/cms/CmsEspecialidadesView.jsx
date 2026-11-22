@@ -14,6 +14,8 @@ import {
   CmsDeleteModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 
 const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) => {
   const [especialidades, setEspecialidades] = useState([]);
@@ -184,7 +186,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     const estadoItem = (esp.estado || "PUBLICADO").toUpperCase();
     let matchEstado = false;
     if (activeTab === "PUBLICADOS") {
-      matchEstado = estadoItem === "PUBLICADO" || estadoItem === "APROBADO";
+      matchEstado = estaPublicadoEnPortal(esp);
     } else if (activeTab === "PENDIENTES") {
       matchEstado = estadoItem === "PENDIENTE_APROBACION";
     } else if (activeTab === "RECHAZADOS") {
@@ -206,7 +208,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
     return matchEstado && matchTipo && matchSearch;
   });
-  const paginacion = usePaginacion(datosFiltrados, 10, [activeTab, filtroTipo, searchTerm]);
+  const paginacion = usePaginacion(vistaPublicados(datosFiltrados, activeTab === "PUBLICADOS"), 10, [activeTab, filtroTipo, searchTerm]);
 
   return (
     <div className="cms-dashboard-card">
@@ -322,7 +324,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                   </div>
                   <div className="news-title-interactive">
                     <span className="activity-title" style={{ fontWeight: "600", color: "#0c2340", fontSize: "0.95rem", display: "block" }}>
-                      {esp.nombre}
+                      {tituloEnLista(esp, activeTab === "PUBLICADOS", esp.nombre)}
                     </span>
                     <span style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "4px", display: "block" }}>
                       {esp.descripcion && esp.descripcion.length > 55 
@@ -373,19 +375,20 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                 <div style={{ width: "130px", textAlign: "center" }}>
                   <span
                     className={`status-badge ${
-                      esp.estado === "PUBLICADO"
+                      (esp.estadoVista || esp.estado) === "PUBLICADO"
                         ? "publicado"
-                        : esp.estado === "PENDIENTE_APROBACION"
+                        : (esp.estadoVista || esp.estado) === "PENDIENTE_APROBACION"
                         ? "pendiente"
-                        : esp.estado === "RECHAZADO"
+                        : (esp.estadoVista || esp.estado) === "RECHAZADO"
                         ? "rechazado"
                         : "archivado"
                     }`}
                   >
-                    {esp.estado === "PENDIENTE_APROBACION"
+                    {(esp.estadoVista || esp.estado) === "PENDIENTE_APROBACION"
                       ? "PENDIENTE"
-                      : esp.estado}
+                      : (esp.estadoVista || esp.estado)}
                   </span>
+                  <SiguePublicado item={esp} activo={activeTab === "PUBLICADOS"} />
                 </div>
 
                 <div style={{ width: "100px", display: "flex", justifyContent: "center", gap: "10px" }}>
@@ -538,6 +541,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         onConfirm={executeDelete}
         itemName={itemAEliminar?.nombre}
         itemType={itemAEliminar?.esServicio ? "el servicio" : "la especialidad"}
+        requiereAprobacion={requiereAprobacionParaEliminar(itemAEliminar)}
         isDeleting={isDeleting}
       />
     </div>

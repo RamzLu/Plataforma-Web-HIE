@@ -21,6 +21,8 @@ import {
   CmsDeleteModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -125,7 +127,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     ).toUpperCase();
     let matchEstado = false;
     if (activeTab === "PUBLICADOS") {
-      matchEstado = estadoItem === "PUBLICADO" || estadoItem === "APROBADO";
+      matchEstado = estaPublicadoEnPortal(prof);
     } else if (activeTab === "PENDIENTES") {
       matchEstado = estadoItem === "PENDIENTE_APROBACION";
     } else if (activeTab === "RECHAZADOS") {
@@ -145,7 +147,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     if (filtroTipo === "SERVICIO") coincideTipo = prof.esServicioClave === true;
     return matchEstado && coincideBusqueda && coincideTipo;
   });
-  const paginacion = usePaginacion(profesionalesFiltrados, 10, [activeTab, searchTerm, filtroTipo]);
+  const paginacion = usePaginacion(vistaPublicados(profesionalesFiltrados, activeTab === "PUBLICADOS"), 10, [activeTab, searchTerm, filtroTipo]);
 
   const handleCloseAttempt = () => {
     if (hasUnsavedChanges) {
@@ -448,7 +450,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                   </div>
                   <div className="news-title-interactive">
                     <span className="activity-title" style={{ fontWeight: "600", color: "#0c2340", fontSize: "0.95rem" }}>
-                      {prof.nombre} {prof.apellido}
+                      {tituloEnLista(prof, activeTab === "PUBLICADOS", `${prof.nombre} ${prof.apellido}`)}
                     </span>
                     <span style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "4px", display: "block" }}>
                       {prof.matricula || "Sin matrícula"}
@@ -506,17 +508,18 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                 <div style={{ width: "130px", textAlign: "center" }}>
                   <span
                     className={`status-badge ${
-                      estadoProf === "PUBLICADO"
+                      (prof.estadoVista || estadoProf) === "PUBLICADO"
                         ? "publicado"
-                        : estadoProf === "PENDIENTE_APROBACION"
+                        : (prof.estadoVista || estadoProf) === "PENDIENTE_APROBACION"
                         ? "pendiente"
-                        : estadoProf === "RECHAZADO"
+                        : (prof.estadoVista || estadoProf) === "RECHAZADO"
                         ? "rechazado"
                         : "archivado"
                     }`}
                   >
-                    {estadoProf === "PENDIENTE_APROBACION" ? "PENDIENTE" : estadoProf}
+                    {(prof.estadoVista || estadoProf) === "PENDIENTE_APROBACION" ? "PENDIENTE" : (prof.estadoVista || estadoProf)}
                   </span>
+                  <SiguePublicado item={prof} activo={activeTab === "PUBLICADOS"} />
                 </div>
 
                 <div className="news-actions-cell" style={{ width: "100px", justifyContent: "center", gap: "8px" }}>
@@ -798,6 +801,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
             </span>.
           </>
         }
+        requiereAprobacion={requiereAprobacionParaEliminar(profesionalToDelete)}
         isDeleting={isSaving}
       />
 

@@ -1,6 +1,8 @@
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -63,6 +65,8 @@ const mapItemFromBackend = (item) => {
     rejectionReason: item.rejectionReason || null,
     cambios: Array.isArray(item.cambios) ? item.cambios : [],
     esActualizacion: Boolean(item.esActualizacion),
+    visibleEnPortal: Boolean(item.visibleEnPortal),
+    tituloPublicado: item.tituloPublicado || null,
   };
 };
 
@@ -152,7 +156,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
         statusFilter === 'Todos' ||
         (statusFilter === 'PENDIENTE' &&
           (item.status === 'Pendiente de aprobación' || Boolean(item.solicitudEliminacion))) ||
-        (statusFilter === 'PUBLICADO' && item.status === 'Publicado') ||
+        (statusFilter === 'PUBLICADO' && estaPublicadoEnPortal(item)) ||
         (statusFilter === 'RECHAZADO' && item.status === 'Rechazado') ||
         (statusFilter === 'ARCHIVADO' && item.status === 'Archivado');
       const matchesSearch =
@@ -163,7 +167,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       return matchesType && matchesStatus && matchesSearch;
     });
   }, [items, search, statusFilter, typeFilter]);
-  const paginacion = usePaginacion(filteredItems, 10, [search, statusFilter, typeFilter]);
+  const paginacion = usePaginacion(vistaPublicados(filteredItems, statusFilter === 'PUBLICADO'), 10, [search, statusFilter, typeFilter]);
 
   const closeDetails = () => {
     setSelectedItem(null);
@@ -227,7 +231,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
   const pendingCount = items.filter(
     (item) => item.status === 'Pendiente de aprobación' || Boolean(item.solicitudEliminacion)
   ).length;
-  const publishedCount = items.filter((item) => item.status === 'Publicado').length;
+  const publishedCount = items.filter(estaPublicadoEnPortal).length;
   const rejectedCount = items.filter((item) => item.status === 'Rechazado').length;
   const archivedCount = items.filter((item) => item.status === 'Archivado').length;
 
@@ -310,7 +314,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
           onClick={() => setStatusFilter('ARCHIVADO')}
         >
           <span><Archive size={19} /></span>
-          <div><small>Archivadas</small><strong>{archivedCount}</strong></div>
+          <div><small>Archivados</small><strong>{archivedCount}</strong></div>
         </button>
       </section>
 
@@ -386,8 +390,8 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                           <Stethoscope size={18} />
                         </span>
                         <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '3px' }}>
-                          <span>{item.name}</span>
-                          <AdminCambiosPill count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+                          <span>{tituloEnLista(item, statusFilter === 'PUBLICADO', item.name)}</span>
+                          <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={item.cambios?.length} esActualizacion={item.esActualizacion} />
                         </span>
                       </button>
                     </td>
@@ -406,7 +410,10 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                       {item.solicitudEliminacion ? (
                         <EtiquetaEliminacion />
                       ) : (
-                        <EtiquetaEstado estado={item.status} texto={item.status} />
+                        <>
+                          <EtiquetaEstado estado={item.statusVista || item.status} texto={item.statusVista || item.status} />
+                          <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+                        </>
                       )}
                     </td>
                   </tr>

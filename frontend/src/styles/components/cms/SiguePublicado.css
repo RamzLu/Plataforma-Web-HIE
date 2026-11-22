@@ -1,0 +1,41 @@
+/* Aviso en la lista de "Publicados": el portal sigue mostrando esta versión y hay otra nueva en revisión o rechazada. */
+:where(.panel-scope) .cms-sigue-publicado-bloque {
+  margin-top: 4px;
+}
+
+:where(.panel-scope) .cms-sigue-publicado {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border: 1px solid var(--color-green-200);
+  border-radius: 999px;
+  background: var(--color-green-50);
+  color: var(--color-green-800);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+:where(.panel-scope) .cms-sigue-publicado.es-pendiente {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+:where(.panel-scope) .cms-sigue-publicado.es-rechazada {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+:where(.panel-scope) .cms-sigue-publicado svg {
+  flex-shrink: 0;
+}
+
+/* Aviso dentro del modal de eliminación cuando el contenido está publicado. */
+:where(.panel-scope) .delete-modal-text .delete-modal-aviso {
+  display: block;
+  margin-top: 8px;
+}

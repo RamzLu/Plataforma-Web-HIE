@@ -13,6 +13,8 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 
 const CATEGORIAS = [
   "Información institucional", 
@@ -336,7 +338,7 @@ const CmsDocsView = ({
   };
 
   const getTextoEstado = (doc) => {
-    const e = (doc.estado || doc.status || "borrador").toUpperCase();
+    const e = (doc.estadoVista || doc.estado || doc.status || "borrador").toUpperCase();
     if (e === "PUBLICADO" || e === "APROBADO") return "Publicado";
     if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") return "Pendiente de aprobación";
     if (e === "RECHAZADO") return "Rechazado";
@@ -344,7 +346,7 @@ const CmsDocsView = ({
   };
 
   const getBadgeClass = (doc) => {
-    const e = (doc.estado || doc.status || "borrador").toUpperCase();
+    const e = (doc.estadoVista || doc.estado || doc.status || "borrador").toUpperCase();
     if (e === "PUBLICADO" || e === "APROBADO") return "publicado";
     if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") return "pendiente";
     if (e === "RECHAZADO") return "rechazado";
@@ -360,8 +362,10 @@ const CmsDocsView = ({
     const res = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, BORRADORES: 0 };
     (docsList || []).forEach((doc) => {
       const e = (doc.estado || doc.status || "").toUpperCase();
-      if (e === "PUBLICADO" || e === "APROBADO") res.PUBLICADOS++;
-      else if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") res.PENDIENTES++;
+      // Lo publicado con una versión nueva en revisión figura en Publicados y también en su pestaña de revisión.
+      if (estaPublicadoEnPortal(doc)) res.PUBLICADOS++;
+      if (e === "PUBLICADO" || e === "APROBADO") return;
+      if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") res.PENDIENTES++;
       else if (e === "RECHAZADO") res.RECHAZADOS++;
       else res.BORRADORES++;
     });
@@ -374,7 +378,7 @@ const CmsDocsView = ({
     return (docsList || []).filter((doc) => {
       const e = (doc.estado || doc.status || "").toUpperCase();
       let matchTab = false;
-      if (activeTab === "PUBLICADOS") matchTab = e === "PUBLICADO" || e === "APROBADO";
+      if (activeTab === "PUBLICADOS") matchTab = estaPublicadoEnPortal(doc);
       else if (activeTab === "PENDIENTES") matchTab = e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO";
       else if (activeTab === "RECHAZADOS") matchTab = e === "RECHAZADO";
       else if (activeTab === "BORRADORES") matchTab = e === "BORRADOR" || e === "ARCHIVADO" || !e;
@@ -474,7 +478,7 @@ const CmsDocsView = ({
               No hay documentos en esta sección.
             </div>
           ) : (
-            docsFiltrados.map((doc) => (
+            vistaPublicados(docsFiltrados, activeTab === "PUBLICADOS").map((doc) => (
               <div className="activity-row docs-table-row" key={doc.id}>
                 <div className="col-content doc-content-cell">
                   <div className="doc-thumb-box">
@@ -485,7 +489,7 @@ const CmsDocsView = ({
                   </div>
                   <div className="doc-info">
                     <div className="doc-title-row">
-                      <span className="doc-title">{doc.title}</span>
+                      <span className="doc-title">{tituloEnLista(doc, activeTab === "PUBLICADOS", doc.title)}</span>
                       {sanitizeUrl(doc.fileUrl) && (
                         <a className="doc-preview-link" href={sanitizeUrl(doc.fileUrl)} target="_blank" rel="noopener noreferrer" title="Ver documento original">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -538,6 +542,7 @@ const CmsDocsView = ({
                   <span className={`status-badge ${getBadgeClass(doc)}`}>
                     {getTextoEstado(doc)}
                   </span>
+                  <SiguePublicado item={doc} activo={activeTab === "PUBLICADOS"} />
                 </div>
 
                 <div className="doc-actions-cell">
@@ -805,6 +810,7 @@ const CmsDocsView = ({
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleExecuteDelete}
         itemType="el documento"
+        requiereAprobacion={requiereAprobacionParaEliminar((docsList || []).find((d) => d.id === docAEliminar))}
         isDeleting={deletingId === docAEliminar}
       />
 

@@ -1,6 +1,8 @@
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -149,6 +151,8 @@ const normalizeResidenciaRecord = (raw) => {
     fechaActualizacion: raw.fechaActualizacion || raw.fechaCarga || 'Reciente',
     cambios: Array.isArray(raw.cambios) ? raw.cambios : [],
     esActualizacion: Boolean(raw.esActualizacion),
+    visibleEnPortal: Boolean(raw.visibleEnPortal),
+    tituloPublicado: raw.tituloPublicado || null,
   };
 };
 
@@ -205,7 +209,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
         (r) => r?.estado === 'PENDIENTE_APROBACION' || Boolean(r?.solicitudEliminacion)
       ).length,
       approved: residenciasVisibles.filter((r) => r?.estado === 'APROBADO').length,
-      published: residenciasVisibles.filter((r) => r?.estado === 'PUBLICADO').length,
+      published: residenciasVisibles.filter(estaPublicadoEnPortal).length,
       scheduled: residenciasVisibles.filter((r) => r?.estado === 'PROGRAMADO').length,
       rejected: residenciasVisibles.filter((r) => r?.estado === 'RECHAZADO').length,
       archived: residenciasVisibles.filter((r) => r?.estado === 'ARCHIVADO').length,
@@ -224,7 +228,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
     return residenciasVisibles.filter((item) => {
       const matchesStatus =
         statusFilter === 'TODOS' ||
-        item?.estado === statusFilter ||
+        (statusFilter === 'PUBLICADO' ? estaPublicadoEnPortal(item) : item?.estado === statusFilter) ||
         (statusFilter === 'PENDIENTE_APROBACION' && Boolean(item?.solicitudEliminacion));
       const searchableContent = [
         item?.nombre,
@@ -456,7 +460,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             <Clock3 size={19} />
           </span>
           <div>
-            <small>Pendientes de revisión</small>
+            <small>Pendientes de aprobación</small>
             <strong>{counts.pending}</strong>
           </div>
         </button>
@@ -471,7 +475,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             <CheckCircle size={19} />
           </span>
           <div>
-            <small>Aprobadas</small>
+            <small>Aprobados</small>
             <strong>{counts.approved}</strong>
           </div>
         </button>
@@ -486,7 +490,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             <Globe2 size={19} />
           </span>
           <div>
-            <small>Publicadas</small>
+            <small>Visibles al público</small>
             <strong>{counts.published}</strong>
           </div>
         </button>
@@ -501,7 +505,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             <XCircle size={19} />
           </span>
           <div>
-            <small>Rechazadas</small>
+            <small>Rechazados</small>
             <strong>{counts.rejected}</strong>
           </div>
         </button>
@@ -516,7 +520,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
             <Archive size={19} />
           </span>
           <div>
-            <small>Archivadas</small>
+            <small>Archivados</small>
             <strong>{counts.archived}</strong>
           </div>
         </button>
@@ -561,7 +565,6 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                 <th scope="col">Residencia / Especialidad</th>
                 <th scope="col">Editor / Fecha</th>
                 <th scope="col">Convocatoria</th>
-                <th scope="col">Fecha de Inicio / Vigencia</th>
                 <th scope="col">Estado</th>
               </tr>
             </thead>
@@ -579,7 +582,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                   </td>
                 </tr>
               ) : (
-                filteredResidencias.map((item) => {
+                vistaPublicados(filteredResidencias, statusFilter === 'PUBLICADO').map((item) => {
                   const vigente = isConvocatoriaVigente(item);
                   const convLabel = normalizeConvocatoria(item?.convocatoria);
                   const convSlug = convLabel
@@ -615,13 +618,13 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                                 openReview(item?.id);
                               }}
                             >
-                              {item?.nombre || 'Residencia sin nombre'}
+                              {tituloEnLista(item, statusFilter === 'PUBLICADO', item?.nombre) || 'Residencia sin nombre'}
                             </button>
                             <small>
                               {item?.categoria || 'Formación Médica de Posgrado'}
                               {item?.duracion ? ` • ${item.duracion}` : ''}
                             </small>
-                            <AdminCambiosPill
+                            <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'}
                               count={item?.cambios?.length}
                               esActualizacion={item?.esActualizacion}
                             />
@@ -652,24 +655,10 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                               {item.cupos}
                             </small>
                           )}
-                        </div>
-                      </td>
-
-                      <td data-label="Fecha de Inicio / Vigencia">
-                        <div className="admin-res-meta-cell-admin">
-                          <span>
-                            <CalendarDays size={14} aria-hidden="true" />
+                          <small className="admin-res-fechas-meta-admin">
+                            <CalendarDays size={13} aria-hidden="true" />
                             {formatVigencia(item)}
-                          </span>
-                          {vigente && (
-                            <span className="admin-res-vigente-badge-admin">
-                              <span
-                                className="admin-res-pulse-admin"
-                                aria-hidden="true"
-                              />
-                              Convocatoria vigente
-                            </span>
-                          )}
+                          </small>
                         </div>
                       </td>
 
@@ -677,10 +666,13 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                         {item.solicitudEliminacion ? (
                           <EtiquetaEliminacion />
                         ) : (
-                          <EtiquetaEstado
-                            estado={item?.estado || 'BORRADOR'}
-                            texto={STATUS_LABELS[item?.estado] || item?.estado || 'Sin estado'}
-                          />
+                          <>
+                            <EtiquetaEstado
+                              estado={item?.estadoVista || item?.estado || 'BORRADOR'}
+                              texto={STATUS_LABELS[item?.estadoVista || item?.estado] || item?.estado || 'Sin estado'}
+                            />
+                            <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+                          </>
                         )}
                       </td>
                     </tr>

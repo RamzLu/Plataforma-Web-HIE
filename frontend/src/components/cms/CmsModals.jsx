@@ -15,12 +15,29 @@ export const CmsDeleteModal = ({
   cancelText = "CANCELAR",
   isDeleting = false,
   loading = false,
+  // true si el contenido ya está publicado: no se borra, queda un pedido que primero revisa el administrador.
+  requiereAprobacion = false,
 }) => {
   if (!isOpen) return null;
 
   const busy = isDeleting || loading;
 
   const renderMessage = () => {
+    if (requiereAprobacion) {
+      return (
+        <>
+          {itemName ? (
+            <>
+              <strong>"{itemName}"</strong> está publicado.{" "}
+            </>
+          ) : (
+            <>Este contenido está <strong>publicado</strong>. </>
+          )}
+          No se elimina de inmediato: tu pedido pasa <strong>primero por el administrador</strong> y {itemType === "este elemento" ? "el contenido" : itemType}{" "}
+          <strong>seguirá visible en el portal</strong> hasta que lo apruebe.
+        </>
+      );
+    }
     if (message) return message;
     if (itemName) {
       return (
@@ -85,7 +102,7 @@ export const CmsDeleteModal = ({
             </svg>
           </div>
 
-          <h2 className="delete-modal-title">{title}</h2>
+          <h2 className="delete-modal-title">{requiereAprobacion ? "Pedir la eliminación de este contenido" : title}</h2>
           <div className="delete-modal-divider"></div>
 
           <p className="delete-modal-text">{renderMessage()}</p>
@@ -124,8 +141,10 @@ export const CmsDeleteModal = ({
                     borderColor: "rgba(255, 255, 255, 0.3)",
                   }}
                 ></div>
-                ELIMINANDO...
+                {requiereAprobacion ? "ENVIANDO PEDIDO..." : "ELIMINANDO..."}
               </span>
+            ) : requiereAprobacion ? (
+              "PEDIR ELIMINACIÓN"
             ) : (
               confirmText
             )}

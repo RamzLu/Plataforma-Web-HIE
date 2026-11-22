@@ -1,6 +1,8 @@
 import '../../styles/components/admin/AdminRevisionModal.css';
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from '../../utils/publicacion.js';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import SiguePublicado from "../../components/cms/SiguePublicado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
@@ -142,6 +144,9 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 solicitudEliminacion: noticia.solicitudEliminacion || null,
                 cambios: Array.isArray(noticia.cambios) ? noticia.cambios : [],
                 esActualizacion: Boolean(noticia.esActualizacion),
+                visibleEnPortal: Boolean(noticia.visibleEnPortal),
+                tituloPublicado: noticia.tituloPublicado || null,
+                versionPublicada: noticia.versionPublicada || null,
               };
             })
             .sort((a, b) => {
@@ -193,7 +198,26 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   }, [cargarNoticias]);
 
   const handleOpenModal = (noticia) => {
-    setSelectedNews(noticia);
+    // Desde "Visibles al público" se abre lo que ve el portal, no la actualización que está en revisión.
+    const publicada = statusFilter === 'PUBLICADO' && noticia.visibleEnPortal && noticia.estado !== 'PUBLICADO' ? noticia.versionPublicada : null;
+    setSelectedNews(
+      publicada
+        ? {
+            ...noticia,
+            estado: 'PUBLICADO',
+            status: 'Publicado',
+            title: publicada.titulo,
+            content: publicada.contenido,
+            category: publicada.category || noticia.category,
+            images: publicada.images || [],
+            cambios: [],
+            esActualizacion: false,
+            rejectionReason: null,
+            requestedEstado: null,
+            actualizacionEnRevision: noticia.estado,
+          }
+        : noticia
+    );
     setIsRejecting(false);
     setRejectReason('');
   };
@@ -332,7 +356,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       n.estado === 'APROBADO' ||
       n.estado === 'PROGRAMADO'
   ).length;
-  const publishedCount = noticias.filter((n) => n.estado === 'PUBLICADO').length;
+  const publishedCount = noticias.filter(estaPublicadoEnPortal).length;
   const rejectedCount = noticias.filter((n) => n.estado === 'RECHAZADO').length;
 
   const filteredNoticias = noticias.filter((item) => {
@@ -343,14 +367,14 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       return item.estado === 'APROBADO' || item.estado === 'PROGRAMADO';
     }
     if (statusFilter === 'PUBLICADO') {
-      return item.estado === 'PUBLICADO';
+      return estaPublicadoEnPortal(item);
     }
     if (statusFilter === 'RECHAZADO') {
       return item.estado === 'RECHAZADO';
     }
     return true;
   });
-  const paginacion = usePaginacion(filteredNoticias, 10, [statusFilter]);
+  const paginacion = usePaginacion(vistaPublicados(filteredNoticias, statusFilter === 'PUBLICADO'), 10, [statusFilter]);
 
   return (
     <div className="admin-review-container-admin">
@@ -404,7 +428,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         >
           <span className="admin-news-summary-icon"><CheckCircle size={19} /></span>
           <span className="admin-news-summary-copy">
-            <span>Aprobados para CMS</span>
+            <span>Aprobados</span>
             <strong>{approvedCount}</strong>
           </span>
         </button>
@@ -501,11 +525,11 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                         className="news-title-interactive-admin"
                         onClick={() => handleOpenModal(item)}
                       >
-                        <span className="news-title-clamped-admin" title={item.title}>
-                          {item.title}
+                        <span className="news-title-clamped-admin" title={tituloEnLista(item, statusFilter === 'PUBLICADO', item.title)}>
+                          {tituloEnLista(item, statusFilter === 'PUBLICADO', item.title)}
                         </span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
-                          <AdminCambiosPill count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+                          <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={item.cambios?.length} esActualizacion={item.esActualizacion} />
                         </div>
                       </button>
                     </div>
@@ -550,8 +574,9 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       {item.solicitudEliminacion ? (
                         <EtiquetaEliminacion />
                       ) : (
-                        <EtiquetaEstado estado={item.status} texto={item.status} />
+                        <EtiquetaEstado estado={item.statusVista || item.status} texto={item.statusVista || item.status} />
                       )}
+                      <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
                       {item.estado === 'PENDIENTE_APROBACION' &&
                         item.requestedEstado === 'BORRADOR' && (
                           <span
@@ -609,6 +634,18 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
             </div>
 
             <div className="modal-body-esp-admin admin-rev-body">
+              {selectedNews.actualizacionEnRevision && (
+                <div className="admin-rev-alert">
+                  <AlertTriangle size={18} />
+                  <div>
+                    Esta es la versión publicada, la que ve el portal.{' '}
+                    {selectedNews.actualizacionEnRevision === 'RECHAZADO'
+                      ? 'La actualización enviada por el CMS fue rechazada.'
+                      : 'Hay una actualización pendiente de aprobación.'}{' '}
+                    Para verla, buscala en el filtro {selectedNews.actualizacionEnRevision === 'RECHAZADO' ? 'Rechazados' : 'Pendientes'}.
+                  </div>
+                </div>
+              )}
               {selectedNews.estado === 'PENDIENTE_APROBACION' &&
                 selectedNews.requestedEstado === 'BORRADOR' && (
                   <div className="admin-rev-alert">

@@ -1,5 +1,7 @@
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import { AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -191,7 +193,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
     return capacitacionesVisibles.filter((training) => {
       const matchesStatus =
         statusFilter === 'TODOS' ||
-        training.estado === statusFilter ||
+        (statusFilter === 'PUBLICADO' ? estaPublicadoEnPortal(training) : training.estado === statusFilter) ||
         (statusFilter === 'PENDIENTE_APROBACION' && Boolean(training.solicitudEliminacion));
       const searchableContent = [
         training.titulo,
@@ -217,7 +219,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
         (training) => training.estado === 'PENDIENTE_APROBACION' || Boolean(training.solicitudEliminacion)
       ).length,
       approved: capacitacionesVisibles.filter((training) => training.estado === 'APROBADO').length,
-      published: capacitacionesVisibles.filter((training) => training.estado === 'PUBLICADO').length,
+      published: capacitacionesVisibles.filter(estaPublicadoEnPortal).length,
       rejected: capacitacionesVisibles.filter((training) => training.estado === 'RECHAZADO').length,
       archived: capacitacionesVisibles.filter((training) => training.estado === 'ARCHIVADO').length,
     }),
@@ -368,7 +370,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
           onClick={() => setStatusFilter('PENDIENTE_APROBACION')}
         >
           <span><Clock3 size={19} /></span>
-          <div><small>Pendientes de revisión</small><strong>{counts.pending}</strong></div>
+          <div><small>Pendientes de aprobación</small><strong>{counts.pending}</strong></div>
         </button>
         <button
           type="button"
@@ -377,7 +379,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
           onClick={() => setStatusFilter('APROBADO')}
         >
           <span><CheckCircle size={19} /></span>
-          <div><small>Aprobadas</small><strong>{counts.approved}</strong></div>
+          <div><small>Aprobados</small><strong>{counts.approved}</strong></div>
         </button>
         <button
           type="button"
@@ -386,7 +388,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
           onClick={() => setStatusFilter('PUBLICADO')}
         >
           <span><Globe2 size={19} /></span>
-          <div><small>Publicadas</small><strong>{counts.published}</strong></div>
+          <div><small>Visibles al público</small><strong>{counts.published}</strong></div>
         </button>
         <button
           type="button"
@@ -395,7 +397,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
           onClick={() => setStatusFilter('RECHAZADO')}
         >
           <span><XCircle size={19} /></span>
-          <div><small>Rechazadas</small><strong>{counts.rejected}</strong></div>
+          <div><small>Rechazados</small><strong>{counts.rejected}</strong></div>
         </button>
         <button
           type="button"
@@ -404,7 +406,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
           onClick={() => setStatusFilter('ARCHIVADO')}
         >
           <span><Archive size={19} /></span>
-          <div><small>Archivadas</small><strong>{counts.archived}</strong></div>
+          <div><small>Archivados</small><strong>{counts.archived}</strong></div>
         </button>
       </section>
 
@@ -455,7 +457,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                   </td>
                 </tr>
               ) : (
-                filteredCapacitaciones.map((training) => (
+                vistaPublicados(filteredCapacitaciones, statusFilter === 'PUBLICADO').map((training) => (
                     <tr key={training.id}>
                       <td data-label="Capacitación">
                         <div className="admin-training-title-cell">
@@ -470,7 +472,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                               className="admin-training-title-button"
                               onClick={() => setSelectedId(training.id)}
                             >
-                              {training.titulo}
+                              {tituloEnLista(training, statusFilter === 'PUBLICADO', training.titulo)}
                             </button>
                             <small>{training.descripcion || 'Sin descripción'}</small>
                           </span>
@@ -486,10 +488,13 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                         {training.solicitudEliminacion ? (
                           <EtiquetaEliminacion />
                         ) : (
-                          <EtiquetaEstado
-                            estado={training.estado || 'BORRADOR'}
-                            texto={STATUS_LABELS[training.estado] || training.estado || 'Sin estado'}
-                          />
+                          <>
+                            <EtiquetaEstado
+                              estado={training.estadoVista || training.estado || 'BORRADOR'}
+                              texto={STATUS_LABELS[training.estadoVista || training.estado] || training.estado || 'Sin estado'}
+                            />
+                            <SiguePublicado item={training} activo={statusFilter === 'PUBLICADO'} />
+                          </>
                         )}
                       </td>
                     </tr>

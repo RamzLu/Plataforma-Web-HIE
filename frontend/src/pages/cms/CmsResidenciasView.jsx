@@ -69,6 +69,8 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 
 const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
@@ -523,7 +525,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     const estadoItem = (res.estado || "PUBLICADO").toUpperCase();
     let matchEstado = false;
     if (activeTab === "PUBLICADOS") {
-      matchEstado = estadoItem === "PUBLICADO" || estadoItem === "APROBADO";
+      matchEstado = estaPublicadoEnPortal(res);
     } else if (activeTab === "PROGRAMADOS") {
       matchEstado = estadoItem === "PROGRAMADO";
     } else if (activeTab === "PENDIENTES") {
@@ -695,7 +697,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
               No se encontraron residencias registradas.
             </div>
           ) : (
-            datosFiltrados.map((res) => (
+            vistaPublicados(datosFiltrados, activeTab === "PUBLICADOS").map((res) => (
               <div
                 className="activity-row news-table-row"
                 key={res.id}
@@ -736,7 +738,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                         display: "block",
                       }}
                     >
-                      {res.nombre}
+                      {tituloEnLista(res, activeTab === "PUBLICADOS", res.nombre)}
                     </span>
                     <span
                       style={{
@@ -874,7 +876,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     alignItems: "center",
                   }}
                 >
-                  {res.estado === "PENDIENTE_APROBACION" ? (
+                  {(res.estadoVista || res.estado) === "PENDIENTE_APROBACION" ? (
                     <span
                       style={{
                         backgroundColor: "#fffbeb",
@@ -896,7 +898,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                         ? "Programación en revisión"
                         : "En revisión"}
                     </span>
-                  ) : res.estado === "PROGRAMADO" ? (
+                  ) : (res.estadoVista || res.estado) === "PROGRAMADO" ? (
                     <span
                       style={{
                         backgroundColor: "#eff6ff",
@@ -913,7 +915,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     >
                       Programado
                     </span>
-                  ) : res.estado === "RECHAZADO" ? (
+                  ) : (res.estadoVista || res.estado) === "RECHAZADO" ? (
                     <span
                       style={{
                         backgroundColor: "#fef2f2",
@@ -931,10 +933,11 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     </span>
                   ) : (
                     <EtiquetaEstado
-                      estado={res.estado}
-                      texto={res.estado === "PUBLICADO" ? "Publicado" : res.estado === "ARCHIVADO" ? "Archivado" : "Borrador"}
+                      estado={(res.estadoVista || res.estado)}
+                      texto={(res.estadoVista || res.estado) === "PUBLICADO" ? "Publicado" : (res.estadoVista || res.estado) === "ARCHIVADO" ? "Archivado" : "Borrador"}
                     />
                   )}
+                  <SiguePublicado item={res} activo={activeTab === "PUBLICADOS"} />
                 </div>
 
                 {/* Columna ACCIONES */}
@@ -1651,6 +1654,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         onConfirm={executeDelete}
         itemName={itemAEliminar?.nombre}
         itemType="la residencia"
+        requiereAprobacion={requiereAprobacionParaEliminar(itemAEliminar)}
         isDeleting={isDeleting}
       />
     </div>
