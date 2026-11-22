@@ -42,6 +42,26 @@ export const vistaPublicados = (lista, activo) =>
       });
 
 /**
+ * ¿Hay que abrir la versión publicada en vez de la actualización? Sí cuando se entra desde "Visibles al público"
+ * a algo publicado que tiene una actualización pendiente o rechazada (y el servidor envió la versión publicada).
+ */
+export const abreVersionPublicada = (item, desdePublicados) =>
+  Boolean(desdePublicados && item?.visibleEnPortal && item?.versionPublicada && !PUBLICADOS.includes(estadoDe(item)));
+
+/**
+ * El mismo registro, pero con los datos de lo que ve el portal. `mapear` es la función que cada vista usa para
+ * pasar lo que manda el servidor a su formato. "actualizacionEnRevision" guarda el estado real de la actualización.
+ */
+export const comoVersionPublicada = (item, mapear = (valor) => valor) => ({
+  ...item,
+  ...mapear(item.versionPublicada),
+  id: item.id,
+  solicitudEliminacion: item.solicitudEliminacion,
+  versionPublicada: item.versionPublicada,
+  actualizacionEnRevision: item.estado,
+});
+
+/**
  * ¿Eliminarlo requiere que lo apruebe el administrador? Sí si está a la vista del público (o programado).
  * Coincide con la regla del servidor: lo que ya es público no se borra directo, queda una solicitud.
  */

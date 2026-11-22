@@ -3,7 +3,8 @@ import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -72,6 +73,7 @@ const mapDocumentFromBackend = (doc) => {
     requestedEstado: doc.requestedEstado || null,
     visibleEnPortal: Boolean(doc.visibleEnPortal),
     tituloPublicado: doc.tituloPublicado || null,
+    versionPublicada: doc.versionPublicada || null,
   };
 };
 
@@ -79,6 +81,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
+  const [verPublicada, setVerPublicada] = useState(false);
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [categoryFilter, setCategoryFilter] = useState('TODOS');
   const [search, setSearch] = useState('');
@@ -155,10 +158,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
     return Array.from(set).sort();
   }, [documents]);
 
-  const selectedDocument = useMemo(
-    () => documents.find((doc) => doc.id === selectedId) || null,
-    [documents, selectedId]
-  );
+  const selectedDocument = useMemo(() => {
+    const base = documents.find((doc) => doc.id === selectedId) || null;
+    return base && verPublicada && base.versionPublicada ? comoVersionPublicada(base, mapDocumentFromBackend) : base;
+  }, [documents, selectedId, verPublicada]);
 
   const isPdf = useMemo(() => {
     if (!selectedDocument) return false;
@@ -218,6 +221,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
 
   const closeDetails = () => {
     setSelectedId(null);
+    setVerPublicada(false);
     setIsRejecting(false);
     setRejectReason('');
   };
@@ -386,7 +390,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                           <button
                             type="button"
                             className="admin-doc-title-button"
-                            onClick={() => setSelectedId(doc.id)}
+                            onClick={() => {
+                              setSelectedId(doc.id);
+                              setVerPublicada(abreVersionPublicada(doc, statusFilter === 'PUBLICADO'));
+                            }}
                           >
                             {tituloEnLista(doc, statusFilter === 'PUBLICADO', doc.title)}
                           </button>
@@ -466,6 +473,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                 </div>
               )}
 
+              <AvisoVersionPublicada item={selectedDocument} />
               <AdminCambiosResaltados
                 cambios={selectedDocument.cambios}
                 esActualizacion={selectedDocument.esActualizacion}

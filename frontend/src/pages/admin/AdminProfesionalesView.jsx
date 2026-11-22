@@ -3,7 +3,8 @@ import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -73,6 +74,7 @@ const mapProfesionalFromBackend = (item) => {
     requestedEstado: item.requestedEstado || null,
     visibleEnPortal: Boolean(item.visibleEnPortal),
     tituloPublicado: item.tituloPublicado || null,
+    versionPublicada: item.versionPublicada || null,
   };
 };
 
@@ -81,6 +83,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [verPublicada, setVerPublicada] = useState(false);
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [typeFilter, setTypeFilter] = useState('TODOS');
   const [search, setSearch] = useState('');
@@ -153,7 +156,11 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
     };
   }, [cargarDatos]);
 
-  const selectedProfessional = profesionales.find((item) => item.id === selectedId);
+  const profesionalBase = profesionales.find((item) => item.id === selectedId);
+  const selectedProfessional =
+    profesionalBase && verPublicada && profesionalBase.versionPublicada
+      ? comoVersionPublicada(profesionalBase, mapProfesionalFromBackend)
+      : profesionalBase;
 
   const filteredProfesionales = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
@@ -194,6 +201,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
 
   const closeDetails = () => {
     setSelectedId(null);
+    setVerPublicada(false);
     setIsRejecting(false);
     setRejectReason('');
   };
@@ -377,7 +385,10 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                           <button
                             type="button"
                             className="admin-prof-name-button"
-                            onClick={() => setSelectedId(item.id)}
+                            onClick={() => {
+                              setSelectedId(item.id);
+                              setVerPublicada(abreVersionPublicada(item, statusFilter === 'PUBLICADO'));
+                            }}
                           >
                             {tituloEnLista(item, statusFilter === 'PUBLICADO', item.nombre)}
                           </button>
@@ -470,6 +481,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                   </div>
                 )}
 
+              <AvisoVersionPublicada item={selectedProfessional} />
               <AdminCambiosResaltados
                 cambios={selectedProfessional.cambios}
                 esActualizacion={selectedProfessional.esActualizacion}

@@ -2,7 +2,8 @@ import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
 import { AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -155,6 +156,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState(null);
+  const [verPublicada, setVerPublicada] = useState(false);
   const [pendingAction, setPendingAction] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [actionError, setActionError] = useState('');
@@ -182,7 +184,11 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
     cargarCapacitaciones();
   }, [cargarCapacitaciones]);
 
-  const selectedTraining = capacitaciones.find((training) => training.id === selectedId);
+  const capacitacionBase = capacitaciones.find((training) => training.id === selectedId);
+  const selectedTraining =
+    capacitacionBase && verPublicada && capacitacionBase.versionPublicada
+      ? comoVersionPublicada(capacitacionBase)
+      : capacitacionBase;
   const capacitacionesVisibles = useMemo(
     () => capacitaciones.filter((training) => training.estado !== 'BORRADOR'),
     [capacitaciones],
@@ -234,6 +240,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
 
   const closeDetails = () => {
     setSelectedId(null);
+    setVerPublicada(false);
     setPendingAction('');
     setRejectReason('');
     setActionError('');
@@ -434,7 +441,10 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                             <button
                               type="button"
                               className="admin-training-title-button"
-                              onClick={() => setSelectedId(training.id)}
+                              onClick={() => {
+                                setSelectedId(training.id);
+                                setVerPublicada(abreVersionPublicada(training, statusFilter === 'PUBLICADO'));
+                              }}
                             >
                               {tituloEnLista(training, statusFilter === 'PUBLICADO', training.titulo)}
                             </button>
@@ -533,6 +543,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                   </div>
                 </div>
               )}
+              <AvisoVersionPublicada item={selectedTraining} />
               <AdminCambiosResaltados
                 cambios={selectedTraining.cambios}
                 esActualizacion={selectedTraining.esActualizacion}

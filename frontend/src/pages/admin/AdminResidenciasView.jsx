@@ -3,7 +3,8 @@ import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -153,6 +154,7 @@ const normalizeResidenciaRecord = (raw) => {
     esActualizacion: Boolean(raw.esActualizacion),
     visibleEnPortal: Boolean(raw.visibleEnPortal),
     tituloPublicado: raw.tituloPublicado || null,
+    versionPublicada: raw.versionPublicada || null,
   };
 };
 
@@ -163,6 +165,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState(null);
+  const [verPublicada, setVerPublicada] = useState(false);
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [actionError, setActionError] = useState('');
@@ -251,13 +254,14 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
     });
   }, [residenciasVisibles, search, statusFilter]);
 
-  const selectedResidencia = useMemo(
-    () => residenciasVisibles.find((item) => item?.id === selectedId) || null,
-    [residenciasVisibles, selectedId],
-  );
+  const selectedResidencia = useMemo(() => {
+    const base = residenciasVisibles.find((item) => item?.id === selectedId) || null;
+    return base && verPublicada && base.versionPublicada ? comoVersionPublicada(base, normalizeResidenciaRecord) : base;
+  }, [residenciasVisibles, selectedId, verPublicada]);
 
   const closeDetails = () => {
     setSelectedId(null);
+    setVerPublicada(false);
     setShowRejectForm(false);
     setRejectReason('');
     setActionError('');
@@ -277,6 +281,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
   const openReview = (id) => {
     if (!id) return;
     setSelectedId(id);
+    setVerPublicada(abreVersionPublicada(residenciasVisibles.find((item) => item?.id === id), statusFilter === 'PUBLICADO'));
     setShowRejectForm(false);
     setRejectReason('');
     setActionError('');
@@ -697,6 +702,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               )}
 
               {/* Cambios resaltados de edición */}
+              <AvisoVersionPublicada item={selectedResidencia} />
               <AdminCambiosResaltados
                 cambios={selectedResidencia.cambios}
                 esActualizacion={selectedResidencia.esActualizacion}

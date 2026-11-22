@@ -3,7 +3,8 @@ import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -66,6 +67,7 @@ const mapItemFromBackend = (item) => {
     esActualizacion: Boolean(item.esActualizacion),
     visibleEnPortal: Boolean(item.visibleEnPortal),
     tituloPublicado: item.tituloPublicado || null,
+    versionPublicada: item.versionPublicada || null,
   };
 };
 
@@ -355,7 +357,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                       <button
                         type="button"
                         className="admin-es-name-button"
-                        onClick={() => setSelectedItem(item)}
+                        onClick={() => setSelectedItem(abreVersionPublicada(item, statusFilter === 'PUBLICADO') ? comoVersionPublicada(item, mapItemFromBackend) : item)}
                       >
                         <span className="admin-es-item-icon">
                           <Stethoscope size={18} />
@@ -437,6 +439,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                 </div>
               )}
 
+              <AvisoVersionPublicada item={selectedItem} />
               <AdminCambiosResaltados
                 cambios={selectedItem.cambios}
                 esActualizacion={selectedItem.esActualizacion}
