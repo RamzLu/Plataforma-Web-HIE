@@ -572,6 +572,24 @@
   background: var(--color-slate-400);
 }
 
+:where(.panel-scope) .cms-page-fila {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+:where(.panel-scope) .cms-page-fila .cms-page-title {
+  margin-bottom: 0;
+}
+
+:where(.panel-scope) .cms-page-acciones {
+  display: flex;
+  align-self: center;
+  flex-shrink: 0;
+}
+
 :where(.panel-scope) .cms-page-title {
   margin-bottom: 26px;
 }

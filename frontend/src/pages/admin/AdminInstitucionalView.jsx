@@ -1,9 +1,9 @@
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   Building,
   Building2,
-  CheckCircle,
   CheckCircle2,
   Clock,
   Clock3,
@@ -248,71 +248,16 @@ const AdminInstitucionalView = () => {
       </div>
 
       {/* 2. Tarjetas de Filtro Superiores (Soft UI) */}
-      <section className="admin-inst-summary-grid-admin" aria-label="Estados de revisión institucional">
-        {/* Tarjeta: Pendientes de revisión */}
-        <button
-          type="button"
-          className={`admin-inst-summary-card-admin is-pending ${statusFilter === 'PENDING' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDING'}
-          onClick={() => setStatusFilter('PENDING')}
-        >
-          <span className="admin-inst-card-icon-admin">
-            <Clock3 size={22} />
-          </span>
-          <div className="admin-inst-card-text-admin">
-            <small>Pendientes de revisión</small>
-            <strong>{counts.pending}</strong>
-          </div>
-        </button>
-
-        {/* Tarjeta: Aprobadas / Habilitadas */}
-        <button
-          type="button"
-          className={`admin-inst-summary-card-admin is-approved ${statusFilter === 'APPROVED' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'APPROVED'}
-          onClick={() => setStatusFilter('APPROVED')}
-        >
-          <span className="admin-inst-card-icon-admin">
-            <CheckCircle size={22} />
-          </span>
-          <div className="admin-inst-card-text-admin">
-            <small>Aprobadas p/ publicar</small>
-            <strong>{counts.approved}</strong>
-          </div>
-        </button>
-
-        {/* Tarjeta: Publicadas */}
-        <button
-          type="button"
-          className={`admin-inst-summary-card-admin is-published ${statusFilter === 'PUBLISHED' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLISHED'}
-          onClick={() => setStatusFilter('PUBLISHED')}
-        >
-          <span className="admin-inst-card-icon-admin">
-            <Globe2 size={22} />
-          </span>
-          <div className="admin-inst-card-text-admin">
-            <small>Publicadas en Portal</small>
-            <strong>{counts.published}</strong>
-          </div>
-        </button>
-
-        {/* Tarjeta: Rechazadas */}
-        <button
-          type="button"
-          className={`admin-inst-summary-card-admin is-rejected ${statusFilter === 'REJECTED' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'REJECTED'}
-          onClick={() => setStatusFilter('REJECTED')}
-        >
-          <span className="admin-inst-card-icon-admin">
-            <XCircle size={22} />
-          </span>
-          <div className="admin-inst-card-text-admin">
-            <small>Rechazadas</small>
-            <strong>{counts.rejected}</strong>
-          </div>
-        </button>
-      </section>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDING", tipo: "pendiente", cuenta: counts.pending },
+          { clave: "APPROVED", tipo: "aprobado", cuenta: counts.approved },
+          { clave: "PUBLISHED", tipo: "publicado", cuenta: counts.published },
+          { clave: "REJECTED", tipo: "rechazado", cuenta: counts.rejected },
+        ]}
+      />
 
       {/* 3. Banner de Alerta de Estado Editorial */}
       <section

@@ -29,6 +29,7 @@ import avatarHospital from "../../assets/logoHospitalEvita.png";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import { usePageMeta } from "../../hooks/usePageMeta.js";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
+import { AccionesTituloContext } from "../../components/ui/AccionesTitulo";
 
 const CmsPage = () => {
   usePageMeta("Panel CMS");
@@ -48,6 +49,8 @@ const CmsPage = () => {
   );
   
   const [selectedNews, setSelectedNews] = useState(null);
+  // Lugar, a la derecha del título, donde los módulos muestran su botón "Actualizar".
+  const [lugarActualizar, setLugarActualizar] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [lightbox, setLightbox] = useState({
     isOpen: false,
@@ -403,6 +406,8 @@ const handleDeleteDoc = (id) => {
         />
 
         <main className="cms-content">
+          <AccionesTituloContext.Provider value={lugarActualizar}>
+          <div className="cms-page-fila">
           <div className="cms-page-title">
             <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
             <h1>
@@ -429,6 +434,8 @@ const handleDeleteDoc = (id) => {
               Evita Formosa.
             </p>
           </div>
+          <div className="cms-page-acciones" ref={setLugarActualizar} />
+          </div>
 
           {activeTab === "dashboard" && (
             <CmsDashboardView
@@ -452,6 +459,7 @@ const handleDeleteDoc = (id) => {
               onUpdateNews={handleUpdateNews}
               onViewNews={setSelectedNews}
               loading={loading}
+              onRefresh={fetchNoticias}
               initialCreateModal={openCreateOnTab}
               onModalOpened={() => setOpenCreateOnTab(false)}
             />
@@ -529,6 +537,7 @@ const handleDeleteDoc = (id) => {
               </p>
             </div>
           )}
+          </AccionesTituloContext.Provider>
         </main>
       </div>
 

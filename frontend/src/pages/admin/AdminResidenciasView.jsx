@@ -1,3 +1,4 @@
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
@@ -16,7 +17,6 @@ import {
   ExternalLink,
   File,
   FileText,
-  Globe2,
   GraduationCap,
   Image as ImageIcon,
   ListChecks,
@@ -446,85 +446,17 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
         </button>
       </div>
 
-      <section
-        className="admin-res-summary-admin"
-        aria-label="Filtrar residencias por estado"
-      >
-        <button
-          type="button"
-          className={`admin-res-summary-card-admin is-pending ${statusFilter === 'PENDIENTE_APROBACION' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDIENTE_APROBACION'}
-          onClick={() => setStatusFilter('PENDIENTE_APROBACION')}
-        >
-          <span>
-            <Clock3 size={19} />
-          </span>
-          <div>
-            <small>Pendientes de aprobación</small>
-            <strong>{counts.pending}</strong>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className={`admin-res-summary-card-admin is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'APROBADO'}
-          onClick={() => setStatusFilter('APROBADO')}
-        >
-          <span>
-            <CheckCircle size={19} />
-          </span>
-          <div>
-            <small>Aprobados</small>
-            <strong>{counts.approved}</strong>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className={`admin-res-summary-card-admin is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLICADO'}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span>
-            <Globe2 size={19} />
-          </span>
-          <div>
-            <small>Visibles al público</small>
-            <strong>{counts.published}</strong>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className={`admin-res-summary-card-admin is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'RECHAZADO'}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span>
-            <XCircle size={19} />
-          </span>
-          <div>
-            <small>Rechazados</small>
-            <strong>{counts.rejected}</strong>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className={`admin-res-summary-card-admin is-archived ${statusFilter === 'ARCHIVADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'ARCHIVADO'}
-          onClick={() => setStatusFilter('ARCHIVADO')}
-        >
-          <span>
-            <Archive size={19} />
-          </span>
-          <div>
-            <small>Archivados</small>
-            <strong>{counts.archived}</strong>
-          </div>
-        </button>
-      </section>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE_APROBACION", tipo: "pendiente", cuenta: counts.pending },
+          { clave: "APROBADO", tipo: "aprobado", cuenta: counts.approved },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: counts.published },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: counts.rejected },
+          { clave: "ARCHIVADO", tipo: "archivado", cuenta: counts.archived },
+        ]}
+      />
 
       <section
         className="dashboard-card-admin admin-res-card-admin"

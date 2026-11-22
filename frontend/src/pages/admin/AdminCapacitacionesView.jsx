@@ -1,3 +1,4 @@
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
@@ -9,7 +10,6 @@ import {
   Archive,
   CalendarDays,
   CheckCircle,
-  Clock3,
   ExternalLink,
   FileText,
   Globe2,
@@ -362,53 +362,17 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
         </button>
       </div>
 
-      <section className="admin-training-summary" aria-label="Filtrar capacitaciones por estado">
-        <button
-          type="button"
-          className={`admin-training-summary-card is-pending ${statusFilter === 'PENDIENTE_APROBACION' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDIENTE_APROBACION'}
-          onClick={() => setStatusFilter('PENDIENTE_APROBACION')}
-        >
-          <span><Clock3 size={19} /></span>
-          <div><small>Pendientes de aprobación</small><strong>{counts.pending}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-training-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'APROBADO'}
-          onClick={() => setStatusFilter('APROBADO')}
-        >
-          <span><CheckCircle size={19} /></span>
-          <div><small>Aprobados</small><strong>{counts.approved}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-training-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLICADO'}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span><Globe2 size={19} /></span>
-          <div><small>Visibles al público</small><strong>{counts.published}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-training-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'RECHAZADO'}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span><XCircle size={19} /></span>
-          <div><small>Rechazados</small><strong>{counts.rejected}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-training-summary-card is-archived ${statusFilter === 'ARCHIVADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'ARCHIVADO'}
-          onClick={() => setStatusFilter('ARCHIVADO')}
-        >
-          <span><Archive size={19} /></span>
-          <div><small>Archivados</small><strong>{counts.archived}</strong></div>
-        </button>
-      </section>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE_APROBACION", tipo: "pendiente", cuenta: counts.pending },
+          { clave: "APROBADO", tipo: "aprobado", cuenta: counts.approved },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: counts.published },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: counts.rejected },
+          { clave: "ARCHIVADO", tipo: "archivado", cuenta: counts.archived },
+        ]}
+      />
 
       <section className="dashboard-card-admin admin-training-card" aria-labelledby="admin-training-list-title">
         <div className="admin-training-card-heading">

@@ -1,3 +1,4 @@
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
@@ -9,8 +10,6 @@ import {
   Building2,
   CalendarDays,
   Check,
-  Clock3,
-  Globe2,
   RefreshCw,
   Search,
   Stethoscope,
@@ -292,44 +291,15 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
           Todos
         </button>
       </div>
-      <section className="admin-prof-summary" aria-label="Filtrar profesionales por estado">
-        <button
-          type="button"
-          className={`admin-prof-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDIENTE'}
-          onClick={() => setStatusFilter('PENDIENTE')}
-        >
-          <span className="admin-prof-summary-icon"><Clock3 size={19} /></span>
-          <div>
-            <span>Pendientes de aprobación</span>
-            <strong>{pendingCount}</strong>
-          </div>
-        </button>
-        <button
-          type="button"
-          className={`admin-prof-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLICADO'}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span className="admin-prof-summary-icon"><Globe2 size={19} /></span>
-          <div>
-            <span>Visibles al público</span>
-            <strong>{publishedCount}</strong>
-          </div>
-        </button>
-        <button
-          type="button"
-          className={`admin-prof-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'RECHAZADO'}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span className="admin-prof-summary-icon"><XCircle size={19} /></span>
-          <div>
-            <span>Rechazados</span>
-            <strong>{rejectedCount}</strong>
-          </div>
-        </button>
-      </section>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE", tipo: "pendiente", cuenta: pendingCount },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
+        ]}
+      />
 
       <section className="admin-prof-card" aria-labelledby="admin-prof-list-title">
         <div className="admin-prof-card-heading">

@@ -1,3 +1,4 @@
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
@@ -9,8 +10,6 @@ import {
   CalendarDays,
   Check,
   FileText,
-  Clock3,
-  Globe2,
   RefreshCw,
   Search,
   X,
@@ -316,35 +315,15 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         </button>
       </div>
 
-      <section className="admin-doc-summary" aria-label="Filtrar documentos por estado">
-        <button
-          type="button"
-          className={`admin-doc-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDIENTE'}
-          onClick={() => setStatusFilter('PENDIENTE')}
-        >
-          <span><Clock3 size={19} /></span>
-          <div><small>Pendientes de aprobación</small><strong>{pendingCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-doc-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLICADO'}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span><Globe2 size={19} /></span>
-          <div><small>Visibles al público</small><strong>{publishedCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-doc-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'RECHAZADO'}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span><XCircle size={19} /></span>
-          <div><small>Rechazados</small><strong>{rejectedCount}</strong></div>
-        </button>
-      </section>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE", tipo: "pendiente", cuenta: pendingCount },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
+        ]}
+      />
 
       <section className="admin-doc-card" aria-labelledby="admin-doc-list-title">
         <div className="admin-doc-card-heading">

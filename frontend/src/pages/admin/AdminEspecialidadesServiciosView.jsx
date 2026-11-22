@@ -1,3 +1,4 @@
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
@@ -9,8 +10,6 @@ import {
   Archive,
   CalendarDays,
   Check,
-  Clock3,
-  Globe2,
   RefreshCw,
   Search,
   Stethoscope,
@@ -279,44 +278,16 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
           Todos
         </button>
       </div>
-      <section className="admin-es-summary" aria-label="Filtrar servicios y especialidades por estado">
-        <button
-          type="button"
-          className={`admin-es-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDIENTE'}
-          onClick={() => setStatusFilter('PENDIENTE')}
-        >
-          <span><Clock3 size={19} /></span>
-          <div><small>Pendientes de aprobación</small><strong>{pendingCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-es-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLICADO'}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span><Globe2 size={19} /></span>
-          <div><small>Visibles al público</small><strong>{publishedCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-es-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'RECHAZADO'}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span><XCircle size={19} /></span>
-          <div><small>Rechazados</small><strong>{rejectedCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-es-summary-card is-archived ${statusFilter === 'ARCHIVADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'ARCHIVADO'}
-          onClick={() => setStatusFilter('ARCHIVADO')}
-        >
-          <span><Archive size={19} /></span>
-          <div><small>Archivados</small><strong>{archivedCount}</strong></div>
-        </button>
-      </section>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE", tipo: "pendiente", cuenta: pendingCount },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
+          { clave: "ARCHIVADO", tipo: "archivado", cuenta: archivedCount },
+        ]}
+      />
 
       <section className="admin-es-card" aria-labelledby="admin-es-list-title">
         <div className="admin-es-card-heading">

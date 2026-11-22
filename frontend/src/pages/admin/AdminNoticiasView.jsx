@@ -1,3 +1,4 @@
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from '../../utils/publicacion.js';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
@@ -5,7 +6,7 @@ import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import keycloak from '../../config/keycloak';
@@ -407,56 +408,16 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           Todos
         </button>
       </div>
-      <div className="admin-news-summary" role="group" aria-label="Filtrar noticias por estado">
-        <button
-          type="button"
-          className={`admin-news-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDIENTE'}
-          onClick={() => setStatusFilter('PENDIENTE')}
-        >
-          <span className="admin-news-summary-icon"><Clock3 size={19} /></span>
-          <span className="admin-news-summary-copy">
-            <span>Pendientes de aprobación</span>
-            <strong>{pendingCount}</strong>
-          </span>
-        </button>
-        <button
-          type="button"
-          className={`admin-news-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'APROBADO'}
-          onClick={() => setStatusFilter('APROBADO')}
-        >
-          <span className="admin-news-summary-icon"><CheckCircle size={19} /></span>
-          <span className="admin-news-summary-copy">
-            <span>Aprobados</span>
-            <strong>{approvedCount}</strong>
-          </span>
-        </button>
-        <button
-          type="button"
-          className={`admin-news-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLICADO'}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span className="admin-news-summary-icon"><Globe2 size={19} /></span>
-          <span className="admin-news-summary-copy">
-            <span>Visibles al público</span>
-            <strong>{publishedCount}</strong>
-          </span>
-        </button>
-        <button
-          type="button"
-          className={`admin-news-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'RECHAZADO'}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span className="admin-news-summary-icon"><XCircle size={19} /></span>
-          <span className="admin-news-summary-copy">
-            <span>Rechazados</span>
-            <strong>{rejectedCount}</strong>
-          </span>
-        </button>
-      </div>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE", tipo: "pendiente", cuenta: pendingCount },
+          { clave: "APROBADO", tipo: "aprobado", cuenta: approvedCount },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
+        ]}
+      />
 
       <div className="dashboard-card-admin">
         <div className="admin-news-card-heading">

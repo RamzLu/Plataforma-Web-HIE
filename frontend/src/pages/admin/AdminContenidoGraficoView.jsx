@@ -1,10 +1,8 @@
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Clock3,
   CheckCircle,
-  Globe2,
   XCircle,
-  Archive,
   Search,
   X,
   Layers,
@@ -266,58 +264,17 @@ const AdminContenidoGraficoView = ({ onPendingCountChange } = {}) => {
       </div>
 
       {/* 5 Tarjetas Superiores Interactivas */}
-      <section className="admin-cg-summary-admin" aria-label="Filtrar contenidos gráficos por estado">
-        <button
-          type="button"
-          className={`admin-cg-summary-card-admin is-pending ${
-            statusFilter === 'PENDIENTE_APROBACION' ? 'is-selected' : ''
-          }`}
-          onClick={() => setStatusFilter('PENDIENTE_APROBACION')}
-        >
-          <span><Clock3 size={19} /></span>
-          <div><small>Pendientes de revisión</small><strong>{counts.pending}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-cg-summary-card-admin is-approved ${
-            statusFilter === 'APROBADO' ? 'is-selected' : ''
-          }`}
-          onClick={() => setStatusFilter('APROBADO')}
-        >
-          <span><CheckCircle size={19} /></span>
-          <div><small>Aprobadas</small><strong>{counts.approved}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-cg-summary-card-admin is-published ${
-            statusFilter === 'PUBLICADO' ? 'is-selected' : ''
-          }`}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span><Globe2 size={19} /></span>
-          <div><small>Publicadas</small><strong>{counts.published}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-cg-summary-card-admin is-rejected ${
-            statusFilter === 'RECHAZADO' ? 'is-selected' : ''
-          }`}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span><XCircle size={19} /></span>
-          <div><small>Rechazadas</small><strong>{counts.rejected}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-cg-summary-card-admin is-archived ${
-            statusFilter === 'ARCHIVADO' ? 'is-selected' : ''
-          }`}
-          onClick={() => setStatusFilter('ARCHIVADO')}
-        >
-          <span><Archive size={19} /></span>
-          <div><small>Archivadas</small><strong>{counts.archived}</strong></div>
-        </button>
-      </section>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE_APROBACION", tipo: "pendiente", cuenta: counts.pending },
+          { clave: "APROBADO", tipo: "aprobado", cuenta: counts.approved },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: counts.published },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: counts.rejected },
+          { clave: "ARCHIVADO", tipo: "archivado", cuenta: counts.archived },
+        ]}
+      />
 
       {/* 2. Contenedor Principal (Dashboard-Card) y Tabla de 4 Secciones Fijas */}
       <section className="dashboard-card-admin admin-cg-card-admin" aria-labelledby="admin-cg-list-title">
