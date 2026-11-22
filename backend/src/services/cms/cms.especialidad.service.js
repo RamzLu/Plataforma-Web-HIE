@@ -6,6 +6,7 @@ import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { nombreDeUsuario, obtenerOCrearUsuarioLocal } from "../../utils/user.utils.js";
 import { calcularCambios, combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "especialidad o servicio", modelos: { esp_: "especialidad", srv_: "servicio" } });
 
@@ -52,11 +53,12 @@ class CmsEspecialidadService {
 
   async crearEspecialidad(data, user) {
     const esServicio = data.esServicio === true || data.esServicio === "true";
-    const estadoSolicitado = data.estado ? data.estado.toUpperCase() : "PUBLICADO";
-    const estadoFinal =
-      estadoSolicitado === "ARCHIVADO" || estadoSolicitado === "BORRADOR"
-        ? "ARCHIVADO"
-        : "PENDIENTE_APROBACION";
+    // Regla común (utils/flujoEditorial.utils.js). Sin estado, el CMS pide publicar.
+    const solicitud = resolverSolicitud({
+      estadoActual: null,
+      intencion: intencionDesdeEstado(data.estado || "PUBLICADO"),
+    });
+    const estadoFinal = solicitud.estado;
 
     const payload = {
       nombre: data.nombre,
@@ -90,13 +92,11 @@ class CmsEspecialidadService {
       updatedAt: nowIso,
     });
 
-    if (estadoFinal === "PENDIENTE_APROBACION") {
+    if (solicitud.meta) {
       await this.guardarPendingMeta(idStr, esServicio, {
-        previousEstado: null,
-        targetEstado: "PUBLICADO",
+        ...solicitud.meta,
         editor: editorNombre,
         updatedAt: nowIso,
-        snapshotPublico: null,
       });
     }
 
@@ -142,31 +142,23 @@ class CmsEspecialidadService {
     }
 
     const estadoAnterior = (existente.estado || "").toUpperCase();
-    const estadoSolicitado = data.estado ? data.estado.toUpperCase() : estadoAnterior;
+    // Sin estado: se mantiene archivado lo archivado y todo lo demás pide publicar.
+    const estadoSolicitado = data.estado ? data.estado.toUpperCase() : estadoAnterior === "ARCHIVADO" ? "ARCHIVADO" : "PUBLICADO";
 
     const editorNombre = await this._resolverNombreEditor(user, data.editor || data.editorNombre);
 
     const metaMap = await this.obtenerMapaPendingMeta();
     const metaExistente = metaMap.get(this._metaKey(idStr, esServicio)) || null;
-    // También cuenta como "publicada" si fue una edición rechazada de algo que ya estaba publicado.
-    const provieneDePublicada =
-      estadoAnterior === "PUBLICADO" ||
-      estadoAnterior === "APROBADO" ||
-      conservaVersionPublica(existente, metaExistente);
-
-    let snapshotPublico = metaExistente?.snapshotPublico || null;
-    if (provieneDePublicada && !snapshotPublico) {
-      snapshotPublico = {
-        nombre: existente.nombre,
-        descripcion: existente.descripcion,
-        ubicacion: existente.ubicacion,
-        horarios: existente.horarios,
-        requisitos: existente.requisitos,
-        documentacionNecesaria: existente.documentacionNecesaria,
-        informacionDerivacion: existente.informacionDerivacion,
-        estado: "PUBLICADO",
-      };
-    }
+    const armarSnapshotPublico = () => ({
+      nombre: existente.nombre,
+      descripcion: existente.descripcion,
+      ubicacion: existente.ubicacion,
+      horarios: existente.horarios,
+      requisitos: existente.requisitos,
+      documentacionNecesaria: existente.documentacionNecesaria,
+      informacionDerivacion: existente.informacionDerivacion,
+      estado: "PUBLICADO",
+    });
 
     const nowIso = new Date().toISOString();
 
@@ -208,19 +200,26 @@ class CmsEspecialidadService {
       updatedAt: nowIso,
     });
 
-    let estadoFinal = "PENDIENTE_APROBACION";
-    if (estadoSolicitado === "ARCHIVADO" && !provieneDePublicada) {
-      estadoFinal = "ARCHIVADO";
-      await this.limpiarPendingMeta(idStr, esServicio);
-      await this.limpiarMotivoRechazo(idStr, esServicio);
-    } else {
+    // Regla común (utils/flujoEditorial.utils.js): lo que es o fue público pasa por el administrador
+    // (incluido despublicarlo o archivarlo) y el portal sigue mostrando la versión publicada mientras tanto.
+    const solicitud = resolverSolicitud({
+      estadoActual: estadoAnterior,
+      meta: metaExistente,
+      intencion: intencionDesdeEstado(estadoSolicitado),
+      snapshotActual: armarSnapshotPublico,
+      hayCambios: cambiosEsp.length > 0,
+    });
+    const estadoFinal = solicitud.estado;
+    if (solicitud.meta) {
       await this.guardarPendingMeta(idStr, esServicio, {
-        previousEstado: provieneDePublicada ? "PUBLICADO" : estadoAnterior,
-        targetEstado: estadoSolicitado === "ARCHIVADO" ? "ARCHIVADO" : "PUBLICADO",
+        ...solicitud.meta,
         editor: editorNombre,
         updatedAt: nowIso,
-        snapshotPublico,
       });
+    } else {
+      await this.limpiarPendingMeta(idStr, esServicio);
+    }
+    if (solicitud.limpiarMotivo) {
       await this.limpiarMotivoRechazo(idStr, esServicio);
     }
 
@@ -312,11 +311,6 @@ class CmsEspecialidadService {
     const idStr = id.toString();
 
     const { estado, rejectionReason } = payload;
-    if (!estado) {
-      const error = new Error("Debe indicar el estado de evaluación.");
-      error.statusCode = 400;
-      throw error;
-    }
 
     let existente = esServicio
       ? await prisma.servicio.findUnique({ where: { id: idBigInt } })
@@ -328,57 +322,30 @@ class CmsEspecialidadService {
       throw error;
     }
 
-    if (existente.estado !== "PENDIENTE_APROBACION") {
-      const error = new Error(
-        "Solo se pueden aprobar o rechazar registros que estén pendientes de aprobación."
-      );
-      error.statusCode = 400;
-      throw error;
-    }
+    // Regla común (utils/flujoEditorial.utils.js): solo lo pendiente; aprobar aplica lo pedido
+    // (publicar, despublicar o archivar); rechazar exige motivo y conserva la versión publicada si la había.
+    const pMeta = (await this.obtenerMapaPendingMeta()).get(this._metaKey(idStr, esServicio)) || null;
+    const revision = resolverRevision({
+      estadoActual: existente.estado,
+      meta: pMeta,
+      decision: decisionDesdeEstado(estado),
+      motivo: rejectionReason,
+    });
+    const nuevoEstado = revision.estado;
+    const motivoGuardado = revision.motivo;
 
-    const estadoUpper = estado.toUpperCase();
-    if (estadoUpper !== "APROBADO" && estadoUpper !== "PUBLICADO" && estadoUpper !== "RECHAZADO") {
-      const error = new Error(
-        "Acción no permitida: el administrador solo puede aprobar o rechazar la solicitud."
-      );
-      error.statusCode = 400;
-      throw error;
-    }
-
-    let nuevoEstado = existente.estado;
-    let motivoGuardado = null;
-
-    if (estadoUpper === "RECHAZADO") {
-      if (!rejectionReason || !rejectionReason.trim()) {
-        const error = new Error("Debe especificar un motivo de rechazo.");
-        error.statusCode = 400;
-        throw error;
-      }
-      nuevoEstado = "RECHAZADO";
-      motivoGuardado = rejectionReason.trim();
-      await this.guardarMotivoRechazo(idStr, esServicio, motivoGuardado);
+    if (revision.motivo) {
+      await this.guardarMotivoRechazo(idStr, esServicio, revision.motivo);
     } else {
-      let targetEst = null;
-      try {
-        const pendingMap = await this.obtenerMapaPendingMeta();
-        const pMeta = pendingMap.get(this._metaKey(idStr, esServicio));
-        targetEst = pMeta?.targetEstado;
-        if (pMeta?.editor && pMeta.editor !== "Editor CMS") {
-          await this.guardarEditorMeta(idStr, esServicio, {
-            editor: pMeta.editor,
-            updatedAt: pMeta.updatedAt || new Date().toISOString(),
-          });
-        }
-      } catch (error) {
-        registrarFalla("Cambios pendientes", error);
-      }
-
-      if (targetEst === "ARCHIVADO") {
-        nuevoEstado = "ARCHIVADO";
-      } else {
-        nuevoEstado = "PUBLICADO";
+      if (pMeta?.editor && pMeta.editor !== "Editor CMS") {
+        await this.guardarEditorMeta(idStr, esServicio, {
+          editor: pMeta.editor,
+          updatedAt: pMeta.updatedAt || new Date().toISOString(),
+        });
       }
       await this.limpiarMotivoRechazo(idStr, esServicio);
+    }
+    if (revision.meta === null) {
       await this.limpiarPendingMeta(idStr, esServicio);
     }
 
