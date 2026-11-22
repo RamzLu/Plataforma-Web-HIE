@@ -9,7 +9,7 @@ process.env.KEYCLOAK_URL ||= "http://localhost:8080";
 process.env.KEYCLOAK_REALM ||= "prueba";
 process.env.KEYCLOAK_CLIENT_ID ||= "prueba";
 
-const { leerRevision, unificarRespuesta, crearControladorEditorial } = await import("../src/controllers/cms/editorial.controller.js");
+const { unificarRespuesta, crearControladorEditorial } = await import("../src/controllers/cms/editorial.controller.js");
 const { MODULOS_EDITORIALES } = await import("../src/services/cms/editorial.modulos.js");
 const { default: cmsRouter } = await import("../src/routes/cms.routes.js");
 const { default: portalRouter } = await import("../src/routes/portal.routes.js");
@@ -48,17 +48,6 @@ test("cada módulo define todo lo que necesita el controlador común", () => {
   }
 });
 
-test("leerRevision: acepta APROBAR o RECHAZAR y exige motivo al rechazar", () => {
-  assert.deepEqual(leerRevision({ decision: "APROBAR" }), { decision: "APROBAR", motivo: null });
-  assert.deepEqual(leerRevision({ decision: "aprobar" }), { decision: "APROBAR", motivo: null });
-  assert.deepEqual(leerRevision({ decision: "RECHAZAR", motivo: "  Falta información  " }), { decision: "RECHAZAR", motivo: "Falta información" });
-  assert.throws(() => leerRevision({ decision: "RECHAZAR" }), /motivo de rechazo/);
-  assert.throws(() => leerRevision({ decision: "RECHAZAR", motivo: "   " }), /motivo de rechazo/);
-  assert.throws(() => leerRevision({ decision: "APROBADO" }), /APROBAR o RECHAZAR/);
-  assert.throws(() => leerRevision({}), /APROBAR o RECHAZAR/);
-  assert.throws(() => leerRevision(undefined), /APROBAR o RECHAZAR/);
-});
-
 test("unificarRespuesta: el registro siempre va en data, sea cual sea la clave del servicio", () => {
   assert.deepEqual(unificarRespuesta({ message: "ok", noticia: { id: 1 } }, "noticia"), { message: "ok", data: { id: 1 } });
   assert.deepEqual(unificarRespuesta({ message: "ok", data: { id: 2 } }, "profesional"), { message: "ok", data: { id: 2 } });
@@ -94,19 +83,10 @@ test("el controlador común: crea con 201, edita con 200 y unifica la respuesta"
   assert.equal(res.codigo, 200);
 
   res = respuestaFalsa();
-  await c.revisar({ body: { decision: "APROBAR" } }, res, assert.fail);
+  await c.revisar({ body: { decision: "APROBAR", motivo: "" } }, res, assert.fail);
   assert.deepEqual(res.cuerpo, { message: "revisada", data: { id: 9, d: { decision: "APROBAR", motivo: null } } });
 
   res = respuestaFalsa();
   await c.eliminar({}, res, assert.fail);
   assert.equal(res.codigo, 202, "si queda una solicitud de eliminación responde 202");
-});
-
-test("el controlador común: un decisión inválida llega a next() como error 400 y no toca el servicio", async () => {
-  let llamado = false;
-  const c = crearControladorEditorial({ clave: "x", entidad: () => "x", revisar: async () => { llamado = true; return {}; } });
-  let error = null;
-  await c.revisar({ body: { decision: "NADA" } }, respuestaFalsa(), (e) => { error = e; });
-  assert.equal(error?.statusCode, 400);
-  assert.equal(llamado, false);
 });

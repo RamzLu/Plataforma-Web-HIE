@@ -67,6 +67,8 @@ Noticias (`noticias`), documentación (`documentacion`), profesionales (`profesi
 
 `POST`, `PUT` y `PATCH` responden `{ message, data }`, con el registro en `data`. Especialidades y servicios comparten ruta: se distinguen con `esServicio` (en el cuerpo, o como parámetro de la URL al eliminar).
 
+Cada cuerpo se valida con [zod](https://zod.dev) antes de llegar al controlador (`backend/src/validation/editorial.schemas.js`): tipos, largos de la base, estados permitidos, fechas y campos obligatorios. Si algo no es válido responde `400` con `{ success: false, error: { code: "VALIDATION_ERROR", message, details: [{ campo, mensaje }] } }`, con el mensaje ya en español para mostrarlo tal cual. Los campos que el esquema no menciona pasan sin tocarse.
+
 Las rutas se arman en un solo lugar (`backend/src/routes/cms.routes.js`) a partir de la lista de `backend/src/services/cms/editorial.modulos.js`, y el frontend las usa con `src/api/editorial.api.js`. Para sumar un módulo se agrega una entrada a esa lista.
 
 ## Roles y flujo editorial

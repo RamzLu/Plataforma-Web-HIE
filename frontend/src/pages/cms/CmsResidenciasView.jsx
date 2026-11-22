@@ -287,7 +287,12 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         ? "PROGRAMADO"
         : res.fechaPublicacion
         ? "PROGRAMADO"
-        : res.estado || "BORRADOR";
+        : ["BORRADOR", "ARCHIVADO", "PUBLICADO"].includes(res.estado)
+        ? res.estado
+        : // Pendiente, rechazada o aprobada: lo que el CM puede volver a pedir es publicar o archivar.
+          res.requestedEstado === "ARCHIVADO"
+        ? "ARCHIVADO"
+        : "PUBLICADO";
 
     setFormData({
       nombre: res.nombre || "",

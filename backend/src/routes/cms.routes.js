@@ -15,6 +15,8 @@ import {
 } from "../controllers/cms/cms.institucional.controller.js";
 import { crearControladorEditorial } from "../controllers/cms/editorial.controller.js";
 import { MODULOS_EDITORIALES } from "../services/cms/editorial.modulos.js";
+import { validar } from "../middlewares/validar.middleware.js";
+import { ESQUEMAS_EDITORIALES, esquemaRevision } from "../validation/editorial.schemas.js";
 import { obtenerSolicitudesEliminacion, resolverSolicitudEliminacion } from "../controllers/cms/cms.eliminaciones.controller.js";
 import { obtenerActividadReciente } from "../controllers/cms/cms.actividad.controller.js";
 import { requireCmsAccess, requireAdminAccess, requireCmsOrAdminAccess, vistaCmsAccess } from '../middlewares/auth.middleware.js';
@@ -40,15 +42,18 @@ router.param('id', (req, _res, next, id) => {
 //   POST   /<módulo>                crear
 //   PUT    /<módulo>/:id            editar o pedir un cambio de estado (publicar, archivar...)
 //   PATCH  /<módulo>/:id/revision   Admin: { decision: "APROBAR" | "RECHAZAR", motivo }
+// Cada cuerpo se valida con su esquema (validation/editorial.schemas.js) antes de llegar al controlador.
 //   DELETE /<módulo>/:id            eliminar (si está publicado queda una solicitud para el Admin)
 // ==========================================
 for (const modulo of MODULOS_EDITORIALES) {
   const controlador = crearControladorEditorial(modulo);
   const archivos = modulo.archivos ? [modulo.archivos] : [];
+  const esquemas = ESQUEMAS_EDITORIALES[modulo.ruta];
   router.get(`/${modulo.ruta}`, vistaCmsAccess, controlador.listar);
-  router.post(`/${modulo.ruta}`, requireCmsAccess, ...archivos, controlador.crear);
-  router.put(`/${modulo.ruta}/:id`, requireCmsAccess, ...archivos, controlador.actualizar);
-  router.patch(`/${modulo.ruta}/:id/revision`, requireAdminAccess, controlador.revisar);
+  // La validación va después de la carga de archivos: en los formularios con archivos el cuerpo se arma ahí.
+  router.post(`/${modulo.ruta}`, requireCmsAccess, ...archivos, validar(esquemas.crear), controlador.crear);
+  router.put(`/${modulo.ruta}/:id`, requireCmsAccess, ...archivos, validar(esquemas.actualizar), controlador.actualizar);
+  router.patch(`/${modulo.ruta}/:id/revision`, requireAdminAccess, validar(esquemaRevision), controlador.revisar);
   router.delete(`/${modulo.ruta}/:id`, requireCmsAccess, controlador.eliminar);
 }
 

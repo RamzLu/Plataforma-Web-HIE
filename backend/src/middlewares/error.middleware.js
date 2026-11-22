@@ -54,7 +54,7 @@ const errorHandler = (err, req, res, next) => {
     message = typeof err?.message === 'string' && err.message.trim()
       ? err.message
       : 'Solicitud inválida.';
-    errorCode = CODIGOS_POR_STATUS[statusCode] || 'CLIENT_ERROR';
+    errorCode = err?.code === 'VALIDATION_ERROR' ? 'VALIDATION_ERROR' : CODIGOS_POR_STATUS[statusCode] || 'CLIENT_ERROR';
   }
 
   return res.status(statusCode).json({
@@ -62,6 +62,7 @@ const errorHandler = (err, req, res, next) => {
     error: {
       code: errorCode,
       message,
+      ...(errorCode === 'VALIDATION_ERROR' && Array.isArray(err?.details) ? { details: err.details } : {}),
     },
   });
 };

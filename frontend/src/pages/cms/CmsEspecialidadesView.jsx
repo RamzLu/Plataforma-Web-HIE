@@ -91,7 +91,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       requisitos: esp.requisitos ? esp.requisitos.join("\n") : "",
       informacionDerivacion: esp.informacionDerivacion || "",
       esServicio: esp.esServicio, 
-      estado: esp.estado || "PUBLICADO"
+      // Lo que el CM puede pedir es publicar o archivar; un estado como RECHAZADO o PENDIENTE no se reenvía.
+      estado: esp.estado === "ARCHIVADO" ? "ARCHIVADO" : "PUBLICADO"
     });
     setHasUnsavedChanges(false);
     setShowModal(true);

@@ -1,30 +1,14 @@
 import { agregarSolicitudesEliminacion } from "../../utils/eliminacion.utils.js";
 
 // Controlador único de los módulos con flujo editorial (ver services/cms/editorial.modulos.js).
+// El cuerpo llega validado (middlewares/validar.middleware.js).
 // Respuestas: listar -> [registros]; crear / actualizar / revisar -> { message, data: registro };
 // eliminar -> { message, ... } (202 si queda una solicitud de eliminación para el administrador).
-
-const DECISIONES = ["APROBAR", "RECHAZAR"];
-
-const crearError = (mensaje, statusCode = 400) => Object.assign(new Error(mensaje), { statusCode });
 
 /** Unifica la respuesta: el registro siempre va en "data", sea cual sea la clave con que lo devuelva el servicio. */
 export const unificarRespuesta = (resultado, clave) => {
   const { message, ...resto } = resultado || {};
   return { message, data: resto[clave] ?? resto.data ?? null };
-};
-
-/** Valida el cuerpo de la revisión: { decision: "APROBAR" | "RECHAZAR", motivo? }. */
-export const leerRevision = (body = {}) => {
-  const decision = String(body.decision || "").trim().toUpperCase();
-  if (!DECISIONES.includes(decision)) {
-    throw crearError("Debe indicar la decisión de la revisión: APROBAR o RECHAZAR.");
-  }
-  const motivo = typeof body.motivo === "string" ? body.motivo.trim() : "";
-  if (decision === "RECHAZAR" && !motivo) {
-    throw crearError("Debe especificar un motivo de rechazo.");
-  }
-  return { decision, motivo: motivo || null };
 };
 
 export const crearControladorEditorial = (modulo) => {
@@ -52,7 +36,9 @@ export const crearControladorEditorial = (modulo) => {
     }),
 
     revisar: envolver(async (req, res) => {
-      res.status(200).json(unificarRespuesta(await modulo.revisar(req, leerRevision(req.body)), modulo.clave));
+      // El cuerpo ya pasó por esquemaRevision (validation/editorial.schemas.js): decision y motivo son válidos.
+      const { decision, motivo } = req.body;
+      res.status(200).json(unificarRespuesta(await modulo.revisar(req, { decision, motivo: motivo || null }), modulo.clave));
     }),
 
     eliminar: envolver(async (req, res) => {
