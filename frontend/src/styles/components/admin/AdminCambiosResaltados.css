@@ -359,3 +359,26 @@
     transform: none;
   }
 }
+
+/* Lo que cambió dentro de un texto, marcado palabra por palabra. */
+:where(.panel-scope) .admin-diff-marca {
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+:where(.panel-scope) .admin-diff-marca.is-antes {
+  background: #fecaca;
+  color: #7f1d1d;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+:where(.panel-scope) .admin-diff-marca.is-despues {
+  background: #bbf7d0;
+  color: #14532d;
+}
+
+:where(.panel-scope) .admin-diff-omitido {
+  opacity: 0.6;
+}

@@ -3,6 +3,25 @@ import { createPortal } from 'react-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, FileEdit, X } from 'lucide-react';
 import '../../styles/components/admin/AdminCambiosResaltados.css';
 import { sanitizeUrl } from '../../utils/sanitizeUrl';
+import { segmentosDeDiferencia } from '../../utils/diffTexto';
+
+/** Texto de un lado de la comparación con lo cambiado marcado y los tramos largos sin cambios acortados. */
+const TextoComparado = ({ antes, despues, lado }) => {
+  const valor = lado === 'antes' ? antes : despues;
+  const segmentos = antes && despues ? segmentosDeDiferencia(antes, despues, lado) : null;
+  if (!segmentos) return valor;
+  return segmentos.map((s, i) =>
+    s.marcado ? (
+      <mark key={i} className={`admin-diff-marca is-${lado}`}>
+        {s.texto}
+      </mark>
+    ) : (
+      <span key={i} className={s.omitido ? 'admin-diff-omitido' : undefined}>
+        {s.texto}
+      </span>
+    )
+  );
+};
 
 /**
  * Visor de imagen que se abre encima del modal de revisión (sin salir de la pantalla ni abrir otra pestaña).
@@ -128,8 +147,8 @@ const MARCA_NUEVA = { clase: 'nueva', texto: 'Nueva' };
  * Píldora para mostrar en las filas de las tablas del Admin cuando un contenido
  * pendiente corresponde a una actualización/edición de un registro existente.
  */
-export const AdminCambiosPill = ({ count = 0, esActualizacion = false }) => {
-  if (!esActualizacion && (!count || count <= 0)) return null;
+export const AdminCambiosPill = ({ count = 0, esActualizacion = false, oculto = false }) => {
+  if (oculto || (!esActualizacion && (!count || count <= 0))) return null;
 
   return (
     <span
@@ -205,7 +224,7 @@ export const AdminCambiosResaltados = ({
                   </div>
                   <div className="admin-diff-text">
                     {c.antes ? (
-                      c.antes
+                      <TextoComparado antes={c.antes} despues={c.despues} lado="antes" />
                     ) : (
                       <em className="admin-diff-empty">(Vacío / Sin información)</em>
                     )}
@@ -225,7 +244,7 @@ export const AdminCambiosResaltados = ({
                   </div>
                   <div className="admin-diff-text">
                     {c.despues ? (
-                      c.despues
+                      <TextoComparado antes={c.antes} despues={c.despues} lado="despues" />
                     ) : (
                       <em className="admin-diff-empty">(Eliminado / Vacío)</em>
                     )}

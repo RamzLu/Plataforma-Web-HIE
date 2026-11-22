@@ -179,8 +179,9 @@ export const cambiosParaCliente = (cambios = []) =>
     campo,
     label,
     tipo,
-    antes,
-    despues,
+    // En los textos se envía el valor completo (el guardado para mostrar está recortado) para poder marcar la diferencia exacta.
+    antes: tipo === "images" || tipo === "image" ? antes : valorAntes ?? antes,
+    despues: tipo === "images" || tipo === "image" ? despues : valorDespues ?? despues,
     ...(tipo === "images" || tipo === "image"
       ? { imagenes: { antes: urlsDeImagenes(valorAntes), despues: urlsDeImagenes(valorDespues) } }
       : {}),
