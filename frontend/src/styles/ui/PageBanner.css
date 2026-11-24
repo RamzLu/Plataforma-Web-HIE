@@ -63,8 +63,8 @@
   height: 100%;
   object-fit: contain;
   display: block;
-  filter: blur(0.5px);
-  transform: rotate(-10deg);
+  filter: blur(1.5px);
+  transform: rotate(-8deg);
 }
 
 /* =========================================================

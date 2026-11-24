@@ -9,7 +9,7 @@ import iconMama from "../../assets/icon-mama.webp";
 import iconCorazon from "../../assets/icon-corazon.webp";
 import iconDonacion from "../../assets/icon-donacion-de-sangre.webp";
 import iconDengue from "../../assets/icon-dengue.webp";
-import avatarHospital from "../../assets/logoHospitalEvita.png";
+import avatarHospital from "../../assets/logo-hie-oficial.png";
 
 import iconMamaStatic from "../../assets/icon-mama-estatico.png";
 import iconCorazonStatic from "../../assets/icon-corazon-estatico.png";

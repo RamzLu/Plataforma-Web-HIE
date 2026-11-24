@@ -48,7 +48,10 @@
   display: flex;
   align-items: center;
   align-self: center;
+  gap: 10px;
   margin-bottom: 10px;
+  padding: 0;
+  background: transparent;
   text-decoration: none;
   flex-shrink: 0;
   transition: opacity 0.25s ease, transform 0.25s ease;
@@ -56,14 +59,48 @@
 
 .hospital-header-container .brand-container:hover {
   opacity: 0.92;
+  transform: translateY(-1px);
 }
 
 .hospital-header-container .header-logo-img {
-  height: 50px;
+  height: 44px;
   width: auto;
   object-fit: contain;
   display: block;
-  filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
+  filter: brightness(1.1) contrast(1.04);
+}
+
+.hospital-header-container .header-brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.06;
+  letter-spacing: 0.04em;
+}
+
+.hospital-header-container .header-brand-line {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: rgba(226, 238, 255, 0.92);
+  letter-spacing: 0.08em;
+}
+
+.hospital-header-container .header-brand-evita {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-white);
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+
+.hospital-header-container .header-brand-formosa {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--color-blue-300);
+  letter-spacing: 0.12em;
 }
 
 .hospital-header-container .nav-content-wrapper {
@@ -351,7 +388,19 @@
   }
 
   .hospital-header-container .header-logo-img {
-    height: 44px;
+    height: 38px;
+  }
+
+  .hospital-header-container .header-brand-line {
+    font-size: 9.5px;
+  }
+
+  .hospital-header-container .header-brand-evita {
+    font-size: 11.5px;
+  }
+
+  .hospital-header-container .header-brand-formosa {
+    font-size: 8px;
   }
 
   .hospital-header-container .btn-location-action,
@@ -517,7 +566,23 @@
   }
 
   .hospital-header-container .header-logo-img {
-    height: 40px;
+    height: 36px;
+  }
+
+  .hospital-header-container .brand-container {
+    gap: 8px;
+  }
+
+  .hospital-header-container .header-brand-line {
+    font-size: 9px;
+  }
+
+  .hospital-header-container .header-brand-evita {
+    font-size: 11px;
+  }
+
+  .hospital-header-container .header-brand-formosa {
+    font-size: 7.5px;
   }
 
   .hospital-header-container .header-controls {

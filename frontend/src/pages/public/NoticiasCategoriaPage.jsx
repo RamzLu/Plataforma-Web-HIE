@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import PageBanner from "../../components/PageBanner";
-import avatarHospital from "../../assets/logoHospitalEvita.png";
+import avatarHospital from "../../assets/logo-hie-oficial.png";
 import fondoBannerNoticias from "../../assets/banner_noticias.png";
 import "../../styles/pages/NoticiasPage.css";
 import { usePageMeta } from "../../hooks/usePageMeta.js";
