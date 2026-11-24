@@ -434,6 +434,83 @@
   padding-bottom: 16px;
 }
 
+.authorities-carousel-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.authorities-cards-track {
+  width: 100%;
+  padding: 0 58px;
+  box-sizing: border-box;
+}
+
+.authorities-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  border: 1px solid rgba(209, 217, 224, 0.6);
+  color: var(--color-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(12, 35, 64, 0.1);
+  z-index: 10;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.authorities-nav-btn:hover {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: var(--color-white);
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 10px 25px rgba(43, 91, 148, 0.3);
+}
+
+.authorities-nav-btn.prev-btn {
+  left: 0;
+}
+
+.authorities-nav-btn.next-btn {
+  right: 0;
+}
+
+.authorities-swiper {
+  width: 100%;
+  padding: 12px 6px 28px 6px;
+  box-sizing: border-box;
+}
+
+.authorities-slide {
+  height: auto;
+  display: flex;
+}
+
+.authorities-slide .authority-card {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 600px) {
+  .authorities-cards-track {
+    padding: 0 44px;
+  }
+
+  .authorities-nav-btn {
+    width: 38px;
+    height: 38px;
+  }
+}
+
 .authorities-tag {
   color: var(--color-slate-500);
   font-size: 0.85rem;
