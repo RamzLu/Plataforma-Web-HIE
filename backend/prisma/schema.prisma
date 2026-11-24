@@ -101,13 +101,13 @@ model documento {
   createdBy            String              @db.Uuid
   updatedBy            String?             @db.Uuid
   estado               EstadoEditorial     @default(BORRADOR)
-  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
-  rejectionReason      String?
-  pendingMeta          Json?
-  editorMeta           Json?
-  solicitudEliminacion Json?
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+  editorMeta           Json?
+  pendingMeta          Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  solicitudEliminacion Json?
   archivo              archivo             @relation(fields: [archivoId], references: [id])
   categoria_documento  categoria_documento @relation(fields: [categoriaId], references: [id])
   creador              usuario             @relation("documento_createdByTousuario", fields: [createdBy], references: [id])
@@ -130,17 +130,17 @@ model especialidad {
   ubicacion              String?
   documentacionNecesaria String?
   informacionDerivacion  String?
-  createdBy              String?         @db.Uuid
-  updatedBy              String?         @db.Uuid
   estado                 EstadoEditorial @default(BORRADOR)
+  editorMeta             Json?
+  pendingMeta            Json?
   /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
   rejectionReason        String?
-  pendingMeta            Json?
-  editorMeta             Json?
   solicitudEliminacion   Json?
-  profesional            profesional[]
+  createdBy              String?         @db.Uuid
+  updatedBy              String?         @db.Uuid
   creador                usuario?        @relation("especialidad_createdByTousuario", fields: [createdBy], references: [id])
   editor                 usuario?        @relation("especialidad_updatedByTousuario", fields: [updatedBy], references: [id])
+  profesional            profesional[]
 
   @@index([createdBy])
   @@index([updatedBy])
@@ -169,14 +169,14 @@ model noticia {
   createdBy            String            @db.Uuid
   updatedBy            String?           @db.Uuid
   estado               EstadoEditorial   @default(BORRADOR)
-  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
-  rejectionReason      String?
-  pendingMeta          Json?
-  editorMeta           Json?
-  solicitudEliminacion Json?
   fechaPublicacion     DateTime?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
+  editorMeta           Json?
+  pendingMeta          Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  solicitudEliminacion Json?
   categoria_noticia    categoria_noticia @relation(fields: [categoriaId], references: [id])
   creador              usuario           @relation("noticia_createdByTousuario", fields: [createdBy], references: [id])
   editor               usuario?          @relation("noticia_updatedByTousuario", fields: [updatedBy], references: [id])
@@ -212,19 +212,19 @@ model profesional {
   activo               Boolean            @default(true)
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
-  createdBy            String?            @db.Uuid
-  updatedBy            String?            @db.Uuid
   estado               EstadoEditorial    @default(BORRADOR)
+  editorMeta           Json?
+  pendingMeta          Json?
   /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
   rejectionReason      String?
-  pendingMeta          Json?
-  editorMeta           Json?
   solicitudEliminacion Json?
+  createdBy            String?            @db.Uuid
+  updatedBy            String?            @db.Uuid
   archivo              archivo?           @relation(fields: [imagenId], references: [id])
-  especialidad         especialidad       @relation(fields: [especialidadId], references: [id])
-  profesional_area     profesional_area[]
   creador              usuario?           @relation("profesional_createdByTousuario", fields: [createdBy], references: [id])
+  especialidad         especialidad       @relation(fields: [especialidadId], references: [id])
   editor               usuario?           @relation("profesional_updatedByTousuario", fields: [updatedBy], references: [id])
+  profesional_area     profesional_area[]
 
   @@index([imagenId])
   @@index([especialidadId])
@@ -261,14 +261,14 @@ model servicio {
   horarios               String?
   informacionDerivacion  String?
   ubicacion              String?
-  createdBy              String?         @db.Uuid
-  updatedBy              String?         @db.Uuid
   estado                 EstadoEditorial @default(BORRADOR)
+  editorMeta             Json?
+  pendingMeta            Json?
   /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
   rejectionReason        String?
-  pendingMeta            Json?
-  editorMeta             Json?
   solicitudEliminacion   Json?
+  createdBy              String?         @db.Uuid
+  updatedBy              String?         @db.Uuid
   creador                usuario?        @relation("servicio_createdByTousuario", fields: [createdBy], references: [id])
   editor                 usuario?        @relation("servicio_updatedByTousuario", fields: [updatedBy], references: [id])
 
@@ -289,18 +289,18 @@ model usuario {
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
   auditoria              auditoria[]
+  capacitacionesCreadas  capacitacion[] @relation("capacitacion_createdByTousuario")
+  capacitacionesEditadas capacitacion[] @relation("capacitacion_updatedByTousuario")
   documentosCreados      documento[]    @relation("documento_createdByTousuario")
   documentosEditados     documento[]    @relation("documento_updatedByTousuario")
+  especialidadesCreadas  especialidad[] @relation("especialidad_createdByTousuario")
+  especialidadesEditadas especialidad[] @relation("especialidad_updatedByTousuario")
   noticiasCreadas        noticia[]      @relation("noticia_createdByTousuario")
   noticiasEditadas       noticia[]      @relation("noticia_updatedByTousuario")
   profesionalesCreados   profesional[]  @relation("profesional_createdByTousuario")
   profesionalesEditados  profesional[]  @relation("profesional_updatedByTousuario")
   residenciasCreadas     residencia[]   @relation("residencia_createdByTousuario")
   residenciasEditadas    residencia[]   @relation("residencia_updatedByTousuario")
-  capacitacionesCreadas  capacitacion[] @relation("capacitacion_createdByTousuario")
-  capacitacionesEditadas capacitacion[] @relation("capacitacion_updatedByTousuario")
-  especialidadesCreadas  especialidad[] @relation("especialidad_createdByTousuario")
-  especialidadesEditadas especialidad[] @relation("especialidad_updatedByTousuario")
   serviciosCreados       servicio[]     @relation("servicio_createdByTousuario")
   serviciosEditados      servicio[]     @relation("servicio_updatedByTousuario")
   rol                    rol            @relation(fields: [rolId], references: [id])
@@ -318,19 +318,19 @@ model capacitacion {
   enlaceUrl            String?
   fechaInicio          DateTime?
   fechaFin             DateTime?
-  createdBy            String?         @db.Uuid
-  updatedBy            String?         @db.Uuid
   estado               EstadoEditorial @default(BORRADOR)
-  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
-  rejectionReason      String?
-  pendingMeta          Json?
-  editorMeta           Json?
-  solicitudEliminacion Json?
   activo               Boolean         @default(true)
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
-  archivo              archivo?        @relation(fields: [imagenId], references: [id])
+  editorMeta           Json?
+  pendingMeta          Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  solicitudEliminacion Json?
+  createdBy            String?         @db.Uuid
+  updatedBy            String?         @db.Uuid
   creador              usuario?        @relation("capacitacion_createdByTousuario", fields: [createdBy], references: [id])
+  archivo              archivo?        @relation(fields: [imagenId], references: [id])
   editor               usuario?        @relation("capacitacion_updatedByTousuario", fields: [updatedBy], references: [id])
 
   @@index([activo])
@@ -381,21 +381,21 @@ model residencia {
   imagenId             BigInt?
   convocatoria         String?
   fechaConvocatoria    DateTime?
-  createdBy            String?                @db.Uuid
-  updatedBy            String?                @db.Uuid
   estado               EstadoEditorial        @default(BORRADOR)
-  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
-  rejectionReason      String?
-  pendingMeta          Json?
-  editorMeta           Json?
-  solicitudEliminacion Json?
   activo               Boolean                @default(true)
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
-  archivo              archivo?               @relation(fields: [imagenId], references: [id])
-  residencia_historial residencia_historial[]
+  editorMeta           Json?
+  pendingMeta          Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  solicitudEliminacion Json?
+  createdBy            String?                @db.Uuid
+  updatedBy            String?                @db.Uuid
   creador              usuario?               @relation("residencia_createdByTousuario", fields: [createdBy], references: [id])
+  archivo              archivo?               @relation(fields: [imagenId], references: [id])
   editor               usuario?               @relation("residencia_updatedByTousuario", fields: [updatedBy], references: [id])
+  residencia_historial residencia_historial[]
 
   @@index([activo])
   @@index([estado])
