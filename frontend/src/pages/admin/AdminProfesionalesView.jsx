@@ -58,7 +58,8 @@ const mapProfesionalFromBackend = (item) => {
     enPapelera: Boolean(item.enPapelera),
     papeleraDesde: item.papeleraDesde || null,
     papeleraVenceEl: item.papeleraVenceEl || null,
-    cargo: item.cargo || 'Profesional de planta',
+    // El cargo real (vacío si el CM no lo cargó): antes se mostraba "Profesional de planta" inventado.
+    cargo: (item.cargo || '').trim(),
     matricula: item.matricula || '',
     especialidad: item.especialidadNombre || 'Sin asignar',
     area: esServicio ? 'Servicio clave' : 'Especialidad médica',
@@ -407,7 +408,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                             {tituloEnLista(item, statusFilter === 'PUBLICADO', item.nombre)}
                           </button>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                            <span>{item.cargo}</span>
+                            <span>{item.cargo || 'Sin cargo o función'}</span>
                             <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={item.cambios?.length} esActualizacion={item.esActualizacion} />
                           </div>
                         </div>
@@ -519,7 +520,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                   )}
                 </div>
                 <div className="admin-prof-rv-summary">
-                  <div className="admin-prof-rv-role">{selectedProfessional.cargo}</div>
+                  {selectedProfessional.cargo && <div className="admin-prof-rv-role">{selectedProfessional.cargo}</div>}
                   <h3 className="admin-prof-rv-name">{selectedProfessional.nombre}</h3>
                   <div className="admin-prof-rv-license">{selectedProfessional.matricula || 'Matrícula no informada'}</div>
                 </div>
@@ -535,6 +536,11 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                   <div className="admin-prof-rv-field-value">{selectedProfessional.area}</div>
                 </div>
               </section>
+
+              <div className="admin-prof-rv-card admin-prof-rv-field">
+                <div className="admin-prof-rv-field-label">Cargo o función</div>
+                <div className="admin-prof-rv-field-value">{selectedProfessional.cargo || 'Sin cargo o función cargado.'}</div>
+              </div>
 
               <div className="admin-prof-rv-card admin-prof-rv-field">
                 <div className="admin-prof-rv-field-label">Descripción / Perfil profesional</div>
