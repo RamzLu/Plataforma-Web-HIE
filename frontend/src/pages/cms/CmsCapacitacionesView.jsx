@@ -52,7 +52,9 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   const [filtroModalidad, setFiltroModalidad] = useState("TODAS");
 
   // Modales
-  const [showModal, setShowModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showModal, setShowModal] = useState(Boolean(initialCreateModal));
   const [editingId, setEditingId] = useState(null);
   // Si lo que se edita está (o estuvo) publicado, retirarlo del portal se pide archivándolo, no pasándolo a borrador.
   const editandoPublicado = (() => {
@@ -105,21 +107,25 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   const [formData, setFormData] = useState(initialForm);
 
   // Cargar capacitaciones desde el backend
+  // Trae la lista y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerCapacitaciones = () =>
+    getCapacitaciones()
+      .then((data) => setCapacitaciones(Array.isArray(data) ? data : []))
+      .catch((error) => {
+        console.error("Error al cargar capacitaciones:", error);
+        toast.error("No se pudieron cargar las capacitaciones desde el servidor.");
+      })
+      .finally(() => setLoading(false));
+
+  // Recarga a pedido: muestra la carga y después trae la lista.
   const cargarCapacitaciones = async () => {
     setLoading(true);
-    try {
-      const data = await getCapacitaciones();
-      setCapacitaciones(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error al cargar capacitaciones:", error);
-      toast.error("No se pudieron cargar las capacitaciones desde el servidor.");
-    } finally {
-      setLoading(false);
-    }
+    await traerCapacitaciones();
   };
 
   useEffect(() => {
-    cargarCapacitaciones();
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerCapacitaciones();
   }, []);
 
   // Helper para generar iniciales
@@ -250,12 +256,10 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
     setShowModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showModal): solo se avisa al panel para que no lo reabra.
   useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   const handleOpenEdit = (item) => {
     setEditingId(item.id);

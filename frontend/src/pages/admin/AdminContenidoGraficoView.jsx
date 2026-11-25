@@ -1,5 +1,5 @@
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   CheckCircle,
   XCircle,
@@ -58,26 +58,30 @@ const AdminContenidoGraficoView = ({ onPendingCountChange } = {}) => {
   const [actionError, setActionError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const cargarEspacios = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getContenidosGraficos();
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerEspacios = useCallback(() => getContenidosGraficos().then((data) => {
       if (Array.isArray(data) && data.length > 0) {
         // Si vienen del backend, se fusionan asegurando estructura
         const map = new Map(data.map((item) => [item.id, item]));
         const merged = INITIAL_ESPACIOS.map((init) => map.get(init.id) || init);
         setEspacios(merged);
       }
-    } catch (err) {
+    }).catch((err) => {
       console.warn('Aviso: usando espacios fijos iniciales para auditoría de Admin.', err);
-    } finally {
+    }).finally(() => {
       setLoading(false);
-    }
-  }, []);
+    }), []);
+
+  // Recarga a pedido: muestra la carga y después trae los datos.
+  const cargarEspacios = useCallback(async () => {
+    setLoading(true);
+    await traerEspacios();
+  }, [traerEspacios]);
 
   useEffect(() => {
-    cargarEspacios();
-  }, [cargarEspacios]);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerEspacios();
+  }, [traerEspacios]);
 
   const counts = useMemo(
     () => ({
@@ -139,10 +143,17 @@ const AdminContenidoGraficoView = ({ onPendingCountChange } = {}) => {
     setActionError('');
   };
 
+  // Escape cierra el modal. Se lee la versión más reciente de closeReviewModal desde una ref,
+  // así el listener no se vuelve a registrar en cada render.
+  const closeReviewModalRef = useRef(closeReviewModal);
+  useEffect(() => {
+    closeReviewModalRef.current = closeReviewModal;
+  });
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && selectedEspacio && !isSaving) {
-        closeReviewModal();
+        closeReviewModalRef.current();
       }
     };
     window.addEventListener('keydown', handleKeyDown);

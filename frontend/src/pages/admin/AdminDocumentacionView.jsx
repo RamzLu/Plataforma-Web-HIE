@@ -105,11 +105,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
     [onPendingCountChange]
   );
 
-  const cargarDocumentos = useCallback(
-    async (silent = false) => {
-      try {
-        if (!silent) setLoading(true);
-        const data = await getDocumentos(true);
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerDocumentos = useCallback(
+    (silent = false) =>
+      getDocumentos(true).then((data) => {
         if (Array.isArray(data)) {
           const mapeados = data
             .filter((doc) => (doc.estado || '').toUpperCase() !== 'BORRADOR')
@@ -127,24 +126,33 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           setDocuments([]);
           syncPendingCount([]);
         }
-      } catch (error) {
+      }).catch((error) => {
         if (!silent) {
           console.error('Error al cargar documentos en el panel de administración:', error);
           toast.error('No se pudieron cargar los documentos para revisión.');
         }
-      } finally {
+      }).finally(() => {
         if (!silent) setLoading(false);
-      }
-    },
+      }),
     [syncPendingCount]
   );
 
+  // Recarga a pedido (botón, después de revisar): muestra la carga y después trae los datos.
+  const cargarDocumentos = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      await traerDocumentos(silent);
+    },
+    [traerDocumentos]
+  );
+
   useEffect(() => {
-    cargarDocumentos(false);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerDocumentos(false);
 
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
-        cargarDocumentos(true);
+        traerDocumentos(true);
       }
     };
 
@@ -153,7 +161,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
-  }, [cargarDocumentos]);
+  }, [traerDocumentos]);
 
   const categories = useMemo(() => {
     const set = new Set();

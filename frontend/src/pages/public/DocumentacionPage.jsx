@@ -59,9 +59,16 @@ const DocumentacionPage = () => {
     return matchesSearch && matchesCategory;
   });
 
-  useEffect(() => {
+  // Al cambiar la búsqueda o la categoría se vuelve a la primera página (en el mismo evento, sin un efecto aparte).
+  const cambiarBusqueda = (texto) => {
+    setSearchTerm(texto);
     setCurrentPage(1);
-  }, [searchTerm, activeCategory]);
+  };
+
+  const cambiarCategoria = (categoria) => {
+    setActiveCategory(categoria);
+    setCurrentPage(1);
+  };
 
   const totalPages = Math.ceil(filteredDocs.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -155,7 +162,7 @@ const DocumentacionPage = () => {
               className="doc-search-input"
               placeholder="Buscar documento..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => cambiarBusqueda(e.target.value)}
             />
             <div className="doc-search-spacer"></div>
           </div>
@@ -166,7 +173,7 @@ const DocumentacionPage = () => {
             <button
               key={cat}
               className={`filter-chip ${activeCategory === cat ? "active" : ""}`}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => cambiarCategoria(cat)}
             >
               <div className="chip-radio"></div>
               {cat}

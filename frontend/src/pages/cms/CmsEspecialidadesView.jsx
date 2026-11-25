@@ -35,7 +35,9 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [showModal, setShowModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showModal, setShowModal] = useState(Boolean(initialCreateModal));
   const [editingId, setEditingId] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
@@ -49,16 +51,21 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState(null);
 
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerDatos = () =>
+    getEspecialidades(true)
+      .then((data) => setEspecialidades(data))
+      .catch(() => toast.error("Error al cargar los datos."))
+      .finally(() => setLoading(false));
+
+  // Recarga a pedido: muestra la carga y después trae los datos.
   const cargarDatos = async () => {
     setLoading(true);
-    try {
-      const data = await getEspecialidades(true);
-      setEspecialidades(data);
-    } catch { toast.error("Error al cargar los datos."); } 
-    finally { setLoading(false); }
+    await traerDatos();
   };
 
-  useEffect(() => { cargarDatos(); }, []);
+  // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+  useEffect(() => { traerDatos(); }, []);
 
   const handleCloseAttempt = () => {
     if (hasUnsavedChanges) {
@@ -85,12 +92,10 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     setShowModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showModal): solo se avisa al panel para que no lo reabra.
   useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   const handleOpenEdit = (esp) => {
     setEditingId(esp.id);

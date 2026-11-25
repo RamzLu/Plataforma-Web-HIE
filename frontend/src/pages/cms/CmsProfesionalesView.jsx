@@ -81,7 +81,9 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
   const [filtroTipo, setFiltroTipo] = useState("Todos"); 
   const [loading, setLoading] = useState(true);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [isModalOpen, setIsModalOpen] = useState(Boolean(initialCreateModal));
   const [editingId, setEditingId] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
@@ -108,26 +110,27 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [isCropping, setIsCropping] = useState(false);
 
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerDatos = () =>
+    Promise.all([getProfesionales(true), getEspecialidades(true)])
+      .then(([dataProf, dataAreas]) => {
+        if (Array.isArray(dataProf)) {
+          setProfesionales(dataProf);
+        }
+        setAreasDisponibles(Array.isArray(dataAreas) ? dataAreas : []);
+      })
+      .catch(() => toast.error("Error al cargar los datos."))
+      .finally(() => setLoading(false));
+
+  // Recarga a pedido: muestra la carga y después trae los datos.
   const fetchDatos = async () => {
     setLoading(true);
-    try {
-      const [dataProf, dataAreas] = await Promise.all([
-        getProfesionales(true),
-        getEspecialidades(true),
-      ]);
-      if (Array.isArray(dataProf)) {
-        setProfesionales(dataProf);
-      }
-      setAreasDisponibles(Array.isArray(dataAreas) ? dataAreas : []);
-    } catch {
-      toast.error("Error al cargar los datos.");
-    } finally {
-      setLoading(false);
-    }
+    await traerDatos();
   };
 
   useEffect(() => {
-    fetchDatos();
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerDatos();
   }, []);
 
   // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
@@ -208,12 +211,10 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     setIsModalOpen(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de isModalOpen): solo se avisa al panel para que no lo reabra.
   useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   const handleOpenEdit = (prof) => {
     setEditingId(prof.id);

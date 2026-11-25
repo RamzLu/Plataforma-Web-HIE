@@ -100,11 +100,10 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
     [onPendingCountChange]
   );
 
-  const cargarDatos = useCallback(
-    async (silent = false) => {
-      try {
-        if (!silent) setLoading(true);
-        const data = await getEspecialidades(true);
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerDatos = useCallback(
+    (silent = false) =>
+      getEspecialidades(true).then((data) => {
         if (Array.isArray(data)) {
           const filtradas = data
             .map(mapItemFromBackend)
@@ -120,30 +119,39 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
           setItems([]);
           syncPendingCount([]);
         }
-      } catch (error) {
+      }).catch((error) => {
         if (!silent) {
           console.error('Error al cargar especialidades y servicios:', error);
           toast.error('No se pudieron cargar los servicios y especialidades.');
         }
-      } finally {
+      }).finally(() => {
         if (!silent) setLoading(false);
-      }
-    },
+      }),
     [syncPendingCount]
   );
 
+  // Recarga a pedido (botón, después de revisar): muestra la carga y después trae los datos.
+  const cargarDatos = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      await traerDatos(silent);
+    },
+    [traerDatos]
+  );
+
   useEffect(() => {
-    cargarDatos(false);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerDatos(false);
 
     const intervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        cargarDatos(true);
+        traerDatos(true);
       }
     }, 60000);
 
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
-        cargarDatos(true);
+        traerDatos(true);
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
@@ -152,7 +160,7 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
       clearInterval(intervalId);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
-  }, [cargarDatos]);
+  }, [traerDatos]);
 
   const filteredItems = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');

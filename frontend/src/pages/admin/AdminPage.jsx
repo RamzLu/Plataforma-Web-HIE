@@ -44,10 +44,15 @@ const AdminPage = () => {
     [navigate]
   );
 
-  const [initialized, setInitialized] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [userName, setUserName] = useState("Cargando...");
+  // Si Keycloak ya tiene sesión al entrar (por ejemplo, al venir desde /cms), se arranca con ella.
+  const [initialized, setInitialized] = useState(() => Boolean(keycloak.authenticated));
+  const [authenticated, setAuthenticated] = useState(() => Boolean(keycloak.authenticated));
+  const [isAdmin, setIsAdmin] = useState(() => Boolean(keycloak.authenticated) && tieneAlgunRol(ROLES_ADMIN));
+  const [userName, setUserName] = useState(() =>
+    keycloak.authenticated
+      ? keycloak.tokenParsed?.name || keycloak.tokenParsed?.preferred_username || "Administrador de TI"
+      : "Cargando..."
+  );
   const [pendingNoticiasCount, setPendingNoticiasCount] = useState(0);
   const [pendingEspecialidadesCount, setPendingEspecialidadesCount] = useState(0);
   const [pendingDocumentosCount, setPendingDocumentosCount] = useState(0);
@@ -129,16 +134,8 @@ const AdminPage = () => {
   useEffect(() => {
     const checkAdminRole = () => tieneAlgunRol(ROLES_ADMIN);
 
-    if (isKeycloakInitialized.current || keycloak.authenticated) {
-      if (keycloak.authenticated) {
-        setInitialized(true);
-        setAuthenticated(true);
-        setIsAdmin(checkAdminRole()); 
-        const name = keycloak.tokenParsed?.name || keycloak.tokenParsed?.preferred_username || "Administrador de TI";
-        setUserName(name);
-      }
-      return;
-    }
+    // Si Keycloak ya tenía sesión (por ejemplo, al venir desde /cms), el estado ya se armó con ella al montar.
+    if (isKeycloakInitialized.current || keycloak.authenticated) return;
 
     isKeycloakInitialized.current = true;
 

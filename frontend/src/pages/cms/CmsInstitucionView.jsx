@@ -79,7 +79,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
   // --- Estado de Autoridades y Modal ---
   const [autoridades, setAutoridades] = useState([]);
-  const [showAutoridadModal, setShowAutoridadModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showAutoridadModal, setShowAutoridadModal] = useState(Boolean(initialCreateModal));
   const [editingAutoridad, setEditingAutoridad] = useState(null);
   const [autoridadForm, setAutoridadForm] = useState({
     nombre: "",
@@ -138,30 +140,34 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   const [sedeCroppedPixels, setSedeCroppedPixels] = useState(null);
   const [isSedeCropping, setIsSedeCropping] = useState(false);
 
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerInstitucional = () =>
+    getInstitucional(true)
+      .then((data) => {
+        setAutoridades(data.autoridades || []);
+        setSocialData(data.redesSociales || { facebook: "", instagram: "" });
+        setTempSocial(data.redesSociales || { facebook: "", instagram: "" });
+        if (data.sedeCentral) {
+          setSedeCentralData(data.sedeCentral);
+          try {
+            sessionStorage.setItem("hie_public_sede_central_cache", JSON.stringify(data.sedeCentral));
+          } catch {
+            // Si el navegador no permite sessionStorage, solo se omite la caché.
+          }
+        }
+      })
+      .catch(() => toast.error("Error al cargar la información institucional."))
+      .finally(() => setLoading(false));
+
+  // Recarga a pedido: muestra la carga y después trae los datos.
   const fetchInstitucional = async () => {
     setLoading(true);
-    try {
-      const data = await getInstitucional(true);
-      setAutoridades(data.autoridades || []);
-      setSocialData(data.redesSociales || { facebook: "", instagram: "" });
-      setTempSocial(data.redesSociales || { facebook: "", instagram: "" });
-      if (data.sedeCentral) {
-        setSedeCentralData(data.sedeCentral);
-        try {
-          sessionStorage.setItem("hie_public_sede_central_cache", JSON.stringify(data.sedeCentral));
-        } catch {
-          // Si el navegador no permite sessionStorage, solo se omite la caché.
-        }
-      }
-    } catch {
-      toast.error("Error al cargar la información institucional.");
-    } finally {
-      setLoading(false);
-    }
+    await traerInstitucional();
   };
 
   useEffect(() => {
-    fetchInstitucional();
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerInstitucional();
   }, []);
 
   // --- HANDLERS DE SEDE CENTRAL ---
@@ -364,12 +370,10 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     setShowAutoridadModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showAutoridadModal): solo se avisa al panel para que no lo reabra.
   useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreateAutoridad();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   // --- ABRIR MODAL EDITAR ---
   const handleOpenEditAutoridad = (autoridad) => {

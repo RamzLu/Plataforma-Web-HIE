@@ -89,7 +89,9 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   const [filtroCategoria] = useState("TODOS");
 
   // Modales
-  const [showModal, setShowModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showModal, setShowModal] = useState(Boolean(initialCreateModal));
   const [editingId, setEditingId] = useState(null);
   // Si lo que se edita está (o estuvo) publicado, retirarlo del portal se pide archivándolo, no pasándolo a borrador.
   const editandoPublicado = (() => {
@@ -146,21 +148,25 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   const [formData, setFormData] = useState(initialForm);
 
   // Cargar residencias desde la BD
+  // Trae la lista y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerResidencias = () =>
+    getResidencias(true)
+      .then((data) => setResidencias(Array.isArray(data) ? data : []))
+      .catch((error) => {
+        console.error("Error al cargar residencias:", error);
+        toast.error("No se pudieron cargar las residencias.");
+      })
+      .finally(() => setLoading(false));
+
+  // Recarga a pedido: muestra la carga y después trae la lista.
   const cargarResidencias = async () => {
     setLoading(true);
-    try {
-      const data = await getResidencias(true);
-      setResidencias(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error al cargar residencias:", error);
-      toast.error("No se pudieron cargar las residencias.");
-    } finally {
-      setLoading(false);
-    }
+    await traerResidencias();
   };
 
   useEffect(() => {
-    cargarResidencias();
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerResidencias();
   }, []);
 
   // Procesamiento de Imagen de Banner
@@ -261,12 +267,10 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     setShowModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showModal): solo se avisa al panel para que no lo reabra.
   useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   // Apertura modal edición
   const handleOpenEdit = (res) => {

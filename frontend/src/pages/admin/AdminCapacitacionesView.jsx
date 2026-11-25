@@ -164,27 +164,31 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
   const [actionError, setActionError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const cargarCapacitaciones = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getCapacitaciones();
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerCapacitaciones = useCallback(() => getCapacitaciones().then((data) => {
       if (!Array.isArray(data)) {
         throw new Error('La respuesta de capacitaciones no tiene un formato válido.');
       }
       setCapacitaciones(data.length > 0 ? data : SIMULATED_CAPACITACIONES);
       setIsSimulation(data.length === 0);
-    } catch (loadError) {
+    }).catch((loadError) => {
       console.error('Error al cargar capacitaciones para revisión:', loadError);
       setCapacitaciones(SIMULATED_CAPACITACIONES);
       setIsSimulation(true);
-    } finally {
+    }).finally(() => {
       setLoading(false);
-    }
-  }, []);
+    }), []);
+
+  // Recarga a pedido: muestra la carga y después trae los datos.
+  const cargarCapacitaciones = useCallback(async () => {
+    setLoading(true);
+    await traerCapacitaciones();
+  }, [traerCapacitaciones]);
 
   useEffect(() => {
-    cargarCapacitaciones();
-  }, [cargarCapacitaciones]);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerCapacitaciones();
+  }, [traerCapacitaciones]);
 
   const capacitacionBase = capacitaciones.find((training) => training.id === selectedId);
   const selectedTraining =

@@ -52,7 +52,9 @@ const CmsDocsView = ({
   initialCreateModal = false,
   onModalOpened,
 }) => {
-  const [showModal, setShowModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showModal, setShowModal] = useState(Boolean(initialCreateModal));
   const [editingId, setEditingId] = useState(null);
   
   // Pestañas y búsqueda unificadas con Especialidades y Noticias
@@ -94,12 +96,10 @@ const CmsDocsView = ({
     setShowModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showModal): solo se avisa al panel para que no lo reabra.
   React.useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   // Al abrir la sección se pide la lista. Solo al montar: onRefreshDocs cambia en cada render de la página y
   // dejarlo como dependencia volvía a pedir la lista una y otra vez.

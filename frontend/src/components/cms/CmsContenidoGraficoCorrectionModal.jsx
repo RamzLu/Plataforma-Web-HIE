@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import toast from "react-hot-toast";
 import Cropper from "react-easy-crop";
 import { CmsUnsavedChangesModal } from "./CmsModals";
@@ -645,8 +645,14 @@ export const CmsContenidoGraficoEditModal = ({
   const isRejected =
     espacio?.estado === "RECHAZADO" || Boolean(espacio?.rejectionReason);
 
-  useEffect(() => {
-    if (isOpen && espacio) {
+  // Al abrir el modal (o al cambiar de espacio con el modal abierto) se arma el formulario con los datos del espacio.
+  // Se hace durante el render, comparando con el espacio con que se armó la última vez (en vez de con un efecto):
+  // así el modal se muestra directamente con los datos correctos, sin un render intermedio con los anteriores.
+  const espacioAbierto = isOpen && espacio ? espacio : null;
+  const [espacioInicializado, setEspacioInicializado] = useState(null);
+  if (espacioAbierto !== espacioInicializado) {
+    setEspacioInicializado(espacioAbierto);
+    if (espacioAbierto) {
       let listaInicial;
 
       if (espacio.id === "espacio-seccion-pacientes") {
@@ -789,7 +795,7 @@ export const CmsContenidoGraficoEditModal = ({
       setIsCropping(false);
       setImageSrc(null);
     }
-  }, [isOpen, espacio]);
+  }
 
   if (!isOpen || !espacio) return null;
 

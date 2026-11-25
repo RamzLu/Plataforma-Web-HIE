@@ -91,11 +91,10 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     [onPendingCountChange]
   );
 
-  const cargarNoticias = useCallback(
-    async (silent = false) => {
-      try {
-        if (!silent) setLoading(true);
-        const data = await getNoticias(true);
+  // Trae las noticias sin tocar el estado antes de la respuesta: así se puede llamar desde un efecto.
+  const traerNoticias = useCallback(
+    (silent = false) =>
+      getNoticias(true).then((data) => {
         if (Array.isArray(data)) {
           const filtradas = data
             .filter((n) => (n.estado || '').toUpperCase() !== 'BORRADOR')
@@ -168,30 +167,39 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           setNoticias([]);
           syncPendingCount([]);
         }
-      } catch (error) {
+      }).catch((error) => {
         if (!silent) {
           console.error('Error al cargar noticias en el panel de administración:', error);
           toast.error('No se pudieron cargar las noticias para revisión.');
         }
-      } finally {
+      }).finally(() => {
         if (!silent) setLoading(false);
-      }
-    },
+      }),
     [syncPendingCount]
   );
 
+  // Recarga a pedido (botón, después de revisar): muestra la carga y después trae los datos.
+  const cargarNoticias = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      await traerNoticias(silent);
+    },
+    [traerNoticias]
+  );
+
   useEffect(() => {
-    cargarNoticias(false);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerNoticias(false);
 
     const intervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        cargarNoticias(true);
+        traerNoticias(true);
       }
     }, 60000);
 
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
-        cargarNoticias(true);
+        traerNoticias(true);
       }
     };
 
@@ -201,7 +209,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
       clearInterval(intervalId);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
-  }, [cargarNoticias]);
+  }, [traerNoticias]);
 
   const handleOpenModal = (noticia) => {
     // Desde "Visibles al público" se abre lo que ve el portal, no la actualización que está en revisión.

@@ -61,28 +61,39 @@ const CmsContenidoGraficoView = () => {
   const [selectedEspacio, setSelectedEspacio] = useState(null);
   const [previewSlideIndex, setPreviewSlideIndex] = useState(0);
 
-  const cargarEspacios = async () => {
-    setLoading(true);
+  // Trae los espacios y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerEspacios = () => {
     try {
       // Limpiamos mocks heredados de localStorage para reflejar siempre la verdad del servidor
       localStorage.removeItem("hie_espacios_graficos_fijos");
       localStorage.removeItem("hie_carousel_text");
       localStorage.removeItem("hie_carousel_btn");
-
-      const data = await getContenidosGraficos();
-      if (Array.isArray(data) && data.length > 0) {
-        setEspacios(data);
-      }
-    } catch (error) {
-      console.error("Error al cargar espacios gráficos:", error);
-      toast.error("No se pudieron cargar los espacios gráficos desde el servidor.");
-    } finally {
-      setLoading(false);
+    } catch {
+      // Sin acceso a localStorage no hay nada que limpiar.
     }
+
+    return getContenidosGraficos()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setEspacios(data);
+        }
+      })
+      .catch((error) => {
+        console.error("Error al cargar espacios gráficos:", error);
+        toast.error("No se pudieron cargar los espacios gráficos desde el servidor.");
+      })
+      .finally(() => setLoading(false));
+  };
+
+  // Recarga a pedido: muestra la carga y después trae los espacios.
+  const cargarEspacios = async () => {
+    setLoading(true);
+    await traerEspacios();
   };
 
   useEffect(() => {
-    cargarEspacios();
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerEspacios();
   }, []);
 
   const paginasDisponibles = useMemo(() => {

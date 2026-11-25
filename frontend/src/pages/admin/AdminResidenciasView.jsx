@@ -175,10 +175,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
   const [actionError, setActionError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const cargarResidencias = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getResidencias(true);
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerResidencias = useCallback(() => getResidencias(true).then((data) => {
       if (!Array.isArray(data)) {
         setResidencias([]);
         return;
@@ -189,17 +187,23 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
         .filter(Boolean);
 
       setResidencias(normalizadas);
-    } catch (loadError) {
+    }).catch((loadError) => {
       console.error('Error al cargar residencias:', loadError);
       setResidencias([]);
-    } finally {
+    }).finally(() => {
       setLoading(false);
-    }
-  }, []);
+    }), []);
+
+  // Recarga a pedido: muestra la carga y después trae los datos.
+  const cargarResidencias = useCallback(async () => {
+    setLoading(true);
+    await traerResidencias();
+  }, [traerResidencias]);
 
   useEffect(() => {
-    cargarResidencias();
-  }, [cargarResidencias]);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerResidencias();
+  }, [traerResidencias]);
 
   const residenciasVisibles = useMemo(
     () =>

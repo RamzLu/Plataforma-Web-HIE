@@ -104,11 +104,10 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
     [onPendingCountChange]
   );
 
-  const cargarDatos = useCallback(
-    async (silent = false) => {
-      try {
-        if (!silent) setLoading(true);
-        const data = await getProfesionales(true);
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerDatos = useCallback(
+    (silent = false) =>
+      getProfesionales(true).then((data) => {
         if (Array.isArray(data)) {
           const filtrados = data
             .filter((item) => (item.estado || '').toUpperCase() !== 'ARCHIVADO')
@@ -125,30 +124,39 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
           setProfesionales([]);
           syncPendingCount([]);
         }
-      } catch (error) {
+      }).catch((error) => {
         if (!silent) {
           console.error('Error al cargar profesionales:', error);
           toast.error('No se pudieron cargar los profesionales.');
         }
-      } finally {
+      }).finally(() => {
         if (!silent) setLoading(false);
-      }
-    },
+      }),
     [syncPendingCount]
   );
 
+  // Recarga a pedido (botón, después de revisar): muestra la carga y después trae los datos.
+  const cargarDatos = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      await traerDatos(silent);
+    },
+    [traerDatos]
+  );
+
   useEffect(() => {
-    cargarDatos(false);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerDatos(false);
 
     const intervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        cargarDatos(true);
+        traerDatos(true);
       }
     }, 60000);
 
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
-        cargarDatos(true);
+        traerDatos(true);
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
@@ -157,7 +165,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
       clearInterval(intervalId);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
-  }, [cargarDatos]);
+  }, [traerDatos]);
 
   const profesionalBase = profesionales.find((item) => item.id === selectedId);
   const selectedProfessional =

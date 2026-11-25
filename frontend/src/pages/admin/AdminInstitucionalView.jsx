@@ -95,7 +95,7 @@ const MOCK_INSTITUCIONAL_PENDIENTE = {
 
 const AdminInstitucionalView = () => {
   const [data, setData] = useState(MOCK_INSTITUCIONAL_PENDIENTE);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState(null);
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'PENDING' | 'APPROVED' | 'PUBLISHED' | 'REJECTED'
 
@@ -104,10 +104,8 @@ const AdminInstitucionalView = () => {
   const [rejectReason, setRejectReason] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const fetchInstitucionalData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await getInstitucional(true);
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerInstitucional = useCallback(() => getInstitucional(true).then((response) => {
       if (response) {
         setData((prev) => ({
           ...prev,
@@ -119,17 +117,23 @@ const AdminInstitucionalView = () => {
           },
         }));
       }
-    } catch (err) {
+    }).catch((err) => {
       console.info('Conexión pasiva a getInstitucional(): utilizando datos de auditoría de respaldo.', err?.message);
-    } finally {
+    }).finally(() => {
       setLoading(false);
-    }
-  }, []);
+    }), []);
+
+  // Recarga a pedido: muestra la carga y después trae los datos.
+  const fetchInstitucionalData = useCallback(async () => {
+    setLoading(true);
+    await traerInstitucional();
+  }, [traerInstitucional]);
 
   // Carga pasiva de información institucional
   useEffect(() => {
-    fetchInstitucionalData();
-  }, [fetchInstitucionalData]);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerInstitucional();
+  }, [traerInstitucional]);
 
   // Conteos de estado editorial para las tarjetas superiores
   const counts = useMemo(() => {

@@ -104,7 +104,9 @@ const CmsNoticiasView = ({
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
   const [busqueda, setBusqueda] = useState("");
 
-  const [showModal, setShowModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showModal, setShowModal] = useState(Boolean(initialCreateModal));
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [showConfirmDraftModal, setShowConfirmDraftModal] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -116,7 +118,8 @@ const CmsNoticiasView = ({
   const [titulo, setTitulo] = useState("");
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("General");
-  const [estado, setEstado] = useState("BORRADOR");
+  // Igual que handleOpenCreate cuando el modal de crear arranca abierto desde el dashboard.
+  const [estado, setEstado] = useState(initialCreateModal ? "PUBLICADO" : "BORRADOR");
   const [fechaProgramada, setFechaProgramada] = useState(null);
   const [imagenesUrls, setImagenesUrls] = useState([]);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
@@ -182,12 +185,10 @@ const CmsNoticiasView = ({
     setShowModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showModal): solo se avisa al panel para que no lo reabra.
   React.useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   const handleOpenEdit = (news) => {
     setEditingId(news.id);
