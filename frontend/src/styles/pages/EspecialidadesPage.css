@@ -37,7 +37,7 @@
   font-family: var(--font-sans);
 }
 
-.especialidades-page > * {
+.especialidades-page>* {
   position: relative;
   z-index: 1;
 }
@@ -501,11 +501,13 @@
 }
 
 .esp-aislado-btn-close {
-  background: var(--color-slate-50);
+  width: 38px;
+  height: 38px;
+  background: var(--color-slate-100);
   border: none;
-  color: var(--color-slate-500);
+  color: var(--color-slate-600);
   cursor: pointer;
-  padding: 8px;
+  padding: 0;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -514,9 +516,19 @@
   flex-shrink: 0;
 }
 
+.esp-aislado-btn-close svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
 .esp-aislado-btn-close:hover {
-  background-color: var(--color-slate-100);
-  color: var(--color-primary);
+  background-color: var(--color-rose-600);
+  color: var(--color-white);
   transform: rotate(90deg);
 }
 
@@ -754,21 +766,25 @@
    RESPONSIVIDAD
 ========================================= */
 @media (max-width: 992px) {
+
   .especialidades-page .public-page-banner,
   .esp-header-fluid {
     padding: 110px 20px 45px 20px !important;
     border-radius: 0 !important;
     margin-bottom: 28px !important;
   }
+
   .especialidades-page .public-page-banner-inner,
   .esp-header-inner {
     border-left-width: 5px !important;
     padding-left: 28px !important;
   }
+
   .especialidades-page .public-page-banner-title,
   .esp-main-title {
     font-size: 2.45rem !important;
   }
+
   .specialties-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
@@ -776,22 +792,26 @@
 }
 
 @media (max-width: 768px) {
+
   .especialidades-page .public-page-banner,
   .esp-header-fluid {
     padding: 95px 16px 36px 16px !important;
     margin-bottom: 24px !important;
     border-radius: 0 !important;
   }
+
   .especialidades-page .public-page-banner-inner,
   .esp-header-inner {
     border-left-width: 5px !important;
     padding-left: 20px !important;
   }
+
   .especialidades-page .public-page-banner-title,
   .esp-main-title {
     font-size: 1.95rem !important;
     margin: 6px 0 10px 0 !important;
   }
+
   .especialidades-page .public-page-banner-subtitle,
   .esp-subtitle {
     font-size: 0.95rem !important;
@@ -890,20 +910,24 @@
 }
 
 @media (max-width: 480px) {
+
   .especialidades-page .public-page-banner,
   .esp-header-fluid {
     padding: 85px 14px 30px 14px !important;
   }
+
   .especialidades-page .public-page-banner-inner,
   .esp-header-inner {
     border-left-width: 4px !important;
     padding-left: 16px !important;
   }
+
   .especialidades-page .public-page-banner-title,
   .esp-main-title {
     font-size: 1.65rem !important;
     letter-spacing: 0.5px !important;
   }
+
   .especialidades-page .public-page-banner-subtitle,
   .esp-subtitle {
     font-size: 0.88rem !important;

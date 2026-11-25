@@ -13,7 +13,7 @@ const EspecialidadesPage = () => {
   usePageMeta("Especialidades y servicios", "Especialidades y servicios del Hospital Interdistrital Evita: horarios, requisitos, ubicación y cómo derivar pacientes.");
   const [currentView, setCurrentView] = useState("menu");
   const [selectedItem, setSelectedItem] = useState(null);
-  
+
   const [especialidadesData, setEspecialidadesData] = useState([]);
   const [serviciosData, setServiciosData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ const EspecialidadesPage = () => {
     window.scrollTo(0, 0);
     const fetchDatos = async () => {
       try {
-        const data = await getEspecialidades(false); 
+        const data = await getEspecialidades(false);
         setEspecialidadesData(data.filter(item => !item.esServicio));
         setServiciosData(data.filter(item => item.esServicio));
       } catch (error) {
@@ -139,7 +139,7 @@ const EspecialidadesPage = () => {
                   <h2>Especialidades</h2>
                 </div>
               </AnimatedContent>
-              
+
               <AnimatedContent
                 distance={40}
                 direction="vertical"
@@ -216,7 +216,7 @@ const EspecialidadesPage = () => {
                     <h3 style={{ margin: 0, textAlign: "center" }}>{item.nombre}</h3>
                   </div>
                 ))}
-                
+
                 {(currentView === "grilla-esp" ? especialidadesData : serviciosData).length === 0 && (
                   <div style={{ padding: "40px", textAlign: "center", color: "#64748b", gridColumn: "1 / -1" }}>
                     No hay {currentView === "grilla-esp" ? "especialidades" : "servicios"} registrados en este momento.
@@ -242,11 +242,22 @@ const EspecialidadesPage = () => {
                   {selectedItem.esServicio ? "SERVICIO" : "ESPECIALIDAD"}: {selectedItem.nombre}
                 </h2>
                 <button
+                  type="button"
                   className="esp-aislado-btn-close"
                   onClick={closeModal}
                   title="Cerrar ventana"
+                  aria-label="Cerrar ventana"
                 >
-                  <svg viewBox="0 0 24 24" fill="none">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M18 6L6 18M6 6l12 12"></path>
                   </svg>
                 </button>
@@ -254,7 +265,7 @@ const EspecialidadesPage = () => {
 
               {/* NUEVO CUERPO DEL MODAL (ESTILO APLICADO) */}
               <div className="modal-body">
-                
+
                 {/* Sección: ¿Qué atendemos aquí? */}
                 {selectedItem.descripcion && (
                   <section className="section-scope" aria-labelledby="scope-title">
@@ -276,7 +287,7 @@ const EspecialidadesPage = () => {
 
                 {/* Tarjetas de Ubicación y Horarios */}
                 <div className="info-cards-grid">
-                  
+
                   {/* Ubicación */}
                   <article className="info-box-card">
                     <div className="card-icon-bubble" aria-hidden="true">

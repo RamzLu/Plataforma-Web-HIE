@@ -534,6 +534,41 @@
   animation: scaleUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.prof-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  background-color: var(--color-slate-100);
+  border: none;
+  color: var(--color-slate-600);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.prof-modal-close svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+.prof-modal-close:hover {
+  background-color: var(--color-rose-600);
+  color: var(--color-white);
+  transform: rotate(90deg);
+}
+
 .prof-modal-photo {
   width: 220px;        
   height: 220px;      
@@ -701,7 +736,12 @@
   }
 
   .prof-modal-content {
-    padding: 28px 22px;
+    padding: 36px 22px 28px 22px;
+  }
+
+  .prof-modal-close {
+    top: 14px;
+    right: 14px;
   }
 
   .prof-modal-photo {
