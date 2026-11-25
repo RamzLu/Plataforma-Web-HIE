@@ -117,16 +117,50 @@ const construirCambio = (key, label, tipo, valorAntes, valorDespues) => {
   return { ...base, antes: recortar(valorAntes), despues: recortar(valorDespues) };
 };
 
+/**
+ * HTML comparable conservando el formato (negritas, listas, títulos, alineación): solo unifica espacios.
+ * El texto que ve el Admin sale de quitarHtml; esto sirve para no perder los cambios que son solo de formato.
+ */
+// &nbsp; escrito o como carácter (U+00A0): los dos son el mismo espacio.
+const ESPACIO_DURO = new RegExp("&nbsp;|" + String.fromCharCode(160), "gi");
+
+export const formatoHtml = (valor) =>
+  String(valor ?? "")
+    .replace(ESPACIO_DURO, " ")
+    .replace(/\s+/g, " ")
+    .replace(/>\s+</g, "><")
+    .trim();
+
+const LEYENDA_FORMATO = " (formato)";
+const etiquetaBase = (label = "") => String(label).replace(LEYENDA_FORMATO, "");
+
+/** Cambio de un campo HTML cuyo texto es el mismo pero el formato no (por ejemplo, una palabra en negrita). */
+const cambioDeFormato = (campo, label, valorAntes, valorDespues, htmlAntes, htmlDespues) => ({
+  campo,
+  label: `${etiquetaBase(label)}${LEYENDA_FORMATO}`,
+  tipo: "html",
+  valorAntes,
+  valorDespues,
+  antes: recortar(valorAntes),
+  despues: recortar(valorDespues),
+  soloFormato: true,
+  htmlAntes,
+  htmlDespues,
+});
+
 export const calcularCambios = (antes = {}, despues = {}, campos = []) => {
   const cambios = [];
   for (const { key, label, tipo = "text" } of campos) {
-    const cambio = construirCambio(
-      key,
-      label,
-      tipo,
-      normalizarValorCambio(antes?.[key], tipo),
-      normalizarValorCambio(despues?.[key], tipo)
-    );
+    const valorAntes = normalizarValorCambio(antes?.[key], tipo);
+    const valorDespues = normalizarValorCambio(despues?.[key], tipo);
+    let cambio = construirCambio(key, label, tipo, valorAntes, valorDespues);
+    if (tipo === "html") {
+      // En los campos con formato se guarda también el HTML, para poder comparar el formato al combinar ediciones.
+      const htmlAntes = formatoHtml(antes?.[key]);
+      const htmlDespues = formatoHtml(despues?.[key]);
+      if (cambio) cambio = { ...cambio, htmlAntes, htmlDespues };
+      else if (htmlAntes !== htmlDespues) cambio = cambioDeFormato(key, label, valorAntes, valorDespues, htmlAntes, htmlDespues);
+    }
     if (cambio) cambios.push(cambio);
   }
   return cambios;
@@ -135,7 +169,7 @@ export const calcularCambios = (antes = {}, despues = {}, campos = []) => {
 /**
  * Combina los cambios acumulados de una solicitud aún pendiente con los de una
  * nueva edición: conserva el valor "antes" original y toma el "después" más reciente.
- * Si un campo vuelve a su valor original, se descarta.
+ * Si un campo vuelve a su valor original, se descarta (en los campos con formato, solo si también vuelve el formato).
  */
 export const combinarCambios = (cambiosPrevios = [], cambiosNuevos = []) => {
   const mapa = new Map();
@@ -149,15 +183,19 @@ export const combinarCambios = (cambiosPrevios = [], cambiosNuevos = []) => {
       mapa.set(c.campo, { ...c });
       continue;
     }
-    const combinado = construirCambio(
-      c.campo,
-      c.label,
-      c.tipo,
-      previo.valorAntes ?? previo.antes ?? "",
-      c.valorDespues ?? c.despues ?? ""
-    );
-    if (combinado) mapa.set(c.campo, combinado);
-    else mapa.delete(c.campo);
+    const valorAntes = previo.valorAntes ?? previo.antes ?? "";
+    const valorDespues = c.valorDespues ?? c.despues ?? "";
+    const combinado = construirCambio(c.campo, etiquetaBase(c.label), c.tipo, valorAntes, valorDespues);
+    const conHtml = c.tipo === "html" && previo.htmlAntes !== undefined && c.htmlDespues !== undefined;
+
+    if (combinado) {
+      mapa.set(c.campo, conHtml ? { ...combinado, htmlAntes: previo.htmlAntes, htmlDespues: c.htmlDespues } : combinado);
+    } else if (conHtml && previo.htmlAntes !== c.htmlDespues) {
+      // El texto volvió al original, pero el formato sigue distinto.
+      mapa.set(c.campo, cambioDeFormato(c.campo, c.label, valorAntes, valorDespues, previo.htmlAntes, c.htmlDespues));
+    } else {
+      mapa.delete(c.campo);
+    }
   }
   return Array.from(mapa.values());
 };
@@ -175,10 +213,12 @@ const urlsDeImagenes = (valor) =>
  * (las agregadas y las quitadas) y no solo "3 imágenes (1 agregada)".
  */
 export const cambiosParaCliente = (cambios = []) =>
-  (Array.isArray(cambios) ? cambios : []).map(({ campo, label, tipo, antes, despues, valorAntes, valorDespues }) => ({
+  (Array.isArray(cambios) ? cambios : []).map(({ campo, label, tipo, antes, despues, valorAntes, valorDespues, soloFormato }) => ({
     campo,
     label,
     tipo,
+    // Mismo texto con otro formato (negritas, listas...): el panel lo avisa en vez de mostrar dos textos iguales.
+    ...(soloFormato ? { soloFormato: true } : {}),
     // En los textos se envía el valor completo (el guardado para mostrar está recortado) para poder marcar la diferencia exacta.
     antes: tipo === "images" || tipo === "image" ? antes : valorAntes ?? antes,
     despues: tipo === "images" || tipo === "image" ? despues : valorDespues ?? despues,

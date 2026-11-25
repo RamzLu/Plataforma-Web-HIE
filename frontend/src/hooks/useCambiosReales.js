@@ -12,6 +12,21 @@ const claveDe = (valores) =>
     return valor;
   });
 
+// &nbsp; escrito o como carácter (U+00A0): los dos son el mismo espacio.
+const ESPACIO_DURO = new RegExp("&nbsp;|" + String.fromCharCode(160), "gi");
+
+/**
+ * HTML comparable conservando el formato (negritas, listas, títulos, alineación): solo unifica espacios.
+ * Es la misma comparación que hace el backend (formatoHtml en backend/src/utils/cambios.utils.js),
+ * así el botón de guardar y el aviso de "sin cambios" del servidor coinciden.
+ */
+export const formatoHtml = (valor) =>
+  String(valor ?? "")
+    .replace(ESPACIO_DURO, " ")
+    .replace(/\s+/g, " ")
+    .replace(/>\s+</g, "><")
+    .trim();
+
 /**
  * ¿El formulario quedó distinto de como se abrió?
  *

@@ -104,6 +104,14 @@
   letter-spacing: 0.5px;
 }
 
+/* Aviso de un cambio que es solo de formato (el texto de antes y de después es el mismo) */
+:where(.panel-scope) .admin-cambio-nota {
+  margin: 6px 0 0;
+  color: var(--color-slate-600);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
 /* Grid comparativo Antes / Flecha / Después */
 :where(.panel-scope) .admin-cambio-diff-grid {
   display: grid;

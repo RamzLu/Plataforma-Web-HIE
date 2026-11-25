@@ -217,6 +217,11 @@ export const AdminCambiosResaltados = ({
               <div className="admin-cambio-label-bar">
                 <span className="admin-cambio-label">{c.label || c.campo}</span>
               </div>
+              {c.soloFormato && (
+                <p className="admin-cambio-nota">
+                  El texto es el mismo: solo cambió el formato (negritas, listas, títulos o alineación). Se ve en la vista previa.
+                </p>
+              )}
               <div className="admin-cambio-diff-grid">
                 <div className="admin-diff-box before">
                   <div className="admin-diff-badge-wrap">

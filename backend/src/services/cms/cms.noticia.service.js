@@ -227,6 +227,10 @@ class CmsNoticiaService {
       throw error;
     }
 
+    // Lo guardado se compara ya saneado, igual que lo que llega: las noticias viejas pueden tener atributos internos
+    // de CKEditor (data-list-item-id, clases) que el saneamiento quita y que no son un cambio de formato.
+    const contenidoGuardado = sanitizarHtmlNoticia(noticiaExistente.contenido || "");
+
     const idStr = id.toString();
     const metaExistente = await this.obtenerPendingMeta(idStr);
     const estadoAnterior = (noticiaExistente.estado || "").toUpperCase();
@@ -241,13 +245,13 @@ class CmsNoticiaService {
       {
         titulo: noticiaExistente.titulo,
         category: catPrevia,
-        contenido: noticiaExistente.contenido,
+        contenido: contenidoGuardado,
         fechaPublicacion: noticiaExistente.fechaPublicacion,
       },
       {
         titulo: titulo !== undefined ? titulo : noticiaExistente.titulo,
         category: catNuevaCheck,
-        contenido: contenido !== undefined ? contenido : noticiaExistente.contenido,
+        contenido: contenido !== undefined ? contenido : contenidoGuardado,
         fechaPublicacion: fechaPublicacion !== undefined ? (fechaPublicacion ? new Date(fechaPublicacion) : null) : noticiaExistente.fechaPublicacion,
       }
     );
@@ -345,14 +349,14 @@ class CmsNoticiaService {
         {
           titulo: noticiaExistente.titulo,
           category: catPrevia,
-          contenido: noticiaExistente.contenido,
+          contenido: contenidoGuardado,
           fechaPublicacion: noticiaExistente.fechaPublicacion,
           images: imgsPrevias,
         },
         {
           titulo: noticiaActualizada.titulo,
           category: catFinal,
-          contenido: noticiaActualizada.contenido,
+          contenido: sanitizarHtmlNoticia(noticiaActualizada.contenido || ""),
           fechaPublicacion: noticiaActualizada.fechaPublicacion,
           images: imgs,
         }

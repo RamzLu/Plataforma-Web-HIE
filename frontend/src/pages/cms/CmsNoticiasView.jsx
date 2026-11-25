@@ -50,7 +50,7 @@ import { usePapelera } from "../../hooks/usePapelera";
 import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import { descartarNoticia, restaurarNoticia } from "../../api/noticias.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
-import { useCambiosReales } from "../../hooks/useCambiosReales";
+import { useCambiosReales, formatoHtml } from "../../hooks/useCambiosReales";
 
 registerLocale("es", es);
 
@@ -126,7 +126,16 @@ const CmsNoticiasView = ({
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
 
   // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
-  const hayCambios = useCambiosReales(hasUnsavedChanges, { titulo, cuerpoHtml, categoria, estado, fechaProgramada, imagenesUrls, archivosSeleccionados });
+  // El cuerpo se compara como el backend: con formato (una negrita es un cambio) pero sin contar espacios.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, {
+    titulo,
+    cuerpoHtml: formatoHtml(cuerpoHtml),
+    categoria,
+    estado,
+    fechaProgramada,
+    imagenesUrls,
+    archivosSeleccionados,
+  });
   const [saving, setSaving] = useState(false);
 
   const [noticiaAEliminar, setNoticiaAEliminar] = useState(null);
@@ -1269,6 +1278,13 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                           alignment: {
                             options: ["left", "center", "right", "justify"],
                           },
+                        }}
+                        onReady={(editor) => {
+                          // CKEditor puede reescribir el HTML guardado al cargarlo (otro orden o espaciado).
+                          // Con el formulario limpio, esa versión pasa a ser la base: si se escribe algo y se
+                          // deshace, vuelve a quedar igual y el botón se deshabilita. El backend sanea el cuerpo
+                          // antes de comparar, así que esta versión no se toma como un cambio.
+                          if (!hasUnsavedChanges) setCuerpoHtml(editor.getData());
                         }}
                         onChange={(event, editor) => {
                           setCuerpoHtml(editor.getData());

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { calcularCambios, combinarCambios, cambiosParaCliente } from "../src/utils/cambios.utils.js";
+import { calcularCambios, combinarCambios, cambiosParaCliente, formatoHtml } from "../src/utils/cambios.utils.js";
 
 const campos = [
   { key: "titulo", label: "Título" },
@@ -61,4 +61,34 @@ test("una foto única (tipo image) también trae su URL de antes y después", ()
     calcularCambios({ foto: "https://x.co/vieja.jpg" }, { foto: "https://x.co/nueva.jpg" }, [{ key: "foto", label: "Fotografía", tipo: "image" }])
   );
   assert.deepEqual(cambio.imagenes, { antes: ["https://x.co/vieja.jpg"], despues: ["https://x.co/nueva.jpg"] });
+});
+
+// ── Contenido con formato (HTML) ──────────────────────────
+const camposHtml = [{ key: "contenido", label: "Contenido", tipo: "html" }];
+
+test("un cambio solo de formato (negrita) cuenta como cambio y se marca como tal", () => {
+  const cambios = calcularCambios({ contenido: "<p>Hola mundo</p>" }, { contenido: "<p>Hola <strong>mundo</strong></p>" }, camposHtml);
+  assert.equal(cambios.length, 1);
+  assert.equal(cambios[0].soloFormato, true);
+  assert.equal(cambios[0].label, "Contenido (formato)");
+  assert.equal(cambiosParaCliente(cambios)[0].soloFormato, true);
+});
+
+test("espacios o &nbsp; distintos no son un cambio de formato", () => {
+  assert.equal(formatoHtml("<p>Hola&nbsp;mundo</p>\n<p>Chau</p>"), formatoHtml("<p>Hola mundo</p><p>Chau</p>"));
+  assert.deepEqual(calcularCambios({ contenido: "<p>Hola&nbsp; mundo</p>" }, { contenido: "<p>Hola mundo</p>\n" }, camposHtml), []);
+});
+
+test("un cambio de texto sigue siendo un cambio normal (no solo de formato)", () => {
+  const [cambio] = calcularCambios({ contenido: "<p>Hola</p>" }, { contenido: "<p><em>Chau</em></p>" }, camposHtml);
+  assert.equal(cambio.label, "Contenido");
+  assert.equal(cambio.soloFormato, undefined);
+});
+
+test("si el texto vuelve al original pero queda otro formato, el cambio se conserva", () => {
+  const primera = calcularCambios({ contenido: "<p>Hola</p>" }, { contenido: "<p>Chau</p>" }, camposHtml);
+  const vuelta = calcularCambios({ contenido: "<p>Chau</p>" }, { contenido: "<p><strong>Hola</strong></p>" }, camposHtml);
+  const acumulados = combinarCambios(primera, vuelta);
+  assert.equal(acumulados.length, 1);
+  assert.equal(acumulados[0].soloFormato, true);
 });
