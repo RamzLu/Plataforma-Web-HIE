@@ -8,6 +8,7 @@ import "../../styles/pages/ProfesionalesPage.css";
 
 import PageBanner from "../../components/PageBanner";
 import AnimatedContent from "../../components/ui/AnimatedContent";
+import DefaultProfessionalImage from "../../components/ui/DefaultProfessionalImage";
 import { getProfesionales } from "../../api/profesionales.api";
 import { usePageMeta } from "../../hooks/usePageMeta.js";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
@@ -17,8 +18,25 @@ const normalizeText = (text) => {
   return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
+const ProfessionalPhoto = ({ src, alt, className = "doctor-photo", compact = false }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (!src || hasError) {
+    return <DefaultProfessionalImage alt={alt} compact={compact} />;
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      onError={() => setHasError(true)}
+    />
+  );
+};
+
 const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
-  const getIniciales = (nombre, apellido) => `${nombre?.charAt(0) || ""}${apellido?.charAt(0) || ""}`.toUpperCase();
   
   // Guardamos el carrusel para mover con las flechas
   const swiperRef = useRef(null);
@@ -96,13 +114,11 @@ const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
               <SwiperSlide key={`${prof.id}-${i}`} className="doctor-swiper-slide">
                 <article className="doctor-card" onClick={() => onSelectProf(prof)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectProf(prof))}>
                   <div className="doctor-image-container">
-                    {prof.imagenUrl ? (
-                      <img src={prof.imagenUrl} alt={`${prof.nombre} ${prof.apellido}`} className="doctor-photo" loading="lazy" />
-                    ) : (
-                      <div className="doctor-photo-placeholder">
-                        <span style={{ fontSize: "3rem", fontWeight: "600", opacity: 0.5 }}>{getIniciales(prof.nombre, prof.apellido)}</span>
-                      </div>
-                    )}
+                    <ProfessionalPhoto
+                      src={prof.imagenUrl}
+                      alt={`${prof.nombre} ${prof.apellido}`}
+                      className="doctor-photo"
+                    />
                     
                     {prof.matricula && (
                       <div className="license-pill">
@@ -335,13 +351,12 @@ const ProfesionalesPage = () => {
           <div className="prof-modal-overlay" onClick={() => setSelectedProf(null)}>
             <div className="prof-modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="prof-modal-photo">
-                {selectedProf.imagenUrl ? (
-                  <img src={selectedProf.imagenUrl} alt={selectedProf.nombre} />
-                ) : (
-                  <span style={{ fontSize: "3rem", fontWeight: "800", color: "#ffffff" }}>
-                    {`${selectedProf.nombre?.charAt(0) || ""}${selectedProf.apellido?.charAt(0) || ""}`.toUpperCase()}
-                  </span>
-                )}
+                <ProfessionalPhoto
+                  src={selectedProf.imagenUrl}
+                  alt={`${selectedProf.nombre} ${selectedProf.apellido}`}
+                  className=""
+                  compact
+                />
               </div>
               
               <h3 className="prof-modal-name">{selectedProf.nombre} {selectedProf.apellido}</h3>

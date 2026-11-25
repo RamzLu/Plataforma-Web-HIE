@@ -1,0 +1,140 @@
+.default-prof-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0b2545;
+  border-radius: inherit;
+  box-sizing: border-box;
+}
+
+.default-prof-image-container img.default-prof-bg-img {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  filter: blur(4px) brightness(0.82) !important;
+  transform: scale(1.1) !important;
+  transition: transform 0.4s ease, filter 0.4s ease !important;
+  pointer-events: none !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.default-prof-image-container:hover img.default-prof-bg-img {
+  transform: scale(1.15) !important;
+  filter: blur(3px) brightness(0.88) !important;
+}
+
+.default-prof-image-container .default-prof-blue-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 85, 155, 0.72) 0%, rgba(10, 35, 68, 0.85) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.default-prof-image-container .default-prof-logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+  max-width: 88%;
+  max-height: 75%;
+  transition: transform 0.3s ease;
+}
+
+.default-prof-image-container .default-prof-logo-badge.compact {
+  padding: 0;
+  gap: 0;
+  max-width: 82%;
+  max-height: 82%;
+}
+
+.default-prof-image-container img.default-prof-logo-full {
+  width: auto !important;
+  height: auto !important;
+  max-width: 112px !important;
+  max-height: 72px !important;
+  object-fit: contain !important;
+  filter: brightness(1.1) contrast(1.04) !important;
+  transition: transform 0.3s ease !important;
+  user-select: none !important;
+  pointer-events: none !important;
+  display: block !important;
+  margin: 0 !important;
+}
+
+.default-prof-image-container .default-prof-brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+  line-height: 1.08;
+  user-select: none;
+  pointer-events: none;
+}
+
+.default-prof-image-container .default-prof-brand-line {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: rgba(226, 238, 255, 0.94);
+}
+
+.default-prof-image-container .default-prof-brand-evita {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+.default-prof-image-container .default-prof-brand-formosa {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #93c5fd;
+  margin-top: 2px;
+}
+
+.default-prof-image-container:hover .default-prof-logo-badge {
+  transform: scale(1.04) !important;
+}
+
+.default-prof-image-container.compact img.default-prof-bg-img {
+  filter: blur(2px) brightness(0.82) !important;
+  transform: scale(1.12) !important;
+}
+
+.default-prof-image-container.compact .default-prof-blue-overlay {
+  padding: 8px;
+}
+
+.default-prof-image-container.compact img.default-prof-logo-compact {
+  width: auto !important;
+  height: auto !important;
+  max-width: 78% !important;
+  max-height: 52px !important;
+  object-fit: contain !important;
+  filter: brightness(1.1) contrast(1.04) !important;
+  user-select: none !important;
+  pointer-events: none !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
