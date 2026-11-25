@@ -15,7 +15,7 @@ const formatearFecha = (valor) => {
  * Etiqueta para el listado: reemplaza a la de estado cuando el CM pidió borrar el contenido.
  * La revisión se hace desde el modal de detalle, igual que el resto de las solicitudes.
  */
-export const EtiquetaEliminacion = () => <EtiquetaEstado tipo="eliminacion" texto="Pide eliminación" />;
+export const EtiquetaEliminacion = ({ nota = false }) => <EtiquetaEstado tipo="eliminacion" texto="Pide eliminación" nota={nota} />;
 
 /**
  * Bloque para el modal de detalle de un contenido publicado que el CM pidió borrar.

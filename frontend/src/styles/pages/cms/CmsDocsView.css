@@ -45,7 +45,7 @@
 :where(.panel-scope) .docs-table-head,
 :where(.panel-scope) .docs-table-row {
   display: grid;
-  grid-template-columns: minmax(260px, 3fr) 1.2fr 1fr 1fr 1fr;
+  grid-template-columns: minmax(260px, 3fr) 1.2fr 1fr minmax(200px, 1fr) 1fr;
   align-items: center;
   gap: 12px;
 }
