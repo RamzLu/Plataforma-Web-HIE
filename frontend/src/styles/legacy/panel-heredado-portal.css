@@ -122,17 +122,25 @@
 }
 
 .hospital-avatar {
-  width: 45px;
-  height: 45px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
+  background-color: var(--color-white);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
   border: 1px solid var(--color-slate-200);
+  padding: 7px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .hospital-avatar img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  display: block;
 }
 
 .author-meta h3 {
@@ -194,21 +202,26 @@
 
 .mosaic-gallery {
   display: grid;
-  gap: 4px; /* Espaciado ajustado para crear el efecto cuadrícula */
-  border-radius: 16px;
+  gap: 6px;
+  border-radius: 14px;
   overflow: hidden;
   width: 100%;
-  height: 480px; /* Altura imponente para la columna derecha */
-  background-color: var(--color-slate-50);
-  box-shadow: 0 10px 25px -5px rgba(12, 35, 64, 0.1);
+  height: min(460px, calc(86vh - 150px));
+  background-color: transparent;
+  box-shadow: none;
   position: sticky;
   top: 0;
+  align-self: center;
+  margin: 0 auto;
 }
 
 .mosaic-item {
   position: relative;
   cursor: pointer;
   overflow: hidden;
+  border-radius: 10px;
+  background-color: var(--color-slate-100);
+  box-shadow: 0 4px 14px rgba(12, 35, 64, 0.08);
 }
 
 .mosaic-item::after {
@@ -221,13 +234,14 @@
 }
 
 .mosaic-item:hover::after {
-  opacity: 0.15;
+  opacity: 0.14;
 }
 
 .mosaic-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
@@ -235,13 +249,13 @@
 
 .layout-2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 
-.layout-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
+.layout-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1.35fr 1fr; }
 
 .layout-3 .mosaic-item:nth-child(1) { grid-column: span 2; }
 
-.layout-4 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
+.layout-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
 
-.layout-4 .mosaic-item:nth-child(1) { grid-column: span 3; }
+.layout-4 .mosaic-item:nth-child(1) { grid-column: span 1; }
 
 .mosaic-overlay {
   position: absolute;

@@ -6,8 +6,6 @@ import NewsSection from "../../components/NewsSection";
 import PatientInfoSection from "../../components/PatientInfoSection";
 import AprendeSection from "../../components/AprendeSection";
 import HomeMapBanner from "../../components/HomeMapBanner";
-import logoEstrellas from "../../assets/logoHospitalEvita.png";
-import logoEstrellasBlanco from "../../assets/logoHospitalEvita-blanco.png";
 import "../../styles/pages/HomePage.css";
 import { usePageMeta } from "../../hooks/usePageMeta.js";
 
@@ -28,22 +26,6 @@ const HomePage = () => {
 
   return (
     <main className="home-page">
-      {/* Marcas de agua decorativas (logo institucional con estrellas) */}
-      <img
-        src={logoEstrellas}
-        alt=""
-        aria-hidden="true"
-        draggable="false"
-        className="home-watermark home-watermark--top"
-      />
-      <img
-        src={logoEstrellasBlanco}
-        alt=""
-        aria-hidden="true"
-        draggable="false"
-        className="home-watermark home-watermark--bottom"
-      />
-
       <Carousel />
       <NewsSection />
       <HomeNewsPreview />

@@ -9,7 +9,7 @@ import iconMama from "../../assets/icon-mama.webp";
 import iconCorazon from "../../assets/icon-corazon.webp";
 import iconDonacion from "../../assets/icon-donacion-de-sangre.webp";
 import iconDengue from "../../assets/icon-dengue.webp";
-import avatarHospital from "../../assets/logoHospitalEvita.png";
+import avatarHospital from "../../assets/logo-hie-oficial.png";
 
 import iconMamaStatic from "../../assets/icon-mama-estatico.png";
 import iconCorazonStatic from "../../assets/icon-corazon-estatico.png";
@@ -63,10 +63,16 @@ const cleanHtmlText = (html) => {
   return text.replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n").replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ").replace(/[ \t]+/g, " ").replace(/\n\s*\n/g, "\n").trim();
 };
 
-const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
+const NewsCard = ({ news, onOpenNews }) => {
   const plainText = cleanHtmlText(news.body[0]);
   return (
-    <article className="full-news-card">
+    <article
+      className="full-news-card"
+      onClick={() => onOpenNews(news)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => activarConTeclado(e, () => onOpenNews(news))}
+    >
       <div className="full-news-header">
         <div className="hospital-avatar"><img src={avatarHospital} alt="Avatar Hospital" /></div>
         <div className="post-meta">
@@ -77,13 +83,22 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
       <div className="full-news-body">
         <h4 className="full-news-title">{news.title}</h4>
         <p className="clamped-text">{plainText}</p>
-        <button className="read-more-btn" onClick={() => onOpenNews(news)}>Ver más</button>
+        <button
+          type="button"
+          className="read-more-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenNews(news);
+          }}
+        >
+          Ver más
+        </button>
       </div>
       <div className="full-news-images">
         {news.images && news.images.length > 0 && news.images[0] ? (
-          <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => onOpenLightbox(news.images, 0)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onOpenLightbox(news.images, 0))} />
+          <img src={news.images[0]} alt={news.title} className="clickable-img" loading="lazy" />
         ) : (
-          <DefaultNewsImage alt={news.title} onClick={() => onOpenNews(news)} />
+          <DefaultNewsImage alt={news.title} />
         )}
       </div>
     </article>

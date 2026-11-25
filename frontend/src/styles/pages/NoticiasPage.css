@@ -29,38 +29,15 @@
   font-family: var(--font-sans);
 }
 
-/* Marca de agua decorativa en fondo continuo (estrellas del hospital Evita, cero cortes) */
-.noticias-page::before {
-  content: "";
-  position: absolute;
-  bottom: 90px;
-  left: 2%;
-  width: clamp(280px, 34vw, 480px);
-  max-width: 85vw;
-  aspect-ratio: 1 / 1;
-  background: url("../../assets/logoHospitalEvita-blanco.png") center / contain no-repeat;
-  opacity: 0.08;
-  mix-blend-mode: soft-light;
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-  filter: blur(0.5px);
-  transform: rotate(8deg);
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
-}
-
-/* Solución al Logo Translúcido en el Banner de Noticias: bajado de posición, reducido y con máscara suave perimetral */
+/* Marca de agua en el Banner de Noticias: debajo del navbar, completa y sin recortes */
 .noticias-page .public-page-banner-watermark-wrap {
-  top: 56% !important;
-  right: 3% !important;
-  transform: translateY(-46%) !important;
-  width: clamp(210px, 26vw, 340px) !important;
-  max-width: 80vw !important;
+  top: calc(50% + 36px) !important;
+  right: clamp(20px, 4vw, 64px) !important;
+  transform: translateY(-50%) !important;
+  height: clamp(165px, 18vw, 206px) !important;
+  width: auto !important;
   aspect-ratio: 1 / 1 !important;
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 36%, rgba(0, 0, 0, 0) 82%) !important;
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 36%, rgba(0, 0, 0, 0) 82%) !important;
-  opacity: 0.11 !important;
+  opacity: 0.14 !important;
 }
 
 .noticias-page-container {
@@ -192,6 +169,7 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  cursor: pointer;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -207,8 +185,8 @@
 }
 
 .hospital-avatar {
-  width: 45px;
-  height: 45px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background-color: var(--color-white);
   display: flex;
@@ -217,12 +195,15 @@
   border: 1px solid var(--color-slate-200);
   flex-shrink: 0;
   overflow: hidden;
+  padding: 7px;
+  box-sizing: border-box;
 }
 
 .hospital-avatar img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  display: block;
 }
 
 .post-meta h3 {
@@ -838,10 +819,10 @@
 .modal-body-esp {
   padding: 30px 40px;
   display: grid;
-  grid-template-columns: 1.3fr 1fr; 
-  gap: 35px;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
   overflow-y: auto;
-  align-items: start;
+  align-items: center;
   box-sizing: border-box;
   flex: 1 1 auto;
   min-height: 0;
@@ -853,21 +834,23 @@
   flex-direction: column;
   gap: 20px;
   min-width: 0;
+  align-self: start;
 }
 
 .mosaic-gallery {
   display: grid;
-  gap: 4px;
+  gap: 6px;
   border-radius: 14px;
   overflow: hidden;
   width: 100%;
   height: auto;
-  max-height: calc(90vh - 160px);
-  background-color: var(--color-slate-50);
-  box-shadow: 0 8px 20px -4px rgba(12, 35, 64, 0.12);
+  max-height: calc(86vh - 150px);
+  background-color: transparent;
+  box-shadow: none;
   position: sticky;
   top: 0;
-  align-self: start;
+  align-self: center;
+  margin: 0 auto;
 }
 
 .mosaic-item {
@@ -876,6 +859,9 @@
   overflow: hidden;
   min-height: 0;
   height: 100%;
+  border-radius: 10px;
+  background-color: var(--color-slate-100);
+  box-shadow: 0 4px 14px rgba(12, 35, 64, 0.08);
 }
 
 .mosaic-item::after {
@@ -888,56 +874,54 @@
 }
 
 .mosaic-item:hover::after {
-  opacity: 0.15;
+  opacity: 0.14;
 }
 
 .mosaic-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
 .layout-1 {
   grid-template-columns: 1fr;
-  grid-template-rows: auto;
-  height: auto;
+  grid-template-rows: 1fr;
+  height: min(440px, calc(86vh - 150px));
 }
 
 .layout-1 .mosaic-item {
-  height: auto;
+  height: 100%;
 }
 
 .layout-1 .mosaic-item img {
   width: 100%;
-  height: auto;
-  max-height: min(420px, calc(90vh - 160px));
+  height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
 .layout-2 {
   grid-template-columns: 1fr;
   grid-template-rows: 1fr 1fr;
-  height: 400px;
-  max-height: calc(90vh - 160px);
-} 
+  height: min(460px, calc(86vh - 150px));
+}
 
 .layout-3 {
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 2fr 1fr;
-  height: 420px;
-  max-height: calc(90vh - 160px);
+  grid-template-rows: 1.35fr 1fr;
+  height: min(460px, calc(86vh - 150px));
 }
 .layout-3 .mosaic-item:nth-child(1) { grid-column: span 2; }
 
 .layout-4 {
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 2fr 1fr;
-  height: 420px;
-  max-height: calc(90vh - 160px);
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: min(460px, calc(86vh - 150px));
 }
-.layout-4 .mosaic-item:nth-child(1) { grid-column: span 3; }
+.layout-4 .mosaic-item:nth-child(1) { grid-column: span 1; }
 
 .mosaic-overlay {
   position: absolute;
@@ -1324,9 +1308,11 @@ z-index: var(--z-lightbox-controls) !important;
     font-size: 0.95rem !important;
   }
   .noticias-page .public-page-banner-watermark-wrap {
-    opacity: 0.08 !important;
-    right: -18% !important;
-    width: clamp(200px, 55vw, 300px) !important;
+    top: calc(50% + 26px) !important;
+    opacity: 0.09 !important;
+    right: 14px !important;
+    height: 128px !important;
+    width: auto !important;
   }
   .slider-arrow {
     display: none;

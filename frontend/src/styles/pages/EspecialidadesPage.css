@@ -14,6 +14,10 @@
   --esp-glass: rgba(255, 255, 255, 0.92);
   --esp-glass-soft: rgba(248, 250, 252, 0.88);
 
+  position: relative;
+  overflow-x: clip;
+  position: relative;
+  overflow: hidden;
   width: 100%;
   padding: 0 0 72px 0;
   display: flex;
@@ -31,6 +35,11 @@
       var(--color-secondary) calc(100% - 160px),
       var(--color-secondary-dark) 100%);
   font-family: var(--font-sans);
+}
+
+.especialidades-page > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* =========================================================

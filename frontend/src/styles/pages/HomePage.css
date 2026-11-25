@@ -50,29 +50,23 @@
   -webkit-user-select: none;
   -webkit-user-drag: none;
   object-fit: contain;
-  /* Escala estética proporcionada */
-  width: clamp(320px, 42vw, 620px);
-  max-width: 90vw;
+  width: clamp(260px, 34vw, 480px);
+  max-width: calc(100vw - 32px);
   height: auto;
-  /* Máscara de desvanecimiento suave para que jamás corte en bordes */
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 90%);
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 45%, rgba(0, 0, 0, 0) 90%);
 }
 
 .home-watermark--top {
   top: 36%;
-  right: 4%;
-  opacity: 0.07;
-  filter: blur(0.5px);
+  right: clamp(16px, 4vw, 56px);
+  opacity: 0.09;
   transform: rotate(-6deg);
 }
 
 .home-watermark--bottom {
-  bottom: 120px;
-  left: 3%;
-  opacity: 0.12;
+  bottom: 100px;
+  left: clamp(16px, 3vw, 48px);
+  opacity: 0.13;
   mix-blend-mode: soft-light;
-  filter: blur(0.5px);
   transform: rotate(8deg);
 }
 
@@ -425,19 +419,19 @@
   }
 
   .home-watermark {
-    width: clamp(280px, 50vw, 480px);
+    width: clamp(220px, 40vw, 380px);
   }
 
   .home-watermark--top {
-    right: -2%;
+    right: 16px;
     top: 32%;
-    opacity: 0.05;
+    opacity: 0.07;
   }
 
   .home-watermark--bottom {
-    left: -2%;
+    left: 16px;
     bottom: 80px;
-    opacity: 0.1;
+    opacity: 0.11;
   }
 
   .home-page .editorial-columns-grid {
@@ -522,19 +516,19 @@
 
 @media (max-width: 480px) {
   .home-watermark {
-    width: clamp(240px, 65vw, 340px);
+    width: clamp(180px, 52vw, 280px);
   }
 
   .home-watermark--top {
-    right: -10px;
+    right: 12px;
     top: 30%;
-    opacity: 0.04;
+    opacity: 0.06;
   }
 
   .home-watermark--bottom {
-    left: -10px;
+    left: 12px;
     bottom: 60px;
-    opacity: 0.08;
+    opacity: 0.09;
   }
 
   .home-page .editorial-column:hover,

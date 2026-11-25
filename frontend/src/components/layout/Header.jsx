@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MapPin, Map as MapIcon, Menu, X } from "lucide-react";
 import "../../styles/layout/Header.css";
-import logoCompleto from "../../assets/logo-completo.png";
+import logoCompleto from "../../assets/logo-hie-oficial.png";
 import HospitalLocationModal from "../ui/HospitalLocationModal"; 
 
 const Header = () => {
@@ -50,7 +50,14 @@ const Header = () => {
     <header className="hospital-header-container">
       <div className="hospital-main-nav">
         <Link to="/" className="brand-container" onClick={handleNavClick}>
-          <img src={logoCompleto} alt="Hospital Evita" className="header-logo-img" />
+          <img src={logoCompleto} alt="Hospital Interdistrital Evita" className="header-logo-img" />
+          <div className="header-brand-text">
+            <span className="header-brand-line">HOSPITAL</span>
+            <span className="header-brand-line">INTERDISTRITAL</span>
+            <span className="header-brand-evita">
+              EVITA <span className="header-brand-formosa">FORMOSA</span>
+            </span>
+          </div>
         </Link>
         <div 
           ref={sidebarRef} 

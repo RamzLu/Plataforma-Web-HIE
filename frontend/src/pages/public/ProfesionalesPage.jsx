@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
 
 import "swiper/css";
 import "../../styles/pages/ProfesionalesPage.css";
 
 import PageBanner from "../../components/PageBanner";
 import AnimatedContent from "../../components/ui/AnimatedContent";
+import DefaultProfessionalImage from "../../components/ui/DefaultProfessionalImage";
 import { getProfesionales } from "../../api/profesionales.api";
 import { usePageMeta } from "../../hooks/usePageMeta.js";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
@@ -16,8 +18,25 @@ const normalizeText = (text) => {
   return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
 
+const ProfessionalPhoto = ({ src, alt, className = "doctor-photo", compact = false }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (!src || hasError) {
+    return <DefaultProfessionalImage alt={alt} compact={compact} />;
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      onError={() => setHasError(true)}
+    />
+  );
+};
+
 const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
-  const getIniciales = (nombre, apellido) => `${nombre?.charAt(0) || ""}${apellido?.charAt(0) || ""}`.toUpperCase();
   
   // Guardamos el carrusel para mover con las flechas
   const swiperRef = useRef(null);
@@ -47,40 +66,59 @@ const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
       <p className="active-specialty-subtitle">Staff de Profesionales</p>
 
       <div className="carousel-viewport-wrapper">
-        
-        <button
-          type="button"
-          className="carousel-nav-btn prev-btn"
-          onClick={() => swiperRef.current?.slidePrev()}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
+        {profesionales.length > 1 && (
+          <button
+            type="button"
+            className="carousel-nav-btn prev-btn"
+            onClick={() => swiperRef.current?.slidePrev()}
+            aria-label={`Ver profesional anterior de ${especialidad}`}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        )}
 
-        <div className="doctors-cards-track">
+        <div className={`doctors-cards-track ${profesionales.length <= 1 ? "single-slide-track" : ""}`}>
           <Swiper
+            modules={[Autoplay]}
             onSwiper={(swiper) => (swiperRef.current = swiper)}
-            spaceBetween={30}
+            spaceBetween={28}
             slidesPerView={1}
+            speed={750}
             centeredSlides={isCarousel}
             loop={isCarousel}
+            watchSlidesProgress
+            autoplay={
+              isCarousel
+                ? {
+                    delay: 3200,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true,
+                  }
+                : false
+            }
             breakpoints={{
-              1024: { slidesPerView: isCarousel ? 3 : profesionales.length },
+              640: {
+                slidesPerView: isCarousel ? 2 : profesionales.length,
+                centeredSlides: false,
+              },
+              1024: {
+                slidesPerView: isCarousel ? 3 : profesionales.length,
+                centeredSlides: isCarousel,
+              },
             }}
             className={isCarousel ? "mySwiper" : "mySwiper few-slides"}
           >
             {slides.map((prof, i) => (
-              <SwiperSlide key={`${prof.id}-${i}`} style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
+              <SwiperSlide key={`${prof.id}-${i}`} className="doctor-swiper-slide">
                 <article className="doctor-card" onClick={() => onSelectProf(prof)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectProf(prof))}>
                   <div className="doctor-image-container">
-                    {prof.imagenUrl ? (
-                      <img src={prof.imagenUrl} alt={`${prof.nombre} ${prof.apellido}`} className="doctor-photo" loading="lazy" />
-                    ) : (
-                      <div className="doctor-photo-placeholder">
-                        <span style={{ fontSize: "3rem", fontWeight: "600", opacity: 0.5 }}>{getIniciales(prof.nombre, prof.apellido)}</span>
-                      </div>
-                    )}
+                    <ProfessionalPhoto
+                      src={prof.imagenUrl}
+                      alt={`${prof.nombre} ${prof.apellido}`}
+                      className="doctor-photo"
+                    />
                     
                     {prof.matricula && (
                       <div className="license-pill">
@@ -107,15 +145,18 @@ const SpecialtyRow = ({ especialidad, profesionales, onSelectProf }) => {
           </Swiper>
         </div>
 
-        <button
-          type="button"
-          className="carousel-nav-btn next-btn"
-          onClick={() => swiperRef.current?.slideNext()}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
+        {profesionales.length > 1 && (
+          <button
+            type="button"
+            className="carousel-nav-btn next-btn"
+            onClick={() => swiperRef.current?.slideNext()}
+            aria-label={`Ver profesional siguiente de ${especialidad}`}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -310,13 +351,12 @@ const ProfesionalesPage = () => {
           <div className="prof-modal-overlay" onClick={() => setSelectedProf(null)}>
             <div className="prof-modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="prof-modal-photo">
-                {selectedProf.imagenUrl ? (
-                  <img src={selectedProf.imagenUrl} alt={selectedProf.nombre} />
-                ) : (
-                  <span style={{ fontSize: "3rem", fontWeight: "800", color: "#ffffff" }}>
-                    {`${selectedProf.nombre?.charAt(0) || ""}${selectedProf.apellido?.charAt(0) || ""}`.toUpperCase()}
-                  </span>
-                )}
+                <ProfessionalPhoto
+                  src={selectedProf.imagenUrl}
+                  alt={`${selectedProf.nombre} ${selectedProf.apellido}`}
+                  className=""
+                  compact
+                />
               </div>
               
               <h3 className="prof-modal-name">{selectedProf.nombre} {selectedProf.apellido}</h3>
