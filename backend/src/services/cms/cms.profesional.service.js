@@ -245,7 +245,12 @@ class CmsProfesionalService {
     const armarSnapshotPublico = () =>
       construirItemProfesional(profesionalExistente, servicios, { estado: "PUBLICADO" });
 
-    const { especialidadId: finalEspecialidadId, areaNombre: finalAreaNombre } = await resolverArea(especialidadId, esServicio);
+    // El área que ya tenía (un servicio clave guarda su nombre en profesional_area) puede quedar aunque ya no esté publicada.
+    const areaActual = {
+      especialidadId: profesionalExistente.especialidadId,
+      areaNombre: profesionalExistente.profesional_area?.[0]?.area?.nombre || null,
+    };
+    const { especialidadId: finalEspecialidadId, areaNombre: finalAreaNombre } = await resolverArea(especialidadId, esServicio, areaActual);
 
     // Validación: verificar si hubo cambios antes de procesar archivos o base de datos
     const versionAnteriorCheck = construirItemProfesional(profesionalExistente, servicios, {});
