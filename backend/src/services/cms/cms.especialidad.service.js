@@ -5,7 +5,7 @@ import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { resolverNombreEditor, resolverEditorVisible } from "../../utils/editor.utils.js";
 import { combinarCambios } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
-import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado } from "../../utils/flujoEditorial.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, pideCambioDeEstado, mensajeSinCambios } from "../../utils/flujoEditorial.utils.js";
 import { formatearEspecialidad } from "./especialidades/formato.js";
 import { cambiosDeEspecialidad, requisitosComoTexto } from "./especialidades/cambios.js";
 
@@ -128,10 +128,10 @@ class CmsEspecialidadService {
         informacionDerivacion: data.informacionDerivacion !== undefined ? data.informacionDerivacion : existente.informacionDerivacion,
       }
     );
-    const estadoCambioEsp = Boolean(data.estado && data.estado.toUpperCase() !== estadoAnterior);
+    const estadoCambioEsp = pideCambioDeEstado(data.estado, { estadoActual: estadoAnterior, meta: metaExistente });
 
     if (cambiosEsp.length === 0 && !estadoCambioEsp) {
-      const error = new Error("No se detectaron cambios para actualizar.");
+      const error = new Error(mensajeSinCambios(estadoAnterior));
       error.statusCode = 400;
       throw error;
     }

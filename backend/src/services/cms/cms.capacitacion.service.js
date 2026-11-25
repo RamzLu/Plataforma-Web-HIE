@@ -28,7 +28,7 @@ import {
   armarContenidoEditado,
 } from "./capacitaciones/datos.js";
 import { cambiosDeCapacitacion } from "./capacitaciones/cambios.js";
-import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico, pideCambioDeEstado, mensajeSinCambios } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "capacitación", modelos: { "": "capacitacion" } });
 
@@ -312,10 +312,10 @@ class CmsCapacitacionService {
 
     const bannerModificado = Boolean(bannerFile || esVerdadero(data.eliminarBanner));
     const archivoModificado = Boolean(materialFile || esVerdadero(data.eliminarArchivo));
-    const estadoModificado = Boolean(data.estado && data.estado.toUpperCase() !== estadoAnterior);
+    const estadoModificado = pideCambioDeEstado(data.estado, { estadoActual: estadoAnterior, meta: metaExistente });
 
     if (cambiosCap.length === 0 && !bannerModificado && !archivoModificado && !estadoModificado) {
-      const error = new Error("No se detectaron cambios para actualizar.");
+      const error = new Error(mensajeSinCambios(estadoAnterior));
       error.statusCode = 400;
       throw error;
     }

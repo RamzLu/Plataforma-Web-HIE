@@ -49,6 +49,38 @@ export const intencionDesdeEstado = (estado, { tieneFecha = false } = {}) => {
   throw err(`Estado no válido: "${estado}".`);
 };
 
+/** Estado al que va el registro: si está pendiente, el que pidió el CM (targetEstado); si no, el guardado. */
+export const estadoVigente = (estadoActual, meta = null) => {
+  const e = String(estadoActual || "").toUpperCase();
+  if (e === "PENDIENTE_APROBACION") return String(meta?.targetEstado || "PUBLICADO").toUpperCase();
+  return e;
+};
+
+/**
+ * true si el "estado" que manda el CM al editar pide algo distinto de lo que el registro ya es o ya tiene pedido.
+ * Sin estado no se pide nada. Si el registro está pendiente de aprobación, se compara con lo pedido (targetEstado):
+ * volver a pedir lo mismo no es un cambio, así reenviarlo sin tocar nada avisa "sin cambios" en vez de guardar en silencio.
+ */
+export const pideCambioDeEstado = (estadoPedido, { estadoActual, meta = null, tieneFecha = false } = {}) => {
+  if (!estadoPedido) return false;
+  const pedido = String(estadoPedido).trim().toUpperCase();
+  const actual = String(estadoActual || "").toUpperCase();
+  if (actual !== "PENDIENTE_APROBACION") return pedido !== actual;
+  let destino;
+  try {
+    destino = ESTADO_DESTINO[intencionDesdeEstado(pedido, { tieneFecha })];
+  } catch {
+    return true; // Un estado no válido lo rechaza después resolverSolicitud, con su propio mensaje.
+  }
+  return destino !== estadoVigente(actual, meta);
+};
+
+/** Mensaje del 400 cuando una edición no cambia nada (al CM le dice por qué no se reenvió). */
+export const mensajeSinCambios = (estadoActual) =>
+  String(estadoActual || "").toUpperCase() === "PENDIENTE_APROBACION"
+    ? "No hay cambios para reenviar: esto ya está pendiente de aprobación tal como está."
+    : "No se detectaron cambios para actualizar.";
+
 /** true si el registro es (o fue) público, mirando su estado y el origen guardado en los metadatos. */
 export const fuePublico = (estadoActual, meta = null) => {
   const e = String(estadoActual || "").toUpperCase();

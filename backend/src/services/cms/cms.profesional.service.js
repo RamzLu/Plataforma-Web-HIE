@@ -12,7 +12,7 @@ import { estadoDe, construirItemProfesional, armarRespuestaGuardado, urlFoto } f
 import { subirFoto, quitarFoto } from "./profesionales/foto.js";
 import { resolverArea, asignarArea, quitarAreas } from "./profesionales/area.js";
 import { cambiosDeProfesional, cambiosDeProfesionalConFoto } from "./profesionales/cambios.js";
-import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico, pideCambioDeEstado, mensajeSinCambios } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "profesional", modelos: { "": "profesional" } });
 
@@ -263,10 +263,10 @@ class CmsProfesionalService {
       especialidadNombre: finalAreaNombre || versionAnteriorCheck.especialidadNombre,
       esServicioClave: esServicio,
     });
-    const estadoCambioProf = Boolean(data.estado && data.estado.toUpperCase() !== (profesionalExistente.estado || "").toUpperCase());
+    const estadoCambioProf = pideCambioDeEstado(data.estado, { estadoActual: profesionalExistente.estado, meta: existingPending });
 
     if (cambiosProf.length === 0 && !file && !estadoCambioProf) {
-      const error = new Error("No se detectaron cambios para actualizar.");
+      const error = new Error(mensajeSinCambios(profesionalExistente.estado));
       error.statusCode = 400;
       throw error;
     }

@@ -27,7 +27,7 @@ import {
   fechaConvocatoriaEditada,
 } from "./residencias/datos.js";
 import { cambiosDeResidencia } from "./residencias/cambios.js";
-import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico, pideCambioDeEstado, mensajeSinCambios } from "../../utils/flujoEditorial.utils.js";
 
 const metaEditorial = crearMetaEditorial({ entidad: "residencia", modelos: { "": "residencia" } });
 
@@ -248,7 +248,11 @@ class CmsResidenciaService {
     const fechaConvocatoria = fechaConvocatoriaEditada(data.fechaConvocatoria, residenciaExistente.fechaConvocatoria);
 
     const todosCambios = cambiosDeResidencia(residenciaExistente, contenidoPrevio, data, { banner: bannerFile, documento: docFile });
-    const estadoCambio = Boolean(data.estado && data.estado.toUpperCase() !== estadoAnterior);
+    const estadoCambio = pideCambioDeEstado(data.estado, {
+      estadoActual: estadoAnterior,
+      meta: metaExistente,
+      tieneFecha: Boolean(data.fechaPublicacion !== undefined ? data.fechaPublicacion : contenidoPrevio.fechaPublicacion),
+    });
     const bannerModificado = Boolean(bannerFile || esVerdadero(data.eliminarBanner));
     const docModificado = Boolean(docFile || esVerdadero(data.eliminarDocumento));
     const fechaPubAnterior = contenidoPrevio.fechaPublicacion || null;
@@ -256,7 +260,7 @@ class CmsResidenciaService {
     const fechaPubCambio = fechaPubAnterior !== fechaPubNueva;
 
     if (todosCambios.length === 0 && !estadoCambio && !bannerModificado && !docModificado && !fechaPubCambio) {
-      const error = new Error("No se detectaron cambios para actualizar.");
+      const error = new Error(mensajeSinCambios(estadoAnterior));
       error.statusCode = 400;
       throw error;
     }

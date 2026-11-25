@@ -8,7 +8,7 @@ import { parsearIdBigInt } from "../../utils/sanitize.utils.js";
 import { combinarCambios } from "../../utils/cambios.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 import { eliminarArchivosReemplazados, refDeArchivo, refDesdeUrl } from "../../utils/archivos.utils.js";
-import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico } from "../../utils/flujoEditorial.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, fuePublico, pideCambioDeEstado, mensajeSinCambios } from "../../utils/flujoEditorial.utils.js";
 import { formatearDocumento, formatearVersionPublicada, datosDeArchivo, CATEGORIA_POR_DEFECTO } from "./documentos/formato.js";
 import { subirDocumento, BUCKET_DOCUMENTOS } from "./documentos/archivo.js";
 import { buscarOCrearCategoria } from "./documentos/categoria.js";
@@ -197,10 +197,10 @@ class CmsDocService {
         categoria: catNuevaNombre,
       }
     );
-    const estadoCambioDoc = Boolean(estado && estado.toUpperCase() !== estadoAnterior);
+    const estadoCambioDoc = pideCambioDeEstado(estado, { estadoActual: estadoAnterior, meta: metaExistente });
 
     if (cambiosDoc.length === 0 && !archivoSubido && !estadoCambioDoc) {
-      const error = new Error("No se detectaron cambios para actualizar.");
+      const error = new Error(mensajeSinCambios(estadoAnterior));
       error.statusCode = 400;
       throw error;
     }

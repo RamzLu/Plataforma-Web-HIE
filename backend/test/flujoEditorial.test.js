@@ -7,6 +7,9 @@ import {
   decisionDesdeEstado,
   resolverSolicitud,
   resolverRevision,
+  estadoVigente,
+  pideCambioDeEstado,
+  mensajeSinCambios,
 } from "../src/utils/flujoEditorial.utils.js";
 
 const snapshot = () => ({ titulo: "Versión publicada" });
@@ -128,4 +131,37 @@ test("rechazar una edición de algo publicado conserva la versión pública", ()
   assert.deepEqual([r.estado, r.meta, r.motivo], ["RECHAZADO", "conservar", "Falta la fuente"]);
   const nuevo = resolverRevision({ estadoActual: "PENDIENTE_APROBACION", meta: { previousEstado: null }, decision: DECISION.RECHAZAR, motivo: "No" });
   assert.equal(nuevo.meta, null);
+});
+
+// ── Reenviar sin cambios ──────────────────────────────────
+test("estado vigente: si está pendiente es lo pedido; si no, el guardado", () => {
+  assert.equal(estadoVigente("PENDIENTE_APROBACION", { targetEstado: "ARCHIVADO" }), "ARCHIVADO");
+  assert.equal(estadoVigente("PENDIENTE_APROBACION", null), "PUBLICADO");
+  assert.equal(estadoVigente("publicado"), "PUBLICADO");
+});
+
+test("reenviar lo mismo que ya está pendiente no es un cambio de estado", () => {
+  const pendiente = (targetEstado) => ({ estadoActual: "PENDIENTE_APROBACION", meta: { targetEstado } });
+  assert.equal(pideCambioDeEstado("PUBLICADO", pendiente("PUBLICADO")), false);
+  assert.equal(pideCambioDeEstado("pendiente_aprobacion", pendiente("PUBLICADO")), false);
+  assert.equal(pideCambioDeEstado("PROGRAMADO", { ...pendiente("PROGRAMADO"), tieneFecha: true }), false);
+  assert.equal(pideCambioDeEstado("ARCHIVADO", pendiente("ARCHIVADO")), false);
+  // Pedir otra cosa sí es un cambio.
+  assert.equal(pideCambioDeEstado("ARCHIVADO", pendiente("PUBLICADO")), true);
+  assert.equal(pideCambioDeEstado("BORRADOR", pendiente("PUBLICADO")), true);
+  assert.equal(pideCambioDeEstado("PROGRAMADO", { ...pendiente("PUBLICADO"), tieneFecha: true }), true);
+  assert.equal(pideCambioDeEstado("PROGRAMADO", pendiente("PROGRAMADO")), true); // sin fecha pide publicar ya
+});
+
+test("fuera de pendiente, se compara con el estado guardado como siempre", () => {
+  assert.equal(pideCambioDeEstado(undefined, { estadoActual: "PUBLICADO" }), false);
+  assert.equal(pideCambioDeEstado("PUBLICADO", { estadoActual: "PUBLICADO" }), false);
+  assert.equal(pideCambioDeEstado("PUBLICADO", { estadoActual: "RECHAZADO" }), true);
+  assert.equal(pideCambioDeEstado("BORRADOR", { estadoActual: "PUBLICADO" }), true);
+  assert.equal(pideCambioDeEstado("CUALQUIERA", { estadoActual: "PENDIENTE_APROBACION" }), true);
+});
+
+test("el aviso de sin cambios le explica al CM que ya está pendiente", () => {
+  assert.match(mensajeSinCambios("PENDIENTE_APROBACION"), /ya está pendiente de aprobación/);
+  assert.equal(mensajeSinCambios("PUBLICADO"), "No se detectaron cambios para actualizar.");
 });

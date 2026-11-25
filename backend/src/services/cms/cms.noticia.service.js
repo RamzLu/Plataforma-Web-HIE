@@ -8,7 +8,7 @@ import { combinarCambios, cambiosParaCliente } from "../../utils/cambios.utils.j
 import { limitePublicacionProgramada } from "../../utils/programacion.utils.js";
 import { registrarAuditoria, ACCIONES } from "../../utils/auditoria.utils.js";
 import { eliminarArchivosReemplazados, refDeArchivo, refDesdeUrl } from "../../utils/archivos.utils.js";
-import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado } from "../../utils/flujoEditorial.utils.js";
+import { resolverSolicitud, resolverRevision, intencionDesdeEstado, decisionDesdeEstado, pideCambioDeEstado, mensajeSinCambios } from "../../utils/flujoEditorial.utils.js";
 import { urlsDeImagenes, subirImagenes, quitarImagenesDescartadas } from "./noticias/imagenes.js";
 import { nombreCategoriaVisible, buscarOCrearCategoria } from "./noticias/categoria.js";
 import { cambiosDeTexto, cambiosDeNoticia } from "./noticias/cambios.js";
@@ -259,10 +259,14 @@ class CmsNoticiaService {
         urlsConservadas.some((url, i) => url !== imgsPrevias[i])
       )
     );
-    const estadoCambio = Boolean(estado && estado.toUpperCase() !== estadoAnterior);
+    const estadoCambio = pideCambioDeEstado(estado, {
+      estadoActual: estadoAnterior,
+      meta: metaExistente,
+      tieneFecha: pideProgramar(estadoSolicitado, fechaPublicacion),
+    });
 
     if (cambiosTexto.length === 0 && !imagenesCambiaron && !estadoCambio) {
-      const error = new Error("No se detectaron cambios para actualizar.");
+      const error = new Error(mensajeSinCambios(estadoAnterior));
       error.statusCode = 400;
       throw error;
     }
