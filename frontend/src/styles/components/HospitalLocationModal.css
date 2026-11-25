@@ -120,13 +120,14 @@
 }
 
 .modal-close-button {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background-color: var(--color-slate-100);
   border: none;
-  color: var(--hospital-text-muted);
+  color: var(--color-slate-600);
   cursor: pointer;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,9 +136,9 @@
 }
 
 .modal-close-button:hover {
-  background-color: var(--color-slate-200);
-  color: var(--hospital-navy-dark);
-  transform: scale(1.05);
+  background-color: var(--color-rose-600);
+  color: var(--color-white);
+  transform: rotate(90deg);
 }
 
 /* Contenido Principal en 2 Columnas */

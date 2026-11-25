@@ -717,16 +717,35 @@
 
 
 .btn-close-modal {
-  background: none;
+  width: 38px;
+  height: 38px;
+  background-color: var(--color-slate-100);
   border: none;
-  color: var(--color-slate-400);
+  color: var(--color-slate-600);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 0;
   border-radius: 50%;
   transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-close-modal svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+.btn-close-modal:hover {
+  background-color: var(--color-rose-600);
+  color: var(--color-white);
+  transform: rotate(90deg);
 }
 
 .modal-slider-container {
@@ -1044,19 +1063,28 @@
   position: absolute;
   top: 25px;
   right: 35px;
-  background: none;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.14);
   border: none;
-  color: white;
-  font-size: 3rem;
-  font-weight: 300;
+  border-radius: 50%;
+  color: var(--color-white);
+  font-size: 1.75rem;
+  font-weight: 400;
   cursor: pointer;
-z-index: var(--z-lightbox-controls) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: var(--z-lightbox-controls) !important;
   line-height: 1;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .lightbox-close:hover {
-  color: #ff4d4d;
+  background-color: var(--color-rose-600);
+  color: var(--color-white);
+  transform: rotate(90deg);
 }
 
 .lightbox-content {
