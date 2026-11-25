@@ -7,3 +7,5 @@ export const createDocumento = documentos.crear;
 export const updateDocumento = documentos.actualizar;
 export const revisarDocumento = documentos.revisar;
 export const deleteDocumento = documentos.eliminar;
+export const descartarDocumento = documentos.descartar;
+export const restaurarDocumento = documentos.restaurar;

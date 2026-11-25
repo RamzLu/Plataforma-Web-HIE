@@ -14,12 +14,16 @@ const ICONOS = {
   eliminacion: Trash2,
 };
 
-const EtiquetaEstado = ({ estado, texto, tipo }) => {
+/**
+ * `nota`: variante más chica para avisos que acompañan al estado (apilados debajo): misma forma y mismos colores.
+ * `Icono`: ícono propio en lugar del que corresponde al tipo.
+ */
+const EtiquetaEstado = ({ estado, texto, tipo, nota = false, Icono: IconoPropio }) => {
   const variante = tipo || tipoDeEstado(estado);
-  const Icono = ICONOS[variante] || AlertTriangle;
+  const Icono = IconoPropio || ICONOS[variante] || AlertTriangle;
   return (
-    <span className={`etiqueta-estado is-${variante}`}>
-      <Icono size={14} strokeWidth={2.25} aria-hidden="true" />
+    <span className={`etiqueta-estado is-${variante}${nota ? " es-nota" : ""}`}>
+      <Icono size={nota ? 12 : 14} strokeWidth={2.25} aria-hidden="true" />
       {texto}
     </span>
   );

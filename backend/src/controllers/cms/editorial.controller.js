@@ -1,4 +1,5 @@
 import { agregarSolicitudesEliminacion } from "../../utils/eliminacion.utils.js";
+import { agregarPapelera, descartar, restaurar, exigirFueraDePapelera } from "../../services/cms/papelera.service.js";
 
 // Controlador único de los módulos con flujo editorial (ver services/cms/editorial.modulos.js).
 // El cuerpo llega validado (middlewares/validar.middleware.js).
@@ -24,7 +25,9 @@ export const crearControladorEditorial = (modulo) => {
     listar: envolver(async (req, res) => {
       const esVistaAdmin = req.adminView === true;
       const registros = await modulo.listar(esVistaAdmin);
-      res.status(200).json(esVistaAdmin ? await agregarSolicitudesEliminacion(registros, modulo.entidad) : registros);
+      if (!esVistaAdmin) return res.status(200).json(registros);
+      const conSolicitudes = await agregarSolicitudesEliminacion(registros, modulo.entidad);
+      res.status(200).json(await agregarPapelera(conSolicitudes, modulo.entidad));
     }),
 
     crear: envolver(async (req, res) => {
@@ -32,6 +35,8 @@ export const crearControladorEditorial = (modulo) => {
     }),
 
     actualizar: envolver(async (req, res) => {
+      // Lo que está en la Papelera no se edita: primero se restaura.
+      if (modulo.papelera) await exigirFueraDePapelera(modulo.papelera.modeloDe(req), req.params.id);
       res.status(200).json(unificarRespuesta(await modulo.actualizar(req), modulo.clave));
     }),
 
@@ -39,6 +44,15 @@ export const crearControladorEditorial = (modulo) => {
       // El cuerpo ya pasó por esquemaRevision (validation/editorial.schemas.js): decision y motivo son válidos.
       const { decision, motivo } = req.body;
       res.status(200).json(unificarRespuesta(await modulo.revisar(req, { decision, motivo: motivo || null }), modulo.clave));
+    }),
+
+    // Papelera de lo rechazado (solo el CM; el Admin no interviene).
+    descartar: envolver(async (req, res) => {
+      res.status(200).json(await descartar(modulo.papelera.modeloDe(req), req.params.id, req.user));
+    }),
+
+    restaurar: envolver(async (req, res) => {
+      res.status(200).json(await restaurar(modulo.papelera.modeloDe(req), req.params.id, req.user));
     }),
 
     eliminar: envolver(async (req, res) => {

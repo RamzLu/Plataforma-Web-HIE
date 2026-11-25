@@ -18,4 +18,7 @@ export const crearApiEditorial = (ruta) => ({
   revisar: async (id, decision, motivo = "", extra = {}) =>
     (await api.patch(`/cms/${ruta}/${id}/revision`, { decision, motivo, ...extra })).data,
   eliminar: async (id, params) => (await api.delete(`/cms/${ruta}/${id}`, params ? { params } : undefined)).data,
+  // Papelera de lo rechazado (solo el CM). En especialidades/servicios, `extra.esServicio` dice a cuál se refiere.
+  descartar: async (id, extra = {}) => (await api.patch(`/cms/${ruta}/${id}/descartar`, extra)).data,
+  restaurar: async (id, extra = {}) => (await api.patch(`/cms/${ruta}/${id}/restaurar`, extra)).data,
 });

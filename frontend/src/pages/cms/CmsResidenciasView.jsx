@@ -70,8 +70,12 @@ import {
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import SiguePublicado from "../../components/cms/SiguePublicado";
-import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarResidencia, restaurarResidencia } from "../../api/residencias.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { textoDeEstado } from "../../components/ui/estados.js";
@@ -498,6 +502,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         toast.success(respuesta.message, { id: toastId, duration: 6000 });
         setShowDeleteModal(false);
         setItemAEliminar(null);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        cargarResidencias();
         return;
       }
       recordCmsActivity({
@@ -523,11 +529,22 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   };
 
   // Filtrado de datos
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarResidencia(item.id),
+    restaurar: (item) => restaurarResidencia(item.id),
+    recargar: cargarResidencias,
+  });
+
   // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
-  const cuentas = { PUBLICADOS: 0, PROGRAMADOS: 0, PENDIENTES: 0, BORRADORES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
+  const cuentas = { PAPELERA: 0, PUBLICADOS: 0, PROGRAMADOS: 0, PENDIENTES: 0, BORRADORES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
   (Array.isArray(residencias) ? residencias : []).forEach((res) => {
     if (!res) return;
     const e = (res.estado || "PUBLICADO").toUpperCase();
+    if (res.enPapelera) {
+      cuentas.PAPELERA++;
+      return;
+    }
     if (estaPublicadoEnPortal(res)) cuentas.PUBLICADOS++;
     if (e === "PROGRAMADO") cuentas.PROGRAMADOS++;
     else if (e === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
@@ -538,9 +555,10 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
 
   const datosFiltrados = (Array.isArray(residencias) ? residencias : []).filter((res) => {
     if (!res) return false;
+    if (activeTab === "PAPELERA" ? !res.enPapelera : res.enPapelera) return false;
     const estadoItem = (res.estado || "PUBLICADO").toUpperCase();
     let matchEstado = false;
-    if (activeTab === "TODOS") {
+    if (activeTab === "TODOS" || activeTab === "PAPELERA") {
       matchEstado = true;
     } else if (activeTab === "PUBLICADOS") {
       matchEstado = estaPublicadoEnPortal(res);
@@ -594,7 +612,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                       { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
                       { clave: "BORRADORES", tipo: "borrador", cuenta: cuentas.BORRADORES },
                       { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
-                    ]}
+                      { clave: "PAPELERA", tipo: "papelera", cuenta: cuentas.PAPELERA },
+          ]}
                   />
       </div>
 
@@ -618,7 +637,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         />
 
       {/* Tabla Unificada con diseño armonizado idéntico a Profesionales */}
-      <div className="cms-news-table-container">
+      {activeTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-news-table-container">
         <div
           className="activity-table-head news-table-head"
           style={{ display: "flex", gap: "10px", alignItems: "center" }}
@@ -626,8 +646,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
           <div style={{ flex: 1.8 }}>PROGRAMA Y CATEGORÍA</div>
           <div style={{ flex: 1 }}>DURACIÓN</div>
           <div style={{ flex: 1.2 }}>FECHA / CONVOCATORIA</div>
-          <div style={{ width: "135px", textAlign: "center" }}>ESTADO</div>
-          <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
+          <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
+          <div style={{ width: "140px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
         <div className="activity-table-body">
@@ -816,13 +836,17 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                 {/* Columna ESTADO */}
                 <div
                   style={{
-                    width: "145px",
+                    width: "200px",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                   }}
                 >
-                  {(() => {
+                  {res.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+{(() => {
                     const estadoMostrado = res.estadoVista || res.estado;
                     if (estadoMostrado === "PENDIENTE_APROBACION") {
                       return (
@@ -850,17 +874,34 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     return <EtiquetaEstado estado={estadoMostrado} texto={textoDeEstado(estadoMostrado)} />;
                   })()}
                   <SiguePublicado item={res} activo={activeTab === "PUBLICADOS"} />
+<NotaPapelera item={res} />
+                  {res.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
                 {/* Columna ACCIONES */}
                 <div
                   className="news-actions-cell"
                   style={{
-                    width: "100px",
+                    width: "140px",
                     justifyContent: "center",
                     gap: "8px",
                   }}
                 >
+{res.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(res)}
+  onEliminar={() => confirmDelete(res)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                   <button
                     type="button"
                     onClick={() => handleOpenEdit(res)}
@@ -901,7 +942,11 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                       <line x1="14" y1="11" x2="14" y2="17"></line>
                     </svg>
                   </button>
-                </div>
+                
+{esDescartable(res) && <BotonADescartar onClick={() => papelera.descartarItem(res)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
               </div>
             ))
           )}

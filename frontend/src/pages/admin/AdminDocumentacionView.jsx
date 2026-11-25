@@ -1,10 +1,12 @@
+import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada, sinPapelera } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -54,6 +56,9 @@ const mapDocumentFromBackend = (doc) => {
     id: doc.id?.toString() || '',
     title: doc.title || doc.titulo || 'Sin título',
     solicitudEliminacion: doc.solicitudEliminacion || null,
+    enPapelera: Boolean(doc.enPapelera),
+    papeleraDesde: doc.papeleraDesde || null,
+    papeleraVenceEl: doc.papeleraVenceEl || null,
     description: doc.description || doc.descripcion || '',
     category: doc.category || doc.categoria || 'Información institucional',
     fileName: doc.fileName || doc.nombreArchivo || 'documento.pdf',
@@ -179,7 +184,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
   const filteredDocuments = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
-    return documents.filter((doc) => {
+    return (statusFilter === 'PAPELERA' ? documents.filter((x) => x?.enPapelera) : sinPapelera(documents)).filter((doc) => {
       let matchesStatus = true;
       if (statusFilter === 'PENDIENTE') matchesStatus = doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion);
       else if (statusFilter === 'PUBLICADO') matchesStatus = estaPublicadoEnPortal(doc);
@@ -207,17 +212,18 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
   }, [categoryFilter, documents, search, statusFilter]);
 
   const pendingCount = useMemo(
-    () => documents.filter((doc) => doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion)).length,
+    () => sinPapelera(documents).filter((doc) => doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion)).length,
     [documents]
   );
   const publishedCount = useMemo(
-    () => documents.filter(estaPublicadoEnPortal).length,
+    () => sinPapelera(documents).filter(estaPublicadoEnPortal).length,
     [documents]
   );
   const rejectedCount = useMemo(
-    () => documents.filter((doc) => doc.status === 'RECHAZADO').length,
+    () => sinPapelera(documents).filter((doc) => doc.status === 'RECHAZADO').length,
     [documents]
   );
+  const papeleraCount = useMemo(() => documents.filter((doc) => doc.enPapelera).length, [documents]);
 
   const closeDetails = () => {
     setSelectedId(null);
@@ -326,7 +332,8 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           { clave: "PENDIENTE", tipo: "pendiente", cuenta: pendingCount },
           { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
           { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
-        ]}
+          { clave: "PAPELERA", tipo: "papelera", cuenta: papeleraCount },
+      ]}
       />
 
       <section className="admin-doc-card" aria-labelledby="admin-doc-list-title">
@@ -362,7 +369,8 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           </label>
         </div>
 
-        <div className="admin-doc-table-wrap">
+        {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
+<div className="admin-doc-table-wrap">
           {loading ? (
             <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
               <div className="cms-spinner" style={{ margin: '0 auto 15px auto', width: '36px', height: '36px' }}></div>
@@ -412,19 +420,25 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                     </td>
                     <td data-label="Categoría / tipo">
                       <div className="admin-doc-category-cell">
-                        <strong>{doc.category}</strong>
+                        <EtiquetaCategoria categoria={doc.category} />
                         <small>{doc.fileType} {doc.fileSize ? `· ${doc.fileSize}` : ''}</small>
                       </div>
                     </td>
                     <td data-label="Estado">
-                      {doc.solicitudEliminacion ? (
-                        <EtiquetaEliminacion />
-                      ) : (
-                        <>
+                      {doc.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
                           <EtiquetaEstado estado={doc.statusVista || doc.status} texto={statusLabels[doc.statusVista || doc.status] || doc.status} />
                           <SiguePublicado item={doc} activo={statusFilter === 'PUBLICADO'} />
+<NotaPapelera item={doc} />
+                          {doc.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
                         </>
-                      )}
+)}
                     </td>
                   </tr>
                 ))}

@@ -14,9 +14,14 @@ import {
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import SiguePublicado from "../../components/cms/SiguePublicado";
-import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarDocumento, restaurarDocumento } from "../../api/documentos.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
 
 // El servidor puede enviar la fecha como texto ISO (2026-11-13T16:13:12Z); se muestra como dd/mm/aaaa.
@@ -96,11 +101,14 @@ const CmsDocsView = ({
     }
   }, [initialCreateModal]);
 
+  // Al abrir la sección se pide la lista. Solo al montar: onRefreshDocs cambia en cada render de la página y
+  // dejarlo como dependencia volvía a pedir la lista una y otra vez.
   React.useEffect(() => {
     if (typeof onRefreshDocs === "function") {
       onRefreshDocs();
     }
-  }, [onRefreshDocs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // El refresco al volver a la pestaña lo hace CmsPage para todas las secciones.
 
@@ -164,6 +172,8 @@ const CmsDocsView = ({
         toast.success(respuesta.message, { duration: 6000 });
         setShowDeleteModal(false);
         setDocAEliminar(null);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        if (typeof onRefreshDocs === "function") onRefreshDocs();
         return;
       }
       recordCmsActivity({
@@ -360,10 +370,23 @@ const CmsDocsView = ({
     ? archivo.name.toLowerCase().endsWith('.pdf') 
     : nombreArchivoActual.toLowerCase().endsWith('.pdf');
 
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarDocumento(item.id),
+    restaurar: (item) => restaurarDocumento(item.id),
+    recargar: async () => {
+      if (typeof onRefreshDocs === "function") await onRefreshDocs();
+    },
+  });
+
   // Conteo dinámico por pestañas
   const counts = useMemo(() => {
-    const res = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, BORRADORES: 0 };
+    const res = { PAPELERA: 0, PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, BORRADORES: 0 };
     (docsList || []).forEach((doc) => {
+      if (doc.enPapelera) {
+        res.PAPELERA++;
+        return;
+      }
       const e = (doc.estado || doc.status || "").toUpperCase();
       // Lo publicado con una versión nueva en revisión figura en Publicados y también en su pestaña de revisión.
       if (estaPublicadoEnPortal(doc)) res.PUBLICADOS++;
@@ -379,9 +402,10 @@ const CmsDocsView = ({
   const docsFiltrados = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     return (docsList || []).filter((doc) => {
+      if (activeTab === "PAPELERA" ? !doc.enPapelera : doc.enPapelera) return false;
       const e = (doc.estado || doc.status || "").toUpperCase();
       let matchTab = false;
-      if (activeTab === "TODOS") matchTab = true;
+      if (activeTab === "TODOS" || activeTab === "PAPELERA") matchTab = true;
       else if (activeTab === "PUBLICADOS") matchTab = estaPublicadoEnPortal(doc);
       else if (activeTab === "PENDIENTES") matchTab = e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO";
       else if (activeTab === "RECHAZADOS") matchTab = e === "RECHAZADO";
@@ -413,7 +437,8 @@ const CmsDocsView = ({
                     { clave: "PUBLICADOS", tipo: "publicado", cuenta: counts.PUBLICADOS },
                     { clave: "RECHAZADOS", tipo: "rechazado", cuenta: counts.RECHAZADOS },
                     { clave: "BORRADORES", tipo: "borrador", cuenta: counts.BORRADORES },
-                  ]}
+                    { clave: "PAPELERA", tipo: "papelera", cuenta: counts.PAPELERA },
+          ]}
                 />
       </div>
 
@@ -438,7 +463,8 @@ const CmsDocsView = ({
         }}
       />
 
-      <div className="cms-docs-table-container">
+      {activeTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-docs-table-container">
         <div className="activity-table-head docs-table-head">
           <div className="col-content">CONTENIDO</div>
           <div className="col-editor">EDITOR / FECHA</div>
@@ -516,14 +542,35 @@ const CmsDocsView = ({
                   </small>
                 </div>
 
-                <div className="col-categoria">{doc.category || "Información institucional"}</div>
+                <div className="col-categoria"><EtiquetaCategoria categoria={doc.category} /></div>
                 
                 <div className="col-estado">
-                  <EtiquetaEstado estado={doc.estadoVista || doc.estado || doc.status} texto={getTextoEstado(doc)} />
+                  {doc.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+<EtiquetaEstado estado={doc.estadoVista || doc.estado || doc.status} texto={getTextoEstado(doc)} />
                   <SiguePublicado item={doc} activo={activeTab === "PUBLICADOS"} />
+<NotaPapelera item={doc} />
+                  {doc.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
                 <div className="doc-actions-cell">
+{doc.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(doc)}
+  onEliminar={() => handleConfirmDeleteClick(doc.id)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                   <button title="Editar" onClick={() => handleOpenEdit(doc)} className="doc-action-btn-edit">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path>
@@ -547,7 +594,11 @@ const CmsDocsView = ({
                       </svg>
                     )}
                   </button>
-                </div>
+                
+{esDescartable(doc) && <BotonADescartar onClick={() => papelera.descartarItem(doc)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
               </div>
             ))
           )}

@@ -44,6 +44,7 @@ router.param('id', (req, _res, next, id) => {
 //   PATCH  /<módulo>/:id/revision   Admin: { decision: "APROBAR" | "RECHAZAR", motivo }
 // Cada cuerpo se valida con su esquema (validation/editorial.schemas.js) antes de llegar al controlador.
 //   DELETE /<módulo>/:id            eliminar (si está publicado queda una solicitud para el Admin)
+//   PATCH  /<módulo>/:id/descartar  CM: manda a la Papelera algo rechazado (/restaurar lo devuelve a Rechazados)
 // ==========================================
 for (const modulo of MODULOS_EDITORIALES) {
   const controlador = crearControladorEditorial(modulo);
@@ -55,6 +56,9 @@ for (const modulo of MODULOS_EDITORIALES) {
   router.put(`/${modulo.ruta}/:id`, requireCmsAccess, ...archivos, validar(esquemas.actualizar), controlador.actualizar);
   router.patch(`/${modulo.ruta}/:id/revision`, requireAdminAccess, validar(esquemaRevision), controlador.revisar);
   router.delete(`/${modulo.ruta}/:id`, requireCmsAccess, controlador.eliminar);
+  // Papelera de lo rechazado: solo el CM (requireCmsAccess no admite al Admin). Se vacía sola a los 15 días.
+  router.patch(`/${modulo.ruta}/:id/descartar`, requireCmsAccess, controlador.descartar);
+  router.patch(`/${modulo.ruta}/:id/restaurar`, requireCmsAccess, controlador.restaurar);
 }
 
 // ==========================================

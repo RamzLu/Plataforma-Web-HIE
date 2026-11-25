@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { createPortal } from "react-dom";
-import { Archive, CalendarClock, CheckCircle, Clock3, Globe2, Pencil, RefreshCw, XCircle } from "lucide-react";
+import { Archive, CalendarClock, CheckCircle, Clock3, Globe2, Pencil, RefreshCw, Trash2, XCircle } from "lucide-react";
 import { AccionesTituloContext } from "./AccionesTitulo";
 import "../../styles/ui/FiltrosEstado.css";
 
@@ -14,6 +14,7 @@ const TIPOS = {
   rechazado: { etiqueta: "Rechazados", Icono: XCircle },
   archivado: { etiqueta: "Archivados", Icono: Archive },
   borrador: { etiqueta: "Borradores", Icono: Pencil },
+  papelera: { etiqueta: "Papelera", Icono: Trash2 },
 };
 
 /**

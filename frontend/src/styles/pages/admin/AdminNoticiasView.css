@@ -147,23 +147,6 @@
   justify-content: flex-start;
 }
 
-:where(.panel-scope) .category-pill-admin {
-  font-size: 0.75rem;
-  color: var(--color-sky-600);
-  font-weight: 700;
-  background-color: var(--color-sky-100);
-  padding: 4px 10px;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-:where(.panel-scope) .category-pill-admin.general {
-  background-color: var(--color-slate-100);
-  color: var(--color-slate-600);
-}
-
 :where(.panel-scope) .col-content-admin-box {
   display: flex;
   flex-direction: row;

@@ -389,27 +389,6 @@
   gap: 5px;
 }
 
-:where(.panel-scope) .admin-prof-association-cell strong:not(:where(.vista-portal *)),
-:where(.panel-scope) .admin-prof-association-cell span:not(:where(.vista-portal *)) {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-:where(.panel-scope) .admin-prof-association-cell strong:not(:where(.vista-portal *)) {
-  color: var(--color-slate-800);
-  font-size: 0.8rem;
-}
-
-:where(.panel-scope) .admin-prof-association-cell strong svg:not(:where(.vista-portal *)) {
-  color: var(--color-blue-600);
-}
-
-:where(.panel-scope) .admin-prof-association-cell span:not(:where(.vista-portal *)) {
-  color: var(--color-slate-500);
-  font-size: 0.72rem;
-}
-
 :where(.panel-scope) .admin-prof-editor-cell small:not(:where(.vista-portal *)) {
   display: inline-flex;
   align-items: center;

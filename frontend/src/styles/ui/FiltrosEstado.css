@@ -198,7 +198,8 @@
 }
 
 :where(.panel-scope) .filtro-estado.is-archivado .filtro-estado-icono,
-:where(.panel-scope) .filtro-estado.is-borrador .filtro-estado-icono {
+:where(.panel-scope) .filtro-estado.is-borrador .filtro-estado-icono,
+:where(.panel-scope) .filtro-estado.is-papelera .filtro-estado-icono {
   background: var(--color-slate-100);
   color: var(--color-slate-600);
 }

@@ -1,3 +1,4 @@
+import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
@@ -40,10 +41,14 @@ import {
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import SiguePublicado from "../../components/cms/SiguePublicado";
-import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { textoDeEstado } from "../../components/ui/estados.js";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarNoticia, restaurarNoticia } from "../../api/noticias.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
 
 registerLocale("es", es);
@@ -120,15 +125,29 @@ const CmsNoticiasView = ({
   const [noticiaAEliminar, setNoticiaAEliminar] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarNoticia(item.id),
+    restaurar: (item) => restaurarNoticia(item.id),
+    recargar: async () => {
+      if (onRefresh) await onRefresh();
+    },
+  });
+
   // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
-  const cuentas = { PUBLICADO: 0, BORRADOR: 0, PENDIENTE_APROBACION: 0, PROGRAMADO: 0, RECHAZADO: 0 };
+  const cuentas = { PAPELERA: 0, PUBLICADO: 0, BORRADOR: 0, PENDIENTE_APROBACION: 0, PROGRAMADO: 0, RECHAZADO: 0 };
   (newsList || []).forEach((n) => {
+    if (n.enPapelera) {
+      cuentas.PAPELERA++;
+      return;
+    }
     const e = n.estado ? n.estado.toUpperCase() : n.isDraft ? "BORRADOR" : "PUBLICADO";
     if (estaPublicadoEnPortal(n)) cuentas.PUBLICADO++;
     if (e in cuentas && e !== "PUBLICADO") cuentas[e]++;
   });
 
   const filteredNews = (newsList || []).filter((n) => {
+    if (viewTab === "PAPELERA" ? !n.enPapelera : n.enPapelera) return false;
     const estadoItem = n.estado
       ? n.estado.toUpperCase()
       : n.isDraft
@@ -136,7 +155,7 @@ const CmsNoticiasView = ({
       : "PUBLICADO";
 
     const matchEstado =
-      viewTab === "TODOS"
+      viewTab === "TODOS" || viewTab === "PAPELERA"
         ? true
         : viewTab === "PUBLICADO"
         ? estaPublicadoEnPortal(n)
@@ -272,6 +291,8 @@ const CmsNoticiasView = ({
         toast.success(respuesta.message, { duration: 6000 });
         setShowDeleteModal(false);
         setNoticiaAEliminar(null);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        if (onRefresh) onRefresh();
         return;
       }
       recordCmsActivity({
@@ -500,6 +521,8 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
       } else {
         if (onAddNewNews) onAddNewNews(noticiaFormateada);
       }
+      // La lista se vuelve a pedir: lo que devuelve el guardado no trae todo (versión publicada, pedidos pendientes).
+      if (onRefresh) onRefresh();
 
       setViewTab(estadoGuardado);
       setHasUnsavedChanges(false);
@@ -547,7 +570,8 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                       { clave: "PROGRAMADO", tipo: "programado", cuenta: cuentas.PROGRAMADO },
                       { clave: "RECHAZADO", tipo: "rechazado", cuenta: cuentas.RECHAZADO },
                       { clave: "BORRADOR", tipo: "borrador", cuenta: cuentas.BORRADOR },
-                    ]}
+                      { clave: "PAPELERA", tipo: "papelera", cuenta: cuentas.PAPELERA },
+          ]}
                   />
       </div>
 
@@ -572,7 +596,8 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
           }}
         />
 
-      <div className="cms-news-table-container">
+      {viewTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-news-table-container">
         <div className="news-table-head">
           <div className="col-content">CONTENIDO</div>
           <div className="col-editor">EDITOR / FECHA</div>
@@ -697,24 +722,16 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                   </div>
 
                   <div className="col-categoria">
-                    <span
-                      style={{
-                        backgroundColor:
-                          news.category === "General" ? "#f1f5f9" : "#e0f2fe",
-                        color: news.category === "General" ? "#475569" : "#0284c7",
-                        padding: "4px 10px",
-                        borderRadius: "6px",
-                        fontSize: "0.75rem",
-                        fontWeight: "700",
-                      }}
-                    >
-                      {news.category || "General"}
-                    </span>
+                    <EtiquetaCategoria categoria={news.category || "General"} />
                   </div>
 
                   <div className="col-estado">
                     <div className="status-wrapper">
-                      {isRejected && !news.estadoVista ? (
+                      {news.solicitudEliminacion && viewTab !== "PUBLICADO" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+{isRejected && !news.estadoVista ? (
                         <span
                           onClick={() => handleOpenCorrection(news)}
                           role="button"
@@ -730,6 +747,14 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                       )}
 
                       <SiguePublicado item={news} activo={viewTab === "PUBLICADO"} />
+<NotaPapelera item={news} />
+                      {news.solicitudEliminacion && (
+                        <div style={{ marginTop: "4px" }}>
+                          <EtiquetaEliminacion nota />
+                        </div>
+                      )}
+</>
+)}
 
                       {estadoMostrado === "PENDIENTE_APROBACION" &&
                         news.requestedEstado === "BORRADOR" && (
@@ -756,6 +781,15 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                   </div>
 
                   <div className="news-actions-cell">
+{news.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(news)}
+  onEliminar={() => handleConfirmDeleteClick(news.id)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                     {isRejected ? (
                       <>
                         <button
@@ -849,7 +883,11 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                         </svg>
                       )}
                     </button>
-                  </div>
+                  
+{esDescartable(news) && <BotonADescartar onClick={() => papelera.descartarItem(news)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
                 </div>
               );
             })

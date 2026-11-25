@@ -55,3 +55,10 @@
   background: #f1ecfe;
   color: #6d3fd8;
 }
+
+/* Avisos que acompañan al estado (por ejemplo "Actualización pendiente"): la misma etiqueta, un poco más chica. */
+.etiqueta-estado.es-nota {
+  gap: 5px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+}

@@ -1,9 +1,11 @@
+import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { EtiquetaModalidad } from "../../components/ui/EtiquetaCategoria";
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada, sinPapelera } from "../../utils/publicacion.js";
 import { AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -196,9 +198,9 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
 
   const filteredCapacitaciones = useMemo(() => {
     const query = search.trim().toLocaleLowerCase('es');
-    return capacitacionesVisibles.filter((training) => {
+    return (statusFilter === 'PAPELERA' ? capacitacionesVisibles.filter((x) => x?.enPapelera) : sinPapelera(capacitacionesVisibles)).filter((training) => {
       const matchesStatus =
-        statusFilter === 'TODOS' ||
+        statusFilter === 'TODOS' || statusFilter === 'PAPELERA' ||
         (statusFilter === 'PUBLICADO' ? estaPublicadoEnPortal(training) : training.estado === statusFilter) ||
         (statusFilter === 'PENDIENTE_APROBACION' && Boolean(training.solicitudEliminacion));
       const searchableContent = [
@@ -221,13 +223,14 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
 
   const counts = useMemo(
     () => ({
-      pending: capacitacionesVisibles.filter(
+      pending: sinPapelera(capacitacionesVisibles).filter(
         (training) => training.estado === 'PENDIENTE_APROBACION' || Boolean(training.solicitudEliminacion)
       ).length,
-      approved: capacitacionesVisibles.filter((training) => training.estado === 'APROBADO').length,
-      published: capacitacionesVisibles.filter(estaPublicadoEnPortal).length,
-      rejected: capacitacionesVisibles.filter((training) => training.estado === 'RECHAZADO').length,
-      archived: capacitacionesVisibles.filter((training) => training.estado === 'ARCHIVADO').length,
+      approved: sinPapelera(capacitacionesVisibles).filter((training) => training.estado === 'APROBADO').length,
+      published: sinPapelera(capacitacionesVisibles).filter(estaPublicadoEnPortal).length,
+      rejected: sinPapelera(capacitacionesVisibles).filter((training) => training.estado === 'RECHAZADO').length,
+      archived: sinPapelera(capacitacionesVisibles).filter((training) => training.estado === 'ARCHIVADO').length,
+      papelera: capacitacionesVisibles.filter((training) => training.enPapelera).length,
     }),
     [capacitacionesVisibles],
   );
@@ -378,7 +381,8 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
           { clave: "PUBLICADO", tipo: "publicado", cuenta: counts.published },
           { clave: "RECHAZADO", tipo: "rechazado", cuenta: counts.rejected },
           { clave: "ARCHIVADO", tipo: "archivado", cuenta: counts.archived },
-        ]}
+          { clave: "PAPELERA", tipo: "papelera", cuenta: counts.papelera },
+      ]}
       />
 
       <section className="dashboard-card-admin admin-training-card" aria-labelledby="admin-training-list-title">
@@ -409,7 +413,8 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
           </label>
         </div>
 
-        <div className="admin-training-table-wrap">
+        {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
+<div className="admin-training-table-wrap">
           <table className="admin-training-table">
             <thead>
               <tr>
@@ -455,21 +460,27 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                       <td data-label="Fechas / modalidad">
                         <div className="admin-training-meta-cell">
                           <span><CalendarDays size={14} />{formatPeriod(training)}</span>
-                          <small>{training.modalidad || 'Modalidad a confirmar'}</small>
+                          <EtiquetaModalidad modalidad={training.modalidad} />
                         </div>
                       </td>
                       <td data-label="Estado">
-                        {training.solicitudEliminacion ? (
-                          <EtiquetaEliminacion />
-                        ) : (
-                          <>
+                        {training.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
                             <EtiquetaEstado
                               estado={training.estadoVista || training.estado || 'BORRADOR'}
                               texto={STATUS_LABELS[training.estadoVista || training.estado] || training.estado || 'Sin estado'}
                             />
                             <SiguePublicado item={training} activo={statusFilter === 'PUBLICADO'} />
-                          </>
-                        )}
+<NotaPapelera item={training} />
+                          {training.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
+                        </>
+)}
                       </td>
                     </tr>
                   ))

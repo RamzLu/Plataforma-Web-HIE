@@ -1,3 +1,4 @@
+import { EtiquetaTipo } from "../../components/ui/EtiquetaCategoria";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
@@ -15,10 +16,14 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 import SiguePublicado from "../../components/cms/SiguePublicado";
-import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { textoDeEstado } from "../../components/ui/estados.js";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarEspecialidad, restaurarEspecialidad } from "../../api/especialidades.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
 
 const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) => {
@@ -165,6 +170,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       if (respuesta?.solicitudEliminacion) {
         toast.success(respuesta.message, { duration: 6000 });
         setShowDeleteModal(false);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        cargarDatos();
         return;
       }
       const tipo = itemAEliminar.esServicio ? "servicio" : "especialidad";
@@ -186,9 +193,20 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     }
   };
 
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarEspecialidad(item.id, { esServicio: item.esServicio }),
+    restaurar: (item) => restaurarEspecialidad(item.id, { esServicio: item.esServicio }),
+    recargar: cargarDatos,
+  });
+
   // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
-  const cuentas = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
+  const cuentas = { PAPELERA: 0, PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
   especialidades.forEach((esp) => {
+    if (esp.enPapelera) {
+      cuentas.PAPELERA++;
+      return;
+    }
     const e = (esp.estado || "PUBLICADO").toUpperCase();
     if (estaPublicadoEnPortal(esp)) cuentas.PUBLICADOS++;
     if (e === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
@@ -197,9 +215,10 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   });
 
   const datosFiltrados = especialidades.filter((esp) => {
+    if (activeTab === "PAPELERA" ? !esp.enPapelera : esp.enPapelera) return false;
     const estadoItem = (esp.estado || "PUBLICADO").toUpperCase();
     let matchEstado = false;
-    if (activeTab === "TODOS") {
+    if (activeTab === "TODOS" || activeTab === "PAPELERA") {
       matchEstado = true;
     } else if (activeTab === "PUBLICADOS") {
       matchEstado = estaPublicadoEnPortal(esp);
@@ -240,7 +259,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                       { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
                       { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
                       { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
-                    ]}
+                      { clave: "PAPELERA", tipo: "papelera", cuenta: cuentas.PAPELERA },
+          ]}
                   />
       </div>
 
@@ -271,14 +291,15 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
           }}
         />
 
-      <div className="cms-news-table-container">
+      {activeTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-news-table-container">
         <div className="activity-table-head news-table-head" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <div style={{ flex: 1.8 }}>CONTENIDO</div>
           <div style={{ flex: 1.2 }}>UBICACIÓN</div>
           <div style={{ flex: 1 }}>HORARIOS</div>
           <div style={{ flex: 1 }}>CLASIFICACIÓN</div>
-          <div style={{ width: "120px", textAlign: "center" }}>ESTADO</div>
-          <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
+          <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
+          <div style={{ width: "140px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
         <div className="activity-table-body">
@@ -340,24 +361,36 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                 </div>
 
                 <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-                  <span style={{ 
-                    backgroundColor: esp.esServicio ? "#e0f2fe" : "#ede9fe", 
-                    color: esp.esServicio ? "#0284c7" : "#6d28d9", 
-                    padding: "6px 14px", 
-                    borderRadius: "8px", 
-                    fontSize: "0.85rem", 
-                    fontWeight: "700" 
-                  }}>
-                    {esp.esServicio ? "SERVICIO CLAVE" : "ESPECIALIDAD"}
-                  </span>
+                  <EtiquetaTipo esServicio={esp.esServicio} />
                 </div>
 
-                <div style={{ width: "130px", textAlign: "center" }}>
-                  <EtiquetaEstado estado={esp.estadoVista || esp.estado} texto={textoDeEstado(esp.estadoVista || esp.estado)} />
+                <div style={{ width: "200px", textAlign: "center" }}>
+                  {esp.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+<EtiquetaEstado estado={esp.estadoVista || esp.estado} texto={textoDeEstado(esp.estadoVista || esp.estado)} />
                   <SiguePublicado item={esp} activo={activeTab === "PUBLICADOS"} />
+<NotaPapelera item={esp} />
+                  {esp.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
-                <div style={{ width: "100px", display: "flex", justifyContent: "center", gap: "10px" }}>
+                <div style={{ width: "140px", display: "flex", justifyContent: "center", gap: "10px" }}>
+{esp.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(esp)}
+  onEliminar={() => confirmDelete(esp)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                   <button type="button" onClick={() => handleOpenEdit(esp)} className="news-action-btn-edit" title="Editar">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -372,7 +405,11 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                       <line x1="14" y1="11" x2="14" y2="17"></line>
                     </svg>
                   </button>
-                </div>
+                
+{esDescartable(esp) && <BotonADescartar onClick={() => papelera.descartarItem(esp)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
 
               </div>
             ))

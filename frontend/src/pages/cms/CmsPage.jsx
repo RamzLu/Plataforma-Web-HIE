@@ -113,6 +113,7 @@ const fetchNoticias = async () => {
         previousEstado: noticia.previousEstado || null,
         isDraft: noticia.isDraft || false,
         visibleEnPortal: Boolean(noticia.visibleEnPortal),
+        solicitudEliminacion: noticia.solicitudEliminacion || null,
         tituloPublicado: noticia.tituloPublicado || null,
         images: noticia.images || [],
         editor: noticia.editor || "Editor CMS",

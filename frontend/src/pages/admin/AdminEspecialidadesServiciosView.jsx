@@ -1,10 +1,12 @@
+import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { EtiquetaTipo } from "../../components/ui/EtiquetaCategoria";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada, sinPapelera } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -49,6 +51,9 @@ const mapItemFromBackend = (item) => {
     type: item.esServicio ? 'Servicio' : 'Especialidad',
     esServicio: Boolean(item.esServicio),
     solicitudEliminacion: item.solicitudEliminacion || null,
+    enPapelera: Boolean(item.enPapelera),
+    papeleraDesde: item.papeleraDesde || null,
+    papeleraVenceEl: item.papeleraVenceEl || null,
     location: item.ubicacion || 'Sin ubicación asignada',
     description: item.descripcion || '',
     hours: item.horarios || '',
@@ -151,10 +156,10 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
 
   const filteredItems = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
-    return items.filter((item) => {
+    return (statusFilter === 'PAPELERA' ? items.filter((x) => x?.enPapelera) : sinPapelera(items)).filter((item) => {
       const matchesType = typeFilter === 'Todos' || item.type === typeFilter;
       const matchesStatus =
-        statusFilter === 'Todos' ||
+        statusFilter === 'Todos' || statusFilter === 'PAPELERA' ||
         (statusFilter === 'PENDIENTE' &&
           (item.status === 'Pendiente de aprobación' || Boolean(item.solicitudEliminacion))) ||
         (statusFilter === 'PUBLICADO' && estaPublicadoEnPortal(item)) ||
@@ -229,12 +234,13 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
     }
   };
 
-  const pendingCount = items.filter(
+  const pendingCount = sinPapelera(items).filter(
     (item) => item.status === 'Pendiente de aprobación' || Boolean(item.solicitudEliminacion)
   ).length;
-  const publishedCount = items.filter(estaPublicadoEnPortal).length;
-  const rejectedCount = items.filter((item) => item.status === 'Rechazado').length;
-  const archivedCount = items.filter((item) => item.status === 'Archivado').length;
+  const publishedCount = sinPapelera(items).filter(estaPublicadoEnPortal).length;
+  const rejectedCount = sinPapelera(items).filter((item) => item.status === 'Rechazado').length;
+  const archivedCount = sinPapelera(items).filter((item) => item.status === 'Archivado').length;
+  const papeleraCount = items.filter((item) => item.enPapelera).length;
 
   const requisitosLista = selectedItem
     ? String(selectedItem.requirements || '').split('\n').map((r) => r.trim()).filter(Boolean)
@@ -288,7 +294,8 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
           { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
           { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
           { clave: "ARCHIVADO", tipo: "archivado", cuenta: archivedCount },
-        ]}
+          { clave: "PAPELERA", tipo: "papelera", cuenta: papeleraCount },
+      ]}
       />
 
       <section className="admin-es-card" aria-labelledby="admin-es-list-title">
@@ -323,7 +330,8 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
           </label>
         </div>
 
-        <div className="admin-es-table-wrap">
+        {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
+<div className="admin-es-table-wrap">
           {loading ? (
             <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
               <div
@@ -377,17 +385,23 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                         </small>
                       </div>
                     </td>
-                    <td data-label="Tipo">{item.type}</td>
+                    <td data-label="Tipo"><EtiquetaTipo esServicio={item.esServicio} /></td>
                     <td data-label="Ubicación">{item.location}</td>
                     <td data-label="Estado">
-                      {item.solicitudEliminacion ? (
-                        <EtiquetaEliminacion />
-                      ) : (
-                        <>
+                      {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
                           <EtiquetaEstado estado={item.statusVista || item.status} texto={item.statusVista || item.status} />
                           <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+<NotaPapelera item={item} />
+                          {item.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
                         </>
-                      )}
+)}
                     </td>
                   </tr>
                 ))}

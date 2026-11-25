@@ -1,10 +1,11 @@
+import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada, sinPapelera } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -153,6 +154,9 @@ const normalizeResidenciaRecord = (raw) => {
     cambios: Array.isArray(raw.cambios) ? raw.cambios : [],
     esActualizacion: Boolean(raw.esActualizacion),
     visibleEnPortal: Boolean(raw.visibleEnPortal),
+    enPapelera: Boolean(raw.enPapelera),
+    papeleraDesde: raw.papeleraDesde || null,
+    papeleraVenceEl: raw.papeleraVenceEl || null,
     tituloPublicado: raw.tituloPublicado || null,
     versionPublicada: raw.versionPublicada || null,
   };
@@ -208,14 +212,15 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
   const counts = useMemo(
     () => ({
       // Las solicitudes de eliminación también esperan respuesta del admin: cuentan como pendientes.
-      pending: residenciasVisibles.filter(
+      pending: sinPapelera(residenciasVisibles).filter(
         (r) => r?.estado === 'PENDIENTE_APROBACION' || Boolean(r?.solicitudEliminacion)
       ).length,
-      approved: residenciasVisibles.filter((r) => r?.estado === 'APROBADO').length,
-      published: residenciasVisibles.filter(estaPublicadoEnPortal).length,
-      scheduled: residenciasVisibles.filter((r) => r?.estado === 'PROGRAMADO').length,
-      rejected: residenciasVisibles.filter((r) => r?.estado === 'RECHAZADO').length,
-      archived: residenciasVisibles.filter((r) => r?.estado === 'ARCHIVADO').length,
+      approved: sinPapelera(residenciasVisibles).filter((r) => r?.estado === 'APROBADO').length,
+      published: sinPapelera(residenciasVisibles).filter(estaPublicadoEnPortal).length,
+      scheduled: sinPapelera(residenciasVisibles).filter((r) => r?.estado === 'PROGRAMADO').length,
+      rejected: sinPapelera(residenciasVisibles).filter((r) => r?.estado === 'RECHAZADO').length,
+      archived: sinPapelera(residenciasVisibles).filter((r) => r?.estado === 'ARCHIVADO').length,
+      papelera: residenciasVisibles.filter((r) => r?.enPapelera).length,
     }),
     [residenciasVisibles],
   );
@@ -228,9 +233,9 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
 
   const filteredResidencias = useMemo(() => {
     const query = (search || '').trim().toLocaleLowerCase('es');
-    return residenciasVisibles.filter((item) => {
+    return (statusFilter === 'PAPELERA' ? residenciasVisibles.filter((x) => x?.enPapelera) : sinPapelera(residenciasVisibles)).filter((item) => {
       const matchesStatus =
-        statusFilter === 'TODOS' ||
+        statusFilter === 'TODOS' || statusFilter === 'PAPELERA' ||
         (statusFilter === 'PUBLICADO' ? estaPublicadoEnPortal(item) : item?.estado === statusFilter) ||
         (statusFilter === 'PENDIENTE_APROBACION' && Boolean(item?.solicitudEliminacion));
       const searchableContent = [
@@ -460,7 +465,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
           { clave: "PUBLICADO", tipo: "publicado", cuenta: counts.published },
           { clave: "RECHAZADO", tipo: "rechazado", cuenta: counts.rejected },
           { clave: "ARCHIVADO", tipo: "archivado", cuenta: counts.archived },
-        ]}
+          { clave: "PAPELERA", tipo: "papelera", cuenta: counts.papelera },
+      ]}
       />
 
       <section
@@ -495,7 +501,8 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
           </label>
         </div>
 
-        <div className="admin-res-table-wrap-admin">
+        {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
+<div className="admin-res-table-wrap-admin">
           <table className="admin-res-table-admin">
             <thead>
               <tr>
@@ -600,17 +607,23 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                       </td>
 
                       <td data-label="Estado">
-                        {item.solicitudEliminacion ? (
-                          <EtiquetaEliminacion />
-                        ) : (
-                          <>
+                        {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
                             <EtiquetaEstado
                               estado={item?.estadoVista || item?.estado || 'BORRADOR'}
                               texto={STATUS_LABELS[item?.estadoVista || item?.estado] || item?.estado || 'Sin estado'}
                             />
                             <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
-                          </>
-                        )}
+<NotaPapelera item={item} />
+                          {item.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
+                        </>
+)}
                       </td>
                     </tr>
                   );

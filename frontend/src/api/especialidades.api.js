@@ -9,3 +9,5 @@ export const updateEspecialidad = especialidades.actualizar;
 export const revisarEspecialidad = (id, decision, motivo = "", esServicio = false) =>
   especialidades.revisar(id, decision, motivo, { esServicio });
 export const deleteEspecialidad = (id, esServicio = false) => especialidades.eliminar(id, { esServicio });
+export const descartarEspecialidad = especialidades.descartar;
+export const restaurarEspecialidad = especialidades.restaurar;
