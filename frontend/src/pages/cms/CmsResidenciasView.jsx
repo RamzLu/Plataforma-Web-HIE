@@ -79,6 +79,7 @@ import { descartarResidencia, restaurarResidencia } from "../../api/residencias.
 import BarraFiltros from "../../components/ui/BarraFiltros";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { textoDeEstado } from "../../components/ui/estados.js";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de residencias de la BD
@@ -146,6 +147,9 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   };
 
   const [formData, setFormData] = useState(initialForm);
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { formData, bannerSeleccionado, eliminarBannerFlag, documentoSeleccionado, eliminarDocumentoFlag, fechaProgramada });
 
   // Cargar residencias desde la BD
   // Trae la lista y aplica el resultado al responder la API, así se puede llamar desde un efecto.
@@ -339,7 +343,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
 
   // Control de cierre modal
   const handleCloseAttempt = () => {
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowModal(false);
@@ -355,7 +359,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Guardar en la BD (Crear o Actualizar)
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
-    if (editingId && !hasUnsavedChanges) {
+    if (editingId && !hayCambios) {
       return toast.error("No se han detectado cambios para actualizar.");
     }
     if (!formData.nombre.trim()) {
@@ -1556,8 +1560,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving || (Boolean(editingId) && !hasUnsavedChanges)}
-                  title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
+                  disabled={isSaving || (Boolean(editingId) && !hayCambios)}
+                  title={editingId && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span

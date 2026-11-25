@@ -32,6 +32,7 @@ import { usePapelera } from "../../hooks/usePapelera";
 import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import { descartarProfesional, restaurarProfesional } from "../../api/profesionales.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -103,6 +104,9 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
   });
   
   const [archivoFoto, setArchivoFoto] = useState(null);
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { formData, archivoFoto });
   const [fotoPreview, setFotoPreview] = useState(null);
   const [imageSrc, setImageSrc] = useState(null);       
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -186,7 +190,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
   const paginacion = usePaginacion(vistaPublicados(profesionalesFiltrados, activeTab === "PUBLICADOS"), 10, [activeTab, searchTerm, filtroTipo]);
 
   const handleCloseAttempt = () => {
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setIsModalOpen(false);
@@ -308,7 +312,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (editingId && !hasUnsavedChanges) {
+    if (editingId && !hayCambios) {
       return toast.error("No se han detectado cambios para actualizar.");
     }
     setIsSaving(true);
@@ -731,8 +735,8 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving || (Boolean(editingId) && !hasUnsavedChanges)}
-                  title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
+                  disabled={isSaving || (Boolean(editingId) && !hayCambios)}
+                  title={editingId && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>

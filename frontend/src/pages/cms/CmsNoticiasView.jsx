@@ -50,6 +50,7 @@ import { usePapelera } from "../../hooks/usePapelera";
 import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import { descartarNoticia, restaurarNoticia } from "../../api/noticias.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 registerLocale("es", es);
 
@@ -123,6 +124,9 @@ const CmsNoticiasView = ({
   const [fechaProgramada, setFechaProgramada] = useState(null);
   const [imagenesUrls, setImagenesUrls] = useState([]);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { titulo, cuerpoHtml, categoria, estado, fechaProgramada, imagenesUrls, archivosSeleccionados });
   const [saving, setSaving] = useState(false);
 
   const [noticiaAEliminar, setNoticiaAEliminar] = useState(null);
@@ -249,7 +253,7 @@ const CmsNoticiasView = ({
 
   const handleCloseAttempt = () => {
     if (saving) return;
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowModal(false);
@@ -342,7 +346,7 @@ const CmsNoticiasView = ({
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
 
-    if ((editingId || correctionNews) && !hasUnsavedChanges) {
+    if ((editingId || correctionNews) && !hayCambios) {
       toast.error("No se han detectado cambios para actualizar.");
       setShowUnsavedModal(false);
       return;
@@ -1386,8 +1390,8 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                         color: "#0c2340",
                       }}
                       onClick={(e) => handleSave(e, "BORRADOR", true)}
-                      disabled={saving || !hasUnsavedChanges}
-                      title={!hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
+                      disabled={saving || !hayCambios}
+                      title={!hayCambios ? "No se han detectado cambios para actualizar" : ""}
                     >
                       GUARDAR BORRADOR
                     </button>
@@ -1400,8 +1404,8 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                         alignItems: "center",
                         gap: "8px",
                       }}
-                      disabled={saving || !hasUnsavedChanges}
-                      title={!hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
+                      disabled={saving || !hayCambios}
+                      title={!hayCambios ? "No se han detectado cambios para actualizar" : ""}
                     >
                       {saving ? (
                         <span
@@ -1448,8 +1452,8 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                     type="submit"
                     className="btn-cerrar-rojo"
                     style={{ backgroundColor: "#2b5b94" }}
-                    disabled={saving || (Boolean(editingId) && !hasUnsavedChanges)}
-                    title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
+                    disabled={saving || (Boolean(editingId) && !hayCambios)}
+                    title={editingId && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
                   >
                     {saving ? (
                       <span

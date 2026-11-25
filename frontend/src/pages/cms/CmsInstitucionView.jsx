@@ -22,6 +22,7 @@ import {
   updateRedesSociales,
   updateSedeCentral,
 } from "../../api/autoridades.api.js";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 // Proporción exacta de la tarjeta de autoridad en el portal público (331.73 x 260)
 const ASPECT_RATIO_AUTORIDAD = 332 / 260;
@@ -100,6 +101,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
   // --- Estado de Cambios Sin Guardar ---
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { autoridadForm });
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
 
   // --- Estado de Arrastre (Drag and Drop) ---
@@ -317,26 +321,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   };
 
   // --- COMPROBAR CAMBIOS PENDIENTES ---
-  const checkHasChanges = () => {
-    if (!editingAutoridad) {
-      return !!(
-        autoridadForm.nombre.trim() ||
-        autoridadForm.cargo.trim() ||
-        autoridadForm.descripcion.trim() ||
-        autoridadForm.archivo
-      );
-    }
-    return (
-      autoridadForm.nombre !== (editingAutoridad.nombre || "") ||
-      autoridadForm.cargo !== (editingAutoridad.cargo || "") ||
-      autoridadForm.descripcion !== (editingAutoridad.descripcion || "") ||
-      autoridadForm.archivo !== null
-    );
-  };
-
   const handleCloseAttempt = () => {
     if (isSaving) return;
-    if (hasUnsavedChanges || checkHasChanges()) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowAutoridadModal(false);
@@ -442,7 +429,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   // --- GUARDAR AUTORIDAD (CREAR O ACTUALIZAR) ---
   const handleSaveAutoridadModal = async (e) => {
     e.preventDefault();
-    if (editingAutoridad && !hasUnsavedChanges && !checkHasChanges()) {
+    if (editingAutoridad && !hayCambios) {
       toast.error("No se detectaron cambios para actualizar.");
       return;
     }
@@ -582,7 +569,17 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   };
 
   // --- GUARDAR REDES SOCIALES ---
+  // Redes sociales: hay cambios si algún enlace quedó distinto del guardado (sin contar espacios al principio o al final).
+  const redesTienenCambios = ["facebook", "instagram"].some(
+    (red) => (tempSocial[red] || "").trim() !== (socialData[red] || "").trim()
+  );
+
   const handleSaveSocial = async () => {
+    if (!redesTienenCambios) {
+      toast.error("No se detectaron cambios para actualizar.");
+      return;
+    }
+
     const fbRaw = (tempSocial.facebook || "").trim();
     const igRaw = (tempSocial.instagram || "").trim();
 
@@ -835,7 +832,12 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
                 <button className="btn-inst-cancel" onClick={() => setIsEditingSocial(false)} disabled={isSaving}>
                   Cancelar
                 </button>
-                <button className="btn-inst-save" onClick={handleSaveSocial} disabled={isSaving}>
+                <button
+                  className="btn-inst-save"
+                  onClick={handleSaveSocial}
+                  disabled={isSaving || !redesTienenCambios}
+                  title={!redesTienenCambios ? "No se han detectado cambios para actualizar" : ""}
+                >
                   <Save size={15} strokeWidth={2.5} /> {isSaving ? "..." : "Guardar"}
                 </button>
               </div>
@@ -1064,8 +1066,8 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving || (Boolean(editingAutoridad) && !hasUnsavedChanges && !checkHasChanges())}
-                  title={editingAutoridad && !hasUnsavedChanges && !checkHasChanges() ? "No se han detectado cambios para actualizar" : ""}
+                  disabled={isSaving || (Boolean(editingAutoridad) && !hayCambios)}
+                  title={editingAutoridad && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>

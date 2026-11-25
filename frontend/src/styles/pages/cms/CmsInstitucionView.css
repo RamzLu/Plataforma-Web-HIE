@@ -86,7 +86,12 @@
   white-space: nowrap;
   transition: background 0.2s;
 }
-:where(.panel-scope) .btn-inst-save:hover { background: var(--color-emerald-600); }
+:where(.panel-scope) .btn-inst-save:hover:not(:disabled) { background: var(--color-emerald-600); }
+/* Deshabilitado (sin cambios para guardar): mismo criterio que los botones de guardar de los modales. */
+:where(.panel-scope) .btn-inst-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 
 :where(.panel-scope) .btn-inst-cancel {
   display: inline-flex;

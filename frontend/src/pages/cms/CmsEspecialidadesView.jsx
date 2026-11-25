@@ -25,6 +25,7 @@ import { usePapelera } from "../../hooks/usePapelera";
 import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import { descartarEspecialidad, restaurarEspecialidad } from "../../api/especialidades.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) => {
   const [especialidades, setEspecialidades] = useState([]);
@@ -48,6 +49,9 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     esServicio: false, estado: "PUBLICADO"
   });
 
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { formData });
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState(null);
 
@@ -68,7 +72,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   useEffect(() => { traerDatos(); }, []);
 
   const handleCloseAttempt = () => {
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowModal(false);
@@ -116,7 +120,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (editingId && !hasUnsavedChanges) {
+    if (editingId && !hayCambios) {
       return toast.error("No se han detectado cambios para actualizar.");
     }
     if (!formData.nombre.trim()) return toast.error("El nombre es obligatorio.");
@@ -513,8 +517,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving || (Boolean(editingId) && !hasUnsavedChanges)}
-                  title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
+                  disabled={isSaving || (Boolean(editingId) && !hayCambios)}
+                  title={editingId && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>

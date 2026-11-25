@@ -11,6 +11,7 @@ import {
   resolveGraphicImageUrl,
 } from "../../utils/contenidoGraficoPresets.js";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 const CARRUSEL_INICIO_ASPECT = 1501 / 641;
 const PACIENTES_INICIO_ASPECT = 4 / 3;
@@ -601,6 +602,9 @@ export const CmsContenidoGraficoEditModal = ({
   const [enlaceUrl, setEnlaceUrl] = useState("");
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { imagenes, titulo, parrafoDescripcion, textoBoton, enlaceUrl, altText, textoSuperpuesto });
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [draggedIdx, setDraggedIdx] = useState(null);
 
@@ -801,7 +805,7 @@ export const CmsContenidoGraficoEditModal = ({
 
   const handleCloseAttempt = () => {
     if (isSaving) return;
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       onClose();
@@ -998,7 +1002,7 @@ export const CmsContenidoGraficoEditModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSaving) return;
-    if (!hasUnsavedChanges) {
+    if (!hayCambios) {
       toast.error("No se detectaron cambios para actualizar.");
       return;
     }
@@ -2478,8 +2482,8 @@ export const CmsContenidoGraficoEditModal = ({
               type="submit"
               className="btn-cerrar-rojo"
               style={{ backgroundColor: "#2b5b94" }}
-              disabled={isSaving || !hasUnsavedChanges}
-              title={!hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
+              disabled={isSaving || !hayCambios}
+              title={!hayCambios ? "No se han detectado cambios para actualizar" : ""}
             >
               {isSaving ? (
                 <span

@@ -23,6 +23,7 @@ import { usePapelera } from "../../hooks/usePapelera";
 import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import { descartarDocumento, restaurarDocumento } from "../../api/documentos.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 // El servidor puede enviar la fecha como texto ISO (2026-11-13T16:13:12Z); se muestra como dd/mm/aaaa.
 const fechaLegible = (valor) => {
@@ -78,6 +79,9 @@ const CmsDocsView = ({
   const [rejectionReasonActual, setRejectionReasonActual] = useState("");
   const [archivo, setArchivo] = useState(null);
   const [nombreArchivoActual, setNombreArchivoActual] = useState("");
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { titulo, categoria, estado, archivo, nombreArchivoActual });
   const [previewUrl, setPreviewUrl] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -132,7 +136,7 @@ const CmsDocsView = ({
   };
 
   const handleCloseAttempt = () => {
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowModal(false);
@@ -256,7 +260,7 @@ const CmsDocsView = ({
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
 
-    if (editingId && !hasUnsavedChanges) {
+    if (editingId && !hayCambios) {
       toast.error("No se han detectado cambios para actualizar.");
       setShowUnsavedModal(false);
       return;
@@ -821,8 +825,8 @@ const CmsDocsView = ({
                 type="submit" 
                 className="btn-primary-docs" 
                 onClick={handleSave} 
-                disabled={saving || (Boolean(editingId) && !hasUnsavedChanges)}
-                title={editingId && !hasUnsavedChanges ? "No se han detectado cambios para actualizar" : ""}
+                disabled={saving || (Boolean(editingId) && !hayCambios)}
+                title={editingId && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
               >
                 {saving 
                   ? (editingId ? "ACTUALIZANDO..." : "GUARDANDO...") 
