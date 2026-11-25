@@ -1,0 +1,61 @@
+/* Papelera de lo rechazado (CMS). */
+:where(.panel-scope) .papelera-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+:where(.panel-scope) .papelera-btn:disabled {
+  cursor: progress;
+  opacity: 0.5;
+}
+
+:where(.panel-scope) .papelera-btn.is-descartar {
+  color: var(--color-slate-600);
+}
+
+:where(.panel-scope) .papelera-btn.is-descartar:hover:not(:disabled) {
+  background-color: var(--color-slate-100);
+}
+
+:where(.panel-scope) .papelera-btn.is-restaurar {
+  color: var(--color-green-700);
+}
+
+:where(.panel-scope) .papelera-btn.is-restaurar:hover:not(:disabled) {
+  background-color: var(--color-green-100);
+}
+
+:where(.panel-scope) .papelera-btn.is-eliminar {
+  color: var(--color-rose-600);
+}
+
+:where(.panel-scope) .papelera-btn.is-eliminar:hover:not(:disabled) {
+  background-color: #ffe4e6;
+}
+
+:where(.panel-scope) .papelera-aviso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  border: 1px solid #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
+}
+
+:where(.panel-scope) .papelera-aviso p {
+  margin: 0;
+  color: var(--color-slate-600);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}

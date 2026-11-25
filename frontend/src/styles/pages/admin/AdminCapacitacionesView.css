@@ -366,13 +366,13 @@
   gap: 6px;
 }
 
-:where(.panel-scope) .admin-training-meta-cell > span:not(:where(.vista-portal *)) {
+:where(.panel-scope) .admin-training-meta-cell > span:not(.etiqueta-categoria):not(:where(.vista-portal *)) {
   display: flex;
   align-items: flex-start;
   gap: 6px;
 }
 
-:where(.panel-scope) .admin-training-meta-cell svg:not(:where(.vista-portal *)) {
+:where(.panel-scope) .admin-training-meta-cell > span:not(.etiqueta-categoria) svg:not(:where(.vista-portal *)) {
   flex: 0 0 auto;
   margin-top: 2px;
   color: var(--color-slate-500);

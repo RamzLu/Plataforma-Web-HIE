@@ -1,15 +1,13 @@
+import { EtiquetaModalidad } from "../../components/ui/EtiquetaCategoria";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import {
-  BookOpen,
   Video,
   FileText,
   Upload,
   X,
-  Users,
-  Globe,
   PlayCircle,
   Image as ImageIcon,
 } from "lucide-react";
@@ -26,8 +24,11 @@ import {
 } from "../../components/cms/CmsModals";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
-import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarCapacitacion, restaurarCapacitacion } from "../../api/capacitaciones.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
 import keycloak from "../../config/keycloak";
 import {
@@ -452,9 +453,20 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   };
 
   // Filtrado de datos
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarCapacitacion(item.id),
+    restaurar: (item) => restaurarCapacitacion(item.id),
+    recargar: cargarCapacitaciones,
+  });
+
   // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
-  const cuentas = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, BORRADORES: 0, ARCHIVADOS: 0 };
+  const cuentas = { PAPELERA: 0, PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, BORRADORES: 0, ARCHIVADOS: 0 };
   capacitaciones.forEach((item) => {
+    if (item.enPapelera) {
+      cuentas.PAPELERA++;
+      return;
+    }
     if (estaPublicadoEnPortal(item)) cuentas.PUBLICADOS++;
     if (item.estado === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
     else if (item.estado === "RECHAZADO") cuentas.RECHAZADOS++;
@@ -463,8 +475,9 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
   });
 
   const datosFiltrados = capacitaciones.filter((item) => {
+    if (activeTab === "PAPELERA" ? !item.enPapelera : item.enPapelera) return false;
     const matchEstado =
-      activeTab === "TODOS"
+      activeTab === "TODOS" || activeTab === "PAPELERA"
         ? true
         : activeTab === "PUBLICADOS"
         ? estaPublicadoEnPortal(item)
@@ -504,7 +517,8 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
                     { clave: "BORRADORES", tipo: "borrador", cuenta: cuentas.BORRADORES },
                     { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
-                  ]}
+                    { clave: "PAPELERA", tipo: "papelera", cuenta: cuentas.PAPELERA },
+          ]}
                 />
       </div>
 
@@ -540,7 +554,8 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       />
 
       {/* Contenedor de la tabla idéntico al estilo de Profesionales y Noticias */}
-      <div className="cms-news-table-container">
+      {activeTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-news-table-container">
         <div
           className="activity-table-head news-table-head"
           style={{ display: "flex", gap: "10px", alignItems: "center" }}
@@ -549,7 +564,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
           <div style={{ flex: 1 }}>MODALIDAD</div>
           <div style={{ flex: 1.2 }}>FECHA Y LUGAR</div>
           <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
-          <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
+          <div style={{ width: "140px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
         <div className="activity-table-body">
@@ -658,24 +673,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
 
                 {/* Columna MODALIDAD */}
                 <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-                  <span
-                    className={`badge-modalidad ${
-                      item.modalidad === "Virtual"
-                        ? "virtual"
-                        : item.modalidad === "Híbrida"
-                        ? "hibrida"
-                        : "presencial"
-                    }`}
-                  >
-                    {item.modalidad === "Virtual" ? (
-                      <Globe size={13} />
-                    ) : item.modalidad === "Híbrida" ? (
-                      <Users size={13} />
-                    ) : (
-                      <BookOpen size={13} />
-                    )}
-                    {item.modalidad}
-                  </span>
+                  <EtiquetaModalidad modalidad={item.modalidad} />
                 </div>
 
                 {/* Columna FECHA Y LUGAR */}
@@ -752,6 +750,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     <span className="cap-motivo-rechazo">Motivo: {item.motivoRechazo}</span>
                   )}
                   <SiguePublicado item={item} activo={activeTab === "PUBLICADOS"} />
+<NotaPapelera item={item} />
                   {item.solicitudEliminacion && (
                     <div style={{ marginTop: "4px" }}>
                       <EtiquetaEliminacion nota />
@@ -765,11 +764,20 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                 <div
                   className="news-actions-cell"
                   style={{
-                    width: "100px",
+                    width: "140px",
                     justifyContent: "center",
                     gap: "8px",
                   }}
                 >
+{item.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(item)}
+  onEliminar={() => confirmDelete(item)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                   <button
                     type="button"
                     onClick={() => handleOpenEdit(item)}
@@ -810,7 +818,11 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                       <line x1="14" y1="11" x2="14" y2="17"></line>
                     </svg>
                   </button>
-                </div>
+                
+{esDescartable(item) && <BotonADescartar onClick={() => papelera.descartarItem(item)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
               </div>
             ))
           )}

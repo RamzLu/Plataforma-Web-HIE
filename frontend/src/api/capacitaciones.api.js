@@ -9,3 +9,5 @@ export const createCapacitacion = capacitaciones.crear;
 export const updateCapacitacion = capacitaciones.actualizar;
 export const revisarCapacitacion = capacitaciones.revisar;
 export const deleteCapacitacion = capacitaciones.eliminar;
+export const descartarCapacitacion = capacitaciones.descartar;
+export const restaurarCapacitacion = capacitaciones.restaurar;

@@ -1,20 +1,19 @@
+import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
-import { invalidarListados } from "../../api/editorial.api.js";
+import EtiquetaCategoria, { EtiquetaTipo } from "../../components/ui/EtiquetaCategoria";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada } from "../../utils/publicacion.js";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada, sinPapelera } from "../../utils/publicacion.js";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Building2,
   CalendarDays,
   Check,
   RefreshCw,
   Search,
-  Stethoscope,
   X,
   XCircle,
   AlertTriangle,
@@ -56,6 +55,9 @@ const mapProfesionalFromBackend = (item) => {
     id: item.id,
     nombre: nombreCompleto,
     solicitudEliminacion: item.solicitudEliminacion || null,
+    enPapelera: Boolean(item.enPapelera),
+    papeleraDesde: item.papeleraDesde || null,
+    papeleraVenceEl: item.papeleraVenceEl || null,
     cargo: item.cargo || 'Profesional de planta',
     matricula: item.matricula || '',
     especialidad: item.especialidadNombre || 'Sin asignar',
@@ -166,9 +168,9 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
   const filteredProfesionales = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
-    return profesionales.filter((item) => {
+    return (statusFilter === 'PAPELERA' ? profesionales.filter((x) => x?.enPapelera) : sinPapelera(profesionales)).filter((item) => {
       const matchesStatus =
-        statusFilter === 'TODOS' ||
+        statusFilter === 'TODOS' || statusFilter === 'PAPELERA' ||
         (statusFilter === 'PENDIENTE' && Boolean(item.solicitudEliminacion)) ||
         (statusFilter === 'PUBLICADO'
           ? estaPublicadoEnPortal(item)
@@ -194,11 +196,12 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
   }, [profesionales, search, statusFilter, typeFilter]);
   const paginacion = usePaginacion(vistaPublicados(filteredProfesionales, statusFilter === 'PUBLICADO'), 10, [search, statusFilter, typeFilter]);
 
-  const pendingCount = profesionales.filter(
+  const pendingCount = sinPapelera(profesionales).filter(
     (item) => item.estado === 'PENDIENTE' || Boolean(item.solicitudEliminacion)
   ).length;
-  const rejectedCount = profesionales.filter((item) => item.estado === 'RECHAZADO').length;
-  const publishedCount = profesionales.filter(estaPublicadoEnPortal).length;
+  const rejectedCount = sinPapelera(profesionales).filter((item) => item.estado === 'RECHAZADO').length;
+  const publishedCount = sinPapelera(profesionales).filter(estaPublicadoEnPortal).length;
+  const papeleraCount = profesionales.filter((item) => item.enPapelera).length;
 
   const closeDetails = () => {
     setSelectedId(null);
@@ -272,10 +275,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
           <button
             type="button"
             className="admin-refresh-btn"
-            onClick={() => {
-              invalidarListados();
-              (() => cargarDatos(false))();
-            }}
+            onClick={() => cargarDatos(false)}
             disabled={loading}
           >
             <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
@@ -310,7 +310,8 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
           { clave: "PENDIENTE", tipo: "pendiente", cuenta: pendingCount },
           { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
           { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
-        ]}
+          { clave: "PAPELERA", tipo: "papelera", cuenta: papeleraCount },
+      ]}
       />
 
       <section className="admin-prof-card" aria-labelledby="admin-prof-list-title">
@@ -347,7 +348,8 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
           </label>
         </div>
 
-        <div className="admin-prof-table-wrap">
+        {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
+<div className="admin-prof-table-wrap">
           {loading ? (
             <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
               <div
@@ -411,8 +413,8 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                     </td>
                     <td data-label="Especialidad / área">
                       <div className="admin-prof-association-cell">
-                        <strong><Stethoscope size={14} />{item.especialidad}</strong>
-                        <span><Building2 size={14} />{item.area}</span>
+                        <EtiquetaCategoria categoria={item.especialidad} tono="gris" />
+                        <EtiquetaTipo esServicio={item.area === 'Servicio clave'} />
                       </div>
                     </td>
                     <td data-label="Estado">
@@ -425,6 +427,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                             texto={item.publicado || item.estadoVista ? 'Publicado' : estadoLabels[item.estado]}
                           />
                           <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+<NotaPapelera item={item} />
                           {item.solicitudEliminacion && (
                             <div style={{ marginTop: '4px' }}>
                               <EtiquetaEliminacion nota />

@@ -1,7 +1,8 @@
+import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
-import { invalidarListados } from "../../api/editorial.api.js";
+import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
 import '../../styles/components/admin/AdminRevisionModal.css';
-import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from '../../utils/publicacion.js';
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, sinPapelera } from '../../utils/publicacion.js';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
@@ -144,6 +145,9 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 requestedEstado: noticia.requestedEstado || null,
                 previousEstado: noticia.previousEstado || null,
                 solicitudEliminacion: noticia.solicitudEliminacion || null,
+                enPapelera: Boolean(noticia.enPapelera),
+                papeleraDesde: noticia.papeleraDesde || null,
+                papeleraVenceEl: noticia.papeleraVenceEl || null,
                 cambios: Array.isArray(noticia.cambios) ? noticia.cambios : [],
                 esActualizacion: Boolean(noticia.esActualizacion),
                 visibleEnPortal: Boolean(noticia.visibleEnPortal),
@@ -350,18 +354,19 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
   };
 
   // Las solicitudes de eliminación también esperan respuesta del admin: cuentan como pendientes.
-  const pendingCount = noticias.filter(
+  const pendingCount = sinPapelera(noticias).filter(
     (n) => n.estado === 'PENDIENTE_APROBACION' || Boolean(n.solicitudEliminacion)
   ).length;
-  const approvedCount = noticias.filter(
+  const approvedCount = sinPapelera(noticias).filter(
     (n) =>
       n.estado === 'APROBADO' ||
       n.estado === 'PROGRAMADO'
   ).length;
-  const publishedCount = noticias.filter(estaPublicadoEnPortal).length;
-  const rejectedCount = noticias.filter((n) => n.estado === 'RECHAZADO').length;
+  const publishedCount = sinPapelera(noticias).filter(estaPublicadoEnPortal).length;
+  const rejectedCount = sinPapelera(noticias).filter((n) => n.estado === 'RECHAZADO').length;
+  const papeleraCount = noticias.filter((n) => n.enPapelera).length;
 
-  const filteredNoticias = noticias.filter((item) => {
+  const filteredNoticias = (statusFilter === 'PAPELERA' ? noticias.filter((x) => x?.enPapelera) : sinPapelera(noticias)).filter((item) => {
     if (statusFilter === 'PENDIENTE') {
       return item.estado === 'PENDIENTE_APROBACION' || Boolean(item.solicitudEliminacion);
     }
@@ -390,10 +395,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           <button
             type="button"
             className="admin-refresh-btn"
-            onClick={() => {
-              invalidarListados();
-              (() => cargarNoticias(false))();
-            }}
+            onClick={() => cargarNoticias(false)}
             disabled={loading}
           >
             <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
@@ -420,7 +422,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           { clave: "APROBADO", tipo: "aprobado", cuenta: approvedCount },
           { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
           { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
-        ]}
+          { clave: "PAPELERA", tipo: "papelera", cuenta: papeleraCount },
+      ]}
       />
 
       <div className="dashboard-card-admin">
@@ -435,7 +438,8 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
             {filteredNoticias.length} {filteredNoticias.length === 1 ? 'resultado' : 'resultados'}
           </span>
         </div>
-        <div className="data-table-container-admin">
+        {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
+<div className="data-table-container-admin">
           <div className="data-table-header-admin">
             <div className="data-table-col-admin">CONTENIDO</div>
             <div className="data-table-col-admin">EDITOR / FECHA</div>
@@ -523,16 +527,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                     </div>
 
                     <div className="col-categoria-data-admin col-text-admin">
-                      <span
-                        className={`category-pill-admin ${item.category === 'General' ? 'general' : ''}`}
-                        style={{
-                          backgroundColor:
-                            item.category === 'General' ? '#f1f5f9' : '#e0f2fe',
-                          color: item.category === 'General' ? '#475569' : '#0284c7',
-                        }}
-                      >
-                        {item.category || 'General'}
-                      </span>
+                      <EtiquetaCategoria categoria={item.category || 'General'} />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
@@ -542,6 +537,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                         <>
                           <EtiquetaEstado estado={item.statusVista || item.status} texto={item.statusVista || item.status} />
                           <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+<NotaPapelera item={item} />
                           {item.solicitudEliminacion && <EtiquetaEliminacion nota />}
                         </>
                       )}

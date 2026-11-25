@@ -4,43 +4,6 @@
    (100% alineado con Noticias, Profesionales y Residencias)
    ========================================================= */
 
-/* Badges de Modalidad */
-:where(.panel-scope) .badge-modalidad {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-}
-
-:where(.panel-scope) .badge-modalidad.presencial {
-  background-color: var(--color-sky-100);
-  color: var(--color-sky-600);
-  border: 1px solid var(--color-sky-200);
-}
-
-:where(.panel-scope) .badge-modalidad.virtual {
-  background-color: #ede9fe;
-  color: #6d28d9;
-  border: 1px solid #ddd6fe;
-}
-
-:where(.panel-scope) .badge-modalidad.hibrida {
-  background-color: #ccfbf1;
-  color: #0f766e;
-  border: 1px solid #99f6e4;
-}
-
-:where(.panel-scope) .badge-modalidad.ondemand {
-  background-color: var(--color-amber-100);
-  color: var(--color-amber-700);
-  border: 1px solid var(--color-amber-200);
-}
-
 /* Indicadores de recursos adicionales en fila */
 :where(.panel-scope) .cap-resource-pill {
   display: inline-flex;

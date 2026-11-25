@@ -59,6 +59,12 @@
   letter-spacing: 0.5px;
 }
 
+:where(.panel-scope) .docs-table-row .col-categoria {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
 :where(.panel-scope) .docs-table-row .col-estado {
   display: flex;
   flex-direction: column;

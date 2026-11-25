@@ -1,8 +1,7 @@
 import { useContext, useState } from "react";
 import { createPortal } from "react-dom";
-import { Archive, CalendarClock, CheckCircle, Clock3, Globe2, Pencil, RefreshCw, XCircle } from "lucide-react";
+import { Archive, CalendarClock, CheckCircle, Clock3, Globe2, Pencil, RefreshCw, Trash2, XCircle } from "lucide-react";
 import { AccionesTituloContext } from "./AccionesTitulo";
-import { invalidarListados } from "../../api/editorial.api.js";
 import "../../styles/ui/FiltrosEstado.css";
 
 // Los mismos filtros por estado en el panel del CMS y en el del Admin: tarjeta con ícono, nombre y cantidad.
@@ -15,6 +14,7 @@ const TIPOS = {
   rechazado: { etiqueta: "Rechazados", Icono: XCircle },
   archivado: { etiqueta: "Archivados", Icono: Archive },
   borrador: { etiqueta: "Borradores", Icono: Pencil },
+  papelera: { etiqueta: "Papelera", Icono: Trash2 },
 };
 
 /**
@@ -42,7 +42,6 @@ const FiltrosEstado = ({
 
   const actualizar = async () => {
     setCargando(true);
-    invalidarListados();
     try {
       await onActualizar();
     } finally {

@@ -1,3 +1,4 @@
+import EtiquetaCategoria, { EtiquetaTipo } from "../../components/ui/EtiquetaCategoria";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
@@ -23,10 +24,13 @@ import {
 } from "../../components/cms/CmsModals";
 import SiguePublicado from "../../components/cms/SiguePublicado";
 import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
-import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { textoDeEstado } from "../../components/ui/estados.js";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarProfesional, restaurarProfesional } from "../../api/profesionales.api.js";
 import BarraFiltros from "../../components/ui/BarraFiltros";
 
 const createImage = (url) =>
@@ -126,9 +130,20 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     fetchDatos();
   }, []);
 
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarProfesional(item.id),
+    restaurar: (item) => restaurarProfesional(item.id),
+    recargar: fetchDatos,
+  });
+
   // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
-  const cuentas = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
+  const cuentas = { PAPELERA: 0, PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
   profesionales.forEach((prof) => {
+    if (prof.enPapelera) {
+      cuentas.PAPELERA++;
+      return;
+    }
     const e = (prof.estado || (prof.publicado ? "PUBLICADO" : "PENDIENTE_APROBACION")).toUpperCase();
     if (estaPublicadoEnPortal(prof)) cuentas.PUBLICADOS++;
     if (e === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
@@ -137,11 +152,12 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
   });
 
   const profesionalesFiltrados = profesionales.filter(prof => {
+    if (activeTab === "PAPELERA" ? !prof.enPapelera : prof.enPapelera) return false;
     const estadoItem = (
       prof.estado || (prof.publicado ? "PUBLICADO" : "PENDIENTE_APROBACION")
     ).toUpperCase();
     let matchEstado = false;
-    if (activeTab === "TODOS") {
+    if (activeTab === "TODOS" || activeTab === "PAPELERA") {
       matchEstado = true;
     } else if (activeTab === "PUBLICADOS") {
       matchEstado = estaPublicadoEnPortal(prof);
@@ -361,8 +377,11 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
     return `${nombre?.charAt(0) || ""}${apellido?.charAt(0) || ""}`.toUpperCase();
   };
 
-  const areasParaElSelect = areasDisponibles.filter(area => 
-    formData.tipoFiltroModal === "ESPECIALIDAD" ? area.esServicio === false : area.esServicio === true
+  // Solo lo que el Admin ya aprobó (lo publicado, aunque tenga una edición en revisión). Al editar se conserva
+  // el área que ya tenía el profesional, para que el select no quede vacío.
+  const areasParaElSelect = areasDisponibles.filter(area =>
+    (formData.tipoFiltroModal === "ESPECIALIDAD" ? area.esServicio === false : area.esServicio === true) &&
+    (estaPublicadoEnPortal(area) || String(area.id) === String(formData.especialidadId))
   );
 
   return (
@@ -378,7 +397,8 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                     { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
                     { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
                     { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
-                  ]}
+                    { clave: "PAPELERA", tipo: "papelera", cuenta: cuentas.PAPELERA },
+          ]}
                 />
       </div>
 
@@ -411,14 +431,15 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
         }}
       />
 
-      <div className="cms-news-table-container">
+      {activeTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-news-table-container">
         <div className="activity-table-head news-table-head" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <div style={{ flex: 1.5 }}>PROFESIONAL</div>
           <div style={{ flex: 1 }}>CARGO O FUNCIÓN</div>
           <div style={{ flex: 1.2 }}>ÁREA ASIGNADA</div>
           <div style={{ flex: 1 }}>CLASIFICACIÓN</div>
           <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
-          <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
+          <div style={{ width: "140px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
         <div className="activity-table-body">
@@ -479,29 +500,11 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                 </div>
 
                 <div className="col-area" style={{ flex: 1.2, display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
-                  <span style={{ 
-                    backgroundColor: "#e0f2fe", 
-                    color: "#0284c7", 
-                    padding: "6px 14px", 
-                    borderRadius: "8px", 
-                    fontSize: "0.85rem", 
-                    fontWeight: "700",
-                    display: "inline-block"
-                  }}>
-                    {prof.especialidadNombre}
-                  </span>
+                  <EtiquetaCategoria categoria={prof.especialidadNombre || "Sin asignar"} tono="gris" />
                 </div>
 
                 <div className="col-clasificacion" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
-                  <span style={{ 
-                    color: prof.esServicioClave ? "#64748b" : "#8b5cf6", 
-                    fontSize: "0.75rem", 
-                    fontWeight: "700", 
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px"
-                  }}>
-                    {prof.esServicioClave ? "SERVICIO CLAVE" : "ESPECIALIDAD MÉDICA"}
-                  </span>
+                  <EtiquetaTipo esServicio={prof.esServicioClave} />
                 </div>
 
                 <div style={{ width: "200px", textAlign: "center" }}>
@@ -511,6 +514,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
 <>
 <EtiquetaEstado estado={prof.estadoVista || estadoProf} texto={textoDeEstado(prof.estadoVista || estadoProf)} />
                   <SiguePublicado item={prof} activo={activeTab === "PUBLICADOS"} />
+<NotaPapelera item={prof} />
                   {prof.solicitudEliminacion && (
                     <div style={{ marginTop: "4px" }}>
                       <EtiquetaEliminacion nota />
@@ -520,7 +524,16 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
 )}
                 </div>
 
-                <div className="news-actions-cell" style={{ width: "100px", justifyContent: "center", gap: "8px" }}>
+                <div className="news-actions-cell" style={{ width: "140px", justifyContent: "center", gap: "8px" }}>
+{prof.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(prof)}
+  onEliminar={() => confirmDelete(prof)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                   <button type="button" title="Editar" onClick={() => handleOpenEdit(prof)} className="news-action-btn-edit">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -535,7 +548,11 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                       <line x1="14" y1="11" x2="14" y2="17"></line>
                     </svg>
                   </button>
-                </div>
+                
+{esDescartable(prof) && <BotonADescartar onClick={() => papelera.descartarItem(prof)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
               </div>
             );
             })
@@ -629,7 +646,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                     >
                       <option value="" disabled>-- Seleccione de la lista --</option>
                       {areasParaElSelect.length === 0 ? (
-                        <option value="" disabled>No hay {formData.tipoFiltroModal === 'ESPECIALIDAD' ? 'Especialidades' : 'Servicios'} creados</option>
+                        <option value="" disabled>No hay {formData.tipoFiltroModal === "ESPECIALIDAD" ? "especialidades" : "servicios"} publicados</option>
                       ) : (
                         areasParaElSelect.map(area => (
                           <option key={area.id} value={area.id}>{area.nombre}</option>

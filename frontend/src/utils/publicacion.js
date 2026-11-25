@@ -41,6 +41,19 @@ export const vistaPublicados = (lista, activo) =>
         return { ...item, estadoVista: "PUBLICADO", ...(status ? { statusVista: status } : {}) };
       });
 
+/** Sin lo que el CM mandó a la Papelera: el Admin no lo ve. */
+export const sinPapelera = (lista) => (Array.isArray(lista) ? lista.filter((item) => !item?.enPapelera) : lista);
+
+/** ¿Se puede mandar a la Papelera? Lo rechazado que nunca se publicó y todavía no está ahí. */
+export const esDescartable = (item) => estadoDe(item) === "RECHAZADO" && !item?.visibleEnPortal && !item?.enPapelera;
+
+/** Días que le quedan a un ítem de la Papelera antes de eliminarse solo (0 si es hoy). */
+export const diasEnPapelera = (item) => {
+  if (!item?.papeleraVenceEl) return null;
+  const dias = Math.ceil((new Date(item.papeleraVenceEl).getTime() - Date.now()) / 86400000);
+  return Math.max(0, dias);
+};
+
 /**
  * ¿Hay que abrir la versión publicada en vez de la actualización? Sí cuando se entra desde "Visibles al público"
  * a algo publicado que tiene una actualización pendiente o rechazada (y el servidor envió la versión publicada).
