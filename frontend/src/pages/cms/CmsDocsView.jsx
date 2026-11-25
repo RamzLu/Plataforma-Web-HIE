@@ -14,6 +14,7 @@ import {
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
@@ -519,8 +520,19 @@ const CmsDocsView = ({
                 <div className="col-categoria">{doc.category || "Información institucional"}</div>
                 
                 <div className="col-estado">
-                  <EtiquetaEstado estado={doc.estadoVista || doc.estado || doc.status} texto={getTextoEstado(doc)} />
+                  {doc.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+<EtiquetaEstado estado={doc.estadoVista || doc.estado || doc.status} texto={getTextoEstado(doc)} />
                   <SiguePublicado item={doc} activo={activeTab === "PUBLICADOS"} />
+                  {doc.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
                 <div className="doc-actions-cell">

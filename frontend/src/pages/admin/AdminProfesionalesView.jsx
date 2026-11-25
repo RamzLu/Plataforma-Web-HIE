@@ -412,17 +412,22 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
                       </div>
                     </td>
                     <td data-label="Estado">
-                      {item.solicitudEliminacion ? (
-                        <EtiquetaEliminacion />
-                      ) : (
-                        <>
+                      {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
                           <EtiquetaEstado
                             estado={item.publicado || item.estadoVista ? 'PUBLICADO' : item.estado}
                             texto={item.publicado || item.estadoVista ? 'Publicado' : estadoLabels[item.estado]}
                           />
                           <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+                          {item.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
                         </>
-                      )}
+)}
                     </td>
                   </tr>
                 ))}

@@ -380,14 +380,19 @@ const AdminEspecialidadesServiciosView = ({ onPendingCountChange }) => {
                     <td data-label="Tipo">{item.type}</td>
                     <td data-label="Ubicación">{item.location}</td>
                     <td data-label="Estado">
-                      {item.solicitudEliminacion ? (
-                        <EtiquetaEliminacion />
-                      ) : (
-                        <>
+                      {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
                           <EtiquetaEstado estado={item.statusVista || item.status} texto={item.statusVista || item.status} />
                           <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+                          {item.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
                         </>
-                      )}
+)}
                     </td>
                   </tr>
                 ))}

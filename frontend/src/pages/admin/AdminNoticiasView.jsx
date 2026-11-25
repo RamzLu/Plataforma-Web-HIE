@@ -532,12 +532,15 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-                      {item.solicitudEliminacion ? (
+                      {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
                         <EtiquetaEliminacion />
                       ) : (
-                        <EtiquetaEstado estado={item.statusVista || item.status} texto={item.statusVista || item.status} />
+                        <>
+                          <EtiquetaEstado estado={item.statusVista || item.status} texto={item.statusVista || item.status} />
+                          <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+                          {item.solicitudEliminacion && <EtiquetaEliminacion nota />}
+                        </>
                       )}
-                      <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
                       {item.estado === 'PENDIENTE_APROBACION' &&
                         item.requestedEstado === 'BORRADOR' && (
                           <span

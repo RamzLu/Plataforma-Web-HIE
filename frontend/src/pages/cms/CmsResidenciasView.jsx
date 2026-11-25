@@ -70,6 +70,7 @@ import {
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import BarraFiltros from "../../components/ui/BarraFiltros";
@@ -626,7 +627,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
           <div style={{ flex: 1.8 }}>PROGRAMA Y CATEGORÍA</div>
           <div style={{ flex: 1 }}>DURACIÓN</div>
           <div style={{ flex: 1.2 }}>FECHA / CONVOCATORIA</div>
-          <div style={{ width: "135px", textAlign: "center" }}>ESTADO</div>
+          <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
           <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
@@ -816,13 +817,17 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                 {/* Columna ESTADO */}
                 <div
                   style={{
-                    width: "145px",
+                    width: "200px",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                   }}
                 >
-                  {(() => {
+                  {res.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+{(() => {
                     const estadoMostrado = res.estadoVista || res.estado;
                     if (estadoMostrado === "PENDIENTE_APROBACION") {
                       return (
@@ -850,6 +855,13 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     return <EtiquetaEstado estado={estadoMostrado} texto={textoDeEstado(estadoMostrado)} />;
                   })()}
                   <SiguePublicado item={res} activo={activeTab === "PUBLICADOS"} />
+                  {res.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
                 {/* Columna ACCIONES */}

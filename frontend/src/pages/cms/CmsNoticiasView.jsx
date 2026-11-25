@@ -40,6 +40,7 @@ import {
 } from "../../components/cms/CmsModals";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { textoDeEstado } from "../../components/ui/estados.js";
@@ -714,7 +715,11 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
 
                   <div className="col-estado">
                     <div className="status-wrapper">
-                      {isRejected && !news.estadoVista ? (
+                      {news.solicitudEliminacion && viewTab !== "PUBLICADO" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+{isRejected && !news.estadoVista ? (
                         <span
                           onClick={() => handleOpenCorrection(news)}
                           role="button"
@@ -730,6 +735,13 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
                       )}
 
                       <SiguePublicado item={news} activo={viewTab === "PUBLICADO"} />
+                      {news.solicitudEliminacion && (
+                        <div style={{ marginTop: "4px" }}>
+                          <EtiquetaEliminacion nota />
+                        </div>
+                      )}
+</>
+)}
 
                       {estadoMostrado === "PENDIENTE_APROBACION" &&
                         news.requestedEstado === "BORRADOR" && (

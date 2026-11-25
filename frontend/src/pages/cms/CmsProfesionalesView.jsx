@@ -22,6 +22,7 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { textoDeEstado } from "../../components/ui/estados.js";
@@ -414,7 +415,7 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
           <div style={{ flex: 1 }}>CARGO O FUNCIÓN</div>
           <div style={{ flex: 1.2 }}>ÁREA ASIGNADA</div>
           <div style={{ flex: 1 }}>CLASIFICACIÓN</div>
-          <div style={{ width: "130px", textAlign: "center" }}>ESTADO</div>
+          <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
           <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
@@ -501,9 +502,20 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
                   </span>
                 </div>
 
-                <div style={{ width: "130px", textAlign: "center" }}>
-                  <EtiquetaEstado estado={prof.estadoVista || estadoProf} texto={textoDeEstado(prof.estadoVista || estadoProf)} />
+                <div style={{ width: "200px", textAlign: "center" }}>
+                  {prof.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+<EtiquetaEstado estado={prof.estadoVista || estadoProf} texto={textoDeEstado(prof.estadoVista || estadoProf)} />
                   <SiguePublicado item={prof} activo={activeTab === "PUBLICADOS"} />
+                  {prof.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
                 <div className="news-actions-cell" style={{ width: "100px", justifyContent: "center", gap: "8px" }}>

@@ -417,14 +417,19 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                       </div>
                     </td>
                     <td data-label="Estado">
-                      {doc.solicitudEliminacion ? (
-                        <EtiquetaEliminacion />
-                      ) : (
-                        <>
+                      {doc.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
                           <EtiquetaEstado estado={doc.statusVista || doc.status} texto={statusLabels[doc.statusVista || doc.status] || doc.status} />
                           <SiguePublicado item={doc} activo={statusFilter === 'PUBLICADO'} />
+                          {doc.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
                         </>
-                      )}
+)}
                     </td>
                   </tr>
                 ))}

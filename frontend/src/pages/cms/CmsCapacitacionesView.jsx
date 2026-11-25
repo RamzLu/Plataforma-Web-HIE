@@ -25,6 +25,7 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
 import BarraFiltros from "../../components/ui/BarraFiltros";
@@ -545,7 +546,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
           <div style={{ flex: 1.8 }}>CAPACITACIÓN Y TEMÁTICA</div>
           <div style={{ flex: 1 }}>MODALIDAD</div>
           <div style={{ flex: 1.2 }}>FECHA Y LUGAR</div>
-          <div style={{ width: "135px", textAlign: "center" }}>ESTADO</div>
+          <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
           <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
@@ -712,7 +713,7 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                 {/* Columna ESTADO INTERACTIVO */}
                 <div
                   style={{
-                    width: "135px",
+                    width: "200px",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
@@ -720,7 +721,11 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     gap: "4px",
                   }}
                 >
-                  {(item.estadoVista || item.estado) === "PENDIENTE_APROBACION" || (item.estadoVista || item.estado) === "RECHAZADO" ? (
+                  {item.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+{(item.estadoVista || item.estado) === "PENDIENTE_APROBACION" || (item.estadoVista || item.estado) === "RECHAZADO" ? (
                     <span title={(item.estadoVista || item.estado) === "RECHAZADO" ? item.motivoRechazo || "" : undefined}>
                       <EtiquetaEstado
                         estado={(item.estadoVista || item.estado)}
@@ -745,6 +750,13 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
                     <span className="cap-motivo-rechazo">Motivo: {item.motivoRechazo}</span>
                   )}
                   <SiguePublicado item={item} activo={activeTab === "PUBLICADOS"} />
+                  {item.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
                 {/* Columna ACCIONES */}

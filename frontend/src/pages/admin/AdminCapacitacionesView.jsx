@@ -459,17 +459,22 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
                         </div>
                       </td>
                       <td data-label="Estado">
-                        {training.solicitudEliminacion ? (
-                          <EtiquetaEliminacion />
-                        ) : (
-                          <>
+                        {training.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
                             <EtiquetaEstado
                               estado={training.estadoVista || training.estado || 'BORRADOR'}
                               texto={STATUS_LABELS[training.estadoVista || training.estado] || training.estado || 'Sin estado'}
                             />
                             <SiguePublicado item={training} activo={statusFilter === 'PUBLICADO'} />
-                          </>
-                        )}
+                          {training.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
+                        </>
+)}
                       </td>
                     </tr>
                   ))

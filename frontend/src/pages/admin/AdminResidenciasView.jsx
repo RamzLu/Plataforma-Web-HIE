@@ -600,17 +600,22 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
                       </td>
 
                       <td data-label="Estado">
-                        {item.solicitudEliminacion ? (
-                          <EtiquetaEliminacion />
-                        ) : (
-                          <>
+                        {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
                             <EtiquetaEstado
                               estado={item?.estadoVista || item?.estado || 'BORRADOR'}
                               texto={STATUS_LABELS[item?.estadoVista || item?.estado] || item?.estado || 'Sin estado'}
                             />
                             <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
-                          </>
-                        )}
+                          {item.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
+                        </>
+)}
                       </td>
                     </tr>
                   );

@@ -15,6 +15,7 @@ import {
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
 import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados } from "../../utils/publicacion.js";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import { textoDeEstado } from "../../components/ui/estados.js";
@@ -277,7 +278,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
           <div style={{ flex: 1.2 }}>UBICACIÓN</div>
           <div style={{ flex: 1 }}>HORARIOS</div>
           <div style={{ flex: 1 }}>CLASIFICACIÓN</div>
-          <div style={{ width: "120px", textAlign: "center" }}>ESTADO</div>
+          <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
           <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
@@ -352,9 +353,20 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                   </span>
                 </div>
 
-                <div style={{ width: "130px", textAlign: "center" }}>
-                  <EtiquetaEstado estado={esp.estadoVista || esp.estado} texto={textoDeEstado(esp.estadoVista || esp.estado)} />
+                <div style={{ width: "200px", textAlign: "center" }}>
+                  {esp.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+<EtiquetaEstado estado={esp.estadoVista || esp.estado} texto={textoDeEstado(esp.estadoVista || esp.estado)} />
                   <SiguePublicado item={esp} activo={activeTab === "PUBLICADOS"} />
+                  {esp.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
                 <div style={{ width: "100px", display: "flex", justifyContent: "center", gap: "10px" }}>
