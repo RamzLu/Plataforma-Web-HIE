@@ -1,4 +1,5 @@
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { invalidarListados } from "../../api/editorial.api.js";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
@@ -418,7 +419,10 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
           <button
             type="button"
             className="admin-refresh-btn"
-            onClick={cargarResidencias}
+            onClick={() => {
+              invalidarListados();
+              (() => cargarResidencias())();
+            }}
             disabled={loading}
           >
             <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />

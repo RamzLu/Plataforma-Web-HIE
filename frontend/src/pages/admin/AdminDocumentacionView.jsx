@@ -1,4 +1,5 @@
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { invalidarListados } from "../../api/editorial.api.js";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
@@ -289,7 +290,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           <button
             type="button"
             className="admin-doc-button admin-rev-button is-secondary"
-            onClick={() => cargarDocumentos(false)}
+            onClick={() => {
+              invalidarListados();
+              cargarDocumentos(false);
+            }}
             disabled={loading}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', alignSelf: 'center' }}
           >

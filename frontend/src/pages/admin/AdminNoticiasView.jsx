@@ -1,4 +1,5 @@
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { invalidarListados } from "../../api/editorial.api.js";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados } from '../../utils/publicacion.js';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
@@ -389,7 +390,10 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           <button
             type="button"
             className="admin-refresh-btn"
-            onClick={() => cargarNoticias(false)}
+            onClick={() => {
+              invalidarListados();
+              (() => cargarNoticias(false))();
+            }}
             disabled={loading}
           >
             <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />

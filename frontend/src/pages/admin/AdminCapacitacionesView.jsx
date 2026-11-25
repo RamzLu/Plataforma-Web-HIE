@@ -1,4 +1,5 @@
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { invalidarListados } from "../../api/editorial.api.js";
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
 import SiguePublicado from "../../components/cms/SiguePublicado";
@@ -340,7 +341,10 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
           <button
             type="button"
             className="admin-refresh-btn"
-            onClick={cargarCapacitaciones}
+            onClick={() => {
+              invalidarListados();
+              (() => cargarCapacitaciones())();
+            }}
             disabled={loading}
           >
             <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
