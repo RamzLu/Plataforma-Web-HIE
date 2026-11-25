@@ -430,6 +430,8 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
       if (respuesta?.solicitudEliminacion) {
         toast.success(respuesta.message, { duration: 6000 });
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        cargarCapacitaciones();
         return;
       }
       recordCmsActivity({

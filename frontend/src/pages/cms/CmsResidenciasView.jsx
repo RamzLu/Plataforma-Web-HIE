@@ -499,6 +499,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         toast.success(respuesta.message, { id: toastId, duration: 6000 });
         setShowDeleteModal(false);
         setItemAEliminar(null);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        cargarResidencias();
         return;
       }
       recordCmsActivity({

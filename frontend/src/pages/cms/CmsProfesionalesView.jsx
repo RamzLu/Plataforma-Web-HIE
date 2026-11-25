@@ -233,6 +233,8 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
       if (respuesta?.solicitudEliminacion) {
         toast.success(respuesta.message, { id: toastId, duration: 6000 });
         setShowDeleteModal(false);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        fetchDatos();
         return;
       }
       

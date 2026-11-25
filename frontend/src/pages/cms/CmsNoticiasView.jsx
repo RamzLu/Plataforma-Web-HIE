@@ -273,6 +273,8 @@ const CmsNoticiasView = ({
         toast.success(respuesta.message, { duration: 6000 });
         setShowDeleteModal(false);
         setNoticiaAEliminar(null);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        if (onRefresh) onRefresh();
         return;
       }
       recordCmsActivity({
@@ -501,6 +503,8 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
       } else {
         if (onAddNewNews) onAddNewNews(noticiaFormateada);
       }
+      // La lista se vuelve a pedir: lo que devuelve el guardado no trae todo (versión publicada, pedidos pendientes).
+      if (onRefresh) onRefresh();
 
       setViewTab(estadoGuardado);
       setHasUnsavedChanges(false);

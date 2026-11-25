@@ -165,6 +165,8 @@ const CmsDocsView = ({
         toast.success(respuesta.message, { duration: 6000 });
         setShowDeleteModal(false);
         setDocAEliminar(null);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        if (typeof onRefreshDocs === "function") onRefreshDocs();
         return;
       }
       recordCmsActivity({
