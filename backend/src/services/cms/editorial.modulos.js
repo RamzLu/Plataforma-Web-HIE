@@ -10,6 +10,7 @@
 //   revisar   (req, { decision, motivo }) => resultado   (solo el Admin; decision: APROBAR | RECHAZAR)
 //   eliminar  (req) => resultado
 //   archivos  middleware de carga de archivos que usan crear y actualizar (o null)
+//   papelera  { modeloDe(req) }: a qué tabla se refiere un pedido de la Papelera (ver papelera.service.js)
 //
 // Los servicios todavía devuelven el registro bajo su propia clave; el controlador lo unifica en { message, data }.
 
@@ -41,6 +42,7 @@ export const MODULOS_EDITORIALES = [
     revisar: (req, d) => noticias.evaluarNoticia(req.params.id, comoEstado(d), req.user),
     eliminar: (req) => noticias.eliminarNoticia(req.params.id, { user: req.user }),
     archivos: uploadImagenesArray("imagenes", 10),
+    papelera: { modeloDe: () => "noticia" },
   },
   {
     ruta: "documentacion",
@@ -52,6 +54,7 @@ export const MODULOS_EDITORIALES = [
     revisar: (req, d) => documentos.evaluarDocumento(req.params.id, comoEstado(d), req.user),
     eliminar: (req) => documentos.eliminarDocumento(req.params.id, { user: req.user }),
     archivos: uploadDocumentoSingle("archivo"),
+    papelera: { modeloDe: () => "documento" },
   },
   {
     ruta: "profesionales",
@@ -63,6 +66,7 @@ export const MODULOS_EDITORIALES = [
     revisar: (req, d) => profesionales.evaluarProfesional(req.params.id, comoEstado(d), req.user),
     eliminar: (req) => profesionales.eliminarProfesional(req.params.id, { user: req.user }),
     archivos: uploadImagenSingle("archivo"),
+    papelera: { modeloDe: () => "profesional" },
   },
   {
     // Especialidades y servicios comparten ruta; se distinguen con "esServicio" (en el cuerpo, o en la URL al eliminar).
@@ -76,6 +80,9 @@ export const MODULOS_EDITORIALES = [
       especialidades.evaluarEspecialidad(req.params.id, { ...comoEstado(d), esServicio: req.body.esServicio }, req.user),
     eliminar: (req) => especialidades.eliminarEspecialidad(req.params.id, req.query.esServicio, { user: req.user }),
     archivos: null,
+    papelera: {
+      modeloDe: (req) => (req.body?.esServicio === true || req.body?.esServicio === "true" || req.query?.esServicio === "true" ? "servicio" : "especialidad"),
+    },
   },
   {
     ruta: "residencias",
@@ -87,6 +94,7 @@ export const MODULOS_EDITORIALES = [
     revisar: (req, d) => residencias.revisar(req.params.id, d, req.user),
     eliminar: (req) => residencias.eliminarResidencia(req.params.id, { user: req.user }),
     archivos: uploadResidenciaFiles,
+    papelera: { modeloDe: () => "residencia" },
   },
   {
     ruta: "capacitaciones",
@@ -98,6 +106,7 @@ export const MODULOS_EDITORIALES = [
     revisar: (req, d) => capacitaciones.revisar(req.params.id, d, req.user),
     eliminar: (req) => capacitaciones.eliminarCapacitacion(req.params.id, { user: req.user }),
     archivos: uploadCapacitacionFiles,
+    papelera: { modeloDe: () => "capacitacion" },
   },
 ];
 

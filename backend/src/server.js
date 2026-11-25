@@ -8,6 +8,7 @@ import errorHandler from './middlewares/error.middleware.js';
 import { prisma } from './config/prisma.js';
 
 import cron from 'node-cron';
+import { purgarVencidos } from './services/cms/papelera.service.js';
 import CmsNoticiaService from './services/cms/cms.noticia.service.js';
 import CmsResidenciaService from './services/cms/cms.residencia.service.js';
 
@@ -125,6 +126,18 @@ const tareasProgramadas = [
   { nombre: 'residencias programadas', ejecutar: () => CmsResidenciaService.publicarResidenciasProgramadas() },
 ];
 const tareasConError = new Set();
+
+// La Papelera se vacía sola: lo que lleva 15 días ahí se elimina (se cuenta por ítem). Corre cada hora y al arrancar.
+const vaciarPapeleraVencida = async () => {
+  try {
+    const eliminados = await purgarVencidos();
+    if (eliminados > 0) console.log(`[Cron] Papelera: se eliminaron ${eliminados} contenidos con más de 15 días.`);
+  } catch (error) {
+    console.error(`[Cron] Error al vaciar la Papelera: ${String(error?.message || error).split('\n').filter(Boolean).pop()}`);
+  }
+};
+cron.schedule('5 * * * *', vaciarPapeleraVencida, { noOverlap: true });
+setTimeout(vaciarPapeleraVencida, 30_000);
 
 cron.schedule('* * * * *', async () => {
   for (const tarea of tareasProgramadas) {

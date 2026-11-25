@@ -64,6 +64,9 @@ Noticias (`noticias`), documentación (`documentacion`), profesionales (`profesi
 | `PUT /api/cms/<módulo>/:id` | CM | Edita o pide un cambio de estado (con `estado`). Si estaba publicado, queda pendiente |
 | `PATCH /api/cms/<módulo>/:id/revision` | Admin | `{ "decision": "APROBAR" \| "RECHAZAR", "motivo": "..." }` (el rechazo exige motivo) |
 | `DELETE /api/cms/<módulo>/:id` | CM | Elimina. Si está publicado responde `202` y queda una solicitud para el Admin |
+| `PATCH /api/cms/<módulo>/:id/descartar` y `/restaurar` | CM | Manda a la Papelera lo rechazado que nunca se publicó, o lo devuelve a Rechazados |
+
+**Papelera.** Un contenido rechazado que nunca se publicó puede mandarse a la Papelera (solo el CM la maneja; el Admin la ve en solo lectura y no confirma ni vacía nada). Desde ahí se restaura o se elimina definitivamente, y lo que lleva **15 días** se elimina solo (no hay un "vaciar todo": así ni el CM ni el Admin deciden cuándo se vacía) (por ítem, desde que se descartó; lo corre `server.js` cada hora). La marca vive en `pendingMeta.papelera` del registro, sin columnas nuevas; mientras está en la Papelera no se puede editar ni reenviar (`409`). La lógica está en `backend/src/services/cms/papelera.service.js`. Las ediciones rechazadas de algo ya publicado todavía no se pueden descartar.
 
 `POST`, `PUT` y `PATCH` responden `{ message, data }`, con el registro en `data`. Especialidades y servicios comparten ruta: se distinguen con `esServicio` (en el cuerpo, o como parámetro de la URL al eliminar).
 
