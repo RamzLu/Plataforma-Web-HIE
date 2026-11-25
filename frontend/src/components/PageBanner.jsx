@@ -1,5 +1,5 @@
 import Breadcrumb from "./Breadcrumb";
-import logoEstrellas from "../assets/logoHospitalEvita.png";
+import logoEstrellas from "../assets/estrellas-hie-azul.png";
 import "../styles/ui/PageBanner.css";
 
 /**

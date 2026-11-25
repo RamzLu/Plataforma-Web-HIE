@@ -39,13 +39,14 @@
   isolation: isolate;
 }
 
-/* Marca de agua decorativa con estrellas a la derecha (proporción uniforme, cero cortes) */
+/* Marca de agua decorativa con estrellas a la derecha (debajo del navbar, completa y sin cortes) */
 .public-page-banner-watermark-wrap {
   position: absolute;
-  top: 50%;
-  right: -2%;
+  top: calc(50% + 36px);
+  right: clamp(20px, 4vw, 64px);
   transform: translateY(-50%);
-  width: clamp(280px, 35vw, 460px);
+  height: clamp(165px, 18vw, 206px);
+  width: auto;
   aspect-ratio: 1 / 1;
   pointer-events: none;
   user-select: none;
@@ -53,9 +54,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 88%);
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 88%);
-  opacity: 0.12;
+  opacity: 0.14;
 }
 
 .public-page-banner-watermark-img {
@@ -63,8 +62,7 @@
   height: 100%;
   object-fit: contain;
   display: block;
-  filter: blur(1.5px);
-  transform: rotate(-8deg);
+  transform: rotate(-6deg);
 }
 
 /* =========================================================
@@ -153,9 +151,11 @@
   }
 
   .public-page-banner-watermark-wrap {
-    right: -10%;
-    width: clamp(240px, 45vw, 360px);
-    opacity: 0.09;
+    top: calc(50% + 30px);
+    right: 20px;
+    height: 165px;
+    width: auto;
+    opacity: 0.11;
   }
 
   .public-page-banner-title,
@@ -205,9 +205,11 @@
   }
 
   .public-page-banner-watermark-wrap {
-    right: -18%;
-    width: clamp(200px, 55vw, 300px);
-    opacity: 0.08;
+    top: calc(50% + 26px);
+    right: 14px;
+    height: 128px;
+    width: auto;
+    opacity: 0.09;
   }
 }
 

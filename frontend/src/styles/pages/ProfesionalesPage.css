@@ -26,38 +26,15 @@
   color: var(--color-primary-soft);
 }
 
-/* Marca de agua decorativa en fondo continuo (estrellas del hospital Evita, sin recortes) */
-.profesionales-page::before {
-  content: "";
-  position: absolute;
-  bottom: 90px;
-  left: 2%;
-  width: clamp(280px, 34vw, 480px);
-  max-width: 85vw;
-  aspect-ratio: 1 / 1;
-  background: url("../../assets/logoHospitalEvita-blanco.png") center / contain no-repeat;
-  opacity: 0.08;
-  mix-blend-mode: soft-light;
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-  filter: blur(0.5px);
-  transform: rotate(8deg);
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
-}
-
-/* Solución al Logo Translúcido en el Banner de Profesionales */
+/* Marca de agua en el Banner de Profesionales: debajo del navbar, completa y sin recortes */
 .profesionales-page .public-page-banner-watermark-wrap {
-  top: 56% !important;
-  right: 3% !important;
-  transform: translateY(-46%) !important;
-  width: clamp(210px, 26vw, 340px) !important;
-  max-width: 80vw !important;
+  top: calc(50% + 36px) !important;
+  right: clamp(20px, 4vw, 64px) !important;
+  transform: translateY(-50%) !important;
+  height: clamp(165px, 18vw, 206px) !important;
+  width: auto !important;
   aspect-ratio: 1 / 1 !important;
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 36%, rgba(0, 0, 0, 0) 82%) !important;
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 36%, rgba(0, 0, 0, 0) 82%) !important;
-  opacity: 0.11 !important;
+  opacity: 0.14 !important;
 }
 
 .medical-directory-container {

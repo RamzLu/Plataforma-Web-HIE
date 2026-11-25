@@ -66,10 +66,11 @@
   position: relative;
   width: 100%;
   max-width: 100%;
-  margin: 0;
+  margin: 78px 0 0 0;
   left: 0;
   right: 0;
   aspect-ratio: 1501 / 641;
+  min-height: 440px;
   overflow: hidden;
   background-color: var(--color-primary);
   border-radius: 0 !important;
@@ -127,7 +128,8 @@
   height: 100%;
   display: flex;
   align-items: center;
-  padding-left: 8%;
+  padding: 28px 88px 64px 88px;
+  box-sizing: border-box;
   z-index: 5;
   pointer-events: none;
 }
@@ -316,15 +318,37 @@
 }
 
 /* Responsividad */
+@media (max-width: 1200px) {
+  .carousel-container {
+    margin-top: 70px;
+    min-height: 410px;
+  }
+
+  .carousel-static-overlay {
+    padding: 24px 84px 62px 84px;
+  }
+
+  .carousel-title {
+    font-size: clamp(1.65rem, 3.2vw, 2.5rem);
+    margin-bottom: 22px;
+  }
+}
+
 @media (max-width: 992px) {
   .carousel-container,
   .hero-carousel,
   .carousel-section {
     border-radius: 0 !important;
+    min-height: 390px;
+  }
+
+  .carousel-static-overlay {
+    padding: 24px 76px 58px 76px;
   }
 
   .carousel-title {
-    font-size: 2.4rem;
+    font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+    margin-bottom: 20px;
   }
 }
 
@@ -332,6 +356,7 @@
   .carousel-container,
   .hero-carousel,
   .carousel-section {
+    margin-top: 70px;
     height: 390px;
     min-height: 390px;
     aspect-ratio: unset;
@@ -344,7 +369,7 @@
 
   .carousel-overlay,
   .carousel-static-overlay {
-    padding: 0 20px;
+    padding: 24px 20px 56px 20px;
     text-align: center;
     justify-content: center;
     align-items: center;
@@ -362,7 +387,7 @@
     font-size: 1.45rem;
     line-height: 1.35;
     margin-bottom: 20px;
-    margin-top: 20px;
+    margin-top: 0;
     padding: 0 10px;
     text-align: center;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
@@ -401,5 +426,15 @@
   .carousel-dot.active {
     background-color: var(--color-white);
     transform: scale(1.2);
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .carousel-container,
+  .hero-carousel,
+  .carousel-section {
+    margin-top: 64px;
+    height: 360px;
+    min-height: 360px;
   }
 }

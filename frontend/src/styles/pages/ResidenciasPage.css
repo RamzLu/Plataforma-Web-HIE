@@ -35,27 +35,6 @@
   font-family: var(--font-sans);
 }
 
-/* Marca de agua decorativa en fondo continuo (estrellas del hospital Evita, cero cortes) */
-.residencias-page::before {
-  content: "";
-  position: absolute;
-  bottom: 90px;
-  left: 2%;
-  width: clamp(280px, 34vw, 480px);
-  max-width: 85vw;
-  aspect-ratio: 1 / 1;
-  background: url("../../assets/logoHospitalEvita-blanco.png") center / contain no-repeat;
-  opacity: 0.08;
-  mix-blend-mode: soft-light;
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-  filter: blur(0.5px);
-  transform: rotate(8deg);
-  -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 1) 38%, rgba(0, 0, 0, 0) 84%);
-}
-
 /* =========================================================
    CONTENEDOR PRINCIPAL
    ========================================================= */

@@ -1,8 +1,27 @@
 /* Contenedor principal de la página */
 .plano-page {
+  position: relative;
+  overflow: hidden;
   padding-top: 110px;
   min-height: 100vh;
-  background-color: var(--color-slate-50);
+  background: linear-gradient(
+    180deg,
+    var(--color-white) 0%,
+    var(--color-slate-50) 28%,
+    #e9ebee calc(100% - 580px),
+    #a4c2d6 calc(100% - 350px),
+    var(--color-secondary) calc(100% - 140px),
+    var(--color-secondary-dark) 100%
+  );
+}
+
+.plano-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.plano-page .hospital-map-section {
+  background-color: transparent;
 }
 
 /* Restricción de ancho para que coincida con el resto de la web */
