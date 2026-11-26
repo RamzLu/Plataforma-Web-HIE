@@ -507,7 +507,8 @@
 
 .authorities-swiper {
   width: 100%;
-  padding: 12px 6px 28px 6px;
+  padding: 16px 14px 48px 14px;
+  margin-bottom: -24px;
   box-sizing: border-box;
 }
 
