@@ -7,7 +7,7 @@ import { CalendarDays } from "lucide-react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { createNoticia, updateNoticia, deleteNoticia } from "../../api/noticias.api.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
-import avatarHospital from "../../assets/logoHospitalEvita.png";
+import avatarHospital from "../../assets/logo-hie-oficial.png";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import keycloak from "../../config/keycloak";

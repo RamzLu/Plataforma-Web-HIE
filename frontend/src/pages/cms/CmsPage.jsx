@@ -25,7 +25,7 @@ import CmsInstitucionView from "../cms/CmsInstitucionView";
 import CmsEspecialidadesView from "../cms/CmsEspecialidadesView";
 import CmsResidenciasView from "../cms/CmsResidenciasView";
 import CmsCapacitacionesView from "../cms/CmsCapacitacionesView";
-import avatarHospital from "../../assets/logoHospitalEvita.png";
+import avatarHospital from "../../assets/logo-hie-oficial.png";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import { usePageMeta } from "../../hooks/usePageMeta.js";
 import { activarConTeclado } from "../../utils/accesibilidad.js";

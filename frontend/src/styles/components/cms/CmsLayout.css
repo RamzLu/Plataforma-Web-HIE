@@ -79,28 +79,72 @@
   min-width: 0;
 }
 
+:where(.panel-scope) .cms-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
 :where(.panel-scope) .cms-logo-completo {
-  height: 67px;
-  max-width: 185px;
+  height: 40px;
   width: auto;
   object-fit: contain;
   display: block;
+  flex-shrink: 0;
+  filter: brightness(1.1) contrast(1.04);
   transition: opacity 0.2s ease;
 }
 
-:where(.panel-scope) .cms-logo:hover .cms-logo-completo {
+:where(.panel-scope) .cms-logo:hover .cms-logo-completo,
+:where(.panel-scope) .cms-logo:hover .cms-logo-img {
   opacity: 0.92;
 }
 
+:where(.panel-scope) .cms-brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.06;
+  min-width: 0;
+}
+
+:where(.panel-scope) .cms-brand-line {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: rgba(226, 238, 255, 0.92);
+  letter-spacing: 0.08em;
+}
+
+:where(.panel-scope) .cms-brand-evita {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--color-white);
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+
+:where(.panel-scope) .cms-brand-formosa {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--color-blue-300);
+  letter-spacing: 0.12em;
+}
+
 :where(.panel-scope) .cms-logo-img {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: auto;
   object-fit: contain;
-  border-radius: 50%;
-  padding: 2px;
+  border-radius: 0;
+  padding: 0;
   border: none;
   background: transparent;
+  filter: brightness(1.1) contrast(1.04);
   display: block;
+  transition: opacity 0.2s ease;
 }
 
 :where(.panel-scope) .cms-logo-text-box {

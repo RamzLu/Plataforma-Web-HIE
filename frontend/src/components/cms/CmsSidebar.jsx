@@ -12,8 +12,7 @@ import {
   GraduationCap,
   BookOpen
 } from "lucide-react";
-import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
-import logoCompletoBlanco from "../../assets/logo-completo-blanco.png";
+import logoOficial from "../../assets/logo-hie-oficial.png";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CmsSidebar = ({ activeTab, setActiveTab }) => {
@@ -68,16 +67,25 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
           >
             {isCollapsed ? (
               <img
-                src={avatarHospital}
-                alt="Logo Hospital Evita"
+                src={logoOficial}
+                alt="Hospital Interdistrital Evita Formosa"
                 className="cms-logo-img"
               />
             ) : (
-              <img
-                src={logoCompletoBlanco}
-                alt="Hospital Interdistrital Evita Formosa"
-                className="cms-logo-completo"
-              />
+              <div className="cms-brand-lockup">
+                <img
+                  src={logoOficial}
+                  alt="Hospital Interdistrital Evita"
+                  className="cms-logo-completo"
+                />
+                <div className="cms-brand-text">
+                  <span className="cms-brand-line">HOSPITAL</span>
+                  <span className="cms-brand-line">INTERDISTRITAL</span>
+                  <span className="cms-brand-evita">
+                    EVITA <span className="cms-brand-formosa">FORMOSA</span>
+                  </span>
+                </div>
+              </div>
             )}
           </div>
         </div>
