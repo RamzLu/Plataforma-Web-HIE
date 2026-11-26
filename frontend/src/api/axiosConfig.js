@@ -15,15 +15,21 @@ const api = axios.create({
 const esRutaDelPanel = (config) => /^\/?cms\//.test(config.url || "");
 const esRutaPublicaPortal = (url) => /^\/?portal\//.test(url || "");
 
-// Caché ligera en memoria + sessionStorage (stale-while-revalidate) exclusiva para GET /portal/...
-// Evita esperas repetidas al navegar entre secciones del portal sin afectar nunca a /cms/...
+// Caché ligera (stale-while-revalidate) con deduplicación para GET /portal/... y /cms/...
+// - /portal/...: memoria + sessionStorage (TTL 3 min, refresco silencioso tras 25s)
+// - /cms/...: solo memoria (TTL 60s, refresco silencioso tras 10s, nunca se persiste en storage)
+// Cualquier POST/PUT/PATCH/DELETE invalida ambas cachés al instante.
 const PORTAL_CACHE_PREFIX = "hie_portal_get_cache_v1:";
-const PORTAL_CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutos
-const PORTAL_REVALIDATE_AFTER_MS = 25 * 1000; // refresco silencioso tras 25s
-const portalMemoryCache = new Map();
-const portalInFlight = new Map();
+const PORTAL_CACHE_TTL_MS = 3 * 60 * 1000;
+const PORTAL_REVALIDATE_AFTER_MS = 25 * 1000;
+const PANEL_CACHE_TTL_MS = 60 * 1000;
+const PANEL_REVALIDATE_AFTER_MS = 10 * 1000;
 
-const buildPortalCacheKey = (url, config) => {
+const portalMemoryCache = new Map();
+const panelMemoryCache = new Map();
+const getInFlight = new Map();
+
+const buildCacheKey = (url, config) => {
   const params = config?.params ? JSON.stringify(config.params) : "";
   return `${url || ""}?${params}`;
 };
@@ -59,8 +65,21 @@ const writePortalCache = (key, data) => {
   }
 };
 
+const readPanelCache = (key) => {
+  const mem = panelMemoryCache.get(key);
+  if (mem && Date.now() - mem.ts < PANEL_CACHE_TTL_MS) {
+    return mem;
+  }
+  return null;
+};
+
+const writePanelCache = (key, data) => {
+  panelMemoryCache.set(key, { ts: Date.now(), data });
+};
+
 export const clearPortalCache = () => {
   portalMemoryCache.clear();
+  panelMemoryCache.clear();
   try {
     const keysToRemove = [];
     for (let i = 0; i < sessionStorage.length; i += 1) {
@@ -76,34 +95,37 @@ export const clearPortalCache = () => {
 const rawGet = api.get.bind(api);
 
 api.get = (url, config) => {
-  if (!esRutaPublicaPortal(url) || config?.skipCache || (config?.responseType && config.responseType !== "json")) {
+  const isPortal = esRutaPublicaPortal(url);
+  const isPanel = esRutaDelPanel({ url });
+  if ((!isPortal && !isPanel) || config?.skipCache || (config?.responseType && config.responseType !== "json")) {
     return rawGet(url, config);
   }
 
-  const key = buildPortalCacheKey(url, config);
-  const cached = readPortalCache(key);
+  const key = buildCacheKey(url, config);
+  const cached = isPortal ? readPortalCache(key) : readPanelCache(key);
+  const revalidateAfter = isPortal ? PORTAL_REVALIDATE_AFTER_MS : PANEL_REVALIDATE_AFTER_MS;
 
   const fetchFresh = () => {
-    if (portalInFlight.has(key)) {
-      return portalInFlight.get(key);
+    if (getInFlight.has(key)) {
+      return getInFlight.get(key);
     }
     const req = rawGet(url, config)
       .then((res) => {
         if (res && res.status >= 200 && res.status < 300) {
-          writePortalCache(key, res.data);
+          if (isPortal) writePortalCache(key, res.data);
+          else writePanelCache(key, res.data);
         }
         return res;
       })
       .finally(() => {
-        portalInFlight.delete(key);
+        getInFlight.delete(key);
       });
-    portalInFlight.set(key, req);
+    getInFlight.set(key, req);
     return req;
   };
 
   if (cached) {
-    // Refresco silencioso en segundo plano si pasaron más de 25s
-    if (Date.now() - cached.ts > PORTAL_REVALIDATE_AFTER_MS) {
+    if (Date.now() - cached.ts > revalidateAfter) {
       fetchFresh().catch(() => {});
     }
     return Promise.resolve({

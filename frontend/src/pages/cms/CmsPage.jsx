@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { getNoticias } from "../../api/noticias.api.js";
 import { getDocumentos } from "../../api/documentos.api.js";
@@ -316,29 +317,7 @@ const handleDeleteDoc = (id) => {
         backgroundColor: '#f8fafc',
         fontFamily: "'Manrope', system-ui, sans-serif"
       }}>
-        <div className="cms-spinner" style={{ 
-          width: '50px', 
-          height: '50px', 
-          borderWidth: '4px', 
-          borderTopColor: '#0c2340',
-          borderColor: 'rgba(12, 35, 64, 0.1)'
-        }}></div>
-        <h2 style={{ 
-          marginTop: '25px', 
-          color: '#0c2340', 
-          fontWeight: '700', 
-          fontSize: '1.2rem',
-          letterSpacing: '0.5px'
-        }}>
-          Iniciando Plataforma
-        </h2>
-        <p style={{ 
-          color: '#64748b', 
-          fontSize: '0.9rem', 
-          marginTop: '8px' 
-        }}>
-          Verificando credenciales de acceso...
-        </p>
+        <PortalLoader message="Iniciando plataforma — verificando credenciales de acceso..." />
       </div>
     );
   }
@@ -354,29 +333,7 @@ const handleDeleteDoc = (id) => {
         backgroundColor: '#f8fafc',
         fontFamily: "'Manrope', system-ui, sans-serif"
       }}>
-        <div className="cms-spinner" style={{ 
-          width: '50px', 
-          height: '50px', 
-          borderWidth: '4px', 
-          borderTopColor: '#0284c7',
-          borderColor: 'rgba(2, 132, 199, 0.1)'
-        }}></div>
-        <h2 style={{ 
-          marginTop: '25px', 
-          color: '#0c2340', 
-          fontWeight: '700', 
-          fontSize: '1.2rem',
-          letterSpacing: '0.5px'
-        }}>
-          Redirigiendo a Seguridad
-        </h2>
-        <p style={{ 
-          color: '#64748b', 
-          fontSize: '0.9rem', 
-          marginTop: '8px' 
-        }}>
-          Por favor, ingrese sus credenciales en la siguiente pantalla...
-        </p>
+        <PortalLoader message="Redirigiendo a inicio de sesión..." />
       </div>
     );
   }

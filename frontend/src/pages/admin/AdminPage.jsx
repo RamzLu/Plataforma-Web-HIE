@@ -6,6 +6,7 @@ import "../../styles/components/admin/AdminLayout.css";
 
 import keycloak from '../../config/keycloak';
 import { ROLES_ADMIN, tieneAlgunRol } from '../../utils/roles';
+import PortalLoader from '../../components/ui/PortalLoader';
 import { getNoticias } from '../../api/noticias.api';
 import { getEspecialidades } from '../../api/especialidades.api';
 import { getDocumentos } from '../../api/documentos.api';
@@ -183,29 +184,7 @@ const AdminPage = () => {
         backgroundColor: '#f8fafc',
         fontFamily: "'Manrope', system-ui, sans-serif"
       }}>
-        <div className="cms-spinner" style={{ 
-          width: '50px', 
-          height: '50px', 
-          borderWidth: '4px', 
-          borderTopColor: '#0c2340',
-          borderColor: 'rgba(12, 35, 64, 0.1)'
-        }}></div>
-        <h2 style={{ 
-          marginTop: '25px', 
-          color: '#0c2340', 
-          fontWeight: '700', 
-          fontSize: '1.2rem',
-          letterSpacing: '0.5px'
-        }}>
-          Iniciando Plataforma
-        </h2>
-        <p style={{ 
-          color: '#64748b', 
-          fontSize: '0.9rem', 
-          marginTop: '8px' 
-        }}>
-          Conectando con el servidor de seguridad...
-        </p>
+        <PortalLoader message="Iniciando plataforma — conectando con el servidor de seguridad..." />
       </div>
     );
   }
@@ -221,29 +200,7 @@ const AdminPage = () => {
         backgroundColor: '#f8fafc',
         fontFamily: "'Manrope', system-ui, sans-serif"
       }}>
-        <div className="cms-spinner" style={{ 
-          width: '50px', 
-          height: '50px', 
-          borderWidth: '4px', 
-          borderTopColor: '#0284c7',
-          borderColor: 'rgba(2, 132, 199, 0.1)'
-        }}></div>
-        <h2 style={{ 
-          marginTop: '25px', 
-          color: '#0c2340', 
-          fontWeight: '700', 
-          fontSize: '1.2rem',
-          letterSpacing: '0.5px'
-        }}>
-          Redirigiendo a Seguridad
-        </h2>
-        <p style={{ 
-          color: '#64748b', 
-          fontSize: '0.9rem', 
-          marginTop: '8px' 
-        }}>
-          Redirigiendo a inicio de sesión...
-        </p>
+        <PortalLoader message="Redirigiendo a inicio de sesión..." />
       </div>
     );
   }

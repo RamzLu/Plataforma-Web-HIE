@@ -1,4 +1,5 @@
 import { EtiquetaModalidad } from "../../components/ui/EtiquetaCategoria";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
@@ -569,11 +570,8 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
 
         <div className="activity-table-body">
           {loading ? (
-            <div style={{ padding: "40px", textAlign: "center", gridColumn: "1 / -1" }}>
-              <div className="cms-spinner" style={{ margin: "0 auto 10px auto" }}></div>
-              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
-                Cargando capacitaciones...
-              </span>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <PortalLoader message="Cargando capacitaciones..." compact />
             </div>
           ) : datosFiltrados.length === 0 ? (
             <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>

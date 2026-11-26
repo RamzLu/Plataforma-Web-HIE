@@ -1,4 +1,5 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak.js";
@@ -321,15 +322,7 @@ const CmsContenidoGraficoView = () => {
             {loading ? (
               <tr>
                 <td colSpan={5} className="cg-empty-cell">
-                  <div className="cg-empty-content">
-                    <div
-                      className="cms-spinner"
-                      style={{ margin: "0 auto 8px auto" }}
-                    />
-                    <p className="cg-empty-desc">
-                      Cargando espacios gráficos del portal...
-                    </p>
-                  </div>
+                  <PortalLoader message="Cargando espacios gráficos del portal..." compact />
                 </td>
               </tr>
             ) : currentEspacios.length === 0 ? (

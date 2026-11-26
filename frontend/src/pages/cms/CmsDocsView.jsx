@@ -1,4 +1,5 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
+import PortalLoader from "../../components/ui/PortalLoader";
 import React, { useState, useRef, useMemo } from "react";
 import { CalendarDays } from "lucide-react";
 import { createDocumento, updateDocumento, deleteDocumento } from "../../api/documentos.api.js";
@@ -475,9 +476,8 @@ const CmsDocsView = ({
 
         <div className="activity-table-body">
           {loading ? (
-            <div style={{ padding: "40px", textAlign: "center", gridColumn: "1 / -1" }}>
-              <div className="cms-spinner" style={{ margin: "0 auto 10px auto" }}></div>
-              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>Cargando listado...</span>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <PortalLoader message="Cargando listado..." compact />
             </div>
           ) : docsFiltrados.length === 0 ? (
             <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>

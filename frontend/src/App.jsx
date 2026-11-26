@@ -18,6 +18,7 @@ import { getInstitucional } from "./api/autoridades.api.js";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/ui/ScrollToTop";
+import PortalLoader from "./components/ui/PortalLoader";
 
 import HomePage from "./pages/public/HomePage";
 import EspecialidadesPage from "./pages/public/EspecialidadesPage";
@@ -38,8 +39,8 @@ import NoticiasCategoriaPage from "./pages/public/NoticiasCategoriaPage";
 import NotFoundPage from "./pages/public/NotFoundPage";
 
 const CargandoPanel = () => (
-  <div className="panel-cargando" role="status" aria-live="polite">
-    Cargando panel…
+  <div className="panel-cargando" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc" }}>
+    <PortalLoader message="Cargando panel..." />
   </div>
 );
 

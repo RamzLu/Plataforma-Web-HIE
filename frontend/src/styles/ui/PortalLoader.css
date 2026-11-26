@@ -20,13 +20,15 @@
 }
 
 .portal-loader-container.compact {
-  padding: 32px 16px;
-  gap: 10px;
+  padding: 36px 16px;
+  gap: 14px;
 }
 
 .portal-loader-ring {
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   border-radius: 50%;
   border: 3.5px solid #dbe6f2;
   border-top-color: #1d4e89;
@@ -34,12 +36,7 @@
   box-sizing: border-box;
   animation: portal-loader-spin 0.65s linear infinite;
   will-change: transform;
-}
-
-.portal-loader-container.compact .portal-loader-ring {
-  width: 32px;
-  height: 32px;
-  border-width: 3px;
+  flex-shrink: 0;
 }
 
 .portal-loader-text {

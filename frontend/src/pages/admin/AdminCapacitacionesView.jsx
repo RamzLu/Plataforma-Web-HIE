@@ -1,5 +1,6 @@
 import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { EtiquetaModalidad } from "../../components/ui/EtiquetaCategoria";
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
@@ -425,7 +426,7 @@ const AdminCapacitacionesView = ({ onPendingCountChange } = {}) => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td className="admin-training-empty" colSpan="3">Cargando capacitaciones...</td></tr>
+                <tr><td className="admin-training-empty" colSpan="3"><PortalLoader message="Cargando capacitaciones..." compact /></td></tr>
               ) : filteredCapacitaciones.length === 0 ? (
                 <tr>
                   <td className="admin-training-empty" colSpan="3">

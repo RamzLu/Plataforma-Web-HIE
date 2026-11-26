@@ -3,6 +3,7 @@ import { getProfesionales } from "../../api/profesionales.api.js";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
 import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
+import PortalLoader from "../../components/ui/PortalLoader";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import "../../styles/components/cms/CmsDashboard.css";
 
@@ -387,11 +388,8 @@ const CmsDashboardView = ({
         
         <div className="cms-news-grid">
           {loading ? (
-            <div className="cms-loading-container">
-              <div className="cms-spinner"></div>
-              <span className="cms-loading-text">
-                Cargando últimas noticias...
-              </span>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <PortalLoader message="Cargando últimas noticias..." compact />
             </div>
           ) : latestNews && latestNews.length > 0 ? (
             latestNews.map((news) => (

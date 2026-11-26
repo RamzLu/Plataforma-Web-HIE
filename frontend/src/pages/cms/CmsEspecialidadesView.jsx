@@ -1,4 +1,5 @@
 import { EtiquetaTipo } from "../../components/ui/EtiquetaCategoria";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import Paginacion from "../../components/ui/Paginacion";
 import { usePaginacion } from "../../hooks/usePaginacion";
@@ -303,10 +304,9 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         </div>
 
         <div className="activity-table-body">
-          {loading ? ( 
-            <div style={{ padding: "40px", textAlign: "center", gridColumn: "1 / -1" }}>
-              <div className="cms-spinner" style={{ margin: "0 auto 10px auto" }}></div>
-              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>Cargando listado...</span>
+          {loading ? (
+            <div style={{ gridColumn: "1 / -1" }}>
+              <PortalLoader message="Cargando listado..." compact />
             </div>
           ) : 
            datosFiltrados.length === 0 ? (

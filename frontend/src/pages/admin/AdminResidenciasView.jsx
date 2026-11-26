@@ -1,5 +1,6 @@
 import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import PortalLoader from "../../components/ui/PortalLoader";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
@@ -516,7 +517,7 @@ const AdminResidenciasView = ({ onPendingCountChange } = {}) => {
               {loading ? (
                 <tr>
                   <td className="admin-res-empty-admin" colSpan="5">
-                    Cargando residencias...
+                    <PortalLoader message="Cargando residencias..." compact />
                   </td>
                 </tr>
               ) : filteredResidencias.length === 0 ? (

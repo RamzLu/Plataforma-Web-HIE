@@ -1,4 +1,5 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { useState, useEffect } from "react";
 import { Plus, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn, ZoomOut, Check, Building2 } from "lucide-react";
 import Cropper from "react-easy-crop";
@@ -610,11 +611,8 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
   if (loading) {
     return (
-      <div className="cms-dashboard-card" style={{ padding: "60px", textAlign: "center" }}>
-        <div className="cms-spinner" style={{ margin: "0 auto 12px auto" }}></div>
-        <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
-          Cargando información institucional...
-        </span>
+      <div className="cms-dashboard-card">
+        <PortalLoader message="Cargando información institucional..." />
       </div>
     );
   }

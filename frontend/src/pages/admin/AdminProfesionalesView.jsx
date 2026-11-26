@@ -1,5 +1,6 @@
 import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import PortalLoader from "../../components/ui/PortalLoader";
 import EtiquetaCategoria, { EtiquetaTipo } from "../../components/ui/EtiquetaCategoria";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
@@ -351,19 +352,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
         {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
 <div className="admin-prof-table-wrap">
           {loading ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
-              <div
-                className="cms-spinner"
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  margin: '0 auto 16px auto',
-                  borderWidth: '3px',
-                  borderTopColor: '#0c2340',
-                }}
-              ></div>
-              <p style={{ fontSize: '0.95rem' }}>Cargando fichas de profesionales...</p>
-            </div>
+            <PortalLoader message="Cargando fichas de profesionales..." />
           ) : (
             <>
             <table className="admin-prof-table">

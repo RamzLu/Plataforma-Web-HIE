@@ -1,5 +1,6 @@
 import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import PortalLoader from "../../components/ui/PortalLoader";
 import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, sinPapelera } from '../../utils/publicacion.js';
@@ -449,9 +450,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
 
           <div className="data-table-body-admin">
             {loading ? (
-              <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
-                Cargando solicitudes de noticias...
-              </div>
+              <PortalLoader message="Cargando solicitudes de noticias..." />
             ) : filteredNoticias.length === 0 ? (
               <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
                 {statusFilter === 'PENDIENTE'

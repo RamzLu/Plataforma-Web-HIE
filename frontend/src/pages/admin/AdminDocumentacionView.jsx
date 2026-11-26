@@ -1,6 +1,7 @@
 import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
 import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import PortalLoader from "../../components/ui/PortalLoader";
 import '../../styles/components/admin/AdminRevisionModal.css';
 import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
 import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
@@ -372,10 +373,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
 <div className="admin-doc-table-wrap">
           {loading ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
-              <div className="cms-spinner" style={{ margin: '0 auto 15px auto', width: '36px', height: '36px' }}></div>
-              <p>Cargando documentos para revisión...</p>
-            </div>
+            <PortalLoader message="Cargando documentos para revisión..." />
           ) : (
             <table className="admin-doc-table">
               <thead>

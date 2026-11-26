@@ -1,4 +1,5 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
+import PortalLoader from "../../components/ui/PortalLoader";
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
@@ -652,11 +653,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
 
         <div className="activity-table-body">
           {loading ? (
-            <div style={{ padding: "40px", textAlign: "center", gridColumn: "1 / -1" }}>
-              <div className="cms-spinner" style={{ margin: "0 auto 10px auto" }}></div>
-              <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
-                Cargando residencias...
-              </span>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <PortalLoader message="Cargando residencias..." compact />
             </div>
           ) : datosFiltrados.length === 0 ? (
             <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>

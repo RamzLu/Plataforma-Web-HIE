@@ -1,4 +1,5 @@
 import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   CheckCircle,
@@ -333,7 +334,7 @@ const AdminContenidoGraficoView = ({ onPendingCountChange } = {}) => {
               {loading ? (
                 <tr>
                   <td colSpan={4} className="admin-cg-empty-admin">
-                    Cargando secciones fijas del portal...
+                    <PortalLoader message="Cargando secciones fijas del portal..." compact />
                   </td>
                 </tr>
               ) : espaciosFiltrados.length === 0 ? (
