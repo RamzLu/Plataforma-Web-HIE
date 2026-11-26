@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,6 +7,13 @@ import {
 } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import "./App.css";
+import { getNoticias } from "./api/noticias.api.js";
+import { getEspecialidades } from "./api/especialidades.api.js";
+import { getProfesionales } from "./api/profesionales.api.js";
+import { getDocumentos } from "./api/documentos.api.js";
+import { getCapacitacionesPublicas } from "./api/capacitaciones.api.js";
+import { getResidencias } from "./api/residencias.api.js";
+import { getInstitucional } from "./api/autoridades.api.js";
 
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
@@ -41,6 +48,30 @@ const AppLayout = () => {
   
   // Agrupamos ambas áreas protegidas para ocultar los componentes públicos
   const isPrivatePanel = location.pathname.startsWith("/cms") || location.pathname.startsWith("/admin");
+
+  // Precarga silenciosa en segundo plano del catálogo público del portal para que
+  // al cambiar de sección no haya que esperar al spinner de carga.
+  useEffect(() => {
+    if (isPrivatePanel) return;
+    const warmPortalData = () => {
+      Promise.allSettled([
+        getNoticias(false),
+        getEspecialidades(),
+        getProfesionales(),
+        getDocumentos(),
+        getCapacitacionesPublicas(),
+        getResidencias(),
+        getInstitucional(),
+      ]);
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(warmPortalData, { timeout: 1500 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const timer = setTimeout(warmPortalData, 600);
+    return () => clearTimeout(timer);
+  }, [isPrivatePanel]);
 
   return (
     <>

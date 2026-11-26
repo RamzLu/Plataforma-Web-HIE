@@ -4,6 +4,7 @@ import { getNoticias } from "../api/noticias.api.js";
 import "../styles/sections/HomeNewsPreview.css";
 import AnimatedContent from "../components/ui/AnimatedContent";
 import DefaultNewsImage from "./ui/DefaultNewsImage";
+import PortalLoader from "./ui/PortalLoader";
 
 const cleanHtmlText = (html) => {
   if (!html || typeof html !== "string") return "";
@@ -62,10 +63,7 @@ const HomeNewsPreview = () => {
 
         <div className="preview-scroll-wrapper">
           {loading ? (
-            <div style={{ padding: "60px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%" }}>
-              <div className="cms-spinner" style={{ borderColor: "#cbd5e1", borderTopColor: "#006eb3" }}></div>
-              <p style={{ marginTop: "15px", color: "#64748b", fontWeight: "600" }}>Cargando últimas noticias...</p>
-            </div>
+            <PortalLoader message="Cargando últimas noticias..." />
           ) : latestNews.length > 0 ? (
             <div className="preview-grid">
               {latestNews.map((news, index) => {

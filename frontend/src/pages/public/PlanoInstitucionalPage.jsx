@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import "../../styles/pages/PlanoInstitucionalPage.css"; // Nueva hoja de estilos
 import Breadcrumb from "../../components/Breadcrumb";
 import HospitalMapSection from "../../components/HospitalMapSection";
@@ -10,9 +9,6 @@ import { usePageMeta } from "../../hooks/usePageMeta.js";
 
 const PlanoInstitucionalPage = () => {
   usePageMeta("Plano del hospital", "Plano interactivo del Hospital Interdistrital Evita: ubicación de servicios, guardia y consultorios.");
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   return (
     <main className="plano-page">

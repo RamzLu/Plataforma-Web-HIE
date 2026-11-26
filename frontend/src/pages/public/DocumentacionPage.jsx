@@ -5,6 +5,7 @@ import "../../styles/pages/DocumentacionPage.css";
 import PageBanner from "../../components/PageBanner";
 import fondoBanner from "../../assets/banner_documentacion.png";
 import AnimatedContent from "../../components/ui/AnimatedContent";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { usePageMeta } from "../../hooks/usePageMeta.js";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 
@@ -188,12 +189,7 @@ const DocumentacionPage = () => {
 
               <div className="doc-table-body">
                 {loading ? (
-                  <div style={{ padding: "60px", textAlign: "center", width: "100%" }}>
-                    <div className="cms-spinner" style={{ margin: "0 auto 15px auto" }}></div>
-                    <span style={{ color: "#64748b", fontSize: "1rem", fontWeight: "600" }}>
-                      Cargando documentos desde la base de datos...
-                    </span>
-                  </div>
+                  <PortalLoader message="Cargando documentos institucionales..." />
                 ) : currentDocs.length > 0 ? (
                   currentDocs.map((doc) => (
                     <div 

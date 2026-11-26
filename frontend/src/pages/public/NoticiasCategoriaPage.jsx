@@ -3,6 +3,7 @@ import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { useParams, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
+import PortalLoader from "../../components/ui/PortalLoader";
 import PageBanner from "../../components/PageBanner";
 import avatarHospital from "../../assets/logo-hie-oficial.png";
 import fondoBannerNoticias from "../../assets/banner_noticias.png";
@@ -135,10 +136,7 @@ const NoticiasCategoriaPage = () => {
       <div className="noticias-page-container" style={{ padding: "60px 20px", margin: "0 auto" }}>
         
         {loading ? (
-          <div style={{ padding: "80px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div className="cms-spinner" style={{ borderColor: "#cbd5e1", borderTopColor: "#006eb3" }}></div>
-            <p style={{ marginTop: "15px", color: "#64748b", fontWeight: "600" }}>Cargando artículos...</p>
-          </div>
+          <PortalLoader message="Cargando artículos..." />
         ) : noticias.length > 0 ? (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
             {noticias.map((news) => {
@@ -178,7 +176,7 @@ const NoticiasCategoriaPage = () => {
                   </div>
                   <div className="full-news-images">
                     {news.images && news.images.length > 0 && news.images[0] ? (
-                      <img src={news.images[0]} alt={news.title} className="clickable-img" loading="lazy" />
+                      <img src={news.images[0]} alt={news.title} className="clickable-img" loading="lazy" decoding="async" />
                     ) : (
                       <DefaultNewsImage alt={news.title} />
                     )}

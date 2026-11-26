@@ -5,6 +5,7 @@ import "../../styles/pages/EspecialidadesPage.css";
 import PageBanner from "../../components/PageBanner";
 import fondoBannerEsp from "../../assets/banner_especialidades.png";
 import AnimatedContent from "../../components/ui/AnimatedContent";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { getEspecialidades } from "../../api/especialidades.api.js";
 import { usePageMeta } from "../../hooks/usePageMeta.js";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
@@ -201,9 +202,7 @@ const EspecialidadesPage = () => {
             </div>
 
             {loading ? (
-              <div style={{ padding: "60px", textAlign: "center", color: "#64748b" }}>
-                Cargando áreas de atención...
-              </div>
+              <PortalLoader message="Cargando áreas de atención..." />
             ) : (
               <div className="specialties-grid">
                 {(currentView === "grilla-esp" ? especialidadesData : serviciosData).map((item) => (

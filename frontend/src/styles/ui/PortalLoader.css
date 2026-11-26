@@ -1,0 +1,52 @@
+@keyframes portal-loader-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.portal-loader-container {
+  width: 100%;
+  padding: 56px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.portal-loader-container.compact {
+  padding: 32px 16px;
+  gap: 10px;
+}
+
+.portal-loader-ring {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3.5px solid #dbe6f2;
+  border-top-color: #1d4e89;
+  border-right-color: #0284c7;
+  box-sizing: border-box;
+  animation: portal-loader-spin 0.65s linear infinite;
+  will-change: transform;
+}
+
+.portal-loader-container.compact .portal-loader-ring {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+.portal-loader-text {
+  margin: 0;
+  color: #475569;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}

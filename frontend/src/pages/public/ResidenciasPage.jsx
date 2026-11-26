@@ -6,6 +6,7 @@ import PageBanner from "../../components/PageBanner";
 import fondoBanner from "../../assets/banner_residencias.png";
 import medicosImg from "../../assets/medicos-residencias.jpg";
 import AnimatedContent from "../../components/ui/AnimatedContent";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { getResidencias } from "../../api/residencias.api";
 import { sanitizeUrl } from "../../utils/sanitizeUrl";
 import { getEspacioGraficoPublico } from "../../api/contenidoGrafico.api.js";
@@ -314,9 +315,7 @@ const ResidenciasPage = () => {
           </div>
 
           {loading ? (
-            <div className="res-loading-state">
-              Cargando programas de residencias médicas...
-            </div>
+            <PortalLoader message="Cargando programas de residencias médicas..." />
           ) : residencias.length === 0 ? (
             <div className="res-empty-state">
               Actualmente no hay convocatorias de residencias publicadas.

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import "../../styles/pages/CapacitacionPage.css";
 import AnimatedContent from "../../components/ui/AnimatedContent";
+import PortalLoader from "../../components/ui/PortalLoader";
 import PageBanner from "../../components/PageBanner";
 
 import fondoBanner from "../../assets/banner_capacitaciones.png";
@@ -539,9 +540,7 @@ const CapacitacionPage = () => {
               </div>
 
               {loading ? (
-                <div style={{ padding: "60px 0", textAlign: "center", color: "#64748b" }}>
-                  <p>Cargando capacitaciones institucionales...</p>
-                </div>
+                <PortalLoader message="Cargando capacitaciones institucionales..." />
               ) : itemsFiltrados.length === 0 ? (
                 <div className="cap-no-results">
                   <span className="material-symbols-outlined" style={{ fontSize: "48px" }}>

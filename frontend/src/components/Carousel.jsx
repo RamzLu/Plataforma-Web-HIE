@@ -114,6 +114,8 @@ const Carousel = () => {
                       : `Imagen ${index + 1} del carrusel`
                   }
                   className="carousel-img"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding="async"
                 />
               )}
             </div>

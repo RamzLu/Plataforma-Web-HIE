@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
@@ -9,6 +9,7 @@ import "../../styles/pages/ProfesionalesPage.css";
 import PageBanner from "../../components/PageBanner";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import DefaultProfessionalImage from "../../components/ui/DefaultProfessionalImage";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { getProfesionales } from "../../api/profesionales.api";
 import { usePageMeta } from "../../hooks/usePageMeta.js";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
@@ -31,6 +32,7 @@ const ProfessionalPhoto = ({ src, alt, className = "doctor-photo", compact = fal
       alt={alt}
       className={className}
       loading="lazy"
+      decoding="async"
       onError={() => setHasError(true)}
     />
   );
@@ -175,23 +177,35 @@ const ProfesionalesPage = () => {
   const searchInputRef = useRef(null);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    let isMounted = true;
     const fetchProfesionales = async () => {
       try {
         // Cliente compartido (api/axiosConfig.js): misma URL base y timeout que el resto del portal.
         const data = await getProfesionales();
-        setProfesionalesDb((Array.isArray(data) ? data : []).filter((p) => p.publicado));
+        if (isMounted) {
+          setProfesionalesDb((Array.isArray(data) ? data : []).filter((p) => p.publicado));
+        }
       } catch (error) {
         console.error("Error al cargar los profesionales:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     fetchProfesionales();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const serviciosList = ["Todos los Servicios", ...new Set(profesionalesDb.filter(p => p.esServicioClave).map(p => p.especialidadNombre))].sort();
-  const especialidadesList = ["Especialidades (Todas)", ...new Set(profesionalesDb.filter(p => !p.esServicioClave).map(p => p.especialidadNombre))].sort();
+  const serviciosList = useMemo(
+    () => ["Todos los Servicios", ...new Set(profesionalesDb.filter((p) => p.esServicioClave).map((p) => p.especialidadNombre))].sort(),
+    [profesionalesDb]
+  );
+
+  const especialidadesList = useMemo(
+    () => ["Especialidades (Todas)", ...new Set(profesionalesDb.filter((p) => !p.esServicioClave).map((p) => p.especialidadNombre))].sort(),
+    [profesionalesDb]
+  );
 
   const handleReset = () => {
     setSearchQuery("");
@@ -303,13 +317,10 @@ const ProfesionalesPage = () => {
 
       <div style={{ width: "100%", maxWidth: "1600px", padding: "0 20px" }}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <div className="cms-spinner" style={{ borderWidth: "4px", width: "40px", height: "40px", borderTopColor: "#0d223f", margin: "0 auto" }}></div>
-            <p style={{ color: "#64748b", marginTop: "15px", fontWeight: "600" }}>Cargando directorio médico...</p>
-          </div>
+          <PortalLoader message="Cargando directorio médico..." />
         ) : dataToRender.length > 0 ? (
           dataToRender.map((area, index) => (
-            <AnimatedContent key={index} distance={40} direction="vertical" delay={index * 0.1}>
+            <AnimatedContent key={area.especialidad} distance={24} direction="vertical" delay={Math.min(index * 0.06, 0.2)}>
               <SpecialtyRow
                 especialidad={area.especialidad}
                 profesionales={area.profesionales}

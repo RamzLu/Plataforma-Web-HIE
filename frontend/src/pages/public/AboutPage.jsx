@@ -8,6 +8,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 import ReactCountUp from "react-countup";
 const CountUp = ReactCountUp.default || ReactCountUp;
 import AnimatedContent from "../../components/ui/AnimatedContent";
+import PortalLoader from "../../components/ui/PortalLoader";
 import { getInstitucional } from "../../api/autoridades.api.js";
 
 // IMÁGENES INSTITUCIONALES
@@ -102,18 +103,16 @@ const AboutPage = () => {
       .finally(() => setLoadingAutoridades(false));
   }, []);
 
-  // EFECTO PARA HACER SCROLL AUTOMÁTICO GENERALIZADO
+  // EFECTO PARA HACER SCROLL AUTOMÁTICO A SECCIONES CON HASH
   useEffect(() => {
-    if (hash) {
-      setTimeout(() => {
-        const element = document.getElementById(hash.replace('#', ''));
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 300); 
-    } else {
-      window.scrollTo(0, 0);
-    }
+    if (!hash) return;
+    const timer = setTimeout(() => {
+      const element = document.getElementById(hash.replace("#", ""));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [hash]);
 
   const handlePlayVideo = () => {
@@ -368,21 +367,7 @@ const AboutPage = () => {
           </div>
 
           {loadingAutoridades ? (
-            <div className="authorities-grid">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="authority-card" style={{ opacity: 0.5 }}>
-                  <div
-                    className="authority-img-box"
-                    style={{ background: "#e2e8f0" }}
-                  />
-                  <div className="authority-info">
-                    <span className="authority-role" style={{ background: "#e2e8f0", borderRadius: 4, display: "block", height: 14, width: "60%" }} />
-                    <h3 className="authority-name" style={{ background: "#e2e8f0", borderRadius: 4, height: 18, width: "80%", marginTop: 8 }} />
-                    <p className="authority-spec" style={{ background: "#e2e8f0", borderRadius: 4, height: 12, width: "70%", marginTop: 8 }} />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <PortalLoader message="Cargando autoridades del hospital..." />
           ) : autoridades.length === 0 ? (
             <p style={{ color: "#64748b", textAlign: "center" }}>
               No hay autoridades registradas en este momento.

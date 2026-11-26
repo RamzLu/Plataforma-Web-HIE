@@ -3,6 +3,7 @@ import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
+import PortalLoader from "../../components/ui/PortalLoader";
 import "../../styles/pages/NoticiasPage.css";
 import PageBanner from "../../components/PageBanner";
 import iconMama from "../../assets/icon-mama.webp";
@@ -96,7 +97,7 @@ const NewsCard = ({ news, onOpenNews }) => {
       </div>
       <div className="full-news-images">
         {news.images && news.images.length > 0 && news.images[0] ? (
-          <img src={news.images[0]} alt={news.title} className="clickable-img" loading="lazy" />
+          <img src={news.images[0]} alt={news.title} className="clickable-img" loading="lazy" decoding="async" />
         ) : (
           <DefaultNewsImage alt={news.title} />
         )}
@@ -135,14 +136,12 @@ const NoticiasPage = () => {
   const prevAltaSlide = () => setAltaIndex((prev) => (prev - 1 + miniCarouselData.length) % miniCarouselData.length);
 
   useEffect(() => {
-    if (hash) {
-      setTimeout(() => {
-        const element = document.getElementById(hash.replace('#', ''));
-        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 300);
-    } else {
-      window.scrollTo(0, 0); 
-    }
+    if (!hash) return;
+    const timer = setTimeout(() => {
+      const element = document.getElementById(hash.replace("#", ""));
+      if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 300);
+    return () => clearTimeout(timer);
   }, [hash]);
 
   useEffect(() => {
@@ -221,10 +220,7 @@ const NoticiasPage = () => {
 
       <div className="noticias-page-container">
         {loading ? (
-          <div style={{ padding: "80px 0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%" }}>
-            <div className="cms-spinner" style={{ borderColor: "#cbd5e1", borderTopColor: "#006eb3" }}></div>
-            <p style={{ marginTop: "15px", color: "#64748b", fontWeight: "600" }}>Cargando últimas noticias...</p>
-          </div>
+          <PortalLoader message="Cargando últimas noticias..." />
         ) : sortedNews.length > 0 ? (
           <div className="slider-wrapper">
             <button className="slider-arrow left-arrow" onClick={() => scrollNews("left")}>&#10094;</button>
