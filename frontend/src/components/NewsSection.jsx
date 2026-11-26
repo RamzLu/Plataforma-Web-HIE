@@ -1,10 +1,8 @@
-import React from "react";
 import { Link } from "react-router-dom"; 
 import "../styles/sections/NewsSection.css";
 import AnimatedContent from "../components/ui/AnimatedContent";
 
-// Íconos de react-icons/fi para el banner inferior
-import { FiMapPin, FiInfo, FiNavigation } from "react-icons/fi";
+import { MapPin, Info, Navigation } from "lucide-react";
 
 const NewsSection = () => {
   return (
@@ -141,7 +139,7 @@ const NewsSection = () => {
           <section className="location-banner" aria-label="Información de la sede">
             <div className="location-left-group">
               <div className="location-icon-bubble" aria-hidden="true">
-                <FiMapPin size={22} strokeWidth={2.2} />
+                <MapPin size={22} strokeWidth={2.2} />
               </div>
               <div className="location-text-group">
                 <span className="location-subtitle">SEDE HOSPITALARIA CENTRAL</span>
@@ -158,7 +156,7 @@ const NewsSection = () => {
                 className="btn-building-info" 
                 style={{ textDecoration: 'none' }}
               >
-                <FiInfo size={16} strokeWidth={2.2} />
+                <Info size={16} strokeWidth={2.2} />
                 Información del Edificio
               </Link>
 
@@ -169,7 +167,7 @@ const NewsSection = () => {
                 className="btn-how-to-arrive" 
                 style={{ cursor: 'pointer' }}
               >
-                <FiNavigation size={16} strokeWidth={2.2} />
+                <Navigation size={16} strokeWidth={2.2} />
                 Cómo llegar
               </button>
             </div>

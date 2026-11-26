@@ -1,10 +1,10 @@
 /* CONTENEDOR PRINCIPAL */
-.cms-profesionales-wrapper {
-  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+:where(.panel-scope) .cms-profesionales-wrapper {
+  font-family: var(--font-sans);
 }
 
 /* HEADER */
-.profesionales-header {
+:where(.panel-scope) .profesionales-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -12,115 +12,115 @@
 }
 
 /* FILTROS */
-.profesionales-filtros {
+:where(.panel-scope) .profesionales-filtros {
   display: flex;
   gap: 20px;
   background: white;
   padding: 20px 24px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   margin-bottom: 25px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   align-items: flex-end;
 }
 
-.filtro-busqueda, .filtro-select {
+:where(.panel-scope) .filtro-busqueda, :where(.panel-scope) .filtro-select {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.filtro-busqueda {
+:where(.panel-scope) .filtro-busqueda {
   flex: 2;
 }
 
-.filtro-select {
+:where(.panel-scope) .filtro-select {
   flex: 1;
 }
 
-.profesionales-filtros label {
+:where(.panel-scope) .profesionales-filtros label:not(:where(.vista-portal *)) {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--color-slate-500);
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
 /* BARRA DE BÚSQUEDA MODERNIZADA */
-.input-icon-wrapper {
+:where(.panel-scope) .input-icon-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon-wrapper svg {
+:where(.panel-scope) .input-icon-wrapper svg:not(:where(.vista-portal *)) {
   position: absolute;
   left: 14px;
   width: 18px;
   height: 18px;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   pointer-events: none;
 }
 
-.input-icon-wrapper input {
+:where(.panel-scope) .input-icon-wrapper input:not(:where(.vista-portal *)) {
   width: 100%;
   padding: 10px 14px 10px 42px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   border-radius: 8px;
   outline: none;
   font-size: 0.95rem;
-  color: #0f172a;
-  background-color: #fff;
+  color: var(--color-slate-900);
+  background-color: var(--color-white);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.input-icon-wrapper input:focus {
+:where(.panel-scope) .input-icon-wrapper input:focus:not(:where(.vista-portal *)) {
   border-color: #0ea5e9;
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
-.filtro-select select {
+:where(.panel-scope) .filtro-select select:not(:where(.vista-portal *)) {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   border-radius: 8px;
   outline: none;
   font-size: 0.95rem;
-  color: #0f172a;
+  color: var(--color-slate-900);
   background: white;
 }
 
 /* AVATAR */
-.avatar-circulo {
+:where(.panel-scope) .avatar-circulo {
   width: 45px;
   height: 45px;
-  background-color: #e0f2fe;
+  background-color: var(--color-sky-100);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: #0284c7;
+  color: var(--color-sky-600);
   font-size: 0.95rem;
   object-fit: cover;
 }
 
-.info-texto strong { 
+:where(.panel-scope) .info-texto strong:not(:where(.vista-portal *)) { 
   display: block; 
-  color: #0c2340; 
+  color: var(--color-primary); 
   font-size: 0.95rem; 
   font-weight: 600;
 }
 
-.info-texto span { 
-  color: #64748b; 
+:where(.panel-scope) .info-texto span:not(:where(.vista-portal *)) { 
+  color: var(--color-slate-500); 
   font-size: 0.75rem; 
   margin-top: 3px;
   display: block;
 }
 
 /* BADGES DE ÁREA */
-.badge-area {
+:where(.panel-scope) .badge-area {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -131,14 +131,14 @@
   width: fit-content;
 }
 
-.badge-medica { 
-  background-color: #e0f2fe; 
-  color: #0369a1; 
+:where(.panel-scope) .badge-medica { 
+  background-color: var(--color-sky-100); 
+  color: var(--color-sky-700); 
 }
 
-.tipo-area-texto { 
+:where(.panel-scope) .tipo-area-texto { 
   font-size: 0.75rem; 
-  color: #94a3b8; 
+  color: var(--color-slate-400); 
   margin-top: 3px;
   display: block;
 }
@@ -151,3 +151,29 @@
    ESTILOS ADICIONALES DE PROFESIONALES
    (El modal utiliza las clases unificadas de CmsModals.css)
    ========================================== */
+:where(.panel-scope) .profesionales-filtros {
+  border-radius: 16px;
+  border-color: #e7edf5;
+  box-shadow: 0 6px 18px rgb(15 23 42 / 3%);
+}
+
+:where(.panel-scope) .input-icon-wrapper input:not(:where(.vista-portal *)),
+:where(.panel-scope) .filtro-select select:not(:where(.vista-portal *)) {
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  :where(.panel-scope) .profesionales-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  :where(.panel-scope) .profesionales-filtros {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 14px;
+  }
+}

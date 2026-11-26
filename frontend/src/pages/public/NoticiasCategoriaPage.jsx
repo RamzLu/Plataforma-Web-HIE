@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { useParams, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import PageBanner from "../../components/PageBanner";
-import avatarHospital from "../../assets/logoHospitalEvita.png";
+import avatarHospital from "../../assets/logo-hie-oficial.png";
 import fondoBannerNoticias from "../../assets/banner_noticias.png";
 import "../../styles/pages/NoticiasPage.css";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CATEGORY_MAP = {
   "cancer-mama": "Cáncer de Mama",
@@ -41,6 +43,7 @@ const NoticiasCategoriaPage = () => {
   const [lightbox, setLightbox] = useState({ isOpen: false, images: [], index: 0 });
 
   const dbCategoryName = CATEGORY_MAP[categoria];
+  usePageMeta(dbCategoryName ? `Noticias: ${dbCategoryName}` : "Noticias");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -141,7 +144,15 @@ const NoticiasCategoriaPage = () => {
             {noticias.map((news) => {
               const plainText = cleanHtmlText(news.body[0]);
               return (
-                 <article key={news.id} className="full-news-card" style={{ height: "100%", width: "350px", flex: "0 0 auto" }}>
+                 <article
+                   key={news.id}
+                   className="full-news-card"
+                   style={{ height: "100%", width: "350px", flex: "0 0 auto" }}
+                   onClick={() => setSelectedNews(news)}
+                   role="button"
+                   tabIndex={0}
+                   onKeyDown={(e) => activarConTeclado(e, () => setSelectedNews(news))}
+                 >
                   <div className="full-news-header">
                     <div className="hospital-avatar">
                       <img src={avatarHospital} alt="Avatar Hospital" />
@@ -154,15 +165,22 @@ const NoticiasCategoriaPage = () => {
                   <div className="full-news-body">
                     <h4 className="full-news-title">{news.title}</h4>
                     <p className="clamped-text">{plainText}</p>
-                    <button className="read-more-btn" onClick={() => setSelectedNews(news)}>
+                    <button
+                      type="button"
+                      className="read-more-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedNews(news);
+                      }}
+                    >
                       Ver más
                     </button>
                   </div>
                   <div className="full-news-images">
                     {news.images && news.images.length > 0 && news.images[0] ? (
-                      <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => openLightbox(news.images, 0)} />
+                      <img src={news.images[0]} alt={news.title} className="clickable-img" loading="lazy" />
                     ) : (
-                      <DefaultNewsImage alt={news.title} onClick={() => setSelectedNews(news)} />
+                      <DefaultNewsImage alt={news.title} />
                     )}
                   </div>
                 </article>
@@ -208,7 +226,7 @@ const NoticiasCategoriaPage = () => {
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
                     const fotosRestantes = selectedNews.images.length - 4;
                     return (
-                      <div key={index} className="mosaic-item" onClick={() => openLightbox(selectedNews.images, index)}>
+                      <div key={index} className="mosaic-item" onClick={() => openLightbox(selectedNews.images, index)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => openLightbox(selectedNews.images, index))}>
                         <img src={img} alt={`Foto noticia ${index + 1}`} />
                         {isLastAndHidden && (
                           <div className="mosaic-overlay"><span>+{fotosRestantes}</span></div>
@@ -228,7 +246,7 @@ const NoticiasCategoriaPage = () => {
       )}
 
       {lightbox.isOpen && (
-        <div className="lightbox-overlay" style={{ zIndex: 999999 }} onClick={closeLightbox}>
+        <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>&times;</button>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             {lightbox.images.length > 1 && (

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Carousel from "../../components/Carousel";
 import HomeNewsPreview from "../../components/HomeNewsPreview";
@@ -6,9 +6,11 @@ import NewsSection from "../../components/NewsSection";
 import PatientInfoSection from "../../components/PatientInfoSection";
 import AprendeSection from "../../components/AprendeSection";
 import HomeMapBanner from "../../components/HomeMapBanner";
-import AboutPage from "../public/AboutPage";
+import "../../styles/pages/HomePage.css";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
 
 const HomePage = () => {
+  usePageMeta(null);
   const { hash } = useLocation();
 
   useEffect(() => {
@@ -23,7 +25,7 @@ const HomePage = () => {
   }, [hash]);
 
   return (
-    <main>
+    <main className="home-page">
       <Carousel />
       <NewsSection />
       <HomeNewsPreview />

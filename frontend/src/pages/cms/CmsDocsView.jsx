@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import React, { useState, useRef, useMemo } from "react";
 import { CalendarDays } from "lucide-react";
 import { createDocumento, updateDocumento, deleteDocumento } from "../../api/documentos.api.js";
@@ -11,6 +12,25 @@ import {
   CmsConfirmDraftModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarDocumento, restaurarDocumento } from "../../api/documentos.api.js";
+import BarraFiltros from "../../components/ui/BarraFiltros";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
+
+// El servidor puede enviar la fecha como texto ISO (2026-11-13T16:13:12Z); se muestra como dd/mm/aaaa.
+const fechaLegible = (valor) => {
+  if (!valor) return "Actualizado hoy";
+  const fecha = new Date(valor);
+  return /^\d{4}-\d{2}-\d{2}T/.test(String(valor)) && !isNaN(fecha) ? fecha.toLocaleDateString("es-AR") : valor;
+};
 
 const CATEGORIAS = [
   "Información institucional", 
@@ -33,12 +53,15 @@ const CmsDocsView = ({
   initialCreateModal = false,
   onModalOpened,
 }) => {
-  const [showModal, setShowModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showModal, setShowModal] = useState(Boolean(initialCreateModal));
   const [editingId, setEditingId] = useState(null);
   
   // Pestañas y búsqueda unificadas con Especialidades y Noticias
   const [activeTab, setActiveTab] = useState("PUBLICADOS");
   const [searchTerm, setSearchTerm] = useState("");
+  const [filtroCategoria, setFiltroCategoria] = useState("TODAS");
   
   // Estados para control de cambios sin guardar y borradores
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -56,6 +79,9 @@ const CmsDocsView = ({
   const [rejectionReasonActual, setRejectionReasonActual] = useState("");
   const [archivo, setArchivo] = useState(null);
   const [nombreArchivoActual, setNombreArchivoActual] = useState("");
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { titulo, categoria, estado, archivo, nombreArchivoActual });
   const [previewUrl, setPreviewUrl] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -74,32 +100,21 @@ const CmsDocsView = ({
     setShowModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showModal): solo se avisa al panel para que no lo reabra.
   React.useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
+  // Al abrir la sección se pide la lista. Solo al montar: onRefreshDocs cambia en cada render de la página y
+  // dejarlo como dependencia volvía a pedir la lista una y otra vez.
   React.useEffect(() => {
     if (typeof onRefreshDocs === "function") {
       onRefreshDocs();
     }
-  }, [onRefreshDocs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  React.useEffect(() => {
-    const handleFocus = () => {
-      if (document.visibilityState === "visible" && typeof onRefreshDocs === "function") {
-        onRefreshDocs();
-      }
-    };
-    window.addEventListener("focus", handleFocus);
-    document.addEventListener("visibilitychange", handleFocus);
-    return () => {
-      window.removeEventListener("focus", handleFocus);
-      document.removeEventListener("visibilitychange", handleFocus);
-    };
-  }, [onRefreshDocs]);
+  // El refresco al volver a la pestaña lo hace CmsPage para todas las secciones.
 
   const handleOpenEdit = (doc) => {
     setEditingId(doc.id);
@@ -121,7 +136,7 @@ const CmsDocsView = ({
   };
 
   const handleCloseAttempt = () => {
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowModal(false);
@@ -146,8 +161,7 @@ const CmsDocsView = ({
     setDeletingId(id);
 
     try {
-      const token = keycloak.token;
-      if (!token) {
+      if (!keycloak.token) {
         toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
@@ -156,7 +170,16 @@ const CmsDocsView = ({
       const docToDelete = (docsList || []).find((d) => d.id === id);
       const tituloDoc = docToDelete?.title || docToDelete?.titulo || "Documento";
 
-      await deleteDocumento(id, token);
+      const respuesta = await deleteDocumento(id);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { duration: 6000 });
+        setShowDeleteModal(false);
+        setDocAEliminar(null);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        if (typeof onRefreshDocs === "function") onRefreshDocs();
+        return;
+      }
       recordCmsActivity({
         titulo: `Eliminó documento: "${tituloDoc}"`,
         categoria: docToDelete?.category || "Documentación",
@@ -172,7 +195,7 @@ const CmsDocsView = ({
       setDocAEliminar(null);
     } catch (error) {
       console.error("Error al eliminar:", error);
-      const backendError = error.response?.data?.error?.message || error.response?.data?.error || "Ocurrió un error al intentar eliminar el documento.";
+      const backendError = mensajeDeError(error, "Ocurrió un error al intentar eliminar el documento.");
       toast.error(backendError);
     } finally {
       setDeletingId(null);
@@ -237,6 +260,12 @@ const CmsDocsView = ({
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
 
+    if (editingId && !hayCambios) {
+      toast.error("No se han detectado cambios para actualizar.");
+      setShowUnsavedModal(false);
+      return;
+    }
+
     if (!titulo.trim()) {
       toast.error("Por favor ingresá un título para el documento.");
       setShowUnsavedModal(false);
@@ -257,8 +286,7 @@ const CmsDocsView = ({
 
     setSaving(true);
     try {
-      const token = keycloak.token;
-      if (!token) {
+      if (!keycloak.token) {
         toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
@@ -277,12 +305,12 @@ const CmsDocsView = ({
 
       let data;
       if (editingId) {
-        data = await updateDocumento(editingId, formData, token);
+        data = await updateDocumento(editingId, formData);
       } else {
-        data = await createDocumento(formData, token);
+        data = await createDocumento(formData);
       }
 
-      const docBackend = data.documento;
+      const docBackend = data.data;
       const docFormateado = {
         id: docBackend?.id || editingId,
         title: titulo,
@@ -327,7 +355,7 @@ const CmsDocsView = ({
       setShowModal(false);
     } catch (error) {
       console.error("Error en handleSave:", error);
-      const backendError = error.response?.data?.error || error.message || "Error al guardar";
+      const backendError = mensajeDeError(error, "Error al guardar");
       toast.error(`Error: ${backendError}`);
     } finally {
       setSaving(false);
@@ -335,32 +363,39 @@ const CmsDocsView = ({
   };
 
   const getTextoEstado = (doc) => {
-    const e = (doc.estado || doc.status || "borrador").toUpperCase();
+    const e = (doc.estadoVista || doc.estado || doc.status || "borrador").toUpperCase();
     if (e === "PUBLICADO" || e === "APROBADO") return "Publicado";
     if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") return "Pendiente de aprobación";
     if (e === "RECHAZADO") return "Rechazado";
     return "Borrador";
   };
 
-  const getBadgeClass = (doc) => {
-    const e = (doc.estado || doc.status || "borrador").toUpperCase();
-    if (e === "PUBLICADO" || e === "APROBADO") return "publicado";
-    if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") return "pendiente";
-    if (e === "RECHAZADO") return "rechazado";
-    return "borrador";
-  };
-
   const isPdf = archivo 
     ? archivo.name.toLowerCase().endsWith('.pdf') 
     : nombreArchivoActual.toLowerCase().endsWith('.pdf');
 
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarDocumento(item.id),
+    restaurar: (item) => restaurarDocumento(item.id),
+    recargar: async () => {
+      if (typeof onRefreshDocs === "function") await onRefreshDocs();
+    },
+  });
+
   // Conteo dinámico por pestañas
   const counts = useMemo(() => {
-    const res = { PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, BORRADORES: 0 };
+    const res = { PAPELERA: 0, PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, BORRADORES: 0 };
     (docsList || []).forEach((doc) => {
+      if (doc.enPapelera) {
+        res.PAPELERA++;
+        return;
+      }
       const e = (doc.estado || doc.status || "").toUpperCase();
-      if (e === "PUBLICADO" || e === "APROBADO") res.PUBLICADOS++;
-      else if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") res.PENDIENTES++;
+      // Lo publicado con una versión nueva en revisión figura en Publicados y también en su pestaña de revisión.
+      if (estaPublicadoEnPortal(doc)) res.PUBLICADOS++;
+      if (e === "PUBLICADO" || e === "APROBADO") return;
+      if (e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO") res.PENDIENTES++;
       else if (e === "RECHAZADO") res.RECHAZADOS++;
       else res.BORRADORES++;
     });
@@ -371,9 +406,11 @@ const CmsDocsView = ({
   const docsFiltrados = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     return (docsList || []).filter((doc) => {
+      if (activeTab === "PAPELERA" ? !doc.enPapelera : doc.enPapelera) return false;
       const e = (doc.estado || doc.status || "").toUpperCase();
       let matchTab = false;
-      if (activeTab === "PUBLICADOS") matchTab = e === "PUBLICADO" || e === "APROBADO";
+      if (activeTab === "TODOS" || activeTab === "PAPELERA") matchTab = true;
+      else if (activeTab === "PUBLICADOS") matchTab = estaPublicadoEnPortal(doc);
       else if (activeTab === "PENDIENTES") matchTab = e === "PENDIENTE_APROBACION" || e === "PENDIENTE" || e === "PROGRAMADO";
       else if (activeTab === "RECHAZADOS") matchTab = e === "RECHAZADO";
       else if (activeTab === "BORRADORES") matchTab = e === "BORRADOR" || e === "ARCHIVADO" || !e;
@@ -385,75 +422,53 @@ const CmsDocsView = ({
         doc.editor || "",
       ].join(" ").toLowerCase();
 
-      return matchTab && (!term || searchable.includes(term));
+      const matchCategoria = filtroCategoria === "TODAS" || doc.category === filtroCategoria;
+      return matchTab && matchCategoria && (!term || searchable.includes(term));
     });
-  }, [docsList, activeTab, searchTerm]);
+  }, [docsList, activeTab, searchTerm, filtroCategoria]);
 
   return (
-    <div className="cms-dashboard-card">
+    <>
+      <div style={{ marginBottom: "18px" }}>
+        <FiltrosEstado
+                  activa={activeTab}
+                  onCambiar={setActiveTab}
+                  todos
+                  onActualizar={onRefreshDocs}
+                  actualizando={loading}
+                  opciones={[
+                    { clave: "PENDIENTES", tipo: "pendiente", cuenta: counts.PENDIENTES },
+                    { clave: "PUBLICADOS", tipo: "publicado", cuenta: counts.PUBLICADOS },
+                    { clave: "RECHAZADOS", tipo: "rechazado", cuenta: counts.RECHAZADOS },
+                    { clave: "BORRADORES", tipo: "borrador", cuenta: counts.BORRADORES },
+                    { clave: "PAPELERA", tipo: "papelera", cuenta: counts.PAPELERA },
+          ]}
+                />
+      </div>
+
+      <div className="cms-dashboard-card">
       <div className="docs-view-header">
         <div>
           <h3 className="cms-card-title docs-view-title">Documentación institucional</h3>
           <p className="docs-view-subtitle">Subí formularios y protocolos. Los documentos aprobados por el Administrador se publicarán en el portal.</p>
         </div>
-        <button type="button" className="btn-subir-doc-header" onClick={handleOpenCreate}>
-          + CARGAR DOCUMENTO
-        </button>
       </div>
 
-      {/* Pestañas de estado idénticas a Especialidades y Noticias */}
-      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "16px", marginBottom: "16px" }}>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("PUBLICADOS")}
-        >
-          Publicados ({counts.PUBLICADOS})
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
-          onClick={() => setActiveTab("PENDIENTES")}
-        >
-          Pendientes de aprobación ({counts.PENDIENTES})
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
-          onClick={() => setActiveTab("RECHAZADOS")}
-        >
-          Rechazados ({counts.RECHAZADOS})
-        </button>
-        <button
-          type="button"
-          className={`res-tab-btn-unificado ${activeTab === "BORRADORES" ? "active" : ""}`}
-          onClick={() => setActiveTab("BORRADORES")}
-        >
-          Borradores ({counts.BORRADORES})
-        </button>
-      </div>
+      
 
-      {/* Barra de búsqueda */}
-      <div style={{ marginBottom: "16px" }}>
-        <input
-          type="search"
-          placeholder="Buscar documento por título, archivo o categoría..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            width: "100%",
-            maxWidth: "420px",
-            padding: "9px 14px",
-            borderRadius: "8px",
-            border: "1px solid #cbd5e1",
-            fontSize: "0.9rem",
-            color: "#0c2340",
-            backgroundColor: "#fff"
-          }}
-        />
-      </div>
+      <BarraFiltros
+        crear={{ texto: "+ AÑADIR DOCUMENTO", onClick: handleOpenCreate }}
+        busqueda={{ etiqueta: "Buscar documento", placeholder: "Buscar por título, archivo o categoría...", valor: searchTerm, onCambio: setSearchTerm }}
+        select={{
+          etiqueta: "Categoría",
+          valor: filtroCategoria,
+          onCambio: setFiltroCategoria,
+          opciones: [{ valor: "TODAS", texto: "Todas las categorías" }, ...CATEGORIAS.map((c) => ({ valor: c, texto: c }))],
+        }}
+      />
 
-      <div className="cms-docs-table-container">
+      {activeTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-docs-table-container">
         <div className="activity-table-head docs-table-head">
           <div className="col-content">CONTENIDO</div>
           <div className="col-editor">EDITOR / FECHA</div>
@@ -473,7 +488,7 @@ const CmsDocsView = ({
               No hay documentos en esta sección.
             </div>
           ) : (
-            docsFiltrados.map((doc) => (
+            vistaPublicados(docsFiltrados, activeTab === "PUBLICADOS").map((doc) => (
               <div className="activity-row docs-table-row" key={doc.id}>
                 <div className="col-content doc-content-cell">
                   <div className="doc-thumb-box">
@@ -484,7 +499,7 @@ const CmsDocsView = ({
                   </div>
                   <div className="doc-info">
                     <div className="doc-title-row">
-                      <span className="doc-title">{doc.title}</span>
+                      <span className="doc-title">{tituloEnLista(doc, activeTab === "PUBLICADOS", doc.title)}</span>
                       {sanitizeUrl(doc.fileUrl) && (
                         <a className="doc-preview-link" href={sanitizeUrl(doc.fileUrl)} target="_blank" rel="noopener noreferrer" title="Ver documento original">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -527,19 +542,39 @@ const CmsDocsView = ({
                   <span style={{ fontWeight: 600, color: '#0c2340' }}>{doc.editor || userName || "Usuario CMS"}</span>
                   <small style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
                     <CalendarDays size={12} />
-                    {doc.updatedAt || "Actualizado hoy"}
+                    {fechaLegible(doc.updatedAt)}
                   </small>
                 </div>
 
-                <div className="col-categoria">{doc.category || "Información institucional"}</div>
+                <div className="col-categoria"><EtiquetaCategoria categoria={doc.category} /></div>
                 
                 <div className="col-estado">
-                  <span className={`status-badge ${getBadgeClass(doc)}`}>
-                    {getTextoEstado(doc)}
-                  </span>
+                  {doc.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+<EtiquetaEstado estado={doc.estadoVista || doc.estado || doc.status} texto={getTextoEstado(doc)} />
+                  <SiguePublicado item={doc} activo={activeTab === "PUBLICADOS"} />
+<NotaPapelera item={doc} />
+                  {doc.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
                 <div className="doc-actions-cell">
+{doc.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(doc)}
+  onEliminar={() => handleConfirmDeleteClick(doc.id)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                   <button title="Editar" onClick={() => handleOpenEdit(doc)} className="doc-action-btn-edit">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path>
@@ -563,7 +598,11 @@ const CmsDocsView = ({
                       </svg>
                     )}
                   </button>
-                </div>
+                
+{esDescartable(doc) && <BotonADescartar onClick={() => papelera.descartarItem(doc)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
               </div>
             ))
           )}
@@ -703,7 +742,7 @@ const CmsDocsView = ({
                     </div>
                   )}
 
-                  <div className={`dropzone-compact ${isDragging ? 'is-dragging' : ''}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} onClick={handleBrowseClick}>
+                  <div className={`dropzone-compact ${isDragging ? 'is-dragging' : ''}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} onClick={handleBrowseClick} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, handleBrowseClick)}>
                     <div className="dropzone-icon-circle">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -786,7 +825,8 @@ const CmsDocsView = ({
                 type="submit" 
                 className="btn-primary-docs" 
                 onClick={handleSave} 
-                disabled={saving}
+                disabled={saving || (Boolean(editingId) && !hayCambios)}
+                title={editingId && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
               >
                 {saving 
                   ? (editingId ? "ACTUALIZANDO..." : "GUARDANDO...") 
@@ -803,6 +843,7 @@ const CmsDocsView = ({
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleExecuteDelete}
         itemType="el documento"
+        requiereAprobacion={requiereAprobacionParaEliminar((docsList || []).find((d) => d.id === docAEliminar))}
         isDeleting={deletingId === docAEliminar}
       />
 
@@ -823,7 +864,8 @@ const CmsDocsView = ({
         itemType="este documento"
         loading={saving}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -1,40 +1,26 @@
-.admin-training-page {
+:where(.panel-scope) .admin-training-page {
   gap: 22px;
 }
 
-.admin-training-page > .admin-page-header-admin {
+:where(.panel-scope) .admin-training-page > .admin-page-header-admin {
   margin-bottom: 0;
 }
 
-.admin-training-simulation-note {
-  padding: 12px 15px;
-  border: 1px solid #bfdbfe;
-  border-radius: 12px;
-  background: #eff6ff;
-  color: #1e3a8a;
-  font-size: 0.84rem;
-  line-height: 1.55;
-}
-
-.admin-training-simulation-note strong {
-  font-weight: 750;
-}
-
-.admin-training-feedback {
+:where(.panel-scope) .admin-training-feedback {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   padding: 11px 14px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid var(--color-green-200);
   border-radius: 12px;
-  background: #f0fdf4;
-  color: #166534;
+  background: var(--color-green-50);
+  color: var(--color-green-800);
   font-size: 0.84rem;
 }
 
-.admin-training-feedback button,
-.admin-training-modal-header button {
+:where(.panel-scope) .admin-training-feedback button:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-training-modal-header button:not(:where(.vista-portal *)) {
   display: grid;
   width: 32px;
   height: 32px;
@@ -47,43 +33,44 @@
   cursor: pointer;
 }
 
-.admin-training-feedback button:hover,
-.admin-training-modal-header button:hover {
+:where(.panel-scope) .admin-training-feedback button:hover:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-training-modal-header button:hover:not(:where(.vista-portal *)) {
   background: rgb(15 23 42 / 7%);
 }
 
-.admin-training-summary-toolbar {
+:where(.panel-scope) .admin-training-summary-toolbar {
   display: flex;
   justify-content: flex-end;
   margin-bottom: -14px;
 }
 
-.admin-training-reset-filter {
+:where(.panel-scope) .admin-training-reset-filter {
   min-height: 32px;
-  padding: 5px 12px;
-  border: 1px solid #dbe3ec;
-  border-radius: 9px;
-  background: #fff;
-  color: #475569;
-  font-size: 0.78rem;
-  font-weight: 650;
+  padding: 6px 14px;
+  border: 1px solid var(--color-slate-300);
+  border-radius: 6px;
+  background: var(--color-white);
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.admin-training-reset-filter.is-active,
-.admin-training-reset-filter:hover {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
+:where(.panel-scope) .admin-training-reset-filter.is-active,
+:where(.panel-scope) .admin-training-reset-filter:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-white);
 }
 
-.admin-training-summary {
+:where(.panel-scope) .admin-training-summary {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
 
-.admin-training-summary-card {
+:where(.panel-scope) .admin-training-summary-card {
   display: flex;
   min-width: 0;
   min-height: 92px;
@@ -92,7 +79,7 @@
   padding: 17px;
   border: 1px solid #e7edf5;
   border-radius: 18px;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 12px 30px rgb(15 23 42 / 4%);
   color: inherit;
   font: inherit;
@@ -101,23 +88,23 @@
   transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
 }
 
-.admin-training-summary-card:hover {
+:where(.panel-scope) .admin-training-summary-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 30px rgb(15 23 42 / 7%);
 }
 
-.admin-training-summary-card.is-selected {
-  border-color: #93c5fd;
+:where(.panel-scope) .admin-training-summary-card.is-selected {
+  border-color: var(--color-blue-300);
   box-shadow: 0 0 0 2px rgb(59 130 246 / 12%), 0 8px 20px rgb(15 23 42 / 5%);
 }
 
-.admin-training-summary-card:focus-visible,
-.admin-training-title-button:focus-visible {
-  outline: 2px solid #0284c7;
+:where(.panel-scope) .admin-training-summary-card:focus-visible,
+:where(.panel-scope) .admin-training-title-button:focus-visible {
+  outline: 2px solid var(--color-sky-600);
   outline-offset: 2px;
 }
 
-.admin-training-summary-card > span {
+:where(.panel-scope) .admin-training-summary-card > span:not(:where(.vista-portal *)) {
   display: grid;
   width: 42px;
   height: 42px;
@@ -126,54 +113,56 @@
   border-radius: 14px;
 }
 
-.admin-training-summary-card > div {
+:where(.panel-scope) .admin-training-summary-card > div:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
 
-.admin-training-summary-card small {
-  color: #64748b;
-  font-size: 0.76rem;
+:where(.panel-scope) .admin-training-summary-card small:not(:where(.vista-portal *)) {
+  color: var(--color-slate-600);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
-.admin-training-summary-card strong {
-  color: #0f172a;
-  font-size: 1.45rem;
+:where(.panel-scope) .admin-training-summary-card strong:not(:where(.vista-portal *)) {
+  color: var(--color-primary);
+  font-size: 1.9rem;
   line-height: 1.1;
+  font-weight: 600;
 }
 
-.admin-training-summary-card.is-pending > span {
-  background: #fef3c7;
-  color: #b45309;
+:where(.panel-scope) .admin-training-summary-card.is-pending > span:not(:where(.vista-portal *)) {
+  background: var(--color-amber-100);
+  color: var(--color-amber-700);
 }
 
-.admin-training-summary-card.is-approved > span {
-  background: #dcfce7;
-  color: #15803d;
+:where(.panel-scope) .admin-training-summary-card.is-approved > span:not(:where(.vista-portal *)) {
+  background: var(--color-green-100);
+  color: var(--color-green-700);
 }
 
-.admin-training-summary-card.is-published > span {
-  background: #e0f2fe;
-  color: #0369a1;
+:where(.panel-scope) .admin-training-summary-card.is-published > span:not(:where(.vista-portal *)) {
+  background: var(--color-sky-100);
+  color: var(--color-sky-700);
 }
 
-.admin-training-summary-card.is-rejected > span {
-  background: #fee2e2;
-  color: #b91c1c;
+:where(.panel-scope) .admin-training-summary-card.is-rejected > span:not(:where(.vista-portal *)) {
+  background: var(--color-red-100);
+  color: var(--color-red-700);
 }
 
-.admin-training-summary-card.is-archived > span {
-  background: #f1f5f9;
-  color: #475569;
+:where(.panel-scope) .admin-training-summary-card.is-archived > span:not(:where(.vista-portal *)) {
+  background: var(--color-slate-100);
+  color: var(--color-slate-600);
 }
 
-.admin-training-card {
+:where(.panel-scope) .admin-training-card {
   min-width: 0;
 }
 
-.admin-training-card-heading {
+:where(.panel-scope) .admin-training-card-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -181,29 +170,39 @@
   margin-bottom: 20px;
 }
 
-.admin-training-card-heading p {
-  margin: 0;
+:where(.panel-scope) .admin-training-card-heading h2:not(:where(.vista-portal *)) {
+  margin: 0 0 6px;
+  color: var(--color-primary);
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
-.admin-training-result-count {
+:where(.panel-scope) .admin-training-card-heading p:not(:where(.vista-portal *)) {
+  margin: 0;
+  color: var(--color-slate-600);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+:where(.panel-scope) .admin-training-result-count {
   flex: 0 0 auto;
   padding: 7px 11px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   border-radius: 999px;
-  background: #f8fafc;
-  color: #475569;
+  background: var(--color-slate-50);
+  color: var(--color-slate-600);
   font-size: 0.77rem;
   font-weight: 700;
 }
 
-.admin-training-toolbar {
+:where(.panel-scope) .admin-training-toolbar {
   display: flex;
   align-items: flex-end;
   gap: 12px;
   margin-bottom: 17px;
 }
 
-.admin-training-search {
+:where(.panel-scope) .admin-training-search {
   display: flex;
   min-width: 220px;
   min-height: 44px;
@@ -214,109 +213,106 @@
   border: 1px solid #e1e8f0;
   border-radius: 12px;
   background: #fbfcfe;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
-.admin-training-search:focus-within,
-.admin-training-filter select:focus {
-  border-color: #93c5fd;
+:where(.panel-scope) .admin-training-search:focus-within {
+  border-color: var(--color-blue-300);
   outline: 0;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
 }
 
-.admin-training-search input {
+:where(.panel-scope) .admin-training-search input:not(:where(.vista-portal *)) {
   width: 100%;
   border: 0;
   outline: 0;
   background: transparent;
-  color: #0f172a;
+  color: var(--color-slate-900);
   font: inherit;
   font-size: 0.85rem;
 }
 
-.admin-training-search input::placeholder {
-  color: #94a3b8;
+:where(.panel-scope) .admin-training-search input:not(:where(.vista-portal *))::placeholder {
+  color: var(--color-slate-400);
 }
 
-.admin-training-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  color: #475569;
-  font-size: 0.74rem;
-  font-weight: 600;
-}
-
-.admin-training-filter select {
-  min-width: 150px;
-  min-height: 44px;
-  padding: 0 30px 0 10px;
-  border: 1px solid #e1e8f0;
-  border-radius: 12px;
-  background: #fbfcfe;
-  color: #0f172a;
-  font: inherit;
-}
-
-.admin-training-table-wrap {
+:where(.panel-scope) .admin-training-table-wrap {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid #e5eaf1;
-  border-radius: 16px;
-  box-shadow: 0 5px 16px rgb(15 23 42 / 3%);
+  border: 1px solid var(--color-slate-300) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+  background-color: var(--color-white) !important;
 }
 
-.admin-training-table {
+:where(.panel-scope) .admin-training-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   text-align: left;
 }
 
-.admin-training-table th {
-  padding: 15px 13px;
-  border-bottom: 1px solid #e5eaf1;
-  background: #f8fafd;
-  color: #64748b;
-  font-size: 0.68rem;
-  letter-spacing: 0.075em;
+:where(.panel-scope) .admin-training-table th:nth-child(1):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-training-table td:nth-child(1):not(:where(.vista-portal *)) {
+  width: 48%;
+}
+
+:where(.panel-scope) .admin-training-table th:nth-child(2):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-training-table td:nth-child(2):not(:where(.vista-portal *)) {
+  width: 32%;
+}
+
+:where(.panel-scope) .admin-training-table th:nth-child(3):not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-training-table td:nth-child(3):not(:where(.vista-portal *)) {
+  width: 20%;
+}
+
+:where(.panel-scope) .admin-training-table th:not(:where(.vista-portal *)) {
+  padding: 14px 16px;
+  border-bottom: 2px solid var(--color-slate-300) !important;
+  background: var(--color-slate-100) !important;
+  color: var(--color-primary) !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.admin-training-table td {
+:where(.panel-scope) .admin-training-table td:not(:where(.vista-portal *)) {
   min-width: 125px;
   padding: 15px 13px;
   border-bottom: 1px solid #edf1f6;
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 0.82rem;
   vertical-align: middle;
 }
 
-.admin-training-table td:first-child {
+:where(.panel-scope) .admin-training-table td:first-child:not(:where(.vista-portal *)) {
   min-width: 290px;
 }
 
-.admin-training-table tbody tr:last-child td {
+:where(.panel-scope) .admin-training-table tbody tr:last-child td:not(:where(.vista-portal *)) {
   border-bottom: 0;
 }
 
-.admin-training-table tbody tr {
+:where(.panel-scope) .admin-training-table tbody tr:not(:where(.vista-portal *)) {
   transition: background-color 150ms ease;
 }
 
-.admin-training-table tbody tr:hover {
+:where(.panel-scope) .admin-training-table tbody tr:hover:not(:where(.vista-portal *)) {
   background: #f8faff;
 }
 
-.admin-training-title-cell {
+:where(.panel-scope) .admin-training-title-cell {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.admin-training-title-cell > img,
-.admin-training-placeholder {
+:where(.panel-scope) .admin-training-title-cell > img:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-training-placeholder {
   display: grid;
   width: 54px;
   height: 46px;
@@ -325,65 +321,64 @@
   overflow: hidden;
   border: 1px solid #e1e8f0;
   border-radius: 10px;
-  background: #eff6ff;
-  color: #0369a1;
+  background: var(--color-blue-50);
+  color: var(--color-sky-700);
   object-fit: cover;
 }
 
-.admin-training-title-cell > span:last-child {
+:where(.panel-scope) .admin-training-title-cell > span:last-child:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
 
-.admin-training-title-button {
+:where(.panel-scope) .admin-training-title-button {
   width: fit-content;
   padding: 0;
   border: 0;
   background: transparent;
-  color: #0c2340;
+  color: var(--color-primary);
   font: inherit;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
 }
 
-.admin-training-title-button:hover {
-  color: #0369a1;
+:where(.panel-scope) .admin-training-title-button:hover {
+  color: var(--color-sky-700);
   text-decoration: underline;
 }
 
-.admin-training-title-cell small,
-.admin-training-meta-cell small {
+:where(.panel-scope) .admin-training-title-cell small:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-training-meta-cell small:not(:where(.vista-portal *)) {
   display: -webkit-box;
   overflow: hidden;
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.74rem;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
-.admin-training-meta-cell {
+:where(.panel-scope) .admin-training-meta-cell {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.admin-training-meta-cell > span {
+:where(.panel-scope) .admin-training-meta-cell > span:not(.etiqueta-categoria):not(:where(.vista-portal *)) {
   display: flex;
   align-items: flex-start;
   gap: 6px;
 }
 
-.admin-training-meta-cell svg {
+:where(.panel-scope) .admin-training-meta-cell > span:not(.etiqueta-categoria) svg:not(:where(.vista-portal *)) {
   flex: 0 0 auto;
   margin-top: 2px;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
-.admin-training-status,
-.admin-training-vigencia {
+:where(.panel-scope) .admin-training-status {
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -396,67 +391,55 @@
   white-space: nowrap;
 }
 
-.admin-training-status.is-pendiente_aprobacion {
-  border-color: #fde68a;
-  background: #fffbeb;
-  color: #b45309;
+:where(.panel-scope) .admin-training-status.is-pendiente_aprobacion {
+  border-color: var(--color-amber-200);
+  background: var(--color-amber-50);
+  color: var(--color-amber-700);
 }
 
-.admin-training-status.is-borrador {
-  border-color: #e2e8f0;
-  background: #f8fafc;
-  color: #475569;
+:where(.panel-scope) .admin-training-status.is-borrador {
+  border-color: var(--color-slate-200);
+  background: var(--color-slate-50);
+  color: var(--color-slate-600);
 }
 
-.admin-training-status.is-aprobado {
-  border-color: #bbf7d0;
-  background: #f0fdf4;
-  color: #15803d;
+:where(.panel-scope) .admin-training-status.is-aprobado {
+  border-color: var(--color-green-200);
+  background: var(--color-green-50);
+  color: var(--color-green-700);
 }
 
-.admin-training-status.is-publicado {
-  border-color: #bae6fd;
-  background: #f0f9ff;
-  color: #0369a1;
+:where(.panel-scope) .admin-training-status.is-publicado {
+  border-color: var(--color-sky-200);
+  background: var(--color-sky-50);
+  color: var(--color-sky-700);
 }
 
-.admin-training-status.is-rechazado {
-  border-color: #fecaca;
-  background: #fef2f2;
-  color: #b91c1c;
+:where(.panel-scope) .admin-training-status.is-rechazado {
+  border-color: var(--color-red-200);
+  background: var(--color-red-50);
+  color: var(--color-red-700);
 }
 
-.admin-training-status.is-archivado {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
-  color: #475569;
+:where(.panel-scope) .admin-training-status.is-archivado {
+  border-color: var(--color-slate-300);
+  background: var(--color-slate-100);
+  color: var(--color-slate-600);
 }
 
-.admin-training-vigencia.is-vigente {
-  border-color: #bbf7d0;
-  background: #f0fdf4;
-  color: #15803d;
-}
-
-.admin-training-vigencia.is-finalizada {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.admin-training-empty {
+:where(.panel-scope) .admin-training-empty {
   padding: 36px !important;
-  color: #64748b !important;
+  color: var(--color-slate-500) !important;
   text-align: center;
 }
 
-.admin-training-error {
+:where(.panel-scope) .admin-training-error {
   margin: 0;
-  color: #b91c1c;
+  color: var(--color-red-700);
   font-size: 0.84rem;
 }
 
-.admin-training-visually-hidden {
+:where(.panel-scope) .admin-training-visually-hidden {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -467,9 +450,9 @@
   border: 0;
 }
 
-.admin-training-overlay {
+:where(.panel-scope) .admin-training-overlay {
   position: fixed;
-  z-index: 3000;
+  z-index: var(--z-modal);
   inset: 0;
   display: flex;
   align-items: center;
@@ -479,7 +462,7 @@
   backdrop-filter: blur(4px);
 }
 
-.admin-training-modal {
+:where(.panel-scope) .admin-training-modal {
   display: flex;
   width: min(940px, 100%);
   max-height: min(92vh, 960px);
@@ -487,13 +470,13 @@
   overflow: hidden;
   border: 1px solid #e4eaf2;
   border-radius: 22px;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 28px 80px rgb(15 23 42 / 28%);
 }
 
-.admin-training-modal-header {
+:where(.panel-scope) .admin-training-modal-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
   padding: 21px 25px;
@@ -501,22 +484,41 @@
   background: #fbfcfe;
 }
 
-.admin-training-modal-header > div > span {
-  color: #64748b;
+:where(.panel-scope) .admin-training-modal-heading {
+  min-width: 0;
+  flex: 1;
+}
+
+:where(.panel-scope) .admin-training-modal-header > div > span:not(:where(.vista-portal *)) {
+  color: var(--color-slate-500);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.admin-training-modal-header h2 {
-  margin: 5px 0 0;
-  color: #0c2340;
-  font-size: 1.35rem;
-  line-height: 1.35;
+:where(.panel-scope) .admin-training-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 5px;
 }
 
-.admin-training-modal-body {
+:where(.panel-scope) .admin-training-modal-header h2:not(:where(.vista-portal *)) {
+  min-width: 0;
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 1.45rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+:where(.panel-scope) .admin-training-title-row .admin-training-status {
+  flex: 0 0 auto;
+}
+
+:where(.panel-scope) .admin-training-modal-body {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -524,22 +526,13 @@
   overflow-y: auto;
 }
 
-.admin-training-state-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 9px;
-  color: #64748b;
-  font-size: 0.8rem;
-}
-
-.admin-training-info-grid {
+:where(.panel-scope) .admin-training-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
-.admin-training-info-grid article {
+:where(.panel-scope) .admin-training-info-grid article:not(:where(.vista-portal *)) {
   min-width: 0;
   padding: 14px;
   border: 1px solid #e7edf5;
@@ -547,81 +540,106 @@
   background: #fbfcfe;
 }
 
-.admin-training-info-grid article.is-wide {
+:where(.panel-scope) .admin-training-info-grid article.is-wide {
   grid-column: 1 / -1;
 }
 
-.admin-training-info-grid h3,
-.admin-training-resources h3 {
+:where(.panel-scope) .admin-training-info-grid h3:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-training-resources h3:not(:where(.vista-portal *)) {
   margin: 0 0 7px;
-  color: #0c2340;
+  color: var(--color-primary);
   font-size: 0.84rem;
 }
 
-.admin-training-info-grid p {
+:where(.panel-scope) .admin-training-info-grid p:not(:where(.vista-portal *)) {
   margin: 0;
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 0.85rem;
   line-height: 1.6;
 }
 
-.admin-training-content {
+:where(.panel-scope) .admin-training-content {
   white-space: pre-line;
 }
 
-.admin-training-resources {
+:where(.panel-scope) .admin-training-inline-resource {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+:where(.panel-scope) .admin-training-inline-resource > svg:not(:where(.vista-portal *)) {
+  flex: 0 0 auto;
+  color: var(--color-sky-700);
+}
+
+:where(.panel-scope) .admin-training-inline-resource a:not(:where(.vista-portal *)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-sky-700);
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+:where(.panel-scope) .admin-training-resources {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-  padding-top: 2px;
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #e7edf5;
+  border-radius: 13px;
+  background: #fbfcfe;
+  box-sizing: border-box;
 }
 
-.admin-training-resources h3 {
+:where(.panel-scope) .admin-training-resources h3:not(:where(.vista-portal *)) {
   margin-bottom: 0;
 }
 
-.admin-training-resource-image {
+:where(.panel-scope) .admin-training-resource-image {
   display: flex;
   width: min(100%, 400px);
   flex-direction: column;
   gap: 7px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   border-radius: 13px;
-  background: #f8fafc;
-  color: #0369a1;
+  background: var(--color-slate-50);
+  color: var(--color-sky-700);
   font-size: 0.78rem;
   font-weight: 650;
   text-decoration: none;
 }
 
-.admin-training-resource-image img {
+:where(.panel-scope) .admin-training-resource-image img:not(:where(.vista-portal *)) {
   width: 100%;
   max-height: 220px;
   object-fit: cover;
 }
 
-.admin-training-resource-image span {
+:where(.panel-scope) .admin-training-resource-image span:not(:where(.vista-portal *)) {
   display: flex;
   align-items: center;
   gap: 7px;
   padding: 0 12px 10px;
 }
 
-.admin-training-resource-link {
+:where(.panel-scope) .admin-training-resource-link {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #0369a1;
+  color: var(--color-sky-700);
   font-size: 0.84rem;
 }
 
-.admin-training-resource-link > svg {
+:where(.panel-scope) .admin-training-resource-link > svg:not(:where(.vista-portal *)) {
   flex: 0 0 auto;
 }
 
-.admin-training-resource-link a {
+:where(.panel-scope) .admin-training-resource-link a:not(:where(.vista-portal *)) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -630,36 +648,36 @@
   overflow-wrap: anywhere;
 }
 
-.admin-training-resource-link small,
-.admin-training-no-resources {
-  color: #64748b;
+:where(.panel-scope) .admin-training-resource-link small:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-training-no-resources {
+  color: var(--color-slate-500);
   font-size: 0.78rem;
 }
 
-.admin-training-rejection-note {
+:where(.panel-scope) .admin-training-rejection-note {
   padding: 12px 14px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-red-200);
   border-radius: 12px;
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--color-red-50);
+  color: var(--color-red-800);
   font-size: 0.82rem;
 }
 
-.admin-training-rejection-note p {
+:where(.panel-scope) .admin-training-rejection-note p:not(:where(.vista-portal *)) {
   margin: 5px 0 0;
   line-height: 1.5;
 }
 
-.admin-training-review-actions,
-.admin-training-confirmation > div:last-child {
+:where(.panel-scope) .admin-training-review-actions,
+:where(.panel-scope) .admin-training-confirmation > div:last-child:not(:where(.vista-portal *)) {
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
 }
 
-.admin-training-action,
-.admin-training-confirm,
-.admin-training-cancel {
+:where(.panel-scope) .admin-training-action,
+:where(.panel-scope) .admin-training-confirm,
+:where(.panel-scope) .admin-training-cancel {
   display: inline-flex;
   min-height: 40px;
   align-items: center;
@@ -675,138 +693,140 @@
   transition: background 150ms ease, transform 150ms ease;
 }
 
-.admin-training-action:hover:not(:disabled),
-.admin-training-confirm:hover:not(:disabled) {
+:where(.panel-scope) .admin-training-action:hover:not(:disabled),
+:where(.panel-scope) .admin-training-confirm:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-.admin-training-action.is-approve,
-.admin-training-confirm.is-aprobado {
-  border-color: #15803d;
-  background: #15803d;
-  color: #fff;
+:where(.panel-scope) .admin-training-action.is-approve,
+:where(.panel-scope) .admin-training-confirm.is-aprobado {
+  border-color: var(--color-green-700);
+  background: var(--color-green-700);
+  color: var(--color-white);
 }
 
-.admin-training-action.is-reject,
-.admin-training-confirm.is-rechazado {
-  border-color: #b91c1c;
-  background: #b91c1c;
-  color: #fff;
+:where(.panel-scope) .admin-training-action.is-reject,
+:where(.panel-scope) .admin-training-confirm.is-rechazado {
+  border-color: var(--color-red-700);
+  background: var(--color-red-700);
+  color: var(--color-white);
 }
 
-.admin-training-action.is-archive,
-.admin-training-confirm.is-archivado {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
-  color: #334155;
+:where(.panel-scope) .admin-training-action.is-archive,
+:where(.panel-scope) .admin-training-confirm.is-archivado {
+  border-color: var(--color-slate-300);
+  background: var(--color-slate-100);
+  color: var(--color-slate-700);
 }
 
-.admin-training-cancel {
+:where(.panel-scope) .admin-training-cancel {
   border-color: #dbe3ec;
-  background: #fff;
-  color: #475569;
+  background: var(--color-white);
+  color: var(--color-slate-600);
 }
 
-.admin-training-confirmation {
+:where(.panel-scope) .admin-training-confirmation {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 15px;
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--color-blue-100);
   border-radius: 13px;
   background: #f8fbff;
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 0.83rem;
 }
 
-.admin-training-confirmation p {
+:where(.panel-scope) .admin-training-confirmation p:not(:where(.vista-portal *)) {
   margin: 0;
   line-height: 1.5;
 }
 
-.admin-training-confirmation label {
+:where(.panel-scope) .admin-training-confirmation label:not(:where(.vista-portal *)) {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  color: #475569;
+  color: var(--color-slate-600);
   font-weight: 650;
 }
 
-.admin-training-confirmation label b {
-  color: #b91c1c;
+:where(.panel-scope) .admin-training-confirmation label b:not(:where(.vista-portal *)) {
+  color: var(--color-red-700);
 }
 
-.admin-training-confirmation textarea {
+:where(.panel-scope) .admin-training-confirmation textarea:not(:where(.vista-portal *)) {
   width: 100%;
   resize: vertical;
   padding: 10px 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   border-radius: 10px;
-  background: #fff;
-  color: #0f172a;
+  background: var(--color-white);
+  color: var(--color-slate-900);
   font: inherit;
   font-weight: 400;
 }
 
-.admin-training-confirmation textarea:focus {
-  border-color: #93c5fd;
+:where(.panel-scope) .admin-training-confirmation textarea:focus:not(:where(.vista-portal *)) {
+  border-color: var(--color-blue-300);
   outline: 0;
   box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
 }
 
-.admin-training-action:disabled,
-.admin-training-confirm:disabled,
-.admin-training-cancel:disabled {
+:where(.panel-scope) .admin-training-action:disabled,
+:where(.panel-scope) .admin-training-confirm:disabled,
+:where(.panel-scope) .admin-training-cancel:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
 @media (max-width: 900px) {
-  .admin-training-summary {
+  :where(.panel-scope) .admin-training-summary {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 700px) {
-  .admin-training-toolbar {
+  :where(.panel-scope) .admin-training-toolbar {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .admin-training-search,
-  .admin-training-filter,
-  .admin-training-filter select {
+  :where(.panel-scope) .admin-training-search {
     width: 100%;
   }
 
-  .admin-training-card {
+  :where(.panel-scope) .admin-training-card {
     padding: 20px;
   }
 
-  .admin-training-card-heading {
+  :where(.panel-scope) .admin-training-card-heading {
     flex-direction: column;
     gap: 10px;
   }
 
-  .admin-training-table thead {
+  :where(.panel-scope) .admin-training-table thead:not(:where(.vista-portal *)) {
     display: none;
   }
 
-  .admin-training-table,
-  .admin-training-table tbody,
-  .admin-training-table tr,
-  .admin-training-table td {
+  :where(.panel-scope) .admin-training-table,
+  :where(.panel-scope) .admin-training-table tbody:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-training-table tr:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-training-table td:not(:where(.vista-portal *)) {
     display: block;
     width: 100%;
   }
 
-  .admin-training-table tbody tr {
+  :where(.panel-scope) .admin-training-table td:nth-child(n):not(:where(.vista-portal *)) {
+    width: 100%;
+  }
+
+  :where(.panel-scope) .admin-training-table tbody tr:not(:where(.vista-portal *)) {
     padding: 13px 15px;
     border-bottom: 1px solid #edf1f6;
   }
 
-  .admin-training-table td,
-  .admin-training-table td:first-child {
+  :where(.panel-scope) .admin-training-table td:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-training-table td:first-child:not(:where(.vista-portal *)) {
     display: flex;
     min-width: 0;
     align-items: flex-start;
@@ -817,14 +837,15 @@
     text-align: right;
   }
 
-  .admin-training-table td:first-child {
+  :where(.panel-scope) .admin-training-table td:first-child:not(:where(.vista-portal *)) {
     display: block;
+    min-width: 0;
     text-align: left;
   }
 
-  .admin-training-table td:not(:first-child)::before {
+  :where(.panel-scope) .admin-training-table td:not(:first-child):not(:where(.vista-portal *))::before {
     flex: 0 0 110px;
-    color: #64748b;
+    color: var(--color-slate-500);
     content: attr(data-label);
     font-size: 0.68rem;
     font-weight: 700;
@@ -835,56 +856,56 @@
 }
 
 @media (max-width: 600px) {
-  .admin-training-page {
+  :where(.panel-scope) .admin-training-page {
     gap: 18px;
   }
 
-  .admin-training-summary {
+  :where(.panel-scope) .admin-training-summary {
     gap: 9px;
   }
 
-  .admin-training-summary-card {
+  :where(.panel-scope) .admin-training-summary-card {
     min-height: 78px;
     gap: 8px;
     padding: 11px;
   }
 
-  .admin-training-summary-card > span {
+  :where(.panel-scope) .admin-training-summary-card > span:not(:where(.vista-portal *)) {
     width: 34px;
     height: 34px;
   }
 
-  .admin-training-summary-card small {
+  :where(.panel-scope) .admin-training-summary-card small:not(:where(.vista-portal *)) {
     font-size: 0.68rem;
   }
 
-  .admin-training-overlay {
+  :where(.panel-scope) .admin-training-overlay {
     align-items: flex-end;
     padding: 0;
   }
 
-  .admin-training-modal {
+  :where(.panel-scope) .admin-training-modal {
     max-height: 94dvh;
     border-radius: 21px 21px 0 0;
   }
 
-  .admin-training-modal-header,
-  .admin-training-modal-body {
+  :where(.panel-scope) .admin-training-modal-header,
+  :where(.panel-scope) .admin-training-modal-body {
     padding-right: 18px;
     padding-left: 18px;
   }
 
-  .admin-training-info-grid {
+  :where(.panel-scope) .admin-training-info-grid {
     grid-template-columns: 1fr;
   }
 
-  .admin-training-info-grid article.is-wide {
+  :where(.panel-scope) .admin-training-info-grid article.is-wide {
     grid-column: auto;
   }
 }
 
 @media (max-width: 380px) {
-  .admin-training-summary {
+  :where(.panel-scope) .admin-training-summary {
     grid-template-columns: 1fr;
   }
 }

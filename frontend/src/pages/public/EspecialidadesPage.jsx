@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
 import "../../styles/pages/EspecialidadesPage.css";
 import PageBanner from "../../components/PageBanner";
 import fondoBannerEsp from "../../assets/banner_especialidades.png";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import { getEspecialidades } from "../../api/especialidades.api.js";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const EspecialidadesPage = () => {
+  usePageMeta("Especialidades y servicios", "Especialidades y servicios del Hospital Interdistrital Evita: horarios, requisitos, ubicación y cómo derivar pacientes.");
   const [currentView, setCurrentView] = useState("menu");
   const [selectedItem, setSelectedItem] = useState(null);
-  
+
   const [especialidadesData, setEspecialidadesData] = useState([]);
   const [serviciosData, setServiciosData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +22,7 @@ const EspecialidadesPage = () => {
     window.scrollTo(0, 0);
     const fetchDatos = async () => {
       try {
-        const data = await getEspecialidades(false); 
+        const data = await getEspecialidades(false);
         setEspecialidadesData(data.filter(item => !item.esServicio));
         setServiciosData(data.filter(item => item.esServicio));
       } catch (error) {
@@ -115,7 +119,7 @@ const EspecialidadesPage = () => {
               >
                 <div
                   className="menu-card"
-                  onClick={() => setCurrentView("grilla-esp")}
+                  onClick={() => setCurrentView("grilla-esp")} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setCurrentView("grilla-esp"))}
                 >
                   <div className="menu-card-icon">
                     <svg
@@ -135,7 +139,7 @@ const EspecialidadesPage = () => {
                   <h2>Especialidades</h2>
                 </div>
               </AnimatedContent>
-              
+
               <AnimatedContent
                 distance={40}
                 direction="vertical"
@@ -144,7 +148,7 @@ const EspecialidadesPage = () => {
               >
                 <div
                   className="menu-card"
-                  onClick={() => setCurrentView("grilla-serv")}
+                  onClick={() => setCurrentView("grilla-serv")} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setCurrentView("grilla-serv"))}
                 >
                   <div className="menu-card-icon">
                     <svg
@@ -206,13 +210,13 @@ const EspecialidadesPage = () => {
                   <div
                     key={item.id}
                     className="specialty-card"
-                    onClick={() => setSelectedItem(item)}
+                    onClick={() => setSelectedItem(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setSelectedItem(item))}
                     style={{ overflow: "hidden", display: "flex", flexDirection: "column", padding: "30px 15px", alignItems: "center", justifyContent: "center" }}
                   >
                     <h3 style={{ margin: 0, textAlign: "center" }}>{item.nombre}</h3>
                   </div>
                 ))}
-                
+
                 {(currentView === "grilla-esp" ? especialidadesData : serviciosData).length === 0 && (
                   <div style={{ padding: "40px", textAlign: "center", color: "#64748b", gridColumn: "1 / -1" }}>
                     No hay {currentView === "grilla-esp" ? "especialidades" : "servicios"} registrados en este momento.
@@ -224,133 +228,146 @@ const EspecialidadesPage = () => {
         )}
       </div>
 
-      {/* MODAL AISLADO */}
-      {selectedItem && (
-        <div className="esp-aislado-overlay" onClick={closeModal}>
-          <div
-            className="esp-aislado-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* CABECERA INTACTA */}
-            <div className="esp-aislado-header">
-              <h2>
-                {selectedItem.esServicio ? "SERVICIO" : "ESPECIALIDAD"}: {selectedItem.nombre}
-              </h2>
-              <button
-                className="esp-aislado-btn-close"
-                onClick={closeModal}
-                title="Cerrar ventana"
-              >
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
-
-            {/* NUEVO CUERPO DEL MODAL (ESTILO APLICADO) */}
-            <div className="modal-body">
-              
-              {/* Sección: ¿Qué atendemos aquí? */}
-              {selectedItem.descripcion && (
-                <section className="section-scope" aria-labelledby="scope-title">
-                  <div className="section-heading-row">
-                    <svg className="section-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" y1="16" x2="12" y2="12" />
-                      <line x1="12" y1="8" x2="12.01" y2="8" />
-                    </svg>
-                    <h2 id="scope-title" className="section-heading-title">
-                      {selectedItem.pregunta || "¿Qué atendemos aquí?"}
-                    </h2>
-                  </div>
-                  <p className="scope-description-text">
-                    {selectedItem.descripcion}
-                  </p>
-                </section>
-              )}
-
-              {/* Tarjetas de Ubicación y Horarios */}
-              <div className="info-cards-grid">
-                
-                {/* Ubicación */}
-                <article className="info-box-card">
-                  <div className="card-icon-bubble" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="10" r="3" />
-                      <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
-                    </svg>
-                  </div>
-                  <div className="card-data">
-                    <span className="card-kicker">UBICACIÓN</span>
-                    <strong className="card-main-val">{selectedItem.ubicacion || "Consultar en Admisión"}</strong>
-                  </div>
-                </article>
-
-                {/* Horarios de Atención */}
-                <article className="info-box-card">
-                  <div className="card-icon-bubble" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                  </div>
-                  <div className="card-data">
-                    <span className="card-kicker">HORARIOS DE ATENCIÓN</span>
-                    <strong className="card-main-val">{selectedItem.horarios || "Consultar horarios disponibles"}</strong>
-                  </div>
-                </article>
-
+      {/* MODAL AISLADO RENDERIZADO EN PORTAL DIRECTO AL BODY */}
+      {selectedItem &&
+        ReactDOM.createPortal(
+          <div className="esp-aislado-overlay" onClick={closeModal}>
+            <div
+              className="esp-aislado-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* CABECERA INTACTA */}
+              <div className="esp-aislado-header">
+                <h2>
+                  {selectedItem.esServicio ? "SERVICIO" : "ESPECIALIDAD"}: {selectedItem.nombre}
+                </h2>
+                <button
+                  type="button"
+                  className="esp-aislado-btn-close"
+                  onClick={closeModal}
+                  title="Cerrar ventana"
+                  aria-label="Cerrar ventana"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 6L6 18M6 6l12 12"></path>
+                  </svg>
+                </button>
               </div>
 
-              {/* Tarjeta de Requisitos Importantes */}
-              {selectedItem.requisitos && selectedItem.requisitos.length > 0 && (
-                <section className="requirements-banner" aria-labelledby="req-title">
-                  <div className="req-header-row">
-                    <span className="req-icon" aria-hidden="true">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                      </svg>
-                    </span>
-                    <h2 id="req-title" className="req-title">
-                      REQUISITOS IMPORTANTES:
-                    </h2>
-                  </div>
-                  <ul className="req-list">
-                    {selectedItem.requisitos.map((req, index) => (
-                      <li key={index} className="req-item">
-                        <span className="req-bullet" aria-hidden="true" />
-                        <span>{req}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
+              {/* NUEVO CUERPO DEL MODAL (ESTILO APLICADO) */}
+              <div className="modal-body">
 
-              {/* Información sobre Derivación Médica */}
-              {selectedItem.informacionDerivacion && (
-                <section className="section-scope" aria-labelledby="deriv-title">
-                  <div className="section-heading-row">
-                    <svg className="section-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="16" y1="13" x2="8" y2="13" />
-                      <line x1="16" y1="17" x2="8" y2="17" />
-                    </svg>
-                    <h2 id="deriv-title" className="section-heading-title">
-                      Información de Derivación:
-                    </h2>
-                  </div>
-                  <p className="scope-description-text">
-                    {selectedItem.informacionDerivacion}
-                  </p>
-                </section>
-              )}
+                {/* Sección: ¿Qué atendemos aquí? */}
+                {selectedItem.descripcion && (
+                  <section className="section-scope" aria-labelledby="scope-title">
+                    <div className="section-heading-row">
+                      <svg className="section-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                      </svg>
+                      <h2 id="scope-title" className="section-heading-title">
+                        {selectedItem.pregunta || "¿Qué atendemos aquí?"}
+                      </h2>
+                    </div>
+                    <p className="scope-description-text">
+                      {selectedItem.descripcion}
+                    </p>
+                  </section>
+                )}
+
+                {/* Tarjetas de Ubicación y Horarios */}
+                <div className="info-cards-grid">
+
+                  {/* Ubicación */}
+                  <article className="info-box-card">
+                    <div className="card-icon-bubble" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="10" r="3" />
+                        <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
+                      </svg>
+                    </div>
+                    <div className="card-data">
+                      <span className="card-kicker">UBICACIÓN</span>
+                      <strong className="card-main-val">{selectedItem.ubicacion || "Consultar en Admisión"}</strong>
+                    </div>
+                  </article>
+
+                  {/* Horarios de Atención */}
+                  <article className="info-box-card">
+                    <div className="card-icon-bubble" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                    </div>
+                    <div className="card-data">
+                      <span className="card-kicker">HORARIOS DE ATENCIÓN</span>
+                      <strong className="card-main-val">{selectedItem.horarios || "Consultar horarios disponibles"}</strong>
+                    </div>
+                  </article>
+
+                </div>
+
+                {/* Tarjeta de Requisitos Importantes */}
+                {selectedItem.requisitos && selectedItem.requisitos.length > 0 && (
+                  <section className="requirements-banner" aria-labelledby="req-title">
+                    <div className="req-header-row">
+                      <span className="req-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                          <line x1="12" y1="9" x2="12" y2="13" />
+                          <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                      </span>
+                      <h2 id="req-title" className="req-title">
+                        REQUISITOS IMPORTANTES:
+                      </h2>
+                    </div>
+                    <ul className="req-list">
+                      {selectedItem.requisitos.map((req, index) => (
+                        <li key={index} className="req-item">
+                          <span className="req-bullet" aria-hidden="true" />
+                          <span>{req}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+
+                {/* Información sobre Derivación Médica */}
+                {selectedItem.informacionDerivacion && (
+                  <section className="section-scope" aria-labelledby="deriv-title">
+                    <div className="section-heading-row">
+                      <svg className="section-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                      </svg>
+                      <h2 id="deriv-title" className="section-heading-title">
+                        Información de Derivación:
+                      </h2>
+                    </div>
+                    <p className="scope-description-text">
+                      {selectedItem.informacionDerivacion}
+                    </p>
+                  </section>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
     </main>
   );

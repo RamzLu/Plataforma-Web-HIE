@@ -1,0 +1,127 @@
+/*
+ * Tokens de diseño de la Plataforma Web HIE.
+ * Única fuente de colores, tipografía, radios, sombras y capas (z-index) para el portal, el CMS y el Admin.
+ * Usar siempre var(--...) en lugar de valores sueltos. Si falta un valor, agregarlo acá.
+ *
+ * Breakpoints (no se pueden usar variables dentro de @media; usar estos valores):
+ *   sm  480px  — celulares grandes
+ *   md  768px  — tablets
+ *   lg  1024px — notebooks chicas
+ *   xl  1280px — escritorio
+ */
+
+:root {
+  /* ── Marca ─────────────────────────────────────────────── */
+  --color-primary: #0c2340;        /* azul marino institucional: header, footer, títulos */
+  --color-primary-dark: #0a162e;
+  --color-primary-soft: #0d223f;
+  --color-secondary: #2b5b94;      /* azul de acción: botones y links */
+  --color-secondary-dark: #0d4077;
+
+  /* ── Neutros ───────────────────────────────────────────── */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+
+  /* ── Informativo (celeste) ─────────────────────────────── */
+  --color-sky-50: #f0f9ff;
+  --color-sky-100: #e0f2fe;
+  --color-sky-200: #bae6fd;
+  --color-sky-400: #38bdf8;
+  --color-sky-600: #0284c7;
+  --color-sky-700: #0369a1;
+
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #93c5fd;
+  --color-blue-400: #60a5fa;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-900: #1e3a8a;
+
+  /* ── Estados ───────────────────────────────────────────── */
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-300: #fca5a5;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-red-700: #b91c1c;
+  --color-red-800: #991b1b;
+  --color-rose-600: #e11d48;
+  --color-rose-700: #be123c;
+
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
+
+  --color-green-50: #f0fdf4;
+  --color-green-100: #dcfce7;
+  --color-green-200: #bbf7d0;
+  --color-green-700: #15803d;
+  --color-green-800: #166534;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+
+  /* ── Semánticos (usar estos en código nuevo) ───────────── */
+  --color-text: var(--color-slate-900);
+  --color-text-secondary: var(--color-slate-600);
+  --color-text-muted: var(--color-slate-500);
+  --color-border: var(--color-slate-200);
+  --color-border-strong: var(--color-slate-300);
+  --color-surface: var(--color-white);
+  --color-surface-alt: var(--color-slate-50);
+  --color-link: var(--color-secondary);
+  --color-success: var(--color-green-700);
+  --color-success-bg: var(--color-green-50);
+  --color-warning: var(--color-amber-700);
+  --color-warning-bg: var(--color-amber-50);
+  --color-danger: var(--color-red-700);
+  --color-danger-bg: var(--color-red-50);
+  --color-info: var(--color-sky-600);
+  --color-info-bg: var(--color-sky-50);
+
+  /* ── Tipografía ────────────────────────────────────────── */
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ── Radios ────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* ── Sombras ───────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+
+  /* ── Capas (z-index): de abajo hacia arriba ────────────────
+     Valores locales (0-99) se usan dentro de un componente; para capas de página usar estos. */
+  --z-header: 1000;
+  --z-header-raised: 1050;
+  --z-sidebar: 1100;
+  --z-sidebar-raised: 1200;
+  --z-overlay: 2000;
+  --z-modal: 3000;
+  --z-modal-raised: 3010;
+  --z-floating: 4000;
+  --z-modal-top: 5000;
+  --z-lightbox: 6000;
+  --z-lightbox-raised: 6001;
+  --z-lightbox-controls: 6010;
+  --z-lightbox-controls-top: 6020;
+  --z-popover: 9000;
+}

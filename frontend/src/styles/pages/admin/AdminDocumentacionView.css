@@ -1,50 +1,50 @@
-.admin-doc-page {
+:where(.panel-scope) .admin-doc-page {
   display: flex;
   width: 100%;
   flex-direction: column;
   gap: 22px;
   padding-bottom: 40px;
-  color: #0c2340;
+  color: var(--color-primary);
 }
 
-.admin-doc-header h1 {
+:where(.panel-scope) .admin-doc-header h1:not(:where(.vista-portal *)) {
   margin: 5px 0;
-  color: #0c2340;
+  color: var(--color-primary);
   font-size: clamp(2rem, 3.2vw, 2.8rem);
   font-weight: 200;
   letter-spacing: normal;
 }
 
-.admin-doc-overtitle {
-  color: #64748b;
+:where(.panel-scope) .admin-doc-overtitle {
+  color: var(--color-slate-500);
   font-size: 0.75rem;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
 
-.admin-doc-header p {
+:where(.panel-scope) .admin-doc-header p:not(:where(.vista-portal *)) {
   margin: 0;
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 1rem;
 }
 
-.admin-doc-feedback {
+:where(.panel-scope) .admin-doc-feedback {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 11px 14px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--color-blue-200);
   border-radius: 12px;
-  background: #eff6ff;
-  color: #1e3a8a;
+  background: var(--color-blue-50);
+  color: var(--color-blue-900);
   font-size: 0.84rem;
 }
 
-.admin-doc-feedback {
+:where(.panel-scope) .admin-doc-feedback {
   justify-content: space-between;
 }
 
-.admin-doc-feedback button {
+:where(.panel-scope) .admin-doc-feedback button:not(:where(.vista-portal *)) {
   display: grid;
   width: 30px;
   height: 30px;
@@ -57,17 +57,17 @@
   cursor: pointer;
 }
 
-.admin-doc-feedback button:hover {
-  background: #dbeafe;
+:where(.panel-scope) .admin-doc-feedback button:hover:not(:where(.vista-portal *)) {
+  background: var(--color-blue-100);
 }
 
-.admin-doc-summary {
+:where(.panel-scope) .admin-doc-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
-.admin-doc-summary-card {
+:where(.panel-scope) .admin-doc-summary-card {
   display: flex;
   min-height: 92px;
   align-items: center;
@@ -75,7 +75,7 @@
   padding: 17px;
   border: 1px solid #e7edf5;
   border-radius: 18px;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 12px 30px rgb(15 23 42 / 4%);
   color: inherit;
   font: inherit;
@@ -84,22 +84,22 @@
   transition: transform 170ms ease, box-shadow 170ms ease, border-color 170ms ease;
 }
 
-.admin-doc-summary-card:hover {
+:where(.panel-scope) .admin-doc-summary-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 30px rgb(15 23 42 / 7%);
 }
 
-.admin-doc-summary-card.is-selected {
-  border-color: #93c5fd;
+:where(.panel-scope) .admin-doc-summary-card.is-selected {
+  border-color: var(--color-blue-300);
   box-shadow: 0 0 0 2px rgb(59 130 246 / 12%), 0 8px 20px rgb(15 23 42 / 5%);
 }
 
-.admin-doc-summary-card:focus-visible {
-  outline: 2px solid #0284c7;
+:where(.panel-scope) .admin-doc-summary-card:focus-visible {
+  outline: 2px solid var(--color-sky-600);
   outline-offset: 2px;
 }
 
-.admin-doc-summary-card > span {
+:where(.panel-scope) .admin-doc-summary-card > span:not(:where(.vista-portal *)) {
   display: grid;
   width: 42px;
   height: 42px;
@@ -108,83 +108,82 @@
   border-radius: 14px;
 }
 
-.admin-doc-summary-card > div {
+:where(.panel-scope) .admin-doc-summary-card > div:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
 
-.admin-doc-summary-card small {
-  color: #64748b;
-  font-size: 0.76rem;
+:where(.panel-scope) .admin-doc-summary-card small:not(:where(.vista-portal *)) {
+  color: var(--color-slate-600);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
-.admin-doc-summary-card strong {
-  color: #0f172a;
-  font-size: 1.45rem;
+:where(.panel-scope) .admin-doc-summary-card strong:not(:where(.vista-portal *)) {
+  color: var(--color-primary);
+  font-size: 1.9rem;
   line-height: 1.1;
+  font-weight: 600;
 }
 
-.admin-doc-summary-card.is-pending > span {
-  background: #fef3c7;
-  color: #b45309;
+:where(.panel-scope) .admin-doc-summary-card.is-pending > span:not(:where(.vista-portal *)) {
+  background: var(--color-amber-100);
+  color: var(--color-amber-700);
 }
 
-.admin-doc-summary-card.is-approved > span {
-  background: #dcfce7;
-  color: #15803d;
+:where(.panel-scope) .admin-doc-summary-card.is-approved > span:not(:where(.vista-portal *)) {
+  background: var(--color-green-100);
+  color: var(--color-green-700);
 }
 
-.admin-doc-summary-card.is-rejected > span {
-  background: #fee2e2;
-  color: #b91c1c;
+:where(.panel-scope) .admin-doc-summary-card.is-rejected > span:not(:where(.vista-portal *)) {
+  background: var(--color-red-100);
+  color: var(--color-red-700);
 }
 
-.admin-doc-summary-card.is-published > span {
-  background: #e0f2fe;
-  color: #0369a1;
+:where(.panel-scope) .admin-doc-summary-card.is-published > span:not(:where(.vista-portal *)) {
+  background: var(--color-sky-100);
+  color: var(--color-sky-700);
 }
 
-.admin-doc-summary-toolbar {
+:where(.panel-scope) .admin-doc-summary-toolbar {
   display: flex;
   justify-content: flex-end;
   margin-bottom: -14px;
 }
 
-.admin-doc-reset-filter {
+:where(.panel-scope) .admin-doc-reset-filter {
   min-height: 32px;
-  padding: 5px 12px;
-  border: 1px solid #dbe3ec;
-  border-radius: 9px;
-  background: #fff;
-  color: #475569;
-  font-size: 0.78rem;
-  font-weight: 650;
+  padding: 6px 14px;
+  border: 1px solid var(--color-slate-300);
+  border-radius: 6px;
+  background: var(--color-white);
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.admin-doc-reset-filter.is-active {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
+:where(.panel-scope) .admin-doc-reset-filter.is-active,
+:where(.panel-scope) .admin-doc-reset-filter:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-white);
 }
 
-.admin-doc-reset-filter:hover {
-  border-color: #93c5fd;
-  background: #eff6ff;
-}
-
-.admin-doc-card {
+:where(.panel-scope) .admin-doc-card {
   min-width: 0;
   padding: 26px;
   border: 1px solid #e7edf5;
   border-radius: 22px;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 12px 30px rgb(15 23 42 / 4%);
 }
 
-.admin-doc-card-heading {
+:where(.panel-scope) .admin-doc-card-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -192,38 +191,39 @@
   margin-bottom: 20px;
 }
 
-.admin-doc-card-heading h2 {
-  margin: 0 0 5px;
-  color: #0c2340;
-  font-size: 1.35rem;
-  font-weight: 650;
+:where(.panel-scope) .admin-doc-card-heading h2:not(:where(.vista-portal *)) {
+  margin: 0 0 6px;
+  color: var(--color-primary);
+  font-size: 1.4rem;
+  font-weight: 600;
 }
 
-.admin-doc-card-heading p {
+:where(.panel-scope) .admin-doc-card-heading p:not(:where(.vista-portal *)) {
   margin: 0;
-  color: #64748b;
-  font-size: 0.88rem;
+  color: var(--color-slate-600);
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
-.admin-doc-result-count {
+:where(.panel-scope) .admin-doc-result-count {
   flex: 0 0 auto;
   padding: 7px 11px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   border-radius: 999px;
-  background: #f8fafc;
-  color: #475569;
+  background: var(--color-slate-50);
+  color: var(--color-slate-600);
   font-size: 0.77rem;
   font-weight: 700;
 }
 
-.admin-doc-toolbar {
+:where(.panel-scope) .admin-doc-toolbar {
   display: flex;
   align-items: flex-end;
   gap: 12px;
   margin-bottom: 17px;
 }
 
-.admin-doc-search {
+:where(.panel-scope) .admin-doc-search {
   display: flex;
   min-width: 220px;
   min-height: 44px;
@@ -234,141 +234,143 @@
   border: 1px solid #e1e8f0;
   border-radius: 12px;
   background: #fbfcfe;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
-.admin-doc-search:focus-within,
-.admin-doc-filter select:focus {
-  border-color: #93c5fd;
+:where(.panel-scope) .admin-doc-search:focus-within,
+:where(.panel-scope) .admin-doc-filter select:focus:not(:where(.vista-portal *)) {
+  border-color: var(--color-blue-300);
   outline: 0;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
 }
 
-.admin-doc-search input {
+:where(.panel-scope) .admin-doc-search input:not(:where(.vista-portal *)) {
   width: 100%;
   border: 0;
   outline: 0;
   background: transparent;
-  color: #0f172a;
+  color: var(--color-slate-900);
   font: inherit;
   font-size: 0.85rem;
 }
 
-.admin-doc-search input::placeholder {
-  color: #94a3b8;
+:where(.panel-scope) .admin-doc-search input:not(:where(.vista-portal *))::placeholder {
+  color: var(--color-slate-400);
 }
 
-.admin-doc-filter {
+:where(.panel-scope) .admin-doc-filter {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 0.74rem;
   font-weight: 600;
 }
 
-.admin-doc-filter select {
+:where(.panel-scope) .admin-doc-filter select:not(:where(.vista-portal *)) {
   min-width: 175px;
   min-height: 44px;
   padding: 0 30px 0 10px;
   border: 1px solid #e1e8f0;
   border-radius: 12px;
   background: #fbfcfe;
-  color: #0f172a;
+  color: var(--color-slate-900);
   font: inherit;
 }
 
-.admin-doc-table-wrap {
+:where(.panel-scope) .admin-doc-table-wrap {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid #e5eaf1;
-  border-radius: 16px;
-  box-shadow: 0 5px 16px rgb(15 23 42 / 3%);
+  border: 1px solid var(--color-slate-300) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+  background-color: var(--color-white) !important;
 }
 
-.admin-doc-table {
+:where(.panel-scope) .admin-doc-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
 }
 
-.admin-doc-table th {
-  padding: 15px 13px;
-  border-bottom: 1px solid #e5eaf1;
-  background: #f8fafd;
-  color: #64748b;
-  font-size: 0.68rem;
-  letter-spacing: 0.075em;
+:where(.panel-scope) .admin-doc-table th:not(:where(.vista-portal *)) {
+  padding: 14px 16px;
+  border-bottom: 2px solid var(--color-slate-300) !important;
+  background: var(--color-slate-100) !important;
+  color: var(--color-primary) !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.admin-doc-table td {
+:where(.panel-scope) .admin-doc-table td:not(:where(.vista-portal *)) {
   min-width: 130px;
   padding: 15px 13px;
   border-bottom: 1px solid #edf1f6;
-  color: #475569;
+  color: var(--color-slate-600);
   font-size: 0.82rem;
   vertical-align: middle;
 }
 
-.admin-doc-table td:first-child {
+:where(.panel-scope) .admin-doc-table td:first-child:not(:where(.vista-portal *)) {
   min-width: 270px;
 }
 
-.admin-doc-table tbody tr:last-child td {
+:where(.panel-scope) .admin-doc-table tbody tr:last-child td:not(:where(.vista-portal *)) {
   border-bottom: 0;
 }
 
-.admin-doc-table tbody tr {
+:where(.panel-scope) .admin-doc-table tbody tr:not(:where(.vista-portal *)) {
   transition: background-color 150ms ease;
 }
 
-.admin-doc-table tbody tr:hover {
+:where(.panel-scope) .admin-doc-table tbody tr:hover:not(:where(.vista-portal *)) {
   background: #f8faff;
 }
 
-.admin-doc-title-cell {
+:where(.panel-scope) .admin-doc-title-cell {
   display: flex;
   align-items: center;
   gap: 11px;
 }
 
-.admin-doc-file-icon {
+:where(.panel-scope) .admin-doc-file-icon {
   display: grid;
   width: 42px;
   height: 42px;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--color-blue-100);
   border-radius: 13px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--color-blue-50);
+  color: var(--color-blue-600);
 }
 
-.admin-doc-file-icon.is-docx {
+:where(.panel-scope) .admin-doc-file-icon.is-docx {
   border-color: #ddd6fe;
   background: #f5f3ff;
   color: #7c3aed;
 }
 
-.admin-doc-title-cell > span:last-child,
-.admin-doc-category-cell,
-.admin-doc-creator-cell {
+:where(.panel-scope) .admin-doc-title-cell > span:last-child:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-doc-category-cell,
+:where(.panel-scope) .admin-doc-creator-cell {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
 
-.admin-doc-title-button {
+:where(.panel-scope) .admin-doc-title-button {
   width: fit-content;
   max-width: 100%;
   padding: 0;
   border: 0;
   background: transparent;
-  color: #0c2340;
+  color: var(--color-primary);
   cursor: pointer;
   font: inherit;
   font-size: 0.84rem;
@@ -377,44 +379,44 @@
   text-align: left;
 }
 
-.admin-doc-title-button:hover {
-  color: #2563eb;
+:where(.panel-scope) .admin-doc-title-button:hover {
+  color: var(--color-blue-600);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.admin-doc-title-button:focus-visible {
+:where(.panel-scope) .admin-doc-title-button:focus-visible {
   border-radius: 4px;
   outline: 3px solid rgb(59 130 246 / 30%);
   outline-offset: 3px;
 }
 
-.admin-doc-title-cell small,
-.admin-doc-category-cell small,
-.admin-doc-creator-cell small {
-  color: #64748b;
+:where(.panel-scope) .admin-doc-title-cell small:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-doc-category-cell small:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-doc-creator-cell small:not(:where(.vista-portal *)) {
+  color: var(--color-slate-500);
   font-size: 0.71rem;
 }
 
-.admin-doc-title-cell small {
+:where(.panel-scope) .admin-doc-title-cell small:not(:where(.vista-portal *)) {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.admin-doc-category-cell strong,
-.admin-doc-creator-cell > span {
-  color: #334155;
+:where(.panel-scope) .admin-doc-category-cell strong:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-doc-creator-cell > span:not(:where(.vista-portal *)) {
+  color: var(--color-slate-700);
   font-size: 0.79rem;
   font-weight: 600;
 }
 
-.admin-doc-creator-cell small {
+:where(.panel-scope) .admin-doc-creator-cell small:not(:where(.vista-portal *)) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.admin-doc-status {
+:where(.panel-scope) .admin-doc-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -427,38 +429,32 @@
   text-align: center;
 }
 
-.admin-doc-status.is-pendiente {
-  border-color: #fde68a;
-  background: #fef3c7;
-  color: #b45309;
+:where(.panel-scope) .admin-doc-status.is-pendiente {
+  border-color: var(--color-amber-200);
+  background: var(--color-amber-100);
+  color: var(--color-amber-700);
 }
 
-.admin-doc-status.is-aprobado {
-  border-color: #bbf7d0;
-  background: #dcfce7;
-  color: #15803d;
+:where(.panel-scope) .admin-doc-status.is-aprobado,
+:where(.panel-scope) .admin-doc-status.is-publicado {
+  border-color: var(--color-green-200);
+  background: var(--color-green-100);
+  color: var(--color-green-700);
 }
 
-.admin-doc-status.is-rechazado {
-  border-color: #fecaca;
-  background: #fee2e2;
-  color: #b91c1c;
+:where(.panel-scope) .admin-doc-status.is-rechazado {
+  border-color: var(--color-red-200);
+  background: var(--color-red-100);
+  color: var(--color-red-700);
 }
 
-.admin-doc-cms-hint {
-  display: block;
-  margin-top: 5px;
-  color: #64748b;
-  font-size: 0.67rem;
-}
-
-.admin-doc-empty {
+:where(.panel-scope) .admin-doc-empty {
   padding: 32px !important;
-  color: #64748b !important;
+  color: var(--color-slate-500) !important;
   text-align: center;
 }
 
-.admin-doc-visually-hidden {
+:where(.panel-scope) .admin-doc-visually-hidden {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -468,9 +464,9 @@
   clip-path: inset(50%);
 }
 
-.admin-doc-overlay {
+:where(.panel-scope) .admin-doc-overlay {
   position: fixed;
-  z-index: 1200;
+  z-index: var(--z-sidebar-raised);
   inset: 0;
   display: flex;
   align-items: center;
@@ -480,7 +476,7 @@
   backdrop-filter: blur(5px);
 }
 
-.admin-doc-modal {
+:where(.panel-scope) .admin-doc-modal {
   display: flex;
   width: min(940px, 100%);
   max-height: min(92dvh, 960px);
@@ -488,11 +484,11 @@
   overflow: hidden;
   border: 1px solid #e4eaf2;
   border-radius: 22px;
-  background: #fff;
+  background: var(--color-white);
   box-shadow: 0 28px 80px rgb(15 23 42 / 28%);
 }
 
-.admin-doc-modal-header {
+:where(.panel-scope) .admin-doc-modal-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -502,19 +498,19 @@
   background: #fbfcfe;
 }
 
-.admin-doc-modal-header > div > span {
-  color: #64748b;
+:where(.panel-scope) .admin-doc-modal-header > div > span:not(:where(.vista-portal *)) {
+  color: var(--color-slate-500);
   font-size: 0.77rem;
 }
 
-.admin-doc-modal-header h2 {
+:where(.panel-scope) .admin-doc-modal-header h2:not(:where(.vista-portal *)) {
   margin: 5px 0 0;
-  color: #0c2340;
+  color: var(--color-primary);
   font-size: 1.3rem;
   line-height: 1.35;
 }
 
-.admin-doc-modal-header button {
+:where(.panel-scope) .admin-doc-modal-header button:not(:where(.vista-portal *)) {
   display: grid;
   width: 38px;
   height: 38px;
@@ -522,29 +518,29 @@
   place-items: center;
   border: 1px solid #e4eaf2;
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-white);
   color: #52657d;
   cursor: pointer;
 }
 
-.admin-doc-modal-header button:hover {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
+:where(.panel-scope) .admin-doc-modal-header button:hover:not(:where(.vista-portal *)) {
+  border-color: var(--color-blue-200);
+  background: var(--color-blue-50);
+  color: var(--color-blue-700);
 }
 
-.admin-doc-modal-body {
+:where(.panel-scope) .admin-doc-modal-body {
   overflow-y: auto;
   padding: 21px 25px;
 }
 
-.admin-doc-info-grid {
+:where(.panel-scope) .admin-doc-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.admin-doc-info-grid article {
+:where(.panel-scope) .admin-doc-info-grid article:not(:where(.vista-portal *)) {
   min-width: 0;
   padding: 12px 14px;
   border: 1px solid #e7edf5;
@@ -552,35 +548,34 @@
   background: #fbfcfe;
 }
 
-.admin-doc-info-grid article.is-wide {
+:where(.panel-scope) .admin-doc-info-grid article.is-wide {
   grid-column: 1 / -1;
 }
 
-.admin-doc-info-grid h3 {
+:where(.panel-scope) .admin-doc-info-grid h3:not(:where(.vista-portal *)) {
   margin: 0 0 5px;
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.68rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-.admin-doc-info-grid p {
+:where(.panel-scope) .admin-doc-info-grid p:not(:where(.vista-portal *)) {
   margin: 0;
-  color: #1e293b;
+  color: var(--color-slate-800);
   font-size: 0.83rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
-.admin-doc-info-grid p span {
-  color: #64748b;
+:where(.panel-scope) .admin-doc-info-grid p span:not(:where(.vista-portal *)) {
+  color: var(--color-slate-500);
 }
 
-/* Card de vista previa real del documento */
-.admin-doc-preview-card {
+:where(.panel-scope) .admin-doc-preview-card {
   margin-top: 16px;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-slate-200);
   border-radius: 14px;
   padding: 16px;
   display: flex;
@@ -589,42 +584,42 @@
   box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04);
 }
 
-.admin-doc-preview-header {
+:where(.panel-scope) .admin-doc-preview-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-slate-100);
   padding-bottom: 10px;
 }
 
-.admin-doc-preview-heading {
+:where(.panel-scope) .admin-doc-preview-heading {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.admin-doc-preview-title {
+:where(.panel-scope) .admin-doc-preview-title {
   font-size: 0.82rem;
-  font-weight: 700;
-  color: #475569;
+  font-weight: 650;
+  color: var(--color-slate-600);
   letter-spacing: 0.03em;
   text-transform: uppercase;
   margin: 0;
 }
 
-.admin-doc-preview-subtext {
+:where(.panel-scope) .admin-doc-preview-subtext {
   font-size: 11px;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin: 0;
 }
 
-.admin-doc-preview-toolbar {
+:where(.panel-scope) .admin-doc-preview-toolbar {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.admin-doc-preview-expand-btn {
+:where(.panel-scope) .admin-doc-preview-expand-btn {
   background: transparent;
   border: none;
   color: #44474e;
@@ -637,18 +632,18 @@
   transition: all 0.2s;
 }
 
-.admin-doc-preview-expand-btn:hover:not(:disabled) {
-  background-color: #f1f5f9;
-  color: #0c2340;
+:where(.panel-scope) .admin-doc-preview-expand-btn:hover:not(:disabled) {
+  background-color: var(--color-slate-100);
+  color: var(--color-primary);
 }
 
-.admin-doc-preview-expand-btn:disabled {
+:where(.panel-scope) .admin-doc-preview-expand-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-.admin-doc-preview-frame-container {
-  border: 1px solid #e2e8f0;
+:where(.panel-scope) .admin-doc-preview-frame-container {
+  border: 1px solid var(--color-slate-200);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -656,10 +651,10 @@
   height: 480px;
   overflow: hidden;
   position: relative;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
 }
 
-.admin-doc-preview-footer {
+:where(.panel-scope) .admin-doc-preview-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -668,19 +663,19 @@
   padding-top: 4px;
 }
 
-.admin-doc-preview-verified {
+:where(.panel-scope) .admin-doc-preview-verified {
   display: flex;
   align-items: center;
   gap: 5px;
   font-weight: 600;
-  color: #059669;
+  color: var(--color-emerald-600);
 }
 
-.admin-doc-preview-resolution {
-  color: #64748b;
+:where(.panel-scope) .admin-doc-preview-resolution {
+  color: var(--color-slate-500);
 }
 
-.admin-doc-state-row {
+:where(.panel-scope) .admin-doc-state-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -692,62 +687,62 @@
   background: #fbfcfe;
 }
 
-.admin-doc-state-row > span {
-  color: #64748b;
+:where(.panel-scope) .admin-doc-state-row > span:not(:where(.vista-portal *)) {
+  color: var(--color-slate-500);
   font-size: 0.75rem;
   font-weight: 600;
 }
 
-.admin-doc-state-row > small {
-  color: #15803d;
+:where(.panel-scope) .admin-doc-state-row > small:not(:where(.vista-portal *)) {
+  color: var(--color-green-700);
   font-size: 0.72rem;
 }
 
-.admin-doc-rejection-note {
+:where(.panel-scope) .admin-doc-rejection-note {
   margin-top: 12px;
   padding: 13px 14px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-red-200);
   border-radius: 12px;
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--color-red-50);
+  color: var(--color-red-800);
   font-size: 0.82rem;
 }
 
-.admin-doc-rejection-note p {
+:where(.panel-scope) .admin-doc-rejection-note p:not(:where(.vista-portal *)) {
   margin: 5px 0 0;
   line-height: 1.5;
 }
 
-.admin-doc-rejection-field {
+:where(.panel-scope) .admin-doc-rejection-field {
   display: flex;
   flex-direction: column;
   gap: 7px;
   margin-top: 15px;
-  color: #334155;
+  color: var(--color-slate-700);
   font-size: 0.83rem;
   font-weight: 600;
 }
 
-.admin-doc-rejection-field b {
-  color: #b91c1c;
+:where(.panel-scope) .admin-doc-rejection-field b:not(:where(.vista-portal *)) {
+  color: var(--color-red-700);
 }
 
-.admin-doc-rejection-field textarea {
+:where(.panel-scope) .admin-doc-rejection-field textarea:not(:where(.vista-portal *)) {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #fca5a5;
+  border: 1px solid var(--color-red-300);
   border-radius: 10px;
-  color: #0f172a;
+  color: var(--color-slate-900);
   font: inherit;
   resize: vertical;
 }
 
-.admin-doc-rejection-field textarea:focus {
-  border-color: #ef4444;
+:where(.panel-scope) .admin-doc-rejection-field textarea:focus:not(:where(.vista-portal *)) {
+  border-color: var(--color-red-500);
   outline: 3px solid rgb(239 68 68 / 12%);
 }
 
-.admin-doc-modal-footer {
+:where(.panel-scope) .admin-doc-modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 9px;
@@ -756,7 +751,7 @@
   background: #fbfcfe;
 }
 
-.admin-doc-button {
+:where(.panel-scope) .admin-doc-button {
   display: inline-flex;
   min-height: 42px;
   align-items: center;
@@ -768,94 +763,94 @@
   cursor: pointer;
   font: inherit;
   font-size: 0.83rem;
-  font-weight: 700;
+  font-weight: 650;
   transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
 }
 
-.admin-doc-button:hover:not(:disabled) {
+:where(.panel-scope) .admin-doc-button:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 7px 16px rgb(15 23 42 / 10%);
 }
 
-.admin-doc-button:disabled {
+:where(.panel-scope) .admin-doc-button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-.admin-doc-button.is-primary {
-  background: #0c2340;
-  color: #fff;
+:where(.panel-scope) .admin-doc-button.is-primary {
+  background: var(--color-primary);
+  color: var(--color-white);
 }
 
-.admin-doc-button.is-primary:hover:not(:disabled) {
+:where(.panel-scope) .admin-doc-button.is-primary:hover:not(:disabled) {
   background: #16375f;
 }
 
-.admin-doc-button.is-danger {
-  border-color: #fecaca;
-  background: #fff;
-  color: #b91c1c;
+:where(.panel-scope) .admin-doc-button.is-danger {
+  border-color: var(--color-red-200);
+  background: var(--color-white);
+  color: var(--color-red-700);
 }
 
-.admin-doc-button.is-danger:hover:not(:disabled) {
-  background: #fef2f2;
+:where(.panel-scope) .admin-doc-button.is-danger:hover:not(:disabled) {
+  background: var(--color-red-50);
 }
 
-.admin-doc-button.is-secondary {
-  border-color: #cbd5e1;
-  background: #fff;
-  color: #334155;
+:where(.panel-scope) .admin-doc-button.is-secondary {
+  border-color: var(--color-slate-300);
+  background: var(--color-white);
+  color: var(--color-slate-700);
 }
 
-.admin-doc-button.is-secondary:hover:not(:disabled) {
-  background: #f1f5f9;
+:where(.panel-scope) .admin-doc-button.is-secondary:hover:not(:disabled) {
+  background: var(--color-slate-100);
 }
 
 @media (max-width: 1000px) {
-  .admin-doc-summary {
+  :where(.panel-scope) .admin-doc-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .admin-doc-toolbar {
+  :where(.panel-scope) .admin-doc-toolbar {
     align-items: stretch;
     flex-wrap: wrap;
   }
 
-  .admin-doc-search {
+  :where(.panel-scope) .admin-doc-search {
     flex-basis: 100%;
   }
 
-  .admin-doc-filter {
+  :where(.panel-scope) .admin-doc-filter {
     flex: 1;
   }
 
-  .admin-doc-filter select {
+  :where(.panel-scope) .admin-doc-filter select:not(:where(.vista-portal *)) {
     width: 100%;
   }
 }
 
 @media (max-width: 700px) {
-  .admin-doc-card {
+  :where(.panel-scope) .admin-doc-card {
     padding: 18px;
   }
 
-  .admin-doc-card-heading {
+  :where(.panel-scope) .admin-doc-card-heading {
     flex-direction: column;
   }
 
-  .admin-doc-table-wrap {
+  :where(.panel-scope) .admin-doc-table-wrap {
     overflow: visible;
     border: 0;
     box-shadow: none;
   }
 
-  .admin-doc-table,
-  .admin-doc-table tbody {
+  :where(.panel-scope) .admin-doc-table,
+  :where(.panel-scope) .admin-doc-table tbody:not(:where(.vista-portal *)) {
     display: block;
     width: 100%;
   }
 
-  .admin-doc-table thead {
+  :where(.panel-scope) .admin-doc-table thead:not(:where(.vista-portal *)) {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -865,7 +860,7 @@
     clip-path: inset(50%);
   }
 
-  .admin-doc-table tbody tr {
+  :where(.panel-scope) .admin-doc-table tbody tr:not(:where(.vista-portal *)) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px 15px;
@@ -873,26 +868,26 @@
     padding: 14px;
     border: 1px solid #e7edf5;
     border-radius: 16px;
-    background: #fff;
+    background: var(--color-white);
     box-shadow: 0 5px 16px rgb(15 23 42 / 3%);
   }
 
-  .admin-doc-table tbody tr:last-child {
+  :where(.panel-scope) .admin-doc-table tbody tr:last-child:not(:where(.vista-portal *)) {
     margin-bottom: 0;
   }
 
-  .admin-doc-table td,
-  .admin-doc-table td:first-child {
+  :where(.panel-scope) .admin-doc-table td:not(:where(.vista-portal *)),
+  :where(.panel-scope) .admin-doc-table td:first-child:not(:where(.vista-portal *)) {
     display: block;
     min-width: 0;
     padding: 0;
     border: 0;
   }
 
-  .admin-doc-table td::before {
+  :where(.panel-scope) .admin-doc-table td:not(:where(.vista-portal *))::before {
     display: block;
     margin-bottom: 5px;
-    color: #64748b;
+    color: var(--color-slate-500);
     content: attr(data-label);
     font-size: 0.63rem;
     font-weight: 700;
@@ -900,85 +895,681 @@
     text-transform: uppercase;
   }
 
-  .admin-doc-table td:first-child {
+  :where(.panel-scope) .admin-doc-table td:first-child:not(:where(.vista-portal *)) {
     grid-column: 1 / -1;
   }
 
-  .admin-doc-empty {
+  :where(.panel-scope) .admin-doc-empty {
     grid-column: 1 / -1;
     padding: 18px !important;
     text-align: center;
   }
 
-  .admin-doc-empty::before {
+  :where(.panel-scope) .admin-doc-empty::before {
     content: none !important;
   }
 
-  .admin-doc-overlay {
+  :where(.panel-scope) .admin-doc-overlay {
     align-items: flex-end;
     padding: 0;
   }
 
-  .admin-doc-modal {
+  :where(.panel-scope) .admin-doc-modal {
     max-height: 94dvh;
     border-radius: 21px 21px 0 0;
   }
 
-  .admin-doc-modal-header,
-  .admin-doc-modal-body,
-  .admin-doc-modal-footer {
+  :where(.panel-scope) .admin-doc-modal-header,
+  :where(.panel-scope) .admin-doc-modal-body,
+  :where(.panel-scope) .admin-doc-modal-footer {
     padding-right: 17px;
     padding-left: 17px;
   }
 }
 
 @media (max-width: 480px) {
-  .admin-doc-summary {
+  :where(.panel-scope) .admin-doc-summary {
     grid-template-columns: 1fr;
     gap: 9px;
   }
 
-  .admin-doc-summary-card {
+  :where(.panel-scope) .admin-doc-summary-card {
     min-height: 75px;
     padding: 12px;
   }
 
-  .admin-doc-filter {
+  :where(.panel-scope) .admin-doc-filter {
     min-width: 100%;
   }
 
-  .admin-doc-info-grid {
+  :where(.panel-scope) .admin-doc-info-grid {
     grid-template-columns: 1fr;
   }
 
-  .admin-doc-info-grid article.is-wide {
+  :where(.panel-scope) .admin-doc-info-grid article.is-wide {
     grid-column: auto;
   }
 
-  .admin-doc-preview-page {
+  :where(.panel-scope) .admin-doc-preview-page {
     width: calc(100% - 20px);
     min-height: 260px;
     padding: 18px 17px 40px;
   }
 
-  .admin-doc-preview-footer {
+  :where(.panel-scope) .admin-doc-preview-footer {
     right: 17px;
     left: 17px;
   }
 
-  .admin-doc-modal-footer {
+  :where(.panel-scope) .admin-doc-modal-footer {
     flex-wrap: wrap;
   }
 
-  .admin-doc-button {
+  :where(.panel-scope) .admin-doc-button {
     flex: 1 1 145px;
   }
 
-  .admin-doc-table tbody tr {
+  :where(.panel-scope) .admin-doc-table tbody tr:not(:where(.vista-portal *)) {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .admin-doc-table td:first-child {
+  :where(.panel-scope) .admin-doc-table td:first-child:not(:where(.vista-portal *)) {
     grid-column: auto;
   }
+}
+
+/* ===================================================
+   Modal de revisión de documento
+   Sigue el diseño entregado (modal-pendiente-aprobacion-documentos: code.html y screen.png).
+   Los avisos de rechazo y el bloque de eliminación vienen de components/admin/AdminRevisionModal.css.
+   Ningún font-weight por encima de 650.
+   =================================================== */
+:where(.panel-scope) .admin-doc-overlay.admin-rev-overlay.admin-doc-rv-overlay {
+  padding: 24px;
+  background: rgb(15 23 42 / 60%);
+  backdrop-filter: blur(4px);
+}
+
+:where(.panel-scope) .admin-doc-modal.admin-rev-modal.admin-doc-rv-modal {
+  width: min(672px, 100%);
+  max-height: 92vh;
+  border: 1px solid rgb(226 232 240 / 80%);
+  border-radius: 16px;
+  background: var(--color-white);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+  color: var(--color-slate-800);
+  font-family: var(--font-sans);
+}
+
+/* Encabezado: solo el título y la X */
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-slate-100);
+  background: var(--color-white);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-title {
+  margin: 2px 0 0;
+  color: #0a3871;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 32px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-close {
+  display: grid;
+  margin-right: -4px;
+  padding: 8px;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-slate-400);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-close:hover {
+  background: var(--color-slate-100);
+  color: var(--color-slate-600);
+}
+
+/* Cuerpo */
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 16px 24px;
+  background: #fcfdff;
+  scrollbar-color: var(--color-slate-300) var(--color-slate-100);
+  scrollbar-width: thin;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-body::-webkit-scrollbar {
+  width: 7px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-body::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background: var(--color-slate-100);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-body::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: var(--color-slate-300);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-body::-webkit-scrollbar-thumb:hover {
+  background: var(--color-slate-400);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-body > *:not(:where(.vista-portal *)) {
+  flex-shrink: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-card,
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambios-card {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgb(226 232 240 / 90%);
+  border-radius: 12px;
+  background: var(--color-white);
+  box-shadow: none;
+}
+
+/* Estado actual */
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status-label {
+  color: var(--color-slate-600);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado svg:not(:where(.vista-portal *)) {
+  width: 14px;
+  height: 14px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado.is-pendiente {
+  border-color: rgb(253 230 138 / 80%);
+  background: var(--color-amber-50);
+  color: var(--color-amber-700);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-status .etiqueta-estado.is-pendiente svg:not(:where(.vista-portal *)) {
+  color: var(--color-amber-600);
+}
+
+/* Comparativa de modificaciones (componente compartido, con las medidas del diseño) */
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambios-card {
+  padding: 14px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambios-header {
+  margin-bottom: 4px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambios-title {
+  margin: 0;
+  color: var(--color-slate-900);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambios-counter {
+  padding: 2px 8px;
+  border: 1px solid var(--color-blue-200);
+  border-radius: 9999px;
+  background: var(--color-blue-50);
+  color: var(--color-blue-600);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: normal;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambios-desc {
+  margin: 0 0 10px;
+  color: var(--color-slate-500);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambios-list {
+  gap: 10px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambio-item {
+  padding: 12px;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 12px;
+  background: rgb(248 250 252 / 40%);
+  box-shadow: none;
+  overflow: visible;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambio-label-bar {
+  margin-bottom: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambio-label {
+  color: var(--color-slate-400);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambio-diff-grid {
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-diff-box {
+  gap: 0;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.625;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-diff-box.before {
+  border: 1px solid #ffe4e6;
+  background: rgb(255 241 242 / 50%);
+  color: #4c0519;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-diff-box.after {
+  border: 1px solid rgb(167 243 208 / 70%);
+  background: rgb(236 253 245 / 40%);
+  color: #022c22;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-diff-badge-wrap {
+  margin-bottom: 4px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-diff-badge {
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.025em;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-diff-badge.before {
+  background: rgb(255 228 230 / 80%);
+  color: var(--color-rose-700);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-diff-badge.after {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-diff-text {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.625;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-diff-arrow {
+  padding: 0 4px;
+  color: var(--color-slate-400);
+}
+
+/* Título del documento (destacado) */
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-title-card {
+  padding: 14px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-title-label {
+  margin-bottom: 4px;
+  color: #0a3871;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-doc-title {
+  margin: 0;
+  color: var(--color-slate-900);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.375;
+  overflow-wrap: anywhere;
+}
+
+/* Campos de datos */
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-field {
+  min-width: 0;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-field-label {
+  margin-bottom: 4px;
+  color: var(--color-slate-400);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-field-text {
+  margin: 0;
+  color: var(--color-slate-700);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.625;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-field-text.is-strong {
+  color: var(--color-slate-800);
+  font-weight: 600;
+  line-height: 16px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-field-text.is-upper {
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-file-icon {
+  flex-shrink: 0;
+  color: #f43f5e;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-file-name {
+  color: var(--color-slate-800);
+  font-weight: 500;
+  overflow-wrap: anywhere; /* corta solo si la palabra no entra entera */
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-file-size {
+  flex-shrink: 0;
+  color: var(--color-slate-400);
+  font-weight: 400;
+}
+
+/* Vista previa */
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-preview-title {
+  margin: 0;
+  color: var(--color-slate-700);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-preview-sub {
+  margin: 0;
+  color: var(--color-slate-500);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-expand {
+  display: grid;
+  padding: 6px;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-slate-400);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-expand:hover:not(:disabled) {
+  background: var(--color-slate-100);
+  color: var(--color-slate-600);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-expand:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-viewer {
+  display: flex;
+  height: 460px;
+  min-height: 380px;
+  padding: 12px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #2d3139;
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 5%);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-viewer iframe:not(:where(.vista-portal *)) {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  border-radius: 4px;
+  background: var(--color-white);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-viewer-msg {
+  display: flex;
+  max-width: 320px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: auto;
+  color: var(--color-slate-300);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-viewer-msg p:not(:where(.vista-portal *)) {
+  margin: 0;
+  color: var(--color-slate-100);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Enviado por / Última modificación */
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-audit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px;
+  color: var(--color-slate-500);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-audit strong:not(:where(.vista-portal *)) {
+  color: var(--color-slate-800);
+  font-weight: 600;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-audit-date {
+  color: var(--color-slate-700);
+  font-weight: 500;
+}
+
+/* Pie y botones */
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-slate-100);
+  background: var(--color-white);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-danger {
+  border-color: #fecdd3;
+  background: var(--color-white);
+  color: var(--color-rose-600);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-danger svg:not(:where(.vista-portal *)) {
+  color: #f43f5e;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-danger:hover:not(:disabled) {
+  background: #fff1f2;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-primary {
+  background: var(--color-slate-900);
+  color: var(--color-white);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-primary svg:not(:where(.vista-portal *)) {
+  color: #34d399;
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-primary:hover:not(:disabled) {
+  background: var(--color-slate-800);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-secondary {
+  border-color: var(--color-slate-300);
+  background: var(--color-white);
+  color: var(--color-slate-700);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn.is-secondary:hover:not(:disabled) {
+  background: var(--color-slate-100);
+}
+
+:where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-btn:focus-visible {
+  outline: 2px solid rgb(15 23 42 / 30%);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  :where(.panel-scope) .admin-doc-overlay.admin-rev-overlay.admin-doc-rv-overlay {
+    padding: 12px;
+  }
+
+  :where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-body {
+    padding: 12px 16px;
+  }
+
+  :where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  :where(.panel-scope) .admin-doc-rv-modal.admin-rev-modal .admin-cambio-diff-grid {
+    grid-template-columns: 1fr;
+  }
+
+  :where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-viewer {
+    height: 380px;
+  }
+
+  :where(.panel-scope) .admin-doc-rv-modal .admin-doc-rv-footer {
+    padding: 16px;
+  }
+}
+
+/* Aviso cuando el CM pide retirar del portal un documento publicado. */
+:where(.panel-scope) .admin-doc-rv-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-amber-200);
+  border-radius: var(--radius-md);
+  background: var(--color-amber-50);
+  color: var(--color-amber-700);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+:where(.panel-scope) .admin-doc-rv-alert svg {
+  flex-shrink: 0;
+  margin-top: 1px;
 }

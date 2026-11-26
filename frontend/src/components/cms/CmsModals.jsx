@@ -1,4 +1,3 @@
-import React from "react";
 
 /* ----------------------------------------------------------------------------
  * 1. CmsDeleteModal
@@ -16,12 +15,29 @@ export const CmsDeleteModal = ({
   cancelText = "CANCELAR",
   isDeleting = false,
   loading = false,
+  // true si el contenido ya está publicado: no se borra, queda un pedido que primero revisa el administrador.
+  requiereAprobacion = false,
 }) => {
   if (!isOpen) return null;
 
   const busy = isDeleting || loading;
 
   const renderMessage = () => {
+    if (requiereAprobacion) {
+      return (
+        <>
+          {itemName ? (
+            <>
+              <strong>"{itemName}"</strong> está publicado.{" "}
+            </>
+          ) : (
+            <>Este contenido está <strong>publicado</strong>. </>
+          )}
+          No se elimina de inmediato: tu pedido pasa <strong>primero por el administrador</strong> y {itemType === "este elemento" ? "el contenido" : itemType}{" "}
+          <strong>seguirá visible en el portal</strong> hasta que lo apruebe.
+        </>
+      );
+    }
     if (message) return message;
     if (itemName) {
       return (
@@ -43,7 +59,7 @@ export const CmsDeleteModal = ({
     <div
       className="modal-overlay"
       onClick={() => !busy && onClose && onClose()}
-      style={{ zIndex: 99999 }}
+      style={{ zIndex: "var(--z-modal-top)" }}
     >
       <div
         className="modal-content-esp delete-modal-global"
@@ -86,7 +102,7 @@ export const CmsDeleteModal = ({
             </svg>
           </div>
 
-          <h2 className="delete-modal-title">{title}</h2>
+          <h2 className="delete-modal-title">{requiereAprobacion ? "Pedir la eliminación de este contenido" : title}</h2>
           <div className="delete-modal-divider"></div>
 
           <p className="delete-modal-text">{renderMessage()}</p>
@@ -125,8 +141,10 @@ export const CmsDeleteModal = ({
                     borderColor: "rgba(255, 255, 255, 0.3)",
                   }}
                 ></div>
-                ELIMINANDO...
+                {requiereAprobacion ? "ENVIANDO PEDIDO..." : "ELIMINANDO..."}
               </span>
+            ) : requiereAprobacion ? (
+              "PEDIR ELIMINACIÓN"
             ) : (
               confirmText
             )}
@@ -160,7 +178,7 @@ export const CmsConfirmDraftModal = ({
     <div
       className="modal-overlay"
       style={{
-        zIndex: 99999,
+        zIndex: "var(--z-modal-top)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -181,7 +199,7 @@ export const CmsConfirmDraftModal = ({
           boxShadow: "0px 10px 30px rgba(13,34,63,0.08)",
           fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
           position: "relative",
-          zIndex: 999999,
+          zIndex: "var(--z-popover)",
           display: "flex",
           flexDirection: "column",
         }}
@@ -328,7 +346,7 @@ export const CmsUnsavedChangesModal = ({
     <div
       className="modal-overlay"
       style={{
-        zIndex: 99999,
+        zIndex: "var(--z-modal-top)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -349,7 +367,7 @@ export const CmsUnsavedChangesModal = ({
           boxShadow: "0px 10px 30px rgba(13,34,63,0.08)",
           fontFamily: "'Manrope', system-ui, -apple-system, sans-serif",
           position: "relative",
-          zIndex: 999999,
+          zIndex: "var(--z-popover)",
           display: "flex",
           flexDirection: "column",
         }}

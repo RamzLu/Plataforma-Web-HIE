@@ -2,13 +2,15 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
-import rolesRoutes from './routes/roles.routes.js'
-import adminRoutes from './routes/admin.routes.js';
 import cmsRoutes from './routes/cms.routes.js';
+import portalRoutes from './routes/portal.routes.js';
 import errorHandler from './middlewares/error.middleware.js';
+import { prisma } from './config/prisma.js';
 
 import cron from 'node-cron';
+import { purgarVencidos } from './services/cms/papelera.service.js';
 import CmsNoticiaService from './services/cms/cms.noticia.service.js';
+import CmsResidenciaService from './services/cms/cms.residencia.service.js';
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -94,15 +96,65 @@ app.use('/api', writeLimiter);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-app.use('/api/roles', rolesRoutes)
-app.use('/api/admin', adminRoutes);
+// Estado del servicio, para monitoreo o el balanceador. No requiere token y no expone datos.
+app.get('/api/health', async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return res.status(200).json({ status: 'ok', baseDeDatos: 'ok' });
+  } catch {
+    return res.status(503).json({ status: 'degradado', baseDeDatos: 'sin conexión' });
+  }
+});
+
+app.use('/api/portal', portalRoutes);
 app.use('/api/cms', cmsRoutes);
+
+// Cualquier otra ruta de la API: 404 en el mismo formato JSON que el resto de los errores.
+app.use('/api', (_req, _res, next) => {
+  const error = new Error('El recurso solicitado no existe.');
+  error.statusCode = 404;
+  next(error);
+});
 
 app.use(errorHandler);
 
+// Cada minuto se publican las noticias y residencias programadas cuya fecha ya llegó.
+// Cada tarea corre por separado: si una falla (por ejemplo, la base de Supabase está pausada)
+// la otra sigue, y el error se avisa una sola vez hasta que la tarea vuelva a funcionar.
+const tareasProgramadas = [
+  { nombre: 'noticias programadas', ejecutar: () => CmsNoticiaService.publicarNoticiasProgramadas() },
+  { nombre: 'residencias programadas', ejecutar: () => CmsResidenciaService.publicarResidenciasProgramadas() },
+];
+const tareasConError = new Set();
+
+// La Papelera se vacía sola: lo que lleva 15 días ahí se elimina (se cuenta por ítem). Corre cada hora y al arrancar.
+const vaciarPapeleraVencida = async () => {
+  try {
+    const eliminados = await purgarVencidos();
+    if (eliminados > 0) console.log(`[Cron] Papelera: se eliminaron ${eliminados} contenidos con más de 15 días.`);
+  } catch (error) {
+    console.error(`[Cron] Error al vaciar la Papelera: ${String(error?.message || error).split('\n').filter(Boolean).pop()}`);
+  }
+};
+cron.schedule('5 * * * *', vaciarPapeleraVencida, { noOverlap: true });
+setTimeout(vaciarPapeleraVencida, 30_000);
+
 cron.schedule('* * * * *', async () => {
-  await CmsNoticiaService.publicarNoticiasProgramadas();
-});
+  for (const tarea of tareasProgramadas) {
+    try {
+      await tarea.ejecutar();
+      if (tareasConError.delete(tarea.nombre)) {
+        console.log(`[Cron] Publicación de ${tarea.nombre}: volvió a funcionar.`);
+      }
+    } catch (error) {
+      if (!tareasConError.has(tarea.nombre)) {
+        tareasConError.add(tarea.nombre);
+        const motivo = String(error?.message || error).split('\n').filter(Boolean).pop();
+        console.error(`[Cron] Error al publicar ${tarea.nombre}: ${motivo}. Se reintenta cada minuto; no se vuelve a avisar hasta que se recupere.`);
+      }
+    }
+  }
+}, { noOverlap: true });
 
 app.listen(PORT, () => {
   console.log(` Servidor corriendo en http://localhost:${PORT}`)

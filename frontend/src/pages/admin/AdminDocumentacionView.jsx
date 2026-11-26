@@ -1,21 +1,29 @@
+import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import '../../styles/components/admin/AdminRevisionModal.css';
+import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada, sinPapelera } from "../../utils/publicacion.js";
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CalendarDays,
-  CheckCircle,
-  ExternalLink,
-  FileCheck2,
+  Check,
   FileText,
-  FolderOpen,
-  Globe2,
   RefreshCw,
   Search,
   X,
   XCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import keycloak from '../../config/keycloak';
-import { getDocumentos, evaluarDocumentoEstado } from '../../api/documentos.api.js';
+import { getDocumentos, revisarDocumento } from '../../api/documentos.api.js';
 import { sanitizeUrl } from '../../utils/sanitizeUrl.js';
+import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminDocumentacionView.css';
 
 const statusLabels = {
@@ -39,12 +47,18 @@ const mapDocumentFromBackend = (doc) => {
   if (doc.createdAt) {
     try {
       fechaFormateada = new Date(doc.createdAt).toLocaleDateString('es-AR');
-    } catch (_) {}
+    } catch {
+      // Fecha inválida: se muestra el texto por defecto.
+    }
   }
 
   return {
     id: doc.id?.toString() || '',
     title: doc.title || doc.titulo || 'Sin título',
+    solicitudEliminacion: doc.solicitudEliminacion || null,
+    enPapelera: Boolean(doc.enPapelera),
+    papeleraDesde: doc.papeleraDesde || null,
+    papeleraVenceEl: doc.papeleraVenceEl || null,
     description: doc.description || doc.descripcion || '',
     category: doc.category || doc.categoria || 'Información institucional',
     fileName: doc.fileName || doc.nombreArchivo || 'documento.pdf',
@@ -59,6 +73,12 @@ const mapDocumentFromBackend = (doc) => {
     estado: estadoUpper,
     rejectionReason: doc.rejectionReason || '',
     previewText: doc.description || 'Documento institucional para revisión y evaluación.',
+    cambios: Array.isArray(doc.cambios) ? doc.cambios : [],
+    esActualizacion: Boolean(doc.esActualizacion),
+    requestedEstado: doc.requestedEstado || null,
+    visibleEnPortal: Boolean(doc.visibleEnPortal),
+    tituloPublicado: doc.tituloPublicado || null,
+    versionPublicada: doc.versionPublicada || null,
   };
 };
 
@@ -66,6 +86,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
+  const [verPublicada, setVerPublicada] = useState(false);
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [categoryFilter, setCategoryFilter] = useState('TODOS');
   const [search, setSearch] = useState('');
@@ -77,26 +98,24 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
   const syncPendingCount = useCallback(
     (list) => {
       if (typeof onPendingCountChange === 'function') {
-        const count = list.filter((doc) => doc.status === 'PENDIENTE').length;
+        const count = list.filter((doc) => doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion)).length;
         onPendingCountChange(count);
       }
     },
     [onPendingCountChange]
   );
 
-  const cargarDocumentos = useCallback(
-    async (silent = false) => {
-      try {
-        if (!silent) setLoading(true);
-        const data = await getDocumentos(true);
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerDocumentos = useCallback(
+    (silent = false) =>
+      getDocumentos(true).then((data) => {
         if (Array.isArray(data)) {
-          // El Admin solo aprueba/rechaza revisiones, filtramos borradores puros si no son de revisión
           const mapeados = data
             .filter((doc) => (doc.estado || '').toUpperCase() !== 'BORRADOR')
             .map(mapDocumentFromBackend)
             .sort((a, b) => {
-              const aPending = a.status === 'PENDIENTE' ? 0 : 1;
-              const bPending = b.status === 'PENDIENTE' ? 0 : 1;
+              const aPending = a.status === 'PENDIENTE' || a.solicitudEliminacion ? 0 : 1;
+              const bPending = b.status === 'PENDIENTE' || b.solicitudEliminacion ? 0 : 1;
               if (aPending !== bPending) return aPending - bPending;
               return a.title.localeCompare(b.title);
             });
@@ -107,35 +126,42 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           setDocuments([]);
           syncPendingCount([]);
         }
-      } catch (error) {
+      }).catch((error) => {
         if (!silent) {
           console.error('Error al cargar documentos en el panel de administración:', error);
           toast.error('No se pudieron cargar los documentos para revisión.');
         }
-      } finally {
+      }).finally(() => {
         if (!silent) setLoading(false);
-      }
-    },
+      }),
     [syncPendingCount]
   );
 
+  // Recarga a pedido (botón, después de revisar): muestra la carga y después trae los datos.
+  const cargarDocumentos = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      await traerDocumentos(silent);
+    },
+    [traerDocumentos]
+  );
+
   useEffect(() => {
-    cargarDocumentos(false);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerDocumentos(false);
 
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
-        cargarDocumentos(true);
+        traerDocumentos(true);
       }
     };
 
-    window.addEventListener('focus', handleVisibilityOrFocus);
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
     return () => {
-      window.removeEventListener('focus', handleVisibilityOrFocus);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
-  }, [cargarDocumentos]);
+  }, [traerDocumentos]);
 
   const categories = useMemo(() => {
     const set = new Set();
@@ -145,10 +171,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
     return Array.from(set).sort();
   }, [documents]);
 
-  const selectedDocument = useMemo(
-    () => documents.find((doc) => doc.id === selectedId) || null,
-    [documents, selectedId]
-  );
+  const selectedDocument = useMemo(() => {
+    const base = documents.find((doc) => doc.id === selectedId) || null;
+    return base && verPublicada && base.versionPublicada ? comoVersionPublicada(base, mapDocumentFromBackend) : base;
+  }, [documents, selectedId, verPublicada]);
 
   const isPdf = useMemo(() => {
     if (!selectedDocument) return false;
@@ -166,10 +192,10 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
   const filteredDocuments = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
-    return documents.filter((doc) => {
+    return (statusFilter === 'PAPELERA' ? documents.filter((x) => x?.enPapelera) : sinPapelera(documents)).filter((doc) => {
       let matchesStatus = true;
-      if (statusFilter === 'PENDIENTE') matchesStatus = doc.status === 'PENDIENTE';
-      else if (statusFilter === 'PUBLICADO') matchesStatus = doc.status === 'PUBLICADO' || doc.status === 'APROBADO';
+      if (statusFilter === 'PENDIENTE') matchesStatus = doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion);
+      else if (statusFilter === 'PUBLICADO') matchesStatus = estaPublicadoEnPortal(doc);
       else if (statusFilter === 'RECHAZADO') matchesStatus = doc.status === 'RECHAZADO';
 
       const matchesCategory =
@@ -194,20 +220,22 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
   }, [categoryFilter, documents, search, statusFilter]);
 
   const pendingCount = useMemo(
-    () => documents.filter((doc) => doc.status === 'PENDIENTE').length,
+    () => sinPapelera(documents).filter((doc) => doc.status === 'PENDIENTE' || Boolean(doc.solicitudEliminacion)).length,
     [documents]
   );
   const publishedCount = useMemo(
-    () => documents.filter((doc) => doc.status === 'PUBLICADO' || doc.status === 'APROBADO').length,
+    () => sinPapelera(documents).filter(estaPublicadoEnPortal).length,
     [documents]
   );
   const rejectedCount = useMemo(
-    () => documents.filter((doc) => doc.status === 'RECHAZADO').length,
+    () => sinPapelera(documents).filter((doc) => doc.status === 'RECHAZADO').length,
     [documents]
   );
+  const papeleraCount = useMemo(() => documents.filter((doc) => doc.enPapelera).length, [documents]);
 
   const closeDetails = () => {
     setSelectedId(null);
+    setVerPublicada(false);
     setIsRejecting(false);
     setRejectReason('');
   };
@@ -221,11 +249,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         await keycloak.updateToken(30).catch(() => {});
       }
 
-      await evaluarDocumentoEstado(
-        selectedDocument.id,
-        { estado: 'APROBADO' },
-        keycloak.token
-      );
+      await revisarDocumento(selectedDocument.id, 'APROBAR');
 
       toast.success(`“${selectedDocument.title}” fue aprobado y publicado.`);
       setFeedback(`“${selectedDocument.title}” fue aprobado y ya está visible en el portal.`);
@@ -233,7 +257,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
       await cargarDocumentos(true);
     } catch (error) {
       console.error('Error al aprobar documento:', error);
-      toast.error(error.response?.data?.error || 'Error al aprobar el documento.');
+      toast.error(mensajeDeError(error, 'Error al aprobar el documento.'));
     } finally {
       setSubmitting(false);
     }
@@ -253,11 +277,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         await keycloak.updateToken(30).catch(() => {});
       }
 
-      await evaluarDocumentoEstado(
-        selectedDocument.id,
-        { estado: 'RECHAZADO', rejectionReason: reason },
-        keycloak.token
-      );
+      await revisarDocumento(selectedDocument.id, 'RECHAZAR', reason);
 
       toast.success(`“${selectedDocument.title}” fue rechazado.`);
       setFeedback(`“${selectedDocument.title}” fue rechazado y se enviaron las correcciones al CMS.`);
@@ -265,7 +285,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
       await cargarDocumentos(true);
     } catch (error) {
       console.error('Error al rechazar documento:', error);
-      toast.error(error.response?.data?.error || 'Error al rechazar el documento.');
+      toast.error(mensajeDeError(error, 'Error al rechazar el documento.'));
     } finally {
       setSubmitting(false);
     }
@@ -282,7 +302,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           </div>
           <button
             type="button"
-            className="admin-doc-button is-secondary"
+            className="admin-doc-button admin-rev-button is-secondary"
             onClick={() => cargarDocumentos(false)}
             disabled={loading}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', alignSelf: 'center' }}
@@ -309,48 +329,29 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           aria-pressed={statusFilter === 'TODOS'}
           onClick={() => setStatusFilter('TODOS')}
         >
-          Todos ({documents.length})
+          Todos
         </button>
       </div>
 
-      <section className="admin-doc-summary" aria-label="Filtrar documentos por estado">
-        <button
-          type="button"
-          className={`admin-doc-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDIENTE'}
-          onClick={() => setStatusFilter('PENDIENTE')}
-        >
-          <span><FolderOpen size={19} /></span>
-          <div><small>Pendientes de aprobación</small><strong>{pendingCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-doc-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLICADO'}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span><Globe2 size={19} /></span>
-          <div><small>Publicados en el portal</small><strong>{publishedCount}</strong></div>
-        </button>
-        <button
-          type="button"
-          className={`admin-doc-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'RECHAZADO'}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span><XCircle size={19} /></span>
-          <div><small>Rechazados</small><strong>{rejectedCount}</strong></div>
-        </button>
-      </section>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE", tipo: "pendiente", cuenta: pendingCount },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
+          { clave: "PAPELERA", tipo: "papelera", cuenta: papeleraCount },
+      ]}
+      />
 
       <section className="admin-doc-card" aria-labelledby="admin-doc-list-title">
         <div className="admin-doc-card-heading">
           <div>
-            <h2 id="admin-doc-list-title">Documentos recibidos</h2>
-            <p>Hacé clic en el título para revisar descripción, archivo adjunto y decidir su aprobación.</p>
+            <h2 id="admin-doc-list-title">Listado de Documentos</h2>
+            <p>Área de Revisión: Aprobación y rechazo de documentos recibidos desde el CMS</p>
           </div>
           <span className="admin-doc-result-count">
-            {filteredDocuments.length} {filteredDocuments.length === 1 ? 'documento' : 'documentos'}
+            {filteredDocuments.length} {filteredDocuments.length === 1 ? 'resultado' : 'resultados'}
           </span>
         </div>
 
@@ -376,7 +377,8 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
           </label>
         </div>
 
-        <div className="admin-doc-table-wrap">
+        {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
+<div className="admin-doc-table-wrap">
           {loading ? (
             <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
               <div className="cms-spinner" style={{ margin: '0 auto 15px auto', width: '36px', height: '36px' }}></div>
@@ -387,13 +389,13 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
               <thead>
                 <tr>
                   <th scope="col">Documento / archivo</th>
-                  <th scope="col">Categoría / tipo</th>
                   <th scope="col">Editor / fecha</th>
+                  <th scope="col">Categoría / tipo</th>
                   <th scope="col">Estado</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredDocuments.map((doc) => (
+                {vistaPublicados(filteredDocuments, statusFilter === 'PUBLICADO').map((doc) => (
                   <tr key={doc.id}>
                     <td data-label="Documento / archivo">
                       <div className="admin-doc-title-cell">
@@ -404,33 +406,47 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                           <button
                             type="button"
                             className="admin-doc-title-button"
-                            onClick={() => setSelectedId(doc.id)}
+                            onClick={() => {
+                              setSelectedId(doc.id);
+                              setVerPublicada(abreVersionPublicada(doc, statusFilter === 'PUBLICADO'));
+                            }}
                           >
-                            {doc.title}
+                            {tituloEnLista(doc, statusFilter === 'PUBLICADO', doc.title)}
                           </button>
-                          <small>{doc.fileName}</small>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
+                            <small>{doc.fileName}</small>
+                            <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={doc.cambios?.length} esActualizacion={doc.esActualizacion} />
+                          </div>
                         </span>
+                      </div>
+                    </td>
+                    <td data-label="Editor / fecha">
+                      <div className="admin-doc-creator-cell" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{doc.editor || doc.creator}</span>
+                        <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}><CalendarDays size={13} />{doc.updatedAt}</small>
                       </div>
                     </td>
                     <td data-label="Categoría / tipo">
                       <div className="admin-doc-category-cell">
-                        <strong>{doc.category}</strong>
+                        <EtiquetaCategoria categoria={doc.category} />
                         <small>{doc.fileType} {doc.fileSize ? `· ${doc.fileSize}` : ''}</small>
                       </div>
                     </td>
-                    <td data-label="Editor / fecha">
-                      <div className="admin-doc-creator-cell">
-                        <span>{doc.editor || doc.creator}</span>
-                        <small><CalendarDays size={13} />{doc.updatedAt}</small>
-                      </div>
-                    </td>
                     <td data-label="Estado">
-                      <span className={`admin-doc-status is-${doc.status.toLowerCase()}`}>
-                        {statusLabels[doc.status] || doc.status}
-                      </span>
-                      {doc.status === 'PENDIENTE' && (
-                        <small className="admin-doc-cms-hint" style={{ color: '#d97706' }}>Requiere tu revisión</small>
-                      )}
+                      {doc.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
+                          <EtiquetaEstado estado={doc.statusVista || doc.status} texto={statusLabels[doc.statusVista || doc.status] || doc.status} />
+                          <SiguePublicado item={doc} activo={statusFilter === 'PUBLICADO'} />
+<NotaPapelera item={doc} />
+                          {doc.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
+                        </>
+)}
                     </td>
                   </tr>
                 ))}
@@ -447,174 +463,158 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
         </div>
       </section>
 
-      {/* Modal de revisión y aprobación */}
       {selectedDocument && (
-        <div className="admin-doc-overlay" onClick={closeDetails}>
+        <div className="admin-doc-overlay admin-rev-overlay admin-doc-rv-overlay" onClick={closeDetails}>
           <section
-            className="admin-doc-modal"
+            className="admin-doc-modal admin-rev-modal admin-doc-rv-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-doc-modal-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <header className="admin-doc-modal-header">
-              <div>
-                <span>Revisión de documento institucional</span>
-                <h2 id="admin-doc-modal-title">{selectedDocument.title}</h2>
-              </div>
-              <button type="button" aria-label="Cerrar detalle" onClick={closeDetails}>
+            <header className="admin-doc-rv-header">
+              <h2 id="admin-doc-modal-title" className="admin-doc-rv-title">Revisión de documento</h2>
+              <button type="button" className="admin-doc-rv-close" aria-label="Cerrar detalle" onClick={closeDetails}>
                 <X size={20} />
               </button>
             </header>
 
-            <div className="admin-doc-modal-body">
-              <div className="admin-doc-info-grid">
-                <article>
-                  <h3>Descripción</h3>
-                  <p>{selectedDocument.description || 'Sin descripción detallada.'}</p>
-                </article>
-                <article>
-                  <h3>Categoría</h3>
-                  <p>{selectedDocument.category}</p>
-                </article>
-                <article>
-                  <h3>Tipo de documento</h3>
-                  <p>{selectedDocument.fileType}</p>
-                </article>
-                <article>
-                  <h3>Subido por</h3>
-                  <p>{selectedDocument.creator}</p>
-                </article>
-                <article className="is-wide">
-                  <h3>Archivo adjunto</h3>
-                  <p>
-                    {selectedDocument.fileName} {selectedDocument.fileSize && <span>· {selectedDocument.fileSize}</span>}
-                  </p>
-                </article>
+            <div className="admin-doc-rv-body">
+              <section className="admin-doc-rv-card admin-doc-rv-status">
+                <span className="admin-doc-rv-status-label">Estado actual</span>
+                <EtiquetaEstado estado={selectedDocument.status} texto={statusLabels[selectedDocument.status] || selectedDocument.status} />
+              </section>
+
+              {selectedDocument.status === 'PENDIENTE' && selectedDocument.requestedEstado === 'BORRADOR' && (
+                <div className="admin-doc-rv-alert" role="note">
+                  <AlertTriangle size={18} aria-hidden="true" />
+                  <div>
+                    <strong>Solicitud de retiro:</strong> el editor del CMS pide pasar este documento publicado a{' '}
+                    <strong>Borrador</strong>. Si lo aprobás, deja de verse en el portal.
+                  </div>
+                </div>
+              )}
+
+              <AvisoVersionPublicada item={selectedDocument} />
+              <AdminCambiosResaltados
+                cambios={selectedDocument.cambios}
+                esActualizacion={selectedDocument.esActualizacion}
+              />
+
+              <section className="admin-doc-rv-card admin-doc-rv-title-card">
+                <div className="admin-doc-rv-title-label">Título del documento</div>
+                <h3 className="admin-doc-rv-doc-title">{selectedDocument.title}</h3>
+              </section>
+
+              <section className="admin-doc-rv-card admin-doc-rv-field">
+                <div className="admin-doc-rv-field-label">Descripción</div>
+                <p className="admin-doc-rv-field-text">{selectedDocument.description || 'Sin descripción detallada.'}</p>
+              </section>
+
+              <div className="admin-doc-rv-grid">
+                <section className="admin-doc-rv-card admin-doc-rv-field">
+                  <div className="admin-doc-rv-field-label">Categoría</div>
+                  <p className="admin-doc-rv-field-text is-strong">{selectedDocument.category}</p>
+                </section>
+                <section className="admin-doc-rv-card admin-doc-rv-field">
+                  <div className="admin-doc-rv-field-label">Tipo de documento</div>
+                  <p className="admin-doc-rv-field-text is-strong is-upper">{selectedDocument.fileType}</p>
+                </section>
               </div>
 
-              {/* Vista previa real del documento */}
-              <section className="admin-doc-preview-card" aria-label="Vista previa del documento">
-                <div className="admin-doc-preview-header">
-                  <div className="admin-doc-preview-heading">
-                    <span className="admin-doc-preview-title">VISTA PREVIA DEL DOCUMENTO</span>
-                    <span className="admin-doc-preview-subtext">
+              <section className="admin-doc-rv-card admin-doc-rv-field">
+                <div className="admin-doc-rv-field-label">Subido por</div>
+                <p className="admin-doc-rv-field-text is-strong">{selectedDocument.creator}</p>
+              </section>
+
+              <section className="admin-doc-rv-card admin-doc-rv-field">
+                <div className="admin-doc-rv-field-label">Archivo adjunto</div>
+                {safeFileUrl ? (
+                  <div className="admin-doc-rv-file">
+                    <svg className="admin-doc-rv-file-icon" width="16" height="16" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path
+                        clipRule="evenodd"
+                        fillRule="evenodd"
+                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                      />
+                    </svg>
+                    <span className="admin-doc-rv-file-name">{selectedDocument.fileName}</span>
+                    {selectedDocument.fileSize && <span className="admin-doc-rv-file-size">· {selectedDocument.fileSize}</span>}
+                  </div>
+                ) : (
+                  <p className="admin-doc-rv-field-text">Sin archivo adjunto</p>
+                )}
+              </section>
+
+              <section className="admin-doc-rv-card admin-doc-rv-preview" aria-label="Vista previa del documento">
+                <div className="admin-doc-rv-preview-header">
+                  <div>
+                    <h3 className="admin-doc-rv-preview-title">Vista previa del documento</h3>
+                    <p className="admin-doc-rv-preview-sub">
                       {safeFileUrl
                         ? isPdf
                           ? 'Visualizador PDF integrado'
                           : 'Vista previa no disponible para este formato'
                         : 'Esperando archivo...'}
-                    </span>
+                    </p>
                   </div>
-                  <div className="admin-doc-preview-toolbar">
-                    <button
-                      type="button"
-                      className="admin-doc-preview-expand-btn"
-                      onClick={() => {
-                        if (safeFileUrl) window.open(safeFileUrl, '_blank', 'noopener,noreferrer');
-                      }}
-                      disabled={!safeFileUrl}
-                      aria-label="Abrir en pestaña nueva"
-                      title="Abrir archivo en pestaña nueva"
-                    >
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
+                  <button
+                    type="button"
+                    className="admin-doc-rv-expand"
+                    onClick={() => {
+                      if (safeFileUrl) window.open(safeFileUrl, '_blank', 'noopener,noreferrer');
+                    }}
+                    disabled={!safeFileUrl}
+                    aria-label="Abrir en pestaña nueva"
+                    title="Abrir archivo en pestaña nueva"
+                  >
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                      >
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <polyline points="9 21 3 21 3 15"></polyline>
-                        <line x1="21" y1="3" x2="14" y2="10"></line>
-                        <line x1="3" y1="21" x2="10" y2="14"></line>
-                      </svg>
-                    </button>
-                  </div>
+                      />
+                    </svg>
+                  </button>
                 </div>
 
-                <div className="admin-doc-preview-frame-container">
+                <div className="admin-doc-rv-viewer">
                   {safeFileUrl ? (
                     isPdf ? (
-                      <iframe
-                        src={`${safeFileUrl}#toolbar=0`}
-                        title="Vista previa del documento"
-                        style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }}
-                      />
+                      <iframe src={`${safeFileUrl}#toolbar=0`} title="Vista previa del documento" />
                     ) : (
-                      <div style={{ textAlign: 'center', color: '#64748b', margin: 'auto', padding: '24px' }}>
-                        <FileText size={48} strokeWidth={1.5} style={{ marginBottom: '10px', color: '#0c2340' }} />
-                        <p style={{ fontWeight: 600, margin: '0 0 5px 0', color: '#0c2340' }}>
-                          Archivo {selectedDocument.fileType || 'DOCX'} adjunto
-                        </p>
-                        <p style={{ fontSize: '0.85rem', margin: 0 }}>
-                          La vista previa integrada está disponible para formato PDF. Hacé clic arriba en ↗ para abrir o descargar el archivo.
-                        </p>
+                      <div className="admin-doc-rv-viewer-msg">
+                        <FileText size={40} strokeWidth={1.5} />
+                        <p>Archivo {selectedDocument.fileType || 'DOCX'} adjunto</p>
+                        <span>La vista previa integrada está disponible para formato PDF. Usá el botón de arriba para abrir o descargar el archivo.</span>
                       </div>
                     )
                   ) : (
-                    <div style={{ textAlign: 'center', color: '#94a3b8', margin: 'auto', padding: '24px' }}>
-                      <p>No hay archivo disponible para previsualizar.</p>
+                    <div className="admin-doc-rv-viewer-msg">
+                      <span>No hay archivo disponible para previsualizar.</span>
                     </div>
-                  )}
-                </div>
-
-                <div className="admin-doc-preview-footer">
-                  {safeFileUrl ? (
-                    <>
-                      <span className="admin-doc-preview-verified">
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#059669"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <polyline points="9 12 11 14 15 10"></polyline>
-                        </svg>
-                        Archivo verificado
-                      </span>
-                      <span className="admin-doc-preview-resolution">
-                        Guardado en BD
-                      </span>
-                    </>
-                  ) : (
-                    <span className="admin-doc-preview-resolution" style={{ marginLeft: 'auto' }}>
-                      Sin archivo adjunto
-                    </span>
                   )}
                 </div>
               </section>
 
-              <div className="admin-doc-state-row">
-                <span>Estado actual</span>
-                <strong className={`admin-doc-status is-${selectedDocument.status.toLowerCase()}`}>
-                  {statusLabels[selectedDocument.status]}
-                </strong>
-                {selectedDocument.status === 'PENDIENTE' && (
-                  <small style={{ color: '#d97706' }}>Pendiente de tu decisión para ser publicado.</small>
-                )}
-                {selectedDocument.status === 'PUBLICADO' && (
-                  <small style={{ color: '#16a34a' }}>Visible al público en el portal institucional.</small>
-                )}
-              </div>
+              <section className="admin-doc-rv-card admin-doc-rv-audit">
+                <div>
+                  Enviado por <strong>{selectedDocument.editedBy || selectedDocument.creator}</strong>
+                </div>
+                <div>
+                  Última modificación: <span className="admin-doc-rv-audit-date">{selectedDocument.updatedAt}</span>
+                </div>
+              </section>
 
               {selectedDocument.rejectionReason && (
-                <div className="admin-doc-rejection-note">
+                <div className="admin-rev-note">
                   <strong>Motivo del rechazo</strong>
                   <p>{selectedDocument.rejectionReason}</p>
                 </div>
               )}
 
               {isRejecting && (
-                <label className="admin-doc-rejection-field">
+                <label className="admin-rev-field">
                   <span>Motivo del rechazo <b>(requerido)</b></span>
                   <textarea
                     value={rejectReason}
@@ -625,36 +625,49 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                   />
                 </label>
               )}
+
+              {selectedDocument.solicitudEliminacion && (
+                <div className="admin-rev-solicitud">
+                  <SolicitudEliminacionAcciones
+                    solicitud={selectedDocument.solicitudEliminacion}
+                    entidad="documento"
+                    id={selectedDocument.id}
+                    titulo={selectedDocument.title}
+                    onResuelto={async () => {
+                      closeDetails();
+                      await cargarDocumentos(true);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
-            {/* El administrador únicamente aprueba o rechaza solicitudes pendientes */}
             {selectedDocument.status === 'PENDIENTE' && (
-              <footer className="admin-doc-modal-footer">
+              <footer className="admin-doc-rv-footer">
                 {!isRejecting ? (
                   <>
                     <button
                       type="button"
-                      className="admin-doc-button is-danger"
+                      className="admin-doc-rv-btn is-danger"
                       onClick={() => setIsRejecting(true)}
                       disabled={submitting}
                     >
-                      <XCircle size={17} /> Rechazar
+                      <XCircle size={16} /> Rechazar
                     </button>
                     <button
                       type="button"
-                      className="admin-doc-button is-primary"
+                      className="admin-doc-rv-btn is-primary"
                       onClick={handleApprove}
                       disabled={submitting}
                     >
-                      <CheckCircle size={17} />
-                      {submitting ? 'Aprobando...' : 'Aprobar documento'}
+                      <Check size={16} strokeWidth={2.5} /> {submitting ? 'Aprobando...' : 'Aprobar'}
                     </button>
                   </>
                 ) : (
                   <>
                     <button
                       type="button"
-                      className="admin-doc-button is-secondary"
+                      className="admin-doc-rv-btn is-secondary"
                       onClick={() => {
                         setIsRejecting(false);
                         setRejectReason('');
@@ -665,7 +678,7 @@ const AdminDocumentacionView = ({ onPendingCountChange }) => {
                     </button>
                     <button
                       type="button"
-                      className="admin-doc-button is-danger"
+                      className="admin-doc-rv-btn is-danger"
                       onClick={handleReject}
                       disabled={submitting || !rejectReason.trim()}
                     >

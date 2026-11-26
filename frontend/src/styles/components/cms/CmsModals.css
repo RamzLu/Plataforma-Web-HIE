@@ -1,6 +1,6 @@
 /* Modales, Lightbox y Logout */
-.modal-overlay,
-.lightbox-overlay {
+:where(.panel-scope) .modal-overlay,
+:where(.panel-scope) .lightbox-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -8,7 +8,7 @@
   height: 100vh;
   background-color: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(8px);
-  z-index: 2000;
+  z-index: var(--z-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,8 +16,8 @@
   box-sizing: border-box;
 }
 
-.modal-content-esp {
-  background-color: #f8fafc;
+:where(.panel-scope) .modal-content-esp {
+  background-color: var(--color-slate-50);
   width: 100%;
   max-width: 800px;
   max-height: 90vh;
@@ -29,39 +29,39 @@
   overflow: hidden;
 }
 
-.modal-header-esp {
-  background-color: #ffffff;
+:where(.panel-scope) .modal-header-esp {
+  background-color: var(--color-white);
   padding: 24px 35px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-slate-200);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.modal-header-esp h2 {
-  color: #2b5b94;
+:where(.panel-scope) .modal-header-esp h2:not(:where(.vista-portal *)) {
+  color: var(--color-secondary);
   font-size: 1.4rem;
   font-weight: 400;
   text-transform: uppercase;
   margin: 0;
 }
 
-.btn-close-modal {
+:where(.panel-scope) .btn-close-modal {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
   transition: all 0.2s ease;
 }
 
-.btn-close-modal:hover {
-  background-color: #fee2e2;
-  color: #e11d48;
+:where(.panel-scope) .btn-close-modal:hover {
+  background-color: var(--color-red-100);
+  color: var(--color-rose-600);
 }
 
-.btn-close-modal svg {
+:where(.panel-scope) .btn-close-modal svg:not(:where(.vista-portal *)) {
   width: 24px;
   height: 24px;
   stroke: currentColor;
@@ -69,50 +69,50 @@
 }
 
 
-.modal-author-row {
+:where(.panel-scope) .modal-author-row:not(:where(.vista-portal *)) {
   display: flex;
   align-items: center;
   gap: 12px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-slate-200);
 }
 
-.hospital-avatar {
+:where(.panel-scope) .hospital-avatar:not(:where(.vista-portal *)) {
   width: 45px;
   height: 45px;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
 }
 
-.hospital-avatar img {
+:where(.panel-scope) .hospital-avatar img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.author-meta h3 {
+:where(.panel-scope) .author-meta h3:not(:where(.vista-portal *)) {
   margin: 0 0 2px 0;
   font-size: 0.98rem;
-  color: #0c2340;
+  color: var(--color-primary);
   font-weight: 700;
 }
 
-.author-meta span {
+:where(.panel-scope) .author-meta span:not(:where(.vista-portal *)) {
   font-size: 0.82rem;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
-.news-modal-title {
-  color: #2b5b94;
+:where(.panel-scope) .news-modal-title:not(:where(.vista-portal *)) {
+  color: var(--color-secondary);
   font-size: 1.80rem;
   font-weight: 400;
   margin: 0;
 }
 
-.info-text {
+:where(.panel-scope) .info-text:not(:where(.vista-portal *)) {
   font-size: 1rem;
-  color: #334155;
+  color: var(--color-slate-700);
   margin: 0;
   line-height: 1.6;
 }
@@ -120,7 +120,7 @@
 /* =========================================
    MODAL: LAYOUT DE DOS COLUMNAS
 ========================================= */
-.modal-body-esp {
+:where(.panel-scope) .modal-body-esp:not(:where(.vista-portal *)) {
   padding: 30px 40px;
   display: grid;
   grid-template-columns: 1.4fr 1fr; /* 58% para texto, 42% para mosaico */
@@ -130,21 +130,30 @@
 }
 
 @media (max-width: 900px) {
-  .modal-body-esp {
+  :where(.panel-scope) .modal-body-esp:not(:where(.vista-portal *)) {
     grid-template-columns: 1fr; /* Pasa a 1 columna en móviles */
   }
 }
 
-.modal-left-content {
+:where(.panel-scope) .modal-left-content:not(:where(.vista-portal *)) {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  /* En una grilla, una columna no se achica por debajo de su palabra más larga: sin esto, un texto sin
+     espacios la ensancha, empuja el mosaico y aparece una barra de scroll horizontal. */
+  min-width: 0;
+}
+
+/* Los textos largos sin espacios se cortan en vez de salirse del modal. */
+:where(.panel-scope) .modal-left-content:not(:where(.vista-portal *)) :is(.news-modal-title, .info-text) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* =========================================
    MOSAICO DINÁMICO DE IMÁGENES (TIPO FACEBOOK)
 ========================================= */
-.news-modal-default-img-wrap {
+:where(.panel-scope) .news-modal-default-img-wrap:not(:where(.vista-portal *)) {
   width: 100%;
   height: 480px;
   border-radius: 16px;
@@ -154,39 +163,39 @@
   top: 0;
 }
 
-.mosaic-gallery {
+:where(.panel-scope) .mosaic-gallery:not(:where(.vista-portal *)) {
   display: grid;
   gap: 4px; /* Espaciado ajustado para crear el efecto cuadrícula */
   border-radius: 16px;
   overflow: hidden;
   width: 100%;
   height: 480px; /* Altura imponente para la columna derecha */
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   box-shadow: 0 10px 25px -5px rgba(12, 35, 64, 0.1);
   position: sticky;
   top: 0;
 }
 
-.mosaic-item {
+:where(.panel-scope) .mosaic-item:not(:where(.vista-portal *)) {
   position: relative;
   cursor: pointer;
   overflow: hidden;
 }
 
-.mosaic-item::after {
+:where(.panel-scope) .mosaic-item:not(:where(.vista-portal *))::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #0c2340;
+  background-color: var(--color-primary);
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
-.mosaic-item:hover::after {
+:where(.panel-scope) .mosaic-item:hover:not(:where(.vista-portal *))::after {
   opacity: 0.15;
 }
 
-.mosaic-item img {
+:where(.panel-scope) .mosaic-item img:not(:where(.vista-portal *)) {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -194,41 +203,45 @@
 }
 
 /* Variantes del Mosaico según cantidad de fotos */
-.layout-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-.layout-2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
-.layout-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
-.layout-3 .mosaic-item:nth-child(1) { grid-column: span 2; }
-.layout-4 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
-.layout-4 .mosaic-item:nth-child(1) { grid-column: span 3; }
+/* Una sola imagen: la tarjeta conserva su tamaño y la imagen se adapta a ella (recorta lo que sobre). El selector
+   lleva .mosaic-gallery para ganarle a las reglas del portal, que dejan la imagen con su propia altura. */
+:where(.panel-scope) .layout-1:not(:where(.vista-portal *)) { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+:where(.panel-scope) .mosaic-gallery.layout-1 .mosaic-item:not(:where(.vista-portal *)) { height: 100%; }
+:where(.panel-scope) .mosaic-gallery.layout-1 .mosaic-item img:not(:where(.vista-portal *)) { height: 100%; max-height: none; object-fit: cover; }
+:where(.panel-scope) .layout-2:not(:where(.vista-portal *)) { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } 
+:where(.panel-scope) .layout-3:not(:where(.vista-portal *)) { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
+:where(.panel-scope) .layout-3 .mosaic-item:nth-child(1):not(:where(.vista-portal *)) { grid-column: span 2; }
+:where(.panel-scope) .layout-4:not(:where(.vista-portal *)) { grid-template-columns: repeat(3, 1fr); grid-template-rows: 2fr 1fr; }
+:where(.panel-scope) .layout-4 .mosaic-item:nth-child(1):not(:where(.vista-portal *)) { grid-column: span 3; }
 
 /* Capa oscura con el +X para la última foto */
-.mosaic-overlay {
+:where(.panel-scope) .mosaic-overlay:not(:where(.vista-portal *)) {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(12, 35, 64, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 2.5rem;
   font-weight: 200;
   backdrop-filter: blur(3px);
   z-index: 10;
 }
 
-.modal-footer-esp {
+:where(.panel-scope) .modal-footer-esp {
   padding: 20px 35px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 15px;
-  background-color: #ffffff;
-  border-top: 1px solid #e2e8f0;
+  background-color: var(--color-white);
+  border-top: 1px solid var(--color-slate-200);
 }
 
-.btn-cerrar-rojo {
-  background-color: #e11d48;
-  color: #ffffff;
+:where(.panel-scope) .btn-cerrar-rojo {
+  background-color: var(--color-rose-600);
+  color: var(--color-white);
   border: none;
   border-radius: 50px;
   padding: 12px 36px;
@@ -238,27 +251,27 @@
   cursor: pointer;
 }
 
-.btn-cerrar-rojo:hover {
-  background-color: #be123c;
+:where(.panel-scope) .btn-cerrar-rojo:hover {
+  background-color: var(--color-rose-700);
 }
 
-.logout-modal {
+:where(.panel-scope) .logout-modal {
   max-width: 450px !important;
 }
 
-.text-center {
+:where(.panel-scope) .text-center:not(:where(.vista-portal *)) {
   text-align: center;
 }
 
-.logout-footer {
+:where(.panel-scope) .logout-footer {
   display: flex;
   gap: 15px;
   justify-content: center;
 }
 
-.btn-cancelar-gris {
-  background-color: #cbd5e1;
-  color: #1e293b;
+:where(.panel-scope) .btn-cancelar-gris {
+  background-color: var(--color-slate-300);
+  color: var(--color-slate-800);
   border: none;
   border-radius: 50px;
   padding: 12px 28px;
@@ -268,12 +281,12 @@
   cursor: pointer;
 }
 
-.btn-cancelar-gris:hover {
-  background-color: #94a3b8;
+:where(.panel-scope) .btn-cancelar-gris:hover {
+  background-color: var(--color-slate-400);
 }
 
 /* Lightbox */
-.lightbox-close {
+:where(.panel-scope) .lightbox-close {
   position: absolute;
   top: 25px;
   right: 40px;
@@ -282,24 +295,24 @@
   color: white;
   font-size: 3.5rem;
   cursor: pointer;
-  z-index: 3010;
+  z-index: var(--z-modal-raised);
 }
 
-.lightbox-content {
+:where(.panel-scope) .lightbox-content {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.lightbox-img {
+:where(.panel-scope) .lightbox-img {
   max-width: 100%;
   max-height: 90vh;
   object-fit: contain;
   border-radius: 8px;
 }
 
-.lightbox-arrow {
+:where(.panel-scope) .lightbox-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -316,16 +329,16 @@
   cursor: pointer;
 }
 
-.lb-left {
+:where(.panel-scope) .lb-left {
   left: -90px;
 }
-.lb-right {
+:where(.panel-scope) .lb-right {
   right: -90px;
 }
 /* =========================================
    MODAL DE FORMULARIOS (CREAR / EDITAR)
 ========================================= */
-.modal-body-form {
+:where(.panel-scope) .modal-body-form {
   padding: 30px 40px;
   display: flex;
   flex-direction: column;
@@ -334,7 +347,7 @@
 }
 
 /* Opcional: Si quieres que los inputs se alineen en 2 columnas prolijas */
-.form-grid-row {
+:where(.panel-scope) .form-grid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
@@ -345,7 +358,7 @@
    NUEVO MODAL DE CERRAR SESIÓN (LOGOUT)
 ========================================= */
 
-.modal-overlay-logout {
+:where(.panel-scope) .modal-overlay-logout {
   position: fixed;
   inset: 0;
   background-color: rgba(13, 34, 63, 0.48);
@@ -354,14 +367,14 @@
   align-items: center;
   justify-content: center;
   padding: 24px 16px;
-  z-index: 99999;
-  font-family: 'Manrope', system-ui, sans-serif;
+  z-index: var(--z-modal-top);
+  font-family: var(--font-sans);
   animation: fadeInLogout 0.2s ease-out;
 }
 
-.modal-card-logout {
+:where(.panel-scope) .modal-card-logout {
   position: relative;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-radius: 16px;
   width: 100%;
   max-width: 520px;
@@ -372,13 +385,13 @@
   animation: modalScaleUpLogout 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.close-button-logout {
+:where(.panel-scope) .close-button-logout {
   position: absolute;
   top: 18px;
   right: 18px;
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   cursor: pointer;
   padding: 6px;
   border-radius: 8px;
@@ -388,25 +401,25 @@
   transition: all 0.2s ease;
 }
 
-.close-button-logout:hover {
-  background-color: #f1f5f9;
-  color: #0d223f;
+:where(.panel-scope) .close-button-logout:hover {
+  background-color: var(--color-slate-100);
+  color: var(--color-primary-soft);
 }
 
 /* Header layout: Icono a la izquierda, texto a la derecha */
-.logout-header-flex {
+:where(.panel-scope) .logout-header-flex {
   display: flex;
   align-items: flex-start;
   gap: 18px;
   margin-bottom: 24px;
 }
 
-.icon-badge-logout {
+:where(.panel-scope) .icon-badge-logout {
   width: 56px;
   height: 56px;
   border-radius: 14px;
   background-color: #fff1f2; /* Fondo rojo suave */
-  color: #e11d48;            /* Rojo intenso */
+  color: var(--color-rose-600);            /* Rojo intenso */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -414,78 +427,78 @@
   box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);
 }
 
-.logout-text-content {
+:where(.panel-scope) .logout-text-content {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding-top: 4px;
 }
 
-.modal-title-logout {
+:where(.panel-scope) .modal-title-logout {
   margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: #0d223f;
+  color: var(--color-primary-soft);
   letter-spacing: -0.02em;
 }
 
-.modal-description-logout {
+:where(.panel-scope) .modal-description-logout {
   margin: 0;
   font-size: 14.5px;
   line-height: 1.5;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
 /* Barra de sesión horizontal */
-.session-info-badge-logout {
+:where(.panel-scope) .session-info-badge-logout {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   border-radius: 8px;
   padding: 12px 16px;
   margin-bottom: 24px;
 }
 
-.session-label {
+:where(.panel-scope) .session-label {
   font-size: 13.5px;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
-.session-user-details {
+:where(.panel-scope) .session-user-details {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.user-dot {
+:where(.panel-scope) .user-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #10b981; /* Verde esmeralda */
+  background-color: var(--color-emerald-500); /* Verde esmeralda */
 }
 
-.user-text-logout {
+:where(.panel-scope) .user-text-logout {
   font-size: 13.5px;
-  color: #0d223f;
+  color: var(--color-primary-soft);
 }
 
-.user-text-logout strong {
+:where(.panel-scope) .user-text-logout strong:not(:where(.vista-portal *)) {
   font-weight: 700;
 }
 
 /* Botones de acción */
-.modal-actions-logout {
+:where(.panel-scope) .modal-actions-logout {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
 }
 
-.btn-cancel-logout {
+:where(.panel-scope) .btn-cancel-logout {
   padding: 10px 24px;
-  background-color: #ffffff;
-  color: #475569;
-  border: 1px solid #cbd5e1;
+  background-color: var(--color-white);
+  color: var(--color-slate-600);
+  border: 1px solid var(--color-slate-300);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
@@ -494,14 +507,14 @@
   transition: all 0.2s ease;
 }
 
-.btn-cancel-logout:hover {
-  background-color: #f1f5f9;
+:where(.panel-scope) .btn-cancel-logout:hover {
+  background-color: var(--color-slate-100);
 }
 
-.btn-confirm-logout {
+:where(.panel-scope) .btn-confirm-logout {
   padding: 10px 24px;
-  background-color: #e11d48;
-  color: #ffffff;
+  background-color: var(--color-rose-600);
+  color: var(--color-white);
   border: none;
   border-radius: 8px;
   font-size: 13px;
@@ -512,13 +525,13 @@
   box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
 }
 
-.btn-confirm-logout:hover {
-  background-color: #be123c;
+:where(.panel-scope) .btn-confirm-logout:hover {
+  background-color: var(--color-rose-700);
   box-shadow: 0 6px 16px rgba(225, 29, 72, 0.35);
   transform: translateY(-1px);
 }
 
-.btn-confirm-logout:active {
+:where(.panel-scope) .btn-confirm-logout:active {
   transform: translateY(0);
 }
 
@@ -541,22 +554,22 @@
 
 /* Responsividad */
 @media (max-width: 500px) {
-  .session-info-badge-logout {
+  :where(.panel-scope) .session-info-badge-logout {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  .modal-actions-logout {
+  :where(.panel-scope) .modal-actions-logout {
     flex-direction: column-reverse;
   }
-  .btn-cancel-logout, .btn-confirm-logout {
+  :where(.panel-scope) .btn-cancel-logout, :where(.panel-scope) .btn-confirm-logout {
     width: 100%;
   }
 }
 
 /* En móviles el formulario pasa a una sola columna */
 @media (max-width: 768px) {
-  .form-grid-row {
+  :where(.panel-scope) .form-grid-row {
     grid-template-columns: 1fr;
   }
 }
@@ -564,46 +577,46 @@
 /* =========================================
    MODAL GLOBAL DE ELIMINACIÓN (ESTILO MODERNO)
 ========================================= */
-.delete-modal-global {
+:where(.panel-scope) .delete-modal-global {
   max-width: 400px !important;
   padding: 35px 25px 25px 25px !important;
   position: relative;
   border-radius: 16px !important;
 }
 
-.btn-close-floating {
+:where(.panel-scope) .btn-close-floating {
   position: absolute;
   top: 15px;
   right: 15px;
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   cursor: pointer;
   padding: 5px;
   transition: color 0.2s;
 }
 
-.btn-close-floating:hover {
-  color: #0f172a;
+:where(.panel-scope) .btn-close-floating:hover {
+  color: var(--color-slate-900);
 }
 
-.btn-close-floating svg {
+:where(.panel-scope) .btn-close-floating svg:not(:where(.vista-portal *)) {
   width: 20px;
   height: 20px;
 }
 
-.delete-modal-body {
+:where(.panel-scope) .delete-modal-body {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 }
 
-.delete-icon-wrapper {
+:where(.panel-scope) .delete-icon-wrapper {
   width: 48px;
   height: 48px;
-  background-color: #fee2e2;
-  color: #ef4444;
+  background-color: var(--color-red-100);
+  color: var(--color-red-500);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -611,19 +624,19 @@
   margin-bottom: 20px;
 }
 
-.delete-icon-wrapper svg {
+:where(.panel-scope) .delete-icon-wrapper svg:not(:where(.vista-portal *)) {
   width: 24px;
   height: 24px;
 }
 
-.delete-modal-title {
+:where(.panel-scope) .delete-modal-title {
   font-size: 1.90rem;
   font-weight: 200;
-  color: #0f172a;
+  color: var(--color-slate-900);
   line-height: 1.3;
 }
 
-.delete-modal-divider {
+:where(.panel-scope) .delete-modal-divider {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -632,41 +645,41 @@
   margin: 5px 0 0;
 }
 
-.delete-modal-divider::before {
+:where(.panel-scope) .delete-modal-divider::before {
   content: "";
   width: 80%;
   height: 8px;
-  background-color: #f1f5f9;
+  background-color: var(--color-slate-100);
   border-radius: 10px;
 }
 
-.delete-modal-divider::after {
+:where(.panel-scope) .delete-modal-divider::after {
   content: "";
   width: 50%;
   height: 8px;
-  background-color: #f1f5f9;
+  background-color: var(--color-slate-100);
   border-radius: 10px;
 }
 
-.delete-modal-text {
+:where(.panel-scope) .delete-modal-text {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin: 0 0 25px 0;
   line-height: 1.5;
 }
 
-.delete-modal-text strong {
-  color: #0f172a;
+:where(.panel-scope) .delete-modal-text strong:not(:where(.vista-portal *)) {
+  color: var(--color-slate-900);
   font-weight: 700;
 }
 
-.delete-modal-footer {
+:where(.panel-scope) .delete-modal-footer {
   display: flex;
   gap: 12px;
   width: 100%;
 }
 
-.delete-modal-footer button {
+:where(.panel-scope) .delete-modal-footer button:not(:where(.vista-portal *)) {
   flex: 1; 
   padding: 12px 0;
   font-size: 0.95rem;
@@ -681,108 +694,108 @@
    ESTILOS UNIFICADOS DE FORMULARIOS EN MODALES DEL CMS
    ========================================================= */
 
-.esp-modal-wrapper {
+:where(.panel-scope) .esp-modal-wrapper {
   max-width: 800px !important;
   width: 100%;
   display: flex;
   flex-direction: column;
   padding: 0 !important;
-  background-color: #f8fafc !important;
+  background-color: var(--color-slate-50) !important;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-.modal-header-esp {
+:where(.panel-scope) .modal-header-esp {
   padding: 24px 35px 20px 35px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-slate-200);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-radius: 16px 16px 0 0;
 }
 
-.modal-header-esp h2 {
+:where(.panel-scope) .modal-header-esp h2:not(:where(.vista-portal *)) {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #2b5b94;
+  color: var(--color-secondary);
   text-transform: uppercase;
   margin: 0;
   letter-spacing: 0.5px;
 }
 
-.esp-modal-body {
+:where(.panel-scope) .esp-modal-body {
   padding: 30px 35px;
   overflow-y: auto;
   max-height: calc(90vh - 160px);
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
 }
 
-.esp-modal-body::-webkit-scrollbar {
+:where(.panel-scope) .esp-modal-body::-webkit-scrollbar {
   width: 6px;
 }
-.esp-modal-body::-webkit-scrollbar-track {
-  background: #f1f5f9;
+:where(.panel-scope) .esp-modal-body::-webkit-scrollbar-track {
+  background: var(--color-slate-100);
   border-radius: 4px;
 }
-.esp-modal-body::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+:where(.panel-scope) .esp-modal-body::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300);
   border-radius: 4px;
 }
 
-.esp-form-grid {
+:where(.panel-scope) .esp-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-.esp-full-width {
+:where(.panel-scope) .esp-full-width {
   grid-column: span 2;
 }
 
-.esp-form-label {
+:where(.panel-scope) .esp-form-label {
   display: block;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.esp-asterisk {
-  color: #ef4444;
+:where(.panel-scope) .esp-asterisk {
+  color: var(--color-red-500);
   margin-left: 4px;
 }
 
-.esp-form-input {
+:where(.panel-scope) .esp-form-input {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   border-radius: 8px;
   font-size: 0.95rem;
-  color: #1e293b;
-  background-color: #ffffff;
+  color: var(--color-slate-800);
+  background-color: var(--color-white);
   transition: border-color 0.2s, box-shadow 0.2s;
   font-family: inherit;
   box-sizing: border-box;
 }
 
-.esp-form-input:focus {
+:where(.panel-scope) .esp-form-input:focus {
   outline: none;
-  border-color: #38bdf8;
+  border-color: var(--color-sky-400);
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
 }
 
-.esp-form-input::placeholder {
-  color: #94a3b8;
+:where(.panel-scope) .esp-form-input::placeholder {
+  color: var(--color-slate-400);
 }
 
-.modal-footer-esp {
+:where(.panel-scope) .modal-footer-esp {
   padding: 20px 35px;
-  background-color: #ffffff;
-  border-top: 1px solid #e2e8f0;
+  background-color: var(--color-white);
+  border-top: 1px solid var(--color-slate-200);
   border-radius: 0 0 16px 16px;
   display: flex;
   justify-content: flex-end;
@@ -791,19 +804,19 @@
 }
 
 @media (max-width: 640px) {
-  .esp-modal-body {
+  :where(.panel-scope) .esp-modal-body {
     padding: 20px;
   }
-  .modal-header-esp {
+  :where(.panel-scope) .modal-header-esp {
     padding: 20px;
   }
-  .modal-footer-esp {
+  :where(.panel-scope) .modal-footer-esp {
     padding: 16px 20px;
   }
-  .esp-form-grid {
+  :where(.panel-scope) .esp-form-grid {
     grid-template-columns: 1fr;
   }
-  .esp-full-width {
+  :where(.panel-scope) .esp-full-width {
     grid-column: span 1;
   }
 }

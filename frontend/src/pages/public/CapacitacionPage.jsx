@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import "../../styles/pages/CapacitacionPage.css";
 import AnimatedContent from "../../components/ui/AnimatedContent";
 import PageBanner from "../../components/PageBanner";
@@ -8,6 +9,8 @@ import imgCapacitacion1 from "../../assets/fondoCARRUSELnoticias2.jpg";
 import imgCapacitacion2 from "../../assets/fondoCARRUSELnoticias3.jpg";
 import { getCapacitacionesPublicas } from "../../api/capacitaciones.api";
 import { sanitizeUrl } from "../../utils/sanitizeUrl";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const capacitacionesData = [
   {
@@ -160,7 +163,9 @@ const formatFechaEspanol = (fechaStr) => {
         year: "numeric"
       });
     }
-  } catch {}
+  } catch {
+    // Error no crítico: se ignora a propósito.
+  }
   return fechaStr;
 };
 
@@ -198,8 +203,8 @@ const formatItemData = (item) => {
 
   tipo = String(tipo).toLowerCase();
 
-  let badgeLabel = "Presencial";
-  let btnText = "VER MÁS";
+  let badgeLabel;
+  let btnText;
 
   if (tipo === "video") {
     badgeLabel = "Video";
@@ -284,6 +289,7 @@ const parseVideoUrl = (url) => {
 };
 
 const CapacitacionPage = () => {
+  usePageMeta("Capacitación", "Cursos, jornadas y recursos de capacitación para profesionales de la salud del Hospital Interdistrital Evita.");
   const [capacitaciones, setCapacitaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -565,7 +571,7 @@ const CapacitacionPage = () => {
                       <article
                         className="training-card group"
                         data-category={item.tipo}
-                        onClick={() => setSelectedCurso(item)}
+                        onClick={() => setSelectedCurso(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setSelectedCurso(item))}
                       >
                         <div className="training-card-top">
                           <div className="training-media-container">
@@ -697,12 +703,12 @@ const CapacitacionPage = () => {
         <section className="cap-docencia-section">
           <div className="cap-docencia-card">
             <div className="cap-docencia-left">
-              <div className="cap-docencia-icon-box">
-                <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+              <div className="cap-docencia-icon-box" aria-hidden="true">
+                <span className="material-symbols-outlined" style={{ fontSize: "26px" }}>
                   menu_book
                 </span>
               </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div className="cap-docencia-text-group" style={{ display: "flex", flexDirection: "column" }}>
                 <h4 className="cap-docencia-title">
                   Revista Científica y Publicaciones Médicas
                 </h4>
@@ -720,20 +726,28 @@ const CapacitacionPage = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span>Ingresar a la Revista Científica</span>
-                <span
-                  className="material-symbols-outlined"
-                  style={{ verticalAlign: "middle", marginLeft: "6px", fontSize: "16px" }}
+                <span>INGRESAR A LA REVISTA</span>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
                 >
-                  open_in_new
-                </span>
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
               </a>
             </div>
           </div>
         </section>
       </div>
 
-      {selectedCurso && (
+      {selectedCurso && createPortal(
         <div
           className="cap-modal-overlay"
           onClick={() => setSelectedCurso(null)}
@@ -993,10 +1007,11 @@ const CapacitacionPage = () => {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {activeVideo && (
+      {activeVideo && createPortal(
         <div
           className="cap-video-modal-overlay"
           onClick={handleCerrarVideo}
@@ -1076,10 +1091,11 @@ const CapacitacionPage = () => {
               </p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {activeImage && (
+      {activeImage && createPortal(
         <div
           className="cap-image-lightbox-overlay"
           onClick={() => setActiveImage(null)}
@@ -1103,7 +1119,8 @@ const CapacitacionPage = () => {
             className="cap-image-lightbox-clean-img"
             onClick={(e) => e.stopPropagation()}
           />
-        </div>
+        </div>,
+        document.body
       )}
     </main>
   );

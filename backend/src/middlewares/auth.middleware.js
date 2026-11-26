@@ -1,4 +1,5 @@
 import { createRemoteJWKSet, jwtVerify, errors as joseErrors } from 'jose';
+import { ejecutarConUsuario } from '../utils/contextoUsuario.utils.js';
 
 let keycloakConfig = null;
 
@@ -70,7 +71,8 @@ export const verifyToken = async (req, res, next) => {
       roles: combinedRoles,
     };
 
-    return next();
+    // El resto del request corre con el usuario disponible para la autoría (createdBy / updatedBy).
+    return ejecutarConUsuario(req.user, () => next());
   } catch (error) {
     if (error instanceof joseErrors.JWTExpired) {
       return res.status(401).json({ error: 'Token expirado.' });
@@ -90,7 +92,14 @@ export const verifyToken = async (req, res, next) => {
   }
 };
 
-export const checkJwt = verifyToken;
+
+// true si el usuario autenticado (req.user) tiene alguno de los roles indicados (sin distinguir mayúsculas).
+export const usuarioTieneRol = (user, roles) => {
+  const rolesUsuario = Array.isArray(user?.roles)
+    ? user.roles.map((r) => String(r).toLowerCase().trim())
+    : [];
+  return roles.some((rol) => rolesUsuario.includes(String(rol).toLowerCase().trim()));
+};
 
 export const requireRole = (...allowedRoles) => {
   const allowedLower = allowedRoles.map((r) => String(r).toLowerCase().trim());
@@ -116,22 +125,13 @@ export const ROLES_VISTA_ADMIN = [...ROLES_CMS, ...ROLES_ADMIN];
 
 export const requireCmsAccess = [verifyToken, requireRole(...ROLES_CMS)];
 export const requireAdminAccess = [verifyToken, requireRole(...ROLES_ADMIN)];
+export const requireCmsOrAdminAccess = [verifyToken, requireRole(...ROLES_VISTA_ADMIN)];
 
-export const adminViewAccess = (req, res, next) => {
-  req.adminView = false;
-  const adminParam = req.query.admin;
-  const isAdminRequested =
-    adminParam === 'true' ||
-    (Array.isArray(adminParam) && adminParam.includes('true'));
-
-  if (!isAdminRequested) return next();
-
-  verifyToken(req, res, (err) => {
-    if (err) return next(err);
-    requireRole(...ROLES_VISTA_ADMIN)(req, res, (roleErr) => {
-      if (roleErr) return next(roleErr);
-      req.adminView = true;
-      next();
-    });
-  });
+// Lecturas del panel (CMS o Admin): exige token y marca la vista completa (borradores, pendientes,
+// programados, solicitudes de eliminación). El portal público lee desde /api/portal.
+const marcarVistaCms = (req, _res, next) => {
+  req.adminView = true;
+  next();
 };
+
+export const vistaCmsAccess = [verifyToken, requireRole(...ROLES_VISTA_ADMIN), marcarVistaCms];

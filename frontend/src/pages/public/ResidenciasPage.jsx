@@ -14,6 +14,7 @@ import {
   normalizeInternalPortalPath,
   resolveGraphicImageUrl,
 } from "../../utils/contenidoGraficoPresets.js";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
 
 const CACHE_KEY_HERO = "hie_public_residencias_destacado_cache";
 
@@ -32,6 +33,7 @@ const leerCacheHeroInicial = () => {
 };
 
 const ResidenciasPage = () => {
+  usePageMeta("Residencias", "Residencias médicas del Hospital Interdistrital Evita: programas, requisitos y convocatorias.");
   const [residencias, setResidencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedIds, setExpandedIds] = useState(new Set());
@@ -170,7 +172,7 @@ const ResidenciasPage = () => {
 
     const lines = requisitosText
       .split(/\r?\n/)
-      .map((l) => l.trim().replace(/^[•\-\*✓\s]+/, ""))
+      .map((l) => l.trim().replace(/^[•\-*✓\s]+/, ""))
       .filter(Boolean);
 
     return (

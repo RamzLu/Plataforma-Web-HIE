@@ -1,5 +1,5 @@
-import React from "react";
 import "../../styles/components/cms/CmsDashboard.css"; 
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CmsQuickAccess = ({ onActionClick }) => {
   const actions = [
@@ -103,7 +103,7 @@ const CmsQuickAccess = ({ onActionClick }) => {
           <div 
             key={action.id} 
             className={`quick-action-card ${action.colorClass}`}
-            onClick={() => onActionClick && onActionClick(action.id, true)}
+            onClick={() => onActionClick && onActionClick(action.id, true)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onActionClick && onActionClick(action.id, true))}
           >
             <div className="quick-action-icon">
               {action.icon}

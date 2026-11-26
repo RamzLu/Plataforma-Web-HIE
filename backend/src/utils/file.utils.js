@@ -196,3 +196,11 @@ export const generarNombreUnico = (originalName, prefix = "file", mimeType = "")
 
   return { nombreUnico, extension };
 };
+
+/** Tamaño de un archivo para mostrarlo: "1.2 MB", "340 KB", o "" si no hay tamaño. */
+export const formatearTamano = (bytes) => {
+  const n = Number(bytes || 0);
+  if (n > 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  if (n > 0) return `${(n / 1024).toFixed(0)} KB`;
+  return "";
+};

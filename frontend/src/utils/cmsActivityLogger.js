@@ -42,23 +42,9 @@ export const recordCmsActivity = ({
 
 export const getCmsActivityLog = () => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === null) {
-      const initialLog = [
-        {
-          id: "act-sample-delete-1",
-          titulo: 'Eliminó noticia: "Comunicado sobre mantenimiento de guardia"',
-          categoria: "Noticias",
-          editor: "Luana Abigail Ramirez Sistema",
-          estado: "ELIMINADO",
-          timestamp: Date.now() - 1000 * 60 * 30,
-        },
-      ];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialLog));
-      return initialLog;
-    }
-    const parsed = JSON.parse(raw || "[]");
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    // Descarta la entrada de ejemplo que sembraban versiones anteriores.
+    return Array.isArray(parsed) ? parsed.filter((log) => log?.id !== "act-sample-delete-1") : [];
   } catch {
     return [];
   }

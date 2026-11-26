@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FiMapPin, FiMap, FiMenu, FiX } from "react-icons/fi";
+import { MapPin, Map as MapIcon, Menu, X } from "lucide-react";
 import "../../styles/layout/Header.css";
-import logoCompleto from "../../assets/logo-completo.png";
+import logoCompleto from "../../assets/logo-hie-oficial.png";
 import HospitalLocationModal from "../ui/HospitalLocationModal"; 
 
 const Header = () => {
@@ -50,7 +50,14 @@ const Header = () => {
     <header className="hospital-header-container">
       <div className="hospital-main-nav">
         <Link to="/" className="brand-container" onClick={handleNavClick}>
-          <img src={logoCompleto} alt="Hospital Evita" className="header-logo-img" />
+          <img src={logoCompleto} alt="Hospital Interdistrital Evita" className="header-logo-img" />
+          <div className="header-brand-text">
+            <span className="header-brand-line">HOSPITAL</span>
+            <span className="header-brand-line">INTERDISTRITAL</span>
+            <span className="header-brand-evita">
+              EVITA <span className="header-brand-formosa">FORMOSA</span>
+            </span>
+          </div>
         </Link>
         <div 
           ref={sidebarRef} 
@@ -82,7 +89,7 @@ const Header = () => {
               title="Ubicación"
             >
               <div className="action-icon-bubble">
-                <FiMapPin size={15} strokeWidth={2.5} />
+                <MapPin size={15} strokeWidth={2.5} />
               </div>
               <div className="action-text-wrapper">
                 <span className="action-eyebrow">ACCESO</span>
@@ -91,7 +98,7 @@ const Header = () => {
             </button>
 
             <Link to="/plano" onClick={handleNavClick} className="btn-blueprint-action" title="Plano Institucional">
-              <FiMap size={18} strokeWidth={2.2} className="blueprint-icon" />
+              <MapIcon size={18} strokeWidth={2.2} className="blueprint-icon" />
               <div className="action-text-wrapper">
                 <span className="action-eyebrow">EDIFICIO</span>
                 <span className="action-title">Plano Institucional</span>
@@ -105,7 +112,7 @@ const Header = () => {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Alternar menú"
           >
-            {isMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
       </div>

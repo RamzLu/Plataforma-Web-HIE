@@ -4,6 +4,7 @@ node_modules/
 # Variables de entorno (¡NUNCA SE COMMITEAN!)
 .env
 .env.*
+!.env.example
 
 # Carpetas autogeneradas de Prisma (por si acaso)
 generated/

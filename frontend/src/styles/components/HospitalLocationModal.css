@@ -1,21 +1,21 @@
 :root {
-  --hospital-navy-dark: #0d223f;
+  --hospital-navy-dark: var(--color-primary-soft);
   --hospital-navy: #102a4e;
   --hospital-blue: #0066cc;
   --hospital-cobalt: #1a56db;
-  --hospital-sky: #0284c7;
-  --hospital-sky-light: #e0f2fe;
-  --hospital-emergency: #dc2626;
-  --hospital-emergency-bg: #fef2f2;
+  --hospital-sky: var(--color-sky-600);
+  --hospital-sky-light: var(--color-sky-100);
+  --hospital-emergency: var(--color-red-600);
+  --hospital-emergency-bg: var(--color-red-50);
   --hospital-bg-overlay: rgba(13, 34, 63, 0.48);
-  --hospital-surface: #ffffff;
-  --hospital-surface-subtle: #f8fafc;
-  --hospital-surface-card: #ffffff;
-  --hospital-border-light: #e2e8f0;
+  --hospital-surface: var(--color-white);
+  --hospital-surface-subtle: var(--color-slate-50);
+  --hospital-surface-card: var(--color-white);
+  --hospital-border-light: var(--color-slate-200);
   --hospital-border-card: #edf2f7;
-  --hospital-text-main: #0d223f;
-  --hospital-text-body: #334155;
-  --hospital-text-muted: #64748b;
+  --hospital-text-main: var(--color-primary-soft);
+  --hospital-text-body: var(--color-slate-700);
+  --hospital-text-muted: var(--color-slate-500);
   --hospital-radius-xl: 18px;
   --hospital-radius-lg: 12px;
   --hospital-radius-md: 8px;
@@ -31,8 +31,8 @@
   align-items: center;
   justify-content: center;
   padding: 24px 16px;
-  z-index: 9999;
-  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: var(--z-floating);
+  font-family: var(--font-sans);
   animation: modalFadeIn 0.2s ease-out;
 }
 
@@ -59,7 +59,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-bottom: 1px solid var(--hospital-border-light);
 }
 
@@ -72,8 +72,8 @@
 .hospital-symbol-box {
   width: 44px;
   height: 44px;
-  background-color: #f1f5f9;
-  border: 1.5px solid #cbd5e1;
+  background-color: var(--color-slate-100);
+  border: 1.5px solid var(--color-slate-300);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -120,13 +120,14 @@
 }
 
 .modal-close-button {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background-color: #f1f5f9;
+  background-color: var(--color-slate-100);
   border: none;
-  color: var(--hospital-text-muted);
+  color: var(--color-slate-600);
   cursor: pointer;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,9 +136,9 @@
 }
 
 .modal-close-button:hover {
-  background-color: #e2e8f0;
-  color: var(--hospital-navy-dark);
-  transform: scale(1.05);
+  background-color: var(--color-rose-600);
+  color: var(--color-white);
+  transform: rotate(90deg);
 }
 
 /* Contenido Principal en 2 Columnas */
@@ -146,7 +147,7 @@
   display: grid;
   grid-template-columns: 1.15fr 1fr;
   gap: 28px;
-  background-color: #f8fafc;
+  background-color: var(--color-slate-50);
   overflow-y: auto;
 }
 
@@ -162,7 +163,7 @@
   height: 270px;
   border-radius: var(--hospital-radius-lg);
   overflow: hidden;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   box-shadow: 0 4px 14px rgba(13, 34, 63, 0.06);
 }
 
@@ -190,7 +191,7 @@
   padding: 7px 12px;
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(4px);
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-slate-300);
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
@@ -201,7 +202,7 @@
 }
 
 .btn-copy-coords:hover {
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-color: var(--hospital-sky);
   color: var(--hospital-blue);
 }
@@ -223,7 +224,7 @@
   border-radius: 6px;
   font-size: 12.5px;
   font-weight: 500;
-  color: #ffffff;
+  color: var(--color-white);
   text-decoration: none;
   box-shadow: 0 3px 8px rgba(13, 34, 63, 0.25);
   transition: all 0.2s ease;
@@ -373,24 +374,24 @@
   font-weight: 500;
   padding: 4px 8px;
   border-radius: 6px;
-  background-color: #f1f5f9;
+  background-color: var(--color-slate-100);
   color: var(--hospital-text-muted);
   letter-spacing: 0.02em;
 }
 
 .transit-badge.badge-frequency {
-  background-color: #e2e8f0;
+  background-color: var(--color-slate-200);
   color: var(--hospital-navy-dark);
 }
 
 .transit-badge.badge-status {
-  background-color: #dbeafe;
+  background-color: var(--color-blue-100);
   color: var(--hospital-cobalt);
   text-transform: uppercase;
 }
 
 .transit-badge.badge-capacity {
-  background-color: #e2e8f0;
+  background-color: var(--color-slate-200);
   color: var(--hospital-navy-dark);
 }
 
@@ -403,14 +404,14 @@
   align-items: center;
   gap: 12px;
   background-color: var(--hospital-sky-light);
-  border: 1px solid #bae6fd;
+  border: 1px solid var(--color-sky-200);
   padding: 12px;
   border-radius: var(--hospital-radius-md);
 }
 
 .bus-pill-primary {
   background-color: var(--hospital-sky);
-  color: #ffffff;
+  color: var(--color-white);
   padding: 6px 14px;
   border-radius: 6px;
   font-size: 15px;
@@ -421,7 +422,7 @@
 }
 
 .bus-transfer-info {
-  background-color: #f1f5f9;
+  background-color: var(--color-slate-100);
   border: 1px solid var(--hospital-border-light);
   padding: 12px;
   border-radius: var(--hospital-radius-md);
@@ -476,7 +477,7 @@
 .feature-indicator {
   font-weight: 500;
   color: var(--hospital-navy-dark);
-  background-color: #e2e8f0;
+  background-color: var(--color-slate-200);
   width: 18px;
   height: 18px;
   border-radius: 4px;
@@ -496,7 +497,7 @@
 /* Footer de Accesibilidad del Modal */
 .location-modal-footer {
   padding: 16px 32px;
-  background-color: #ffffff;
+  background-color: var(--color-white);
   border-top: 1px solid var(--hospital-border-light);
   display: flex;
   align-items: center;

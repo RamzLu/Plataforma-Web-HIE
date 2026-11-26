@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { adminFetch } from "../../api/adminFetch.js";
+import { useState, useEffect } from "react";
+import { getCapacitaciones } from "../../api/capacitaciones.api.js";
+import { getResidencias } from "../../api/residencias.api.js";
+import { getActividadReciente } from "../../api/actividad.api.js";
 import { getCmsActivityLog } from "../../utils/cmsActivityLogger";
 
 const formatActivityDate = (timestamp) => {
@@ -69,8 +71,9 @@ const CmsRecentActivity = ({
 }) => {
   const [extraCaps, setExtraCaps] = useState([]);
   const [extraRes, setExtraRes] = useState([]);
-  const [loadingExtras, setLoadingExtras] = useState(true);
+  const [, setLoadingExtras] = useState(true);
   const [loggedActivities, setLoggedActivities] = useState(() => getCmsActivityLog());
+  const [serverActivities, setServerActivities] = useState([]);
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -87,16 +90,14 @@ const CmsRecentActivity = ({
   useEffect(() => {
     let isMounted = true;
     Promise.all([
-      adminFetch("/cms/capacitaciones")
-        .then((r) => r.json())
-        .catch(() => []),
-      adminFetch("/cms/residencias")
-        .then((r) => r.json())
-        .catch(() => []),
-    ]).then(([caps, res]) => {
+      getCapacitaciones().catch(() => []),
+      getResidencias(true).catch(() => []),
+      getActividadReciente(30).catch(() => []),
+    ]).then(([caps, res, auditoria]) => {
       if (isMounted) {
         if (Array.isArray(caps)) setExtraCaps(caps);
         if (Array.isArray(res)) setExtraRes(res);
+        if (Array.isArray(auditoria)) setServerActivities(auditoria);
         setLoadingExtras(false);
       }
     });
@@ -123,7 +124,7 @@ const CmsRecentActivity = ({
       (log) => log.newsId && String(log.newsId) === String(n.id)
     );
 
-    let activityTitle = "";
+    let activityTitle;
     if (n.actionTitle) {
       activityTitle = n.actionTitle;
     } else if (matchingLog && matchingLog.titulo) {
@@ -234,7 +235,23 @@ const CmsRecentActivity = ({
       categoria: log.categoria || "General",
       editor: log.editor || userName,
       estado: resolveEstado(log.estado),
-      timestamp: log.timestamp || Date.now(),
+      timestamp: log.timestamp || 0,
+    });
+  });
+
+  // Movimientos registrados en el servidor (tabla auditoria), compartidos entre todos los editores.
+  // Las altas y ediciones ya salen de las listas de arriba; acá se suman aprobaciones, rechazos,
+  // eliminaciones y pedidos de eliminación.
+  (serverActivities || []).forEach((a) => {
+    const accion = String(a.accion || "").toUpperCase();
+    if (["CREAR", "MODIFICAR", "ACTUALIZAR"].includes(accion)) return;
+    activities.push({
+      id: `audit-${a.id}`,
+      titulo: a.descripcion || `${accion} ${a.entidad}`,
+      categoria: a.entidad ? a.entidad.charAt(0).toUpperCase() + a.entidad.slice(1) : "General",
+      editor: a.usuario || "Editor CMS",
+      estado: resolveEstado(accion.includes("ELIMIN") ? "ELIMINADO" : accion),
+      timestamp: a.fechaHora ? new Date(a.fechaHora).getTime() : 0,
     });
   });
 

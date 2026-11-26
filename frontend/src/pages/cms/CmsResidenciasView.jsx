@@ -1,3 +1,4 @@
+import { mensajeDeError } from "../../utils/mensajeDeError";
 import React, { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
@@ -16,8 +17,46 @@ import {
   createResidencia,
   updateResidencia,
   deleteResidencia,
-  cambiarEstadoResidencia,
 } from "../../api/residencias.api";
+
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { isToday } from "date-fns";
+import es from "date-fns/locale/es";
+
+registerLocale("es", es);
+
+const CustomScheduleInput = React.forwardRef(
+  ({ value, onClick, icon, placeholder, isDate }, ref) => {
+    let displayValue = value || placeholder;
+
+    if (isDate && value) {
+      const [dia, mes, anio] = value.split("/");
+      const dateObj = new Date(parseInt(anio), parseInt(mes) - 1, parseInt(dia));
+      if (!isNaN(dateObj) && isToday(dateObj)) {
+        displayValue = "Hoy";
+      }
+    }
+
+    return (
+      <button className="schedule-custom-btn" onClick={onClick} ref={ref} type="button">
+        <span className="schedule-icon">{icon}</span>
+        <span className="schedule-text">{displayValue}</span>
+        <svg
+          className="schedule-chevron"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    );
+  }
+);
 
 import "../../styles/components/cms/CmsDashboard.css";
 import "../../styles/components/cms/CmsModals.css";
@@ -29,6 +68,18 @@ import {
   CmsConfirmDraftModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarResidencia, restaurarResidencia } from "../../api/residencias.api.js";
+import BarraFiltros from "../../components/ui/BarraFiltros";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Lista de residencias de la BD
@@ -36,11 +87,18 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("PUBLICADOS"); 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filtroCategoria, setFiltroCategoria] = useState("TODOS");
+  const [filtroCategoria] = useState("TODOS");
 
   // Modales
-  const [showModal, setShowModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showModal, setShowModal] = useState(Boolean(initialCreateModal));
   const [editingId, setEditingId] = useState(null);
+  // Si lo que se edita está (o estuvo) publicado, retirarlo del portal se pide archivándolo, no pasándolo a borrador.
+  const editandoPublicado = (() => {
+    const actual = (Array.isArray(residencias) ? residencias : []).find((r) => r.id === editingId);
+    return Boolean(actual && (["PUBLICADO", "PROGRAMADO", "APROBADO"].includes(actual.estado) || actual.esActualizacion));
+  })();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [showConfirmDraftModal, setShowConfirmDraftModal] = useState(false);
@@ -60,11 +118,13 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   const [eliminarBannerFlag, setEliminarBannerFlag] = useState(false);
   const [documentoSeleccionado, setDocumentoSeleccionado] = useState(null);
   const [eliminarDocumentoFlag, setEliminarDocumentoFlag] = useState(false);
+  const [fechaProgramada, setFechaProgramada] = useState(null);
 
   // Formulario según los campos solicitados para la vista del portal
   const initialForm = {
     nombre: "", // Nombre de la residencia
     categoria: "Formación Médica de Posgrado", // Categoría
+    fechaInicio: "", // Fecha de Inicio / Apertura
     fechaConvocatoria: "", // Fecha Límite / Fecha de Examen
     convocatoria: "Abierta",
     descripcion: "", // Resumen breve / copete
@@ -88,22 +148,29 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
 
   const [formData, setFormData] = useState(initialForm);
 
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { formData, bannerSeleccionado, eliminarBannerFlag, documentoSeleccionado, eliminarDocumentoFlag, fechaProgramada });
+
   // Cargar residencias desde la BD
+  // Trae la lista y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerResidencias = () =>
+    getResidencias(true)
+      .then((data) => setResidencias(Array.isArray(data) ? data : []))
+      .catch((error) => {
+        console.error("Error al cargar residencias:", error);
+        toast.error("No se pudieron cargar las residencias.");
+      })
+      .finally(() => setLoading(false));
+
+  // Recarga a pedido: muestra la carga y después trae la lista.
   const cargarResidencias = async () => {
     setLoading(true);
-    try {
-      const data = await getResidencias(true);
-      setResidencias(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error al cargar residencias:", error);
-      toast.error("No se pudieron cargar las residencias.");
-    } finally {
-      setLoading(false);
-    }
+    await traerResidencias();
   };
 
   useEffect(() => {
-    cargarResidencias();
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerResidencias();
   }, []);
 
   // Procesamiento de Imagen de Banner
@@ -196,6 +263,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     setEliminarBannerFlag(false);
     setDocumentoSeleccionado(null);
     setEliminarDocumentoFlag(false);
+    setFechaProgramada(null);
     setFormData(initialForm);
     if (bannerInputRef.current) bannerInputRef.current.value = "";
     if (docInputRef.current) docInputRef.current.value = "";
@@ -203,12 +271,10 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     setShowModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showModal): solo se avisa al panel para que no lo reabra.
   useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   // Apertura modal edición
   const handleOpenEdit = (res) => {
@@ -217,6 +283,12 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     setEliminarBannerFlag(false);
     setDocumentoSeleccionado(null);
     setEliminarDocumentoFlag(false);
+
+    if (res.fechaPublicacion) {
+      setFechaProgramada(new Date(res.fechaPublicacion));
+    } else {
+      setFechaProgramada(null);
+    }
 
     let convVal = "Abierta";
     if (res.convocatoria) {
@@ -227,11 +299,24 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       else convVal = res.convocatoria;
     }
 
+    const estadoInicial =
+      res.estado === "PROGRAMADO"
+        ? "PROGRAMADO"
+        : res.fechaPublicacion
+        ? "PROGRAMADO"
+        : ["BORRADOR", "ARCHIVADO", "PUBLICADO"].includes(res.estado)
+        ? res.estado
+        : // Pendiente, rechazada o aprobada: lo que el CM puede volver a pedir es publicar o archivar.
+          res.requestedEstado === "ARCHIVADO"
+        ? "ARCHIVADO"
+        : "PUBLICADO";
+
     setFormData({
       nombre: res.nombre || "",
       categoria:
         res.categoria ||
         "Formación Médica de Posgrado - Ministerio de Desarrollo Humano",
+      fechaInicio: res.fechaInicio || res.fechaInicioVigencia || "",
       fechaConvocatoria: res.fechaConvocatoria || "",
       convocatoria: convVal,
       descripcion: res.descripcion || "",
@@ -242,7 +327,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       reglamentoRotacion:
         res.reglamentoRotacion ||
         "Descargue el cronograma de actividades, régimen de guardias docentes y plan de evaluación de Residencia.",
-      estado: res.estado || "BORRADOR",
+      estado: estadoInicial,
 
       bannerNombre: res.bannerNombre || "",
       bannerUrl: res.bannerUrl || "",
@@ -258,7 +343,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
 
   // Control de cierre modal
   const handleCloseAttempt = () => {
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowModal(false);
@@ -274,11 +359,18 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   // Guardar en la BD (Crear o Actualizar)
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
+    if (editingId && !hayCambios) {
+      return toast.error("No se han detectado cambios para actualizar.");
+    }
     if (!formData.nombre.trim()) {
       return toast.error("El nombre de la residencia es obligatorio.");
     }
 
     const estadoFinal = forcedEstado || formData.estado || "BORRADOR";
+
+    if (estadoFinal === "PROGRAMADO" && !fechaProgramada) {
+      return toast.error("Por favor, selecciona una fecha y hora para programar la publicación.");
+    }
 
     if (estadoFinal === "BORRADOR" && !bypassDraftWarning) {
       setShowConfirmDraftModal(true);
@@ -293,11 +385,11 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     );
 
     try {
-      const token = keycloak?.token;
       const dataForm = new FormData();
       dataForm.append("nombre", formData.nombre.trim());
       dataForm.append("categoria", formData.categoria.trim());
-      dataForm.append("fechaConvocatoria", formData.fechaConvocatoria);
+      dataForm.append("fechaInicio", formData.fechaInicio || "");
+      dataForm.append("fechaConvocatoria", formData.fechaConvocatoria || "");
       dataForm.append("convocatoria", formData.convocatoria.trim());
       dataForm.append("descripcion", formData.descripcion.trim());
       dataForm.append("descripcionPrograma", formData.descripcionPrograma.trim());
@@ -306,6 +398,18 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       dataForm.append("requisitos", formData.requisitos.trim());
       dataForm.append("reglamentoRotacion", formData.reglamentoRotacion.trim());
       dataForm.append("estado", estadoFinal);
+
+      if (estadoFinal === "PROGRAMADO" && fechaProgramada) {
+        dataForm.append("fechaPublicacion", fechaProgramada.toISOString());
+      }
+
+      dataForm.append(
+        "editor",
+        keycloak?.tokenParsed?.name ||
+          keycloak?.idTokenParsed?.name ||
+          keycloak?.tokenParsed?.preferred_username ||
+          "Editor CMS"
+      );
 
       // Archivo de Banner (imagen)
       if (bannerSeleccionado) {
@@ -321,22 +425,56 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         dataForm.append("eliminarDocumento", "true");
       }
 
+      let resp;
       if (editingId) {
-        await updateResidencia(editingId, dataForm, token);
-        toast.success(
-          estadoFinal === "BORRADOR"
-            ? "Borrador actualizado con éxito."
-            : "Residencia actualizada con éxito.",
-          { id: toastId },
-        );
+        resp = await updateResidencia(editingId, dataForm);
       } else {
-        await createResidencia(dataForm, token);
+        resp = await createResidencia(dataForm);
+      }
+
+      const resObj = resp?.data || resp;
+      const estadoResultante = (resObj?.estado || estadoFinal).toUpperCase();
+
+      if (estadoResultante === "PENDIENTE_APROBACION") {
+        const esArchivado =
+          estadoFinal === "ARCHIVADO" || resObj?.requestedEstado === "ARCHIVADO";
+        const esProgramado =
+          estadoFinal === "PROGRAMADO" || resObj?.requestedEstado === "PROGRAMADO";
         toast.success(
-          estadoFinal === "BORRADOR"
-            ? "Borrador guardado con éxito."
-            : "Residencia publicada con éxito.",
+          esArchivado
+            ? "Solicitud de archivado enviada a revisión del administrador."
+            : esProgramado
+            ? "Residencia programada enviada a revisión del administrador."
+            : editingId
+            ? "Modificaciones enviadas a revisión del administrador."
+            : "Residencia enviada a revisión del administrador para su aprobación.",
           { id: toastId },
         );
+        setActiveTab("PENDIENTES");
+      } else if (estadoFinal === "PROGRAMADO") {
+        toast.success(
+          editingId
+            ? "Residencia programada actualizada con éxito."
+            : "Residencia programada con éxito.",
+          { id: toastId },
+        );
+        setActiveTab("PROGRAMADOS");
+      } else if (estadoFinal === "BORRADOR") {
+        toast.success(
+          editingId
+            ? "Borrador actualizado con éxito."
+            : "Borrador guardado con éxito.",
+          { id: toastId },
+        );
+        setActiveTab("BORRADORES");
+      } else {
+        toast.success(
+          editingId
+            ? "Residencia actualizada con éxito."
+            : "Residencia creada con éxito.",
+          { id: toastId },
+        );
+        setActiveTab(estadoFinal === "ARCHIVADO" ? "ARCHIVADOS" : "PUBLICADOS");
       }
 
       await cargarResidencias();
@@ -347,38 +485,10 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     } catch (error) {
       console.error("Error al guardar residencia:", error);
       const msg =
-        error.response?.data?.error ||
-        error.message ||
-        "Error al guardar la residencia.";
+        mensajeDeError(error, "Error al guardar la residencia.");
       toast.error(msg, { id: toastId });
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  // Cambiar estado interactivo (Publicado, Borrador, Archivado)
-  const handleCambiarEstado = async (id, nuevoEstado) => {
-    const estadoLegible =
-      nuevoEstado === "PUBLICADO"
-        ? "Publicado"
-        : nuevoEstado === "BORRADOR"
-          ? "Borrador"
-          : "Archivado";
-
-    const toastId = toast.loading(`Cambiando estado a ${estadoLegible}...`);
-    try {
-      const token = keycloak?.token;
-      await cambiarEstadoResidencia(id, nuevoEstado, token);
-      toast.success(
-        `Estado actualizado a ${estadoLegible} con éxito.`,
-        { id: toastId },
-      );
-      await cargarResidencias();
-    } catch (error) {
-      console.error("Error al cambiar estado:", error);
-      const msg =
-        error.response?.data?.error || "Error al cambiar el estado.";
-      toast.error(msg, { id: toastId });
     }
   };
 
@@ -394,8 +504,16 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     const toastId = toast.loading("Eliminando residencia...");
 
     try {
-      const token = keycloak?.token;
-      await deleteResidencia(itemAEliminar.id, token);
+      const respuesta = await deleteResidencia(itemAEliminar.id);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { id: toastId, duration: 6000 });
+        setShowDeleteModal(false);
+        setItemAEliminar(null);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        cargarResidencias();
+        return;
+      }
       recordCmsActivity({
         titulo: `Eliminó residencia: "${itemAEliminar.nombre || "Residencia"}"`,
         categoria: "Residencias",
@@ -411,8 +529,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
     } catch (error) {
       console.error("Error al eliminar residencia:", error);
       const msg =
-        error.response?.data?.error ||
-        "Error al eliminar la residencia.";
+        mensajeDeError(error, "Error al eliminar la residencia.");
       toast.error(msg, { id: toastId });
     } finally {
       setIsDeleting(false);
@@ -420,14 +537,50 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   };
 
   // Filtrado de datos
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarResidencia(item.id),
+    restaurar: (item) => restaurarResidencia(item.id),
+    recargar: cargarResidencias,
+  });
+
+  // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
+  const cuentas = { PAPELERA: 0, PUBLICADOS: 0, PROGRAMADOS: 0, PENDIENTES: 0, BORRADORES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
+  (Array.isArray(residencias) ? residencias : []).forEach((res) => {
+    if (!res) return;
+    const e = (res.estado || "PUBLICADO").toUpperCase();
+    if (res.enPapelera) {
+      cuentas.PAPELERA++;
+      return;
+    }
+    if (estaPublicadoEnPortal(res)) cuentas.PUBLICADOS++;
+    if (e === "PROGRAMADO") cuentas.PROGRAMADOS++;
+    else if (e === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
+    else if (e === "BORRADOR") cuentas.BORRADORES++;
+    else if (e === "RECHAZADO") cuentas.RECHAZADOS++;
+    else if (e === "ARCHIVADO") cuentas.ARCHIVADOS++;
+  });
+
   const datosFiltrados = (Array.isArray(residencias) ? residencias : []).filter((res) => {
     if (!res) return false;
-    const matchEstado =
-      activeTab === "PUBLICADOS"
-        ? res.estado === "PUBLICADO"
-        : activeTab === "BORRADORES"
-          ? res.estado === "BORRADOR"
-          : res.estado === "ARCHIVADO";
+    if (activeTab === "PAPELERA" ? !res.enPapelera : res.enPapelera) return false;
+    const estadoItem = (res.estado || "PUBLICADO").toUpperCase();
+    let matchEstado = false;
+    if (activeTab === "TODOS" || activeTab === "PAPELERA") {
+      matchEstado = true;
+    } else if (activeTab === "PUBLICADOS") {
+      matchEstado = estaPublicadoEnPortal(res);
+    } else if (activeTab === "PROGRAMADOS") {
+      matchEstado = estadoItem === "PROGRAMADO";
+    } else if (activeTab === "PENDIENTES") {
+      matchEstado = estadoItem === "PENDIENTE_APROBACION";
+    } else if (activeTab === "BORRADORES") {
+      matchEstado = estadoItem === "BORRADOR";
+    } else if (activeTab === "RECHAZADOS") {
+      matchEstado = estadoItem === "RECHAZADO";
+    } else if (activeTab === "ARCHIVADOS") {
+      matchEstado = estadoItem === "ARCHIVADO";
+    }
 
     const matchCategoria =
       filtroCategoria === "TODOS" ? true : res.categoria === filtroCategoria;
@@ -453,7 +606,26 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
   };
 
   return (
-    <div className="cms-dashboard-card">
+    <>
+      <div style={{ marginBottom: "18px" }}>
+        <FiltrosEstado
+                    activa={activeTab}
+                    onCambiar={setActiveTab}
+                    todos
+                    onActualizar={cargarResidencias}
+                    opciones={[
+                      { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
+                      { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
+                      { clave: "PROGRAMADOS", tipo: "programado", cuenta: cuentas.PROGRAMADOS },
+                      { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
+                      { clave: "BORRADORES", tipo: "borrador", cuenta: cuentas.BORRADORES },
+                      { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
+                      { clave: "PAPELERA", tipo: "papelera", cuenta: cuentas.PAPELERA },
+          ]}
+                  />
+      </div>
+
+      <div className="cms-dashboard-card">
       {/* Cabecera */}
       <div className="news-view-header">
         <div>
@@ -464,85 +636,17 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
             Administre los programas formativos, convocatorias, banner y reglamentos que se visualizan en el portal de residencias.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn-crear-noticia-header"
-          onClick={handleOpenCreate}
-        >
-          + AÑADIR RESIDENCIA
-        </button>
       </div>
 
       {/* Barra de herramientas: Pestañas a la izquierda, buscador a la derecha */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-          flexWrap: "wrap",
-          gap: "15px",
-        }}
-      >
-        {/* Pestañas de estado */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("PUBLICADOS")}
-          >
-            Publicados
-          </button>
-          <button
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "BORRADORES" ? "active" : ""}`}
-            onClick={() => setActiveTab("BORRADORES")}
-          >
-            Borradores
-          </button>
-          <button
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("ARCHIVADOS")}
-          >
-            Archivados
-          </button>
-        </div>
-
-        {/* Buscador */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div className="res-search-wrapper">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input
-              type="text"
-              placeholder="Buscar por programa o categoría..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="res-search-input-field"
-            />
-          </div>
-        </div>
-      </div>
+      <BarraFiltros
+        crear={{ texto: "+ AÑADIR RESIDENCIA", onClick: handleOpenCreate }}
+          busqueda={{ etiqueta: "Buscar residencia", placeholder: "Buscar por programa o categoría...", valor: searchTerm, onCambio: setSearchTerm }}
+        />
 
       {/* Tabla Unificada con diseño armonizado idéntico a Profesionales */}
-      <div className="cms-news-table-container">
+      {activeTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-news-table-container">
         <div
           className="activity-table-head news-table-head"
           style={{ display: "flex", gap: "10px", alignItems: "center" }}
@@ -550,8 +654,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
           <div style={{ flex: 1.8 }}>PROGRAMA Y CATEGORÍA</div>
           <div style={{ flex: 1 }}>DURACIÓN</div>
           <div style={{ flex: 1.2 }}>FECHA / CONVOCATORIA</div>
-          <div style={{ width: "135px", textAlign: "center" }}>ESTADO</div>
-          <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
+          <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
+          <div style={{ width: "140px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
         <div className="activity-table-body">
@@ -567,7 +671,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
               No se encontraron residencias registradas.
             </div>
           ) : (
-            datosFiltrados.map((res) => (
+            vistaPublicados(datosFiltrados, activeTab === "PUBLICADOS").map((res) => (
               <div
                 className="activity-row news-table-row"
                 key={res.id}
@@ -608,7 +712,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                         display: "block",
                       }}
                     >
-                      {res.nombre}
+                      {tituloEnLista(res, activeTab === "PUBLICADOS", res.nombre)}
                     </span>
                     <span
                       style={{
@@ -657,6 +761,22 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                         </span>
                       )}
                     </span>
+                    {res.motivoRechazo && res.estado === "RECHAZADO" && (
+                      <div
+                        style={{
+                          marginTop: "6px",
+                          padding: "6px 10px",
+                          background: "#fef2f2",
+                          border: "1px solid #fecaca",
+                          borderRadius: "6px",
+                          fontSize: "0.78rem",
+                          color: "#991b1b",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        <strong>Motivo de rechazo:</strong> {res.motivoRechazo}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -685,9 +805,22 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     alignItems: "flex-start",
                   }}
                 >
-                  <span style={{ color: "#0c2340", fontWeight: "600", fontSize: "0.88rem" }}>
-                    {res.fechaConvocatoria || "Sin fecha fija"}
-                  </span>
+                  {res.estado === "PROGRAMADO" && res.fechaPublicacion ? (
+                    <span style={{ color: "#2563eb", fontWeight: "700", fontSize: "0.82rem" }}>
+                      Publicación: {new Date(res.fechaPublicacion).toLocaleDateString("es-AR")} {new Date(res.fechaPublicacion).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  ) : (
+                    <>
+                      {res.fechaInicio && (
+                        <span style={{ color: "#0c2340", fontWeight: "600", fontSize: "0.80rem" }}>
+                          Inicio: {res.fechaInicio}
+                        </span>
+                      )}
+                      <span style={{ color: "#475569", fontWeight: "500", fontSize: "0.80rem" }}>
+                        Cierre: {res.fechaConvocatoria || "Sin fecha fija"}
+                      </span>
+                    </>
+                  )}
                   <span
                     style={{
                       fontSize: "0.75rem",
@@ -711,33 +844,72 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                 {/* Columna ESTADO */}
                 <div
                   style={{
-                    width: "135px",
+                    width: "200px",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                   }}
                 >
-                  <select
-                    value={res.estado}
-                    onChange={(e) => handleCambiarEstado(res.id, e.target.value)}
-                    className={`status-badge-select ${res.estado?.toLowerCase()}`}
-                    title="Cambiar estado: Publicado / Borrador / Archivado"
-                  >
-                    <option value="PUBLICADO">Publicado</option>
-                    <option value="BORRADOR">Borrador</option>
-                    <option value="ARCHIVADO">Archivado</option>
-                  </select>
+                  {res.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+{(() => {
+                    const estadoMostrado = res.estadoVista || res.estado;
+                    if (estadoMostrado === "PENDIENTE_APROBACION") {
+                      return (
+                        <EtiquetaEstado
+                          estado={estadoMostrado}
+                          texto={
+                            res.requestedEstado === "ARCHIVADO"
+                              ? "Archivado solicitado"
+                              : res.requestedEstado === "BORRADOR"
+                              ? "Retiro solicitado"
+                              : res.requestedEstado === "PROGRAMADO"
+                              ? "Programación en revisión"
+                              : textoDeEstado(estadoMostrado)
+                          }
+                        />
+                      );
+                    }
+                    if (estadoMostrado === "PROGRAMADO") {
+                      return (
+                        <span title={res.fechaPublicacion ? `Programado para: ${new Date(res.fechaPublicacion).toLocaleString("es-AR")}` : "Programado"}>
+                          <EtiquetaEstado estado={estadoMostrado} texto={textoDeEstado(estadoMostrado)} />
+                        </span>
+                      );
+                    }
+                    return <EtiquetaEstado estado={estadoMostrado} texto={textoDeEstado(estadoMostrado)} />;
+                  })()}
+                  <SiguePublicado item={res} activo={activeTab === "PUBLICADOS"} />
+<NotaPapelera item={res} />
+                  {res.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
                 {/* Columna ACCIONES */}
                 <div
                   className="news-actions-cell"
                   style={{
-                    width: "100px",
+                    width: "140px",
                     justifyContent: "center",
                     gap: "8px",
                   }}
                 >
+{res.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(res)}
+  onEliminar={() => confirmDelete(res)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                   <button
                     type="button"
                     onClick={() => handleOpenEdit(res)}
@@ -778,7 +950,11 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                       <line x1="14" y1="11" x2="14" y2="17"></line>
                     </svg>
                   </button>
-                </div>
+                
+{esDescartable(res) && <BotonADescartar onClick={() => papelera.descartarItem(res)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
               </div>
             ))
           )}
@@ -860,7 +1036,26 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     />
                   </div>
 
-                  {/* 3. Fecha Límite / Fecha de Examen */}
+                  {/* Fecha de Inicio / Apertura */}
+                  <div>
+                    <label className="esp-form-label">
+                      Fecha de Inicio / Apertura
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.fechaInicio}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          fechaInicio: e.target.value,
+                        });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="esp-form-input"
+                    />
+                  </div>
+
+                  {/* Fecha Límite / Fecha de Examen */}
                   <div>
                     <label className="esp-form-label">
                       Fecha Límite / Fecha de Examen
@@ -917,14 +1112,108 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                       onChange={(e) => {
                         setFormData({ ...formData, estado: e.target.value });
                         setHasUnsavedChanges(true);
+                        if (e.target.value !== "PROGRAMADO") setFechaProgramada(null);
                       }}
                       className="esp-form-input"
                     >
-                      <option value="PUBLICADO">Publicado</option>
-                      <option value="BORRADOR">Borrador</option>
-                      <option value="ARCHIVADO">Archivado</option>
+                      <option value="PUBLICADO">Publicar (Enviar a aprobación)</option>
+                      {!editandoPublicado && <option value="BORRADOR">Borrador</option>}
+                      <option value="PROGRAMADO">Programado (Enviar a aprobación)</option>
+                      {editingId && (
+                        <option value="ARCHIVADO">
+                          {editandoPublicado ? "Archivar (pedir retiro del portal)" : "Archivado"}
+                        </option>
+                      )}
                     </select>
                   </div>
+
+                  {formData.estado === "PROGRAMADO" && (
+                    <div className="esp-full-width" style={{ marginBottom: "15px" }}>
+                      <label
+                        className="esp-form-label"
+                        style={{ display: "block", marginBottom: "8px" }}
+                      >
+                        Publicar el:
+                      </label>
+                      <div className="schedule-picker-container">
+                        <DatePicker
+                          selected={fechaProgramada}
+                          onChange={(date) => {
+                            if (fechaProgramada && date) {
+                              date.setHours(fechaProgramada.getHours());
+                              date.setMinutes(fechaProgramada.getMinutes());
+                            }
+                            setFechaProgramada(date);
+                            setHasUnsavedChanges(true);
+                          }}
+                          minDate={new Date()}
+                          locale="es"
+                          dateFormat="dd/MM/yyyy"
+                          portalId="root-portal"
+                          customInput={
+                            <CustomScheduleInput
+                              isDate={true}
+                              placeholder="Elegir fecha"
+                              icon={
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <rect
+                                    x="3"
+                                    y="4"
+                                    width="18"
+                                    height="18"
+                                    rx="2"
+                                    ry="2"
+                                  ></rect>
+                                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                              }
+                            />
+                          }
+                        />
+
+                        <DatePicker
+                          selected={fechaProgramada}
+                          onChange={(date) => {
+                            setFechaProgramada(date);
+                            setHasUnsavedChanges(true);
+                          }}
+                          showTimeSelect
+                          showTimeSelectOnly
+                          timeIntervals={5}
+                          timeCaption="Hora"
+                          dateFormat="HH:mm"
+                          portalId="root-portal"
+                          customInput={
+                            <CustomScheduleInput
+                              placeholder="Elegir hora"
+                              icon={
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <circle cx="12" cy="12" r="10"></circle>
+                                  <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                              }
+                            />
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Resumen breve introductorio */}
                   <div className="esp-full-width">
@@ -1088,7 +1377,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     ) : (
                       <div
                         className={`res-file-upload-zone ${isDraggingBanner ? "drag-active" : ""}`}
-                        onClick={() => bannerInputRef.current?.click()}
+                        onClick={() => bannerInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => bannerInputRef.current?.click())}
                         onDragOver={(e) => {
                           e.preventDefault();
                           setIsDraggingBanner(true);
@@ -1226,7 +1515,7 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                     ) : (
                       <div
                         className={`res-file-upload-zone ${isDraggingDoc ? "drag-active" : ""}`}
-                        onClick={() => docInputRef.current?.click()}
+                        onClick={() => docInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => docInputRef.current?.click())}
                         onDragOver={(e) => {
                           e.preventDefault();
                           setIsDraggingDoc(true);
@@ -1271,7 +1560,8 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving}
+                  disabled={isSaving || (Boolean(editingId) && !hayCambios)}
+                  title={editingId && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span
@@ -1329,9 +1619,11 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
         onConfirm={executeDelete}
         itemName={itemAEliminar?.nombre}
         itemType="la residencia"
+        requiereAprobacion={requiereAprobacionParaEliminar(itemAEliminar)}
         isDeleting={isDeleting}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

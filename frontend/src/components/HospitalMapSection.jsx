@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/sections/HospitalMapSection.css";
 
-import planoGeneral from "../assets/planoHospital.jpg";
 import planoBloqueQuirurgico from "../assets/plano_bloque_quirurgico.jpg";
 import planoObstetrico from "../assets/plano_obstetrico.jpg";
 import planoCirugiaAmbulatoria from "../assets/planoCirugiaAmbulatoria.jpeg"

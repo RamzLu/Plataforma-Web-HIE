@@ -1,5 +1,8 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
+import "swiper/css";
 import "../../styles/pages/AboutPage.css";
 import Breadcrumb from "../../components/Breadcrumb";
 import ReactCountUp from "react-countup";
@@ -19,6 +22,7 @@ import InteractiveTimelineSection from "../../components/InteractiveTimelineSect
 
 // Imagen de fallback cuando la autoridad no tiene foto cargada
 import fotoDirector from "../../assets/imagen-temporal-autoridades.jpg";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
 
 
 const VALORES_INSTITUCIONALES = [
@@ -54,11 +58,13 @@ const VALORES_INSTITUCIONALES = [
 ];
 
 const AboutPage = () => {
+  usePageMeta("Acerca del hospital", "Historia, autoridades, sede y canales de contacto del Hospital Interdistrital Evita de Formosa.");
   const { hash } = useLocation();
 
   const videoSectionRef = useRef(null);
   const htmlVideoRef = useRef(null);
   const autoridadesRef = useRef(null);
+  const autoridadesSwiperRef = useRef(null);
   const valoresRef = useRef(null);
   const sedeCentralRef = useRef(null);
 
@@ -87,7 +93,9 @@ const AboutPage = () => {
               "hie_public_sede_central_cache",
               JSON.stringify(data.sedeCentral)
             );
-          } catch {}
+          } catch {
+            // Si el navegador no permite sessionStorage, solo se omite la caché.
+          }
         }
       })
       .catch(() => setAutoridades([]))
@@ -359,14 +367,13 @@ const AboutPage = () => {
             <h2 className="authorities-title">AUTORIDADES DEL HOSPITAL</h2>
           </div>
 
-          <div className="authorities-grid">
-            {loadingAutoridades ? (
-              // Skeleton de carga
-              [1, 2, 3].map((n) => (
+          {loadingAutoridades ? (
+            <div className="authorities-grid">
+              {[1, 2, 3].map((n) => (
                 <div key={n} className="authority-card" style={{ opacity: 0.5 }}>
                   <div
                     className="authority-img-box"
-                    style={{ background: "#e2e8f0", borderRadius: "50%" }}
+                    style={{ background: "#e2e8f0" }}
                   />
                   <div className="authority-info">
                     <span className="authority-role" style={{ background: "#e2e8f0", borderRadius: 4, display: "block", height: 14, width: "60%" }} />
@@ -374,39 +381,95 @@ const AboutPage = () => {
                     <p className="authority-spec" style={{ background: "#e2e8f0", borderRadius: 4, height: 12, width: "70%", marginTop: 8 }} />
                   </div>
                 </div>
-              ))
-            ) : autoridades.length === 0 ? (
-              <p style={{ color: "#64748b", gridColumn: "1/-1", textAlign: "center" }}>
-                No hay autoridades registradas en este momento.
-              </p>
-            ) : (
-              autoridades.map((item, idx) => (
-                <AnimatedContent
-                  key={item.id}
-                  distance={50}
-                  delay={idx * 0.15}
-                  scale={0.96}
+              ))}
+            </div>
+          ) : autoridades.length === 0 ? (
+            <p style={{ color: "#64748b", textAlign: "center" }}>
+              No hay autoridades registradas en este momento.
+            </p>
+          ) : (
+            <div className="authorities-carousel-wrap">
+              {autoridades.length > 1 && (
+                <button
+                  type="button"
+                  className="authorities-nav-btn prev-btn"
+                  onClick={() => autoridadesSwiperRef.current?.slidePrev()}
+                  aria-label="Ver autoridad anterior"
                 >
-                  <div className="authority-card">
-                    <div className="authority-img-box">
-                      <img
-                        src={item.imagenUrl || fotoDirector}
-                        alt={item.nombre}
-                        onError={(e) => { e.target.src = fotoDirector; }}
-                      />
-                    </div>
-                    <div className="authority-info">
-                      <span className="authority-role">{item.cargo}</span>
-                      <h3 className="authority-name">{item.nombre}</h3>
-                      {item.descripcion && (
-                        <p className="authority-spec">{item.descripcion}</p>
-                      )}
-                    </div>
-                  </div>
-                </AnimatedContent>
-              ))
-            )}
-          </div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                </button>
+              )}
+
+              <div className="authorities-cards-track">
+                <Swiper
+                  modules={[Autoplay]}
+                  onSwiper={(swiper) => {
+                    autoridadesSwiperRef.current = swiper;
+                  }}
+                  spaceBetween={28}
+                  slidesPerView={1}
+                  speed={750}
+                  loop={autoridades.length > 3}
+                  autoplay={
+                    autoridades.length > 1
+                      ? {
+                          delay: 3200,
+                          disableOnInteraction: false,
+                          pauseOnMouseEnter: true,
+                        }
+                      : false
+                  }
+                  breakpoints={{
+                    640: {
+                      slidesPerView: Math.min(2, autoridades.length),
+                    },
+                    992: {
+                      slidesPerView: Math.min(3, autoridades.length),
+                    },
+                  }}
+                  className="authorities-swiper"
+                >
+                  {autoridades.map((item) => (
+                    <SwiperSlide key={item.id} className="authorities-slide">
+                      <article className="authority-card">
+                        <div className="authority-img-box">
+                          <img
+                            src={item.imagenUrl || fotoDirector}
+                            alt={item.nombre}
+                            onError={(e) => {
+                              e.target.src = fotoDirector;
+                            }}
+                          />
+                        </div>
+                        <div className="authority-info">
+                          <span className="authority-role">{item.cargo}</span>
+                          <h3 className="authority-name">{item.nombre}</h3>
+                          {item.descripcion && (
+                            <p className="authority-spec">{item.descripcion}</p>
+                          )}
+                        </div>
+                      </article>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+
+              {autoridades.length > 1 && (
+                <button
+                  type="button"
+                  className="authorities-nav-btn next-btn"
+                  onClick={() => autoridadesSwiperRef.current?.slideNext()}
+                  aria-label="Ver autoridad siguiente"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
         </section>
       </div>
     </main>

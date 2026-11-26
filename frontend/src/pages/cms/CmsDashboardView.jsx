@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { adminFetch } from "../../api/adminFetch.js";
+import { useState, useEffect } from "react";
+import { getProfesionales } from "../../api/profesionales.api.js";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import CmsQuickAccess from "../../components/cms/CmsQuickAccess";
 import CmsRecentActivity from "../../components/cms/CmsRecentActivity";
@@ -171,8 +171,7 @@ const CmsDashboardView = ({
 
   useEffect(() => {
     if (!profesionalesList || profesionalesList.length === 0) {
-      adminFetch("/cms/profesionales")
-        .then((res) => res.json())
+      getProfesionales(true)
         .then((data) => {
           if (Array.isArray(data)) setFallbackProfs(data);
         })
@@ -215,9 +214,9 @@ const CmsDashboardView = ({
   const profsDelta = calculateWeeklyDelta(activeProfs);
 
   // Determinamos los datos del gráfico según la selección del usuario
-  let currentChartData = [];
-  let chartTitle = "Total Profesionales";
-  let chartCenterLabel = "TOTAL PROF.";
+  let currentChartData;
+  let chartTitle;
+  let chartCenterLabel;
 
   if (chartType === "documentacion") {
     currentChartData = processDocsData(docsList);

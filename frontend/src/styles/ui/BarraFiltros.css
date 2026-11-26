@@ -1,0 +1,103 @@
+/* Buscador y filtro por clasificación: el mismo aspecto que en el panel del Admin. */
+:where(.panel-scope) .barra-filtros {
+  display: flex;
+  flex-basis: 100%;
+  width: 100%;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+:where(.panel-scope) .barra-filtros-busqueda {
+  display: flex;
+  min-width: 220px;
+  min-height: 44px;
+  flex: 1;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
+  color: var(--color-slate-500);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+:where(.panel-scope) .barra-filtros-busqueda svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+:where(.panel-scope) .barra-filtros-busqueda input:not(:where(.vista-portal *)) {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-slate-900);
+  font: inherit;
+}
+
+:where(.panel-scope) .barra-filtros-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+:where(.panel-scope) .barra-filtros-select {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--color-slate-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+:where(.panel-scope) .barra-filtros-select select:not(:where(.vista-portal *)) {
+  min-width: 155px;
+  min-height: 44px;
+  padding: 0 30px 0 10px;
+  border: 1px solid #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
+  color: var(--color-slate-900);
+  font: inherit;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+:where(.panel-scope) .barra-filtros-busqueda:focus-within,
+:where(.panel-scope) .barra-filtros-select select:focus:not(:where(.vista-portal *)) {
+  border-color: var(--color-blue-300);
+  outline: 0;
+  background: var(--color-white);
+  box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
+}
+
+@media (max-width: 768px) {
+  :where(.panel-scope) .barra-filtros {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  :where(.panel-scope) .barra-filtros-busqueda {
+    flex-basis: 100%;
+  }
+
+  :where(.panel-scope) .barra-filtros-select {
+    flex: 1;
+  }
+
+  :where(.panel-scope) .barra-filtros-select select:not(:where(.vista-portal *)) {
+    width: 100%;
+  }
+}
+
+/* El botón de crear acompaña al buscador, con su mismo alto. */
+:where(.panel-scope) .barra-filtros .filtro-crear {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 12px;
+}

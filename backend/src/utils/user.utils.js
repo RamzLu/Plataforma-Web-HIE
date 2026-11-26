@@ -13,6 +13,16 @@ const crearError = (mensaje, statusCode) => {
   return error;
 };
 
+// Los usuarios que llegan de Keycloak sin apellido se crean con este apellido de relleno.
+export const APELLIDO_RELLENO = "Sistema";
+
+/** Nombre para mostrar de un usuario local, sin el apellido de relleno. */
+export const nombreDeUsuario = (usuario) => {
+  if (!usuario) return "";
+  const apellido = usuario.apellido && usuario.apellido !== APELLIDO_RELLENO ? usuario.apellido : "";
+  return `${usuario.nombre || ""} ${apellido}`.trim();
+};
+
 /**
  * Obtiene el usuario local asociado al usuario autenticado en Keycloak.
  * Si no existe, lo crea con el rol mínimo ("Editor CMS").
@@ -62,7 +72,7 @@ export const obtenerOCrearUsuarioLocal = async (user) => {
           username,
           email,
           nombre: (user?.name || "Editor CMS").slice(0, 100),
-          apellido: "Sistema",
+          apellido: APELLIDO_RELLENO,
           rolId: rolMinimo.id,
           updatedAt: new Date(),
         },

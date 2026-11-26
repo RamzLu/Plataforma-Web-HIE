@@ -11,3 +11,11 @@
   */
   padding-top: 80px; 
 }
+.panel-cargando {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}

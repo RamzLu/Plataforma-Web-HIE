@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getNoticias } from "../../api/noticias.api.js";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
 import "../../styles/pages/NoticiasPage.css";
 import PageBanner from "../../components/PageBanner";
-import iconMama from "../../assets/icon-mama.png";
-import iconCorazon from "../../assets/icon-corazon.png";
-import iconDonacion from "../../assets/icon-donacion-de-sangre.png";
-import iconDengue from "../../assets/icon-dengue.png";
-import avatarHospital from "../../assets/logoHospitalEvita.png";
+import iconMama from "../../assets/icon-mama.webp";
+import iconCorazon from "../../assets/icon-corazon.webp";
+import iconDonacion from "../../assets/icon-donacion-de-sangre.webp";
+import iconDengue from "../../assets/icon-dengue.webp";
+import avatarHospital from "../../assets/logo-hie-oficial.png";
 
 import iconMamaStatic from "../../assets/icon-mama-estatico.png";
 import iconCorazonStatic from "../../assets/icon-corazon-estatico.png";
@@ -22,6 +22,8 @@ import imgAlta1 from "../../assets/fondoCARRUSELnoticiasCM.jpg";
 import imgAlta2 from "../../assets/fondoCARRUSELnoticias2.jpg";
 import imgAlta3 from "../../assets/fondoCARRUSELnoticias3.jpg";
 import imgAlta4 from "../../assets/fondoCARRUSELnoticias4.jpg";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const categoriasDestacadas = [
   { id: 1, title: "CÁNCER DE MAMA", slug: "cancer-mama", color: "#005c89", icon: iconMamaStatic, iconAnimated: iconMama },
@@ -61,10 +63,16 @@ const cleanHtmlText = (html) => {
   return text.replace(/<\/p>|<\/div>|<br\s*\/?>/gi, "\n").replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ").replace(/[ \t]+/g, " ").replace(/\n\s*\n/g, "\n").trim();
 };
 
-const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
+const NewsCard = ({ news, onOpenNews }) => {
   const plainText = cleanHtmlText(news.body[0]);
   return (
-    <article className="full-news-card">
+    <article
+      className="full-news-card"
+      onClick={() => onOpenNews(news)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => activarConTeclado(e, () => onOpenNews(news))}
+    >
       <div className="full-news-header">
         <div className="hospital-avatar"><img src={avatarHospital} alt="Avatar Hospital" /></div>
         <div className="post-meta">
@@ -75,13 +83,22 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
       <div className="full-news-body">
         <h4 className="full-news-title">{news.title}</h4>
         <p className="clamped-text">{plainText}</p>
-        <button className="read-more-btn" onClick={() => onOpenNews(news)}>Ver más</button>
+        <button
+          type="button"
+          className="read-more-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenNews(news);
+          }}
+        >
+          Ver más
+        </button>
       </div>
       <div className="full-news-images">
         {news.images && news.images.length > 0 && news.images[0] ? (
-          <img src={news.images[0]} alt={news.title} className="clickable-img" onClick={() => onOpenLightbox(news.images, 0)} />
+          <img src={news.images[0]} alt={news.title} className="clickable-img" loading="lazy" />
         ) : (
-          <DefaultNewsImage alt={news.title} onClick={() => onOpenNews(news)} />
+          <DefaultNewsImage alt={news.title} />
         )}
       </div>
     </article>
@@ -89,6 +106,7 @@ const NewsCard = ({ news, onOpenNews, onOpenLightbox }) => {
 };
 
 const NoticiasPage = () => {
+  usePageMeta("Noticias", "Novedades, comunicados y campañas de salud del Hospital Interdistrital Evita de Formosa.");
   const sliderRef = useRef(null);
   const { hash } = useLocation();
   const navigate = useNavigate();
@@ -106,7 +124,9 @@ const NoticiasPage = () => {
 
   const scrollNews = (direction) => {
     if (sliderRef.current) {
-      const scrollAmount = 360;
+      const card = sliderRef.current.querySelector('.full-news-card');
+      const cardWidth = card ? card.offsetWidth + 20 : 320;
+      const scrollAmount = cardWidth * (window.innerWidth < 900 ? 1 : 2);
       sliderRef.current.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
     }
   };
@@ -237,7 +257,7 @@ const NoticiasPage = () => {
               <p className="mini-caption">{miniCarouselData[altaIndex].caption}</p>
               <div className="mini-dots">
                 {miniCarouselData.map((_, idx) => (
-                  <div key={idx} className={`mini-dot ${altaIndex === idx ? "active" : ""}`} onClick={() => setAltaIndex(idx)} />
+                  <div key={idx} className={`mini-dot ${altaIndex === idx ? "active" : ""}`} onClick={() => setAltaIndex(idx)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setAltaIndex(idx))} />
                 ))}
               </div>
             </div>
@@ -312,7 +332,7 @@ const NoticiasPage = () => {
                     const isLastAndHidden = index === 3 && selectedNews.images.length > 4;
                     const fotosRestantes = selectedNews.images.length - 4;
                     return (
-                      <div key={index} className="mosaic-item" onClick={() => openLightbox(selectedNews.images, index)}>
+                      <div key={index} className="mosaic-item" onClick={() => openLightbox(selectedNews.images, index)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => openLightbox(selectedNews.images, index))}>
                         <img src={img} alt={`Foto noticia ${index + 1}`} />
                         {isLastAndHidden && <div className="mosaic-overlay"><span>+{fotosRestantes}</span></div>}
                       </div>
@@ -330,15 +350,15 @@ const NoticiasPage = () => {
       )}
 
       {lightbox.isOpen && (
-        <div className="lightbox-overlay" style={{ zIndex: 999999 }} onClick={closeLightbox}>
+        <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>&times;</button>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             {lightbox.images.length > 1 && (
-              <button className="lightbox-arrow lb-left" onClick={(e) => { e.stopPropagation(); setLightbox(prev => ({ ...prev, index: (prev.index - 1 + prev.images.length) % prev.images.length })); }}>&#10094;</button>
+              <button className="lightbox-arrow lb-left" onClick={prevLightboxImage}>&#10094;</button>
             )}
             <img src={lightbox.images[lightbox.index]} alt="Ampliada" className="lightbox-img" />
             {lightbox.images.length > 1 && (
-              <button className="lightbox-arrow lb-right" onClick={(e) => { e.stopPropagation(); setLightbox(prev => ({ ...prev, index: (prev.index + 1) % prev.images.length })); }}>&#10095;</button>
+              <button className="lightbox-arrow lb-right" onClick={nextLightboxImage}>&#10095;</button>
             )}
           </div>
         </div>

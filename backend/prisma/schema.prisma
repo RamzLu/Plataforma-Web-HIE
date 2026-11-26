@@ -22,7 +22,6 @@ model archivo {
   documento            documento[]
   noticia_archivo      noticia_archivo[]
   profesional          profesional[]
-  publicacion_archivo  publicacion_archivo[]
   residencia           residencia[]
   residencia_historial residencia_historial[]
 }
@@ -35,7 +34,6 @@ model area {
   ubicacion        String?            @db.VarChar(255)
   activo           Boolean            @default(true)
   profesional_area profesional_area[]
-  servicio_area    servicio_area[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -78,7 +76,7 @@ model configuracion {
   valor       String
   descripcion String?  @db.VarChar(255)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime @updatedAt
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -95,20 +93,25 @@ model contacto_institucional {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model documento {
-  id                                   BigInt              @id @default(autoincrement())
-  titulo                               String              @db.VarChar(200)
-  descripcion                          String?
-  categoriaId                          BigInt
-  archivoId                            BigInt
-  createdBy                            String              @db.Uuid
-  updatedBy                            String?             @db.Uuid
-  estado                               EstadoEditorial
-  createdAt                            DateTime            @default(now())
-  updatedAt                            DateTime
-  archivo                              archivo             @relation(fields: [archivoId], references: [id])
-  categoria_documento                  categoria_documento @relation(fields: [categoriaId], references: [id])
-  usuario_documento_createdByTousuario usuario             @relation("documento_createdByTousuario", fields: [createdBy], references: [id])
-  usuario_documento_updatedByTousuario usuario?            @relation("documento_updatedByTousuario", fields: [updatedBy], references: [id])
+  id                   BigInt              @id @default(autoincrement())
+  titulo               String              @db.VarChar(200)
+  descripcion          String?
+  categoriaId          BigInt
+  archivoId            BigInt
+  createdBy            String              @db.Uuid
+  updatedBy            String?             @db.Uuid
+  estado               EstadoEditorial     @default(BORRADOR)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  editorMeta           Json?
+  pendingMeta          Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  solicitudEliminacion Json?
+  archivo              archivo             @relation(fields: [archivoId], references: [id])
+  categoria_documento  categoria_documento @relation(fields: [categoriaId], references: [id])
+  creador              usuario             @relation("documento_createdByTousuario", fields: [createdBy], references: [id])
+  editor               usuario?            @relation("documento_updatedByTousuario", fields: [updatedBy], references: [id])
 
   @@index([archivoId])
   @@index([categoriaId])
@@ -127,8 +130,20 @@ model especialidad {
   ubicacion              String?
   documentacionNecesaria String?
   informacionDerivacion  String?
-  estado                 EstadoEditorial @default(PUBLICADO)
+  estado                 EstadoEditorial @default(BORRADOR)
+  editorMeta             Json?
+  pendingMeta            Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason        String?
+  solicitudEliminacion   Json?
+  createdBy              String?         @db.Uuid
+  updatedBy              String?         @db.Uuid
+  creador                usuario?        @relation("especialidad_createdByTousuario", fields: [createdBy], references: [id])
+  editor                 usuario?        @relation("especialidad_updatedByTousuario", fields: [updatedBy], references: [id])
   profesional            profesional[]
+
+  @@index([createdBy])
+  @@index([updatedBy])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -141,26 +156,31 @@ model informacion_institucional {
   provincia              String                   @db.VarChar(100)
   codigoPostal           String?                  @db.VarChar(20)
   createdAt              DateTime                 @default(now())
-  updatedAt              DateTime
+  updatedAt              DateTime                 @updatedAt
   contacto_institucional contacto_institucional[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model noticia {
-  id                                 BigInt            @id @default(autoincrement())
-  titulo                             String            @db.VarChar(200)
-  contenido                          String
-  categoriaId                        BigInt
-  createdBy                          String            @db.Uuid
-  updatedBy                          String?           @db.Uuid
-  estado                             EstadoEditorial
-  fechaPublicacion                   DateTime?
-  createdAt                          DateTime          @default(now())
-  updatedAt                          DateTime
-  categoria_noticia                  categoria_noticia @relation(fields: [categoriaId], references: [id])
-  usuario_noticia_createdByTousuario usuario           @relation("noticia_createdByTousuario", fields: [createdBy], references: [id])
-  usuario_noticia_updatedByTousuario usuario?          @relation("noticia_updatedByTousuario", fields: [updatedBy], references: [id])
-  noticia_archivo                    noticia_archivo[]
+  id                   BigInt            @id @default(autoincrement())
+  titulo               String            @db.VarChar(200)
+  contenido            String
+  categoriaId          BigInt
+  createdBy            String            @db.Uuid
+  updatedBy            String?           @db.Uuid
+  estado               EstadoEditorial   @default(BORRADOR)
+  fechaPublicacion     DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  editorMeta           Json?
+  pendingMeta          Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  solicitudEliminacion Json?
+  categoria_noticia    categoria_noticia @relation(fields: [categoriaId], references: [id])
+  creador              usuario           @relation("noticia_createdByTousuario", fields: [createdBy], references: [id])
+  editor               usuario?          @relation("noticia_updatedByTousuario", fields: [updatedBy], references: [id])
+  noticia_archivo      noticia_archivo[]
 
   @@index([categoriaId])
   @@index([createdBy])
@@ -180,23 +200,37 @@ model noticia_archivo {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model profesional {
-  id               BigInt             @id @default(autoincrement())
-  nombre           String             @db.VarChar(100)
-  apellido         String             @db.VarChar(100)
-  matricula        String?            @db.VarChar(50)
-  cargo            String?            @db.VarChar(100)
-  especialidadId   BigInt
-  archivoId        BigInt?
-  descripcion      String?
-  activo           Boolean            @default(true)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime
-  archivo          archivo?           @relation(fields: [archivoId], references: [id])
-  especialidad     especialidad       @relation(fields: [especialidadId], references: [id])
-  profesional_area profesional_area[]
+  id                   BigInt             @id @default(autoincrement())
+  nombre               String             @db.VarChar(100)
+  apellido             String             @db.VarChar(100)
+  matricula            String?            @db.VarChar(50)
+  cargo                String?            @db.VarChar(100)
+  especialidadId       BigInt
+  /// Foto del profesional. En la base la columna se sigue llamando "archivoId".
+  imagenId             BigInt?            @map("archivoId")
+  descripcion          String?
+  activo               Boolean            @default(true)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  estado               EstadoEditorial    @default(BORRADOR)
+  editorMeta           Json?
+  pendingMeta          Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  solicitudEliminacion Json?
+  createdBy            String?            @db.Uuid
+  updatedBy            String?            @db.Uuid
+  archivo              archivo?           @relation(fields: [imagenId], references: [id])
+  creador              usuario?           @relation("profesional_createdByTousuario", fields: [createdBy], references: [id])
+  especialidad         especialidad       @relation(fields: [especialidadId], references: [id])
+  editor               usuario?           @relation("profesional_updatedByTousuario", fields: [updatedBy], references: [id])
+  profesional_area     profesional_area[]
 
-  @@index([archivoId])
+  @@index([imagenId])
   @@index([especialidadId])
+  @@index([estado])
+  @@index([createdBy])
+  @@index([updatedBy])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -210,37 +244,6 @@ model profesional_area {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model publicacion_academica {
-  id                                               BigInt                   @id @default(autoincrement())
-  titulo                                           String                   @db.VarChar(200)
-  descripcion                                      String?
-  tipo                                             TipoPublicacionAcademica
-  fechaEvento                                      DateTime?
-  estado                                           EstadoEditorial
-  createdBy                                        String                   @db.Uuid
-  updatedBy                                        String?                  @db.Uuid
-  createdAt                                        DateTime                 @default(now())
-  updatedAt                                        DateTime
-  usuario_publicacion_academica_createdByTousuario usuario                  @relation("publicacion_academica_createdByTousuario", fields: [createdBy], references: [id])
-  usuario_publicacion_academica_updatedByTousuario usuario?                 @relation("publicacion_academica_updatedByTousuario", fields: [updatedBy], references: [id])
-  publicacion_archivo                              publicacion_archivo[]
-
-  @@index([createdBy])
-  @@index([estado])
-  @@index([updatedBy])
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model publicacion_archivo {
-  publicacionId         BigInt
-  archivoId             BigInt
-  archivo               archivo               @relation(fields: [archivoId], references: [id], onDelete: Cascade)
-  publicacion_academica publicacion_academica @relation(fields: [publicacionId], references: [id], onDelete: Cascade)
-
-  @@id([publicacionId, archivoId])
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model rol {
   id          BigInt    @id @default(autoincrement())
   nombre      String    @unique @db.VarChar(50)
@@ -251,70 +254,90 @@ model rol {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model servicio {
   id                     BigInt          @id @default(autoincrement())
-  nombre                 String          @db.VarChar(150)
+  nombre                 String          @unique @db.VarChar(150)
   descripcion            String?
   requisitos             String?
   documentacionNecesaria String?
   horarios               String?
   informacionDerivacion  String?
   ubicacion              String?
-  estado                 EstadoEditorial @default(PUBLICADO)
-  servicio_area          servicio_area[]
+  estado                 EstadoEditorial @default(BORRADOR)
+  editorMeta             Json?
+  pendingMeta            Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason        String?
+  solicitudEliminacion   Json?
+  createdBy              String?         @db.Uuid
+  updatedBy              String?         @db.Uuid
+  creador                usuario?        @relation("servicio_createdByTousuario", fields: [createdBy], references: [id])
+  editor                 usuario?        @relation("servicio_updatedByTousuario", fields: [updatedBy], references: [id])
+
+  @@index([createdBy])
+  @@index([updatedBy])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model usuario {
-  id                                                             String                  @id @db.Uuid
-  keycloakId                                                     String                  @unique @db.Uuid
-  username                                                       String                  @unique @db.VarChar(100)
-  email                                                          String                  @unique @db.VarChar(150)
-  nombre                                                         String                  @db.VarChar(100)
-  apellido                                                       String                  @db.VarChar(100)
-  rolId                                                          BigInt
-  activo                                                         Boolean                 @default(true)
-  createdAt                                                      DateTime                @default(now())
-  updatedAt                                                      DateTime
-  auditoria                                                      auditoria[]
-  documento_documento_createdByTousuario                         documento[]             @relation("documento_createdByTousuario")
-  documento_documento_updatedByTousuario                         documento[]             @relation("documento_updatedByTousuario")
-  noticia_noticia_createdByTousuario                             noticia[]               @relation("noticia_createdByTousuario")
-  noticia_noticia_updatedByTousuario                             noticia[]               @relation("noticia_updatedByTousuario")
-  publicacion_academica_publicacion_academica_createdByTousuario publicacion_academica[] @relation("publicacion_academica_createdByTousuario")
-  publicacion_academica_publicacion_academica_updatedByTousuario publicacion_academica[] @relation("publicacion_academica_updatedByTousuario")
-  rol                                                            rol                     @relation(fields: [rolId], references: [id])
+  id                     String         @id @db.Uuid
+  keycloakId             String         @unique @db.Uuid
+  username               String         @unique @db.VarChar(100)
+  email                  String         @unique @db.VarChar(150)
+  nombre                 String         @db.VarChar(100)
+  apellido               String         @db.VarChar(100)
+  rolId                  BigInt
+  activo                 Boolean        @default(true)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  auditoria              auditoria[]
+  capacitacionesCreadas  capacitacion[] @relation("capacitacion_createdByTousuario")
+  capacitacionesEditadas capacitacion[] @relation("capacitacion_updatedByTousuario")
+  documentosCreados      documento[]    @relation("documento_createdByTousuario")
+  documentosEditados     documento[]    @relation("documento_updatedByTousuario")
+  especialidadesCreadas  especialidad[] @relation("especialidad_createdByTousuario")
+  especialidadesEditadas especialidad[] @relation("especialidad_updatedByTousuario")
+  noticiasCreadas        noticia[]      @relation("noticia_createdByTousuario")
+  noticiasEditadas       noticia[]      @relation("noticia_updatedByTousuario")
+  profesionalesCreados   profesional[]  @relation("profesional_createdByTousuario")
+  profesionalesEditados  profesional[]  @relation("profesional_updatedByTousuario")
+  residenciasCreadas     residencia[]   @relation("residencia_createdByTousuario")
+  residenciasEditadas    residencia[]   @relation("residencia_updatedByTousuario")
+  serviciosCreados       servicio[]     @relation("servicio_createdByTousuario")
+  serviciosEditados      servicio[]     @relation("servicio_updatedByTousuario")
+  rol                    rol            @relation(fields: [rolId], references: [id])
 
   @@index([rolId])
 }
 
-model servicio_area {
-  servicioId BigInt
-  areaId     BigInt
-  area       area     @relation(fields: [areaId], references: [id], onDelete: Cascade)
-  servicio   servicio @relation(fields: [servicioId], references: [id], onDelete: Cascade)
-
-  @@id([servicioId, areaId])
-  @@index([areaId])
-}
-
 model capacitacion {
-  id          BigInt          @id @default(autoincrement())
-  titulo      String          @db.VarChar(200)
-  descripcion String?
-  contenido   String?
-  imagenId    BigInt?
-  videoUrl    String?
-  enlaceUrl   String?
-  fechaInicio DateTime?
-  fechaFin    DateTime?
-  estado      EstadoEditorial
-  activo      Boolean         @default(true)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime
-  archivo     archivo?        @relation(fields: [imagenId], references: [id])
+  id                   BigInt          @id @default(autoincrement())
+  titulo               String          @db.VarChar(200)
+  descripcion          String?
+  contenido            String?
+  imagenId             BigInt?
+  videoUrl             String?
+  enlaceUrl            String?
+  fechaInicio          DateTime?
+  fechaFin             DateTime?
+  estado               EstadoEditorial @default(BORRADOR)
+  activo               Boolean         @default(true)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  editorMeta           Json?
+  pendingMeta          Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  solicitudEliminacion Json?
+  createdBy            String?         @db.Uuid
+  updatedBy            String?         @db.Uuid
+  creador              usuario?        @relation("capacitacion_createdByTousuario", fields: [createdBy], references: [id])
+  archivo              archivo?        @relation(fields: [imagenId], references: [id])
+  editor               usuario?        @relation("capacitacion_updatedByTousuario", fields: [updatedBy], references: [id])
 
   @@index([activo])
   @@index([estado])
   @@index([imagenId])
+  @@index([createdBy])
+  @@index([updatedBy])
 }
 
 model contenido_grafico {
@@ -329,7 +352,7 @@ model contenido_grafico {
   tipoId                      BigInt
   ubicacionId                 BigInt
   createdAt                   DateTime                    @default(now())
-  updatedAt                   DateTime
+  updatedAt                   DateTime                    @updatedAt
   estado                      EstadoEditorial
   createdBy                   String                      @db.Uuid
   updatedBy                   String?                     @db.Uuid
@@ -358,16 +381,27 @@ model residencia {
   imagenId             BigInt?
   convocatoria         String?
   fechaConvocatoria    DateTime?
-  estado               EstadoEditorial
+  estado               EstadoEditorial        @default(BORRADOR)
   activo               Boolean                @default(true)
   createdAt            DateTime               @default(now())
-  updatedAt            DateTime
+  updatedAt            DateTime               @updatedAt
+  editorMeta           Json?
+  pendingMeta          Json?
+  /// Flujo editorial interno (nunca se envía al portal; ver utils/metaEditorial.utils.js)
+  rejectionReason      String?
+  solicitudEliminacion Json?
+  createdBy            String?                @db.Uuid
+  updatedBy            String?                @db.Uuid
+  creador              usuario?               @relation("residencia_createdByTousuario", fields: [createdBy], references: [id])
   archivo              archivo?               @relation(fields: [imagenId], references: [id])
+  editor               usuario?               @relation("residencia_updatedByTousuario", fields: [updatedBy], references: [id])
   residencia_historial residencia_historial[]
 
   @@index([activo])
   @@index([estado])
   @@index([imagenId])
+  @@index([createdBy])
+  @@index([updatedBy])
 }
 
 model residencia_historial {
@@ -379,7 +413,7 @@ model residencia_historial {
   orden        Int        @default(0)
   activo       Boolean    @default(true)
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime   @updatedAt
   archivo      archivo?   @relation(fields: [imagenId], references: [id])
   residencia   residencia @relation(fields: [residenciaId], references: [id], onDelete: Cascade)
 
@@ -426,19 +460,4 @@ enum EstadoEditorial {
   PUBLICADO
   ARCHIVADO
   PROGRAMADO
-}
-
-enum TipoPublicacionAcademica {
-  CURSO
-  JORNADA
-  CONGRESO
-  PROYECTO_INVESTIGACION
-  CONVOCATORIA
-}
-
-enum TipoContacto {
-  TELEFONO
-  EMAIL
-  RED_SOCIAL
-  OTRO
 }

@@ -1,8 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
-import { adminFetch } from "../../api/adminFetch.js";
+import { getNoticias } from "../../api/noticias.api.js";
+import { getDocumentos } from "../../api/documentos.api.js";
+import { getProfesionales } from "../../api/profesionales.api.js";
 
 import keycloak from "../../config/keycloak";
+import { ROLES_CMS, tieneAlgunRol } from "../../utils/roles";
 
 import "../../styles/components/cms/CmsLayout.css";
 import "../../styles/components/cms/CmsDashboard.css";
@@ -13,7 +17,6 @@ import CmsHeader from "../../components/cms/CmsHeader";
 import AccessDeniedScreen from "../../components/ui/AccessDeniedScreen";
 import CmsDashboardView from "../cms/CmsDashboardView";
 import CmsNoticiasView from "../cms/CmsNoticiasView";
-import CmsBannersView from "../cms/CmsBannersView";
 import CmsContenidoGraficoView from "../cms/CmsContenidoGraficoView";
 import CmsDocsView from "../cms/CmsDocsView";
 import CmsProfesionalesView from "../cms/CmsProfesionalesView"; 
@@ -24,22 +27,35 @@ import CmsResidenciasView from "../cms/CmsResidenciasView";
 import CmsCapacitacionesView from "../cms/CmsCapacitacionesView";
 import avatarHospital from "../../assets/logoHospitalEvita.png";
 import DefaultNewsImage from "../../components/ui/DefaultNewsImage";
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
+import { AccionesTituloContext } from "../../components/ui/AccionesTitulo";
 
 const CmsPage = () => {
-  const [initialized, setInitialized] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
-  const [isCms, setIsCms] = useState(false);
-  const [userName, setUserName] = useState("Usuario CMS");
+  usePageMeta("Panel CMS");
+  // Si Keycloak ya tiene sesión al entrar (por ejemplo, al volver desde /admin), se arranca con ella.
+  const [initialized, setInitialized] = useState(() => Boolean(keycloak.authenticated));
+  const [authenticated, setAuthenticated] = useState(() => Boolean(keycloak.authenticated));
+  const [isCms, setIsCms] = useState(() => Boolean(keycloak.authenticated) && tieneAlgunRol(ROLES_CMS));
+  const [userName, setUserName] = useState(() =>
+    keycloak.authenticated
+      ? keycloak.tokenParsed?.name || keycloak.tokenParsed?.preferred_username || "Editor CMS"
+      : "Usuario CMS",
+  );
 
-  const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem("cms_active_tab") || "dashboard";
-  });
-  
-  useEffect(() => {
-    localStorage.setItem("cms_active_tab", activeTab);
-  }, [activeTab]);
+  // La sección activa sale de la URL (/cms/noticias, /cms/profesionales...): se puede compartir
+  // el link y el botón "atrás" del navegador vuelve a la sección anterior.
+  const { seccion } = useParams();
+  const navigate = useNavigate();
+  const activeTab = seccion || "dashboard";
+  const setActiveTab = useCallback(
+    (tab) => navigate(!tab || tab === "dashboard" ? "/cms" : `/cms/${tab}`),
+    [navigate]
+  );
   
   const [selectedNews, setSelectedNews] = useState(null);
+  // Lugar, a la derecha del título, donde los módulos muestran su botón "Actualizar".
+  const [lugarActualizar, setLugarActualizar] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [lightbox, setLightbox] = useState({
     isOpen: false,
@@ -50,17 +66,32 @@ const CmsPage = () => {
   const [newsList, setNewsList] = useState([]);
   const [docsList, setDocsList] = useState([]);
   const [profesionalesList, setProfesionalesList] = useState([]);
-  const [dashboardStats, setDashboardStats] = useState({
-    contenidoPublicado: 0,
-    borradores: 0,
-    documentosActivos: 0,
-    profesionalesActivos: 0,
-    visitas: "0",
-  });
+  // Las estadísticas del dashboard salen de las listas: se recalculan solas cuando cambian.
+  const dashboardStats = useMemo(
+    () => ({
+      contenidoPublicado: newsList.filter((n) => (n.estado || "").toUpperCase() === "PUBLICADO").length,
+      borradores: newsList.filter((n) => (n.estado || "").toUpperCase() === "BORRADOR").length,
+      documentosActivos: docsList.length,
+      profesionalesActivos: profesionalesList.length,
+      visitas: "0",
+    }),
+    [newsList, docsList, profesionalesList],
+  );
   const [openCreateOnTab, setOpenCreateOnTab] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const isKeycloakInitialized = useRef(false);
+
+  // Versiones anteriores guardaban en el navegador la lista completa de la vista admin
+  // (borradores incluidos). Se borra lo que haya quedado para que no persista tras cerrar sesión.
+  useEffect(() => {
+    try {
+      localStorage.removeItem("portal_docs_data");
+      localStorage.removeItem("portal_news_data");
+    } catch {
+      // Sin acceso a localStorage no hay nada que limpiar.
+    }
+  }, []);
 
   const handleQuickAction = (tabId, openModal = true) => {
     setActiveTab(tabId);
@@ -69,92 +100,70 @@ const CmsPage = () => {
     }
   };
 
-const fetchNoticias = async () => {
-  try {
+  // Las cargas aplican el resultado al responder la API (no tocan el estado antes), así se pueden llamar desde efectos.
+  const fetchNoticias = () =>
+    getNoticias(true)
+      .then((data) => {
+        if (data && data.length > 0) {
+          const noticiasFormateadas = data.map((noticia) => ({
+            id: noticia.id,
+            title: noticia.titulo || noticia.title,
+            body: Array.isArray(noticia.body) ? noticia.body : [noticia.contenido || noticia.body],
+            date: noticia.createdAt
+              ? new Date(noticia.createdAt).toLocaleDateString("es-AR")
+              : "Hoy",
+            createdAt: noticia.createdAt,
+            updatedAt: noticia.updatedAt,
+            fechaPublicacion: noticia.fechaPublicacion || null,
+            category: noticia.category || "General",
+            estado: noticia.estado || "PUBLICADO",
+            requestedEstado: noticia.requestedEstado || null,
+            previousEstado: noticia.previousEstado || null,
+            isDraft: noticia.isDraft || false,
+            visibleEnPortal: Boolean(noticia.visibleEnPortal),
+            solicitudEliminacion: noticia.solicitudEliminacion || null,
+            tituloPublicado: noticia.tituloPublicado || null,
+            images: noticia.images || [],
+            editor: noticia.editor || "Editor CMS",
+            editedBy: noticia.editedBy || null,
+            rejectionReason: noticia.rejectionReason || null
+          }));
+
+          setNewsList(noticiasFormateadas);
+        } else {
+          setNewsList([]);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
+  // Recarga a pedido desde la vista de noticias: muestra la carga y después trae los datos.
+  const recargarNoticias = () => {
     setLoading(true);
-    const response = await adminFetch("/cms/noticias?admin=true");
-    if (!response.ok) throw new Error("Error al obtener noticias del servidor");
-    const data = await response.json();
-
-    if (data && data.length > 0) {
-      const noticiasFormateadas = data.map((noticia) => ({
-        id: noticia.id,
-        title: noticia.titulo || noticia.title,
-        body: Array.isArray(noticia.body) ? noticia.body : [noticia.contenido || noticia.body],
-        date: noticia.createdAt
-          ? new Date(noticia.createdAt).toLocaleDateString("es-AR")
-          : "Hoy",
-        createdAt: noticia.createdAt,
-        updatedAt: noticia.updatedAt,
-        fechaPublicacion: noticia.fechaPublicacion || null,
-        category: noticia.category || "General",
-        estado: noticia.estado || "PUBLICADO",
-        requestedEstado: noticia.requestedEstado || null,
-        previousEstado: noticia.previousEstado || null,
-        isDraft: noticia.isDraft || false,
-        images: noticia.images || [],
-        editor: noticia.editor || "Editor CMS",
-        editedBy: noticia.editedBy || null,
-        rejectionReason: noticia.rejectionReason || null
-      }));
-
-      setNewsList(noticiasFormateadas);
-    } else {
-      setNewsList([]);
-    }
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const leerCacheLocal = (clave) => {
-    try {
-      const raw = localStorage.getItem(clave);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
+    return fetchNoticias();
   };
 
-  const fetchDocs = async () => {
-    try {
-      const response = await adminFetch("/cms/documentacion");
-      if (!response.ok) throw new Error("Error al obtener documentos");
-      const data = await response.json();
-      
-      if (Array.isArray(data)) {
-        setDocsList(data);
-        localStorage.setItem("portal_docs_data", JSON.stringify(data));
-      } else {
-        setDocsList(leerCacheLocal("portal_docs_data"));
-      }
-    } catch (error) {
-      console.error("Error obteniendo documentos:", error);
-      setDocsList(leerCacheLocal("portal_docs_data"));
-    }
-  };
+  const fetchDocs = () =>
+    getDocumentos(true)
+      .then((data) => setDocsList(Array.isArray(data) ? data : []))
+      .catch((error) => console.error("Error obteniendo documentos:", error));
 
-  const fetchProfesionales = async () => {
-    try {
-      const response = await adminFetch("/cms/profesionales");
-      if (!response.ok) throw new Error("Error al obtener profesionales");
-      const data = await response.json();
-      if (data && Array.isArray(data)) {
-        setProfesionalesList(data);
-      }
-    } catch (error) {
-      console.error("Error obteniendo profesionales:", error);
-    }
-  };
+  const fetchProfesionales = () =>
+    getProfesionales(true)
+      .then((data) => {
+        if (data && Array.isArray(data)) {
+          setProfesionalesList(data);
+        }
+      })
+      .catch((error) => console.error("Error obteniendo profesionales:", error));
 
   const handleAddNewDoc = (nuevoDoc) => {
     const updatedList = [nuevoDoc, ...docsList];
     setDocsList(updatedList);
-    localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
   };
 
   const handleUpdateDoc = (updatedDoc) => {
@@ -162,13 +171,11 @@ const fetchNoticias = async () => {
       item.id === updatedDoc.id ? updatedDoc : item,
     );
     setDocsList(updatedList);
-    localStorage.setItem("portal_docs_data", JSON.stringify(updatedList));
   };
 
 const handleDeleteDoc = (id) => {
     const filtered = docsList.filter((d) => d.id !== id);
     setDocsList(filtered);
-    localStorage.setItem("portal_docs_data", JSON.stringify(filtered));
   };
 
   // Las lecturas del CMS exigen token con rol 'cm': se piden recien cuando la sesion esta lista.
@@ -201,32 +208,17 @@ const handleDeleteDoc = (id) => {
         fetchProfesionales();
       }
     };
-    window.addEventListener("focus", handleFocusOrVisibility);
+    // Solo visibilitychange: escuchar también "focus" pedía todo dos veces al volver a la pestaña.
     document.addEventListener("visibilitychange", handleFocusOrVisibility);
-    return () => {
-      window.removeEventListener("focus", handleFocusOrVisibility);
-      document.removeEventListener("visibilitychange", handleFocusOrVisibility);
-    };
+    return () => document.removeEventListener("visibilitychange", handleFocusOrVisibility);
   }, [authenticated, isCms]);
 
   useEffect(() => {
-    // Solo el rol 'cm' accede al CMS (admin-hief pertenece al panel de administracion)
-    const checkCmsRole = () => keycloak.hasRealmRole("cm");
+    // Roles de gestor de contenidos (los mismos que acepta el backend). Los roles de admin van al panel /admin.
+    const checkCmsRole = () => tieneAlgunRol(ROLES_CMS);
 
-    if (isKeycloakInitialized.current || keycloak.authenticated) {
-      if (keycloak.authenticated) {
-        setInitialized(true);
-        setAuthenticated(true);
-        setIsCms(checkCmsRole());
-        const name =
-          keycloak.tokenParsed?.name ||
-          keycloak.tokenParsed?.preferred_username ||
-          "Editor CMS";
-        setUserName(name);
-        updateStats(newsList, docsList);
-      }
-      return;
-    }
+    // Si Keycloak ya tenía sesión (por ejemplo, al volver desde /admin), el estado ya se armó con ella al montar.
+    if (isKeycloakInitialized.current || keycloak.authenticated) return;
 
     isKeycloakInitialized.current = true;
 
@@ -243,39 +235,16 @@ const handleDeleteDoc = (id) => {
             keycloak.tokenParsed?.preferred_username ||
             "Editor CMS";
           setUserName(name);
-
-          updateStats(newsList, docsList);
         }
       })
       .catch((err) => {
         console.error("Error al inicializar Keycloak:", err);
       });
-  }, [newsList]);
-
-  const updateStats = (currentNews = newsList, currentDocs = docsList, currentProfs = profesionalesList) => {
-    const publicadas = (currentNews || []).filter((n) => (n.estado || "").toUpperCase() === "PUBLICADO").length;
-    const borradoresPendientes = (currentNews || []).filter((n) => (n.estado || "").toUpperCase() === "BORRADOR").length;
-    const totalDocumentos = currentDocs ? currentDocs.length : 0;
-    const totalProfesionales = currentProfs ? currentProfs.length : 0;
-
-    setDashboardStats({
-      contenidoPublicado: publicadas,
-      borradores: borradoresPendientes,
-      documentosActivos: totalDocumentos,
-      profesionalesActivos: totalProfesionales,
-      visitas: "0",
-    });
-  };
-
-  useEffect(() => {
-    updateStats(newsList, docsList, profesionalesList);
-  }, [newsList, docsList, profesionalesList]);
+  }, []); // Las estadísticas (dashboardStats) se derivan de las listas con useMemo.
 
   const handleAddNewNews = (nuevaNoticia) => {
     const updatedList = [nuevaNoticia, ...newsList];
     setNewsList(updatedList);
-    updateStats(updatedList, docsList);
-    localStorage.setItem("portal_news_data", JSON.stringify(updatedList));
   };
 
   const handleUpdateNews = (updatedNews) => {
@@ -283,28 +252,13 @@ const handleDeleteDoc = (id) => {
       item.id === updatedNews.id ? updatedNews : item,
     );
     setNewsList(updatedList);
-    updateStats(updatedList, docsList);
   };
 
   const handleDeleteNews = (id) => {
     const filtered = newsList.filter((n) => n.id !== id);
     setNewsList(filtered);
-    updateStats(filtered, docsList);
-    localStorage.setItem("portal_news_data", JSON.stringify(filtered));
   };
 
-  const testBackendConnection = async () => {
-    try {
-      const response = await adminFetch("/cms/noticias");
-      if (!response.ok) throw new Error("Error en la respuesta del servidor");
-      const data = await response.json();
-      console.log("Respuesta del Backend:", data);
-      alert("Conexión exitosa. Revisa la consola.");
-    } catch (err) {
-      console.error("Error conectando al backend", err);
-      alert("Error al conectar con el backend.");
-    }
-  };
 
   const openLightbox = (images, index) =>
     setLightbox({ isOpen: true, images, index });
@@ -327,9 +281,9 @@ const handleDeleteDoc = (id) => {
     }));
   };
 
-if (!initialized) {
+  if (!initialized) {
     return (
-      <div style={{ 
+      <div className="panel-scope" style={{ 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center', 
@@ -365,9 +319,9 @@ if (!initialized) {
     );
   }
 
-if (!authenticated) {
+  if (!authenticated) {
     return (
-      <div style={{ 
+      <div className="panel-scope" style={{ 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center', 
@@ -413,18 +367,19 @@ if (!authenticated) {
     .slice(0, 4);
 
   return (
-    <div className="cms-layout">
+    <div className="cms-layout panel-scope">
       <CmsSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="cms-main-wrapper">
         <CmsHeader
           userName={userName}
-          testBackendConnection={testBackendConnection}
           onLogoutClick={() => setShowLogoutModal(true)}
           activeTab={activeTab}
         />
 
         <main className="cms-content">
+          <AccionesTituloContext.Provider value={lugarActualizar}>
+          <div className="cms-page-fila">
           <div className="cms-page-title">
             <span className="cms-overtitle">CONTENIDO INSTITUCIONAL</span>
             <h1>
@@ -451,6 +406,8 @@ if (!authenticated) {
               Evita Formosa.
             </p>
           </div>
+          <div className="cms-page-acciones" ref={setLugarActualizar} />
+          </div>
 
           {activeTab === "dashboard" && (
             <CmsDashboardView
@@ -474,6 +431,7 @@ if (!authenticated) {
               onUpdateNews={handleUpdateNews}
               onViewNews={setSelectedNews}
               loading={loading}
+              onRefresh={recargarNoticias}
               initialCreateModal={openCreateOnTab}
               onModalOpened={() => setOpenCreateOnTab(false)}
             />
@@ -551,6 +509,7 @@ if (!authenticated) {
               </p>
             </div>
           )}
+          </AccionesTituloContext.Provider>
         </main>
       </div>
 
@@ -601,7 +560,6 @@ if (!authenticated) {
                   if (keycloak && typeof keycloak.logout === 'function') {
                     keycloak.logout();
                   } else {
-                    localStorage.removeItem("cms_active_tab");
                     window.location.href = "/";
                   }
                 }}
@@ -661,7 +619,7 @@ if (!authenticated) {
                       <div 
                         key={index} 
                         className="mosaic-item"
-                        onClick={() => openLightbox(imageUrls, index)} 
+                        onClick={() => openLightbox(imageUrls, index)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => openLightbox(imageUrls, index))} 
                       >
                         <img src={img.url || img} alt={`Imagen ${index + 1}`} />
                         {isLastAndHidden && (

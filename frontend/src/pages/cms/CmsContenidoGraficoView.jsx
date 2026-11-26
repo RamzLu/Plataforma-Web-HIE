@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { mensajeDeError } from "../../utils/mensajeDeError";
+import { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
 import "../../styles/pages/cms/CmsContenidoGraficoView.css";
 import {
   getContenidosGraficos,
@@ -22,6 +25,7 @@ import {
   getPortalRouteLabel,
   resolveGraphicImageUrl,
 } from "../../utils/contenidoGraficoPresets.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CmsContenidoGraficoView = () => {
   const [espacios, setEspacios] = useState([
@@ -57,28 +61,39 @@ const CmsContenidoGraficoView = () => {
   const [selectedEspacio, setSelectedEspacio] = useState(null);
   const [previewSlideIndex, setPreviewSlideIndex] = useState(0);
 
-  const cargarEspacios = async () => {
-    setLoading(true);
+  // Trae los espacios y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerEspacios = () => {
     try {
       // Limpiamos mocks heredados de localStorage para reflejar siempre la verdad del servidor
       localStorage.removeItem("hie_espacios_graficos_fijos");
       localStorage.removeItem("hie_carousel_text");
       localStorage.removeItem("hie_carousel_btn");
-
-      const data = await getContenidosGraficos();
-      if (Array.isArray(data) && data.length > 0) {
-        setEspacios(data);
-      }
-    } catch (error) {
-      console.error("Error al cargar espacios gráficos:", error);
-      toast.error("No se pudieron cargar los espacios gráficos desde el servidor.");
-    } finally {
-      setLoading(false);
+    } catch {
+      // Sin acceso a localStorage no hay nada que limpiar.
     }
+
+    return getContenidosGraficos()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setEspacios(data);
+        }
+      })
+      .catch((error) => {
+        console.error("Error al cargar espacios gráficos:", error);
+        toast.error("No se pudieron cargar los espacios gráficos desde el servidor.");
+      })
+      .finally(() => setLoading(false));
+  };
+
+  // Recarga a pedido: muestra la carga y después trae los espacios.
+  const cargarEspacios = async () => {
+    setLoading(true);
+    await traerEspacios();
   };
 
   useEffect(() => {
-    cargarEspacios();
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerEspacios();
   }, []);
 
   const paginasDisponibles = useMemo(() => {
@@ -189,11 +204,7 @@ const CmsContenidoGraficoView = () => {
       setShowEditModal(false);
       setSelectedEspacio(null);
     } catch (error) {
-      const apiErr = error?.response?.data?.error;
-      const msg =
-        (typeof apiErr === "string" ? apiErr : apiErr?.message) ||
-        error?.response?.data?.message ||
-        "No se pudo guardar el espacio gráfico.";
+      const msg = mensajeDeError(error, "No se pudo guardar el espacio gráfico.");
       toast.error(msg, { id: toastId });
     } finally {
       setIsSaving(false);
@@ -370,7 +381,7 @@ const CmsContenidoGraficoView = () => {
                       <div className="cg-recurso-box">
                         <div
                           className="cg-thumb-container"
-                          onClick={() => handleOpenPreview(item)}
+                          onClick={() => handleOpenPreview(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenPreview(item))}
                           title="Clic para previsualizar cómo se ve en el portal"
                         >
                           {coverImg ? (
@@ -396,7 +407,7 @@ const CmsContenidoGraficoView = () => {
                             <span
                               className="cg-info-title"
                               title={item.nombre}
-                              onClick={() => handleOpenModify(item)}
+                              onClick={() => handleOpenModify(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenModify(item))}
                             >
                               {item.nombre}
                             </span>
@@ -410,7 +421,7 @@ const CmsContenidoGraficoView = () => {
                           {isRejected && item.rejectionReason && (
                             <div
                               className="cg-rejection-warning-pill"
-                              onClick={() => handleOpenModify(item)}
+                              onClick={() => handleOpenModify(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenModify(item))}
                               title="Hacer clic para ver motivo de rechazo y corregir"
                             >
                               <span
@@ -438,35 +449,19 @@ const CmsContenidoGraficoView = () => {
                     </td>
 
                     <td className="cg-td-estado">
-                      {isApproved && (
-                        <span className="cg-status-badge status-aprobado">
-                          <span className="cg-status-dot dot-aprobado"></span>
-                          PUBLICADO
-                        </span>
-                      )}
+                      {isApproved && <EtiquetaEstado estado="PUBLICADO" texto={textoDeEstado("PUBLICADO")} />}
                       {isRejected && (
                         <button
                           type="button"
-                          className="cg-status-badge status-rechazado clickable"
                           onClick={() => handleOpenModify(item)}
                           title="Hacer clic para corregir el espacio observado"
+                          style={{ padding: 0, border: 0, background: "none", cursor: "pointer" }}
                         >
-                          <span className="cg-status-dot dot-rechazado"></span>
-                          RECHAZADO
+                          <EtiquetaEstado estado="RECHAZADO" texto={textoDeEstado("RECHAZADO")} />
                         </button>
                       )}
-                      {isPending && (
-                        <span className="cg-status-badge status-pendiente">
-                          <span className="cg-status-dot dot-pendiente"></span>
-                          PENDIENTE
-                        </span>
-                      )}
-                      {isDraft && (
-                        <span className="cg-status-badge status-borrador">
-                          <span className="cg-status-dot dot-borrador"></span>
-                          BORRADOR
-                        </span>
-                      )}
+                      {isPending && <EtiquetaEstado estado="PENDIENTE_APROBACION" texto={textoDeEstado("PENDIENTE_APROBACION")} />}
+                      {isDraft && <EtiquetaEstado estado="BORRADOR" texto={textoDeEstado("BORRADOR")} />}
                     </td>
 
                     <td className="cg-td-acciones">

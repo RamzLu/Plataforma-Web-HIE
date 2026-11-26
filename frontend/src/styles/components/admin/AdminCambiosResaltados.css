@@ -1,0 +1,392 @@
+/* ===================================================
+   ADMIN CAMBIOS RESALTADOS (Visual Diff para Administrador)
+   =================================================== */
+
+/* Píldora para filas de tabla */
+:where(.panel-scope) .admin-table-diff-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid #fed7aa;
+  border-radius: 6px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+:where(.panel-scope) .admin-table-diff-pill svg:not(:where(.vista-portal *)) {
+  color: #ea580c;
+  flex-shrink: 0;
+}
+
+/* Tarjeta contenedora de comparativa dentro del modal */
+:where(.panel-scope) .admin-cambios-card {
+  margin: 0 0 20px 0;
+  padding: 16px 18px;
+  border: 1px solid var(--color-blue-200);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f0f7ff 0%, var(--color-white) 100%);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.06);
+}
+
+:where(.panel-scope) .admin-cambios-header {
+  margin-bottom: 14px;
+}
+
+:where(.panel-scope) .admin-cambios-header-text {
+  width: 100%;
+}
+
+:where(.panel-scope) .admin-cambios-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 3px 0;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+:where(.panel-scope) .admin-cambios-counter {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-sky-600);
+  color: var(--color-white);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+:where(.panel-scope) .admin-cambios-desc {
+  margin: 0;
+  color: var(--color-slate-600);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+/* Lista de campos comparados */
+:where(.panel-scope) .admin-cambios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+:where(.panel-scope) .admin-cambio-item {
+  border: 1px solid var(--color-slate-200);
+  border-radius: 10px;
+  background: var(--color-white);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+:where(.panel-scope) .admin-cambio-label-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--color-slate-50);
+  border-bottom: 1px solid var(--color-slate-200);
+}
+
+:where(.panel-scope) .admin-cambio-label {
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Aviso de un cambio que es solo de formato (el texto de antes y de después es el mismo) */
+:where(.panel-scope) .admin-cambio-nota {
+  margin: 6px 0 0;
+  color: var(--color-slate-600);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+/* Grid comparativo Antes / Flecha / Después */
+:where(.panel-scope) .admin-cambio-diff-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+:where(.panel-scope) .admin-diff-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+:where(.panel-scope) .admin-diff-box.before {
+  background: var(--color-red-50);
+  border: 1px solid var(--color-red-200);
+  color: #7f1d1d;
+}
+
+:where(.panel-scope) .admin-diff-box.after {
+  background: var(--color-green-50);
+  border: 1px solid var(--color-green-200);
+  color: #14532d;
+}
+
+:where(.panel-scope) .admin-diff-badge-wrap {
+  display: flex;
+  align-items: center;
+}
+
+:where(.panel-scope) .admin-diff-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+:where(.panel-scope) .admin-diff-badge.before {
+  background: var(--color-red-100);
+  color: var(--color-red-800);
+  border: 1px solid var(--color-red-300);
+}
+
+:where(.panel-scope) .admin-diff-badge.after {
+  background: var(--color-green-100);
+  color: var(--color-green-800);
+  border: 1px solid #86efac;
+}
+
+:where(.panel-scope) .admin-diff-text {
+  white-space: pre-wrap;
+  font-size: 0.84rem;
+  color: inherit;
+}
+
+:where(.panel-scope) .admin-diff-empty {
+  font-style: italic;
+  opacity: 0.75;
+}
+
+:where(.panel-scope) .admin-diff-arrow {
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  color: var(--color-slate-400);
+  flex-shrink: 0;
+}
+
+@media (max-width: 680px) {
+  :where(.panel-scope) .admin-cambio-diff-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  :where(.panel-scope) .admin-diff-arrow {
+    transform: rotate(90deg);
+    padding: 2px 0;
+  }
+}
+
+
+/* Miniaturas de las imágenes agregadas o quitadas (cambios de tipo imagen) */
+:where(.panel-scope) .admin-diff-imagenes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.panel-scope) .admin-diff-miniatura {
+  position: relative;
+  display: block;
+  width: 84px;
+  height: 84px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: var(--color-white);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  padding: 0;
+  cursor: zoom-in;
+}
+
+:where(.panel-scope) .admin-diff-miniatura img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+:where(.panel-scope) .admin-diff-miniatura:hover,
+:where(.panel-scope) .admin-diff-miniatura:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-sky-600);
+}
+
+:where(.panel-scope) .admin-diff-miniatura.is-nueva {
+  border-color: var(--color-green-200);
+}
+
+:where(.panel-scope) .admin-diff-miniatura.is-quitada {
+  border-color: var(--color-red-200);
+}
+
+:where(.panel-scope) .admin-diff-miniatura.is-quitada img {
+  opacity: 0.6;
+}
+
+:where(.panel-scope) .admin-diff-miniatura-marca {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2px 0;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+:where(.panel-scope) .admin-diff-miniatura.is-nueva .admin-diff-miniatura-marca {
+  background: var(--color-green-100);
+  color: var(--color-green-800);
+}
+
+:where(.panel-scope) .admin-diff-miniatura.is-quitada .admin-diff-miniatura-marca {
+  background: var(--color-red-100);
+  color: var(--color-red-800);
+}
+
+/* Visor de imagen: se abre encima del modal de revisión */
+:where(.panel-scope) .admin-visor-imagen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-lightbox);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 80px;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: zoom-out;
+}
+
+:where(.panel-scope) .admin-visor-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--color-white);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+
+:where(.panel-scope) .admin-visor-cerrar,
+:where(.panel-scope) .admin-visor-flecha {
+  position: absolute;
+  z-index: var(--z-lightbox-controls);
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--color-white);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+:where(.panel-scope) .admin-visor-cerrar {
+  top: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+}
+
+:where(.panel-scope) .admin-visor-flecha {
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  transform: translateY(-50%);
+}
+
+:where(.panel-scope) .admin-visor-flecha.is-izquierda {
+  left: 16px;
+}
+
+:where(.panel-scope) .admin-visor-flecha.is-derecha {
+  right: 16px;
+}
+
+:where(.panel-scope) .admin-visor-cerrar:hover,
+:where(.panel-scope) .admin-visor-flecha:hover,
+:where(.panel-scope) .admin-visor-cerrar:focus-visible,
+:where(.panel-scope) .admin-visor-flecha:focus-visible {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-primary);
+}
+
+:where(.panel-scope) .admin-visor-contador {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--color-white);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (max-width: 680px) {
+  :where(.panel-scope) .admin-visor-imagen {
+    padding: 64px 12px;
+  }
+
+  :where(.panel-scope) .admin-visor-flecha {
+    top: auto;
+    bottom: 14px;
+    transform: none;
+  }
+}
+
+/* Lo que cambió dentro de un texto, marcado palabra por palabra. */
+:where(.panel-scope) .admin-diff-marca {
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+:where(.panel-scope) .admin-diff-marca.is-antes {
+  background: #fecaca;
+  color: #7f1d1d;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+:where(.panel-scope) .admin-diff-marca.is-despues {
+  background: #bbf7d0;
+  color: #14532d;
+}
+
+:where(.panel-scope) .admin-diff-omitido {
+  opacity: 0.6;
+}

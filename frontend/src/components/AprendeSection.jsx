@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../styles/sections/AprendeSection.css";
+import AnimatedContent from "./ui/AnimatedContent";
 import { getEspacioGraficoPublico } from "../api/contenidoGrafico.api.js";
 import {
   DEFAULT_APRENDE_INICIO,
@@ -93,7 +94,13 @@ const AprendeSection = () => {
       aria-label={titulo || "Aprendé con el Evita"}
     >
       <div className="aprende-container">
-        <div className="aprende-left-image">
+        <AnimatedContent
+          className="aprende-left-image"
+          distance={45}
+          direction="horizontal"
+          reverse={true}
+          delay={0.1}
+        >
           <div className="image-frame">
             {mainImgUrl && (
               <img
@@ -105,22 +112,24 @@ const AprendeSection = () => {
               />
             )}
           </div>
-        </div>
+        </AnimatedContent>
 
         <div className="aprende-right-content">
-          <div className="aprende-header">
-            <span className="aprende-subtitle">{subtitulo}</span>
-            <h2 className="aprende-title">{titulo}</h2>
-          </div>
+          <AnimatedContent distance={35} direction="vertical" delay={0.15}>
+            <div className="aprende-header">
+              <span className="aprende-subtitle">{subtitulo}</span>
+              <h2 className="aprende-title">{titulo}</h2>
+            </div>
 
-          <p className="aprende-description">
-            {lineasParrafo.map((linea, idxLinea) => (
-              <React.Fragment key={idxLinea}>
-                {linea}
-                {idxLinea < lineasParrafo.length - 1 && <br />}
-              </React.Fragment>
-            ))}
-          </p>
+            <p className="aprende-description">
+              {lineasParrafo.map((linea, idxLinea) => (
+                <React.Fragment key={idxLinea}>
+                  {linea}
+                  {idxLinea < lineasParrafo.length - 1 && <br />}
+                </React.Fragment>
+              ))}
+            </p>
+          </AnimatedContent>
 
           <div className="aprende-cards-grid">
             {tarjetas.map((card, idx) => {
@@ -131,26 +140,34 @@ const AprendeSection = () => {
                 normalizeInternalPortalPath(card.enlaceUrl) || "/noticias";
 
               return (
-                <div key={card.id || idx} className="aprende-card">
-                  <div className="card-image-box">
-                    {cardImgUrl && (
-                      <img
-                        src={cardImgUrl}
-                        alt={card.altText || card.titulo || `Tarjeta ${idx + 1}`}
-                      />
-                    )}
+                <AnimatedContent
+                  key={card.id || idx}
+                  distance={40}
+                  direction="vertical"
+                  delay={0.22 + idx * 0.12}
+                  threshold={0.1}
+                >
+                  <div className="aprende-card">
+                    <div className="card-image-box">
+                      {cardImgUrl && (
+                        <img
+                          src={cardImgUrl}
+                          alt={card.altText || card.titulo || `Tarjeta ${idx + 1}`}
+                        />
+                      )}
+                    </div>
+                    <div className="card-info">
+                      <span className={`card-badge ${badgeColor}`}>
+                        {card.etiquetaSuperior}
+                      </span>
+                      <h4>{card.titulo}</h4>
+                    </div>
+                    <Link to={enlaceDestino} className="card-action-link">
+                      <span>MÁS INFORMACIÓN</span>
+                      <span className="arrow">→</span>
+                    </Link>
                   </div>
-                  <div className="card-info">
-                    <span className={`card-badge ${badgeColor}`}>
-                      {card.etiquetaSuperior}
-                    </span>
-                    <h4>{card.titulo}</h4>
-                  </div>
-                  <Link to={enlaceDestino} className="card-action-link">
-                    <span>MÁS INFORMACIÓN</span>
-                    <span className="arrow">→</span>
-                  </Link>
-                </div>
+                </AnimatedContent>
               );
             })}
           </div>

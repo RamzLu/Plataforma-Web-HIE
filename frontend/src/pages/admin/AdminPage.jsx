@@ -1,12 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import '../../styles/pages/AdminPage.css'; 
 import "../../styles/components/admin/AdminLayout.css"; 
 
 import keycloak from '../../config/keycloak';
+import { ROLES_ADMIN, tieneAlgunRol } from '../../utils/roles';
 import { getNoticias } from '../../api/noticias.api';
 import { getEspecialidades } from '../../api/especialidades.api';
 import { getDocumentos } from '../../api/documentos.api';
+import { getProfesionales } from '../../api/profesionales.api';
+import { getResidencias } from '../../api/residencias.api';
+import { getCapacitaciones } from '../../api/capacitaciones.api';
 
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminHeader from '../../components/admin/AdminHeader';
@@ -18,28 +23,45 @@ import AdminEspecialidadesServiciosView from '../admin/AdminEspecialidadesServic
 import AdminProfesionalesView from '../admin/AdminProfesionalesView';
 import AdminDocumentacionView from '../admin/AdminDocumentacionView';
 import AdminCapacitacionesView from '../admin/AdminCapacitacionesView';
-// import AdminUsuariosView from './admin/AdminUsuariosView';
-// import AdminRolesView from './admin/AdminRolesView';
-// import AdminAuditoriaView from './admin/AdminAuditoriaView';
+import AdminResidenciasView from '../admin/AdminResidenciasView';
+import AdminContenidoGraficoView from '../admin/AdminContenidoGraficoView';
+import AdminInstitucionalView from '../admin/AdminInstitucionalView';
+import { usePageMeta } from "../../hooks/usePageMeta.js";
+
+const SECCIONES_ADMIN = [
+  "dashboard", "noticias", "documentacion", "servicios", "profesionales",
+  "residencias", "capacitaciones", "graficos", "institucional",
+];
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem("admin_active_tab") || "dashboard";
-  });
+  usePageMeta("Panel de administración");
+  // La sección activa sale de la URL (/admin/noticias, /admin/profesionales...).
+  const { seccion } = useParams();
+  const navigate = useNavigate();
+  const activeTab = seccion || "dashboard";
+  const setActiveTab = useCallback(
+    (tab) => navigate(!tab || tab === "dashboard" ? "/admin" : `/admin/${tab}`),
+    [navigate]
+  );
 
-  const [initialized, setInitialized] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [userName, setUserName] = useState("Cargando...");
+  // Si Keycloak ya tiene sesión al entrar (por ejemplo, al venir desde /cms), se arranca con ella.
+  const [initialized, setInitialized] = useState(() => Boolean(keycloak.authenticated));
+  const [authenticated, setAuthenticated] = useState(() => Boolean(keycloak.authenticated));
+  const [isAdmin, setIsAdmin] = useState(() => Boolean(keycloak.authenticated) && tieneAlgunRol(ROLES_ADMIN));
+  const [userName, setUserName] = useState(() =>
+    keycloak.authenticated
+      ? keycloak.tokenParsed?.name || keycloak.tokenParsed?.preferred_username || "Administrador de TI"
+      : "Cargando..."
+  );
   const [pendingNoticiasCount, setPendingNoticiasCount] = useState(0);
   const [pendingEspecialidadesCount, setPendingEspecialidadesCount] = useState(0);
   const [pendingDocumentosCount, setPendingDocumentosCount] = useState(0);
+  const [pendingProfesionalesCount, setPendingProfesionalesCount] = useState(0);
+  const [pendingResidenciasCount, setPendingResidenciasCount] = useState(0);
+  const [pendingCapacitacionesCount, setPendingCapacitacionesCount] = useState(0);
   
   const isKeycloakInitialized = useRef(false);
 
-  useEffect(() => {
-    localStorage.setItem("admin_active_tab", activeTab);
-  }, [activeTab]);
 
   useEffect(() => {
     if (!authenticated || !isAdmin) return;
@@ -47,7 +69,7 @@ const AdminPage = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           const pending = data.filter(
-            (n) => (n.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+            (n) => (n.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(n.solicitudEliminacion)
           ).length;
           setPendingNoticiasCount(pending);
         }
@@ -58,7 +80,7 @@ const AdminPage = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           const pending = data.filter(
-            (e) => (e.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+            (e) => (e.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(e.solicitudEliminacion)
           ).length;
           setPendingEspecialidadesCount(pending);
         }
@@ -69,42 +91,51 @@ const AdminPage = () => {
       .then((data) => {
         if (Array.isArray(data)) {
           const pending = data.filter(
-            (d) => (d.estado || "").toUpperCase() === "PENDIENTE_APROBACION"
+            (d) => (d.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(d.solicitudEliminacion)
           ).length;
           setPendingDocumentosCount(pending);
+        }
+      })
+      .catch(() => {});
+
+    getProfesionales(true)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const pending = data.filter(
+            (p) => (p.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(p.solicitudEliminacion)
+          ).length;
+          setPendingProfesionalesCount(pending);
+        }
+      })
+      .catch(() => {});
+
+    getResidencias(true)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const pending = data.filter(
+            (r) => (r.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(r.solicitudEliminacion)
+          ).length;
+          setPendingResidenciasCount(pending);
+        }
+      })
+      .catch(() => {});
+    getCapacitaciones()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const pending = data.filter(
+            (c) => (c.estado || "").toUpperCase() === "PENDIENTE_APROBACION" || Boolean(c.solicitudEliminacion)
+          ).length;
+          setPendingCapacitacionesCount(pending);
         }
       })
       .catch(() => {});
   }, [authenticated, isAdmin]);
 
   useEffect(() => {
-    const checkAdminRole = () => {
-      const realmRoles = (keycloak?.tokenParsed?.realm_access?.roles || []).map((r) =>
-        r.toLowerCase()
-      );
-      const clientRoles = Object.values(keycloak?.tokenParsed?.resource_access || {})
-        .flatMap((r) => r?.roles || [])
-        .map((r) => r.toLowerCase());
-      const allRoles = [...new Set([...realmRoles, ...clientRoles])];
-      const targetAdminRoles = ["admin-hief", "admin-hie", "admin", "administrator", "administrador"];
-      return targetAdminRoles.some(
-        (role) =>
-          keycloak?.hasRealmRole?.(role) ||
-          keycloak?.hasResourceRole?.(role) ||
-          allRoles.includes(role.toLowerCase())
-      );
-    };
+    const checkAdminRole = () => tieneAlgunRol(ROLES_ADMIN);
 
-    if (isKeycloakInitialized.current || keycloak.authenticated) {
-      if (keycloak.authenticated) {
-        setInitialized(true);
-        setAuthenticated(true);
-        setIsAdmin(checkAdminRole()); 
-        const name = keycloak.tokenParsed?.name || keycloak.tokenParsed?.preferred_username || "Administrador de TI";
-        setUserName(name);
-      }
-      return;
-    }
+    // Si Keycloak ya tenía sesión (por ejemplo, al venir desde /cms), el estado ya se armó con ella al montar.
+    if (isKeycloakInitialized.current || keycloak.authenticated) return;
 
     isKeycloakInitialized.current = true;
 
@@ -127,17 +158,20 @@ const AdminPage = () => {
 
   const handleLogout = () => {
     if (keycloak && typeof keycloak.logout === 'function') {
-      localStorage.removeItem("admin_active_tab");
       keycloak.logout({ redirectUri: window.location.origin });
     } else {
-      localStorage.removeItem("admin_active_tab");
       window.location.href = "/";
     }
   };
 
+  // Una sección que no existe (link viejo o mal escrito) vuelve al dashboard.
+  if (!SECCIONES_ADMIN.includes(activeTab)) {
+    return <Navigate to="/admin" replace />;
+  }
+
   if (!initialized) {
     return (
-      <div style={{ 
+      <div className="panel-scope" style={{ 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center', 
@@ -175,7 +209,7 @@ const AdminPage = () => {
 
   if (!authenticated) {
     return (
-      <div style={{ 
+      <div className="panel-scope" style={{ 
         display: 'flex', 
         flexDirection: 'column',
         justifyContent: 'center', 
@@ -216,13 +250,16 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="admin-layout">
+    <div className="admin-layout panel-scope">
       <AdminSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         pendingNoticiasCount={pendingNoticiasCount}
         pendingEspecialidadesCount={pendingEspecialidadesCount}
         pendingDocumentosCount={pendingDocumentosCount}
+        pendingProfesionalesCount={pendingProfesionalesCount}
+        pendingResidenciasCount={pendingResidenciasCount}
+        pendingCapacitacionesCount={pendingCapacitacionesCount}
       />
       
       <div className="admin-main-wrapper">
@@ -243,16 +280,26 @@ const AdminPage = () => {
               onPendingCountChange={setPendingEspecialidadesCount}
             />
           )}
-          {activeTab === "profesionales" && <AdminProfesionalesView />}
+          {activeTab === "profesionales" && (
+            <AdminProfesionalesView
+              onPendingCountChange={setPendingProfesionalesCount}
+            />
+          )}
           {activeTab === "documentacion" && (
             <AdminDocumentacionView
               onPendingCountChange={setPendingDocumentosCount}
             />
           )}
-          {activeTab === "capacitaciones" && <AdminCapacitacionesView />}
-          {activeTab === "usuarios" && <AdminUsuariosView />}
-          {activeTab === "roles" && <AdminRolesView />}
-          {activeTab === "auditoria" && <AdminAuditoriaView />}
+          {activeTab === "capacitaciones" && (
+            <AdminCapacitacionesView onPendingCountChange={setPendingCapacitacionesCount} />
+          )}
+          {activeTab === "residencias" && (
+            <AdminResidenciasView
+              onPendingCountChange={setPendingResidenciasCount}
+            />
+          )}
+          {activeTab === "graficos" && <AdminContenidoGraficoView />}
+          {activeTab === "institucional" && <AdminInstitucionalView />}
         </main>
       </div>
     </div>

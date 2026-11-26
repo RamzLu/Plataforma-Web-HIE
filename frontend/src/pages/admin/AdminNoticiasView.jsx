@@ -1,13 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, Globe2, Clock3 } from 'lucide-react';
+import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
+import '../../styles/components/admin/AdminRevisionModal.css';
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, sinPapelera } from '../../utils/publicacion.js';
+import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { mensajeDeError } from "../../utils/mensajeDeError";
+import { useState, useEffect, useCallback } from 'react';
+import { CheckCircle, XCircle, CalendarClock, CalendarDays, AlertTriangle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import keycloak from '../../config/keycloak';
-import { getNoticias, evaluarNoticiaEstado } from '../../api/noticias.api';
+import { getNoticias, revisarNoticia } from '../../api/noticias.api';
 import avatarHospital from '../../assets/logoHospitalEvita.png';
 import DefaultNewsImage from '../../components/ui/DefaultNewsImage';
 import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
+import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminNoticiasView.css';
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const AdminNoticiasView = ({ onPendingCountChange }) => {
   const [noticias, setNoticias] = useState([]);
@@ -68,7 +81,9 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     (list) => {
       if (typeof onPendingCountChange === 'function') {
         const count = list.filter(
-          (item) => (item.estado || '').toUpperCase() === 'PENDIENTE_APROBACION'
+          (item) =>
+            (item.estado || '').toUpperCase() === 'PENDIENTE_APROBACION' ||
+            Boolean(item.solicitudEliminacion)
         ).length;
         onPendingCountChange(count);
       }
@@ -76,11 +91,10 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     [onPendingCountChange]
   );
 
-  const cargarNoticias = useCallback(
-    async (silent = false) => {
-      try {
-        if (!silent) setLoading(true);
-        const data = await getNoticias(true);
+  // Trae las noticias sin tocar el estado antes de la respuesta: así se puede llamar desde un efecto.
+  const traerNoticias = useCallback(
+    (silent = false) =>
+      getNoticias(true).then((data) => {
         if (Array.isArray(data)) {
           const filtradas = data
             .filter((n) => (n.estado || '').toUpperCase() !== 'BORRADOR')
@@ -116,12 +130,12 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 fechaPublicacion: noticia.fechaPublicacion || null,
                 scheduledDate: noticia.fechaPublicacion
                   ? new Date(noticia.fechaPublicacion).toLocaleString('es-AR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }) + ' hs'
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }) + ' hs'
                   : null,
                 createdAt: noticia.createdAt,
                 updatedAt: noticia.updatedAt,
@@ -129,11 +143,20 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 rejectionReason: noticia.rejectionReason || null,
                 requestedEstado: noticia.requestedEstado || null,
                 previousEstado: noticia.previousEstado || null,
+                solicitudEliminacion: noticia.solicitudEliminacion || null,
+                enPapelera: Boolean(noticia.enPapelera),
+                papeleraDesde: noticia.papeleraDesde || null,
+                papeleraVenceEl: noticia.papeleraVenceEl || null,
+                cambios: Array.isArray(noticia.cambios) ? noticia.cambios : [],
+                esActualizacion: Boolean(noticia.esActualizacion),
+                visibleEnPortal: Boolean(noticia.visibleEnPortal),
+                tituloPublicado: noticia.tituloPublicado || null,
+                versionPublicada: noticia.versionPublicada || null,
               };
             })
             .sort((a, b) => {
-              const aPending = a.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
-              const bPending = b.estado === 'PENDIENTE_APROBACION' ? 0 : 1;
+              const aPending = a.estado === 'PENDIENTE_APROBACION' || a.solicitudEliminacion ? 0 : 1;
+              const bPending = b.estado === 'PENDIENTE_APROBACION' || b.solicitudEliminacion ? 0 : 1;
               if (aPending !== bPending) return aPending - bPending;
               return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
             });
@@ -144,45 +167,71 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           setNoticias([]);
           syncPendingCount([]);
         }
-      } catch (error) {
+      }).catch((error) => {
         if (!silent) {
           console.error('Error al cargar noticias en el panel de administración:', error);
           toast.error('No se pudieron cargar las noticias para revisión.');
         }
-      } finally {
+      }).finally(() => {
         if (!silent) setLoading(false);
-      }
-    },
+      }),
     [syncPendingCount]
   );
 
+  // Recarga a pedido (botón, después de revisar): muestra la carga y después trae los datos.
+  const cargarNoticias = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      await traerNoticias(silent);
+    },
+    [traerNoticias]
+  );
+
   useEffect(() => {
-    cargarNoticias(false);
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerNoticias(false);
 
     const intervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        cargarNoticias(true);
+        traerNoticias(true);
       }
     }, 60000);
 
     const handleVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
-        cargarNoticias(true);
+        traerNoticias(true);
       }
     };
 
-    window.addEventListener('focus', handleVisibilityOrFocus);
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
     return () => {
       clearInterval(intervalId);
-      window.removeEventListener('focus', handleVisibilityOrFocus);
       document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
     };
-  }, [cargarNoticias]);
+  }, [traerNoticias]);
 
   const handleOpenModal = (noticia) => {
-    setSelectedNews(noticia);
+    // Desde "Visibles al público" se abre lo que ve el portal, no la actualización que está en revisión.
+    const publicada = statusFilter === 'PUBLICADO' && noticia.visibleEnPortal && noticia.estado !== 'PUBLICADO' ? noticia.versionPublicada : null;
+    setSelectedNews(
+      publicada
+        ? {
+            ...noticia,
+            estado: 'PUBLICADO',
+            status: 'Publicado',
+            title: publicada.titulo,
+            content: publicada.contenido,
+            category: publicada.category || noticia.category,
+            images: publicada.images || [],
+            cambios: [],
+            esActualizacion: false,
+            rejectionReason: null,
+            requestedEstado: null,
+            actualizacionEnRevision: noticia.estado,
+          }
+        : noticia
+    );
     setIsRejecting(false);
     setRejectReason('');
   };
@@ -200,16 +249,12 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     try {
       setSubmitting(true);
       if (keycloak.authenticated) {
-        await keycloak.updateToken(30).catch(() => {});
+        await keycloak.updateToken(30).catch(() => { });
       }
 
-      const response = await evaluarNoticiaEstado(
-        selectedNews.id,
-        { estado: 'APROBADO' },
-        keycloak.token
-      );
+      const response = await revisarNoticia(selectedNews.id, 'APROBAR');
 
-      const estadoFinal = (response?.noticia?.estado || 'APROBADO').toUpperCase();
+      const estadoFinal = (response?.data?.estado || 'APROBADO').toUpperCase();
 
       if (estadoFinal === 'BORRADOR') {
         const updatedList = noticias.filter((item) => item.id !== selectedNews.id);
@@ -226,19 +271,21 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
         estadoFinal === 'PUBLICADO'
           ? 'Publicado'
           : estadoFinal === 'PROGRAMADO'
-          ? 'Programado'
-          : 'Aprobado';
+            ? 'Programado'
+            : 'Aprobado';
 
       const updatedList = noticias.map((item) =>
         item.id === selectedNews.id
           ? {
-              ...item,
-              estado: estadoFinal,
-              status: nuevoStatusLabel,
-              requestedEstado: null,
-              rejectionReason: null,
-              updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
-            }
+            ...item,
+            estado: estadoFinal,
+            status: nuevoStatusLabel,
+            requestedEstado: null,
+            rejectionReason: null,
+            fechaPublicacion:
+              response?.data?.fechaPublicacion ?? item.fechaPublicacion,
+            updatedAt: response?.data?.updatedAt || new Date().toISOString(),
+          }
           : item
       );
 
@@ -259,7 +306,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     } catch (error) {
       console.error('Error al aprobar la noticia:', error);
       toast.error(
-        error?.response?.data?.message || 'Ocurrió un error al aprobar la noticia.'
+        mensajeDeError(error, 'Ocurrió un error al aprobar la noticia.')
       );
     } finally {
       setSubmitting(false);
@@ -281,28 +328,21 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     try {
       setSubmitting(true);
       if (keycloak.authenticated) {
-        await keycloak.updateToken(30).catch(() => {});
+        await keycloak.updateToken(30).catch(() => { });
       }
 
       const motivoLimpio = rejectReason.trim();
-      const response = await evaluarNoticiaEstado(
-        selectedNews.id,
-        {
-          estado: 'RECHAZADO',
-          rejectionReason: motivoLimpio,
-        },
-        keycloak.token
-      );
+      const response = await revisarNoticia(selectedNews.id, 'RECHAZAR', motivoLimpio);
 
       const updatedList = noticias.map((item) =>
         item.id === selectedNews.id
           ? {
-              ...item,
-              estado: 'RECHAZADO',
-              status: 'Rechazado',
-              rejectionReason: motivoLimpio,
-              updatedAt: response?.noticia?.updatedAt || new Date().toISOString(),
-            }
+            ...item,
+            estado: 'RECHAZADO',
+            status: 'Rechazado',
+            rejectionReason: motivoLimpio,
+            updatedAt: response?.data?.updatedAt || new Date().toISOString(),
+          }
           : item
       );
 
@@ -314,59 +354,62 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
     } catch (error) {
       console.error('Error al rechazar la noticia:', error);
       toast.error(
-        error?.response?.data?.message || 'Ocurrió un error al rechazar la noticia.'
+        mensajeDeError(error, 'Ocurrió un error al rechazar la noticia.')
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  const getBadgeClass = (status) => {
-    if (status === 'Aprobado' || status === 'Programado' || status === 'Publicado') {
-      return 'status-aprobado-admin';
-    }
-    if (status === 'Rechazado') return 'status-rechazado-admin';
-    return 'status-pendiente-admin';
-  };
-
-  const getLayoutClass = (numImages) => {
-    if (numImages >= 4) return 'layout-4-admin';
-    if (numImages === 3) return 'layout-3-admin';
-    if (numImages === 2) return 'layout-2-admin';
-    return 'layout-1-admin';
-  };
-
-  const pendingCount = noticias.filter((n) => n.estado === 'PENDIENTE_APROBACION').length;
-  const approvedCount = noticias.filter(
+  // Las solicitudes de eliminación también esperan respuesta del admin: cuentan como pendientes.
+  const pendingCount = sinPapelera(noticias).filter(
+    (n) => n.estado === 'PENDIENTE_APROBACION' || Boolean(n.solicitudEliminacion)
+  ).length;
+  const approvedCount = sinPapelera(noticias).filter(
     (n) =>
       n.estado === 'APROBADO' ||
       n.estado === 'PROGRAMADO'
   ).length;
-  const publishedCount = noticias.filter((n) => n.estado === 'PUBLICADO').length;
-  const rejectedCount = noticias.filter((n) => n.estado === 'RECHAZADO').length;
+  const publishedCount = sinPapelera(noticias).filter(estaPublicadoEnPortal).length;
+  const rejectedCount = sinPapelera(noticias).filter((n) => n.estado === 'RECHAZADO').length;
+  const papeleraCount = noticias.filter((n) => n.enPapelera).length;
 
-  const filteredNoticias = noticias.filter((item) => {
+  const filteredNoticias = (statusFilter === 'PAPELERA' ? noticias.filter((x) => x?.enPapelera) : sinPapelera(noticias)).filter((item) => {
     if (statusFilter === 'PENDIENTE') {
-      return item.estado === 'PENDIENTE_APROBACION';
+      return item.estado === 'PENDIENTE_APROBACION' || Boolean(item.solicitudEliminacion);
     }
     if (statusFilter === 'APROBADO') {
       return item.estado === 'APROBADO' || item.estado === 'PROGRAMADO';
     }
     if (statusFilter === 'PUBLICADO') {
-      return item.estado === 'PUBLICADO';
+      return estaPublicadoEnPortal(item);
     }
     if (statusFilter === 'RECHAZADO') {
       return item.estado === 'RECHAZADO';
     }
     return true;
   });
+  const paginacion = usePaginacion(vistaPublicados(filteredNoticias, statusFilter === 'PUBLICADO'), 10, [statusFilter]);
 
   return (
     <div className="admin-review-container-admin">
       <div className="admin-page-header-admin admin-view-heading">
-        <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
-        <h1>Revisión Editorial</h1>
-        <p>Evalúa las solicitudes de publicación enviadas por el equipo de redactores del CMS.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+          <div>
+            <span className="admin-overtitle-admin">PANEL DE CONTROL DIRECTIVO</span>
+            <h1>Revisión Editorial</h1>
+            <p>Evalúa las solicitudes de publicación enviadas por el equipo de redactores del CMS.</p>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={() => cargarNoticias(false)}
+            disabled={loading}
+          >
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            Actualizar
+          </button>
+        </div>
       </div>
 
       <div className="admin-news-summary-toolbar">
@@ -379,63 +422,32 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           Todos
         </button>
       </div>
-      <div className="admin-news-summary" role="group" aria-label="Filtrar noticias por estado">
-        <button
-          type="button"
-          className={`admin-news-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDIENTE'}
-          onClick={() => setStatusFilter('PENDIENTE')}
-        >
-          <span className="admin-news-summary-icon"><Clock3 size={19} /></span>
-          <span className="admin-news-summary-copy">
-            <span>Pendientes de aprobación</span>
-            <strong>{pendingCount}</strong>
-          </span>
-        </button>
-        <button
-          type="button"
-          className={`admin-news-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'APROBADO'}
-          onClick={() => setStatusFilter('APROBADO')}
-        >
-          <span className="admin-news-summary-icon"><CheckCircle size={19} /></span>
-          <span className="admin-news-summary-copy">
-            <span>Aprobados para CMS</span>
-            <strong>{approvedCount}</strong>
-          </span>
-        </button>
-        <button
-          type="button"
-          className={`admin-news-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLICADO'}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span className="admin-news-summary-icon"><Globe2 size={19} /></span>
-          <span className="admin-news-summary-copy">
-            <span>Visibles al público</span>
-            <strong>{publishedCount}</strong>
-          </span>
-        </button>
-        <button
-          type="button"
-          className={`admin-news-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'RECHAZADO'}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span className="admin-news-summary-icon"><XCircle size={19} /></span>
-          <span className="admin-news-summary-copy">
-            <span>Rechazados</span>
-            <strong>{rejectedCount}</strong>
-          </span>
-        </button>
-      </div>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE", tipo: "pendiente", cuenta: pendingCount },
+          { clave: "APROBADO", tipo: "aprobado", cuenta: approvedCount },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
+          { clave: "PAPELERA", tipo: "papelera", cuenta: papeleraCount },
+      ]}
+      />
 
       <div className="dashboard-card-admin">
-        <h2 className="dashboard-card-title-admin">Listado de las Noticias</h2>
-        <p className="news-view-subtitle-admin">
-          Área de Revisión: Aprobación y rechazo de notificaciones recibidas desde el CMS
-        </p>
-        <div className="data-table-container-admin">
+        <div className="admin-news-card-heading">
+          <div>
+            <h2 className="dashboard-card-title-admin">Listado de Noticias</h2>
+            <p className="news-view-subtitle-admin">
+              Área de Revisión: Aprobación y rechazo de noticias recibidas desde el CMS
+            </p>
+          </div>
+          <span className="admin-news-result-count">
+            {filteredNoticias.length} {filteredNoticias.length === 1 ? 'resultado' : 'resultados'}
+          </span>
+        </div>
+        {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
+<div className="data-table-container-admin">
           <div className="data-table-header-admin">
             <div className="data-table-col-admin">CONTENIDO</div>
             <div className="data-table-col-admin">EDITOR / FECHA</div>
@@ -444,7 +456,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
           </div>
 
           <div className="data-table-body-admin">
-{loading ? (
+            {loading ? (
               <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
                 Cargando solicitudes de noticias...
               </div>
@@ -453,27 +465,27 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                 {statusFilter === 'PENDIENTE'
                   ? 'No hay noticias pendientes de aprobación en este momento.'
                   : statusFilter === 'APROBADO'
-                  ? 'No hay noticias aprobadas registradas.'
-                  : statusFilter === 'PUBLICADO'
-                  ? 'No hay noticias publicadas registradas.'
-                  : statusFilter === 'RECHAZADO'
-                  ? 'No hay noticias rechazadas registradas.'
-                  : 'No hay noticias registradas.'}
+                    ? 'No hay noticias aprobadas registradas.'
+                    : statusFilter === 'PUBLICADO'
+                      ? 'No hay noticias publicadas registradas.'
+                      : statusFilter === 'RECHAZADO'
+                        ? 'No hay noticias rechazadas registradas.'
+                        : 'No hay noticias registradas.'}
               </div>
             ) : (
-              filteredNoticias.map((item) => {
+              paginacion.itemsPagina.map((item) => {
                 const wasEdited =
                   item.updatedAt &&
                   item.createdAt &&
                   new Date(item.updatedAt).getTime() >
-                    new Date(item.createdAt).getTime() + 5000;
+                  new Date(item.createdAt).getTime() + 5000;
 
                 return (
                   <div className="activity-row-admin" key={item.id}>
-                                        <div className="col-content-admin-box">
+                    <div className="col-content-admin-box">
                       <div
                         className="news-thumb-box-admin"
-                        onClick={() => handleOpenModal(item)}
+                        onClick={() => handleOpenModal(item)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenModal(item))}
                       >
                         {item.images && item.images.length > 0 && item.images[0] ? (
                           <img
@@ -490,29 +502,21 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                         className="news-title-interactive-admin"
                         onClick={() => handleOpenModal(item)}
                       >
-                        <span className="news-title-clamped-admin" title={item.title}>
-                          {item.title}
+                        <span className="news-title-clamped-admin" title={tituloEnLista(item, statusFilter === 'PUBLICADO', item.title)}>
+                          {tituloEnLista(item, statusFilter === 'PUBLICADO', item.title)}
                         </span>
-                        {item.editor && (
-                          <span
-                            style={{
-                              fontSize: '0.75rem',
-                              color: '#64748b',
-                              marginTop: '4px',
-                            }}
-                          >
-                            Editado por {item.editedBy || item.editor} Sistema
-                          </span>
-                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                          <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+                        </div>
                       </button>
                     </div>
 
-                                        <div
+                    <div
                       className="col-text-admin"
                       style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}
                     >
-                      <span style={{ fontWeight: 600, color: '#0c2340' }}>{item.editor}</span>
-                      <small style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
+                      <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{item.editor}</span>
+                      <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}>
                         <CalendarDays size={13} />
                         {item.date}
                         {wasEdited && (
@@ -530,16 +534,21 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       </small>
                     </div>
 
-                                        <div className="col-categoria-data-admin col-text-admin">
-                      <span className="category-pill-admin">
-                        {item.category || 'Noticias'}
-                      </span>
+                    <div className="col-categoria-data-admin col-text-admin">
+                      <EtiquetaCategoria categoria={item.category || 'General'} />
                     </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-                      <span className={`status-pill-admin ${getBadgeClass(item.status)}`}>
-                        {item.status}
-                      </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                      {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+                        <EtiquetaEliminacion />
+                      ) : (
+                        <>
+                          <EtiquetaEstado estado={item.statusVista || item.status} texto={item.statusVista || item.status} />
+                          <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+<NotaPapelera item={item} />
+                          {item.solicitudEliminacion && <EtiquetaEliminacion nota />}
+                        </>
+                      )}
                       {item.estado === 'PENDIENTE_APROBACION' &&
                         item.requestedEstado === 'BORRADOR' && (
                           <span
@@ -552,46 +561,41 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                             Solicita pasar a Borrador
                           </span>
                         )}
+                      {(item.estado === 'PROGRAMADO' || item.estado === 'APROBADO') &&
+                        item.fechaPublicacion && (
+                          <span className="status-programmed-date-admin">
+                            Para:{' '}
+                            {new Date(item.fechaPublicacion).toLocaleDateString('es-AR')} -{' '}
+                            {new Date(item.fechaPublicacion).toLocaleTimeString('es-AR', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: false,
+                            })}{' '}
+                            hs
+                          </span>
+                        )}
                     </div>
 
                   </div>
                 );
               })
             )}
+            <Paginacion {...paginacion} etiqueta="noticias" />
           </div>
         </div>
       </div>
 
-            {selectedNews && (
-        <div className="modal-overlay-admin" onClick={handleCloseModal}>
-          <div className="modal-content-esp-admin" onClick={(e) => e.stopPropagation()}>
-            {selectedNews.estado === 'PENDIENTE_APROBACION' &&
-              selectedNews.requestedEstado === 'BORRADOR' && (
-                <div className="scheduled-alert-admin">
-                  <AlertTriangle size={20} />
-                  <span>
-                    Solicitud de cambio de estado: El editor del CMS solicita pasar esta noticia
-                    publicada a <strong>Borrador</strong> (retirarla del portal público).
-                  </span>
-                </div>
-              )}
-
-            {selectedNews.scheduledDate &&
-              (selectedNews.estado === 'PENDIENTE_APROBACION' ||
-                selectedNews.estado === 'PROGRAMADO') && (
-                <div className="scheduled-alert-admin">
-                  <CalendarClock size={20} />
-                  <span>
-                    Atención: Esta noticia está programada para publicarse automáticamente el{' '}
-                    {selectedNews.scheduledDate}.
-                  </span>
-                </div>
-              )}
-
-            <div className="modal-header-esp-admin">
-              <h2>COMUNICADO INSTITUCIONAL</h2>
+      {selectedNews && (
+        <div className="modal-overlay-admin admin-rev-overlay" onClick={handleCloseModal}>
+          <div className="modal-content-esp-admin admin-rev-modal admin-rev-modal--noticia" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-esp-admin admin-rev-header">
+              <div>
+                <span className="admin-rev-kicker">Información pública</span>
+                <h2 className="admin-rev-title">Revisión de noticia</h2>
+              </div>
               <button
-                className="btn-close-modal-admin"
+                className="btn-close-modal-admin admin-rev-close"
+                aria-label="Cerrar detalle"
                 onClick={handleCloseModal}
                 disabled={submitting}
               >
@@ -601,66 +605,104 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               </button>
             </div>
 
-<div className="modal-body-esp-admin">
-              <div className="preview-mock-left-admin">
-                <div className="modal-author-row-admin">
-                  <div className="hospital-avatar-admin">
-                    <img src={avatarHospital} alt="Avatar Hospital" />
+            <div className="modal-body-esp-admin admin-rev-body">
+              {selectedNews.actualizacionEnRevision && (
+                <div className="admin-rev-alert">
+                  <AlertTriangle size={18} />
+                  <div>
+                    Esta es la versión publicada, la que ve el portal.{' '}
+                    {selectedNews.actualizacionEnRevision === 'RECHAZADO'
+                      ? 'La actualización enviada por el CMS fue rechazada.'
+                      : 'Hay una actualización pendiente de aprobación.'}{' '}
+                    Para verla, buscala en el filtro {selectedNews.actualizacionEnRevision === 'RECHAZADO' ? 'Rechazados' : 'Pendientes'}.
                   </div>
-                  <div className="author-meta-admin">
-                    <h3>Hospital Interdistrital Evita Formosa</h3>
-                    <span>{selectedNews.date}</span>
-                  </div>
-                </div>
-
-                <div className="news-modal-headline-admin">
-                  <h3 className="news-modal-title-admin">{selectedNews.title}</h3>
-                </div>
-
-                <div className="news-modal-body-text-admin">
-                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedNews.content) }} />
-                </div>
-              </div>
-
-                            {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
-                <div className="news-modal-images-section-admin">
-                  <div
-                    className={`news-modal-images-grid-admin ${getLayoutClass(
-                      selectedNews.images.length
-                    )}`}
-                  >
-                    {selectedNews.images.slice(0, 4).map((img, idx) => {
-                      const isLastAndHidden =
-                        idx === 3 && selectedNews.images.length > 4;
-                      const fotosRestantes = selectedNews.images.length - 4;
-                      const imageUrls = selectedNews.images.map((i) => i.url || i);
-
-                      return (
-                        <div
-                          className="modal-news-img-box-admin"
-                          key={idx}
-                          onClick={() => openLightbox(imageUrls, idx)}
-                          title="Haga clic para maximizar la imagen"
-                        >
-                          <img src={img.url || img} alt={`Foto noticia ${idx + 1}`} />
-                          {isLastAndHidden && (
-                            <div className="mosaic-overlay-admin">
-                              <span>+{fotosRestantes}</span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <div className="news-modal-default-img-wrap-admin">
-                  <DefaultNewsImage alt={selectedNews.title} />
                 </div>
               )}
+              {selectedNews.estado === 'PENDIENTE_APROBACION' &&
+                selectedNews.requestedEstado === 'BORRADOR' && (
+                  <div className="admin-rev-alert">
+                    <AlertTriangle size={18} />
+                    <div>
+                      <strong>Solicitud de cambio de estado:</strong> El editor del CMS solicita pasar esta noticia
+                      publicada a <strong>Borrador</strong> (retirarla del portal público).
+                    </div>
+                  </div>
+                )}
 
-{selectedNews.estado === 'RECHAZADO' && selectedNews.rejectionReason && (
-                <div className="rejection-area-admin">
+              {selectedNews.scheduledDate &&
+                (selectedNews.estado === 'PENDIENTE_APROBACION' ||
+                  selectedNews.estado === 'PROGRAMADO') && (
+                  <div className="admin-rev-alert is-info">
+                    <CalendarClock size={18} />
+                    <div>
+                      <strong>Publicación programada:</strong> Esta noticia está programada para publicarse
+                      automáticamente el {selectedNews.scheduledDate}.
+                    </div>
+                  </div>
+                )}
+
+              {selectedNews.esActualizacion && selectedNews.cambios?.length > 0 && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <AdminCambiosResaltados
+                    cambios={selectedNews.cambios}
+                    esActualizacion={selectedNews.esActualizacion}
+                  />
+                </div>
+              )}
+              {/* Vista previa: mismo HTML y CSS que el modal público de Noticias (NoticiasPage.css). */}
+              <section className="admin-rev-portal-preview" aria-label="Vista previa de la noticia en el portal">
+                <span className="admin-rev-portal-preview-label">Así se verá en el portal</span>
+                <div className="modal-content-esp vista-portal">
+                <div className="modal-body-esp">
+                  <div className="modal-left-content">
+                    <div className="modal-author-row">
+                      <div className="hospital-avatar"><img src={avatarHospital} alt="Avatar Hospital" /></div>
+                      <div className="author-meta">
+                        <h3>Hospital Interdistrital Evita Formosa</h3>
+                        <span>{selectedNews.date}</span>
+                      </div>
+                    </div>
+                    <h3 className="news-modal-title">{selectedNews.title}</h3>
+                    <div className="news-modal-body-text">
+                      <div className="info-text" dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedNews.content) }} />
+                    </div>
+                  </div>
+                  {selectedNews.images && selectedNews.images.length > 0 && selectedNews.images[0] ? (
+                    <div className={`mosaic-gallery layout-${Math.min(selectedNews.images.length, 4)}`}>
+                      {selectedNews.images.slice(0, 4).map((img, idx) => {
+                        const imageUrls = selectedNews.images.map((i) => i.url || i);
+                        const isLastAndHidden = idx === 3 && selectedNews.images.length > 4;
+                        return (
+                          <div
+                            key={idx}
+                            className="mosaic-item"
+                            onClick={() => openLightbox(imageUrls, idx)}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => activarConTeclado(e, () => openLightbox(imageUrls, idx))}
+                            title="Haga clic para maximizar la imagen"
+                          >
+                            <img src={img.url || img} alt={`Foto noticia ${idx + 1}`} />
+                            {isLastAndHidden && (
+                              <div className="mosaic-overlay">
+                                <span>+{selectedNews.images.length - 4}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="news-modal-default-img-wrap">
+                      <DefaultNewsImage alt={selectedNews.title} />
+                    </div>
+                  )}
+                </div>
+                </div>
+              </section>
+
+              {selectedNews.estado === 'RECHAZADO' && selectedNews.rejectionReason && (
+                <div className="admin-rev-note">
                   <label>
                     <AlertTriangle
                       size={16}
@@ -675,7 +717,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               )}
 
               {selectedNews.estado === 'PENDIENTE_APROBACION' && isRejecting && (
-                <div className="rejection-area-admin">
+                <div className="admin-rev-field">
                   <label htmlFor="rejection-reason">
                     <AlertTriangle
                       size={16}
@@ -694,21 +736,36 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                   />
                 </div>
               )}
+              {selectedNews.solicitudEliminacion && (
+                <div className="admin-rev-solicitud">
+                  <SolicitudEliminacionAcciones
+                    solicitud={selectedNews.solicitudEliminacion}
+                    entidad="noticia"
+                    id={selectedNews.id}
+                    titulo={selectedNews.title}
+                    onResuelto={async () => {
+                      handleCloseModal();
+                      await cargarNoticias(true);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
-{selectedNews.estado === 'PENDIENTE_APROBACION' && (
-              <div className="modal-footer-esp-admin">
+
+            {selectedNews.estado === 'PENDIENTE_APROBACION' && (
+              <div className="modal-footer-esp-admin admin-rev-footer">
                 {!isRejecting ? (
                   <>
                     <button
-                      className="btn-modal-admin btn-modal-danger-admin"
+                      className="btn-modal-admin btn-modal-danger-admin admin-rev-button is-danger"
                       onClick={handleTriggerReject}
                       disabled={submitting}
                     >
                       <XCircle size={18} /> Rechazar
                     </button>
                     <button
-                      className="btn-modal-admin btn-modal-success-admin"
+                      className="btn-modal-admin btn-modal-success-admin admin-rev-button is-primary"
                       onClick={handleApprove}
                       disabled={submitting}
                     >
@@ -716,21 +773,21 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
                       {submitting
                         ? 'Procesando...'
                         : selectedNews.requestedEstado === 'BORRADOR'
-                        ? 'Aprobar paso a Borrador'
-                        : `Aprobar ${selectedNews.scheduledDate ? 'y Programar' : ''}`}
+                          ? 'Aprobar paso a Borrador'
+                          : `Aprobar ${selectedNews.scheduledDate ? 'y Programar' : ''}`}
                     </button>
                   </>
                 ) : (
                   <>
                     <button
-                      className="btn-modal-admin btn-modal-cancel-admin"
+                      className="btn-modal-admin btn-modal-cancel-admin admin-rev-button is-secondary"
                       onClick={() => setIsRejecting(false)}
                       disabled={submitting}
                     >
                       Cancelar
                     </button>
                     <button
-                      className="btn-modal-admin btn-modal-confirm-reject-admin"
+                      className="btn-modal-admin btn-modal-confirm-reject-admin admin-rev-button is-danger"
                       onClick={handleConfirmReject}
                       disabled={submitting}
                     >
@@ -741,7 +798,7 @@ const AdminNoticiasView = ({ onPendingCountChange }) => {
               </div>
             )}
 
-                </div>
+          </div>
         </div>
       )}
 

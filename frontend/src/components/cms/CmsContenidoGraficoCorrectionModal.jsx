@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import toast from "react-hot-toast";
 import Cropper from "react-easy-crop";
 import { CmsUnsavedChangesModal } from "./CmsModals";
@@ -10,6 +10,8 @@ import {
   normalizeInternalPortalPath,
   resolveGraphicImageUrl,
 } from "../../utils/contenidoGraficoPresets.js";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 const CARRUSEL_INICIO_ASPECT = 1501 / 641;
 const PACIENTES_INICIO_ASPECT = 4 / 3;
@@ -370,7 +372,7 @@ export const PortalAprendePreview = ({
           className={`cg-portal-aprende-left ${
             isMainSelected ? "is-selected" : ""
           } ${onSelectItem ? "is-clickable" : ""}`}
-          onClick={() => onSelectItem && onSelectItem(0)}
+          onClick={() => onSelectItem && onSelectItem(0)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectItem && onSelectItem(0))}
           title={
             onSelectItem
               ? "Clic para editar la imagen principal y el encabezado"
@@ -396,7 +398,7 @@ export const PortalAprendePreview = ({
             className={`cg-portal-aprende-text-block ${
               isMainSelected ? "is-selected" : ""
             } ${onSelectItem ? "is-clickable" : ""}`}
-            onClick={() => onSelectItem && onSelectItem(0)}
+            onClick={() => onSelectItem && onSelectItem(0)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectItem && onSelectItem(0))}
             title={
               onSelectItem
                 ? "Clic para editar subtítulo, título y párrafo descriptivo"
@@ -445,7 +447,7 @@ export const PortalAprendePreview = ({
                   className={`cg-portal-aprende-card ${
                     isCardSelected ? "is-selected" : ""
                   } ${onSelectItem ? "is-clickable" : ""}`}
-                  onClick={() => onSelectItem && onSelectItem(itemIndex)}
+                  onClick={() => onSelectItem && onSelectItem(itemIndex)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectItem && onSelectItem(itemIndex))}
                   title={
                     onSelectItem
                       ? `Clic para editar la Tarjeta #${itemIndex}`
@@ -501,7 +503,6 @@ export const PortalResidenciasHeroPreview = ({
   titulo = "Excelencia en Alta Complejidad & Vocación Pública",
   parrafoDescripcion = "",
   textoBoton = "Ver Especialidades Disponibles",
-  enlaceUrl = "/especialidades",
   imagen = null,
   altText = "",
   onSelectImage,
@@ -561,7 +562,7 @@ export const PortalResidenciasHeroPreview = ({
         className={`cg-portal-residencias-media ${
           onSelectImage ? "is-clickable" : ""
         }`}
-        onClick={() => onSelectImage && onSelectImage()}
+        onClick={() => onSelectImage && onSelectImage()} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onSelectImage && onSelectImage())}
         title={
           onSelectImage
             ? "Clic para cambiar o recortar la imagen de la sección"
@@ -601,6 +602,9 @@ export const CmsContenidoGraficoEditModal = ({
   const [enlaceUrl, setEnlaceUrl] = useState("");
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { imagenes, titulo, parrafoDescripcion, textoBoton, enlaceUrl, altText, textoSuperpuesto });
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [draggedIdx, setDraggedIdx] = useState(null);
 
@@ -645,9 +649,15 @@ export const CmsContenidoGraficoEditModal = ({
   const isRejected =
     espacio?.estado === "RECHAZADO" || Boolean(espacio?.rejectionReason);
 
-  useEffect(() => {
-    if (isOpen && espacio) {
-      let listaInicial = [];
+  // Al abrir el modal (o al cambiar de espacio con el modal abierto) se arma el formulario con los datos del espacio.
+  // Se hace durante el render, comparando con el espacio con que se armó la última vez (en vez de con un efecto):
+  // así el modal se muestra directamente con los datos correctos, sin un render intermedio con los anteriores.
+  const espacioAbierto = isOpen && espacio ? espacio : null;
+  const [espacioInicializado, setEspacioInicializado] = useState(null);
+  if (espacioAbierto !== espacioInicializado) {
+    setEspacioInicializado(espacioAbierto);
+    if (espacioAbierto) {
+      let listaInicial;
 
       if (espacio.id === "espacio-seccion-pacientes") {
         const defaultsPacientes = DEFAULT_PACIENTES_INICIO.imagenes;
@@ -789,13 +799,13 @@ export const CmsContenidoGraficoEditModal = ({
       setIsCropping(false);
       setImageSrc(null);
     }
-  }, [isOpen, espacio]);
+  }
 
   if (!isOpen || !espacio) return null;
 
   const handleCloseAttempt = () => {
     if (isSaving) return;
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       onClose();
@@ -992,6 +1002,10 @@ export const CmsContenidoGraficoEditModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSaving) return;
+    if (!hayCambios) {
+      toast.error("No se detectaron cambios para actualizar.");
+      return;
+    }
 
     // =========================================================================
     // ENVÍO ESPECÍFICO: RESIDENCIAS (TARJETA DESTACADA CON 1 IMAGEN Y BOTÓN)
@@ -2468,7 +2482,8 @@ export const CmsContenidoGraficoEditModal = ({
               type="submit"
               className="btn-cerrar-rojo"
               style={{ backgroundColor: "#2b5b94" }}
-              disabled={isSaving}
+              disabled={isSaving || !hayCambios}
+              title={!hayCambios ? "No se han detectado cambios para actualizar" : ""}
             >
               {isSaving ? (
                 <span
@@ -2506,7 +2521,7 @@ export const CmsContenidoGraficoEditModal = ({
             position: "fixed",
             inset: 0,
             backgroundColor: "rgba(15, 23, 42, 0.92)",
-            zIndex: 100000,
+            zIndex: "var(--z-lightbox)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

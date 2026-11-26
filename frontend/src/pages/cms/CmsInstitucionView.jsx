@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn, ZoomOut, Check, Building2 } from "lucide-react";
+import { mensajeDeError } from "../../utils/mensajeDeError";
+import { useState, useEffect } from "react";
+import { Plus, Save, X, Edit3, Users, Upload, GripVertical, Crop, ZoomIn, ZoomOut, Check, Building2 } from "lucide-react";
 import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
@@ -21,6 +22,7 @@ import {
   updateRedesSociales,
   updateSedeCentral,
 } from "../../api/autoridades.api.js";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 // Proporción exacta de la tarjeta de autoridad en el portal público (331.73 x 260)
 const ASPECT_RATIO_AUTORIDAD = 332 / 260;
@@ -78,7 +80,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
   // --- Estado de Autoridades y Modal ---
   const [autoridades, setAutoridades] = useState([]);
-  const [showAutoridadModal, setShowAutoridadModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showAutoridadModal, setShowAutoridadModal] = useState(Boolean(initialCreateModal));
   const [editingAutoridad, setEditingAutoridad] = useState(null);
   const [autoridadForm, setAutoridadForm] = useState({
     nombre: "",
@@ -97,6 +101,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
   // --- Estado de Cambios Sin Guardar ---
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { autoridadForm });
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
 
   // --- Estado de Arrastre (Drag and Drop) ---
@@ -137,28 +144,34 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   const [sedeCroppedPixels, setSedeCroppedPixels] = useState(null);
   const [isSedeCropping, setIsSedeCropping] = useState(false);
 
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerInstitucional = () =>
+    getInstitucional(true)
+      .then((data) => {
+        setAutoridades(data.autoridades || []);
+        setSocialData(data.redesSociales || { facebook: "", instagram: "" });
+        setTempSocial(data.redesSociales || { facebook: "", instagram: "" });
+        if (data.sedeCentral) {
+          setSedeCentralData(data.sedeCentral);
+          try {
+            sessionStorage.setItem("hie_public_sede_central_cache", JSON.stringify(data.sedeCentral));
+          } catch {
+            // Si el navegador no permite sessionStorage, solo se omite la caché.
+          }
+        }
+      })
+      .catch(() => toast.error("Error al cargar la información institucional."))
+      .finally(() => setLoading(false));
+
+  // Recarga a pedido: muestra la carga y después trae los datos.
   const fetchInstitucional = async () => {
     setLoading(true);
-    try {
-      const data = await getInstitucional();
-      setAutoridades(data.autoridades || []);
-      setSocialData(data.redesSociales || { facebook: "", instagram: "" });
-      setTempSocial(data.redesSociales || { facebook: "", instagram: "" });
-      if (data.sedeCentral) {
-        setSedeCentralData(data.sedeCentral);
-        try {
-          sessionStorage.setItem("hie_public_sede_central_cache", JSON.stringify(data.sedeCentral));
-        } catch {}
-      }
-    } catch (error) {
-      toast.error("Error al cargar la información institucional.");
-    } finally {
-      setLoading(false);
-    }
+    await traerInstitucional();
   };
 
   useEffect(() => {
-    fetchInstitucional();
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerInstitucional();
   }, []);
 
   // --- HANDLERS DE SEDE CENTRAL ---
@@ -231,8 +244,25 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     }
   };
 
+  const checkSedeHasChanges = () => {
+    return (
+      (sedeForm.titulo || "").trim() !== (sedeCentralData.titulo || DEFAULT_SEDE_CENTRAL.titulo || "").trim() ||
+      (sedeForm.tagSuperior || "").trim() !== (sedeCentralData.tagSuperior || DEFAULT_SEDE_CENTRAL.tagSuperior || "").trim() ||
+      (sedeForm.direccion || "").trim() !== (sedeCentralData.direccion || DEFAULT_SEDE_CENTRAL.direccion || "").trim() ||
+      (sedeForm.parrafoDescripcion || "").trim() !== (sedeCentralData.parrafoDescripcion || DEFAULT_SEDE_CENTRAL.parrafoDescripcion || "").trim() ||
+      (sedeForm.badgeAtencion || "").trim() !== (sedeCentralData.badgeAtencion || DEFAULT_SEDE_CENTRAL.badgeAtencion || "").trim() ||
+      (sedeForm.altText || "").trim() !== (sedeCentralData.altText || DEFAULT_SEDE_CENTRAL.altText || "").trim() ||
+      sedeForm.archivo !== null
+    );
+  };
+
   const handleSaveSede = async (e) => {
     e.preventDefault();
+
+    if (!checkSedeHasChanges()) {
+      toast.error("No se detectaron cambios para actualizar.");
+      return;
+    }
 
     if (!sedeForm.titulo?.trim()) {
       toast.error("El título del edificio principal es obligatorio.");
@@ -262,14 +292,16 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
         formData.append("archivo", sedeForm.archivo);
       }
 
-      const res = await updateSedeCentral(formData, keycloak?.token);
+      const res = await updateSedeCentral(formData);
       const updated = res.sedeCentral;
 
       if (updated) {
         setSedeCentralData(updated);
         try {
           sessionStorage.setItem("hie_public_sede_central_cache", JSON.stringify(updated));
-        } catch {}
+        } catch {
+          // Si el navegador no permite sessionStorage, solo se omite la caché.
+        }
       }
 
       recordCmsActivity(
@@ -281,11 +313,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
       toast.success(res.message || "¡Sede Central actualizada correctamente!", { id: toastId });
       setShowSedeModal(false);
     } catch (error) {
-      const apiErr = error?.response?.data?.error;
-      const msg =
-        (typeof apiErr === "string" ? apiErr : apiErr?.message) ||
-        error?.response?.data?.message ||
-        "Error al guardar los datos de la Sede Central.";
+      const msg = mensajeDeError(error, "Error al guardar los datos de la Sede Central.");
       toast.error(msg, { id: toastId });
     } finally {
       setIsSaving(false);
@@ -293,26 +321,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   };
 
   // --- COMPROBAR CAMBIOS PENDIENTES ---
-  const checkHasChanges = () => {
-    if (!editingAutoridad) {
-      return !!(
-        autoridadForm.nombre.trim() ||
-        autoridadForm.cargo.trim() ||
-        autoridadForm.descripcion.trim() ||
-        autoridadForm.archivo
-      );
-    }
-    return (
-      autoridadForm.nombre !== (editingAutoridad.nombre || "") ||
-      autoridadForm.cargo !== (editingAutoridad.cargo || "") ||
-      autoridadForm.descripcion !== (editingAutoridad.descripcion || "") ||
-      autoridadForm.archivo !== null
-    );
-  };
-
   const handleCloseAttempt = () => {
     if (isSaving) return;
-    if (hasUnsavedChanges || checkHasChanges()) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowAutoridadModal(false);
@@ -346,12 +357,10 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     setShowAutoridadModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showAutoridadModal): solo se avisa al panel para que no lo reabra.
   useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreateAutoridad();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   // --- ABRIR MODAL EDITAR ---
   const handleOpenEditAutoridad = (autoridad) => {
@@ -420,6 +429,10 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
   // --- GUARDAR AUTORIDAD (CREAR O ACTUALIZAR) ---
   const handleSaveAutoridadModal = async (e) => {
     e.preventDefault();
+    if (editingAutoridad && !hayCambios) {
+      toast.error("No se detectaron cambios para actualizar.");
+      return;
+    }
     if (!autoridadForm.nombre.trim() || !autoridadForm.cargo.trim()) {
       toast.error("Complete al menos el nombre y el cargo de la autoridad.");
       return;
@@ -447,7 +460,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
       }
 
       if (editingAutoridad) {
-        const data = await updateAutoridad(editingAutoridad.id, formData, keycloak?.token);
+        const data = await updateAutoridad(editingAutoridad.id, formData);
         setAutoridades((prev) =>
           prev
             .map((a) => (a.id === editingAutoridad.id ? data.autoridad : a))
@@ -455,7 +468,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
         );
         toast.success("¡Autoridad actualizada con éxito!", { id: toastId });
       } else {
-        const data = await createAutoridad(formData, keycloak?.token);
+        const data = await createAutoridad(formData);
         setAutoridades((prev) =>
           [...prev, data.autoridad].sort((a, b) => a.orden - b.orden)
         );
@@ -464,7 +477,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
 
       setHasUnsavedChanges(false);
       setShowAutoridadModal(false);
-    } catch (error) {
+    } catch {
       toast.error("No se pudo guardar la autoridad.", { id: toastId });
     } finally {
       setIsSaving(false);
@@ -477,7 +490,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     e.dataTransfer.effectAllowed = "move";
     try {
       e.dataTransfer.setData("text/plain", `${index}`);
-    } catch (err) {}
+    } catch {
+      // Algunos navegadores no permiten setData: el arrastre funciona igual.
+    }
   };
 
   const handleDragOver = (e, index) => {
@@ -517,9 +532,9 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     const toastId = toast.loading("Guardando nuevo orden...");
     try {
       const ordenIds = updatedList.map((a) => a.id);
-      await reordenarAutoridades(ordenIds, keycloak?.token);
+      await reordenarAutoridades(ordenIds);
       toast.success("¡Orden actualizado con éxito!", { id: toastId });
-    } catch (error) {
+    } catch {
       toast.error("Error al actualizar el orden.", { id: toastId });
       fetchInstitucional(); // Restaurar orden en caso de fallo
     }
@@ -533,7 +548,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
     const toastId = toast.loading("Eliminando autoridad...");
 
     try {
-      await deleteAutoridad(autoridadToDelete.id, keycloak?.token);
+      await deleteAutoridad(autoridadToDelete.id);
 
       const nombreAutoridad = `${autoridadToDelete.nombre || ""} ${autoridadToDelete.apellido || ""}`.trim() || "Autoridad";
       recordCmsActivity({
@@ -547,14 +562,24 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
       toast.success("Autoridad eliminada correctamente.", { id: toastId });
       setAutoridadToDelete(null);
     } catch (error) {
-      toast.error("Error al eliminar la autoridad.", { id: toastId });
+      toast.error(mensajeDeError(error, "Error al eliminar la autoridad."), { id: toastId });
     } finally {
       setIsSaving(false);
     }
   };
 
   // --- GUARDAR REDES SOCIALES ---
+  // Redes sociales: hay cambios si algún enlace quedó distinto del guardado (sin contar espacios al principio o al final).
+  const redesTienenCambios = ["facebook", "instagram"].some(
+    (red) => (tempSocial[red] || "").trim() !== (socialData[red] || "").trim()
+  );
+
   const handleSaveSocial = async () => {
+    if (!redesTienenCambios) {
+      toast.error("No se detectaron cambios para actualizar.");
+      return;
+    }
+
     const fbRaw = (tempSocial.facebook || "").trim();
     const igRaw = (tempSocial.instagram || "").trim();
 
@@ -571,8 +596,7 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
         {
           facebook: fbRaw ? sanitizeUrl(fbRaw) : "",
           instagram: igRaw ? sanitizeUrl(igRaw) : "",
-        },
-        keycloak?.token
+        }
       );
 
       setSocialData(data);
@@ -808,7 +832,12 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
                 <button className="btn-inst-cancel" onClick={() => setIsEditingSocial(false)} disabled={isSaving}>
                   Cancelar
                 </button>
-                <button className="btn-inst-save" onClick={handleSaveSocial} disabled={isSaving}>
+                <button
+                  className="btn-inst-save"
+                  onClick={handleSaveSocial}
+                  disabled={isSaving || !redesTienenCambios}
+                  title={!redesTienenCambios ? "No se han detectado cambios para actualizar" : ""}
+                >
                   <Save size={15} strokeWidth={2.5} /> {isSaving ? "..." : "Guardar"}
                 </button>
               </div>
@@ -1037,7 +1066,8 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving}
+                  disabled={isSaving || (Boolean(editingAutoridad) && !hayCambios)}
+                  title={editingAutoridad && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -1422,7 +1452,8 @@ const CmsInstitucionView = ({ initialCreateModal = false, onModalOpened }) => {
                   type="submit"
                   className="btn-cerrar-rojo"
                   style={{ backgroundColor: "#2b5b94" }}
-                  disabled={isSaving}
+                  disabled={isSaving || !checkSedeHasChanges()}
+                  title={!checkSedeHasChanges() ? "No se han detectado cambios para actualizar" : ""}
                 >
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>

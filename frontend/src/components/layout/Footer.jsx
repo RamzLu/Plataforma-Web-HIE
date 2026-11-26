@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import logosGobierno from "../../assets/logosGobierno.png";
-import logoCompleto from "../../assets/logo-completo.png";
+import membreteInstitucional from "../../assets/membrete-institucional-blanco.png";
+import logoCompleto from "../../assets/logo-hie-oficial.png";
 import { getInstitucional } from "../../api/autoridades.api.js";
 import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
 import "../../styles/layout/Footer.css";
@@ -35,21 +35,6 @@ const Footer = () => {
     };
   }, []);
 
-  const getHandle = (url, defaultHandle) => {
-    if (!url) return defaultHandle;
-    try {
-      const cleaned = url.trim().replace(/\/+$/, "");
-      const parts = cleaned.split("/");
-      const last = parts[parts.length - 1];
-      if (last && !last.includes("?") && !last.includes("&") && last.length > 1) {
-        return `@${last}`;
-      }
-      return defaultHandle;
-    } catch {
-      return defaultHandle;
-    }
-  };
-
   return (
     <footer className="hospital-footer" role="contentinfo" aria-label="Pie de página institucional">
       {/* Línea decorativa superior institucional con degradado */}
@@ -66,6 +51,12 @@ const Footer = () => {
               alt="Hospital Interdistrital Evita" 
               className="footer-main-logo-img" 
             />
+            <div className="footer-brand-text">
+              <span className="footer-brand-line">HOSPITAL</span>
+              <span className="footer-brand-line">INTERDISTRITAL</span>
+              <span className="footer-brand-evita">EVITA</span>
+              <span className="footer-brand-formosa">FORMOSA</span>
+            </div>
           </Link>
 
           <p className="footer-brand-mission">
@@ -140,8 +131,8 @@ const Footer = () => {
             
             <div className="endorsement-panel">
               <img 
-                src={logosGobierno} 
-                alt="Ministerio de Desarrollo Humano - Gobierno de Formosa" 
+                src={membreteInstitucional} 
+                alt="Hospital Interdistrital Evita - Ministerio de Desarrollo Humano - Todos Unidos - Gobierno de Formosa" 
                 className="footer-gov-img"
               />
             </div>

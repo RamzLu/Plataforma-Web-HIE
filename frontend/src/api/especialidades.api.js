@@ -1,34 +1,13 @@
-import axios from './axiosConfig.js';
+import { crearApiEditorial } from "./editorial.api.js";
 
-export const getEspecialidades = async (isAdmin = false) => {
-  const response = await axios.get(`/cms/especialidades?admin=${isAdmin}`);
-  return response.data;
-};
+// Especialidades y servicios comparten ruta: "esServicio" dice a cuál se refiere (en el cuerpo, o en la URL al eliminar).
+const especialidades = crearApiEditorial("especialidades");
 
-export const createEspecialidad = async (data, token) => {
-  const response = await axios.post('/cms/especialidades', data, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
-
-export const updateEspecialidad = async (id, data, token) => {
-  const response = await axios.put(`/cms/especialidades/${id}`, data, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
-
-export const evaluarEspecialidadEstado = async (id, payload, token) => {
-  const response = await axios.patch(`/cms/especialidades/${id}/estado`, payload, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
-
-export const deleteEspecialidad = async (id, token, isServicio) => {
-  const response = await axios.delete(`/cms/especialidades/${id}?isServicio=${isServicio}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
+export const getEspecialidades = especialidades.listar;
+export const createEspecialidad = especialidades.crear;
+export const updateEspecialidad = especialidades.actualizar;
+export const revisarEspecialidad = (id, decision, motivo = "", esServicio = false) =>
+  especialidades.revisar(id, decision, motivo, { esServicio });
+export const deleteEspecialidad = (id, esServicio = false) => especialidades.eliminar(id, { esServicio });
+export const descartarEspecialidad = especialidades.descartar;
+export const restaurarEspecialidad = especialidades.restaurar;

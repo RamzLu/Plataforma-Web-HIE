@@ -1,3 +1,7 @@
+import EtiquetaCategoria from "../../components/ui/EtiquetaCategoria";
+import { mensajeDeError } from "../../utils/mensajeDeError";
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
 import React, { useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { sanitizeHtml } from "../../utils/sanitizeHtml.js";
@@ -35,6 +39,18 @@ import {
   CmsConfirmDraftModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarNoticia, restaurarNoticia } from "../../api/noticias.api.js";
+import BarraFiltros from "../../components/ui/BarraFiltros";
+import { useCambiosReales, formatoHtml } from "../../hooks/useCambiosReales";
 
 registerLocale("es", es);
 
@@ -81,13 +97,17 @@ const CmsNoticiasView = ({
   onUpdateNews,
   onViewNews,
   loading,
+  onRefresh,
   initialCreateModal = false,
   onModalOpened,
 }) => {
   const [viewTab, setViewTab] = useState("PUBLICADO");
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
+  const [busqueda, setBusqueda] = useState("");
 
-  const [showModal, setShowModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showModal, setShowModal] = useState(Boolean(initialCreateModal));
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [showConfirmDraftModal, setShowConfirmDraftModal] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -99,16 +119,51 @@ const CmsNoticiasView = ({
   const [titulo, setTitulo] = useState("");
   const [cuerpoHtml, setCuerpoHtml] = useState("");
   const [categoria, setCategoria] = useState("General");
-  const [estado, setEstado] = useState("BORRADOR");
+  // Igual que handleOpenCreate cuando el modal de crear arranca abierto desde el dashboard.
+  const [estado, setEstado] = useState(initialCreateModal ? "PUBLICADO" : "BORRADOR");
   const [fechaProgramada, setFechaProgramada] = useState(null);
   const [imagenesUrls, setImagenesUrls] = useState([]);
   const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
+
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  // El cuerpo se compara como el backend: con formato (una negrita es un cambio) pero sin contar espacios.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, {
+    titulo,
+    cuerpoHtml: formatoHtml(cuerpoHtml),
+    categoria,
+    estado,
+    fechaProgramada,
+    imagenesUrls,
+    archivosSeleccionados,
+  });
   const [saving, setSaving] = useState(false);
 
   const [noticiaAEliminar, setNoticiaAEliminar] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarNoticia(item.id),
+    restaurar: (item) => restaurarNoticia(item.id),
+    recargar: async () => {
+      if (onRefresh) await onRefresh();
+    },
+  });
+
+  // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
+  const cuentas = { PAPELERA: 0, PUBLICADO: 0, BORRADOR: 0, PENDIENTE_APROBACION: 0, PROGRAMADO: 0, RECHAZADO: 0 };
+  (newsList || []).forEach((n) => {
+    if (n.enPapelera) {
+      cuentas.PAPELERA++;
+      return;
+    }
+    const e = n.estado ? n.estado.toUpperCase() : n.isDraft ? "BORRADOR" : "PUBLICADO";
+    if (estaPublicadoEnPortal(n)) cuentas.PUBLICADO++;
+    if (e in cuentas && e !== "PUBLICADO") cuentas[e]++;
+  });
+
   const filteredNews = (newsList || []).filter((n) => {
+    if (viewTab === "PAPELERA" ? !n.enPapelera : n.enPapelera) return false;
     const estadoItem = n.estado
       ? n.estado.toUpperCase()
       : n.isDraft
@@ -116,14 +171,18 @@ const CmsNoticiasView = ({
       : "PUBLICADO";
 
     const matchEstado =
-      viewTab === "PUBLICADO"
-        ? estadoItem === "PUBLICADO" || estadoItem === "APROBADO"
+      viewTab === "TODOS" || viewTab === "PAPELERA"
+        ? true
+        : viewTab === "PUBLICADO"
+        ? estaPublicadoEnPortal(n)
         : estadoItem === viewTab;
 
     const matchCategoria =
       filtroCategoria === "Todas" || n.category === filtroCategoria;
-    return matchEstado && matchCategoria;
+    const matchBusqueda = !busqueda || String(n.title || "").toLowerCase().includes(busqueda.trim().toLowerCase());
+    return matchEstado && matchCategoria && matchBusqueda;
   });
+  const paginacion = usePaginacion(vistaPublicados(filteredNews, viewTab === "PUBLICADO"), 10, [viewTab, filtroCategoria, busqueda]);
 
   const handleOpenCreate = () => {
     setEditingId(null);
@@ -139,12 +198,10 @@ const CmsNoticiasView = ({
     setShowModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showModal): solo se avisa al panel para que no lo reabra.
   React.useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   const handleOpenEdit = (news) => {
     setEditingId(news.id);
@@ -205,7 +262,7 @@ const CmsNoticiasView = ({
 
   const handleCloseAttempt = () => {
     if (saving) return;
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowModal(false);
@@ -231,8 +288,7 @@ const CmsNoticiasView = ({
     setDeletingId(id);
 
     try {
-      const token = keycloak.token;
-      if (!token) {
+      if (!keycloak.token) {
         toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
@@ -243,7 +299,16 @@ const CmsNoticiasView = ({
         (newsList || []).find((n) => n.id === id);
       const tituloNoticia = noticia?.title || noticia?.titulo || "Noticia";
 
-      await deleteNoticia(id, token);
+      const respuesta = await deleteNoticia(id);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { duration: 6000 });
+        setShowDeleteModal(false);
+        setNoticiaAEliminar(null);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        if (onRefresh) onRefresh();
+        return;
+      }
       recordCmsActivity({
         titulo: `Eliminó noticia: "${tituloNoticia}"`,
         categoria: noticia?.category || "Noticias",
@@ -257,8 +322,7 @@ const CmsNoticiasView = ({
     } catch (error) {
       console.error("Error al eliminar noticia:", error);
       toast.error(
-        error.response?.data?.error?.message ||
-          "Ocurrió un error al intentar eliminar la noticia."
+        mensajeDeError(error, "Ocurrió un error al intentar eliminar la noticia.")
       );
     } finally {
       setDeletingId(null);
@@ -290,6 +354,12 @@ const CmsNoticiasView = ({
 
   const handleSave = async (e, forcedEstado, bypassDraftWarning = false) => {
     if (e) e.preventDefault();
+
+    if ((editingId || correctionNews) && !hayCambios) {
+      toast.error("No se han detectado cambios para actualizar.");
+      setShowUnsavedModal(false);
+      return;
+    }
 
     const textoContenido =
       typeof cuerpoHtml === "string"
@@ -323,8 +393,7 @@ const CmsNoticiasView = ({
       if (keycloak.authenticated) {
         await keycloak.updateToken(30).catch(() => {});
       }
-      const token = keycloak.token;
-      if (!token) {
+      if (!keycloak.token) {
         toast.error("Tu sesión ha expirado.");
         keycloak.login();
         return;
@@ -384,8 +453,8 @@ const CmsNoticiasView = ({
 
       let data;
       if (editingId) {
-        data = await updateNoticia(editingId, formData, token);
-        const estadoDevuelto = (data.noticia?.estado || "").toUpperCase();
+        data = await updateNoticia(editingId, formData);
+        const estadoDevuelto = (data.data?.estado || "").toUpperCase();
         if (estadoSolicitado === "BORRADOR" && estadoDevuelto === "PENDIENTE_APROBACION") {
           toast.success(
             "Solicitud para pasar la noticia a Borrador enviada al administrador para su aprobación."
@@ -404,8 +473,8 @@ const CmsNoticiasView = ({
           );
         }
       } else {
-        data = await createNoticia(formData, token);
-        const estadoDevuelto = (data.noticia?.estado || "").toUpperCase();
+        data = await createNoticia(formData);
+        const estadoDevuelto = (data.data?.estado || "").toUpperCase();
         toast.success(
           estadoDevuelto === "BORRADOR"
             ? "Borrador guardado con éxito."
@@ -413,7 +482,7 @@ const CmsNoticiasView = ({
         );
       }
 
-const estadoGuardado = data.noticia?.estado || "PENDIENTE_APROBACION";
+const estadoGuardado = data.data?.estado || "PENDIENTE_APROBACION";
 
       const catSlugMap = {
         "cáncer de mama": "cancer-mama",
@@ -436,28 +505,28 @@ const estadoGuardado = data.noticia?.estado || "PENDIENTE_APROBACION";
         editor: editorResponsable,
         estado: estadoFinal,
         timestamp: Date.now(),
-        newsId: String(data.noticia?.id || editingId),
+        newsId: String(data.data?.id || editingId),
       });
 
       const noticiaFormateada = {
-        id: data.noticia?.id || editingId,
+        id: data.data?.id || editingId,
         title: titulo,
         body: [textoContenido],
-date: data.noticia?.createdAt
-          ? new Date(data.noticia.createdAt).toLocaleDateString("es-AR")
+date: data.data?.createdAt
+          ? new Date(data.data.createdAt).toLocaleDateString("es-AR")
           : new Date().toLocaleDateString("es-AR"),
-        createdAt: data.noticia?.createdAt || prevNoticia?.createdAt || new Date().toISOString(),
-        updatedAt: data.noticia?.updatedAt || new Date().toISOString(),
+        createdAt: data.data?.createdAt || prevNoticia?.createdAt || new Date().toISOString(),
+        updatedAt: data.data?.updatedAt || new Date().toISOString(),
         category: categoria || "General",
         estado: estadoGuardado,
-        requestedEstado: data.noticia?.requestedEstado || null,
-        previousEstado: data.noticia?.previousEstado || null,
+        requestedEstado: data.data?.requestedEstado || null,
+        previousEstado: data.data?.previousEstado || null,
         isDraft: estadoGuardado === "BORRADOR",
-        images: data.noticia?.images || imagenesUrls || [],
-editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
-        editedBy: editingId ? (data.noticia?.editedBy || editorResponsable) : null,
-        fechaPublicacion: data.noticia?.fechaPublicacion || null,
-        rejectionReason: data.noticia?.rejectionReason || null,
+        images: data.data?.images || imagenesUrls || [],
+editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
+        editedBy: editingId ? (data.data?.editedBy || editorResponsable) : null,
+        fechaPublicacion: data.data?.fechaPublicacion || null,
+        rejectionReason: data.data?.rejectionReason || null,
         actionTitle: accionTitulo,
       };
 
@@ -466,6 +535,8 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
       } else {
         if (onAddNewNews) onAddNewNews(noticiaFormateada);
       }
+      // La lista se vuelve a pedir: lo que devuelve el guardado no trae todo (versión publicada, pedidos pendientes).
+      if (onRefresh) onRefresh();
 
       setViewTab(estadoGuardado);
       setHasUnsavedChanges(false);
@@ -477,10 +548,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
       console.error("Error al guardar noticia:", error);
       toast.error(
         `Error: ${
-          error.response?.data?.error?.message ||
-          error.response?.data?.message ||
-          error.message ||
-          "Error al guardar"
+          mensajeDeError(error, "Error al guardar")
         }`
       );
     } finally {
@@ -502,7 +570,26 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
   );
 
   return (
-    <div className="cms-dashboard-card">
+    <>
+      <div style={{ marginBottom: "18px" }}>
+        <FiltrosEstado
+                    activa={viewTab}
+                    onCambiar={setViewTab}
+                    todos
+                    onActualizar={onRefresh}
+                    actualizando={loading}
+                    opciones={[
+                      { clave: "PENDIENTE_APROBACION", tipo: "pendiente", cuenta: cuentas.PENDIENTE_APROBACION },
+                      { clave: "PUBLICADO", tipo: "publicado", cuenta: cuentas.PUBLICADO },
+                      { clave: "PROGRAMADO", tipo: "programado", cuenta: cuentas.PROGRAMADO },
+                      { clave: "RECHAZADO", tipo: "rechazado", cuenta: cuentas.RECHAZADO },
+                      { clave: "BORRADOR", tipo: "borrador", cuenta: cuentas.BORRADOR },
+                      { clave: "PAPELERA", tipo: "papelera", cuenta: cuentas.PAPELERA },
+          ]}
+                  />
+      </div>
+
+      <div className="cms-dashboard-card">
       <div className="news-view-header">
         <div>
           <h3 className="cms-card-title news-view-title">Listado de las noticias</h3>
@@ -510,99 +597,21 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
             Administre las publicaciones y artículos clasificados del portal.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn-crear-noticia-header"
-          onClick={handleOpenCreate}
-        >
-          + CREAR NOTICIA
-        </button>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-          flexWrap: "wrap",
-          gap: "15px",
-        }}
-      >
-        <div className="news-tabs-group">
-          <button
-            type="button"
-            className={`news-tab-item ${viewTab === "PUBLICADO" ? "active" : ""}`}
-            onClick={() => setViewTab("PUBLICADO")}
-          >
-            Publicados
-          </button>
-          <button
-            type="button"
-            className={`news-tab-item ${viewTab === "BORRADOR" ? "active" : ""}`}
-            onClick={() => setViewTab("BORRADOR")}
-          >
-            Borradores
-          </button>
-          <button
-            type="button"
-            className={`news-tab-item ${
-              viewTab === "PENDIENTE_APROBACION" ? "active" : ""
-            }`}
-            onClick={() => setViewTab("PENDIENTE_APROBACION")}
-          >
-            Pendientes
-          </button>
-          <button
-            type="button"
-            className={`news-tab-item ${viewTab === "PROGRAMADO" ? "active" : ""}`}
-            onClick={() => setViewTab("PROGRAMADO")}
-          >
-            Programados
-          </button>
-          <button
-            type="button"
-            className={`news-tab-item ${viewTab === "RECHAZADO" ? "active" : ""}`}
-            onClick={() => setViewTab("RECHAZADO")}
-          >
-            Rechazados
-          </button>
-        </div>
+      <BarraFiltros
+        crear={{ texto: "+ AÑADIR NOTICIA", onClick: handleOpenCreate }}
+          busqueda={{ etiqueta: "Buscar noticia", placeholder: "Buscar por título...", valor: busqueda, onCambio: setBusqueda }}
+          select={{
+            etiqueta: "Clasificación",
+            valor: filtroCategoria,
+            onCambio: setFiltroCategoria,
+            opciones: [{ valor: "Todas", texto: "Todas las clasificaciones" }, ...CATEGORIAS.map((c) => ({ valor: c, texto: c }))],
+          }}
+        />
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span
-            style={{
-              fontSize: "0.85rem",
-              fontWeight: "700",
-              color: "#64748b",
-              textTransform: "uppercase",
-            }}
-          >
-            Filtrar por:
-          </span>
-          <select
-            value={filtroCategoria}
-            onChange={(e) => setFiltroCategoria(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid #cbd5e1",
-              fontWeight: "600",
-              color: "#0c2340",
-              outline: "none",
-            }}
-          >
-            <option value="Todas">Todas las clasificaciones</option>
-            {CATEGORIAS.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="cms-news-table-container">
+      {viewTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-news-table-container">
         <div className="news-table-head">
           <div className="col-content">CONTENIDO</div>
           <div className="col-editor">EDITOR / FECHA</div>
@@ -626,11 +635,12 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
               No hay noticias registradas con estos filtros.
             </div>
           ) : (
-            filteredNews.map((news) => {
+            paginacion.itemsPagina.map((news) => {
               const estadoUpper = (
                 news.estado || (news.isDraft ? "BORRADOR" : "PUBLICADO")
               ).toUpperCase();
               const isRejected = estadoUpper === "RECHAZADO";
+              const estadoMostrado = news.estadoVista || estadoUpper;
 
               return (
                 <div className="news-table-row" key={news.id}>
@@ -657,11 +667,11 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div
                         className="news-title-interactive"
-                        onClick={() => onViewNews && onViewNews(news)}
+                        onClick={() => onViewNews && onViewNews(news)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => onViewNews && onViewNews(news))}
                         title="Ver comunicado completo"
                       >
                         <span className="activity-title news-title-clamped">
-                          {news.title}
+                          {tituloEnLista(news, viewTab === "PUBLICADO", news.title)}
                         </span>
                         {news.editedBy && (
                           <span
@@ -680,7 +690,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                       {isRejected && (
                         <div
                           className="news-rejection-warning-pill"
-                          onClick={() => handleOpenCorrection(news)}
+                          onClick={() => handleOpenCorrection(news)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleOpenCorrection(news))}
                           title="Haga clic para ver el motivo del rechazo y corregir la noticia"
                         >
                           <svg
@@ -726,56 +736,49 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                   </div>
 
                   <div className="col-categoria">
-                    <span
-                      style={{
-                        backgroundColor:
-                          news.category === "General" ? "#f1f5f9" : "#e0f2fe",
-                        color: news.category === "General" ? "#475569" : "#0284c7",
-                        padding: "4px 10px",
-                        borderRadius: "6px",
-                        fontSize: "0.75rem",
-                        fontWeight: "700",
-                      }}
-                    >
-                      {news.category || "General"}
-                    </span>
+                    <EtiquetaCategoria categoria={news.category || "General"} />
                   </div>
 
                   <div className="col-estado">
                     <div className="status-wrapper">
-                      {isRejected ? (
+                      {news.solicitudEliminacion && viewTab !== "PUBLICADO" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+{isRejected && !news.estadoVista ? (
                         <span
-                          className="status-badge rejected"
                           onClick={() => handleOpenCorrection(news)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => activarConTeclado(e, () => handleOpenCorrection(news))}
                           title="Haga clic para corregir la noticia"
+                          style={{ cursor: "pointer" }}
                         >
-                          • RECHAZADO
+                          <EtiquetaEstado estado="RECHAZADO" texto="Rechazado" />
                         </span>
                       ) : (
-                        <span
-                          className={`status-badge ${
-                            estadoUpper === "PUBLICADO" || estadoUpper === "APROBADO"
-                              ? "publicado"
-                              : estadoUpper === "PROGRAMADO"
-                              ? "programado"
-                              : "pendiente"
-                          }`}
-                        >
-                          {estadoUpper === "PENDIENTE_APROBACION"
-                            ? "PENDIENTE"
-                            : estadoUpper}
-                        </span>
+                        <EtiquetaEstado estado={estadoMostrado} texto={textoDeEstado(estadoMostrado)} />
                       )}
 
-                      {estadoUpper === "PENDIENTE_APROBACION" &&
+                      <SiguePublicado item={news} activo={viewTab === "PUBLICADO"} />
+<NotaPapelera item={news} />
+                      {news.solicitudEliminacion && (
+                        <div style={{ marginTop: "4px" }}>
+                          <EtiquetaEliminacion nota />
+                        </div>
+                      )}
+</>
+)}
+
+                      {estadoMostrado === "PENDIENTE_APROBACION" &&
                         news.requestedEstado === "BORRADOR" && (
                           <span className="status-programmed-date">
                             Cambio a: Borrador
                           </span>
                         )}
 
-                      {(estadoUpper === "PROGRAMADO" ||
-                        estadoUpper === "PENDIENTE_APROBACION") &&
+                      {(estadoMostrado === "PROGRAMADO" ||
+                        estadoMostrado === "PENDIENTE_APROBACION") &&
                         news.fechaPublicacion && (
                           <span className="status-programmed-date">
                             Para:{" "}
@@ -792,6 +795,15 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                   </div>
 
                   <div className="news-actions-cell">
+{news.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(news)}
+  onEliminar={() => handleConfirmDeleteClick(news.id)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                     {isRejected ? (
                       <>
                         <button
@@ -885,11 +897,16 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                         </svg>
                       )}
                     </button>
-                  </div>
+                  
+{esDescartable(news) && <BotonADescartar onClick={() => papelera.descartarItem(news)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
                 </div>
               );
             })
           )}
+          <Paginacion {...paginacion} etiqueta="noticias" />
         </div>
       </div>
 
@@ -898,6 +915,7 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleExecuteDelete}
         itemType="la noticia"
+        requiereAprobacion={requiereAprobacionParaEliminar((newsList || []).find((n) => n.id === noticiaAEliminar))}
         isDeleting={deletingId === noticiaAEliminar}
       />
 
@@ -1261,6 +1279,13 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                             options: ["left", "center", "right", "justify"],
                           },
                         }}
+                        onReady={(editor) => {
+                          // CKEditor puede reescribir el HTML guardado al cargarlo (otro orden o espaciado).
+                          // Con el formulario limpio, esa versión pasa a ser la base: si se escribe algo y se
+                          // deshace, vuelve a quedar igual y el botón se deshabilita. El backend sanea el cuerpo
+                          // antes de comparar, así que esta versión no se toma como un cambio.
+                          if (!hasUnsavedChanges) setCuerpoHtml(editor.getData());
+                        }}
                         onChange={(event, editor) => {
                           setCuerpoHtml(editor.getData());
                           setHasUnsavedChanges(true);
@@ -1381,7 +1406,8 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                         color: "#0c2340",
                       }}
                       onClick={(e) => handleSave(e, "BORRADOR", true)}
-                      disabled={saving}
+                      disabled={saving || !hayCambios}
+                      title={!hayCambios ? "No se han detectado cambios para actualizar" : ""}
                     >
                       GUARDAR BORRADOR
                     </button>
@@ -1394,7 +1420,8 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                         alignItems: "center",
                         gap: "8px",
                       }}
-                      disabled={saving}
+                      disabled={saving || !hayCambios}
+                      title={!hayCambios ? "No se han detectado cambios para actualizar" : ""}
                     >
                       {saving ? (
                         <span
@@ -1441,7 +1468,8 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
                     type="submit"
                     className="btn-cerrar-rojo"
                     style={{ backgroundColor: "#2b5b94" }}
-                    disabled={saving}
+                    disabled={saving || (Boolean(editingId) && !hayCambios)}
+                    title={editingId && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
                   >
                     {saving ? (
                       <span
@@ -1501,7 +1529,8 @@ editor: data.noticia?.editor || prevNoticia?.editor || editorResponsable,
         onDiscard={handleForceClose}
         onSaveDraft={(e) => handleSave(e, "BORRADOR", true)}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

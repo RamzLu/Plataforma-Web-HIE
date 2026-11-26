@@ -1,27 +1,11 @@
-import api from "./axiosConfig.js";
+import { crearApiEditorial } from "./editorial.api.js";
 
-export const getProfesionales = async (isAdmin = false) => {
-  const response = await api.get(isAdmin ? "/cms/profesionales?admin=true" : "/cms/profesionales");
-  return response.data;
-};
+const profesionales = crearApiEditorial("profesionales");
 
-export const createProfesional = async (formData, token) => {
-  const response = await api.post("/cms/profesionales", formData, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
-
-export const updateProfesional = async (id, formData, token) => {
-  const response = await api.put(`/cms/profesionales/${id}`, formData, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
-
-export const deleteProfesional = async (id, token) => {
-  const response = await api.delete(`/cms/profesionales/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  return response.data;
-};
+export const getProfesionales = profesionales.listar;
+export const createProfesional = profesionales.crear;
+export const updateProfesional = profesionales.actualizar;
+export const revisarProfesional = profesionales.revisar;
+export const deleteProfesional = profesionales.eliminar;
+export const descartarProfesional = profesionales.descartar;
+export const restaurarProfesional = profesionales.restaurar;

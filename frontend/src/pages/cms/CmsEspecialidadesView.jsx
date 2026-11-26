@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { EtiquetaTipo } from "../../components/ui/EtiquetaCategoria";
+import { mensajeDeError } from "../../utils/mensajeDeError";
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import keycloak from "../../config/keycloak";
 import { getEspecialidades, createEspecialidad, updateEspecialidad, deleteEspecialidad } from "../../api/especialidades.api.js";
@@ -11,6 +15,17 @@ import {
   CmsDeleteModal,
   CmsUnsavedChangesModal,
 } from "../../components/cms/CmsModals";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import { estaPublicadoEnPortal, requiereAprobacionParaEliminar, tituloEnLista, vistaPublicados, esDescartable } from "../../utils/publicacion.js";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import { textoDeEstado } from "../../components/ui/estados.js";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import { usePapelera } from "../../hooks/usePapelera";
+import { AccionesPapelera, BotonADescartar, NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import { descartarEspecialidad, restaurarEspecialidad } from "../../api/especialidades.api.js";
+import BarraFiltros from "../../components/ui/BarraFiltros";
+import { useCambiosReales } from "../../hooks/useCambiosReales";
 
 const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) => {
   const [especialidades, setEspecialidades] = useState([]);
@@ -21,7 +36,9 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [showModal, setShowModal] = useState(false);
+  // Si se llegó desde un acceso rápido del dashboard, el modal de crear arranca abierto
+  // (los demás campos ya empiezan con los valores de un contenido nuevo).
+  const [showModal, setShowModal] = useState(Boolean(initialCreateModal));
   const [editingId, setEditingId] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
@@ -32,22 +49,30 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     esServicio: false, estado: "PUBLICADO"
   });
 
+  // Cambios reales: si se edita algo y se vuelve a dejar como estaba, el botón de guardar se vuelve a deshabilitar.
+  const hayCambios = useCambiosReales(hasUnsavedChanges, { formData });
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemAEliminar, setItemAEliminar] = useState(null);
 
-  useEffect(() => { cargarDatos(); }, []);
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerDatos = () =>
+    getEspecialidades(true)
+      .then((data) => setEspecialidades(data))
+      .catch(() => toast.error("Error al cargar los datos."))
+      .finally(() => setLoading(false));
 
+  // Recarga a pedido: muestra la carga y después trae los datos.
   const cargarDatos = async () => {
     setLoading(true);
-    try {
-      const data = await getEspecialidades(true);
-      setEspecialidades(data);
-    } catch (error) { toast.error("Error al cargar los datos."); } 
-    finally { setLoading(false); }
+    await traerDatos();
   };
 
+  // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+  useEffect(() => { traerDatos(); }, []);
+
   const handleCloseAttempt = () => {
-    if (hasUnsavedChanges) {
+    if (hayCambios) {
       setShowUnsavedModal(true);
     } else {
       setShowModal(false);
@@ -71,12 +96,10 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     setShowModal(true);
   };
 
+  // El modal ya arrancó abierto (ver el estado inicial de showModal): solo se avisa al panel para que no lo reabra.
   useEffect(() => {
-    if (initialCreateModal) {
-      handleOpenCreate();
-      if (onModalOpened) onModalOpened();
-    }
-  }, [initialCreateModal]);
+    if (initialCreateModal && onModalOpened) onModalOpened();
+  }, [initialCreateModal, onModalOpened]);
 
   const handleOpenEdit = (esp) => {
     setEditingId(esp.id);
@@ -88,7 +111,8 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       requisitos: esp.requisitos ? esp.requisitos.join("\n") : "",
       informacionDerivacion: esp.informacionDerivacion || "",
       esServicio: esp.esServicio, 
-      estado: esp.estado || "PUBLICADO"
+      // Lo que el CM puede pedir es publicar o archivar; un estado como RECHAZADO o PENDIENTE no se reenvía.
+      estado: esp.estado === "ARCHIVADO" ? "ARCHIVADO" : "PUBLICADO"
     });
     setHasUnsavedChanges(false);
     setShowModal(true);
@@ -96,11 +120,15 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (editingId && !hayCambios) {
+      return toast.error("No se han detectado cambios para actualizar.");
+    }
     if (!formData.nombre.trim()) return toast.error("El nombre es obligatorio.");
 
     const payload = {
       ...formData,
-      requisitos: formData.requisitos.split("\n").map(r => r.trim()).filter(r => r)
+      requisitos: formData.requisitos.split("\n").map(r => r.trim()).filter(r => r),
+      editor: keycloak?.tokenParsed?.name || keycloak?.idTokenParsed?.name || keycloak?.tokenParsed?.preferred_username || ""
     };
 
     setIsSaving(true);
@@ -108,18 +136,20 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       if (keycloak.authenticated) {
         await keycloak.updateToken(30).catch(() => {});
       }
-      const token = keycloak.token;
       let resp;
       if (editingId) {
-        resp = await updateEspecialidad(editingId, payload, token);
+        resp = await updateEspecialidad(editingId, payload);
       } else {
-        resp = await createEspecialidad(payload, token);
+        resp = await createEspecialidad(payload);
       }
 
       const estadoResultante = (resp?.data?.estado || payload.estado || "PENDIENTE_APROBACION").toUpperCase();
       if (estadoResultante === "PENDIENTE_APROBACION") {
+        const esArchivado = payload.estado === "ARCHIVADO" || resp?.data?.requestedEstado === "ARCHIVADO";
         toast.success(
-          editingId
+          esArchivado
+            ? "Solicitud de archivado enviada a revisión del administrador."
+            : editingId
             ? "Modificaciones enviadas a revisión del administrador."
             : "Especialidad/Servicio enviado a revisión del administrador para su aprobación."
         );
@@ -133,7 +163,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       setHasUnsavedChanges(false);
       cargarDatos();
     } catch (error) {
-      toast.error(error.response?.data?.error || "Error al guardar.");
+      toast.error(mensajeDeError(error, "Error al guardar."));
     } finally {
       setIsSaving(false);
     }
@@ -144,7 +174,15 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
   const executeDelete = async () => {
     setIsDeleting(true); 
     try {
-      await deleteEspecialidad(itemAEliminar.id, keycloak.token, itemAEliminar.esServicio);
+      const respuesta = await deleteEspecialidad(itemAEliminar.id, itemAEliminar.esServicio);
+      // Si el contenido está publicado, el backend no lo borra: queda una solicitud para el administrador.
+      if (respuesta?.solicitudEliminacion) {
+        toast.success(respuesta.message, { duration: 6000 });
+        setShowDeleteModal(false);
+        // El pedido queda registrado en el servidor: se vuelve a pedir la lista para que la fila lo muestre.
+        cargarDatos();
+        return;
+      }
       const tipo = itemAEliminar.esServicio ? "servicio" : "especialidad";
       recordCmsActivity({
         titulo: `Eliminó ${tipo}: "${itemAEliminar.nombre || ""}"`,
@@ -156,7 +194,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
       setShowDeleteModal(false);
       cargarDatos();
     } catch (error) {
-      const msg = error.response?.data?.error?.message || "Error al intentar eliminar.";
+      const msg = mensajeDeError(error, "Error al intentar eliminar.");
       toast.error(msg, { duration: 5000 });
       setShowDeleteModal(false);
     } finally {
@@ -164,11 +202,35 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
     }
   };
 
+  // Papelera de lo rechazado: mandar a la Papelera y restaurar (solo el CM; se vacía sola a los 15 días).
+  const papelera = usePapelera({
+    descartar: (item) => descartarEspecialidad(item.id, { esServicio: item.esServicio }),
+    restaurar: (item) => restaurarEspecialidad(item.id, { esServicio: item.esServicio }),
+    recargar: cargarDatos,
+  });
+
+  // Cantidad por filtro (lo publicado con una actualización en revisión cuenta también como publicado).
+  const cuentas = { PAPELERA: 0, PUBLICADOS: 0, PENDIENTES: 0, RECHAZADOS: 0, ARCHIVADOS: 0 };
+  especialidades.forEach((esp) => {
+    if (esp.enPapelera) {
+      cuentas.PAPELERA++;
+      return;
+    }
+    const e = (esp.estado || "PUBLICADO").toUpperCase();
+    if (estaPublicadoEnPortal(esp)) cuentas.PUBLICADOS++;
+    if (e === "PENDIENTE_APROBACION") cuentas.PENDIENTES++;
+    else if (e === "RECHAZADO") cuentas.RECHAZADOS++;
+    else if (e === "ARCHIVADO" || e === "BORRADOR") cuentas.ARCHIVADOS++;
+  });
+
   const datosFiltrados = especialidades.filter((esp) => {
+    if (activeTab === "PAPELERA" ? !esp.enPapelera : esp.enPapelera) return false;
     const estadoItem = (esp.estado || "PUBLICADO").toUpperCase();
     let matchEstado = false;
-    if (activeTab === "PUBLICADOS") {
-      matchEstado = estadoItem === "PUBLICADO" || estadoItem === "APROBADO";
+    if (activeTab === "TODOS" || activeTab === "PAPELERA") {
+      matchEstado = true;
+    } else if (activeTab === "PUBLICADOS") {
+      matchEstado = estaPublicadoEnPortal(esp);
     } else if (activeTab === "PENDIENTES") {
       matchEstado = estadoItem === "PENDIENTE_APROBACION";
     } else if (activeTab === "RECHAZADOS") {
@@ -190,10 +252,28 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
 
     return matchEstado && matchTipo && matchSearch;
   });
+  const paginacion = usePaginacion(vistaPublicados(datosFiltrados, activeTab === "PUBLICADOS"), 10, [activeTab, filtroTipo, searchTerm]);
 
   return (
-    <div className="cms-dashboard-card">
-      {/* Cabecera idéntica a Noticias y Profesionales */}
+    <>
+      <div style={{ marginBottom: "18px" }}>
+        <FiltrosEstado
+                    activa={activeTab}
+                    onCambiar={setActiveTab}
+                    todos
+                    onActualizar={cargarDatos}
+                    actualizando={loading}
+                    opciones={[
+                      { clave: "PENDIENTES", tipo: "pendiente", cuenta: cuentas.PENDIENTES },
+                      { clave: "PUBLICADOS", tipo: "publicado", cuenta: cuentas.PUBLICADOS },
+                      { clave: "RECHAZADOS", tipo: "rechazado", cuenta: cuentas.RECHAZADOS },
+                      { clave: "ARCHIVADOS", tipo: "archivado", cuenta: cuentas.ARCHIVADOS },
+                      { clave: "PAPELERA", tipo: "papelera", cuenta: cuentas.PAPELERA },
+          ]}
+                  />
+      </div>
+
+      <div className="cms-dashboard-card">
       <div className="news-view-header">
         <div>
           <h3 className="cms-card-title news-view-title">
@@ -203,88 +283,32 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
             Administre las especialidades médicas y servicios clave de la institución.
           </p>
         </div>
-        <button type="button" className="btn-crear-noticia-header" onClick={handleOpenCreate}>
-          + AÑADIR ESPECIALIDAD
-        </button>
       </div>
 
-      {/* Barra de herramientas: Pestañas a la izquierda, buscador y filtros a la derecha */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
-        
-        {/* Pestañas de estado idénticas a Noticias */}
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <button 
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "PUBLICADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("PUBLICADOS")}
-          >
-            Publicados
-          </button>
-          <button 
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "PENDIENTES" ? "active" : ""}`}
-            onClick={() => setActiveTab("PENDIENTES")}
-          >
-            Pendientes de aprobación
-          </button>
-          <button 
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "RECHAZADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("RECHAZADOS")}
-          >
-            Rechazados
-          </button>
-          <button 
-            type="button"
-            className={`res-tab-btn-unificado ${activeTab === "ARCHIVADOS" ? "active" : ""}`}
-            onClick={() => setActiveTab("ARCHIVADOS")}
-          >
-            Archivados
-          </button>
-        </div>
+      <BarraFiltros
+        crear={{ texto: "+ AÑADIR ESPECIALIDAD", onClick: handleOpenCreate }}
+          busqueda={{ etiqueta: "Buscar especialidad o servicio", placeholder: "Buscar por nombre o ubicación...", valor: searchTerm, onCambio: setSearchTerm }}
+          select={{
+            etiqueta: "Clasificación",
+            valor: filtroTipo,
+            onCambio: setFiltroTipo,
+            opciones: [
+              { valor: "TODOS", texto: "Todas las clasificaciones" },
+              { valor: "ESPECIALIDADES", texto: "Solo Especialidades" },
+              { valor: "SERVICIOS", texto: "Solo Servicios Clave" },
+            ],
+          }}
+        />
 
-        {/* Buscador y Selector alineados */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-          <div className="res-search-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input 
-              type="text" 
-              placeholder="Buscar por nombre o ubicación..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="res-search-input-field"
-            />
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "#64748b", textTransform: "uppercase" }}>
-              FILTRAR POR:
-            </span>
-            <select 
-              value={filtroTipo} 
-              onChange={(e) => setFiltroTipo(e.target.value)}
-              className="res-select-field"
-            >
-              <option value="TODOS">Todas las clasificaciones</option>
-              <option value="ESPECIALIDADES">Solo Especialidades</option>
-              <option value="SERVICIOS">Solo Servicios Clave</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Contenedor de la tabla idéntico al estilo de Noticias y Profesionales */}
-      <div className="cms-news-table-container">
+      {activeTab === "PAPELERA" && <AvisoPapelera />}
+<div className="cms-news-table-container">
         <div className="activity-table-head news-table-head" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <div style={{ flex: 1.8 }}>CONTENIDO</div>
           <div style={{ flex: 1.2 }}>UBICACIÓN</div>
           <div style={{ flex: 1 }}>HORARIOS</div>
           <div style={{ flex: 1 }}>CLASIFICACIÓN</div>
-          <div style={{ width: "120px", textAlign: "center" }}>ESTADO</div>
-          <div style={{ width: "100px", textAlign: "center" }}>ACCIONES</div>
+          <div style={{ width: "200px", textAlign: "center" }}>ESTADO</div>
+          <div style={{ width: "140px", textAlign: "center" }}>ACCIONES</div>
         </div>
 
         <div className="activity-table-body">
@@ -299,10 +323,9 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
               No se encontraron registros que coincidan con los filtros aplicados.
             </div> 
           ) : (
-            datosFiltrados.map((esp) => (
+            paginacion.itemsPagina.map((esp) => (
               <div className="activity-row news-table-row" key={esp.id + (esp.esServicio ? 'srv' : 'esp')} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                 
-                {/* Columna CONTENIDO con miniatura e información */}
                 <div className="col-content" style={{ flex: 1.8, display: "flex", flexDirection: "row", alignItems: "center", gap: "15px" }}>
                   <div className="news-thumb-box" style={{ display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f1f5f9" }}>
                     <div className="news-thumb-mock" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
@@ -311,7 +334,7 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                   </div>
                   <div className="news-title-interactive">
                     <span className="activity-title" style={{ fontWeight: "600", color: "#0c2340", fontSize: "0.95rem", display: "block" }}>
-                      {esp.nombre}
+                      {tituloEnLista(esp, activeTab === "PUBLICADOS", esp.nombre)}
                     </span>
                     <span style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "4px", display: "block" }}>
                       {esp.descripcion && esp.descripcion.length > 55 
@@ -338,51 +361,45 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                   </div>
                 </div>
 
-                {/* Columna UBICACIÓN */}
                 <div style={{ flex: 1.2, color: "#475569", fontSize: "0.9rem", fontWeight: "500" }}>
                   {esp.ubicacion || "Sin ubicación asignada"}
                 </div>
 
-                {/* Columna HORARIOS */}
                 <div style={{ flex: 1, color: "#475569", fontSize: "0.9rem", fontWeight: "500" }}>
                   {esp.horarios || "Consultar horarios"}
                 </div>
 
-                {/* Columna CLASIFICACIÓN (estilo idéntico a Noticias y Profesionales) */}
                 <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-                  <span style={{ 
-                    backgroundColor: esp.esServicio ? "#e0f2fe" : "#ede9fe", 
-                    color: esp.esServicio ? "#0284c7" : "#6d28d9", 
-                    padding: "6px 14px", 
-                    borderRadius: "8px", 
-                    fontSize: "0.85rem", 
-                    fontWeight: "700" 
-                  }}>
-                    {esp.esServicio ? "SERVICIO CLAVE" : "ESPECIALIDAD"}
-                  </span>
+                  <EtiquetaTipo esServicio={esp.esServicio} />
                 </div>
 
-                {/* Columna ESTADO */}
-                <div style={{ width: "130px", textAlign: "center" }}>
-                  <span
-                    className={`status-badge ${
-                      esp.estado === "PUBLICADO"
-                        ? "publicado"
-                        : esp.estado === "PENDIENTE_APROBACION"
-                        ? "pendiente"
-                        : esp.estado === "RECHAZADO"
-                        ? "rechazado"
-                        : "archivado"
-                    }`}
-                  >
-                    {esp.estado === "PENDIENTE_APROBACION"
-                      ? "PENDIENTE"
-                      : esp.estado}
-                  </span>
+                <div style={{ width: "200px", textAlign: "center" }}>
+                  {esp.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (
+<EtiquetaEliminacion />
+) : (
+<>
+<EtiquetaEstado estado={esp.estadoVista || esp.estado} texto={textoDeEstado(esp.estadoVista || esp.estado)} />
+                  <SiguePublicado item={esp} activo={activeTab === "PUBLICADOS"} />
+<NotaPapelera item={esp} />
+                  {esp.solicitudEliminacion && (
+                    <div style={{ marginTop: "4px" }}>
+                      <EtiquetaEliminacion nota />
+                    </div>
+                  )}
+</>
+)}
                 </div>
 
-                {/* Columna ACCIONES */}
-                <div style={{ width: "100px", display: "flex", justifyContent: "center", gap: "10px" }}>
+                <div style={{ width: "140px", display: "flex", justifyContent: "center", gap: "10px" }}>
+{esp.enPapelera ? (
+<AccionesPapelera
+  onRestaurar={() => papelera.restaurarItem(esp)}
+  onEliminar={() => confirmDelete(esp)}
+  ocupado={papelera.ocupado}
+/>
+) : (
+<>
+
                   <button type="button" onClick={() => handleOpenEdit(esp)} className="news-action-btn-edit" title="Editar">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -397,11 +414,16 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                       <line x1="14" y1="11" x2="14" y2="17"></line>
                     </svg>
                   </button>
-                </div>
+                
+{esDescartable(esp) && <BotonADescartar onClick={() => papelera.descartarItem(esp)} ocupado={papelera.ocupado} />}
+</>
+)}
+</div>
 
               </div>
             ))
           )}
+          <Paginacion {...paginacion} etiqueta="registros" />
         </div>
       </div>
 
@@ -491,7 +513,13 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
                 <button type="button" className="btn-cancelar-gris" onClick={handleCloseAttempt} disabled={isSaving}>
                   CANCELAR
                 </button>
-                <button type="submit" className="btn-cerrar-rojo" style={{ backgroundColor: "#2b5b94" }} disabled={isSaving}>
+                <button
+                  type="submit"
+                  className="btn-cerrar-rojo"
+                  style={{ backgroundColor: "#2b5b94" }}
+                  disabled={isSaving || (Boolean(editingId) && !hayCambios)}
+                  title={editingId && !hayCambios ? "No se han detectado cambios para actualizar" : ""}
+                >
                   {isSaving ? (
                     <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <div className="cms-spinner" style={{ width: "16px", height: "16px", borderWidth: "2px", borderTopColor: "white", borderColor: "rgba(255,255,255,0.3)" }}></div>
@@ -507,7 +535,6 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         </div>
       )}
 
-      {/* MODAL DE CAMBIOS SIN GUARDAR */}
       <CmsUnsavedChangesModal
         isOpen={showUnsavedModal}
         onKeepEditing={() => setShowUnsavedModal(false)}
@@ -520,16 +547,17 @@ const CmsEspecialidadesView = ({ initialCreateModal = false, onModalOpened }) =>
         message="¿Qué deseas hacer con el registro actual?"
       />
 
-      {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
       <CmsDeleteModal
         isOpen={showDeleteModal && !!itemAEliminar}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={executeDelete}
         itemName={itemAEliminar?.nombre}
         itemType={itemAEliminar?.esServicio ? "el servicio" : "la especialidad"}
+        requiereAprobacion={requiereAprobacionParaEliminar(itemAEliminar)}
         isDeleting={isDeleting}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

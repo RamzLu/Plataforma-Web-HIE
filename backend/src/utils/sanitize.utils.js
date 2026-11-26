@@ -179,3 +179,6 @@ export const parsearArregloJson = (rawJson, nombreCampo = 'lista de datos') => {
 
 
 
+
+/** Los formularios mandan los booleanos como texto: true y "true" son verdaderos, todo lo demás no. */
+export const esVerdadero = (valor) => valor === true || valor === "true";

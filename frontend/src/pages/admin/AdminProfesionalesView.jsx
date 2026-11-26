@@ -1,175 +1,194 @@
-import { useMemo, useState } from 'react';
+import { NotaPapelera, AvisoPapelera } from "../../components/cms/Papelera";
+import FiltrosEstado from "../../components/ui/FiltrosEstado";
+import EtiquetaCategoria, { EtiquetaTipo } from "../../components/ui/EtiquetaCategoria";
+import '../../styles/components/admin/AdminRevisionModal.css';
+import SolicitudEliminacionAcciones, { EtiquetaEliminacion } from "../../components/admin/SolicitudEliminacionAcciones";
+import EtiquetaEstado from "../../components/ui/EtiquetaEstado";
+import SiguePublicado from "../../components/cms/SiguePublicado";
+import AvisoVersionPublicada from "../../components/admin/AvisoVersionPublicada";
+import { estaPublicadoEnPortal, tituloEnLista, vistaPublicados, abreVersionPublicada, comoVersionPublicada, sinPapelera } from "../../utils/publicacion.js";
+import { mensajeDeError } from "../../utils/mensajeDeError";
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  BadgeCheck,
-  Building2,
   CalendarDays,
-  CheckCircle,
-  Globe2,
+  Check,
+  RefreshCw,
   Search,
-  Stethoscope,
-  UserRound,
   X,
   XCircle,
+  AlertTriangle,
 } from 'lucide-react';
-import fotoDoctor from '../../assets/foto-doctor-ejemplo.jpg';
-import fotoDoctora from '../../assets/foto-doctora-ejemplo.jpg';
+import toast from 'react-hot-toast';
+import keycloak from '../../config/keycloak';
+import {
+  getProfesionales,
+  revisarProfesional,
+} from '../../api/profesionales.api.js';
+import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
 import '../../styles/pages/admin/AdminProfesionalesView.css';
-
-const initialProfesionales = [
-  {
-    id: 'prof-001',
-    nombre: 'Lucía Fernández',
-    cargo: 'Médica especialista',
-    matricula: 'MP 2841',
-    especialidad: 'Cardiología',
-    area: 'Consultorios externos',
-    tipo: 'Especialidad médica',
-    descripcion:
-      'Atención integral de personas adultas, seguimiento cardiovascular y orientación para la prevención.',
-    imagen: fotoDoctora,
-    editor: 'María Gómez',
-    fechaCarga: '04/11/2026',
-    fechaActualizacion: '04/11/2026',
-    estado: 'PENDIENTE',
-    activo: true,
-    publicado: false,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-002',
-    nombre: 'Martín Ríos',
-    cargo: 'Médico de planta',
-    matricula: 'MP 1936',
-    especialidad: 'Clínica médica',
-    area: 'Atención ambulatoria',
-    tipo: 'Especialidad médica',
-    descripcion:
-      'Abordaje clínico integral, evaluación inicial y acompañamiento de pacientes adultos.',
-    imagen: fotoDoctor,
-    editor: 'Carlos Benítez',
-    fechaCarga: '02/11/2026',
-    fechaActualizacion: '03/11/2026',
-    estado: 'APROBADO',
-    activo: true,
-    publicado: false,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-003',
-    nombre: 'Sofía Acosta',
-    cargo: 'Licenciada en diagnóstico por imágenes',
-    matricula: 'MP 3472',
-    especialidad: 'Diagnóstico por imágenes',
-    area: 'Diagnóstico y tratamiento',
-    tipo: 'Servicio de apoyo',
-    descripcion:
-      'Profesional del equipo de diagnóstico por imágenes. La información pública se encuentra aprobada.',
-    imagen: null,
-    editor: 'María Gómez',
-    fechaCarga: '29/10/2026',
-    fechaActualizacion: '01/11/2026',
-    fechaPublicacion: '2026-11-03T10:30:00',
-    estado: 'APROBADO',
-    activo: true,
-    publicado: true,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-005',
-    nombre: 'Gabriel Benítez',
-    cargo: 'Médico especialista',
-    matricula: 'MP 2204',
-    especialidad: 'Traumatología',
-    area: 'Consultorios externos',
-    tipo: 'Especialidad médica',
-    descripcion:
-      'Atención y seguimiento de afecciones del sistema musculoesquelético.',
-    imagen: fotoDoctor,
-    editor: 'María Gómez',
-    fechaCarga: '25/10/2026',
-    fechaActualizacion: '28/10/2026',
-    fechaPublicacion: '2026-11-01T09:15:00',
-    estado: 'APROBADO',
-    activo: true,
-    publicado: true,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-006',
-    nombre: 'Elena Sosa',
-    cargo: 'Licenciada en Kinesiología',
-    matricula: 'MP 4160',
-    especialidad: 'Kinesiología y rehabilitación',
-    area: 'Rehabilitación',
-    tipo: 'Servicio de apoyo',
-    descripcion:
-      'Acompañamiento terapéutico y rehabilitación funcional.',
-    imagen: fotoDoctora,
-    editor: 'Carlos Benítez',
-    fechaCarga: '22/10/2026',
-    fechaActualizacion: '26/10/2026',
-    fechaPublicacion: '2026-10-30T14:00:00',
-    estado: 'APROBADO',
-    activo: true,
-    publicado: true,
-    motivoRechazo: '',
-  },
-  {
-    id: 'prof-004',
-    nombre: 'Valentina López',
-    cargo: 'Licenciada en Nutrición',
-    matricula: 'MP 5108',
-    especialidad: 'Nutrición',
-    area: 'Atención ambulatoria',
-    tipo: 'Servicio de apoyo',
-    descripcion:
-      'Orientación nutricional y acompañamiento para el cuidado integral de la salud.',
-    imagen: fotoDoctora,
-    editor: 'Carlos Benítez',
-    fechaCarga: '27/10/2026',
-    fechaActualizacion: '30/10/2026',
-    estado: 'RECHAZADO',
-    activo: false,
-    publicado: false,
-    motivoRechazo: 'Revisar la descripción y completar la información del área de atención.',
-  },
-];
+import Paginacion from "../../components/ui/Paginacion";
+import { usePaginacion } from "../../hooks/usePaginacion";
 
 const estadoLabels = {
   PENDIENTE: 'Pendiente de aprobación',
-  APROBADO: 'Aprobado',
+  PUBLICADO: 'Publicado',
+  APROBADO: 'Publicado',
   RECHAZADO: 'Rechazado',
 };
 
-const AdminProfesionalesView = () => {
-  const [profesionales, setProfesionales] = useState(initialProfesionales);
+const mapProfesionalFromBackend = (item) => {
+  const estadoUpper = (
+    item.estado || (item.publicado ? 'PUBLICADO' : 'PENDIENTE_APROBACION')
+  ).toUpperCase();
+
+  let estado = 'PENDIENTE';
+  if (estadoUpper === 'PUBLICADO' || estadoUpper === 'APROBADO') {
+    estado = 'PUBLICADO';
+  } else if (estadoUpper === 'RECHAZADO') {
+    estado = 'RECHAZADO';
+  }
+
+  const nombreCompleto = `${item.nombre || ''} ${item.apellido || ''}`.trim() || 'Profesional';
+  const esServicio = Boolean(item.esServicioClave);
+
+  return {
+    id: item.id,
+    nombre: nombreCompleto,
+    solicitudEliminacion: item.solicitudEliminacion || null,
+    enPapelera: Boolean(item.enPapelera),
+    papeleraDesde: item.papeleraDesde || null,
+    papeleraVenceEl: item.papeleraVenceEl || null,
+    // El cargo real (vacío si el CM no lo cargó): antes se mostraba "Profesional de planta" inventado.
+    cargo: (item.cargo || '').trim(),
+    matricula: item.matricula || '',
+    especialidad: item.especialidadNombre || 'Sin asignar',
+    area: esServicio ? 'Servicio clave' : 'Especialidad médica',
+    tipo: esServicio ? 'Servicio de apoyo' : 'Especialidad médica',
+    descripcion: item.descripcion || '',
+    imagen: item.imagenUrl || null,
+    editor: item.editor || 'Editor CMS',
+    fechaCarga: item.fechaCarga || 'Reciente',
+    fechaActualizacion: item.fechaActualizacion || item.fechaCarga || 'Reciente',
+    estado,
+    activo: item.activo !== false,
+    publicado: estado === 'PUBLICADO',
+    motivoRechazo: item.rejectionReason || '',
+    cambios: Array.isArray(item.cambios) ? item.cambios : [],
+    esActualizacion: Boolean(item.esActualizacion),
+    requestedEstado: item.requestedEstado || null,
+    visibleEnPortal: Boolean(item.visibleEnPortal),
+    tituloPublicado: item.tituloPublicado || null,
+    versionPublicada: item.versionPublicada || null,
+  };
+};
+
+const AdminProfesionalesView = ({ onPendingCountChange }) => {
+  const [profesionales, setProfesionales] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [verPublicada, setVerPublicada] = useState(false);
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [typeFilter, setTypeFilter] = useState('TODOS');
-  const [publishedTypeFilter, setPublishedTypeFilter] = useState('TODOS');
-  const [publishedSearch, setPublishedSearch] = useState('');
   const [search, setSearch] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [isRejecting, setIsRejecting] = useState(false);
   const [feedback, setFeedback] = useState('');
 
-  const selectedProfessional = profesionales.find((item) => item.id === selectedId);
+  const syncPendingCount = useCallback(
+    (list) => {
+      if (typeof onPendingCountChange === 'function') {
+        const count = list.filter((item) => item.estado === 'PENDIENTE' || Boolean(item.solicitudEliminacion)).length;
+        onPendingCountChange(count);
+      }
+    },
+    [onPendingCountChange]
+  );
+
+  // Trae los datos y aplica el resultado al responder la API, así se puede llamar desde un efecto.
+  const traerDatos = useCallback(
+    (silent = false) =>
+      getProfesionales(true).then((data) => {
+        if (Array.isArray(data)) {
+          const filtrados = data
+            .filter((item) => (item.estado || '').toUpperCase() !== 'ARCHIVADO')
+            .map(mapProfesionalFromBackend)
+            .sort((a, b) => {
+              const aPending = a.estado === 'PENDIENTE' || a.solicitudEliminacion ? 0 : 1;
+              const bPending = b.estado === 'PENDIENTE' || b.solicitudEliminacion ? 0 : 1;
+              if (aPending !== bPending) return aPending - bPending;
+              return a.nombre.localeCompare(b.nombre);
+            });
+          setProfesionales(filtrados);
+          syncPendingCount(filtrados);
+        } else {
+          setProfesionales([]);
+          syncPendingCount([]);
+        }
+      }).catch((error) => {
+        if (!silent) {
+          console.error('Error al cargar profesionales:', error);
+          toast.error('No se pudieron cargar los profesionales.');
+        }
+      }).finally(() => {
+        if (!silent) setLoading(false);
+      }),
+    [syncPendingCount]
+  );
+
+  // Recarga a pedido (botón, después de revisar): muestra la carga y después trae los datos.
+  const cargarDatos = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      await traerDatos(silent);
+    },
+    [traerDatos]
+  );
+
+  useEffect(() => {
+    // "loading" ya empieza en true: la primera carga no necesita marcarlo.
+    traerDatos(false);
+
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        traerDatos(true);
+      }
+    }, 60000);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        traerDatos(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
+  }, [traerDatos]);
+
+  const profesionalBase = profesionales.find((item) => item.id === selectedId);
+  const selectedProfessional =
+    profesionalBase && verPublicada && profesionalBase.versionPublicada
+      ? comoVersionPublicada(profesionalBase, mapProfesionalFromBackend)
+      : profesionalBase;
 
   const filteredProfesionales = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase('es');
 
-    return profesionales.filter((item) => {
+    return (statusFilter === 'PAPELERA' ? profesionales.filter((x) => x?.enPapelera) : sinPapelera(profesionales)).filter((item) => {
       const matchesStatus =
-        statusFilter === 'TODOS' ||
+        statusFilter === 'TODOS' || statusFilter === 'PAPELERA' ||
+        (statusFilter === 'PENDIENTE' && Boolean(item.solicitudEliminacion)) ||
         (statusFilter === 'PUBLICADO'
-          ? item.publicado
+          ? estaPublicadoEnPortal(item)
           : item.estado === statusFilter);
       const matchesType = typeFilter === 'TODOS' || item.tipo === typeFilter;
-      const matchesPublication =
-        statusFilter === 'PUBLICADO' ? item.publicado : !item.publicado;
       const searchableText = [
         item.nombre,
         item.cargo,
+        item.matricula,
         item.especialidad,
         item.area,
         item.editor,
@@ -178,77 +197,76 @@ const AdminProfesionalesView = () => {
         .toLocaleLowerCase('es');
 
       return (
-        matchesPublication &&
         matchesStatus &&
         matchesType &&
         (!normalizedSearch || searchableText.includes(normalizedSearch))
       );
     });
   }, [profesionales, search, statusFilter, typeFilter]);
+  const paginacion = usePaginacion(vistaPublicados(filteredProfesionales, statusFilter === 'PUBLICADO'), 10, [search, statusFilter, typeFilter]);
 
-  const pendingCount = profesionales.filter((item) => item.estado === 'PENDIENTE').length;
-  const approvedCount = profesionales.filter(
-    (item) => item.estado === 'APROBADO' && !item.publicado
+  const pendingCount = sinPapelera(profesionales).filter(
+    (item) => item.estado === 'PENDIENTE' || Boolean(item.solicitudEliminacion)
   ).length;
-  const rejectedCount = profesionales.filter((item) => item.estado === 'RECHAZADO').length;
-  const publishedProfesionales = useMemo(() => {
-    const normalizedSearch = publishedSearch.trim().toLocaleLowerCase('es');
-
-    return profesionales
-      .filter((item) => {
-        const searchableText = `${item.nombre} ${item.cargo} ${item.especialidad} ${item.area}`
-          .toLocaleLowerCase('es');
-        return (
-          item.publicado &&
-          (publishedTypeFilter === 'TODOS' || item.tipo === publishedTypeFilter) &&
-          (!normalizedSearch || searchableText.includes(normalizedSearch))
-        );
-      })
-      .sort((a, b) => new Date(b.fechaPublicacion || 0) - new Date(a.fechaPublicacion || 0));
-  }, [profesionales, publishedSearch, publishedTypeFilter]);
-  const publishedCount = profesionales.filter((item) => item.publicado).length;
+  const rejectedCount = sinPapelera(profesionales).filter((item) => item.estado === 'RECHAZADO').length;
+  const publishedCount = sinPapelera(profesionales).filter(estaPublicadoEnPortal).length;
+  const papeleraCount = profesionales.filter((item) => item.enPapelera).length;
 
   const closeDetails = () => {
     setSelectedId(null);
+    setVerPublicada(false);
     setIsRejecting(false);
     setRejectReason('');
   };
 
-  const updateProfessional = (id, changes) => {
-    setProfesionales((items) =>
-      items.map((item) => (item.id === id ? { ...item, ...changes } : item))
-    );
+  const handleApprove = async () => {
+    if (!selectedProfessional || submitting) return;
+    try {
+      setSubmitting(true);
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
+      }
+      await revisarProfesional(selectedProfessional.id, 'APROBAR');
+      toast.success(`"${selectedProfessional.nombre}" fue aprobado y publicado.`);
+      setFeedback(`"${selectedProfessional.nombre}" fue aprobado y publicado con éxito.`);
+      closeDetails();
+      await cargarDatos(true);
+    } catch (error) {
+      console.error('Error al aprobar profesional:', error);
+      toast.error(mensajeDeError(error, 'Error al aprobar al profesional.'));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleApprove = () => {
-    if (!selectedProfessional) return;
-
-    updateProfessional(selectedProfessional.id, {
-      estado: 'APROBADO',
-      motivoRechazo: '',
-      fechaActualizacion: 'Hoy',
-    });
-    setFeedback(
-      `${selectedProfessional.nombre} fue aprobado. La publicación se administra por separado.`
-    );
-  };
-
-  const handleReject = () => {
-    if (!selectedProfessional || !rejectReason.trim()) return;
-
-    updateProfessional(selectedProfessional.id, {
-      estado: 'RECHAZADO',
-      publicado: false,
-      motivoRechazo: rejectReason.trim(),
-      fechaActualizacion: 'Hoy',
-    });
-    setFeedback(`Se registró el rechazo de ${selectedProfessional.nombre} con su motivo.`);
-    closeDetails();
+  const handleReject = async () => {
+    if (!selectedProfessional || submitting) return;
+    if (!rejectReason.trim()) {
+      toast.error('Ingresá un motivo para que el Editor CMS pueda corregir la ficha.');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      if (keycloak.authenticated) {
+        await keycloak.updateToken(30).catch(() => {});
+      }
+      await revisarProfesional(selectedProfessional.id, 'RECHAZAR', rejectReason.trim());
+      toast.success(`"${selectedProfessional.nombre}" fue rechazado. Se notificó al Editor CMS.`);
+      setFeedback(`Se registró el rechazo de "${selectedProfessional.nombre}" con su motivo.`);
+      closeDetails();
+      await cargarDatos(true);
+    } catch (error) {
+      console.error('Error al rechazar profesional:', error);
+      toast.error(mensajeDeError(error, 'Error al rechazar al profesional.'));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getInitials = (name) =>
-    name
+    (name || '')
       .split(' ')
+      .filter(Boolean)
       .slice(0, 2)
       .map((part) => part[0])
       .join('')
@@ -257,10 +275,21 @@ const AdminProfesionalesView = () => {
   return (
     <div className="admin-prof-page">
       <header className="admin-prof-header admin-view-heading">
-        <div>
-          <span className="admin-prof-overtitle">PANEL DE CONTROL DIRECTIVO</span>
-          <h1>Revisión de Profesionales</h1>
-          <p>Revisá y respondé las solicitudes de profesionales enviadas por el CMS.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', width: '100%' }}>
+          <div>
+            <span className="admin-prof-overtitle">PANEL DE CONTROL DIRECTIVO</span>
+            <h1>Revisión de Profesionales</h1>
+            <p>Revisá y respondé las solicitudes de profesionales enviadas por el CMS.</p>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={() => cargarDatos(false)}
+            disabled={loading}
+          >
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            Actualizar
+          </button>
         </div>
       </header>
 
@@ -283,65 +312,24 @@ const AdminProfesionalesView = () => {
           Todos
         </button>
       </div>
-      <section className="admin-prof-summary" aria-label="Filtrar profesionales por estado">
-        <button
-          type="button"
-          className={`admin-prof-summary-card is-pending ${statusFilter === 'PENDIENTE' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PENDIENTE'}
-          onClick={() => setStatusFilter('PENDIENTE')}
-        >
-          <span className="admin-prof-summary-icon"><UserRound size={19} /></span>
-          <div>
-            <span>Pendientes de aprobación</span>
-            <strong>{pendingCount}</strong>
-          </div>
-        </button>
-        <button
-          type="button"
-          className={`admin-prof-summary-card is-approved ${statusFilter === 'APROBADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'APROBADO'}
-          onClick={() => setStatusFilter('APROBADO')}
-        >
-          <span className="admin-prof-summary-icon"><BadgeCheck size={19} /></span>
-          <div>
-            <span>Aprobados para CMS</span>
-            <strong>{approvedCount}</strong>
-          </div>
-        </button>
-        <button
-          type="button"
-          className={`admin-prof-summary-card is-published ${statusFilter === 'PUBLICADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'PUBLICADO'}
-          onClick={() => setStatusFilter('PUBLICADO')}
-        >
-          <span className="admin-prof-summary-icon"><Globe2 size={19} /></span>
-          <div>
-            <span>Visibles al público</span>
-            <strong>{publishedCount}</strong>
-          </div>
-        </button>
-        <button
-          type="button"
-          className={`admin-prof-summary-card is-rejected ${statusFilter === 'RECHAZADO' ? 'is-selected' : ''}`}
-          aria-pressed={statusFilter === 'RECHAZADO'}
-          onClick={() => setStatusFilter('RECHAZADO')}
-        >
-          <span className="admin-prof-summary-icon"><XCircle size={19} /></span>
-          <div>
-            <span>Rechazados</span>
-            <strong>{rejectedCount}</strong>
-          </div>
-        </button>
-      </section>
+      <FiltrosEstado
+        activa={statusFilter}
+        onCambiar={setStatusFilter}
+        opciones={[
+          { clave: "PENDIENTE", tipo: "pendiente", cuenta: pendingCount },
+          { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
+          { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
+          { clave: "PAPELERA", tipo: "papelera", cuenta: papeleraCount },
+      ]}
+      />
 
-      <div className={`admin-prof-content-grid ${statusFilter === 'PUBLICADO' ? 'is-published-filter' : ''}`}>
       <section className="admin-prof-card" aria-labelledby="admin-prof-list-title">
         <div className="admin-prof-card-heading">
           <div>
             <h2 id="admin-prof-list-title">
-              {statusFilter === 'PUBLICADO' ? 'Profesionales visibles al público' : 'Solicitudes editoriales'}
+              Listado de Profesionales
             </h2>
-            <p>Revisá los perfiles pendientes, aprobados o rechazados enviados por el CMS.</p>
+            <p>Área de Revisión: Aprobación y rechazo de profesionales recibidos desde el CMS</p>
           </div>
           <span className="admin-prof-results-count">
             {filteredProfesionales.length} {filteredProfesionales.length === 1 ? 'resultado' : 'resultados'}
@@ -369,188 +357,159 @@ const AdminProfesionalesView = () => {
           </label>
         </div>
 
-        <div className="admin-prof-table-wrap">
-          <table className="admin-prof-table">
-            <thead>
-              <tr>
-                <th scope="col">Profesional</th>
-                <th scope="col">Especialidad / área</th>
-                <th scope="col">Editor / fecha</th>
-                <th scope="col">Estado editorial</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProfesionales.map((item) => (
-                <tr key={item.id}>
-                  <td data-label="Profesional">
-                    <div className="admin-prof-person-cell">
-                      <div className="admin-prof-avatar">
-                        {item.imagen ? (
-                          <img src={item.imagen} alt={`Fotografía de ${item.nombre}`} />
-                        ) : (
-                          <span aria-label="Sin fotografía">{getInitials(item.nombre)}</span>
-                        )}
-                      </div>
-                      <div className="admin-prof-person-copy">
-                        <button
-                          type="button"
-                          className="admin-prof-name-button"
-                          onClick={() => setSelectedId(item.id)}
-                        >
-                          {item.nombre}
-                        </button>
-                        <span>{item.cargo}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td data-label="Especialidad / área">
-                    <div className="admin-prof-association-cell">
-                      <strong><Stethoscope size={14} />{item.especialidad}</strong>
-                      <span><Building2 size={14} />{item.area}</span>
-                    </div>
-                  </td>
-                  <td data-label="Editor / fecha">
-                    <div className="admin-prof-editor-cell">
-                      <span>{item.editor}</span>
-                      <small><CalendarDays size={13} />{item.fechaActualizacion}</small>
-                    </div>
-                  </td>
-                  <td data-label="Estado editorial">
-                    <span
-                      className={`admin-prof-status is-${item.publicado ? 'aprobado' : item.estado.toLowerCase()}`}
-                    >
-                      {item.publicado ? 'Publicado' : estadoLabels[item.estado]}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {filteredProfesionales.length === 0 && (
+        {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
+<div className="admin-prof-table-wrap">
+          {loading ? (
+            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
+              <div
+                className="cms-spinner"
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  margin: '0 auto 16px auto',
+                  borderWidth: '3px',
+                  borderTopColor: '#0c2340',
+                }}
+              ></div>
+              <p style={{ fontSize: '0.95rem' }}>Cargando fichas de profesionales...</p>
+            </div>
+          ) : (
+            <>
+            <table className="admin-prof-table">
+              <thead>
                 <tr>
-                  <td className="admin-prof-empty" colSpan="4">
-                    No se encontraron profesionales con esos filtros.
-                  </td>
+                  <th scope="col">Profesional</th>
+                  <th scope="col">Editor / fecha</th>
+                  <th scope="col">Especialidad / área</th>
+                  <th scope="col">Estado</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {paginacion.itemsPagina.map((item) => (
+                  <tr key={item.id}>
+                    <td data-label="Profesional">
+                      <div className="admin-prof-person-cell">
+                        <div className="admin-prof-avatar">
+                          {item.imagen ? (
+                            <img src={item.imagen} alt={`Fotografía de ${item.nombre}`} />
+                          ) : (
+                            <span aria-label="Sin fotografía">{getInitials(item.nombre)}</span>
+                          )}
+                        </div>
+                        <div className="admin-prof-person-copy">
+                          <button
+                            type="button"
+                            className="admin-prof-name-button"
+                            onClick={() => {
+                              setSelectedId(item.id);
+                              setVerPublicada(abreVersionPublicada(item, statusFilter === 'PUBLICADO'));
+                            }}
+                          >
+                            {tituloEnLista(item, statusFilter === 'PUBLICADO', item.nombre)}
+                          </button>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <span>{item.cargo || 'Sin cargo o función'}</span>
+                            <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td data-label="Editor / fecha">
+                      <div className="admin-prof-editor-cell" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{item.editor}</span>
+                        <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}><CalendarDays size={13} />{item.fechaActualizacion}</small>
+                      </div>
+                    </td>
+                    <td data-label="Especialidad / área">
+                      <div className="admin-prof-association-cell">
+                        <EtiquetaCategoria categoria={item.especialidad} tono="gris" />
+                        <EtiquetaTipo esServicio={item.area === 'Servicio clave'} />
+                      </div>
+                    </td>
+                    <td data-label="Estado">
+                      {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+<EtiquetaEliminacion />
+) : (
+<>
+                          <EtiquetaEstado
+                            estado={item.publicado || item.estadoVista ? 'PUBLICADO' : item.estado}
+                            texto={item.publicado || item.estadoVista ? 'Publicado' : estadoLabels[item.estado]}
+                          />
+                          <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+<NotaPapelera item={item} />
+                          {item.solicitudEliminacion && (
+                            <div style={{ marginTop: '4px' }}>
+                              <EtiquetaEliminacion nota />
+                            </div>
+                          )}
+                        </>
+)}
+                    </td>
+                  </tr>
+                ))}
+                {filteredProfesionales.length === 0 && (
+                  <tr>
+                    <td className="admin-prof-empty" colSpan="4">
+                      No se encontraron profesionales con esos filtros.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <Paginacion {...paginacion} etiqueta="profesionales" />
+            </>
+          )}
         </div>
         <p className="admin-prof-grouping-note">
           La agrupación por tipo es referencial y queda sujeta a validación institucional; no reemplaza las asociaciones registradas.
         </p>
       </section>
 
-      {statusFilter !== 'PUBLICADO' && (
-      <aside className="admin-prof-published-panel" aria-labelledby="admin-prof-published-title">
-        <div className="admin-prof-published-heading">
-          <div className="admin-prof-published-heading-icon"><Globe2 size={18} /></div>
-          <div>
-            <h2 id="admin-prof-published-title">Publicados</h2>
-            <p>Perfiles visibles al público</p>
-          </div>
-          <span className="admin-prof-published-count">{publishedCount}</span>
-        </div>
-
-        <label className="admin-prof-published-search">
-          <Search size={16} aria-hidden="true" />
-          <span className="admin-prof-visually-hidden">Buscar en profesionales publicados</span>
-          <input
-            type="search"
-            placeholder="Buscar publicados..."
-            value={publishedSearch}
-            onChange={(event) => setPublishedSearch(event.target.value)}
-          />
-        </label>
-
-        <div className="admin-prof-published-filters" role="group" aria-label="Filtrar publicados por tipo">
-          {[
-            { value: 'TODOS', label: 'Todos' },
-            { value: 'Especialidad médica', label: 'Especialidades' },
-            { value: 'Servicio de apoyo', label: 'Servicios' },
-          ].map((filter) => (
-            <button
-              key={filter.value}
-              type="button"
-              className={publishedTypeFilter === filter.value ? 'is-active' : ''}
-              aria-pressed={publishedTypeFilter === filter.value}
-              onClick={() => setPublishedTypeFilter(filter.value)}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-
-        <p className="admin-prof-published-sort">
-          Ordenados por fecha de publicación, más recientes primero
-        </p>
-
-        <div className="admin-prof-published-list">
-          {publishedProfesionales.map((item, index) => (
-            <button
-              className="admin-prof-published-item"
-              type="button"
-              key={item.id}
-              onClick={() => setSelectedId(item.id)}
-              aria-label={`Ver profesional publicado ${item.nombre}`}
-            >
-              <span className="admin-prof-published-order">{String(index + 1).padStart(2, '0')}</span>
-              <span className="admin-prof-published-avatar">
-                {item.imagen ? (
-                  <img src={item.imagen} alt="" />
-                ) : (
-                  getInitials(item.nombre)
-                )}
-              </span>
-              <span className="admin-prof-published-copy">
-                <strong>{item.nombre}</strong>
-                <span>{item.especialidad}</span>
-                <small>
-                  {item.fechaPublicacion
-                    ? new Date(item.fechaPublicacion).toLocaleDateString('es-AR', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                      })
-                    : 'Fecha no disponible'}
-                </small>
-              </span>
-              <span
-                className={`admin-prof-published-indicator ${item.activo ? 'is-active' : 'is-inactive'}`}
-                title={item.activo ? 'Activo' : 'Desactivado'}
-              />
-            </button>
-          ))}
-          {publishedProfesionales.length === 0 && (
-            <p className="admin-prof-published-empty">
-              No hay profesionales publicados para este filtro.
-            </p>
-          )}
-        </div>
-      </aside>
-      )}
-      </div>
-
       {selectedProfessional && (
-        <div className="admin-prof-overlay" onClick={closeDetails}>
+        <div className="admin-prof-overlay admin-rev-overlay admin-prof-rv-overlay" onClick={closeDetails}>
           <section
-            className="admin-prof-modal"
+            className="admin-prof-modal admin-rev-modal admin-prof-rv-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-prof-modal-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <header className="admin-prof-modal-header">
-              <div>
-                <span>Revisión de información pública</span>
-                <h2 id="admin-prof-modal-title">{selectedProfessional.nombre}</h2>
-              </div>
-              <button type="button" className="admin-prof-close" aria-label="Cerrar detalle" onClick={closeDetails}>
+            <header className="admin-prof-rv-header">
+              <h2 id="admin-prof-modal-title" className="admin-prof-rv-title">Revisión de profesional</h2>
+              <button type="button" className="admin-prof-rv-close" aria-label="Cerrar detalle" onClick={closeDetails}>
                 <X size={20} />
               </button>
             </header>
 
-            <div className="admin-prof-modal-body">
-              <div className="admin-prof-profile">
-                <div className="admin-prof-profile-photo">
+            <div className="admin-prof-rv-body">
+              <div className="admin-prof-rv-card admin-prof-rv-status">
+                <span className="admin-prof-rv-status-label">Estado actual</span>
+                <EtiquetaEstado
+                  estado={selectedProfessional.publicado ? 'PUBLICADO' : selectedProfessional.estado}
+                  texto={selectedProfessional.publicado ? 'Publicado' : estadoLabels[selectedProfessional.estado]}
+                />
+              </div>
+
+              {selectedProfessional.estado === 'PENDIENTE' &&
+                ['BORRADOR', 'ARCHIVADO'].includes(selectedProfessional.requestedEstado) && (
+                  <div className="admin-prof-rv-alert" role="note">
+                    <AlertTriangle size={18} aria-hidden="true" />
+                    <div>
+                      <strong>Solicitud de retiro:</strong> el editor del CMS pide pasar este profesional a{' '}
+                      <strong>{selectedProfessional.requestedEstado === 'BORRADOR' ? 'Borrador' : 'Archivado'}</strong>.
+                      Si lo aprobás, deja de verse en el portal.
+                    </div>
+                  </div>
+                )}
+
+              <AvisoVersionPublicada item={selectedProfessional} />
+              <AdminCambiosResaltados
+                cambios={selectedProfessional.cambios}
+                esActualizacion={selectedProfessional.esActualizacion}
+              />
+
+              <section className="admin-prof-rv-card admin-prof-rv-profile">
+                <div className="admin-prof-rv-photo">
                   {selectedProfessional.imagen ? (
                     <img
                       src={selectedProfessional.imagen}
@@ -560,67 +519,52 @@ const AdminProfesionalesView = () => {
                     <span>{getInitials(selectedProfessional.nombre)}</span>
                   )}
                 </div>
-                <div className="admin-prof-profile-summary">
-                  <span className="admin-prof-role">{selectedProfessional.cargo}</span>
-                  <h3>{selectedProfessional.nombre}</h3>
-                  <span>{selectedProfessional.matricula || 'Matrícula no informada'}</span>
-                  <span className={`admin-prof-status is-${selectedProfessional.estado.toLowerCase()}`}>
-                    {estadoLabels[selectedProfessional.estado]}
-                  </span>
+                <div className="admin-prof-rv-summary">
+                  {selectedProfessional.cargo && <div className="admin-prof-rv-role">{selectedProfessional.cargo}</div>}
+                  <h3 className="admin-prof-rv-name">{selectedProfessional.nombre}</h3>
+                  <div className="admin-prof-rv-license">{selectedProfessional.matricula || 'Matrícula no informada'}</div>
                 </div>
+              </section>
+
+              <section className="admin-prof-rv-grid">
+                <div className="admin-prof-rv-card admin-prof-rv-field">
+                  <div className="admin-prof-rv-field-label">Especialidad / Servicio asociado</div>
+                  <div className="admin-prof-rv-field-value">{selectedProfessional.especialidad}</div>
+                </div>
+                <div className="admin-prof-rv-card admin-prof-rv-field">
+                  <div className="admin-prof-rv-field-label">Clasificación</div>
+                  <div className="admin-prof-rv-field-value">{selectedProfessional.area}</div>
+                </div>
+              </section>
+
+              <div className="admin-prof-rv-card admin-prof-rv-field">
+                <div className="admin-prof-rv-field-label">Cargo o función</div>
+                <div className="admin-prof-rv-field-value">{selectedProfessional.cargo || 'Sin cargo o función cargado.'}</div>
               </div>
 
-              <div className="admin-prof-detail-grid">
-                <article className="admin-prof-detail">
-                  <h4>Especialidad asociada</h4>
-                  <p>{selectedProfessional.especialidad}</p>
-                </article>
-                <article className="admin-prof-detail">
-                  <h4>Área correspondiente</h4>
-                  <p>{selectedProfessional.area}</p>
-                </article>
-                <article className="admin-prof-detail admin-prof-detail-wide">
-                  <h4>Descripción pública</h4>
-                  <p>{selectedProfessional.descripcion || 'Sin descripción cargada.'}</p>
-                </article>
-                <article className="admin-prof-detail">
-                  <h4>Enviado por el Editor CMS</h4>
-                  <p>{selectedProfessional.editor}</p>
-                </article>
-                <article className="admin-prof-detail">
-                  <h4>Fecha de carga / actualización</h4>
-                  <p>{selectedProfessional.fechaCarga} · {selectedProfessional.fechaActualizacion}</p>
-                </article>
+              <div className="admin-prof-rv-card admin-prof-rv-field">
+                <div className="admin-prof-rv-field-label">Descripción / Perfil profesional</div>
+                <div className="admin-prof-rv-field-text">{selectedProfessional.descripcion || 'Sin descripción cargada.'}</div>
               </div>
 
-              <div className="admin-prof-state-panel">
+              <div className="admin-prof-rv-card admin-prof-rv-sent">
                 <div>
-                  <span>Estado editorial</span>
-                  <strong>{estadoLabels[selectedProfessional.estado]}</strong>
+                  Enviado por <strong>{selectedProfessional.editor}</strong>
                 </div>
                 <div>
-                  <span>Presencia pública</span>
-                  <strong>
-                    {!selectedProfessional.activo
-                      ? 'Desactivado'
-                      : selectedProfessional.publicado
-                        ? 'Publicado y activo'
-                        : selectedProfessional.estado === 'APROBADO'
-                          ? 'Aprobado, pendiente de publicación'
-                          : 'No publicado'}
-                  </strong>
+                  Última modificación: <strong>{selectedProfessional.fechaActualizacion}</strong>
                 </div>
               </div>
 
               {selectedProfessional.motivoRechazo && (
-                <div className="admin-prof-rejection-note">
+                <div className="admin-rev-note">
                   <strong>Motivo del rechazo anterior</strong>
                   <p>{selectedProfessional.motivoRechazo}</p>
                 </div>
               )}
 
               {isRejecting && (
-                <label className="admin-prof-rejection-field">
+                <label className="admin-rev-field">
                   <span>Motivo del rechazo <b>(requerido)</b></span>
                   <textarea
                     value={rejectReason}
@@ -631,46 +575,64 @@ const AdminProfesionalesView = () => {
                   />
                 </label>
               )}
+
+              {selectedProfessional.solicitudEliminacion && (
+                <div className="admin-rev-solicitud">
+                  <SolicitudEliminacionAcciones
+                    solicitud={selectedProfessional.solicitudEliminacion}
+                    entidad="profesional"
+                    id={selectedProfessional.id}
+                    titulo={selectedProfessional.nombre}
+                    onResuelto={async () => {
+                      closeDetails();
+                      await cargarDatos(true);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {selectedProfessional.estado === 'PENDIENTE' && (
-              <footer className="admin-prof-modal-footer">
+              <footer className="admin-prof-rv-footer">
                 {!isRejecting ? (
                   <>
                     <button
                       type="button"
-                      className="admin-prof-button is-danger"
+                      className="admin-prof-rv-btn is-danger"
                       onClick={() => setIsRejecting(true)}
+                      disabled={submitting}
                     >
-                      <XCircle size={17} /> Rechazar
+                      <XCircle size={16} /> Rechazar
                     </button>
                     <button
                       type="button"
-                      className="admin-prof-button is-primary"
+                      className="admin-prof-rv-btn is-primary"
                       onClick={handleApprove}
+                      disabled={submitting}
                     >
-                      <CheckCircle size={17} /> Aprobar solicitud
+                      <Check size={16} strokeWidth={2.5} /> {submitting ? 'Aprobando...' : 'Aprobar'}
                     </button>
                   </>
                 ) : (
                   <>
                     <button
                       type="button"
-                      className="admin-prof-button is-secondary"
+                      className="admin-prof-rv-btn is-secondary"
                       onClick={() => {
                         setIsRejecting(false);
                         setRejectReason('');
                       }}
+                      disabled={submitting}
                     >
                       Cancelar
                     </button>
                     <button
                       type="button"
-                      className="admin-prof-button is-danger"
+                      className="admin-prof-rv-btn is-danger"
                       onClick={handleReject}
-                      disabled={!rejectReason.trim()}
+                      disabled={!rejectReason.trim() || submitting}
                     >
-                      Confirmar rechazo
+                      {submitting ? 'Rechazando...' : 'Confirmar rechazo'}
                     </button>
                   </>
                 )}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { 
   LayoutDashboard, 
   FileText, 
@@ -8,13 +8,12 @@ import {
   GraduationCap, 
   Building2, 
   Image as ImageIcon, 
-  UserCog, 
-  FileClock, 
   Building,
   ChevronDown
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 import logoCompletoBlanco from "../../assets/logo-completo-blanco.png";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const AdminSidebar = ({
   activeTab,
@@ -22,6 +21,9 @@ const AdminSidebar = ({
   pendingNoticiasCount = 0,
   pendingEspecialidadesCount = 0,
   pendingDocumentosCount = 0,
+  pendingProfesionalesCount = 0,
+  pendingResidenciasCount = 0,
+  pendingCapacitacionesCount = 0,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
@@ -40,22 +42,10 @@ const AdminSidebar = ({
         { id: "noticias", label: "Noticias", icon: <FileText />, pendingCount: pendingNoticiasCount },
         { id: "documentacion", label: "Documentación", icon: <FolderOpen />, pendingCount: pendingDocumentosCount },
         { id: "servicios", label: "Servicios y Especialidades", icon: <Stethoscope />, pendingCount: pendingEspecialidadesCount },
-        { id: "profesionales", label: "Profesionales", icon: <Contact />, pendingCount: 2 }, 
-        { id: "capacitaciones", label: "Capacitaciones Públicas", icon: <GraduationCap /> },
-        { id: "residencias", label: "Residencias", icon: <Building2 /> },
+        { id: "profesionales", label: "Profesionales", icon: <Contact />, pendingCount: pendingProfesionalesCount }, 
+        { id: "residencias", label: "Residencias", icon: <Building2 />, pendingCount: pendingResidenciasCount },
+        { id: "capacitaciones", label: "Capacitaciones Públicas", icon: <GraduationCap />, pendingCount: pendingCapacitacionesCount },
         { id: "graficos", label: "Contenido Gráfico", icon: <ImageIcon /> },
-      ],
-    },
-    {
-      title: "Gestión de Usuarios",
-      items: [
-        { id: "usuarios", label: "Gestión de Usuarios", icon: <UserCog /> }, 
-        { id: "auditoria", label: "Auditoría de Cambios", icon: <FileClock /> },
-      ],
-    },
-    {
-      title: "Información Institucional",
-      items: [
         { id: "institucional", label: "Datos Institucionales", icon: <Building /> },
       ],
     },
@@ -75,7 +65,7 @@ const AdminSidebar = ({
         <div className="admin-logo-container-inner">
           <div 
             className="admin-logo"
-            onClick={() => setActiveTab && setActiveTab("dashboard")}
+            onClick={() => setActiveTab && setActiveTab("dashboard")} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setActiveTab && setActiveTab("dashboard"))}
             style={{ cursor: "pointer" }}
             title="Hospital Interdistrital Evita Formosa"
           >
@@ -126,7 +116,7 @@ const AdminSidebar = ({
               {!isGeneral && !isCollapsed && (
                 <div 
                   className={`admin-nav-group-header ${isExpanded ? "active" : ""}`}
-                  onClick={() => handleToggleSection(section.title)}
+                  onClick={() => handleToggleSection(section.title)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleToggleSection(section.title))}
                 >
                   <span className="admin-nav-group-title">{section.title}</span>
                   <ChevronDown size={16} className="accordion-icon" />
@@ -138,7 +128,7 @@ const AdminSidebar = ({
                   <li
                     key={item.id}
                     className={activeTab === item.id ? "active" : ""}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => setActiveTab(item.id)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setActiveTab(item.id))}
                     title={isCollapsed ? item.label : ""}
                   >
                     <div className="admin-nav-item-left">

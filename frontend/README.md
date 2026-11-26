@@ -1,16 +1,16 @@
-# React + Vite
+# Frontend — Plataforma Web HIE
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Portal público, CMS (`/cms`) y panel de administración (`/admin`) en React + Vite.
 
-Currently, two official plugins are available:
+La puesta en marcha, las variables de entorno y la descripción de la API están en el [README principal](../README.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Estructura
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Carpeta | Contenido |
+|---|---|
+| `src/pages/public` | Páginas del portal |
+| `src/pages/cms`, `src/pages/admin` | Secciones de cada panel (`/cms/:seccion`, `/admin/:seccion`) |
+| `src/components` | Componentes compartidos, de layout y de cada panel |
+| `src/api` | Única capa de acceso a la API (`/portal` sin token, `/cms` con token) |
+| `src/styles` | Hojas de estilo por página, sección y componente |
+| `src/config/keycloak.js` | Cliente de Keycloak |

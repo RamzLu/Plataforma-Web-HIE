@@ -1,0 +1,446 @@
+/*
+ * COMPATIBILIDAD — estilos de los paneles que el portal público venía heredando.
+ *
+ * Antes el CSS del CMS y del Admin era global y pisaba clases del portal (modal y galería de noticias,
+ * breadcrumb, sede en "Acerca de", etc.). Al limitarlo a los paneles, estas reglas se copiaron acá,
+ * en la misma posición de la cascada, para que el portal se vea exactamente igual.
+ *
+ * Deuda: mover cada regla al CSS de su página pública y borrar este archivo.
+ * Generado automáticamente: 55 reglas.
+ */
+/*  ── desde styles/components/cms/CmsDashboard.css ──  */
+
+.ck-content ul {
+  list-style-type: disc !important;
+  margin-left: 25px !important;
+  margin-bottom: 10px !important;
+}
+
+.ck-content ol {
+  list-style-type: decimal !important;
+  margin-left: 25px !important;
+  margin-bottom: 10px !important;
+}
+
+.news-modal-body-text ul {
+  list-style-type: disc;
+  margin-left: 25px;
+  margin-bottom: 10px;
+}
+
+.news-modal-body-text ol {
+  list-style-type: decimal;
+  margin-left: 25px;
+  margin-bottom: 10px;
+}
+
+.cms-spinner {
+  width: 45px;
+  height: 45px;
+  border: 4px solid var(--color-slate-200);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 50%;
+  animation: cms-spin 0.8s linear infinite;
+}
+
+/*  ── desde styles/components/cms/CmsModals.css ──  */
+
+.modal-overlay, .lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: var(--z-overlay);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modal-content-esp {
+  background-color: var(--color-slate-50);
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  border-radius: 16px;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header-esp {
+  background-color: var(--color-white);
+  padding: 24px 35px;
+  border-bottom: 1px solid var(--color-slate-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header-esp h2 {
+  color: var(--color-secondary);
+  font-size: 1.4rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.btn-close-modal {
+  width: 38px;
+  height: 38px;
+  background-color: var(--color-slate-100);
+  border: none;
+  color: var(--color-slate-600);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-close-modal:hover {
+  background-color: var(--color-rose-600);
+  color: var(--color-white);
+  transform: rotate(90deg);
+}
+
+.btn-close-modal svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+.modal-author-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-slate-200);
+}
+
+.hospital-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-slate-200);
+  padding: 7px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.hospital-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.author-meta h3 {
+  margin: 0 0 2px 0;
+  font-size: 0.98rem;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.author-meta span {
+  font-size: 0.82rem;
+  color: var(--color-slate-500);
+}
+
+.news-modal-title {
+  color: var(--color-secondary);
+  font-size: 1.80rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+.info-text {
+  font-size: 1rem;
+  color: var(--color-slate-700);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.modal-body-esp {
+  padding: 30px 40px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr; /* 58% para texto, 42% para mosaico */
+  gap: 40px;
+  overflow-y: auto;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .modal-body-esp {
+    grid-template-columns: 1fr; /* Pasa a 1 columna en móviles */
+  }
+}
+
+.modal-left-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.news-modal-default-img-wrap {
+  width: 100%;
+  height: 480px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(12, 35, 64, 0.1);
+  position: sticky;
+  top: 0;
+}
+
+.mosaic-gallery {
+  display: grid;
+  gap: 6px;
+  border-radius: 14px;
+  overflow: hidden;
+  width: 100%;
+  height: min(460px, calc(86vh - 150px));
+  background-color: transparent;
+  box-shadow: none;
+  position: sticky;
+  top: 0;
+  align-self: center;
+  margin: 0 auto;
+}
+
+.mosaic-item {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 10px;
+  background-color: var(--color-slate-100);
+  box-shadow: 0 4px 14px rgba(12, 35, 64, 0.08);
+}
+
+.mosaic-item::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--color-primary);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mosaic-item:hover::after {
+  opacity: 0.14;
+}
+
+.mosaic-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.layout-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+
+.layout-2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+
+.layout-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1.35fr 1fr; }
+
+.layout-3 .mosaic-item:nth-child(1) { grid-column: span 2; }
+
+.layout-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
+.layout-4 .mosaic-item:nth-child(1) { grid-column: span 1; }
+
+.mosaic-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(12, 35, 64, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-size: 2.5rem;
+  font-weight: 200;
+  backdrop-filter: blur(3px);
+  z-index: 10;
+}
+
+.modal-footer-esp {
+  padding: 20px 35px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  background-color: var(--color-white);
+  border-top: 1px solid var(--color-slate-200);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 25px;
+  right: 40px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 3.5rem;
+  cursor: pointer;
+  z-index: var(--z-modal-raised);
+}
+
+.lightbox-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.lb-left {
+  left: -90px;
+}
+
+.lb-right {
+  right: -90px;
+}
+
+.modal-header-esp {
+  padding: 24px 35px 20px 35px;
+  border-bottom: 1px solid var(--color-slate-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-white);
+  border-radius: 16px 16px 0 0;
+}
+
+.modal-header-esp h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-secondary);
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.modal-footer-esp {
+  padding: 20px 35px;
+  background-color: var(--color-white);
+  border-top: 1px solid var(--color-slate-200);
+  border-radius: 0 0 16px 16px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+}
+
+@media (max-width: 640px) {
+  .modal-header-esp {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-footer-esp {
+    padding: 16px 20px;
+  }
+}
+
+/*  ── desde styles/pages/cms/CmsDocsView.css ──  */
+
+.preview-header {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--color-slate-100); padding-bottom: 10px;
+}
+
+/*  ── desde styles/pages/cms/CmsEspecialidadesView.css ──  */
+
+.modal-header-esp {
+  padding: 25px 35px 20px 35px;
+  border-bottom: 1px solid var(--color-slate-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-white);
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header-esp h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--color-secondary); /* Color principal institucional */
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.modal-footer-esp {
+  padding: 20px 35px;
+  background-color: var(--color-white);
+  border-top: 1px solid var(--color-slate-200);
+  border-radius: 0 0 12px 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+/*  ── desde styles/components/admin/AdminLayout.css ──  */
+
+.breadcrumb-current {
+  color: var(--color-slate-900);
+}
+
+.breadcrumb-separator {
+  color: var(--color-slate-300);
+}
+
+.breadcrumb-current {
+  color: var(--color-primary);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+@media (max-width: 680px) {
+
+  .breadcrumb-current {
+    font-size: 0.72rem;
+  }
+}

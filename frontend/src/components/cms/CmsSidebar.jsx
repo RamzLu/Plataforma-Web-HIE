@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { 
   LayoutDashboard, 
   FileText, 
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
 import logoCompletoBlanco from "../../assets/logo-completo-blanco.png";
+import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const CmsSidebar = ({ activeTab, setActiveTab }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -61,7 +62,7 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
         <div className="cms-logo-container-inner">
           <div 
             className="cms-logo"
-            onClick={() => setActiveTab && setActiveTab("dashboard")}
+            onClick={() => setActiveTab && setActiveTab("dashboard")} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setActiveTab && setActiveTab("dashboard"))}
             style={{ cursor: "pointer" }}
             title="Hospital Interdistrital Evita Formosa"
           >
@@ -111,7 +112,7 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
               {!isGeneral && !isCollapsed && (
                 <div 
                   className={`cms-nav-group-header ${isExpanded ? "active" : ""}`}
-                  onClick={() => handleToggleSection(section.title)}
+                  onClick={() => handleToggleSection(section.title)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => handleToggleSection(section.title))}
                 >
                   <span className="cms-nav-group-title">{section.title}</span>
                   <ChevronDown size={16} className="accordion-icon" />
@@ -123,7 +124,7 @@ const CmsSidebar = ({ activeTab, setActiveTab }) => {
                   <li
                     key={item.id}
                     className={(activeTab === item.id || (item.id === "contenido-grafico" && activeTab === "banners")) ? "active" : ""}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => setActiveTab(item.id)} role="button" tabIndex={0} onKeyDown={(e) => activarConTeclado(e, () => setActiveTab(item.id))}
                     title={isCollapsed ? item.label : ""}
                   >
                     <div className="cms-nav-icon">{item.icon}</div>
