@@ -11,8 +11,7 @@ import {
   Building,
   ChevronDown
 } from "lucide-react";
-import avatarHospital from "../../assets/logoHospitalEvita-blanco.png";
-import logoCompletoBlanco from "../../assets/logo-completo-blanco.png";
+import logoOficial from "../../assets/logo-hie-oficial.png";
 import { activarConTeclado } from "../../utils/accesibilidad.js";
 
 const AdminSidebar = ({
@@ -71,16 +70,25 @@ const AdminSidebar = ({
           >
             {isCollapsed ? (
               <img
-                src={avatarHospital}
-                alt="Logo Hospital Evita"
+                src={logoOficial}
+                alt="Hospital Interdistrital Evita Formosa"
                 className="admin-logo-img"
               />
             ) : (
-              <img
-                src={logoCompletoBlanco}
-                alt="Hospital Interdistrital Evita Formosa"
-                className="admin-logo-completo"
-              />
+              <div className="admin-brand-lockup">
+                <img
+                  src={logoOficial}
+                  alt="Hospital Interdistrital Evita"
+                  className="admin-logo-completo"
+                />
+                <div className="admin-brand-text">
+                  <span className="admin-brand-line">HOSPITAL</span>
+                  <span className="admin-brand-line">INTERDISTRITAL</span>
+                  <span className="admin-brand-evita">
+                    EVITA <span className="admin-brand-formosa">FORMOSA</span>
+                  </span>
+                </div>
+              </div>
             )}
           </div>
         </div>

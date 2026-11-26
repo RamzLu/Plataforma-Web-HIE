@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 
 import keycloak from '../../config/keycloak';
 import { getNoticias, revisarNoticia } from '../../api/noticias.api';
-import avatarHospital from '../../assets/logoHospitalEvita.png';
+import avatarHospital from '../../assets/logo-hie-oficial.png';
 import DefaultNewsImage from '../../components/ui/DefaultNewsImage';
 import { sanitizeHtml } from '../../utils/sanitizeHtml.js';
 import { AdminCambiosPill, AdminCambiosResaltados } from '../../components/admin/AdminCambiosResaltados.jsx';
