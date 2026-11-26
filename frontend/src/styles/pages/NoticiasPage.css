@@ -836,24 +836,45 @@
 
 
 .modal-body-esp {
-  padding: 30px 40px;
+  padding: 28px 36px;
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.25fr 1fr;
   gap: 32px;
-  overflow-y: auto;
-  align-items: center;
+  overflow: hidden;
+  align-items: stretch;
   box-sizing: border-box;
   flex: 1 1 auto;
   min-height: 0;
-  max-height: 100%;
 }
 
 .modal-left-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
   min-width: 0;
-  align-self: start;
+  max-height: min(460px, calc(84vh - 150px));
+  overflow-y: auto;
+  padding-right: 12px;
+  box-sizing: border-box;
+  align-self: stretch;
+}
+
+.modal-left-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-left-content::-webkit-scrollbar-track {
+  background: var(--color-slate-100);
+  border-radius: 4px;
+}
+
+.modal-left-content::-webkit-scrollbar-thumb {
+  background: var(--color-slate-300);
+  border-radius: 4px;
+}
+
+.modal-left-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
 }
 
 .mosaic-gallery {
@@ -862,14 +883,12 @@
   border-radius: 14px;
   overflow: hidden;
   width: 100%;
-  height: auto;
-  max-height: calc(86vh - 150px);
+  height: min(460px, calc(84vh - 150px));
   background-color: transparent;
   box-shadow: none;
-  position: sticky;
-  top: 0;
-  align-self: center;
-  margin: 0 auto;
+  position: static;
+  align-self: stretch;
+  margin: 0;
 }
 
 .mosaic-item {
@@ -1448,15 +1467,19 @@
     position: static !important;
     margin-bottom: 20px !important;
   }
-.modal-body-esp {
-    display: block !important; 
-    padding: 20px 20px 60px 20px !important; 
+  .modal-body-esp {
+    display: block !important;
+    overflow-y: auto !important;
+    padding: 20px 20px 40px 20px !important;
   }
 
   .modal-left-content {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    max-height: none !important;
+    overflow-y: visible !important;
+    padding-right: 0 !important;
     margin-bottom: 25px !important;
   }
 
