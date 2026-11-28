@@ -144,8 +144,156 @@
 }
 
 /* ==========================================
-   ESTILOS DEL MODAL (REFERENCIA AÑADIR PROFESIONAL)
+   ESTILOS DEL MODAL (ESTRUCTURA SOFT UI ALINEADA AL ADMIN)
    ========================================== */
+:where(.panel-scope) .cms-prof-modal-overlay {
+  padding: 24px;
+  background: rgb(15 23 42 / 60%) !important;
+  backdrop-filter: blur(4px);
+}
+
+:where(.panel-scope) .cms-prof-modal-wrapper {
+  width: min(740px, 100%) !important;
+  max-width: 740px !important;
+  max-height: 92vh !important;
+  border: 1px solid rgb(226 232 240 / 80%) !important;
+  border-radius: 16px !important;
+  background-color: var(--color-white) !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%) !important;
+  overflow: hidden;
+}
+
+:where(.panel-scope) .cms-prof-modal-header {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid var(--color-slate-100) !important;
+  background-color: var(--color-white) !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+:where(.panel-scope) .cms-prof-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px !important;
+  background: rgb(248 250 252 / 60%) !important;
+  max-height: calc(92vh - 145px) !important;
+  overflow-y: auto;
+}
+
+:where(.panel-scope) .cms-prof-soft-card {
+  margin: 0;
+  padding: 18px 20px;
+  border: 1px solid rgb(226 232 240 / 85%);
+  border-radius: 12px;
+  background: var(--color-white);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 5%);
+}
+
+:where(.panel-scope) .cms-prof-identity-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+:where(.panel-scope) .cms-prof-photo-col {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-slate-100);
+}
+
+:where(.panel-scope) .cms-prof-avatar-box {
+  display: grid;
+  width: 80px;
+  height: 80px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 12px;
+  background: var(--color-slate-100);
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 5%);
+  color: var(--color-blue-700);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+:where(.panel-scope) .cms-prof-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+:where(.panel-scope) .cms-prof-upload-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+:where(.panel-scope) .cms-prof-photo-label {
+  margin-bottom: 0 !important;
+}
+
+:where(.panel-scope) .cms-prof-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--color-slate-100);
+  border: 1px solid var(--color-slate-200);
+  color: var(--color-primary);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+:where(.panel-scope) .cms-prof-upload-btn:hover {
+  background: var(--color-slate-200);
+  border-color: var(--color-slate-300);
+}
+
+:where(.panel-scope) .cms-prof-upload-hint {
+  font-size: 0.78rem;
+  color: var(--color-slate-500);
+}
+
+:where(.panel-scope) .cms-prof-identity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+:where(.panel-scope) .cms-prof-cards-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+:where(.panel-scope) .cms-prof-modal-footer {
+  padding: 16px 24px !important;
+  border-top: 1px solid var(--color-slate-200) !important;
+  background-color: var(--color-white) !important;
+  border-radius: 0 0 16px 16px !important;
+}
+
+@media (max-width: 640px) {
+  :where(.panel-scope) .cms-prof-identity-grid,
+  :where(.panel-scope) .cms-prof-cards-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  :where(.panel-scope) .cms-prof-photo-col {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
 
 /* ==========================================
    ESTILOS ADICIONALES DE PROFESIONALES

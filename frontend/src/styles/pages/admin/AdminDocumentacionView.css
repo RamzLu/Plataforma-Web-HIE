@@ -307,12 +307,17 @@
 }
 
 :where(.panel-scope) .admin-doc-table td:not(:where(.vista-portal *)) {
-  min-width: 130px;
-  padding: 15px 13px;
+  min-width: 140px;
+  padding: 15px 16px;
   border-bottom: 1px solid #edf1f6;
   color: var(--color-slate-600);
   font-size: 0.82rem;
   vertical-align: middle;
+}
+
+:where(.panel-scope) .admin-doc-table td:nth-child(3):not(:where(.vista-portal *)) {
+  min-width: 180px;
+  white-space: nowrap;
 }
 
 :where(.panel-scope) .admin-doc-table td:first-child:not(:where(.vista-portal *)) {
@@ -361,6 +366,7 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
 }
 
@@ -373,7 +379,7 @@
   color: var(--color-primary);
   cursor: pointer;
   font: inherit;
-  font-size: 0.84rem;
+  font-size: 0.88rem;
   font-weight: 700;
   line-height: 1.4;
   text-align: left;
@@ -395,7 +401,8 @@
 :where(.panel-scope) .admin-doc-category-cell small:not(:where(.vista-portal *)),
 :where(.panel-scope) .admin-doc-creator-cell small:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
-  font-size: 0.71rem;
+  font-size: 0.78rem;
+  font-weight: 500;
 }
 
 :where(.panel-scope) .admin-doc-title-cell small:not(:where(.vista-portal *)) {

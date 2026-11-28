@@ -536,9 +536,9 @@ const CmsDocsView = ({
                   </small>
                 </div>
 
-                <div className="col-categoria" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                <div className="col-categoria">
                   <EtiquetaCategoria categoria={doc.category} />
-                  <small style={{ color: '#64748b', fontSize: '0.78rem', marginTop: '2px' }}>
+                  <small className="doc-type-size" style={{ marginTop: '2px' }}>
                     {(doc.fileType || "PDF").toUpperCase()} · {(doc.fileSize || "0.1 MB")}
                   </small>
                 </div>

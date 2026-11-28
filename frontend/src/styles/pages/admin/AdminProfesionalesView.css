@@ -98,14 +98,14 @@
   border-radius: 14px;
 }
 
-:where(.panel-scope) .admin-prof-summary-card > div:not(:where(.vista-portal *)) {
+:where(.panel-scope) .admin-prof-summary-card>div:not(:where(.vista-portal *)) {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 4px;
 }
 
-:where(.panel-scope) .admin-prof-summary-card > div span:not(:where(.vista-portal *)) {
+:where(.panel-scope) .admin-prof-summary-card>div span:not(:where(.vista-portal *)) {
   color: var(--color-slate-600);
   font-size: 0.82rem;
   font-weight: 600;
@@ -165,11 +165,12 @@
 }
 
 :where(.panel-scope) .admin-prof-card {
+  min-width: 0;
   padding: 26px;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 18px;
+  border: 1px solid #e7edf5;
+  border-radius: 22px;
   background: var(--color-white);
-  box-shadow: 0 10px 30px -5px rgb(0 0 0 / 5%);
+  box-shadow: 0 12px 30px rgb(15 23 42 / 4%);
 }
 
 :where(.panel-scope) .admin-prof-card-heading {
@@ -215,28 +216,33 @@
 :where(.panel-scope) .admin-prof-search {
   display: flex;
   min-width: 220px;
-  height: 42px;
+  min-height: 44px;
   flex: 1;
   align-items: center;
   gap: 9px;
   padding: 0 12px;
-  border: 1px solid var(--color-slate-300);
-  border-radius: 8px;
+  border: 1px solid #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
   color: var(--color-slate-500);
 }
 
 :where(.panel-scope) .admin-prof-search:focus-within,
 :where(.panel-scope) .admin-prof-filter select:focus:not(:where(.vista-portal *)) {
-  border-color: var(--color-primary);
-  outline: 2px solid rgb(12 35 64 / 12%);
+  border-color: var(--color-blue-300);
+  outline: 0;
+  background: var(--color-white);
+  box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
 }
 
 :where(.panel-scope) .admin-prof-search input:not(:where(.vista-portal *)) {
   width: 100%;
   border: 0;
   outline: 0;
+  background: transparent;
   color: var(--color-slate-900);
   font: inherit;
+  font-size: 0.85rem;
 }
 
 :where(.panel-scope) .admin-prof-search input:not(:where(.vista-portal *))::placeholder {
@@ -254,11 +260,11 @@
 
 :where(.panel-scope) .admin-prof-filter select:not(:where(.vista-portal *)) {
   min-width: 175px;
-  height: 42px;
+  min-height: 44px;
   padding: 0 30px 0 10px;
-  border: 1px solid var(--color-slate-300);
-  border-radius: 8px;
-  background: var(--color-white);
+  border: 1px solid #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
   color: var(--color-slate-900);
   font: inherit;
 }
@@ -266,8 +272,10 @@
 :where(.panel-scope) .admin-prof-table-wrap {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid var(--color-slate-300);
-  border-radius: 12px;
+  border: 1px solid var(--color-slate-300) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+  background-color: var(--color-white) !important;
 }
 
 :where(.panel-scope) .admin-prof-table {
@@ -290,8 +298,8 @@
 
 :where(.panel-scope) .admin-prof-table td:not(:where(.vista-portal *)) {
   min-width: 115px;
-  padding: 12px;
-  border-bottom: 1px solid var(--color-slate-200);
+  padding: 15px 16px;
+  border-bottom: 1px solid #edf1f6;
   color: var(--color-slate-600);
   font-size: 0.82rem;
   vertical-align: middle;
@@ -302,7 +310,7 @@
 }
 
 :where(.panel-scope) .admin-prof-table tbody tr:hover:not(:where(.vista-portal *)) {
-  background: var(--color-slate-50);
+  background: #f8faff;
 }
 
 :where(.panel-scope) .admin-prof-table td:first-child:not(:where(.vista-portal *)) {
@@ -489,7 +497,7 @@
   border-bottom: 1px solid var(--color-slate-200);
 }
 
-:where(.panel-scope) .admin-prof-modal-header > div > span:not(:where(.vista-portal *)) {
+:where(.panel-scope) .admin-prof-modal-header>div>span:not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.77rem;
 }
@@ -549,7 +557,7 @@
 }
 
 :where(.panel-scope) .admin-prof-role,
-:where(.panel-scope) .admin-prof-profile-summary > span:not(.admin-prof-status):not(:where(.vista-portal *)) {
+:where(.panel-scope) .admin-prof-profile-summary>span:not(.admin-prof-status):not(:where(.vista-portal *)) {
   color: var(--color-slate-500);
   font-size: 0.82rem;
 }
@@ -602,7 +610,7 @@
   background: #f8fbff;
 }
 
-:where(.panel-scope) .admin-prof-state-panel > div:not(:where(.vista-portal *)) {
+:where(.panel-scope) .admin-prof-state-panel>div:not(:where(.vista-portal *)) {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -784,7 +792,7 @@
     height: 36px;
   }
 
-  :where(.panel-scope) .admin-prof-summary-card > div span:not(:where(.vista-portal *)) {
+  :where(.panel-scope) .admin-prof-summary-card>div span:not(:where(.vista-portal *)) {
     font-size: 0.68rem;
   }
 
@@ -1091,7 +1099,7 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-:where(.panel-scope) .admin-prof-content-grid > .admin-prof-card {
+:where(.panel-scope) .admin-prof-content-grid>.admin-prof-card {
   min-width: 0;
 }
 
@@ -1129,7 +1137,7 @@
   color: var(--color-blue-700);
 }
 
-:where(.panel-scope) .admin-prof-published-heading > div:nth-child(2):not(:where(.vista-portal *)) {
+:where(.panel-scope) .admin-prof-published-heading>div:nth-child(2):not(:where(.vista-portal *)) {
   min-width: 0;
   flex: 1;
 }
@@ -1430,12 +1438,13 @@
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-title {
-  margin: 2px 0 0;
-  color: #0a3871;
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 32px;
+  margin: 0;
+  color: var(--color-secondary);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-close {
@@ -1488,7 +1497,7 @@
   background: var(--color-slate-300);
 }
 
-:where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-body > *:not(:where(.vista-portal *)) {
+:where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-body>*:not(:where(.vista-portal *)) {
   flex-shrink: 0;
   margin-top: 0;
   margin-bottom: 0;
@@ -1513,9 +1522,11 @@
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-status-label {
-  color: var(--color-slate-700);
-  font-size: 14px;
+  color: var(--color-slate-500);
+  font-size: 0.85rem;
   font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-status .etiqueta-estado {
@@ -1698,30 +1709,30 @@
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-role {
   color: var(--color-slate-500);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.025em;
-  line-height: 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
   text-transform: uppercase;
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-name {
-  margin: 2px 0 0;
+  margin: 4px 0 0;
   overflow: hidden;
-  color: var(--color-slate-900);
-  font-size: 18px;
-  font-weight: 650;
-  line-height: 28px;
+  color: var(--color-primary);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-license {
-  margin-top: 8px;
-  color: var(--color-slate-600);
-  font-size: 12px;
+  margin-top: 6px;
+  color: var(--color-slate-500);
+  font-size: 0.85rem;
   font-weight: 500;
-  line-height: 16px;
+  line-height: 1.4;
 }
 
 /* Datos asociados */
@@ -1737,27 +1748,27 @@
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-field-label {
-  color: var(--color-slate-400);
-  font-size: 11px;
+  color: var(--color-slate-500);
+  font-size: 0.82rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  line-height: 16px;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
   text-transform: uppercase;
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-field-value {
-  margin-top: 4px;
-  color: var(--color-slate-800);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
+  margin-top: 6px;
+  color: var(--color-slate-700);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-field-text {
-  margin-top: 4px;
-  color: var(--color-slate-800);
-  font-size: 14px;
-  font-weight: 500;
+  margin-top: 6px;
+  color: var(--color-slate-700);
+  font-size: 0.95rem;
+  font-weight: 400;
   line-height: 1.5;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
@@ -1770,14 +1781,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 14px;
+  padding: 14px 16px;
   color: var(--color-slate-500);
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 :where(.panel-scope) .admin-prof-rv-modal .admin-prof-rv-sent strong:not(:where(.vista-portal *)) {
-  color: var(--color-slate-800);
+  color: var(--color-slate-700);
   font-weight: 600;
 }
 
@@ -1907,4 +1918,165 @@
 :where(.panel-scope) .admin-prof-rv-alert svg {
   flex-shrink: 0;
   margin-top: 1px;
+}
+
+/* ===================================================
+   Unificación de Tabla de Profesionales Admin con CMS
+   (Clases con sufijo -admin para evitar colisiones)
+   =================================================== */
+:where(.panel-scope) .admin-prof-table-admin {
+  display: block;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+:where(.panel-scope) .admin-prof-table-admin thead,
+:where(.panel-scope) .admin-prof-table-admin tbody {
+  display: block;
+  width: 100%;
+}
+
+:where(.panel-scope) .admin-prof-table-admin thead tr,
+:where(.panel-scope) .admin-prof-table-admin tbody tr {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.05fr) minmax(0, 1.2fr) minmax(0, 0.95fr) minmax(195px, 1.1fr);
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+:where(.panel-scope) .admin-prof-table-admin thead tr {
+  border-bottom: 2px solid var(--color-slate-300) !important;
+  background: var(--color-slate-100) !important;
+}
+
+:where(.panel-scope) .admin-prof-table-admin tbody tr {
+  border-bottom: 1px solid #edf1f6;
+}
+
+:where(.panel-scope) .admin-prof-table-admin tbody tr:last-child {
+  border-bottom: 0;
+}
+
+:where(.panel-scope) .admin-prof-table-admin th:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-prof-table-admin td:not(:where(.vista-portal *)),
+:where(.panel-scope) .admin-prof-table-admin td:first-child:not(:where(.vista-portal *)) {
+  display: flex;
+  align-items: center;
+  min-width: 0 !important;
+  width: 100% !important;
+  border-bottom: 0 !important;
+  box-sizing: border-box;
+}
+
+:where(.panel-scope) .admin-prof-th-estado-admin,
+:where(.panel-scope) .admin-prof-td-estado-admin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center !important;
+}
+
+:where(.panel-scope) .admin-prof-table-admin .admin-prof-empty {
+  grid-column: 1 / -1;
+  width: 100% !important;
+}
+
+:where(.panel-scope) .admin-prof-row-clickable-admin {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+:where(.panel-scope) .admin-prof-row-clickable-admin:hover:not(:where(.vista-portal *)) {
+  background-color: var(--color-slate-50) !important;
+}
+
+:where(.panel-scope) .admin-prof-person-cell-admin {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+:where(.panel-scope) .admin-prof-avatar-admin {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--color-slate-300) !important;
+  background-color: var(--color-slate-200) !important;
+  color: var(--color-slate-500) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+}
+
+:where(.panel-scope) .admin-prof-avatar-admin img:not(:where(.vista-portal *)) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+:where(.panel-scope) .admin-prof-person-copy-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+:where(.panel-scope) .admin-prof-name-button-admin {
+  color: #0c2340 !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+:where(.panel-scope) .admin-prof-matricula-wrap-admin {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+:where(.panel-scope) .admin-prof-matricula-text-admin {
+  font-size: 0.75rem !important;
+  color: #64748b !important;
+  display: block;
+}
+
+:where(.panel-scope) .admin-prof-cargo-text-admin {
+  display: block;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+:where(.panel-scope) .admin-prof-area-cell-admin,
+:where(.panel-scope) .admin-prof-clasificacion-cell-admin {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  :where(.panel-scope) .admin-prof-table-admin thead tr,
+  :where(.panel-scope) .admin-prof-table-admin tbody tr {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  :where(.panel-scope) .admin-prof-th-estado-admin,
+  :where(.panel-scope) .admin-prof-td-estado-admin {
+    align-items: flex-start;
+    text-align: left !important;
+  }
 }

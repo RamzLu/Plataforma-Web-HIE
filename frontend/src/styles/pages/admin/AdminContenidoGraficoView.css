@@ -337,12 +337,12 @@
 }
 
 :where(.panel-scope) .admin-cg-table-admin th:not(:where(.vista-portal *)) {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--color-slate-200);
-  background-color: var(--color-slate-50);
-  color: var(--color-slate-500);
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding: 14px 16px;
+  border-bottom: 2px solid var(--color-slate-300) !important;
+  background-color: var(--color-slate-100) !important;
+  color: var(--color-primary) !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;

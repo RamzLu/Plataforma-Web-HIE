@@ -31,11 +31,12 @@
 }
 
 :where(.panel-scope) .dashboard-card-admin {
+  min-width: 0;
   background-color: var(--color-white);
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--color-slate-200);
+  border-radius: 22px;
+  padding: 26px;
+  box-shadow: 0 12px 30px rgb(15 23 42 / 4%);
+  border: 1px solid #e7edf5;
 }
 
 :where(.panel-scope) .admin-news-card-heading {

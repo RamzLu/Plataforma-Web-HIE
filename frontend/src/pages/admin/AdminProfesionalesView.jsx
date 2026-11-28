@@ -216,7 +216,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
     try {
       setSubmitting(true);
       if (keycloak.authenticated) {
-        await keycloak.updateToken(30).catch(() => {});
+        await keycloak.updateToken(30).catch(() => { });
       }
       await revisarProfesional(selectedProfessional.id, 'APROBAR');
       toast.success(`"${selectedProfessional.nombre}" fue aprobado y publicado.`);
@@ -240,7 +240,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
     try {
       setSubmitting(true);
       if (keycloak.authenticated) {
-        await keycloak.updateToken(30).catch(() => {});
+        await keycloak.updateToken(30).catch(() => { });
       }
       await revisarProfesional(selectedProfessional.id, 'RECHAZAR', rejectReason.trim());
       toast.success(`"${selectedProfessional.nombre}" fue rechazado. Se notificó al Editor CMS.`);
@@ -312,7 +312,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
           { clave: "PUBLICADO", tipo: "publicado", cuenta: publishedCount },
           { clave: "RECHAZADO", tipo: "rechazado", cuenta: rejectedCount },
           { clave: "PAPELERA", tipo: "papelera", cuenta: papeleraCount },
-      ]}
+        ]}
       />
 
       <section className="admin-prof-card" aria-labelledby="admin-prof-list-title">
@@ -350,93 +350,103 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
         </div>
 
         {statusFilter === 'PAPELERA' && <AvisoPapelera soloLectura />}
-<div className="admin-prof-table-wrap">
+        <div className="admin-prof-table-wrap">
           {loading ? (
             <PortalLoader message="Cargando fichas de profesionales..." />
           ) : (
             <>
-            <table className="admin-prof-table">
-              <thead>
-                <tr>
-                  <th scope="col">Profesional</th>
-                  <th scope="col">Editor / fecha</th>
-                  <th scope="col">Especialidad / área</th>
-                  <th scope="col">Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginacion.itemsPagina.map((item) => (
-                  <tr key={item.id}>
-                    <td data-label="Profesional">
-                      <div className="admin-prof-person-cell">
-                        <div className="admin-prof-avatar">
-                          {item.imagen ? (
-                            <img src={item.imagen} alt={`Fotografía de ${item.nombre}`} />
-                          ) : (
-                            <span aria-label="Sin fotografía">{getInitials(item.nombre)}</span>
-                          )}
-                        </div>
-                        <div className="admin-prof-person-copy">
-                          <button
-                            type="button"
-                            className="admin-prof-name-button"
-                            onClick={() => {
-                              setSelectedId(item.id);
-                              setVerPublicada(abreVersionPublicada(item, statusFilter === 'PUBLICADO'));
-                            }}
-                          >
-                            {tituloEnLista(item, statusFilter === 'PUBLICADO', item.nombre)}
-                          </button>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                            <span>{item.cargo}</span>
-                            <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+              <table className="admin-prof-table admin-prof-table-admin">
+                <thead>
+                  <tr>
+                    <th scope="col" className="admin-prof-th-profesional-admin">Profesional</th>
+                    <th scope="col" className="admin-prof-th-cargo-admin">Cargo o función</th>
+                    <th scope="col" className="admin-prof-th-area-admin">Área asignada</th>
+                    <th scope="col" className="admin-prof-th-clasificacion-admin">Clasificación</th>
+                    <th scope="col" className="admin-prof-th-estado-admin">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginacion.itemsPagina.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="admin-prof-row-clickable-admin"
+                      onClick={() => {
+                        setSelectedId(item.id);
+                        setVerPublicada(abreVersionPublicada(item, statusFilter === 'PUBLICADO'));
+                      }}
+                    >
+                      <td data-label="Profesional" className="admin-prof-td-profesional-admin">
+                        <div className="admin-prof-person-cell admin-prof-person-cell-admin">
+                          <div className="admin-prof-avatar admin-prof-avatar-admin">
+                            {item.imagen ? (
+                              <img src={item.imagen} alt={`Fotografía de ${item.nombre}`} />
+                            ) : (
+                              <span aria-label="Sin fotografía">{getInitials(item.nombre)}</span>
+                            )}
+                          </div>
+                          <div className="admin-prof-person-copy admin-prof-person-copy-admin">
+                            <button
+                              type="button"
+                              className="admin-prof-name-button admin-prof-name-button-admin"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setSelectedId(item.id);
+                                setVerPublicada(abreVersionPublicada(item, statusFilter === 'PUBLICADO'));
+                              }}
+                            >
+                              {tituloEnLista(item, statusFilter === 'PUBLICADO', item.nombre)}
+                            </button>
+                            <div className="admin-prof-matricula-wrap-admin">
+                              <span className="admin-prof-matricula-text-admin">{item.matricula || 'Sin matrícula'}</span>
+                              <AdminCambiosPill oculto={statusFilter === 'PUBLICADO'} count={item.cambios?.length} esActualizacion={item.esActualizacion} />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td data-label="Editor / fecha">
-                      <div className="admin-prof-editor-cell" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                        <span style={{ fontWeight: 600, color: '#1e293b', fontSize: '0.9rem' }}>{item.editor}</span>
-                        <small style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 500 }}><CalendarDays size={13} />{item.fechaActualizacion}</small>
-                      </div>
-                    </td>
-                    <td data-label="Especialidad / área">
-                      <div className="admin-prof-association-cell">
-                        <EtiquetaCategoria categoria={item.especialidad} tono="gris" />
-                        <EtiquetaTipo esServicio={item.area === 'Servicio clave'} />
-                      </div>
-                    </td>
-                    <td data-label="Estado">
-                      {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
-<EtiquetaEliminacion />
-) : (
-<>
-                          <EtiquetaEstado
-                            estado={item.publicado || item.estadoVista ? 'PUBLICADO' : item.estado}
-                            texto={item.publicado || item.estadoVista ? 'Publicado' : estadoLabels[item.estado]}
-                          />
-                          <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
-<NotaPapelera item={item} />
-                          {item.solicitudEliminacion && (
-                            <div style={{ marginTop: '4px' }}>
-                              <EtiquetaEliminacion nota />
-                            </div>
-                          )}
-                        </>
-)}
-                    </td>
-                  </tr>
-                ))}
-                {filteredProfesionales.length === 0 && (
-                  <tr>
-                    <td className="admin-prof-empty" colSpan="4">
-                      No se encontraron profesionales con esos filtros.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            <Paginacion {...paginacion} etiqueta="profesionales" />
+                      </td>
+                      <td data-label="Cargo o función" className="admin-prof-td-cargo-admin">
+                        <span className="admin-prof-cargo-text-admin">{item.cargo || '-'}</span>
+                      </td>
+                      <td data-label="Área asignada" className="admin-prof-td-area-admin">
+                        <div className="admin-prof-area-cell-admin">
+                          <EtiquetaCategoria categoria={item.especialidad || 'Sin asignar'} tono="gris" />
+                        </div>
+                      </td>
+                      <td data-label="Clasificación" className="admin-prof-td-clasificacion-admin">
+                        <div className="admin-prof-clasificacion-cell-admin">
+                          <EtiquetaTipo esServicio={item.area === 'Servicio clave'} />
+                        </div>
+                      </td>
+                      <td data-label="Estado" className="admin-prof-td-estado-admin">
+                        {item.solicitudEliminacion && statusFilter !== 'PUBLICADO' ? (
+                          <EtiquetaEliminacion />
+                        ) : (
+                          <>
+                            <EtiquetaEstado
+                              estado={item.publicado || item.estadoVista ? 'PUBLICADO' : item.estado}
+                              texto={item.publicado || item.estadoVista ? 'Publicado' : estadoLabels[item.estado]}
+                            />
+                            <SiguePublicado item={item} activo={statusFilter === 'PUBLICADO'} />
+                            <NotaPapelera item={item} />
+                            {item.solicitudEliminacion && (
+                              <div style={{ marginTop: '4px' }}>
+                                <EtiquetaEliminacion nota />
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredProfesionales.length === 0 && (
+                    <tr>
+                      <td className="admin-prof-empty" colSpan="5">
+                        No se encontraron profesionales con esos filtros.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              <Paginacion {...paginacion} etiqueta="profesionales" />
             </>
           )}
         </div>
@@ -519,7 +529,7 @@ const AdminProfesionalesView = ({ onPendingCountChange }) => {
 
               <div className="admin-prof-rv-card admin-prof-rv-field">
                 <div className="admin-prof-rv-field-label">Descripción / Perfil profesional</div>
-                <div className="admin-prof-rv-field-text">{selectedProfessional.descripcion || 'Sin descripción cargada.'}</div>
+                <div className="admin-prof-rv-field-text">{selectedProfessional.descripcion || selectedProfessional.cargo || 'Sin descripción cargada.'}</div>
               </div>
 
               <div className="admin-prof-rv-card admin-prof-rv-sent">

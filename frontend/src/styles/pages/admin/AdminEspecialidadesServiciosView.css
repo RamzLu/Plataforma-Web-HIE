@@ -38,19 +38,20 @@
 }
 
 :where(.panel-scope) .admin-es-card {
-  padding: 28px;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 20px;
+  min-width: 0;
+  padding: 26px;
+  border: 1px solid #e7edf5;
+  border-radius: 22px;
   background: var(--color-white);
-  box-shadow: 0 10px 30px -5px rgb(0 0 0 / 5%);
+  box-shadow: 0 12px 30px rgb(15 23 42 / 4%);
 }
 
 :where(.panel-scope) .admin-es-card-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 22px;
+  gap: 18px;
+  margin-bottom: 20px;
 }
 
 :where(.panel-scope) .admin-es-card-heading h2:not(:where(.vista-portal *)) {
@@ -62,12 +63,12 @@
 
 :where(.panel-scope) .admin-es-result-count {
   flex-shrink: 0;
-  padding: 7px 12px;
+  padding: 7px 11px;
   border: 1px solid var(--color-slate-200);
   border-radius: 999px;
   background: var(--color-slate-50);
   color: var(--color-slate-600);
-  font-size: 0.8rem;
+  font-size: 0.77rem;
   font-weight: 700;
 }
 
@@ -200,13 +201,14 @@
 :where(.panel-scope) .admin-es-search {
   display: flex;
   min-width: 220px;
-  height: 42px;
+  min-height: 44px;
   flex: 1;
   align-items: center;
   gap: 9px;
   padding: 0 12px;
-  border: 1px solid var(--color-slate-300);
-  border-radius: 8px;
+  border: 1px solid #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
   color: var(--color-slate-500);
 }
 
@@ -214,14 +216,18 @@
   width: 100%;
   border: 0;
   outline: 0;
+  background: transparent;
   color: var(--color-slate-900);
   font: inherit;
+  font-size: 0.85rem;
 }
 
 :where(.panel-scope) .admin-es-search:focus-within,
 :where(.panel-scope) .admin-es-filter select:focus:not(:where(.vista-portal *)) {
-  border-color: var(--color-primary);
-  outline: 2px solid rgb(12 35 64 / 12%);
+  border-color: var(--color-blue-300);
+  outline: 0;
+  background: var(--color-white);
+  box-shadow: 0 0 0 4px rgb(59 130 246 / 10%);
 }
 
 :where(.panel-scope) .admin-es-filter {
@@ -229,17 +235,17 @@
   flex-direction: column;
   gap: 5px;
   color: var(--color-slate-600);
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 600;
 }
 
 :where(.panel-scope) .admin-es-filter select:not(:where(.vista-portal *)) {
-  min-width: 155px;
-  height: 42px;
+  min-width: 175px;
+  min-height: 44px;
   padding: 0 30px 0 10px;
-  border: 1px solid var(--color-slate-300);
-  border-radius: 8px;
-  background: var(--color-white);
+  border: 1px solid #e1e8f0;
+  border-radius: 12px;
+  background: #fbfcfe;
   color: var(--color-slate-900);
   font: inherit;
 }
@@ -247,8 +253,10 @@
 :where(.panel-scope) .admin-es-table-wrap {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid var(--color-slate-300);
-  border-radius: 12px;
+  border: 1px solid var(--color-slate-300) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+  background-color: var(--color-white) !important;
 }
 
 :where(.panel-scope) .admin-es-table {
@@ -271,10 +279,11 @@
 
 :where(.panel-scope) .admin-es-table td:not(:where(.vista-portal *)) {
   min-width: 110px;
-  padding: 13px 12px;
-  border-bottom: 1px solid var(--color-slate-200);
+  padding: 15px 16px;
+  border-bottom: 1px solid #edf1f6;
   color: var(--color-slate-600);
   font-size: 0.85rem;
+  vertical-align: middle;
 }
 
 :where(.panel-scope) .admin-es-table tbody tr:last-child td:not(:where(.vista-portal *)) {
@@ -282,7 +291,7 @@
 }
 
 :where(.panel-scope) .admin-es-table tbody tr:hover:not(:where(.vista-portal *)) {
-  background: var(--color-slate-50);
+  background: #f8faff;
 }
 
 :where(.panel-scope) .admin-es-table td:first-child:not(:where(.vista-portal *)) {
@@ -321,13 +330,14 @@
 
 :where(.panel-scope) .admin-es-item-icon {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   flex-shrink: 0;
   place-items: center;
-  border-radius: 8px;
+  border: 1px solid var(--color-blue-100);
+  border-radius: 13px;
   background: var(--color-blue-50);
-  color: var(--color-primary);
+  color: var(--color-blue-600);
 }
 
 :where(.panel-scope) .admin-es-status,
