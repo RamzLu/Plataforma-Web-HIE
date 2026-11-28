@@ -524,17 +524,17 @@ const CmsCapacitacionesView = ({ initialCreateModal = false, onModalOpened }) =>
       </div>
 
       <div className="cms-dashboard-card">
-      {/* Cabecera idéntica a Noticias, Profesionales y Residencias */}
-      <div className="news-view-header">
-        <div>
-          <h3 className="cms-card-title news-view-title">
-            Listado de capacitaciones
-          </h3>
-          <p className="news-view-subtitle">
-            Administre los cursos, talleres, material formativo y jornadas institucionales del hospital.
-          </p>
+        <div className="cms-card-heading news-view-header">
+          <div>
+            <h3 className="cms-card-title news-view-title">
+              Listado de capacitaciones
+            </h3>
+            <p className="news-view-subtitle">
+              Administre los cursos, talleres, material formativo y jornadas institucionales del hospital.
+            </p>
+          </div>
+          <span className="cms-result-count">{datosFiltrados.length} resultados</span>
         </div>
-      </div>
 
       
 

@@ -577,14 +577,15 @@ editor: data.data?.editor || prevNoticia?.editor || editorResponsable,
       </div>
 
       <div className="cms-dashboard-card">
-      <div className="news-view-header">
-        <div>
-          <h3 className="cms-card-title news-view-title">Listado de las noticias</h3>
-          <p className="news-view-subtitle">
-            Administre las publicaciones y artículos clasificados del portal.
-          </p>
+        <div className="cms-card-heading news-view-header">
+          <div>
+            <h3 className="cms-card-title news-view-title">Listado de las noticias</h3>
+            <p className="news-view-subtitle">
+              Administre las publicaciones y artículos clasificados del portal.
+            </p>
+          </div>
+          <span className="cms-result-count">{filteredNews.length} resultados</span>
         </div>
-      </div>
 
       <BarraFiltros
         crear={{ texto: "+ AÑADIR NOTICIA", onClick: handleOpenCreate }}

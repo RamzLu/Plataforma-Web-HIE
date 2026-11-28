@@ -242,54 +242,62 @@ const CmsDashboardView = ({
         
         {/* --- LADO IZQUIERDO: GRILLA 2x2 DE ESTADÍSTICAS --- */}
         <div className="cms-dashboard-stats-grid">
-          <div className="stat-card-violet">
-            <div className="stat-header">
-              <div className="stat-icon">
+          <div className="kpi-card-refined stat-card-violet">
+            <div className="kpi-card-top stat-header">
+              <span className="kpi-label stat-label">Noticias publicadas</span>
+              <div className="kpi-icon-wrapper stat-icon" style={{ color: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.08)' }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
               </div>
             </div>
-            <h3 className="stat-value">{noticiasPublicadas}</h3>
-            <p className="stat-label">Noticias publicadas</p>
-            <div style={{ marginTop: "16px" }}>
+            <div className="kpi-value-row">
+              <h3 className="kpi-value stat-value">{noticiasPublicadas}</h3>
+            </div>
+            <div className="kpi-footer-trend" style={{ marginTop: "auto" }}>
               <DeltaBadge diff={noticiasDelta} />
             </div>
           </div>
 
-          <div className="stat-card-violet">
-            <div className="stat-header">
-              <div className="stat-icon">
+          <div className="kpi-card-refined stat-card-violet">
+            <div className="kpi-card-top stat-header">
+              <span className="kpi-label stat-label">Documentos activos</span>
+              <div className="kpi-icon-wrapper stat-icon" style={{ color: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.08)' }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               </div>
             </div>
-            <h3 className="stat-value">{documentosActivos}</h3>
-            <p className="stat-label">Documentos activos</p>
-            <div style={{ marginTop: "16px" }}>
+            <div className="kpi-value-row">
+              <h3 className="kpi-value stat-value">{documentosActivos}</h3>
+            </div>
+            <div className="kpi-footer-trend" style={{ marginTop: "auto" }}>
               <DeltaBadge diff={docsDelta} />
             </div>
           </div>
 
-          <div className="stat-card-violet">
-            <div className="stat-header">
-              <div className="stat-icon">
+          <div className="kpi-card-refined stat-card-violet">
+            <div className="kpi-card-top stat-header">
+              <span className="kpi-label stat-label">Profesionales listados</span>
+              <div className="kpi-icon-wrapper stat-icon" style={{ color: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.08)' }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </div>
             </div>
-            <h3 className="stat-value">{profesionalesTotal}</h3>
-            <p className="stat-label">Profesionales listados</p>
-            <div style={{ marginTop: "16px" }}>
+            <div className="kpi-value-row">
+              <h3 className="kpi-value stat-value">{profesionalesTotal}</h3>
+            </div>
+            <div className="kpi-footer-trend" style={{ marginTop: "auto" }}>
               <DeltaBadge diff={profsDelta} />
             </div>
           </div>
 
-          <div className="stat-card-violet">
-            <div className="stat-header">
-              <div className="stat-icon">
+          <div className="kpi-card-refined stat-card-violet">
+            <div className="kpi-card-top stat-header">
+              <span className="kpi-label stat-label">Tasa de publicación</span>
+              <div className="kpi-icon-wrapper stat-icon" style={{ color: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.08)' }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
               </div>
             </div>
-            <h3 className="stat-value">{actividadPorcentaje}%</h3>
-            <p className="stat-label">Tasa de publicación activa</p>
-            <div style={{ marginTop: "16px" }}>
+            <div className="kpi-value-row">
+              <h3 className="kpi-value stat-value">{actividadPorcentaje}%</h3>
+            </div>
+            <div className="kpi-footer-trend" style={{ marginTop: "auto" }}>
               <DeltaBadge
                 diff={actividadPorcentaje >= 75 ? 1 : actividadPorcentaje >= 50 ? 0 : -1}
                 customText={actividadPorcentaje >= 75 ? "Óptimo" : actividadPorcentaje >= 50 ? "Regular" : "Requiere atención"}
@@ -379,9 +387,12 @@ const CmsDashboardView = ({
 
       {/* --- SECCIÓN ORIGINAL DE NOTICIAS --- */}
       <div className="cms-dashboard-card" style={{ marginBottom: "30px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-          <h3 className="cms-card-title" style={{ margin: 0 }}>Últimas Noticias del Portal</h3>
-          <button className="cms-btn-outline" onClick={() => handleQuickAction && handleQuickAction("noticias", false)} style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1", background: "white", cursor: "pointer", fontWeight: "600", fontSize: "0.85rem", color: "#0c2340" }}>
+        <div className="cms-card-heading" style={{ alignItems: "center", marginBottom: "20px" }}>
+          <div>
+            <h3 className="cms-card-title" style={{ margin: 0 }}>Últimas Noticias del Portal</h3>
+            <p className="cms-card-subtitle">Publicaciones recientes aprobadas y en circulación</p>
+          </div>
+          <button className="cms-btn-outline" onClick={() => handleQuickAction && handleQuickAction("noticias", false)} style={{ padding: "8px 16px", borderRadius: "8px", border: "1px solid var(--color-slate-300)", background: "white", cursor: "pointer", fontWeight: "600", fontSize: "0.85rem", color: "var(--color-primary)" }}>
             Gestionar todas
           </button>
         </div>

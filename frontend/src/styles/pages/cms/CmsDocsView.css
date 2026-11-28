@@ -38,30 +38,33 @@
   border-radius: 12px !important;
   overflow: hidden;
   border: 1px solid var(--color-slate-300) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
   margin-top: 20px;
 }
 
 :where(.panel-scope) .docs-table-head,
 :where(.panel-scope) .docs-table-row {
   display: grid;
-  grid-template-columns: minmax(260px, 3fr) 1.2fr 1fr minmax(200px, 1fr) 1fr;
+  grid-template-columns: minmax(280px, 3fr) minmax(170px, 1.4fr) minmax(170px, 1.4fr) minmax(180px, 1.2fr) minmax(100px, 0.8fr);
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 :where(.panel-scope) .docs-table-head {
   padding: 14px 16px;
-  border-bottom: 2px solid var(--color-slate-300);
-  background-color: var(--color-slate-100);
-  color: var(--color-primary);
-  font-size: 0.8rem;
-  font-weight: 650;
+  border-bottom: 2px solid var(--color-slate-300) !important;
+  background-color: var(--color-slate-100) !important;
+  color: var(--color-primary) !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
   letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 :where(.panel-scope) .docs-table-row .col-categoria {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -73,8 +76,13 @@
 }
 
 :where(.panel-scope) .docs-table-row { 
-  padding: 14px 16px; 
-  border-bottom: 1px solid #eef2f7; 
+  padding: 15px 16px; 
+  border-bottom: 1px solid #edf1f6; 
+  transition: background-color 150ms ease;
+}
+
+:where(.panel-scope) .docs-table-row:hover {
+  background: #f8faff;
 }
 
 /* Celda de contenido */
@@ -82,14 +90,15 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 15px;
+  gap: 13px;
 }
 :where(.panel-scope) .doc-thumb-box {
   width: 42px;
   height: 42px;
-  border-radius: 8px;
-  background: #eef2f7;
-  color: var(--color-primary);
+  border-radius: 13px;
+  border: 1px solid var(--color-blue-100);
+  background: var(--color-blue-50);
+  color: var(--color-blue-600);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,7 +107,7 @@
 :where(.panel-scope) .doc-info { 
   display: flex; 
   flex-direction: column; 
-  gap: 3px; 
+  gap: 2px; 
   min-width: 0; 
 }
 :where(.panel-scope) .doc-title-row { 
@@ -109,15 +118,29 @@
 :where(.panel-scope) .doc-title { 
   font-weight: 700; 
   color: var(--color-primary);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
 }
-:where(.panel-scope) .doc-preview-link { color: var(--color-slate-500); display: inline-flex; }
+:where(.panel-scope) .doc-preview-link { color: var(--color-slate-400); display: inline-flex; }
 :where(.panel-scope) .doc-preview-link:hover { color: var(--color-primary); }
-:where(.panel-scope) .doc-meta { color: var(--color-slate-400); font-size: 0.8rem; }
+:where(.panel-scope) .doc-filename { 
+  color: var(--color-slate-500); 
+  font-size: 0.78rem; 
+  font-weight: 400; 
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+:where(.panel-scope) .doc-type-size { 
+  color: var(--color-slate-500); 
+  font-size: 0.78rem; 
+  font-weight: 500; 
+}
 
 :where(.panel-scope) .status-badge.programado, :where(.panel-scope) .status-badge.en.revisión {
   background: #e0edff;
@@ -138,23 +161,25 @@
 :where(.panel-scope) .doc-actions-cell {
   display: flex;
   justify-content: center;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
 }
 :where(.panel-scope) .doc-action-btn-edit, :where(.panel-scope) .doc-action-btn-delete {
-  background: none;
-  border: none;
+  background: transparent;
+  border: 1px solid transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
-  border-radius: 6px;
-  transition: background-color 0.2s;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  transition: all 0.2s ease;
 }
 :where(.panel-scope) .doc-action-btn-edit { color: var(--color-sky-600); }
-:where(.panel-scope) .doc-action-btn-edit:hover { background-color: var(--color-sky-100); }
+:where(.panel-scope) .doc-action-btn-edit:hover { background-color: var(--color-sky-50); border-color: var(--color-sky-200); color: var(--color-sky-700); }
 :where(.panel-scope) .doc-action-btn-delete { color: var(--color-rose-600); }
-:where(.panel-scope) .doc-action-btn-delete:hover { background-color: #ffe4e6; }
+:where(.panel-scope) .doc-action-btn-delete:hover { background-color: #fff1f2; border-color: #fecdd3; color: var(--color-rose-700); }
 
 @media (max-width: 768px) {
   :where(.panel-scope) .docs-table-head { display: none; }

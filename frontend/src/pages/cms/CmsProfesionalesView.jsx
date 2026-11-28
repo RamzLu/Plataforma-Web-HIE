@@ -404,16 +404,17 @@ const CmsProfesionalesView = ({ initialCreateModal = false, onModalOpened }) => 
       </div>
 
       <div className="cms-dashboard-card">
-      <div className="news-view-header">
-        <div>
-          <h3 className="cms-card-title news-view-title">
-            Listado del personal
-          </h3>
-          <p className="news-view-subtitle">
-            Gestione las fichas de los profesionales de la institución.
-          </p>
+        <div className="cms-card-heading news-view-header">
+          <div>
+            <h3 className="cms-card-title news-view-title">
+              Listado del personal
+            </h3>
+            <p className="news-view-subtitle">
+              Gestione las fichas de los profesionales de la institución.
+            </p>
+          </div>
+          <span className="cms-result-count">{profesionalesFiltrados.length} resultados</span>
         </div>
-      </div>
 
       
 

@@ -1,7 +1,7 @@
 import { mensajeDeError } from "../../utils/mensajeDeError";
 import PortalLoader from "../../components/ui/PortalLoader";
 import React, { useState, useRef, useMemo } from "react";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, FileText } from "lucide-react";
 import { createDocumento, updateDocumento, deleteDocumento } from "../../api/documentos.api.js";
 import { recordCmsActivity } from "../../utils/cmsActivityLogger.js";
 import { sanitizeUrl } from "../../utils/sanitizeUrl.js";
@@ -444,12 +444,15 @@ const CmsDocsView = ({
       </div>
 
       <div className="cms-dashboard-card">
-      <div className="docs-view-header">
-        <div>
-          <h3 className="cms-card-title docs-view-title">Documentación institucional</h3>
-          <p className="docs-view-subtitle">Subí formularios y protocolos. Los documentos aprobados por el Administrador se publicarán en el portal.</p>
+        <div className="cms-card-heading docs-view-header">
+          <div>
+            <h2 className="cms-card-title docs-view-title">Documentación institucional</h2>
+            <p className="cms-card-subtitle docs-view-subtitle">Subí formularios y protocolos. Los documentos aprobados por el Administrador se publicarán en el portal.</p>
+          </div>
+          <span className="cms-result-count">
+            {docsFiltrados.length} {docsFiltrados.length === 1 ? "resultado" : "resultados"}
+          </span>
         </div>
-      </div>
 
       
 
@@ -465,11 +468,11 @@ const CmsDocsView = ({
       />
 
       {activeTab === "PAPELERA" && <AvisoPapelera />}
-<div className="cms-docs-table-container">
+      <div className="cms-docs-table-container">
         <div className="activity-table-head docs-table-head">
-          <div className="col-content">CONTENIDO</div>
+          <div className="col-content">DOCUMENTO / ARCHIVO</div>
           <div className="col-editor">EDITOR / FECHA</div>
-          <div className="col-categoria">CATEGORÍA</div>
+          <div className="col-categoria">CATEGORÍA / TIPO</div>
           <div className="col-estado">ESTADO</div>
           <div className="col-acciones" style={{ textAlign: "center" }}>ACCIONES</div>
         </div>
@@ -488,17 +491,14 @@ const CmsDocsView = ({
               <div className="activity-row docs-table-row" key={doc.id}>
                 <div className="col-content doc-content-cell">
                   <div className="doc-thumb-box">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                    </svg>
+                    <FileText size={20} aria-hidden="true" />
                   </div>
                   <div className="doc-info">
                     <div className="doc-title-row">
                       <span className="doc-title">{tituloEnLista(doc, activeTab === "PUBLICADOS", doc.title)}</span>
                       {sanitizeUrl(doc.fileUrl) && (
                         <a className="doc-preview-link" href={sanitizeUrl(doc.fileUrl)} target="_blank" rel="noopener noreferrer" title="Ver documento original">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
                           </svg>
@@ -506,14 +506,8 @@ const CmsDocsView = ({
                       )}
                     </div>
                     
-                    {doc.editedBy && (
-                      <span style={{ fontSize: "0.75rem", color: "#64748b", display: "block", marginTop: "2px", marginBottom: "2px" }}>
-                        Editado por {doc.editedBy}
-                      </span>
-                    )}
-
-                    <span className="doc-meta">
-                      {(doc.fileType || "PDF")} · {(doc.fileSize || "—")}
+                    <span className="doc-filename">
+                      {doc.fileName || doc.nombreArchivo || "documento.pdf"}
                     </span>
 
                     {/* Alerta del motivo de rechazo del Administrador */}
@@ -537,12 +531,17 @@ const CmsDocsView = ({
                 <div className="col-editor" style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <span style={{ fontWeight: 600, color: '#0c2340' }}>{doc.editor || userName || "Usuario CMS"}</span>
                   <small style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
-                    <CalendarDays size={12} />
-                    {fechaLegible(doc.updatedAt)}
+                    <CalendarDays size={13} aria-hidden="true" />
+                    {fechaLegible(doc.updatedAt || doc.createdAt)}
                   </small>
                 </div>
 
-                <div className="col-categoria"><EtiquetaCategoria categoria={doc.category} /></div>
+                <div className="col-categoria" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                  <EtiquetaCategoria categoria={doc.category} />
+                  <small style={{ color: '#64748b', fontSize: '0.78rem', marginTop: '2px' }}>
+                    {(doc.fileType || "PDF").toUpperCase()} · {(doc.fileSize || "0.1 MB")}
+                  </small>
+                </div>
                 
                 <div className="col-estado">
                   {doc.solicitudEliminacion && activeTab !== "PUBLICADOS" ? (

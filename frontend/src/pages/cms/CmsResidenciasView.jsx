@@ -619,17 +619,17 @@ const CmsResidenciasView = ({ initialCreateModal = false, onModalOpened }) => {
       </div>
 
       <div className="cms-dashboard-card">
-      {/* Cabecera */}
-      <div className="news-view-header">
-        <div>
-          <h3 className="cms-card-title news-view-title">
-            Listado de residencias
-          </h3>
-          <p className="news-view-subtitle">
-            Administre los programas formativos, convocatorias, banner y reglamentos que se visualizan en el portal de residencias.
-          </p>
+        <div className="cms-card-heading news-view-header">
+          <div>
+            <h3 className="cms-card-title news-view-title">
+              Listado de residencias
+            </h3>
+            <p className="news-view-subtitle">
+              Administre los programas formativos, convocatorias, banner y reglamentos que se visualizan en el portal de residencias.
+            </p>
+          </div>
+          <span className="cms-result-count">{datosFiltrados.length} resultados</span>
         </div>
-      </div>
 
       {/* Barra de herramientas: Pestañas a la izquierda, buscador a la derecha */}
       <BarraFiltros
